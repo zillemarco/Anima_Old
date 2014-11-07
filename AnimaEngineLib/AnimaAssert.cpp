@@ -13,6 +13,9 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QStyleFactory>
+#include <QFile>
+#include <QApplication>
 
 #include "AnimaAssert.h"
 
@@ -57,8 +60,22 @@ AnimaAssertWindow::AnimaAssertWindow(const char* expr, const char* fileName, int
 void reportAssertionFailure(const char* expr, const char* fileName, int line)
 {
 	int argc = 0;
+
 	QApplication app(argc, NULL);
+
+	char workingDir[FILENAME_MAX];
+
+	if (!ANIMA_WORKING_DIR(workingDir, FILENAME_MAX))
+		return;
+
+	QString path = QString(workingDir) + QString("darkorange.qss");
+
+	QFile File(path);
+	File.open(QIODevice::ReadOnly);
+	QString StyleSheet = QLatin1String(File.readAll());
 	
+	app.setStyleSheet(StyleSheet);
+
 	AnimaAssertWindow* window = new AnimaAssertWindow(expr, fileName, line);
 	window->show();
 	

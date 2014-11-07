@@ -11,18 +11,17 @@
 
 #include "AnimaEngineLib.h"
 
-#include <QApplication>
 #include <QDialog>
 
 #if defined ANIMA_ENGINE_EXPORT_ENABLED
 #	if _MSC_VER
-		void __declspec(dllexport) reportAssertionFailure(const char* expr, const char* fileName, int line);
+		__declspec(dllexport) void reportAssertionFailure(const char* expr, const char* fileName, int line);
 #	else
 		extern "C" { void reportAssertionFailure(const char* expr, const char* fileName, int line); }
 #	endif
 #else
 #	if _MSC_VER
-		void __declspec(dllimport) reportAssertionFailure(const char* expr, const char* fileName, int line);
+		__declspec(dllimport) void reportAssertionFailure(const char* expr, const char* fileName, int line);
 #	else
 		void reportAssertionFailure(const char* expr, const char* fileName, int line);
 #	endif
