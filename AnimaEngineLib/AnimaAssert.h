@@ -9,23 +9,37 @@
 #ifndef Anima_AnimaAssert_h
 #define Anima_AnimaAssert_h
 
+#include "AnimaEngineLib.h"
+
 #include <QApplication>
 #include <QDialog>
 
-void reportAssertionFailure(const char* expr, const char* fileName, int line);
+#if defined ANIMA_ENGINE_EXPORT_ENABLED
+#	if _MSC_VER
+		void __declspec(dllexport) reportAssertionFailure(const char* expr, const char* fileName, int line);
+#	else
+		extern "C" { void reportAssertionFailure(const char* expr, const char* fileName, int line); }
+#	endif
+#else
+#	if _MSC_VER
+		void __declspec(dllimport) reportAssertionFailure(const char* expr, const char* fileName, int line);
+#	else
+		void reportAssertionFailure(const char* expr, const char* fileName, int line);
+#	endif
+#endif
 
 class QCheckBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
 
-class AnimaAssertWindow : public QDialog
+BEGIN_DERIVED_CLASS_EXPORT(AnimaAssertWindow, public QDialog)
 {
 	Q_OBJECT
-	
+
 public:
 	AnimaAssertWindow(const char* expr, const char* fileName, int line, QWidget* parent = NULL);
-	
+
 private:
 	QLabel*			_label;
 	QPushButton*	_closeButton;
@@ -37,7 +51,7 @@ private:
 #endif
 
 #if defined _MSC_VER
-#define debug_break()   __debugbreak()
+#define debug_break()   //__debugbreak()
 #else
 #define debug_break()   //raise(SIGTRAP)
 #endif
