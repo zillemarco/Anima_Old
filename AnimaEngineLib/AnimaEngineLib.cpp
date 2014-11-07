@@ -30,11 +30,18 @@ bool __anima_get_working_dir(char* dest, int length)
 	dest[pch - dest + 1] = '\0';
 	return true;
 #else
-	char szTmp[32];
-	sprintf(szTmp, "/proc/%d/exe", getpid());
-	int bytes = MIN(readlink(szTmp, dest, length), length - 1);
-	if (bytes >= 0)
-		dest[bytes] = '\0';
+	char* cwd;
+	if((cwd = getcwd(dest, length)) == NULL)
+		return false;
+	
+	int cwdLen = strlen(cwd);
+	
+	if(cwdLen == length)
+		return false;
+	
+	dest[cwdLen] = '/';
+	dest[cwdLen + 1] = '\0';
+	
 	return true;
 #endif
 }

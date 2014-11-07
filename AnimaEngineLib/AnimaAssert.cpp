@@ -23,8 +23,8 @@ AnimaAssertWindow::AnimaAssertWindow(const char* expr, const char* fileName, int
 	: QDialog(parent)
 {
 	QString errorString = tr("Error: ") + tr(expr);
-	QString fileString = tr("\nIn file: ") + tr(fileName);
-	QString lineString = QString("\nAt line: %1").arg(line);
+	QString fileString = tr("\n\nIn file: ") + tr(fileName);
+	QString lineString = QString("\n\nAt line: %1").arg(line);
 	
 	QString finalString = errorString + fileString + lineString;
 	
@@ -37,10 +37,12 @@ AnimaAssertWindow::AnimaAssertWindow(const char* expr, const char* fileName, int
 	QHBoxLayout* labelLayout = new QHBoxLayout;
 	QHBoxLayout* buttonsLayout = new QHBoxLayout;
 	
+	_label->setWordWrap(true);
+	_label->setMaximumWidth(350);
 	_closeButton->setDefault(true);
-	
 	_closeButton->setFixedWidth(_closeButton->sizeHint().width());
 	_reportButton->setFixedWidth(_reportButton->sizeHint().width());
+	
 	buttonsLayout->setAlignment(Qt::AlignRight);
 	
 	labelLayout->addWidget(_label);
@@ -62,20 +64,23 @@ void reportAssertionFailure(const char* expr, const char* fileName, int line)
 	int argc = 0;
 
 	QApplication app(argc, NULL);
-
-	char workingDir[FILENAME_MAX];
-
-	if (!ANIMA_WORKING_DIR(workingDir, FILENAME_MAX))
-		return;
-
-	QString path = QString(workingDir) + QString("darkorange.qss");
-
-	QFile File(path);
-	File.open(QIODevice::ReadOnly);
-	QString StyleSheet = QLatin1String(File.readAll());
 	
-	app.setStyleSheet(StyleSheet);
-
+	QApplication::setStyle(QStyleFactory::create("Fusion"));
+	QPalette palette;
+	palette.setColor(QPalette::Window, QColor(53,53,53));
+	palette.setColor(QPalette::WindowText, Qt::white);
+	palette.setColor(QPalette::Base, QColor(15,15,15));
+	palette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+	palette.setColor(QPalette::ToolTipBase, Qt::white);
+	palette.setColor(QPalette::ToolTipText, Qt::white);
+	palette.setColor(QPalette::Text, Qt::white);
+	palette.setColor(QPalette::Button, QColor(53,53,53));
+	palette.setColor(QPalette::ButtonText, Qt::white);
+	palette.setColor(QPalette::BrightText, Qt::red);
+	palette.setColor(QPalette::Highlight, QColor(142,45,197).lighter());
+	palette.setColor(QPalette::HighlightedText, Qt::black);
+	app.setPalette(palette);
+	
 	AnimaAssertWindow* window = new AnimaAssertWindow(expr, fileName, line);
 	window->show();
 	

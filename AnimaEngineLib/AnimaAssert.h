@@ -13,26 +13,14 @@
 
 #include <QDialog>
 
-#if defined ANIMA_ENGINE_EXPORT_ENABLED
-#	if _MSC_VER
-		__declspec(dllexport) void reportAssertionFailure(const char* expr, const char* fileName, int line);
-#	else
-		extern "C" { void reportAssertionFailure(const char* expr, const char* fileName, int line); }
-#	endif
-#else
-#	if _MSC_VER
-		__declspec(dllimport) void reportAssertionFailure(const char* expr, const char* fileName, int line);
-#	else
-		void reportAssertionFailure(const char* expr, const char* fileName, int line);
-#	endif
-#endif
+extern "C" ANIMA_EXPORT void reportAssertionFailure(const char* expr, const char* fileName, int line);
 
 class QCheckBox;
 class QLabel;
 class QLineEdit;
 class QPushButton;
 
-BEGIN_DERIVED_CLASS_EXPORT(AnimaAssertWindow, public QDialog)
+class ANIMA_EXPORT AnimaAssertWindow : public QDialog
 {
 	Q_OBJECT
 

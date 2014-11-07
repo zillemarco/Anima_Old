@@ -4,7 +4,7 @@ set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../../install)
 add_definitions(-DANIMA_ENGINE_EXPORT_ENABLED)
 
 set(${PROJECT_NAME}_headers AnimaEngineLib.h AnimaAssert.h AnimaTypes.h)
-set(${PROJECT_NAME}_sources AnimaAssert.cpp)
+set(${PROJECT_NAME}_sources AnimaAssert.cpp AnimaEngineLib.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
 
