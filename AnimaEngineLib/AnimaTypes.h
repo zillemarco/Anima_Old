@@ -10,12 +10,21 @@
 #define Anima_AnimaTypes_h
 
 #include "AnimaEngineLib.h"
+#include <cstdint>
+#include <cstdlib>
 
 BEGIN_NAMESPACE
 
-typedef float   AnimaFloat;
-typedef int		AnimaInt;
-typedef char    AnimaChar;
+typedef size_t	ASizeT;
+typedef float   AFloat;
+typedef int		AInt;
+typedef char    AChar;
+
+typedef uint8_t		AU8;
+typedef uint16_t	AU16;
+typedef uint32_t	AU32;
+typedef uint64_t	AU64;
+typedef uintptr_t	AUptr;
 
 END_NAMESPACE
 

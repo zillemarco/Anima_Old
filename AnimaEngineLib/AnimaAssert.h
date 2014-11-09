@@ -15,9 +15,7 @@
 
 extern "C" ANIMA_EXPORT void reportAssertionFailure(const char* expr, const char* fileName, int line);
 
-class QCheckBox;
 class QLabel;
-class QLineEdit;
 class QPushButton;
 
 class ANIMA_EXPORT AnimaAssertWindow : public QDialog
@@ -38,9 +36,9 @@ private:
 #endif
 
 #if defined _MSC_VER
-#define debug_break()   //__debugbreak()
+#define debug_break()   __debugbreak()
 #else
-#define debug_break()   //raise(SIGTRAP)
+#define debug_break()   raise(SIGTRAP)
 #endif
 
 #define ANIMA_ASSERT(expr)                  \

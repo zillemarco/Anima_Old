@@ -18,6 +18,8 @@
 #define BEGIN_NAMESPACE namespace Anima {
 #define END_NAMESPACE }
 
+#define ANIMA_ALLOCATOR_DEBUG
+
 extern "C" ANIMA_EXPORT void __init_anina_app__(int argc, char** argv);
 extern "C" ANIMA_EXPORT bool __anima_get_working_dir(char* dest, int length);
 
