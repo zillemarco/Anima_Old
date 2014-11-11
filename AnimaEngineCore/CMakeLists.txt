@@ -5,6 +5,7 @@ include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 add_definitions(-DANIMA_ENGINE_CORE_EXPORT_ENABLED)
 
 set(common_HEADERS	AnimaEngineCore.h
+					AnimaEngine.h
 					AnimaWindow_Data.h 
 					AnimaWindow_Base.h 
 					AnimaAssert.h 
@@ -13,7 +14,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaStackAllocator.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
+					AnimaEngine.cpp
 					AnimaAssert.cpp 
+					AnimaWindow_Base.cpp 
 					AnimaStackAllocator.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
@@ -51,7 +54,7 @@ if (APPLE)
     set_source_files_properties(${AnimaEngineCore_HEADERS} PROPERTIES LANGUAGE CXX)
 endif()
 
-add_library(${PROJECT_NAME} ${AnimaEngineCore_SOURCES} ${AnimaEngineCore_HEADERS})
+add_library(${PROJECT_NAME} SHARED ${AnimaEngineCore_SOURCES} ${AnimaEngineCore_HEADERS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)

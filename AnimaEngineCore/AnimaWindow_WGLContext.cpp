@@ -1,4 +1,5 @@
 #include "AnimaWindow_Base.h"
+#include "AnimaEngine.h"
 
 #include <stdlib.h>
 #include <malloc.h>
@@ -209,7 +210,7 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 
 	if (!usableCount)
 	{
-		_glfwInputError(GLFW_API_UNAVAILABLE, "WGL: The driver does not appear to support OpenGL");
+		//_glfwInputError(GLFW_API_UNAVAILABLE, "WGL: The driver does not appear to support OpenGL");
 
 		free(usableConfigs);
 		return false;
@@ -218,7 +219,7 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 	closest = _AnimaEngineWindowChooseFBConfig(desired, usableConfigs, usableCount);
 	if (!closest)
 	{
-		_glfwInputError(GLFW_PLATFORM_ERROR, "WGL: Failed to find a suitable pixel format");
+		//_glfwInputError(GLFW_PLATFORM_ERROR, "WGL: Failed to find a suitable pixel format");
 
 		free(usableConfigs);
 		return false;
@@ -235,20 +236,20 @@ bool _AnimaEngineWindowInitContextAPI(void)
 	if (!_AnimaEngineWindowInitTLS())
 		return false;
 
-	//_glfw.wgl.opengl32.instance = LoadLibraryW(L"opengl32.dll");
-	//if (!_glfw.wgl.opengl32.instance)
-	//{
-	//	_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to load opengl32.dll");
-	//	return false;
-	//}
+	AnimaEngine::wgl._opengl32._instance = LoadLibraryW(L"opengl32.dll");
+	if (!AnimaEngine::wgl._opengl32._instance)
+	{
+		//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to load opengl32.dll");
+		return false;
+	}
 
 	return true;
 }
 
 void _AnimaEngineWindowTerminateContextAPI(void)
 {
-	//if (_glfw.wgl.opengl32.instance)
-	//	FreeLibrary(_glfw.wgl.opengl32.instance);
+	if (AnimaEngine::wgl._opengl32._instance)
+		FreeLibrary(AnimaEngine::wgl._opengl32._instance);
 
 	_AnimaEngineWindowTerminateTLS();
 }
@@ -260,7 +261,7 @@ void _AnimaEngineWindowTerminateContextAPI(void)
     assert((size_t) index < sizeof(attribs) / sizeof(attribs[0]));	\
 }
 
-bool _glfwCreateContext(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
+bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
 {
 	int attribs[40];
 	int pixelFormat = 0;
@@ -560,16 +561,16 @@ bool _AnimaEngineWindowPlatformExtensionSupported(const char* extension)
 	return false;
 }
 
-AnimaEngineWSglproc _AnimaEngineWindowPlatformGetProcAddress(const char* procname)
+AnimaEngineWindowglproc _AnimaEngineWindowPlatformGetProcAddress(const char* procname)
 {
-	const AnimaEngineWSglproc proc = (AnimaEngineWSglproc)wglGetProcAddress(procname);
+	const AnimaEngineWindowglproc proc = (AnimaEngineWindowglproc)wglGetProcAddress(procname);
 	if (proc)
 		return proc;
 
-	//return (AnimaEngineWSglproc)GetProcAddress(_glfw.wgl.opengl32.instance, procname);
+	return (AnimaEngineWindowglproc)GetProcAddress(AnimaEngine::wgl._opengl32._instance, procname);
 }
 
-HGLRC AnimaEngineWSGetWGLContext(AnimaEngineWSwindow* handle)
+HGLRC AnimaEngineWindowGetWGLContext(AnimaEngineWindowwindow* handle)
 {
 	_AnimaEngineWindowwindow* window = (_AnimaEngineWindowwindow*)handle;
 	/*_GLFW_REQUIRE_INIT_OR_RETURN(NULL);*/

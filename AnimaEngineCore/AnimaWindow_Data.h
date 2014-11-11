@@ -264,19 +264,31 @@
 #define ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE    0x00032001
 #define ANIMA_ENGINE_CORE_OPENGL_COMPAT_PROFILE  0x00032002
 
+#define ANIMA_ENGINE_CORE_CURSOR_NORMAL          0x00034001
+#define ANIMA_ENGINE_CORE_CURSOR_HIDDEN          0x00034002
+#define ANIMA_ENGINE_CORE_CURSOR_DISABLED        0x00034003
+
 #define ANIMA_ENGINE_CORE_ANY_RELEASE_BEHAVIOR            0
 #define ANIMA_ENGINE_CORE_RELEASE_BEHAVIOR_FLUSH 0x00035001
 #define ANIMA_ENGINE_CORE_RELEASE_BEHAVIOR_NONE  0x00035002
 
-typedef void(*AnimaEngineWSglproc)(void);
+#define ANIMA_ENGINE_CORE_MOD_SHIFT           0x0001
+#define ANIMA_ENGINE_CORE_MOD_CONTROL         0x0002
+#define ANIMA_ENGINE_CORE_MOD_ALT             0x0004
+#define ANIMA_ENGINE_CORE_MOD_SUPER           0x0008
+
+#define ANIMA_ENGINE_CORE_DONT_CARE              -1
+
+
+typedef void(*AnimaEngineWindowglproc)(void);
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
-typedef struct AnimaEngineWSmonitor AnimaEngineWSmonitor;
-typedef struct AnimaEngineWSwindow	AnimaEngineWSwindow;
-typedef struct AnimaEngineWScursor	AnimaEngineWScursor;
+typedef struct AnimaEngineWindowmonitor AnimaEngineWindowmonitor;
+typedef struct AnimaEngineWindowwindow	AnimaEngineWindowwindow;
+typedef struct AnimaEngineWindowcursor	AnimaEngineWindowcursor;
 
-typedef struct AnimaEngineWSvidmode
+typedef struct AnimaEngineWindowvidmode
 {
 	int _width;
 	int _height;
@@ -284,22 +296,22 @@ typedef struct AnimaEngineWSvidmode
 	int _greenBits;
 	int _blueBits;
 	int _refreshRate;
-} AnimaEngineWSvidmode;
+} AnimaEngineWindowvidmode;
 
-typedef struct AnimaEngineWSgammaramp
+typedef struct AnimaEngineWindowgammaramp
 {
 	unsigned short* _red;
 	unsigned short* _green;
 	unsigned short* _blue;
 	unsigned int	_size;
-} AnimaEngineWSgammaramp;
+} AnimaEngineWindowgammaramp;
 
-typedef struct AnimaEngineWSimage
+typedef struct AnimaEngineWindowimage
 {
 	int _width;
 	int _height;
 	unsigned char* _pixels;
-} AnimaEngineWSimage;
+} AnimaEngineWindowimage;
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
 

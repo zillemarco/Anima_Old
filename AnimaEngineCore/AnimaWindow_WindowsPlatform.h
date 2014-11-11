@@ -79,13 +79,13 @@ typedef BOOL(WINAPI * SETPROCESSDPIAWARE_T)(void);
 typedef BOOL(WINAPI * CHANGEWINDOWMESSAGEFILTEREX_T)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
 typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 
-#define _AnimaEngineWindow_joyGetDevCaps _glfw.win32.winmm.joyGetDevCaps
-#define _AnimaEngineWindow_joyGetPos _glfw.win32.winmm.joyGetPos
-#define _AnimaEngineWindow_joyGetPosEx _glfw.win32.winmm.joyGetPosEx
-#define _AnimaEngineWindow_timeGetTime _glfw.win32.winmm.timeGetTime
-#define _AnimaEngineWindow_SetProcessDPIAware _glfw.win32.user32.SetProcessDPIAware
-#define _AnimaEngineWindow_ChangeWindowMessageFilterEx _glfw.win32.user32.ChangeWindowMessageFilterEx
-#define _AnimaEngineWindow_DwmIsCompositionEnabled _glfw.win32.dwmapi.DwmIsCompositionEnabled
+#define _AnimaEngineWindow_joyGetDevCaps AnimaEngine::win32._winmm._joyGetDevCaps
+#define _AnimaEngineWindow_joyGetPos AnimaEngine::win32._winmm._joyGetPos
+#define _AnimaEngineWindow_joyGetPosEx AnimaEngine::win32._winmm._joyGetPosEx
+#define _AnimaEngineWindow_timeGetTime AnimaEngine::win32._winmm._timeGetTime
+#define _AnimaEngineWindow_SetProcessDPIAware AnimaEngine::win32._user32._SetProcessDPIAware
+#define _AnimaEngineWindow_ChangeWindowMessageFilterEx AnimaEngine::win32._user32._ChangeWindowMessageFilterEx
+#define _AnimaEngineWindow_DwmIsCompositionEnabled AnimaEngine::win32._dwmapi._DwmIsCompositionEnabled
 
 #define _ANIMA_ENGINE_CORE_RECREATION_NOT_NEEDED 0
 #define _ANIMA_ENGINE_CORE_RECREATION_REQUIRED   1
@@ -110,6 +110,9 @@ typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 #define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE   _AnimaEngineWindowtimeWin32    win32_time
 #define _ANIMA_ENGINE_CORE_PLATFORM_MONITOR_STATE        _AnimaEngineWindowmonitorWin32 win32
 #define _ANIMA_ENGINE_CORE_PLATFORM_CURSOR_STATE         _AnimaEngineWindowcursorWin32  win32
+
+#define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE(class) _AnimaEngineWindowlibraryWin32 class::win32;
+#define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE(class) _AnimaEngineWindowtimeWin32 class::win32_time;
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
@@ -176,18 +179,18 @@ typedef struct _AnimaEngineWindowtimeWin32
 } _AnimaEngineWindowtimeWin32;
 
 
-bool _AnimaEngineWindowRegisterWindowClass(void);
-void _AnimaEngineWindowUnregisterWindowClass(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowRegisterWindowClass(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowUnregisterWindowClass(void);
 
-bool _AnimaEngineWindowIsCompositionEnabled(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowIsCompositionEnabled(void);
 
-WCHAR* _AnimaEngineWindowCreateWideStringFromUTF8(const char* source);
-char* _AnimaEngineWindowCreateUTF8FromWideString(const WCHAR* source);
+extern "C" ANIMA_ENGINE_CORE_EXPORT WCHAR* _AnimaEngineWindowCreateWideStringFromUTF8(const char* source);
+extern "C" ANIMA_ENGINE_CORE_EXPORT char* _AnimaEngineWindowCreateUTF8FromWideString(const WCHAR* source);
 
-void _AnimaEngineWindowInitTimer(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowInitTimer(void);
 
-bool _AnimaEngineWindowSetVideoMode(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWSvidmode* desired);
-void _AnimaEngineWindowRestoreVideoMode(_AnimaEngineWindowmonitor* monitor);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowSetVideoMode(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowvidmode* desired);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowRestoreVideoMode(_AnimaEngineWindowmonitor* monitor);
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
 

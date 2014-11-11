@@ -4,9 +4,11 @@
 #include "AnimaEngineCore.h"
 #include <GL\wglext.h>
 
-#define _ANIMA_ENGINE_CORE_PLATFORM_FBCONFIG                 int						wgl
-#define _ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE            _AnimaEngineWindowcontextWGL wgl
-#define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE    _AnimaEngineWindowlibraryWGL wgl
+#define _ANIMA_ENGINE_CORE_PLATFORM_FBCONFIG                 int							wgl
+#define _ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE            _AnimaEngineWindowcontextWGL	wgl
+#define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE    _AnimaEngineWindowlibraryWGL	wgl
+
+#define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE(class) _AnimaEngineWindowlibraryWGL class::wgl;
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
@@ -40,12 +42,12 @@ typedef struct _AnimaEngineWindowlibraryWGL
 
 } _AnimaEngineWindowlibraryWGL;
 
-bool _AnimaEngineWindowInitContextAPI(void);
-void _AnimaEngineWindowTerminateContextAPI(void);
-int _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowInitContextAPI(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowTerminateContextAPI(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
 
-void _AnimaEngineWindowDestroyContext(_AnimaEngineWindowwindow* window);
-int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowDestroyContext(_AnimaEngineWindowwindow* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
 
