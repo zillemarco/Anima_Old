@@ -19,9 +19,14 @@
 #define BEGIN_ANIMA_ENGINE_CORE_NAMESPACE namespace Anima {
 #define END_ANIMA_ENGINE_CORE_NAMESPACE }
 
-#define ANIMA_ALLOCATOR_DEBUG
-
 extern "C" ANIMA_ENGINE_CORE_EXPORT bool __anima_get_working_dir(char* dest, int length);
 #define ANIMA_WORKING_DIR(dest, len)	__anima_get_working_dir(dest, len)
+
+#define ANIMA_ALLOCATOR_DEBUG
+
+#define _ANIMA_ENGINE_CORE_WIN32
+#define _ANIMA_ENGINE_CORE_WGL
+#define _ANIMA_ENGINE_CORE_USE_OPENGL
+#define _ANIMA_ENGINE_CORE_VERSION_NUMBER "0.0.0"
 
 #endif //_ANIMA_ENGINE_LIB_H

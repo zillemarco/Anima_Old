@@ -377,8 +377,11 @@ endif()
 #--------------------------------------------------------------------
 # Add subdirectories
 #--------------------------------------------------------------------
+
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies")
+
 add_subdirectory(AnimaEngine)
-add_subdirectory(AnimaEngineWS)
+#add_subdirectory(AnimaEngineWS)
 add_subdirectory(AnimaEngineCore)
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
