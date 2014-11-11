@@ -1,6 +1,7 @@
-#include "AnimaEngineLib.h"
-#include <QApplication>
+#include "AnimaEngineCore.h"
+//#include <QApplication>
 #include <stdio.h>
+#include <string>
 
 #if defined _MSC_VER
 #include <Windows.h>
@@ -8,10 +9,10 @@
 #include <unistd.h>
 #endif
 
-void __init_anina_app__(int argc, char** argv)
-{
-	QApplication app(argc, argv);
-}
+//void __init_anina_app__(int argc, char** argv)
+//{
+//	QApplication app(argc, argv);
+//}
 
 bool __anima_get_working_dir(char* dest, int length)
 {

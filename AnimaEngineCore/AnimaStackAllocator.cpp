@@ -8,7 +8,7 @@
 
 #include "AnimaStackAllocator.h"
 
-BEGIN_NAMESPACE
+BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 AnimaStackAllocator::AnimaStackAllocator(ASizeT size, void* start)
 : AnimaAllocator(size, start), _currentPosition(start)
@@ -76,4 +76,4 @@ void AnimaStackAllocator::Deallocate(void* p)
 	_numAllocations--;
 }
 
-END_NAMESPACE
+END_ANIMA_ENGINE_CORE_NAMESPACE

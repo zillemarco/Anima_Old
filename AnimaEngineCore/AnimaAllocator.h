@@ -10,14 +10,14 @@
 #define __Anima__AnimaAllocator__
 
 #include <new>
-#include "AnimaEngineLib.h"
+#include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
 #include "AnimaAssert.h"
 
 #define BEGIN_ANIMA_ALLOCATOR_NAMESPACE namespace AnimaAllocatorNamespace
 #define BEGIN_ANIMA_POINTER_MATH_NAMESPACE namespace AnimaPointerMath
 
-BEGIN_NAMESPACE
+BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 BEGIN_ANIMA_POINTER_MATH_NAMESPACE
 {
@@ -39,7 +39,7 @@ BEGIN_ANIMA_POINTER_MATH_NAMESPACE
 	const void*	subtract(const void* p, ASizeT x);
 };
 
-class ANIMA_EXPORT AnimaAllocator
+class ANIMA_ENGINE_CORE_EXPORT AnimaAllocator
 {
 public:
 	AnimaAllocator(ASizeT size, void* start)
@@ -230,6 +230,6 @@ BEGIN_ANIMA_POINTER_MATH_NAMESPACE
 	}
 };
 
-END_NAMESPACE
+END_ANIMA_ENGINE_CORE_NAMESPACE
 
 #endif /* defined(__Anima__AnimaAllocator__) */

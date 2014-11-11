@@ -9,27 +9,27 @@
 #ifndef Anima_AnimaAssert_h
 #define Anima_AnimaAssert_h
 
-#include "AnimaEngineLib.h"
+#include "AnimaEngineCore.h"
 
-#include <QDialog>
+//#include <QDialog>
 
-extern "C" ANIMA_EXPORT void reportAssertionFailure(const char* expr, const char* fileName, int line);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void reportAssertionFailure(const char* expr, const char* fileName, int line);
 
-class QLabel;
-class QPushButton;
-
-class ANIMA_EXPORT AnimaAssertWindow : public QDialog
-{
-	Q_OBJECT
-
-public:
-	AnimaAssertWindow(const char* expr, const char* fileName, int line, QWidget* parent = NULL);
-
-private:
-	QLabel*			_label;
-	QPushButton*	_closeButton;
-	QPushButton*	_reportButton;
-};
+//class QLabel;
+//class QPushButton;
+//
+//class ANIMA_ENGINE_CORE_EXPORT AnimaAssertWindow : public QDialog
+//{
+//	Q_OBJECT
+//
+//public:
+//	AnimaAssertWindow(const char* expr, const char* fileName, int line, QWidget* parent = NULL);
+//
+//private:
+//	QLabel*			_label;
+//	QPushButton*	_closeButton;
+//	QPushButton*	_reportButton;
+//};
 
 #ifndef _MSC_VER
 #include <signal.h>

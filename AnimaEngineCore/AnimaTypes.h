@@ -9,11 +9,11 @@
 #ifndef Anima_AnimaTypes_h
 #define Anima_AnimaTypes_h
 
-#include "AnimaEngineLib.h"
+#include "AnimaEngineCore.h"
 #include <cstdint>
 #include <cstdlib>
 
-BEGIN_NAMESPACE
+BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 typedef size_t	ASizeT;
 typedef float   AFloat;
@@ -26,6 +26,6 @@ typedef uint32_t	AU32;
 typedef uint64_t	AU64;
 typedef uintptr_t	AUptr;
 
-END_NAMESPACE
+END_ANIMA_ENGINE_CORE_NAMESPACE
 
 #endif

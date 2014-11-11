@@ -9,13 +9,13 @@
 #ifndef __Anima__AnimaStackAllocator__
 #define __Anima__AnimaStackAllocator__
 
-#include "AnimaEngineLib.h"
+#include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
 #include "AnimaAllocator.h"
 
-BEGIN_NAMESPACE
+BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
-class ANIMA_EXPORT AnimaStackAllocator : AnimaAllocator
+class ANIMA_ENGINE_CORE_EXPORT AnimaStackAllocator : AnimaAllocator
 {
 public:
 	AnimaStackAllocator(ASizeT size, void* start);
@@ -62,6 +62,6 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 	}
 };
 
-END_NAMESPACE
+END_ANIMA_ENGINE_CORE_NAMESPACE
 
 #endif /* defined(__Anima__AnimaStackAllocator__) */
