@@ -13,6 +13,7 @@
 #	else
 #		define APIENTRY
 #	endif
+#	define ANIMA_ENGINE_CORE_APIENTRY_DEFINED
 #endif
 
 #if !defined(WINGDIAPI) && defined(_WIN32)
@@ -250,8 +251,43 @@
 #define ANIMA_ENGINE_CORE_JOYSTICK_LAST          ANIMA_ENGINE_CORE_JOYSTICK_16
 
 #define ANIMA_ENGINE_CORE_RELEASE	0
-#define ANIMA_ENGINE_CORE_PRESS	1
+#define ANIMA_ENGINE_CORE_PRESS		1
 #define ANIMA_ENGINE_CORE_REPEAT	2
+
+#define ANIMA_ENGINE_CORE_FOCUSED					0x00020001
+#define ANIMA_ENGINE_CORE_ICONIFIED					0x00020002
+#define ANIMA_ENGINE_CORE_RESIZABLE					0x00020003
+#define ANIMA_ENGINE_CORE_VISIBLE					0x00020004
+#define ANIMA_ENGINE_CORE_DECORATED					0x00020005
+#define ANIMA_ENGINE_CORE_AUTO_ICONIFY				0x00020006
+#define ANIMA_ENGINE_CORE_FLOATING					0x00020007
+
+#define ANIMA_ENGINE_CORE_RED_BITS					0x00021001
+#define ANIMA_ENGINE_CORE_GREEN_BITS				0x00021002
+#define ANIMA_ENGINE_CORE_BLUE_BITS					0x00021003
+#define ANIMA_ENGINE_CORE_ALPHA_BITS				0x00021004
+#define ANIMA_ENGINE_CORE_DEPTH_BITS				0x00021005
+#define ANIMA_ENGINE_CORE_STENCIL_BITS				0x00021006
+#define ANIMA_ENGINE_CORE_ACCUM_RED_BITS			0x00021007
+#define ANIMA_ENGINE_CORE_ACCUM_GREEN_BITS			0x00021008
+#define ANIMA_ENGINE_CORE_ACCUM_BLUE_BITS			0x00021009
+#define ANIMA_ENGINE_CORE_ACCUM_ALPHA_BITS			0x0002100A
+#define ANIMA_ENGINE_CORE_AUX_BUFFERS				0x0002100B
+#define ANIMA_ENGINE_CORE_STEREO					0x0002100C
+#define ANIMA_ENGINE_CORE_SAMPLES					0x0002100D
+#define ANIMA_ENGINE_CORE_SRGB_CAPABLE				0x0002100E
+#define ANIMA_ENGINE_CORE_REFRESH_RATE				0x0002100F
+#define ANIMA_ENGINE_CORE_DOUBLEBUFFER				0x00021010
+
+#define ANIMA_ENGINE_CORE_CLIENT_API				0x00022001
+#define ANIMA_ENGINE_CORE_CONTEXT_VERSION_MAJOR		0x00022002
+#define ANIMA_ENGINE_CORE_CONTEXT_VERSION_MINOR		0x00022003
+#define ANIMA_ENGINE_CORE_CONTEXT_REVISION			0x00022004
+#define ANIMA_ENGINE_CORE_CONTEXT_ROBUSTNESS		0x00022005
+#define ANIMA_ENGINE_CORE_OPENGL_FORWARD_COMPAT		0x00022006
+#define ANIMA_ENGINE_CORE_OPENGL_DEBUG_CONTEXT		0x00022007
+#define ANIMA_ENGINE_CORE_OPENGL_PROFILE			0x00022008
+#define ANIMA_ENGINE_CORE_CONTEXT_RELEASE_BEHAVIOR	0x00022009
 
 #define ANIMA_ENGINE_CORE_OPENGL_API             0x00030001
 #define ANIMA_ENGINE_CORE_OPENGL_ES_API          0x00030002
@@ -272,6 +308,9 @@
 #define ANIMA_ENGINE_CORE_RELEASE_BEHAVIOR_FLUSH 0x00035001
 #define ANIMA_ENGINE_CORE_RELEASE_BEHAVIOR_NONE  0x00035002
 
+#define ANIMA_ENGINE_CORE_CONNECTED              0x00040001
+#define ANIMA_ENGINE_CORE_DISCONNECTED           0x00040002
+
 #define ANIMA_ENGINE_CORE_MOD_SHIFT           0x0001
 #define ANIMA_ENGINE_CORE_MOD_CONTROL         0x0002
 #define ANIMA_ENGINE_CORE_MOD_ALT             0x0004
@@ -279,14 +318,11 @@
 
 #define ANIMA_ENGINE_CORE_DONT_CARE              -1
 
-
-typedef void(*AnimaEngineWindowglproc)(void);
-
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 typedef struct AnimaEngineWindowmonitor AnimaEngineWindowmonitor;
-typedef struct AnimaEngineWindowwindow	AnimaEngineWindowwindow;
 typedef struct AnimaEngineWindowcursor	AnimaEngineWindowcursor;
+typedef class AnimaEngineWindow_Base	AnimaEngineWindow_Base;
 
 typedef struct AnimaEngineWindowvidmode
 {
@@ -312,6 +348,26 @@ typedef struct AnimaEngineWindowimage
 	int _height;
 	unsigned char* _pixels;
 } AnimaEngineWindowimage;
+
+typedef void(*AnimaEngineWindowglproc)(void);
+typedef void(*AnimaEngineWindowerrorfun)(int, const char*);
+typedef void(*AnimaEngineWindowmonitorfun)(AnimaEngineWindowmonitor*, int);
+
+typedef void(*AnimaEngineWindowFocusCallback)			(AnimaEngineWindow_Base* /*window*/, bool /*focused*/);
+typedef void(*AnimaEngineWindowPosCallback)				(AnimaEngineWindow_Base* /*window*/, int /*xpos*/, int /*ypos*/);
+typedef void(*AnimaEngineWindowSizeCallback)			(AnimaEngineWindow_Base* /*window*/, int /*width*/, int /*height*/);
+typedef void(*AnimaEngineWindowFramebufferSizeCallback)	(AnimaEngineWindow_Base* /*window*/, int /*width*/, int /*height*/);
+typedef void(*AnimaEngineWindowIconifyCallback)			(AnimaEngineWindow_Base* /*window*/, bool /*iconified*/);
+typedef void(*AnimaEngineWindowVisibilityCallback)		(AnimaEngineWindow_Base* /*window*/, bool /*visible*/);
+typedef void(*AnimaEngineWindowDamageCallback)			(AnimaEngineWindow_Base* /*window*/);
+typedef void(*AnimaEngineWindowCloseRequestCallback)	(AnimaEngineWindow_Base* /*window*/);
+typedef void(*AnimaEngineWindowKeyCallback)				(AnimaEngineWindow_Base* /*window*/, int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/);
+typedef void(*AnimaEngineWindowCharCallback)			(AnimaEngineWindow_Base* /*window*/, unsigned int /*codepoint*/, int /*mods*/, bool /*plain*/);
+typedef void(*AnimaEngineWindowScrollCallback)			(AnimaEngineWindow_Base* /*window*/, double /*x*/, double /*y*/);
+typedef void(*AnimaEngineWindowMouseClickCallback)		(AnimaEngineWindow_Base* /*window*/, int /*button*/, int /*action*/, int /*mods*/);
+typedef void(*AnimaEngineWindowCursorMotionCallback)	(AnimaEngineWindow_Base* /*window*/, double /*x*/, double /*y*/);
+typedef void(*AnimaEngineWindowCursorEnterCallback)		(AnimaEngineWindow_Base* /*window*/, bool /*entered*/);
+typedef void(*AnimaEngineWindowDropCallback)			(AnimaEngineWindow_Base* /*window*/, int /*count*/, const char** /*names*/);
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
 

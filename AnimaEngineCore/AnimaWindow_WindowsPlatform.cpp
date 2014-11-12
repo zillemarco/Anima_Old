@@ -12,6 +12,14 @@
 #define _ANIMA_ENGINE_CORE_KEY_INVALID -2
 #define _ANIMA_ENGINE_CORE_WNDCLASSNAME L"AnimaEngineWindow"
 
+#ifndef EDS_ROTATEDMODE
+#	define EDS_ROTATEDMODE 0x00000004
+#endif
+
+#ifndef DISPLAY_DEVICE_ACTIVE
+#	define DISPLAY_DEVICE_ACTIVE 0x00000001
+#endif
+
 #ifdef __BORLANDC__
 #	include <float.h>
 #endif
@@ -20,35 +28,35 @@ BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 static bool initLibraries(void)
 {
-	AnimaEngine::win32._winmm._instance = LoadLibraryW(L"winmm.dll");
-	if (!AnimaEngine::win32._winmm._instance)
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance = LoadLibraryW(L"winmm.dll");
+	if (!AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to load winmm.dll");
 		return false;
 	}
 
-	AnimaEngine::win32._winmm._joyGetDevCaps = (JOYGETDEVCAPS_T)GetProcAddress(AnimaEngine::win32._winmm._instance, "joyGetDevCapsW");
-	AnimaEngine::win32._winmm._joyGetPos = (JOYGETPOS_T)GetProcAddress(AnimaEngine::win32._winmm._instance, "joyGetPos");
-	AnimaEngine::win32._winmm._joyGetPosEx = (JOYGETPOSEX_T)GetProcAddress(AnimaEngine::win32._winmm._instance, "joyGetPosEx");
-	AnimaEngine::win32._winmm._timeGetTime = (TIMEGETTIME_T)GetProcAddress(AnimaEngine::win32._winmm._instance, "timeGetTime");
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetDevCaps = (JOYGETDEVCAPS_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance, "joyGetDevCapsW");
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPos = (JOYGETPOS_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance, "joyGetPos");
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPosEx = (JOYGETPOSEX_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance, "joyGetPosEx");
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._timeGetTime = (TIMEGETTIME_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance, "timeGetTime");
 
-	if (!AnimaEngine::win32._winmm._joyGetDevCaps || !AnimaEngine::win32._winmm._joyGetPos || !AnimaEngine::win32._winmm._joyGetPosEx || !AnimaEngine::win32._winmm._timeGetTime)
+	if (!AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetDevCaps || !AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPos || !AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPosEx || !AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._timeGetTime)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to load winmm functions");
 		return false;
 	}
 
-	AnimaEngine::win32._user32._instance = LoadLibraryW(L"user32.dll");
-	if (AnimaEngine::win32._user32._instance)
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance = LoadLibraryW(L"user32.dll");
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance)
 	{
-		AnimaEngine::win32._user32._SetProcessDPIAware = (SETPROCESSDPIAWARE_T)GetProcAddress(AnimaEngine::win32._user32._instance, "SetProcessDPIAware");
-		AnimaEngine::win32._user32._ChangeWindowMessageFilterEx = (CHANGEWINDOWMESSAGEFILTEREX_T)GetProcAddress(AnimaEngine::win32._user32._instance, "ChangeWindowMessageFilterEx");
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._SetProcessDPIAware = (SETPROCESSDPIAWARE_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance, "SetProcessDPIAware");
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._ChangeWindowMessageFilterEx = (CHANGEWINDOWMESSAGEFILTEREX_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance, "ChangeWindowMessageFilterEx");
 	}
 
-	AnimaEngine::win32._dwmapi._instance = LoadLibraryW(L"dwmapi.dll");
-	if (AnimaEngine::win32._dwmapi._instance)
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._instance = LoadLibraryW(L"dwmapi.dll");
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._instance)
 	{
-		AnimaEngine::win32._dwmapi._DwmIsCompositionEnabled = (DWMISCOMPOSITIONENABLED_T)GetProcAddress(AnimaEngine::win32._dwmapi._instance, "DwmIsCompositionEnabled");
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._DwmIsCompositionEnabled = (DWMISCOMPOSITIONENABLED_T)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._instance, "DwmIsCompositionEnabled");
 	}
 
 	return true;
@@ -56,14 +64,14 @@ static bool initLibraries(void)
 
 static void terminateLibraries(void)
 {
-	if (AnimaEngine::win32._winmm._instance)
-		FreeLibrary(AnimaEngine::win32._winmm._instance);
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance)
+		FreeLibrary(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._instance);
 
-	if (AnimaEngine::win32._user32._instance)
-		FreeLibrary(AnimaEngine::win32._user32._instance);
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance)
+		FreeLibrary(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._instance);
 
-	if (AnimaEngine::win32._dwmapi._instance)
-		FreeLibrary(AnimaEngine::win32._dwmapi._instance);
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._instance)
+		FreeLibrary(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._instance);
 }
 
 bool _AnimaEngineWindowIsCompositionEnabled(void)
@@ -76,7 +84,9 @@ bool _AnimaEngineWindowIsCompositionEnabled(void)
 	if (_AnimaEngineWindow_DwmIsCompositionEnabled(&enabled) != S_OK)
 		return false;
 
-	return enabled;
+	if (enabled == TRUE)
+		return true;
+	return false;
 }
 
 WCHAR* _AnimaEngineWindowCreateWideStringFromUTF8(const char* source)
@@ -125,7 +135,7 @@ bool _AnimaEngineWindowPlatformInit(void)
 	// To make SetForegroundWindow work as we want, we need to fiddle
 	// with the FOREGROUNDLOCKTIMEOUT system setting (we do this as early
 	// as possible in the hope of still being the foreground process)
-	SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &AnimaEngine::win32._foregroundLockTimeout, 0);
+	SystemParametersInfoW(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, &AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_foregroundLockTimeout, 0);
 	SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, UIntToPtr(0), SPIF_SENDCHANGE);
 
 	if (!initLibraries())
@@ -157,9 +167,9 @@ void _AnimaEngineWindowPlatformTerminate(void)
 	_AnimaEngineWindowUnregisterWindowClass();
 
 	// Restore previous foreground lock timeout system setting
-	SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, UIntToPtr(AnimaEngine::win32._foregroundLockTimeout), SPIF_SENDCHANGE);
+	SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, UIntToPtr(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_foregroundLockTimeout), SPIF_SENDCHANGE);
 
-	free(AnimaEngine::win32._clipboardString);
+	free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
 
 	_AnimaEngineWindowTerminateJoysticks();
 	_AnimaEngineWindowTerminateContextAPI();
@@ -187,70 +197,70 @@ const char* _AnimaEngineWindowPlatformGetVersionString(void)
 	return version;
 }
 
-static void updateClipRect(_AnimaEngineWindowwindow* window)
+static void updateClipRect(AnimaEngineWindow_Base* window)
 {
 	RECT clipRect;
-	GetClientRect(window->win32._handle, &clipRect);
-	ClientToScreen(window->win32._handle, (POINT*)&clipRect.left);
-	ClientToScreen(window->win32._handle, (POINT*)&clipRect.right);
+	GetClientRect(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, &clipRect);
+	ClientToScreen(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, (POINT*)&clipRect.left);
+	ClientToScreen(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, (POINT*)&clipRect.right);
 	ClipCursor(&clipRect);
 }
 
-static void hideCursor(_AnimaEngineWindowwindow* window)
+static void hideCursor(AnimaEngineWindow_Base* window)
 {
 	POINT pos;
 
 	ReleaseCapture();
 	ClipCursor(NULL);
 
-	if (window->win32._cursorHidden)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden)
 	{
 		ShowCursor(TRUE);
-		window->win32._cursorHidden = false;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden = false;
 	}
 
 	if (GetCursorPos(&pos))
 	{
-		if (WindowFromPoint(pos) == window->win32._handle)
+		if (WindowFromPoint(pos) == window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle)
 			SetCursor(NULL);
 	}
 }
 
 // Disable the mouse cursor
 //
-static void disableCursor(_AnimaEngineWindowwindow* window)
+static void disableCursor(AnimaEngineWindow_Base* window)
 {
-	if (!window->win32._cursorHidden)
+	if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden)
 	{
 		ShowCursor(FALSE);
-		window->win32._cursorHidden = true;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden = true;
 	}
 
 	updateClipRect(window);
-	SetCapture(window->win32._handle);
+	SetCapture(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
 }
 
 // Restores the mouse cursor
 //
-static void restoreCursor(_AnimaEngineWindowwindow* window)
+static void restoreCursor(AnimaEngineWindow_Base* window)
 {
 	POINT pos;
 
 	ReleaseCapture();
 	ClipCursor(NULL);
 
-	if (window->win32._cursorHidden)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden)
 	{
 		ShowCursor(TRUE);
-		window->win32._cursorHidden = false;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorHidden = false;
 	}
 
 	if (GetCursorPos(&pos))
 	{
-		if (WindowFromPoint(pos) == window->win32._handle)
+		if (WindowFromPoint(pos) == window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle)
 		{
-			if (window->_cursor)
-				SetCursor(window->_cursor->win32._handle);
+			if (window->GetCursor())
+				SetCursor(window->GetCursor()->win32._handle);
 			else
 				SetCursor(LoadCursorW(NULL, IDC_ARROW));
 		}
@@ -530,494 +540,547 @@ static int translateKey(WPARAM wParam, LPARAM lParam)
 	return ANIMA_ENGINE_CORE_KEY_UNKNOWN;
 }
 
-// Enter fullscreen mode
-//
-static GLboolean enterFullscreenMode(_AnimaEngineWindowwindow* window)
+static bool enterFullscreenMode(AnimaEngineWindow_Base* window)
 {
 	AnimaEngineWindowvidmode mode;
-	GLboolean status;
+	bool status;
 	int xpos, ypos;
 
-	status = _AnimaEngineWindowSetVideoMode(window->_monitor, &window->_videoMode);
+	status = _AnimaEngineWindowSetVideoMode(window->GetMonitor(), window->GetVideoMode());
 
-	_AnimaEngineWindowPlatformGetVideoMode(window->_monitor, &mode);
-	_AnimaEngineWindowPlatformGetMonitorPos(window->_monitor, &xpos, &ypos);
+	_AnimaEngineWindowPlatformGetVideoMode(window->GetMonitor(), &mode);
+	_AnimaEngineWindowPlatformGetMonitorPos(window->GetMonitor(), &xpos, &ypos);
 
-	SetWindowPos(window->win32._handle, HWND_TOPMOST, xpos, ypos, mode._width, mode._height, SWP_NOCOPYBITS);
+	SetWindowPos(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, HWND_TOPMOST, xpos, ypos, mode._width, mode._height, SWP_NOCOPYBITS);
 
 	return status;
 }
 
-// Leave fullscreen mode
-//
-static void leaveFullscreenMode(_AnimaEngineWindowwindow* window)
+static void leaveFullscreenMode(AnimaEngineWindow_Base* window)
 {
-	_AnimaEngineWindowRestoreVideoMode(window->_monitor);
+	_AnimaEngineWindowRestoreVideoMode(window->GetMonitor());
 }
 
-//// Window callback function (handles window events)
-////
-//static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-//{
-//	_AnimaEngineWindowwindow* window = (_AnimaEngineWindowwindow*)GetWindowLongPtrW(hWnd, 0);
-//
-//	switch (uMsg)
-//	{
-//	case WM_NCCREATE:
-//	{
-//		CREATESTRUCTW* cs = (CREATESTRUCTW*)lParam;
-//		SetWindowLongPtrW(hWnd, 0, (LONG_PTR)cs->lpCreateParams);
-//		break;
-//	}
-//
-//	case WM_ACTIVATE:
-//	{
-//		// Window was (de)focused and/or (de)iconified
-//
-//		BOOL focused = LOWORD(wParam) != WA_INACTIVE;
-//		BOOL iconified = HIWORD(wParam) ? TRUE : FALSE;
-//
-//		if (focused && iconified)
-//		{
-//			if (window->_iconified && AnimaEngine::_focusedWindow != window)
-//			{
-//				// This is a workaround for window restoration using the
-//				// Win+D hot key leading to windows being told they're
-//				// focused and iconified and then never told they're
-//				// restored
-//				iconified = FALSE;
-//			}
-//			else
-//			{
-//				// This is a workaround for window iconification using the
-//				// taskbar leading to windows being told they're focused and
-//				// iconified and then never told they're defocused
-//				focused = FALSE;
-//			}
-//		}
-//
-//		if (!focused && AnimaEngine::_focusedWindow == window)
-//		{
-//			// The window was defocused (or iconified, see above)
-//
-//			if (window->cursorMode != ANIMA_ENGINE_CORE_CURSOR_NORMAL)
-//				restoreCursor(window);
-//
-//			if (window->monitor && window->autoIconify)
-//			{
-//				if (!iconified)
-//				{
-//					// Iconify the (on top, borderless, oddly positioned)
-//					// window or the user will be annoyed
-//					_AnimaEngineWindowPlatformIconifyWindow(window);
-//				}
-//
-//				leaveFullscreenMode(window);
-//			}
-//		}
-//		else if (focused && AnimaEngine::_focusedWindow != window)
-//		{
-//			// The window was focused
-//
-//			if (window->cursorMode != ANIMA_ENGINE_CORE_CURSOR_NORMAL)
-//				_AnimaEngineWindowPlatformApplyCursorMode(window);
-//
-//			if (window->monitor && window->autoIconify)
-//				enterFullscreenMode(window);
-//		}
-//
-//		_AnimaEngineWindowInputWindowFocus(window, focused);
-//		_AnimaEngineWindowInputWindowIconify(window, iconified);
-//		return 0;
-//	}
-//
-//	case WM_ACTIVATEAPP:
-//	{
-//		if (!wParam && IsIconic(hWnd))
-//		{
-//			// This is a workaround for full screen windows losing focus
-//			// through Alt+Tab leading to windows being told they're
-//			// unfocused and restored and then never told they're iconified
-//			_AnimaEngineWindowInputWindowIconify(window, GL_TRUE);
-//		}
-//
-//		return 0;
-//	}
-//
-//	case WM_SHOWWINDOW:
-//	{
-//		_AnimaEngineWindowInputWindowVisibility(window, wParam ? GL_TRUE : GL_FALSE);
-//		break;
-//	}
-//
-//	case WM_SYSCOMMAND:
-//	{
-//		switch (wParam & 0xfff0)
-//		{
-//		case SC_SCREENSAVE:
-//		case SC_MONITORPOWER:
-//		{
-//			if (window->monitor)
-//			{
-//				// We are running in fullscreen mode, so disallow
-//				// screen saver and screen blanking
-//				return 0;
-//			}
-//			else
-//				break;
-//		}
-//
-//			// User trying to access application menu using ALT?
-//		case SC_KEYMENU:
-//			return 0;
-//		}
-//		break;
-//	}
-//
-//	case WM_CLOSE:
-//	{
-//		_AnimaEngineWindowInputWindowCloseRequest(window);
-//		return 0;
-//	}
-//
-//	case WM_KEYDOWN:
-//	case WM_SYSKEYDOWN:
-//	{
-//		const int scancode = (lParam >> 16) & 0x1ff;
-//		const int key = translateKey(wParam, lParam);
-//		if (key == _ANIMA_ENGINE_CORE_KEY_INVALID)
-//			break;
-//
-//		_AnimaEngineWindowInputKey(window, key, scancode, ANIMA_ENGINE_CORE_PRESS, getKeyMods());
-//		break;
-//	}
-//
-//	case WM_CHAR:
-//	{
-//		_AnimaEngineWindowInputChar(window, (unsigned int)wParam, getKeyMods(), GL_TRUE);
-//		return 0;
-//	}
-//
-//	case WM_SYSCHAR:
-//	{
-//		_AnimaEngineWindowInputChar(window, (unsigned int)wParam, getKeyMods(), GL_FALSE);
-//		return 0;
-//	}
-//
-//	case WM_UNICHAR:
-//	{
-//		// This message is not sent by Windows, but is sent by some
-//		// third-party input method engines
-//
-//		if (wParam == UNICODE_NOCHAR)
-//		{
-//			// Returning TRUE here announces support for this message
-//			return TRUE;
-//		}
-//
-//		_AnimaEngineWindowInputChar(window, (unsigned int)wParam, getKeyMods(), GL_TRUE);
-//		return FALSE;
-//	}
-//
-//	case WM_KEYUP:
-//	case WM_SYSKEYUP:
-//	{
-//		const int mods = getKeyMods();
-//		const int scancode = (lParam >> 16) & 0x1ff;
-//		const int key = translateKey(wParam, lParam);
-//		if (key == _ANIMA_ENGINE_CORE_KEY_INVALID)
-//			break;
-//
-//		if (wParam == VK_SHIFT)
-//		{
-//			// Release both Shift keys on Shift up event, as only one event
-//			// is sent even if both keys are released
-//			_AnimaEngineWindowInputKey(window, ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
-//			_AnimaEngineWindowInputKey(window, ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
-//		}
-//		else if (wParam == VK_SNAPSHOT)
-//		{
-//			// Key down is not reported for the print screen key
-//			_AnimaEngineWindowInputKey(window, key, scancode, ANIMA_ENGINE_CORE_PRESS, mods);
-//			_AnimaEngineWindowInputKey(window, key, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
-//		}
-//		else
-//			_AnimaEngineWindowInputKey(window, key, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
-//
-//		break;
-//	}
-//
-//	case WM_LBUTTONDOWN:
-//	case WM_RBUTTONDOWN:
-//	case WM_MBUTTONDOWN:
-//	case WM_XBUTTONDOWN:
-//	{
-//		const int mods = getKeyMods();
-//
-//		SetCapture(hWnd);
-//
-//		if (uMsg == WM_LBUTTONDOWN)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_PRESS, mods);
-//		else if (uMsg == WM_RBUTTONDOWN)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_PRESS, mods);
-//		else if (uMsg == WM_MBUTTONDOWN)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_MIDDLE, ANIMA_ENGINE_CORE_PRESS, mods);
-//		else
-//		{
-//			if (HIWORD(wParam) == XBUTTON1)
-//				_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_4, ANIMA_ENGINE_CORE_PRESS, mods);
-//			else if (HIWORD(wParam) == XBUTTON2)
-//				_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_5, ANIMA_ENGINE_CORE_PRESS, mods);
-//
-//			return TRUE;
-//		}
-//
-//		return 0;
-//	}
-//
-//	case WM_LBUTTONUP:
-//	case WM_RBUTTONUP:
-//	case WM_MBUTTONUP:
-//	case WM_XBUTTONUP:
-//	{
-//		const int mods = getKeyMods();
-//
-//		ReleaseCapture();
-//
-//		if (uMsg == WM_LBUTTONUP)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_RELEASE, mods);
-//		else if (uMsg == WM_RBUTTONUP)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_RELEASE, mods);
-//		else if (uMsg == WM_MBUTTONUP)
-//			_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_MIDDLE, ANIMA_ENGINE_CORE_RELEASE, mods);
-//		else
-//		{
-//			if (HIWORD(wParam) == XBUTTON1)
-//				_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_4, ANIMA_ENGINE_CORE_RELEASE, mods);
-//			else if (HIWORD(wParam) == XBUTTON2)
-//				_AnimaEngineWindowInputMouseClick(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_5, ANIMA_ENGINE_CORE_RELEASE, mods);
-//
-//			return TRUE;
-//		}
-//
-//		return 0;
-//	}
-//
-//	case WM_MOUSEMOVE:
-//	{
-//		const int newCursorX = GET_X_LPARAM(lParam);
-//		const int newCursorY = GET_Y_LPARAM(lParam);
-//
-//		if (newCursorX != window->win32.oldCursorX ||
-//			newCursorY != window->win32.oldCursorY)
-//		{
-//			int x, y;
-//
-//			if (window->cursorMode == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
-//			{
-//				if (AnimaEngine::_focusedWindow != window)
-//					return 0;
-//
-//				x = newCursorX - window->win32.oldCursorX;
-//				y = newCursorY - window->win32.oldCursorY;
-//			}
-//			else
-//			{
-//				x = newCursorX;
-//				y = newCursorY;
-//			}
-//
-//			window->win32.oldCursorX = newCursorX;
-//			window->win32.oldCursorY = newCursorY;
-//			window->win32.cursorCentered = GL_FALSE;
-//
-//			_AnimaEngineWindowInputCursorMotion(window, x, y);
-//		}
-//
-//		if (!window->win32.cursorInside)
-//		{
-//			TRACKMOUSEEVENT tme;
-//			ZeroMemory(&tme, sizeof(tme));
-//			tme.cbSize = sizeof(tme);
-//			tme.dwFlags = TME_LEAVE;
-//			tme.hwndTrack = window->win32.handle;
-//			TrackMouseEvent(&tme);
-//
-//			window->win32.cursorInside = GL_TRUE;
-//			_AnimaEngineWindowInputCursorEnter(window, GL_TRUE);
-//		}
-//
-//		return 0;
-//	}
-//
-//	case WM_MOUSELEAVE:
-//	{
-//		window->win32.cursorInside = GL_FALSE;
-//		_AnimaEngineWindowInputCursorEnter(window, GL_FALSE);
-//		return 0;
-//	}
-//
-//	case WM_MOUSEWHEEL:
-//	{
-//		_AnimaEngineWindowInputScroll(window, 0.0, (SHORT)HIWORD(wParam) / (double)WHEEL_DELTA);
-//		return 0;
-//	}
-//
-//	case WM_MOUSEHWHEEL:
-//	{
-//		// This message is only sent on Windows Vista and later
-//		// NOTE: The X-axis is inverted for consistency with OS X and X11.
-//		_AnimaEngineWindowInputScroll(window, -((SHORT)HIWORD(wParam) / (double)WHEEL_DELTA), 0.0);
-//		return 0;
-//	}
-//
-//	case WM_SIZE:
-//	{
-//		if (AnimaEngine::_focusedWindow == window)
-//		{
-//			if (window->cursorMode == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
-//				updateClipRect(window);
-//		}
-//
-//		_AnimaEngineWindowInputFramebufferSize(window, LOWORD(lParam), HIWORD(lParam));
-//		_AnimaEngineWindowInputWindowSize(window, LOWORD(lParam), HIWORD(lParam));
-//		return 0;
-//	}
-//
-//	case WM_MOVE:
-//	{
-//		if (AnimaEngine::_focusedWindow == window)
-//		{
-//			if (window->cursorMode == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
-//				updateClipRect(window);
-//		}
-//
-//		// NOTE: This cannot use LOWORD/HIWORD recommended by MSDN, as
-//		// those macros do not handle negative window positions correctly
-//		_AnimaEngineWindowInputWindowPos(window,
-//			GET_X_LPARAM(lParam),
-//			GET_Y_LPARAM(lParam));
-//		return 0;
-//	}
-//
-//	case WM_PAINT:
-//	{
-//		_AnimaEngineWindowInputWindowDamage(window);
-//		break;
-//	}
-//
-//	case WM_ERASEBKGND:
-//	{
-//		return TRUE;
-//	}
-//
-//	case WM_SETCURSOR:
-//	{
-//		if (AnimaEngine::_focusedWindow == window && LOWORD(lParam) == HTCLIENT)
-//		{
-//			if (window->cursorMode == ANIMA_ENGINE_CORE_CURSOR_HIDDEN ||
-//				window->cursorMode == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
-//			{
-//				SetCursor(NULL);
-//				return TRUE;
-//			}
-//			else if (window->cursor)
-//			{
-//				SetCursor(window->cursor->win32.handle);
-//				return TRUE;
-//			}
-//		}
-//
-//		break;
-//	}
-//
-//	case WM_DEVICECHANGE:
-//	{
-//		if (DBT_DEVNODES_CHANGED == wParam)
-//		{
-//			_AnimaEngineWindowInputMonitorChange();
-//			return TRUE;
-//		}
-//		break;
-//	}
-//
-//	case WM_DWMCOMPOSITIONCHANGED:
-//	{
-//		if (_AnimaEngineWindowIsCompositionEnabled())
-//		{
-//			_AnimaEngineWindowwindow* previous = _AnimaEngineWindowPlatformGetCurrentContext();
-//			_AnimaEngineWindowPlatformMakeContextCurrent(window);
-//			_AnimaEngineWindowPlatformSwapInterval(0);
-//			_AnimaEngineWindowPlatformMakeContextCurrent(previous);
-//		}
-//
-//		// TODO: Restore vsync if compositing was disabled
-//		break;
-//	}
-//
-//	case WM_DROPFILES:
-//	{
-//		HDROP hDrop = (HDROP)wParam;
-//		POINT pt;
-//		int i;
-//
-//		const int count = DragQueryFileW(hDrop, 0xffffffff, NULL, 0);
-//		char** names = calloc(count, sizeof(char*));
-//
-//		// Move the mouse to the position of the drop
-//		DragQueryPoint(hDrop, &pt);
-//		_AnimaEngineWindowInputCursorMotion(window, pt.x, pt.y);
-//
-//		for (i = 0; i < count; i++)
-//		{
-//			const UINT length = DragQueryFileW(hDrop, i, NULL, 0);
-//			WCHAR* buffer = calloc(length + 1, sizeof(WCHAR));
-//
-//			DragQueryFileW(hDrop, i, buffer, length + 1);
-//			names[i] = _AnimaEngineWindowCreateUTF8FromWideString(buffer);
-//
-//			free(buffer);
-//		}
-//
-//		_AnimaEngineWindowInputDrop(window, count, (const char**)names);
-//
-//		for (i = 0; i < count; i++)
-//			free(names[i]);
-//		free(names);
-//
-//		DragFinish(hDrop);
-//		return 0;
-//	}
-//	}
-//
-//	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-//}
+static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*)GetWindowLongPtrW(hWnd, 0);
 
-// Translate client window size to full window size (including window borders)
-//
-static void getFullWindowSize(_AnimaEngineWindowwindow* window, int clientWidth, int clientHeight, int* fullWidth, int* fullHeight)
+	switch (uMsg)
+	{
+	case WM_NCCREATE:
+	{
+		CREATESTRUCTW* cs = (CREATESTRUCTW*)lParam;
+		SetWindowLongPtrW(hWnd, 0, (LONG_PTR)cs->lpCreateParams);
+		break;
+	}
+
+	case WM_ACTIVATE:
+	{
+		// Window was (de)focused and/or (de)iconified
+		bool focused = LOWORD(wParam) != WA_INACTIVE;
+		bool iconified = HIWORD(wParam) ? true : false;
+
+		if (focused && iconified)
+		{
+			if (window->IsIconified() && window->GetEngine()->GetFocusedWindow() != window)
+			{
+				// This is a workaround for window restoration using the
+				// Win+D hot key leading to windows being told they're
+				// focused and iconified and then never told they're
+				// restored
+				iconified = false;
+			}
+			else
+			{
+				// This is a workaround for window iconification using the
+				// taskbar leading to windows being told they're focused and
+				// iconified and then never told they're defocused
+				focused = false;
+			}
+		}
+
+		if (!focused && window->GetEngine()->GetFocusedWindow() == window)
+		{
+			// The window was defocused (or iconified, see above)
+
+			if (window->GetCursorMode() != ANIMA_ENGINE_CORE_CURSOR_NORMAL)
+				restoreCursor(window);
+
+			if (window->GetMonitor() && window->IsAutoIconifiy())
+			{
+				if (!iconified)
+				{
+					// Iconify the (on top, borderless, oddly positioned)
+					// window or the user will be annoyed
+					_AnimaEngineWindowPlatformIconifyWindow(window);
+				}
+
+				leaveFullscreenMode(window);
+			}
+		}
+		else if (focused && window->GetEngine()->GetFocusedWindow() != window)
+		{
+			// The window was focused
+			if (window->GetCursorMode() != ANIMA_ENGINE_CORE_CURSOR_NORMAL)
+				_AnimaEngineWindowPlatformApplyCursorMode(window);
+
+			if (window->GetMonitor() && window->IsAutoIconifiy())
+				enterFullscreenMode(window);
+		}
+
+		if (window->GetFocusCallback())
+			window->GetFocusCallback()(window, focused);
+
+		if (window->GetIconifyCallback())
+			window->GetIconifyCallback()(window, iconified);
+
+		return 0;
+	}
+
+	case WM_ACTIVATEAPP:
+	{
+		if (!wParam && IsIconic(hWnd))
+		{
+			// This is a workaround for full screen windows losing focus
+			// through Alt+Tab leading to windows being told they're
+			// unfocused and restored and then never told they're iconified
+			if (window->GetIconifyCallback())
+				window->GetIconifyCallback()(window, true);
+		}
+
+		return 0;
+	}
+
+	case WM_SHOWWINDOW:
+	{
+		if (window->GetVisibilityCallback())
+			window->GetVisibilityCallback()(window, wParam ? true : false);
+		break;
+	}
+
+	case WM_SYSCOMMAND:
+	{
+		switch (wParam & 0xfff0)
+		{
+		case SC_SCREENSAVE:
+		case SC_MONITORPOWER:
+		{
+			if (window->GetMonitor())
+			{
+				// We are running in fullscreen mode, so disallow
+				// screen saver and screen blanking
+				return 0;
+			}
+			else
+				break;
+		}
+
+			// User trying to access application menu using ALT?
+		case SC_KEYMENU:
+			return 0;
+		}
+		break;
+	}
+
+	case WM_CLOSE:
+	{
+		if (window->GetCloseRequestCallback())
+			window->GetCloseRequestCallback();
+		return 0;
+	}
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	{
+		const int scancode = (lParam >> 16) & 0x1ff;
+		const int key = translateKey(wParam, lParam);
+		if (key == _ANIMA_ENGINE_CORE_KEY_INVALID)
+			break;
+
+		if (window->GetKeyCallback())
+			window->GetKeyCallback()(window, key, scancode, ANIMA_ENGINE_CORE_PRESS, getKeyMods());
+
+		break;
+	}
+
+	case WM_CHAR:
+	{
+		if (window->GetCharCallback())
+			window->GetCharCallback()(window, (unsigned int)wParam, getKeyMods(), true);
+		return 0;
+	}
+
+	case WM_SYSCHAR:
+	{
+		if (window->GetCharCallback())
+			window->GetCharCallback()(window, (unsigned int)wParam, getKeyMods(), false);
+		return 0;
+	}
+
+	case WM_UNICHAR:
+	{
+		// This message is not sent by Windows, but is sent by some
+		// third-party input method engines
+
+		if (wParam == UNICODE_NOCHAR)
+		{
+			// Returning TRUE here announces support for this message
+			return TRUE;
+		}
+
+		if (window->GetCharCallback())
+			window->GetCharCallback()(window, (unsigned int)wParam, getKeyMods(), true);
+
+		return FALSE;
+	}
+
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	{
+		const int mods = getKeyMods();
+		const int scancode = (lParam >> 16) & 0x1ff;
+		const int key = translateKey(wParam, lParam);
+		if (key == _ANIMA_ENGINE_CORE_KEY_INVALID)
+			break;
+
+		if (wParam == VK_SHIFT)
+		{
+			// Release both Shift keys on Shift up event, as only one event
+			// is sent even if both keys are released
+			if (window->GetKeyCallback())
+			{
+				window->GetKeyCallback()(window, ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
+				window->GetKeyCallback()(window, ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
+		}
+		else if (wParam == VK_SNAPSHOT)
+		{
+			// Key down is not reported for the print screen key
+			if (window->GetKeyCallback())
+			{
+				window->GetKeyCallback()(window, key, scancode, ANIMA_ENGINE_CORE_PRESS, mods);
+				window->GetKeyCallback()(window, key, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
+		}
+		else
+		{
+			if (window->GetKeyCallback())
+				window->GetKeyCallback()(window, key, scancode, ANIMA_ENGINE_CORE_RELEASE, mods);
+		}
+
+		break;
+	}
+
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_XBUTTONDOWN:
+	{
+		const int mods = getKeyMods();
+
+		SetCapture(hWnd);
+
+		if (uMsg == WM_LBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_PRESS, mods);
+		}
+		else if (uMsg == WM_RBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_PRESS, mods);
+		}
+		else if (uMsg == WM_MBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_MIDDLE, ANIMA_ENGINE_CORE_PRESS, mods);
+		}
+		else
+		{
+			if (HIWORD(wParam) == XBUTTON1)
+			{
+				if (window->GetMouseClickCallback())
+					window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_4, ANIMA_ENGINE_CORE_PRESS, mods);
+			}
+			else if (HIWORD(wParam) == XBUTTON2)
+			{
+				if (window->GetMouseClickCallback())
+					window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_5, ANIMA_ENGINE_CORE_PRESS, mods);
+			}
+			
+			return TRUE;
+		}
+
+		return 0;
+	}
+
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_XBUTTONUP:
+	{
+		const int mods = getKeyMods();
+
+		ReleaseCapture();
+
+		if (uMsg == WM_LBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_RELEASE, mods);
+		}
+		else if (uMsg == WM_RBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_RELEASE, mods);
+		}
+		else if (uMsg == WM_MBUTTONDOWN)
+		{
+			if (window->GetMouseClickCallback())
+				window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_MIDDLE, ANIMA_ENGINE_CORE_RELEASE, mods);
+		}
+		else
+		{
+			if (HIWORD(wParam) == XBUTTON1)
+			{
+				if (window->GetMouseClickCallback())
+					window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_4, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
+			else if (HIWORD(wParam) == XBUTTON2)
+			{
+				if (window->GetMouseClickCallback())
+					window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_5, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
+
+			return TRUE;
+		}
+		
+		return 0;
+	}
+
+	case WM_MOUSEMOVE:
+	{
+		const int newCursorX = GET_X_LPARAM(lParam);
+		const int newCursorY = GET_Y_LPARAM(lParam);
+
+		if (newCursorX != window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorX || newCursorY != window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorY)
+		{
+			int x, y;
+
+			if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+			{
+				if (window->GetEngine()->GetFocusedWindow() != window)
+					return 0;
+
+				x = newCursorX - window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorX;
+				y = newCursorY - window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorY;
+			}
+			else
+			{
+				x = newCursorX;
+				y = newCursorY;
+			}
+
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorX = newCursorX;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorY = newCursorY;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorCentered = false;
+
+			if (window->GetCursorMotionCallback())
+				window->GetCursorMotionCallback()(window, x, y);
+		}
+
+		if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside)
+		{
+			TRACKMOUSEEVENT tme;
+			ZeroMemory(&tme, sizeof(tme));
+			tme.cbSize = sizeof(tme);
+			tme.dwFlags = TME_LEAVE;
+			tme.hwndTrack = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle;
+			TrackMouseEvent(&tme);
+
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside = true;
+
+			if (window->GetCursorEnterCallback())
+				window->GetCursorEnterCallback()(window, true);
+		}
+
+		return 0;
+	}
+
+	case WM_MOUSELEAVE:
+	{
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside = false;
+
+		if (window->GetCursorEnterCallback())
+			window->GetCursorEnterCallback()(window, false);
+		return 0;
+	}
+
+	case WM_MOUSEWHEEL:
+	{
+		if (window->GetScrollCallback())
+			window->GetScrollCallback()(window, 0.0, (SHORT)HIWORD(wParam) / (double)WHEEL_DELTA);
+		return 0;
+	}
+
+	case WM_MOUSEHWHEEL:
+	{
+		// This message is only sent on Windows Vista and later
+		// NOTE: The X-axis is inverted for consistency with OS X and X11.
+		if (window->GetScrollCallback())
+			window->GetScrollCallback()(window, -((SHORT)HIWORD(wParam) / (double)WHEEL_DELTA), 0.0);
+		return 0;
+	}
+
+	case WM_SIZE:
+	{
+		if (window->GetEngine()->GetFocusedWindow() == window)
+		{
+			if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+				updateClipRect(window);
+		}
+
+		if (window->GetFramebufferSizeCallback())
+			window->GetFramebufferSizeCallback()(window, LOWORD(lParam), HIWORD(lParam));
+
+		if (window->GetSizeCallback())
+			window->GetSizeCallback()(window, LOWORD(lParam), HIWORD(lParam));
+
+		return 0;
+	}
+
+	case WM_MOVE:
+	{
+		if (window->GetEngine()->GetFocusedWindow() == window)
+		{
+			if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+				updateClipRect(window);
+		}
+
+		// NOTE: This cannot use LOWORD/HIWORD recommended by MSDN, as
+		// those macros do not handle negative window positions correctly
+		if (window->GetPosCallback())
+			window->GetPosCallback()(window, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+		return 0;
+	}
+
+	case WM_PAINT:
+	{
+		if (window->GetDamageCallback())
+			window->GetDamageCallback()(window);
+		break;
+	}
+
+	case WM_ERASEBKGND:
+	{
+		return TRUE;
+	}
+
+	case WM_SETCURSOR:
+	{
+		if (window->GetEngine()->GetFocusedWindow() == window && LOWORD(lParam) == HTCLIENT)
+		{
+			if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_HIDDEN || window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+			{
+				SetCursor(NULL);
+				return TRUE;
+			}
+			else if (window->GetCursor())
+			{
+				SetCursor(window->GetCursor()->win32._handle);
+				return TRUE;
+			}
+		}
+
+		break;
+	}
+
+	case WM_DEVICECHANGE:
+	{
+		if (DBT_DEVNODES_CHANGED == wParam)
+		{
+			_AnimaEngineWindowInputMonitorChange(window->GetEngine());
+			return TRUE;
+		}
+		break;
+	}
+
+	case WM_DWMCOMPOSITIONCHANGED:
+	{
+		if (_AnimaEngineWindowIsCompositionEnabled())
+		{
+			AnimaEngineWindow_Base* previous = _AnimaEngineWindowPlatformGetCurrentContext();
+			_AnimaEngineWindowPlatformMakeContextCurrent(window);
+			_AnimaEngineWindowPlatformSwapInterval(0);
+			_AnimaEngineWindowPlatformMakeContextCurrent(previous);
+		}
+
+		// TODO: Restore vsync if compositing was disabled
+		break;
+	}
+
+	case WM_DROPFILES:
+	{
+		HDROP hDrop = (HDROP)wParam;
+		POINT pt;
+		int i;
+
+		const int count = DragQueryFileW(hDrop, 0xffffffff, NULL, 0);
+		char** names = (char**)calloc(count, sizeof(char*));
+
+		// Move the mouse to the position of the drop
+		DragQueryPoint(hDrop, &pt);
+
+		if (window->GetCursorMotionCallback())
+			window->GetCursorMotionCallback()(window, pt.x, pt.y);
+
+		for (i = 0; i < count; i++)
+		{
+			const UINT length = DragQueryFileW(hDrop, i, NULL, 0);
+			WCHAR* buffer = (WCHAR*)calloc(length + 1, sizeof(WCHAR));
+
+			DragQueryFileW(hDrop, i, buffer, length + 1);
+			names[i] = _AnimaEngineWindowCreateUTF8FromWideString(buffer);
+
+			free(buffer);
+		}
+
+		if (window->GetDropCallback())
+			window->GetDropCallback()(window, count, (const char**)names);
+
+		for (i = 0; i < count; i++)
+			free(names[i]);
+		free(names);
+
+		DragFinish(hDrop);
+		return 0;
+	}
+	}
+
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+static void getFullWindowSize(AnimaEngineWindow_Base* window, int clientWidth, int clientHeight, int* fullWidth, int* fullHeight)
 {
 	RECT rect = { 0, 0, clientWidth, clientHeight };
 
-	AdjustWindowRectEx(&rect, window->win32._dwStyle, FALSE, window->win32._dwExStyle);
+	AdjustWindowRectEx(&rect, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle, FALSE, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle);
 
 	*fullWidth = rect.right - rect.left;
 	*fullHeight = rect.bottom - rect.top;
 }
 
-// Creates the ANIMA_ENGINE_CORE window and rendering context
-//
-static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
+static bool createWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
 {
 	int xpos, ypos, fullWidth, fullHeight;
 	WCHAR* wideTitle;
 
-	window->win32._dwStyle = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
-	window->win32._dwExStyle = WS_EX_APPWINDOW;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle = WS_EX_APPWINDOW;
 
-	if (window->_monitor)
+	if (window->GetMonitor())
 	{
-		window->win32._dwStyle |= WS_POPUP;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle |= WS_POPUP;
 
 		// NOTE: This window placement is temporary and approximate, as the
 		//       correct position and size cannot be known until the monitor
@@ -1030,16 +1093,16 @@ static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWin
 	{
 		if (wndconfig->_decorated)
 		{
-			window->win32._dwStyle |= WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle |= WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
 			if (wndconfig->_resizable)
 			{
-				window->win32._dwStyle |= WS_MAXIMIZEBOX | WS_SIZEBOX;
-				window->win32._dwExStyle |= WS_EX_WINDOWEDGE;
+				window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle |= WS_MAXIMIZEBOX | WS_SIZEBOX;
+				window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle |= WS_EX_WINDOWEDGE;
 			}
 		}
 		else
-			window->win32._dwStyle |= WS_POPUP;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle |= WS_POPUP;
 
 		xpos = CW_USEDEFAULT;
 		ypos = CW_USEDEFAULT;
@@ -1054,10 +1117,10 @@ static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWin
 		return false;
 	}
 
-	window->win32._handle = CreateWindowExW(window->win32._dwExStyle,
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle = CreateWindowExW(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle,
 											_ANIMA_ENGINE_CORE_WNDCLASSNAME,
 											wideTitle,
-											window->win32._dwStyle,
+											window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle,
 											xpos, ypos,
 											fullWidth, fullHeight,
 											NULL, // No parent window
@@ -1067,7 +1130,7 @@ static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWin
 
 	free(wideTitle);
 
-	if (!window->win32._handle)
+	if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to create window");
 		return false;
@@ -1075,17 +1138,17 @@ static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWin
 
 	if (_AnimaEngineWindow_ChangeWindowMessageFilterEx)
 	{
-		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->win32._handle, WM_DROPFILES, MSGFLT_ALLOW, NULL);
-		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->win32._handle, WM_COPYDATA, MSGFLT_ALLOW, NULL);
-		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->win32._handle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, NULL);
+		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, WM_DROPFILES, MSGFLT_ALLOW, NULL);
+		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, WM_COPYDATA, MSGFLT_ALLOW, NULL);
+		_AnimaEngineWindow_ChangeWindowMessageFilterEx(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, NULL);
 	}
 
 	if (wndconfig->_floating && !wndconfig->_monitor)
 	{
-		SetWindowPos(window->win32._handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 	}
 
-	DragAcceptFiles(window->win32._handle, TRUE);
+	DragAcceptFiles(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, TRUE);
 
 	if (!_AnimaEngineWindowCreateContext(window, ctxconfig, fbconfig))
 		return false;
@@ -1093,26 +1156,17 @@ static bool createWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWin
 	return true;
 }
 
-// Destroys the ANIMA_ENGINE_CORE window and rendering context
-//
-static void destroyWindow(_AnimaEngineWindowwindow* window)
+static void destroyWindow(AnimaEngineWindow_Base* window)
 {
 	_AnimaEngineWindowDestroyContext(window);
 
-	if (window->win32._handle)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle)
 	{
-		DestroyWindow(window->win32._handle);
-		window->win32._handle = NULL;
+		DestroyWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle = NULL;
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//////                       ANIMA_ENGINE_CORE internal API                      //////
-//////////////////////////////////////////////////////////////////////////
-
-// Registers the ANIMA_ENGINE_CORE window class
-//
 bool _AnimaEngineWindowRegisterWindowClass(void)
 {
 	WNDCLASSW wc;
@@ -1144,19 +1198,12 @@ bool _AnimaEngineWindowRegisterWindowClass(void)
 	return true;
 }
 
-// Unregisters the ANIMA_ENGINE_CORE window class
-//
 void _AnimaEngineWindowUnregisterWindowClass(void)
 {
 	UnregisterClassW(_ANIMA_ENGINE_CORE_WNDCLASSNAME, GetModuleHandleW(NULL));
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//////                       GLFW platform API                      //////
-//////////////////////////////////////////////////////////////////////////
-
-bool _AnimaEngineWindowPlatformCreateWindow(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
+bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
 {
 	int status;
 
@@ -1199,7 +1246,7 @@ bool _AnimaEngineWindowPlatformCreateWindow(_AnimaEngineWindowwindow* window, co
 			return false;
 	}
 
-	if (window->_monitor)
+	if (window->GetMonitor())
 	{
 		_AnimaEngineWindowPlatformShowWindow(window);
 		if (!enterFullscreenMode(window))
@@ -1209,15 +1256,15 @@ bool _AnimaEngineWindowPlatformCreateWindow(_AnimaEngineWindowwindow* window, co
 	return true;
 }
 
-void _AnimaEngineWindowPlatformDestroyWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformDestroyWindow(AnimaEngineWindow_Base* window)
 {
-	if (window->_monitor)
+	if (window->GetMonitor())
 		leaveFullscreenMode(window);
 
 	destroyWindow(window);
 }
 
-void _AnimaEngineWindowPlatformSetWindowTitle(_AnimaEngineWindowwindow* window, const char* title)
+void _AnimaEngineWindowPlatformSetWindowTitle(AnimaEngineWindow_Base* window, const char* title)
 {
 	WCHAR* wideTitle = _AnimaEngineWindowCreateWideStringFromUTF8(title);
 	if (!wideTitle)
@@ -1226,14 +1273,14 @@ void _AnimaEngineWindowPlatformSetWindowTitle(_AnimaEngineWindowwindow* window, 
 		return;
 	}
 
-	SetWindowTextW(window->win32._handle, wideTitle);
+	SetWindowTextW(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, wideTitle);
 	free(wideTitle);
 }
 
-void _AnimaEngineWindowPlatformGetWindowPos(_AnimaEngineWindowwindow* window, int* xpos, int* ypos)
+void _AnimaEngineWindowPlatformGetWindowPos(AnimaEngineWindow_Base* window, int* xpos, int* ypos)
 {
 	POINT pos = { 0, 0 };
-	ClientToScreen(window->win32._handle, &pos);
+	ClientToScreen(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, &pos);
 
 	if (xpos)
 		*xpos = pos.x;
@@ -1241,18 +1288,18 @@ void _AnimaEngineWindowPlatformGetWindowPos(_AnimaEngineWindowwindow* window, in
 		*ypos = pos.y;
 }
 
-void _AnimaEngineWindowPlatformSetWindowPos(_AnimaEngineWindowwindow* window, int xpos, int ypos)
+void _AnimaEngineWindowPlatformSetWindowPos(AnimaEngineWindow_Base* window, int xpos, int ypos)
 {
 	RECT rect = { xpos, ypos, xpos, ypos };
 
-	AdjustWindowRectEx(&rect, window->win32._dwStyle, FALSE, window->win32._dwExStyle);
-	SetWindowPos(window->win32._handle, NULL, rect.left, rect.top, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
+	AdjustWindowRectEx(&rect, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle, FALSE, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle);
+	SetWindowPos(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, NULL, rect.left, rect.top, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
 }
 
-void _AnimaEngineWindowPlatformGetWindowSize(_AnimaEngineWindowwindow* window, int* width, int* height)
+void _AnimaEngineWindowPlatformGetWindowSize(AnimaEngineWindow_Base* window, int* width, int* height)
 {
 	RECT area;
-	GetClientRect(window->win32._handle, &area);
+	GetClientRect(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, &area);
 
 	if (width)
 		*width = area.right;
@@ -1260,25 +1307,25 @@ void _AnimaEngineWindowPlatformGetWindowSize(_AnimaEngineWindowwindow* window, i
 		*height = area.bottom;
 }
 
-void _AnimaEngineWindowPlatformSetWindowSize(_AnimaEngineWindowwindow* window, int width, int height)
+void _AnimaEngineWindowPlatformSetWindowSize(AnimaEngineWindow_Base* window, int width, int height)
 {
-	if (window->_monitor)
+	if (window->GetMonitor())
 		enterFullscreenMode(window);
 	else
 	{
 		int fullWidth, fullHeight;
 		getFullWindowSize(window, width, height, &fullWidth, &fullHeight);
 
-		SetWindowPos(window->win32._handle, HWND_TOP, 0, 0, fullWidth, fullHeight, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
+		SetWindowPos(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, HWND_TOP, 0, 0, fullWidth, fullHeight, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 	}
 }
 
-void _AnimaEngineWindowPlatformGetFramebufferSize(_AnimaEngineWindowwindow* window, int* width, int* height)
+void _AnimaEngineWindowPlatformGetFramebufferSize(AnimaEngineWindow_Base* window, int* width, int* height)
 {
 	_AnimaEngineWindowPlatformGetWindowSize(window, width, height);
 }
 
-void _AnimaEngineWindowPlatformGetWindowFrameSize(_AnimaEngineWindowwindow* window, int* left, int* top, int* right, int* bottom)
+void _AnimaEngineWindowPlatformGetWindowFrameSize(AnimaEngineWindow_Base* window, int* left, int* top, int* right, int* bottom)
 {
 	RECT rect;
 	int width, height;
@@ -1286,7 +1333,7 @@ void _AnimaEngineWindowPlatformGetWindowFrameSize(_AnimaEngineWindowwindow* wind
 	_AnimaEngineWindowPlatformGetWindowSize(window, &width, &height);
 	SetRect(&rect, 0, 0, width, height);
 
-	AdjustWindowRectEx(&rect, window->win32._dwStyle, FALSE, window->win32._dwExStyle);
+	AdjustWindowRectEx(&rect, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwStyle, FALSE, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_dwExStyle);
 
 	if (left)
 		*left = -rect.left;
@@ -1298,50 +1345,51 @@ void _AnimaEngineWindowPlatformGetWindowFrameSize(_AnimaEngineWindowwindow* wind
 		*bottom = rect.bottom - height;
 }
 
-void _AnimaEngineWindowPlatformIconifyWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformIconifyWindow(AnimaEngineWindow_Base* window)
 {
-	ShowWindow(window->win32._handle, SW_MINIMIZE);
+	ShowWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, SW_MINIMIZE);
 }
 
-void _AnimaEngineWindowPlatformRestoreWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformRestoreWindow(AnimaEngineWindow_Base* window)
 {
-	ShowWindow(window->win32._handle, SW_RESTORE);
+	ShowWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, SW_RESTORE);
 }
 
-void _AnimaEngineWindowPlatformShowWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformShowWindow(AnimaEngineWindow_Base* window)
 {
-	ShowWindow(window->win32._handle, SW_SHOW);
-	BringWindowToTop(window->win32._handle);
-	SetForegroundWindow(window->win32._handle);
-	SetFocus(window->win32._handle);
+	ShowWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, SW_SHOW);
+	BringWindowToTop(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
+	SetForegroundWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
+	SetFocus(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
 }
 
-void _AnimaEngineWindowPlatformUnhideWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformUnhideWindow(AnimaEngineWindow_Base* window)
 {
-	ShowWindow(window->win32._handle, SW_SHOW);
+	ShowWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, SW_SHOW);
 }
 
-void _AnimaEngineWindowPlatformHideWindow(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformHideWindow(AnimaEngineWindow_Base* window)
 {
-	ShowWindow(window->win32._handle, SW_HIDE);
+	ShowWindow(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, SW_HIDE);
 }
 
-void _AnimaEngineWindowPlatformPollEvents(void)
+void _AnimaEngineWindowPlatformPollEvents(AnimaEngine* engine)
 {
 	MSG msg;
-	_AnimaEngineWindowwindow* window;
+	AnimaEngineWindow_Base* window;
 
 	while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		if (msg.message == WM_QUIT)
 		{
 			// Treat WM_QUIT as a close on all windows
-
-			window = AnimaEngine::_windowListHead;
+			window = engine->GetWindowListHead();
 			while (window)
 			{
-				_AnimaEngineWindowInputWindowCloseRequest(window);
-				window = window->_next;
+				if (window->GetCloseRequestCallback())
+					window->GetCloseRequestCallback()(window);
+
+				window = window->GetNext();
 			}
 		}
 		else
@@ -1351,7 +1399,7 @@ void _AnimaEngineWindowPlatformPollEvents(void)
 		}
 	}
 
-	window = AnimaEngine::_focusedWindow;
+	window = engine->GetFocusedWindow();
 	if (window)
 	{
 		// LSHIFT/RSHIFT fixup (keys tend to "stick" without this fix)
@@ -1366,50 +1414,56 @@ void _AnimaEngineWindowPlatformPollEvents(void)
 
 			// See if this differs from our belief of what has happened
 			// (we only have to check for lost key up events)
-			if (!lshiftDown && window->_keys[ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT] == 1)
-				_AnimaEngineWindowInputKey(window, ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT, 0, ANIMA_ENGINE_CORE_RELEASE, mods);
+			if (!lshiftDown && window->GetKeys()[ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT] == 1)
+			{
+				if(window->GetKeyCallback())
+					window->GetKeyCallback()(window, ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT, 0, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
 
-			if (!rshiftDown && window->_keys[ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT] == 1)
-				_AnimaEngineWindowInputKey(window, ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT, 0, ANIMA_ENGINE_CORE_RELEASE, mods);
+			if (!rshiftDown && window->GetKeys()[ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT] == 1)
+			{
+				if (window->GetKeyCallback())
+					window->GetKeyCallback()(window, ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT, 0, ANIMA_ENGINE_CORE_RELEASE, mods);
+			}
 		}
 
 		// Did the cursor move in an focused window that has disabled the cursor
-		if (window->_cursorMode == ANIMA_ENGINE_CORE_CURSOR_DISABLED && !window->win32._cursorCentered)
+		if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED && !window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorCentered)
 		{
 			int width, height;
 			_AnimaEngineWindowPlatformGetWindowSize(window, &width, &height);
 			_AnimaEngineWindowPlatformSetCursorPos(window, width / 2.0, height / 2.0);
-			window->win32._cursorCentered = true;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorCentered = true;
 		}
 	}
 }
 
-void _AnimaEngineWindowPlatformWaitEvents(void)
+void _AnimaEngineWindowPlatformWaitEvents(AnimaEngine* engine)
 {
 	WaitMessage();
 
-	_AnimaEngineWindowPlatformPollEvents();
+	_AnimaEngineWindowPlatformPollEvents(engine);
 }
 
-void _AnimaEngineWindowPlatformPostEmptyEvent(void)
+void _AnimaEngineWindowPlatformPostEmptyEvent(AnimaEngine* engine)
 {
-	_AnimaEngineWindowwindow* window = AnimaEngine::_windowListHead;
-	PostMessage(window->win32._handle, WM_NULL, 0, 0);
+	AnimaEngineWindow_Base* window = engine->GetWindowListHead();
+	PostMessage(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, WM_NULL, 0, 0);
 }
 
-void _AnimaEngineWindowPlatformSetCursorPos(_AnimaEngineWindowwindow* window, double xpos, double ypos)
+void _AnimaEngineWindowPlatformSetCursorPos(AnimaEngineWindow_Base* window, double xpos, double ypos)
 {
 	POINT pos = { (int)xpos, (int)ypos };
-	ClientToScreen(window->win32._handle, &pos);
+	ClientToScreen(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, &pos);
 	SetCursorPos(pos.x, pos.y);
 
-	window->win32._oldCursorX = (int)xpos;
-	window->win32._oldCursorY = (int)ypos;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorX = (int)xpos;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_oldCursorY = (int)ypos;
 }
 
-void _AnimaEngineWindowPlatformApplyCursorMode(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformApplyCursorMode(AnimaEngineWindow_Base* window)
 {
-	switch (window->_cursorMode)
+	switch (window->GetCursorMode())
 	{
 	case ANIMA_ENGINE_CORE_CURSOR_NORMAL:
 		restoreCursor(window);
@@ -1446,8 +1500,7 @@ bool _AnimaEngineWindowPlatformCreateCursor(_AnimaEngineWindowcursor* cursor, co
 	bi.bV5AlphaMask = 0xff000000;
 
 	dc = GetDC(NULL);
-	bitmap = CreateDIBSection(dc, (BITMAPINFO*)&bi, DIB_RGB_COLORS,
-		(void**)&target, NULL, (DWORD)0);
+	bitmap = CreateDIBSection(dc, (BITMAPINFO*)&bi, DIB_RGB_COLORS, (void**)&target, NULL, (DWORD)0);
 	ReleaseDC(NULL, dc);
 
 	if (!bitmap)
@@ -1489,13 +1542,12 @@ void _AnimaEngineWindowPlatformDestroyCursor(_AnimaEngineWindowcursor* cursor)
 		DestroyIcon((HICON)cursor->win32._handle);
 }
 
-void _AnimaEngineWindowPlatformSetCursor(_AnimaEngineWindowwindow* window, _AnimaEngineWindowcursor* cursor)
+void _AnimaEngineWindowPlatformSetCursor(AnimaEngine* engine, AnimaEngineWindow_Base* window, _AnimaEngineWindowcursor* cursor)
 {
 	// It should be guaranteed that the cursor is not being used by this window if
 	// the following condition is not met. That way it should be safe to destroy the
 	// cursor after calling glfwSetCursor(window, NULL) on all windows using the cursor.
-
-	if (window->_cursorMode == ANIMA_ENGINE_CORE_CURSOR_NORMAL && AnimaEngine::_focusedWindow == window && window->win32._cursorInside)
+	if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_NORMAL && engine->GetFocusedWindow() == window && window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside)
 	{
 		if (cursor)
 			SetCursor(cursor->win32._handle);
@@ -1504,7 +1556,7 @@ void _AnimaEngineWindowPlatformSetCursor(_AnimaEngineWindowwindow* window, _Anim
 	}
 }
 
-void _AnimaEngineWindowPlatformSetClipboardString(_AnimaEngineWindowwindow* window, const char* string)
+void _AnimaEngineWindowPlatformSetClipboardString(AnimaEngineWindow_Base* window, const char* string)
 {
 	WCHAR* wideString;
 	HANDLE stringHandle;
@@ -1531,7 +1583,7 @@ void _AnimaEngineWindowPlatformSetClipboardString(_AnimaEngineWindowwindow* wind
 	memcpy(GlobalLock(stringHandle), wideString, wideSize);
 	GlobalUnlock(stringHandle);
 
-	if (!OpenClipboard(window->win32._handle))
+	if (!OpenClipboard(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle))
 	{
 		GlobalFree(stringHandle);
 		free(wideString);
@@ -1547,7 +1599,7 @@ void _AnimaEngineWindowPlatformSetClipboardString(_AnimaEngineWindowwindow* wind
 	free(wideString);
 }
 
-const char* _AnimaEngineWindowPlatformGetClipboardString(_AnimaEngineWindowwindow* window)
+const char* _AnimaEngineWindowPlatformGetClipboardString(AnimaEngineWindow_Base* window)
 {
 	HANDLE stringHandle;
 
@@ -1557,7 +1609,7 @@ const char* _AnimaEngineWindowPlatformGetClipboardString(_AnimaEngineWindowwindo
 		return NULL;
 	}
 
-	if (!OpenClipboard(window->win32._handle))
+	if (!OpenClipboard(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle))
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to open clipboard");
 		return NULL;
@@ -1572,31 +1624,327 @@ const char* _AnimaEngineWindowPlatformGetClipboardString(_AnimaEngineWindowwindo
 		return NULL;
 	}
 
-	free(AnimaEngine::win32._clipboardString);
-	AnimaEngine::win32._clipboardString = _AnimaEngineWindowCreateUTF8FromWideString((const WCHAR*)GlobalLock(stringHandle));
+	free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString = _AnimaEngineWindowCreateUTF8FromWideString((const WCHAR*)GlobalLock(stringHandle));
 
 	GlobalUnlock(stringHandle);
 	CloseClipboard();
 
-	if (!AnimaEngine::win32._clipboardString)
+	if (!AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to convert wide string to UTF-8");
 		return NULL;
 	}
 
-	return AnimaEngine::win32._clipboardString;
+	return AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString;
 }
 
+HWND AnimaEngineWindowGetWin32Window(AnimaEngineWindow_Base* handle)
+{
+	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*)handle;
+	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(NULL);
+	return window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle;
+}
 
-//////////////////////////////////////////////////////////////////////////
-//////                        GLFW native API                       //////
-//////////////////////////////////////////////////////////////////////////
+bool _AnimaEngineWindowSetVideoMode(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowvidmode* desired)
+{
+	AnimaEngineWindowvidmode current;
+	const AnimaEngineWindowvidmode* best;
+	DEVMODEW dm;
 
-//GLFWAPI HWND glfwGetWin32Window(AnimaEngineWindowwindow* handle)
-//{
-//	_AnimaEngineWindowwindow* window = (_AnimaEngineWindowwindow*)handle;
-//	_GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-//	return window->win32.handle;
-//}
+	best = _AnimaEngineWindowChooseVideoMode(monitor, desired);
+	_AnimaEngineWindowPlatformGetVideoMode(monitor, &current);
+	if (_AnimaEngineWindowCompareVideoModes(&current, best) == 0)
+		return true;
+
+	ZeroMemory(&dm, sizeof(dm));
+	dm.dmSize = sizeof(DEVMODEW);
+	dm.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_DISPLAYFREQUENCY;
+	dm.dmPelsWidth = best->_width;
+	dm.dmPelsHeight = best->_height;
+	dm.dmBitsPerPel = best->_redBits + best->_greenBits + best->_blueBits;
+	dm.dmDisplayFrequency = best->_refreshRate;
+
+	if (dm.dmBitsPerPel < 15 || dm.dmBitsPerPel >= 24)
+		dm.dmBitsPerPel = 32;
+
+	if (ChangeDisplaySettingsExW(monitor->win32._adapterName, &dm, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)
+	{
+		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to set video mode");
+		return false;
+	}
+
+	monitor->win32._modeChanged = true;
+	return true;
+}
+
+void _AnimaEngineWindowRestoreVideoMode(_AnimaEngineWindowmonitor* monitor)
+{
+	if (monitor->win32._modeChanged)
+	{
+		ChangeDisplaySettingsExW(monitor->win32._adapterName, NULL, NULL, CDS_FULLSCREEN, NULL);
+		monitor->win32._modeChanged = false;
+	}
+}
+
+_AnimaEngineWindowmonitor** _AnimaEngineWindowPlatformGetMonitors(int* count)
+{
+	int size = 0, found = 0;
+	_AnimaEngineWindowmonitor** monitors = NULL;
+	DWORD adapterIndex, displayIndex;
+
+	*count = 0;
+
+	for (adapterIndex = 0;; adapterIndex++)
+	{
+		DISPLAY_DEVICEW adapter;
+
+		ZeroMemory(&adapter, sizeof(DISPLAY_DEVICEW));
+		adapter.cb = sizeof(DISPLAY_DEVICEW);
+
+		if (!EnumDisplayDevicesW(NULL, adapterIndex, &adapter, 0))
+			break;
+
+		if (!(adapter.StateFlags & DISPLAY_DEVICE_ACTIVE))
+			continue;
+
+		for (displayIndex = 0;; displayIndex++)
+		{
+			DISPLAY_DEVICEW display;
+			char* name;
+			HDC dc;
+
+			ZeroMemory(&display, sizeof(DISPLAY_DEVICEW));
+			display.cb = sizeof(DISPLAY_DEVICEW);
+
+			if (!EnumDisplayDevicesW(adapter.DeviceName, displayIndex, &display, 0))
+				break;
+
+			if (found == size)
+			{
+				size += 4;
+				monitors = (_AnimaEngineWindowmonitor**)realloc(monitors, sizeof(_AnimaEngineWindowmonitor*) * size);
+			}
+
+			name = _AnimaEngineWindowCreateUTF8FromWideString(display.DeviceString);
+			if (!name)
+			{
+				//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to convert string to UTF-8");
+				continue;
+			}
+
+			dc = CreateDCW(L"DISPLAY", adapter.DeviceName, NULL, NULL);
+
+			monitors[found] = _AnimaEngineWindowAllocMonitor(name, GetDeviceCaps(dc, HORZSIZE), GetDeviceCaps(dc, VERTSIZE));
+
+			DeleteDC(dc);
+			free(name);
+
+			wcscpy(monitors[found]->win32._adapterName, adapter.DeviceName);
+			wcscpy(monitors[found]->win32._displayName, display.DeviceName);
+
+			WideCharToMultiByte(CP_UTF8, 0, adapter.DeviceName, -1, monitors[found]->win32._publicAdapterName, sizeof(monitors[found]->win32._publicAdapterName), NULL, NULL);
+
+			WideCharToMultiByte(CP_UTF8, 0, display.DeviceName, -1, monitors[found]->win32._publicDisplayName, sizeof(monitors[found]->win32._publicDisplayName), NULL, NULL);
+
+			if (adapter.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE &&
+				displayIndex == 0)
+			{
+				_ANIMA_ENGINE_CORE_SWAP_POINTERS(monitors[0], monitors[found], _AnimaEngineWindowmonitor*);
+			}
+
+			found++;
+		}
+	}
+
+	*count = found;
+	return monitors;
+}
+
+bool _AnimaEngineWindowPlatformIsSameMonitor(_AnimaEngineWindowmonitor* first, _AnimaEngineWindowmonitor* second)
+{
+	return wcscmp(first->win32._displayName, second->win32._displayName) == 0;
+}
+
+void _AnimaEngineWindowPlatformGetMonitorPos(_AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos)
+{
+	DEVMODEW settings;
+	ZeroMemory(&settings, sizeof(DEVMODEW));
+	settings.dmSize = sizeof(DEVMODEW);
+
+	EnumDisplaySettingsExW(monitor->win32._adapterName, ENUM_CURRENT_SETTINGS, &settings, EDS_ROTATEDMODE);
+
+	if (xpos)
+		*xpos = settings.dmPosition.x;
+	if (ypos)
+		*ypos = settings.dmPosition.y;
+}
+
+AnimaEngineWindowvidmode* _AnimaEngineWindowPlatformGetVideoModes(_AnimaEngineWindowmonitor* monitor, int* found)
+{
+	int modeIndex = 0, count = 0;
+	AnimaEngineWindowvidmode* result = NULL;
+
+	*found = 0;
+
+	for (;;)
+	{
+		int i;
+		AnimaEngineWindowvidmode mode;
+		DEVMODEW dm;
+
+		ZeroMemory(&dm, sizeof(DEVMODEW));
+		dm.dmSize = sizeof(DEVMODEW);
+
+		if (!EnumDisplaySettingsW(monitor->win32._adapterName, modeIndex, &dm))
+			break;
+
+		modeIndex++;
+
+		if (dm.dmBitsPerPel < 15)
+		{
+			// Skip modes with less than 15 BPP
+			continue;
+		}
+
+		mode._width = dm.dmPelsWidth;
+		mode._height = dm.dmPelsHeight;
+		mode._refreshRate = dm.dmDisplayFrequency;
+		_AnimaEngineWindowSplitBPP(dm.dmBitsPerPel, &mode._redBits, &mode._greenBits, &mode._blueBits);
+
+		for (i = 0; i < *found; i++)
+		{
+			if (_AnimaEngineWindowCompareVideoModes(result + i, &mode) == 0)
+				break;
+		}
+
+		if (i < *found)
+		{
+			// This is a duplicate, so skip it
+			continue;
+		}
+
+		if (*found == count)
+		{
+			if (count)
+				count *= 2;
+			else
+				count = 128;
+
+			result = (AnimaEngineWindowvidmode*)realloc(result, count * sizeof(AnimaEngineWindowvidmode));
+		}
+
+		result[*found] = mode;
+		(*found)++;
+	}
+
+	return result;
+}
+
+void _AnimaEngineWindowPlatformGetVideoMode(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowvidmode* mode)
+{
+	DEVMODEW dm;
+
+	ZeroMemory(&dm, sizeof(DEVMODEW));
+	dm.dmSize = sizeof(DEVMODEW);
+
+	EnumDisplaySettingsW(monitor->win32._adapterName, ENUM_CURRENT_SETTINGS, &dm);
+
+	mode->_width = dm.dmPelsWidth;
+	mode->_height = dm.dmPelsHeight;
+	mode->_refreshRate = dm.dmDisplayFrequency;
+	_AnimaEngineWindowSplitBPP(dm.dmBitsPerPel, &mode->_redBits, &mode->_greenBits, &mode->_blueBits);
+}
+
+void _AnimaEngineWindowPlatformGetGammaRamp(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowgammaramp* ramp)
+{
+	HDC dc;
+	WORD values[768];
+
+	dc = CreateDCW(L"DISPLAY", monitor->win32._adapterName, NULL, NULL);
+	GetDeviceGammaRamp(dc, values);
+	DeleteDC(dc);
+
+	_AnimaEngineWindowAllocGammaArrays(ramp, 256);
+
+	memcpy(ramp->_red, values + 0, 256 * sizeof(unsigned short));
+	memcpy(ramp->_green, values + 256, 256 * sizeof(unsigned short));
+	memcpy(ramp->_blue, values + 512, 256 * sizeof(unsigned short));
+}
+
+void _AnimaEngineWindowPlatformSetGammaRamp(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp)
+{
+	HDC dc;
+	WORD values[768];
+
+	if (ramp->_size != 256)
+	{
+		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Gamma ramp size must be 256");
+		return;
+	}
+
+	memcpy(values + 0, ramp->_red, 256 * sizeof(unsigned short));
+	memcpy(values + 256, ramp->_green, 256 * sizeof(unsigned short));
+	memcpy(values + 512, ramp->_blue, 256 * sizeof(unsigned short));
+
+	dc = CreateDCW(L"DISPLAY", monitor->win32._adapterName, NULL, NULL);
+	SetDeviceGammaRamp(dc, values);
+	DeleteDC(dc);
+}
+
+const char* AnimaEngineWindowGetWin32Adapter(AnimaEngineWindowmonitor* handle)
+{
+	_AnimaEngineWindowmonitor* monitor = (_AnimaEngineWindowmonitor*)handle;
+	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(NULL);
+	return monitor->win32._publicAdapterName;
+}
+
+const char* AnimaEngineWindowGetWin32Monitor(AnimaEngineWindowmonitor* handle)
+{
+	_AnimaEngineWindowmonitor* monitor = (_AnimaEngineWindowmonitor*)handle;
+	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(NULL);
+	return monitor->win32._publicDisplayName;
+}
+
+static unsigned __int64 getRawTime(void)
+{
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_hasPC)
+	{
+		unsigned __int64 time;
+		QueryPerformanceCounter((LARGE_INTEGER*)&time);
+		return time;
+	}
+	else
+		return (unsigned __int64)_AnimaEngineWindow_timeGetTime();
+}
+
+void _AnimaEngineWindowInitTimer(void)
+{
+	unsigned __int64 frequency;
+
+	if (QueryPerformanceFrequency((LARGE_INTEGER*)&frequency))
+	{
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_hasPC = true;
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution = 1.0 / (double)frequency;
+	}
+	else
+	{
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_hasPC = false;
+		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution = 0.001;
+	}
+
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime();
+}
+
+double _AnimaEngineWindowPlatformGetTime(void)
+{
+	return (double)(getRawTime() - AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base) * AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution;
+}
+
+void _AnimaEngineWindowPlatformSetTime(double time)
+{
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime() - (unsigned __int64)(time / AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution);
+}
+
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

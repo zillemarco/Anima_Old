@@ -27,6 +27,10 @@ extern "C" ANIMA_ENGINE_CORE_EXPORT bool __anima_get_working_dir(char* dest, int
 #define _ANIMA_ENGINE_CORE_WIN32
 #define _ANIMA_ENGINE_CORE_WGL
 #define _ANIMA_ENGINE_CORE_USE_OPENGL
+
+#define _ANIMA_ENGINE_CORE_VERSION_MAJOR          0
+#define _ANIMA_ENGINE_CORE_VERSION_MINOR          0
+#define _ANIMA_ENGINE_CORE_VERSION_REVISION       0
 #define _ANIMA_ENGINE_CORE_VERSION_NUMBER "0.0.0"
 
 #endif //_ANIMA_ENGINE_LIB_H

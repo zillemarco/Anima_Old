@@ -5,6 +5,9 @@
 
 #define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE _AnimaEngineWindowtlsWin32 win32_tls
 
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE	_AnimaEngineWindowtlsWin32* GetPlatformLibraryTLSState() { return &win32_tls; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE	GetPlatformLibraryTLSState()
+
 #define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE(class) _AnimaEngineWindowtlsWin32 class::win32_tls;
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
@@ -18,7 +21,7 @@ typedef struct _AnimaEngineWindowtlsWin32
 
 extern "C" ANIMA_ENGINE_CORE_EXPORT bool _AnimaEngineWindowInitTLS(void);
 extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowTerminateTLS(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowSetCurrentContext(_AnimaEngineWindowwindow* context);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowSetCurrentContext(AnimaEngineWindow_Base* context);
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
 

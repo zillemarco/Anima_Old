@@ -5,31 +5,31 @@ BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 bool _AnimaEngineWindowInitTLS(void)
 {
-	AnimaEngine::win32_tls._context = TlsAlloc();
-	if (AnimaEngine::win32_tls._context == TLS_OUT_OF_INDEXES)
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_context = TlsAlloc();
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_context == TLS_OUT_OF_INDEXES)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to allocate TLS index");
 		return false;
 	}
 
-	AnimaEngine::win32_tls._allocated = true;
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_allocated = true;
 	return true;
 }
 
 void _AnimaEngineWindowTerminateTLS(void)
 {
-	if (AnimaEngine::win32_tls._allocated)
-		TlsFree(AnimaEngine::win32_tls._context);
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_allocated)
+		TlsFree(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_context);
 }
 
-void _AnimaEngineWindowSetCurrentContext(_AnimaEngineWindowwindow* context)
+void _AnimaEngineWindowSetCurrentContext(AnimaEngineWindow_Base* context)
 {
-	TlsSetValue(AnimaEngine::win32_tls._context, context);
+	TlsSetValue(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_context, context);
 }
 
-_AnimaEngineWindowwindow* _AnimaEngineWindowPlatformGetCurrentContext(void)
+AnimaEngineWindow_Base* _AnimaEngineWindowPlatformGetCurrentContext(void)
 {
-	return (_AnimaEngineWindowwindow*)TlsGetValue(AnimaEngine::win32_tls._context);
+	return (AnimaEngineWindow_Base*)TlsGetValue(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE->_context);
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

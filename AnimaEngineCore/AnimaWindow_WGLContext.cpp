@@ -7,90 +7,89 @@
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
-static void initWGLExtensions(_AnimaEngineWindowwindow* window)
+static void initWGLExtensions(AnimaEngineWindow_Base* window)
 {
 	// This needs to include every function pointer loaded below
-	window->wgl._SwapIntervalEXT = NULL;
-	window->wgl._GetPixelFormatAttribivARB = NULL;
-	window->wgl._GetExtensionsStringARB = NULL;
-	window->wgl._GetExtensionsStringEXT = NULL;
-	window->wgl._CreateContextAttribsARB = NULL;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_SwapIntervalEXT				= NULL;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetPixelFormatAttribivARB	= NULL;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringARB		= NULL;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringEXT		= NULL;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_CreateContextAttribsARB		= NULL;
 
 	// This needs to include every extension used below except for
 	// WGL_ARB_extensions_string and WGL_EXT_extensions_string
-	window->wgl._ARB_multisample = GL_FALSE;
-	window->wgl._ARB_framebuffer_sRGB = GL_FALSE;
-	window->wgl._ARB_create_context = GL_FALSE;
-	window->wgl._ARB_create_context_profile = GL_FALSE;
-	window->wgl._EXT_create_context_es2_profile = GL_FALSE;
-	window->wgl._ARB_create_context_robustness = GL_FALSE;
-	window->wgl._EXT_swap_control = GL_FALSE;
-	window->wgl._ARB_pixel_format = GL_FALSE;
-	window->wgl._ARB_context_flush_control = GL_FALSE;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_multisample					= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_framebuffer_sRGB			= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context				= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_profile		= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_create_context_es2_profile	= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_robustness	= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_swap_control				= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format				= false;
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_context_flush_control		= false;
 
-	window->wgl._GetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wglGetProcAddress("wglGetExtensionsStringEXT");
-	if (!window->wgl._GetExtensionsStringEXT)
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wglGetProcAddress("wglGetExtensionsStringEXT");
+	if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringEXT)
 	{
-		window->wgl._GetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
-		if (!window->wgl._GetExtensionsStringARB)
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
+		if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringARB)
 			return;
 	}
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_multisample"))
-		window->wgl._ARB_multisample = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_multisample = true;
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_framebuffer_sRGB"))
-		window->wgl._ARB_framebuffer_sRGB = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_framebuffer_sRGB = true;
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_create_context"))
 	{
-		window->wgl._CreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-		if (window->wgl._CreateContextAttribsARB)
-			window->wgl._ARB_create_context = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_CreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_CreateContextAttribsARB)
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context = true;
 	}
 
-	if (window->wgl._ARB_create_context)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
 	{
 		if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_create_context_profile"))
-			window->wgl._ARB_create_context_profile = GL_TRUE;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_profile = true;
 	}
 
-	if (window->wgl._ARB_create_context &&
-		window->wgl._ARB_create_context_profile)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context && window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_profile)
 	{
 		if (_AnimaEngineWindowPlatformExtensionSupported("WGL_EXT_create_context_es2_profile"))
-			window->wgl._EXT_create_context_es2_profile = GL_TRUE;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_create_context_es2_profile = true;
 	}
 
-	if (window->wgl._ARB_create_context)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
 	{
 		if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_create_context_robustness"))
-			window->wgl._ARB_create_context_robustness = GL_TRUE;
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_robustness = true;
 	}
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_EXT_swap_control"))
 	{
-		window->wgl._SwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-		if (window->wgl._SwapIntervalEXT)
-			window->wgl._EXT_swap_control = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_SwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_SwapIntervalEXT)
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_swap_control = true;
 	}
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_pixel_format"))
 	{
-		window->wgl._GetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)wglGetProcAddress("wglGetPixelFormatAttribivARB");
-		if (window->wgl._GetPixelFormatAttribivARB)
-			window->wgl._ARB_pixel_format = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)wglGetProcAddress("wglGetPixelFormatAttribivARB");
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetPixelFormatAttribivARB)
+			window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format = true;
 	}
 
 	if (_AnimaEngineWindowPlatformExtensionSupported("WGL_ARB_context_flush_control"))
-		window->wgl._ARB_context_flush_control = GL_TRUE;
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_context_flush_control = true;
 }
 
-static int getPixelFormatAttrib(_AnimaEngineWindowwindow* window, int pixelFormat, int attrib)
+static int getPixelFormatAttrib(AnimaEngineWindow_Base* window, int pixelFormat, int attrib)
 {
 	int value = 0;
 
-	if (!window->wgl._GetPixelFormatAttribivARB(window->wgl._dc, pixelFormat, 0, 1, &attrib, &value))
+	if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetPixelFormatAttribivARB(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, pixelFormat, 0, 1, &attrib, &value))
 	{
 		// NOTE: We should probably handle this error somehow
 		return 0;
@@ -99,16 +98,16 @@ static int getPixelFormatAttrib(_AnimaEngineWindowwindow* window, int pixelForma
 	return value;
 }
 
-static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowfbconfig* desired, int* result)
+static bool choosePixelFormat(AnimaEngineWindow_Base* window, const _AnimaEngineWindowfbconfig* desired, int* result)
 {
 	_AnimaEngineWindowfbconfig* usableConfigs;
 	const _AnimaEngineWindowfbconfig* closest;
 	int i, nativeCount, usableCount;
 
-	if (window->wgl._ARB_pixel_format)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format)
 		nativeCount = getPixelFormatAttrib(window, 1, WGL_NUMBER_PIXEL_FORMATS_ARB);
 	else
-		nativeCount = DescribePixelFormat(window->wgl._dc, 1, sizeof(PIXELFORMATDESCRIPTOR), NULL);
+		nativeCount = DescribePixelFormat(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, 1, sizeof(PIXELFORMATDESCRIPTOR), NULL);
 
 	if (!nativeCount)
 	{
@@ -124,7 +123,7 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 		const int n = i + 1;
 		_AnimaEngineWindowfbconfig* u = usableConfigs + usableCount;
 
-		if (window->wgl._ARB_pixel_format)
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format)
 		{
 			// Get pixel format attributes through WGL_ARB_pixel_format
 			if (!getPixelFormatAttrib(window, n, WGL_SUPPORT_OPENGL_ARB) || !getPixelFormatAttrib(window, n, WGL_DRAW_TO_WINDOW_ARB))
@@ -152,17 +151,17 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 			u->_auxBuffers = getPixelFormatAttrib(window, n, WGL_AUX_BUFFERS_ARB);
 
 			if (getPixelFormatAttrib(window, n, WGL_STEREO_ARB))
-				u->_stereo = GL_TRUE;
+				u->_stereo = true;
 			if (getPixelFormatAttrib(window, n, WGL_DOUBLE_BUFFER_ARB))
-				u->_doublebuffer = GL_TRUE;
+				u->_doublebuffer = true;
 
-			if (window->wgl._ARB_multisample)
+			if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_multisample)
 				u->_samples = getPixelFormatAttrib(window, n, WGL_SAMPLES_ARB);
 
-			if (window->wgl._ARB_framebuffer_sRGB)
+			if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_framebuffer_sRGB)
 			{
 				if (getPixelFormatAttrib(window, n, WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB))
-					u->_sRGB = GL_TRUE;
+					u->_sRGB = true;
 			}
 		}
 		else
@@ -171,7 +170,7 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 
 			// Get pixel format attributes through old-fashioned PFDs
 
-			if (!DescribePixelFormat(window->wgl._dc, n, sizeof(PIXELFORMATDESCRIPTOR), &pfd))
+			if (!DescribePixelFormat(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, n, sizeof(PIXELFORMATDESCRIPTOR), &pfd))
 				continue;
 
 			if (!(pfd.dwFlags & PFD_DRAW_TO_WINDOW) || !(pfd.dwFlags & PFD_SUPPORT_OPENGL))
@@ -199,9 +198,9 @@ static bool choosePixelFormat(_AnimaEngineWindowwindow* window, const _AnimaEngi
 			u->_auxBuffers = pfd.cAuxBuffers;
 
 			if (pfd.dwFlags & PFD_STEREO)
-				u->_stereo = GL_TRUE;
+				u->_stereo = true;
 			if (pfd.dwFlags & PFD_DOUBLEBUFFER)
-				u->_doublebuffer = GL_TRUE;
+				u->_doublebuffer = true;
 		}
 
 		u->wgl = n;
@@ -236,8 +235,8 @@ bool _AnimaEngineWindowInitContextAPI(void)
 	if (!_AnimaEngineWindowInitTLS())
 		return false;
 
-	AnimaEngine::wgl._opengl32._instance = LoadLibraryW(L"opengl32.dll");
-	if (!AnimaEngine::wgl._opengl32._instance)
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE->_opengl32._instance = LoadLibraryW(L"opengl32.dll");
+	if (!AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE->_opengl32._instance)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to load opengl32.dll");
 		return false;
@@ -248,8 +247,8 @@ bool _AnimaEngineWindowInitContextAPI(void)
 
 void _AnimaEngineWindowTerminateContextAPI(void)
 {
-	if (AnimaEngine::wgl._opengl32._instance)
-		FreeLibrary(AnimaEngine::wgl._opengl32._instance);
+	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE->_opengl32._instance)
+		FreeLibrary(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE->_opengl32._instance);
 
 	_AnimaEngineWindowTerminateTLS();
 }
@@ -261,7 +260,7 @@ void _AnimaEngineWindowTerminateContextAPI(void)
     assert((size_t) index < sizeof(attribs) / sizeof(attribs[0]));	\
 }
 
-bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
+bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
 {
 	int attribs[40];
 	int pixelFormat = 0;
@@ -269,10 +268,10 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 	HGLRC share = NULL;
 
 	if (ctxconfig->_share)
-		share = ctxconfig->_share->wgl._context;
+		share = ctxconfig->_share->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context;
 
-	window->wgl._dc = GetDC(window->win32._handle);
-	if (!window->wgl._dc)
+	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc = GetDC(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle);
+	if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc)
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to retrieve DC for window");
 		return false;
@@ -281,19 +280,19 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 	if (!choosePixelFormat(window, fbconfig, &pixelFormat))
 		return false;
 
-	if (!DescribePixelFormat(window->wgl._dc, pixelFormat, sizeof(pfd), &pfd))
+	if (!DescribePixelFormat(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, pixelFormat, sizeof(pfd), &pfd))
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to retrieve PFD for selected pixel " "format");
 		return false;
 	}
 
-	if (!SetPixelFormat(window->wgl._dc, pixelFormat, &pfd))
+	if (!SetPixelFormat(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, pixelFormat, &pfd))
 	{
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to set selected pixel format");
 		return false;
 	}
 
-	if (window->wgl._ARB_create_context)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
 	{
 		int index = 0, mask = 0, flags = 0, strategy = 0;
 
@@ -318,7 +317,7 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 
 		if (ctxconfig->_robustness)
 		{
-			if (window->wgl._ARB_create_context_robustness)
+			if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_robustness)
 			{
 				if (ctxconfig->_robustness == ANIMA_ENGINE_CORE_NO_RESET_NOTIFICATION)
 					strategy = WGL_NO_RESET_NOTIFICATION_ARB;
@@ -331,7 +330,7 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 
 		if (ctxconfig->_release)
 		{
-			if (window->wgl._ARB_context_flush_control)
+			if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_context_flush_control)
 			{
 				if (ctxconfig->_release == ANIMA_ENGINE_CORE_RELEASE_BEHAVIOR_NONE)
 				{
@@ -365,8 +364,8 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 
 		setWGLattrib(0, 0);
 
-		window->wgl._context = window->wgl._CreateContextAttribsARB(window->wgl._dc, share, attribs);
-		if (!window->wgl._context)
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_CreateContextAttribsARB(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, share, attribs);
+		if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context)
 		{
 			//_glfwInputError(GLFW_VERSION_UNAVAILABLE, "WGL: Failed to create OpenGL context");
 			return false;
@@ -374,8 +373,8 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 	}
 	else
 	{
-		window->wgl._context = wglCreateContext(window->wgl._dc);
-		if (!window->wgl._context)
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context = wglCreateContext(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc);
+		if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context)
 		{
 			//_glfwInputError(GLFW_PLATFORM_ERROR, "WGL: Failed to create OpenGL context");
 			return false;
@@ -383,7 +382,7 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 
 		if (share)
 		{
-			if (!wglShareLists(share, window->wgl._context))
+			if (!wglShareLists(share, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context))
 			{
 				//_glfwInputError(GLFW_PLATFORM_ERROR, "WGL: Failed to enable sharing with specified " "OpenGL context");
 				return false;
@@ -397,76 +396,76 @@ bool _AnimaEngineWindowCreateContext(_AnimaEngineWindowwindow* window, const _An
 	return true;
 }
 
-void _AnimaEngineWindowDestroyContext(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowDestroyContext(AnimaEngineWindow_Base* window)
 {
-	if (window->wgl._context)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context)
 	{
-		wglDeleteContext(window->wgl._context);
-		window->wgl._context = NULL;
+		wglDeleteContext(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context);
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context = NULL;
 	}
 
-	if (window->wgl._dc)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc)
 	{
-		ReleaseDC(window->win32._handle, window->wgl._dc);
-		window->wgl._dc = NULL;
+		ReleaseDC(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_handle, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc);
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc = NULL;
 	}
 }
 
-int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
+int _AnimaEngineWindowAnalyzeContext(AnimaEngineWindow_Base* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
 {
-	GLboolean required = GL_FALSE;
+	bool required = false;
 
 	if (ctxconfig->_api == ANIMA_ENGINE_CORE_OPENGL_API)
 	{
 		if (ctxconfig->_forward)
 		{
-			if (!window->wgl._ARB_create_context)
+			if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
 			{
 				//_glfwInputError(GLFW_VERSION_UNAVAILABLE, "WGL: A forward compatible OpenGL context " "requested but WGL_ARB_create_context is " "unavailable");
 				return _ANIMA_ENGINE_CORE_RECREATION_IMPOSSIBLE;
 			}
 
-			required = GL_TRUE;
+			required = true;
 		}
 
 		if (ctxconfig->_profile)
 		{
-			if (!window->wgl._ARB_create_context_profile)
+			if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_profile)
 			{
 				//_glfwInputError(GLFW_VERSION_UNAVAILABLE, "WGL: OpenGL profile requested but " "WGL_ARB_create_context_profile is unavailable");
 				return _ANIMA_ENGINE_CORE_RECREATION_IMPOSSIBLE;
 			}
 
-			required = GL_TRUE;
+			required = true;
 		}
 
 		if (ctxconfig->_release)
 		{
-			if (window->wgl._ARB_context_flush_control)
-				required = GL_TRUE;
+			if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_context_flush_control)
+				required = true;
 		}
 	}
 	else
 	{
-		if (!window->wgl._ARB_create_context || !window->wgl._ARB_create_context_profile || !window->wgl._EXT_create_context_es2_profile)
+		if (!window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context || !window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context_profile || !window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_create_context_es2_profile)
 		{
 			//_glfwInputError(GLFW_API_UNAVAILABLE, "WGL: OpenGL ES requested but " "WGL_ARB_create_context_es2_profile is unavailable");
 			return _ANIMA_ENGINE_CORE_RECREATION_IMPOSSIBLE;
 		}
 
-		required = GL_TRUE;
+		required = true;
 	}
 
 	if (ctxconfig->_major != 1 || ctxconfig->_minor != 0)
 	{
-		if (window->wgl._ARB_create_context)
-			required = GL_TRUE;
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
+			required = true;
 	}
 
 	if (ctxconfig->_debug)
 	{
-		if (window->wgl._ARB_create_context)
-			required = GL_TRUE;
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_create_context)
+			required = true;
 	}
 
 	if (fbconfig->_samples > 0)
@@ -474,10 +473,10 @@ int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, con
 		// We want FSAA, but can we get it?
 		// FSAA is not a hard constraint, so otherwise we just don't care
 
-		if (window->wgl._ARB_multisample && window->wgl._ARB_pixel_format)
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_multisample && window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format)
 		{
 			// We appear to have both the extension and the means to ask for it
-			required = GL_TRUE;
+			required = true;
 		}
 	}
 
@@ -486,10 +485,10 @@ int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, con
 		// We want sRGB, but can we get it?
 		// sRGB is not a hard constraint, so otherwise we just don't care
 
-		if (window->wgl._ARB_framebuffer_sRGB && window->wgl._ARB_pixel_format)
+		if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_framebuffer_sRGB && window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_ARB_pixel_format)
 		{
 			// We appear to have both the extension and the means to ask for it
-			required = GL_TRUE;
+			required = true;
 		}
 	}
 
@@ -500,24 +499,24 @@ int _AnimaEngineWindowAnalyzeContext(const _AnimaEngineWindowwindow* window, con
 }
 
 
-void _AnimaEngineWindowPlatformMakeContextCurrent(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformMakeContextCurrent(AnimaEngineWindow_Base* window)
 {
 	if (window)
-		wglMakeCurrent(window->wgl._dc, window->wgl._context);
+		wglMakeCurrent(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc, window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context);
 	else
 		wglMakeCurrent(NULL, NULL);
 
 	_AnimaEngineWindowSetCurrentContext(window);
 }
 
-void _AnimaEngineWindowPlatformSwapBuffers(_AnimaEngineWindowwindow* window)
+void _AnimaEngineWindowPlatformSwapBuffers(AnimaEngineWindow_Base* window)
 {
-	SwapBuffers(window->wgl._dc);
+	SwapBuffers(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc);
 }
 
 void _AnimaEngineWindowPlatformSwapInterval(int interval)
 {
-	_AnimaEngineWindowwindow* window = _AnimaEngineWindowPlatformGetCurrentContext();
+	AnimaEngineWindow_Base* window = _AnimaEngineWindowPlatformGetCurrentContext();
 
 #if !defined(_ANIMA_ENGINE_CORE_USE_DWM_SWAP_INTERVAL)
 	if (_AnimaEngineWindowIsCompositionEnabled() && interval)
@@ -528,19 +527,19 @@ void _AnimaEngineWindowPlatformSwapInterval(int interval)
 	}
 #endif
 
-	if (window->wgl._EXT_swap_control)
-		window->wgl._SwapIntervalEXT(interval);
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_EXT_swap_control)
+		window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_SwapIntervalEXT(interval);
 }
 
 bool _AnimaEngineWindowPlatformExtensionSupported(const char* extension)
 {
 	const GLubyte* extensions;
 
-	_AnimaEngineWindowwindow* window = _AnimaEngineWindowPlatformGetCurrentContext();
+	AnimaEngineWindow_Base* window = _AnimaEngineWindowPlatformGetCurrentContext();
 
-	if (window->wgl._GetExtensionsStringEXT != NULL)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringEXT != NULL)
 	{
-		extensions = (GLubyte*)window->wgl._GetExtensionsStringEXT();
+		extensions = (GLubyte*)window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringEXT();
 		if (extensions != NULL)
 		{
 			if (_AnimaEngineWindowStringInExtensionString(extension, extensions))
@@ -548,9 +547,9 @@ bool _AnimaEngineWindowPlatformExtensionSupported(const char* extension)
 		}
 	}
 
-	if (window->wgl._GetExtensionsStringARB != NULL)
+	if (window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringARB != NULL)
 	{
-		extensions = (GLubyte*)window->wgl._GetExtensionsStringARB(window->wgl._dc);
+		extensions = (GLubyte*)window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_GetExtensionsStringARB(window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_dc);
 		if (extensions != NULL)
 		{
 			if (_AnimaEngineWindowStringInExtensionString(extension, extensions))
@@ -567,14 +566,15 @@ AnimaEngineWindowglproc _AnimaEngineWindowPlatformGetProcAddress(const char* pro
 	if (proc)
 		return proc;
 
-	return (AnimaEngineWindowglproc)GetProcAddress(AnimaEngine::wgl._opengl32._instance, procname);
+	return (AnimaEngineWindowglproc)GetProcAddress(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE->_opengl32._instance, procname);
 }
 
-HGLRC AnimaEngineWindowGetWGLContext(AnimaEngineWindowwindow* handle)
+HGLRC AnimaEngineWindowGetWGLContext(AnimaEngineWindow_Base* handle)
 {
-	_AnimaEngineWindowwindow* window = (_AnimaEngineWindowwindow*)handle;
-	/*_GLFW_REQUIRE_INIT_OR_RETURN(NULL);*/
-	return window->wgl._context;
+	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*)handle;
+	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(NULL);
+
+	return window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context;
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

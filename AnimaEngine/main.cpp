@@ -1,9 +1,17 @@
 #include <stdio.h>
-#include <AnimaAssert.h>
+#include <AnimaEngine.h>
 
 int main(int argc, char** argv)
 {
-	ANIMA_ASSERT(false);
+	Anima::AnimaEngine engine;
+	engine.Initialize();
+
+	Anima::AnimaEngineWindow_Base* window = engine.CreateAnimaWindow(500, 300, "AnimaWindow", NULL, NULL);
+	
+	while (!window->ShouldClose())
+	{ 
+		;
+	}
 
 	return 0;
 }

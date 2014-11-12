@@ -20,7 +20,7 @@ void _AnimaEngineWindowInitJoysticks(void)
 void _AnimaEngineWindowTerminateJoysticks(void)
 {
 	for (int i = 0; i < ANIMA_ENGINE_CORE_JOYSTICK_LAST; i++)
-		free(AnimaEngine::winmm_js[i].name);
+		free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[i].name);
 }
 
 bool _AnimaEngineWindowPlatformJoystickPresent(int joy)
@@ -36,7 +36,7 @@ const float* _AnimaEngineWindowPlatformGetJoystickAxes(int joy, int* count)
 {
 	JOYCAPS jc;
 	JOYINFOEX ji;
-	float* axes = AnimaEngine::winmm_js[joy].axes;
+	float* axes = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy].axes;
 
 	if (_AnimaEngineWindow_joyGetDevCaps(joy, &jc, sizeof(JOYCAPS)) != JOYERR_NOERROR)
 		return NULL;
@@ -69,7 +69,7 @@ const unsigned char* _AnimaEngineWindowPlatformGetJoystickButtons(int joy, int* 
 {
 	JOYCAPS jc;
 	JOYINFOEX ji;
-	unsigned char* buttons = AnimaEngine::winmm_js[joy].buttons;
+	unsigned char* buttons = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy].buttons;
 
 	if (_AnimaEngineWindow_joyGetDevCaps(joy, &jc, sizeof(JOYCAPS)) != JOYERR_NOERROR)
 		return NULL;
@@ -120,10 +120,10 @@ const char* _AnimaEngineWindowPlatformGetJoystickName(int joy)
 	if (_AnimaEngineWindow_joyGetDevCaps(joy, &jc, sizeof(JOYCAPS)) != JOYERR_NOERROR)
 		return NULL;
 
-	free(AnimaEngine::winmm_js[joy].name);
-	AnimaEngine::winmm_js[joy].name = _AnimaEngineWindowCreateUTF8FromWideString(jc.szPname);
+	free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy].name);
+	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy].name = _AnimaEngineWindowCreateUTF8FromWideString(jc.szPname);
 
-	return AnimaEngine::winmm_js[joy].name;
+	return AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy].name;
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

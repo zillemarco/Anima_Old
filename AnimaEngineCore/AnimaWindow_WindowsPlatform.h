@@ -1,8 +1,6 @@
 #ifndef _AnimaWindow_WindowsPlatform_h
 #define _AnimaWindow_WindowsPlatform_h
 
-#include "AnimaEngineCore.h"
-
 #ifndef NOMINMAX
 #	define NOMINMAX
 #endif
@@ -79,13 +77,13 @@ typedef BOOL(WINAPI * SETPROCESSDPIAWARE_T)(void);
 typedef BOOL(WINAPI * CHANGEWINDOWMESSAGEFILTEREX_T)(HWND, UINT, DWORD, PCHANGEFILTERSTRUCT);
 typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 
-#define _AnimaEngineWindow_joyGetDevCaps AnimaEngine::win32._winmm._joyGetDevCaps
-#define _AnimaEngineWindow_joyGetPos AnimaEngine::win32._winmm._joyGetPos
-#define _AnimaEngineWindow_joyGetPosEx AnimaEngine::win32._winmm._joyGetPosEx
-#define _AnimaEngineWindow_timeGetTime AnimaEngine::win32._winmm._timeGetTime
-#define _AnimaEngineWindow_SetProcessDPIAware AnimaEngine::win32._user32._SetProcessDPIAware
-#define _AnimaEngineWindow_ChangeWindowMessageFilterEx AnimaEngine::win32._user32._ChangeWindowMessageFilterEx
-#define _AnimaEngineWindow_DwmIsCompositionEnabled AnimaEngine::win32._dwmapi._DwmIsCompositionEnabled
+#define _AnimaEngineWindow_joyGetDevCaps AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetDevCaps
+#define _AnimaEngineWindow_joyGetPos AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPos
+#define _AnimaEngineWindow_joyGetPosEx AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._joyGetPosEx
+#define _AnimaEngineWindow_timeGetTime AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_winmm._timeGetTime
+#define _AnimaEngineWindow_SetProcessDPIAware AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._SetProcessDPIAware
+#define _AnimaEngineWindow_ChangeWindowMessageFilterEx AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_user32._ChangeWindowMessageFilterEx
+#define _AnimaEngineWindow_DwmIsCompositionEnabled AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_dwmapi._DwmIsCompositionEnabled
 
 #define _ANIMA_ENGINE_CORE_RECREATION_NOT_NEEDED 0
 #define _ANIMA_ENGINE_CORE_RECREATION_REQUIRED   1
@@ -96,7 +94,7 @@ typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 #if defined(_ANIMA_ENGINE_CORE_WGL)
 #	include "AnimaWindow_WGLContext.h"
 #elif defined(_GLFW_EGL)
-#	define _GLFW_EGL_NATIVE_WINDOW  window->win32.handle
+#	define _GLFW_EGL_NATIVE_WINDOW  window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->handle
 #	define _GLFW_EGL_NATIVE_DISPLAY EGL_DEFAULT_DISPLAY
 #	include "egl_context.h"
 #else
@@ -111,8 +109,54 @@ typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 #define _ANIMA_ENGINE_CORE_PLATFORM_MONITOR_STATE        _AnimaEngineWindowmonitorWin32 win32
 #define _ANIMA_ENGINE_CORE_PLATFORM_CURSOR_STATE         _AnimaEngineWindowcursorWin32  win32
 
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE	_AnimaEngineWindowwindowWin32* GetPlatformWindowState() { return &win32; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE	GetPlatformWindowState()
+
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE	_AnimaEngineWindowlibraryWin32* GetPlatformLibraryWindowState() { return &win32; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE	GetPlatformLibraryWindowState()
+
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE	_AnimaEngineWindowtimeWin32* GetPlatformTimeState() { return &win32_time; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE	GetPlatformTimeState()
+
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_MONITOR_STATE	_AnimaEngineWindowmonitorWin32* GetPlatformMonitorState() { return &win32; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_MONITOR_STATE	GetPlatformMonitorState()
+
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_CURSOR_STATE	_AnimaEngineWindowcursorWin32* GetPlatformCursorState() { return &win32; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_CURSOR_STATE	GetPlatformCursorState()
+
 #define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE(class) _AnimaEngineWindowlibraryWin32 class::win32;
 #define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE(class) _AnimaEngineWindowtimeWin32 class::win32_time;
+
+#define _INIT_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE	win32._handle			= NULL;		\
+														win32._dwStyle			= NULL;		\
+														win32._dwExStyle		= NULL;		\
+														win32._cursorCentered	= false;	\
+														win32._cursorInside		= false;	\
+														win32._cursorHidden		= false;	\
+														win32._oldCursorX		= 0;		\
+														win32._oldCursorY		= 0;
+
+#define _INIT_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE	win32._foregroundLockTimeout				= NULL;	\
+																win32._clipboardString						= NULL;	\
+																win32._winmm._instance						= NULL;	\
+																win32._winmm._joyGetDevCaps					= NULL;	\
+																win32._winmm._joyGetPos						= NULL;	\
+																win32._winmm._joyGetPosEx					= NULL;	\
+																win32._winmm._timeGetTime					= NULL;	\
+																win32._user32._instance						= NULL;	\
+																win32._user32._SetProcessDPIAware			= NULL;	\
+																win32._user32._ChangeWindowMessageFilterEx	= NULL;	\
+																win32._dwmapi._instance						= NULL;	\
+																win32._dwmapi._DwmIsCompositionEnabled		= NULL;
+
+#define _INIT_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE		win32_time._hasPC		= false;	\
+																win32_time._resolution	= 0.0001;	\
+																win32_time._base		= 0;
+
+#define _INIT_ANIMA_ENGINE_CORE_PLATFORM_MONITOR_STATE			win32._modeChanged = false;
+
+#define _INIT_ANIMA_ENGINE_CORE_PLATFORM_CURSOR_STATE			win32._handle = NULL;
+
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 

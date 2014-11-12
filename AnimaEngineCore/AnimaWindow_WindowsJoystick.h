@@ -6,6 +6,9 @@
 #define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE \
     _AnimaEngineWindowjoystickWinMM winmm_js[ANIMA_ENGINE_CORE_JOYSTICK_LAST + 1]
 
+#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE	_AnimaEngineWindowjoystickWinMM* GetPlatformLibraryJoystickState() { return winmm_js; }
+#define _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE	GetPlatformLibraryJoystickState()
+
 #define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE(class) _AnimaEngineWindowjoystickWinMM class::winmm_js[];
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
