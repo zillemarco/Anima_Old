@@ -87,156 +87,6 @@ void AnimaEngine::Terminate()
 	}
 }
 
-AnimaEngineWindow_Base* AnimaEngine::CreateAnimaWindow(int width, int height, const char* title, AnimaEngineWindowmonitor* monitor, AnimaEngineWindow_Base* share)
-{
-	_AnimaEngineWindowfbconfig fbconfig;
-	_AnimaEngineWindowctxconfig ctxconfig;
-	_AnimaEngineWindowwndconfig wndconfig;
-	AnimaEngineWindow_Base* window;
-	AnimaEngineWindow_Base* previous;
-
-	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(NULL);
-
-	if (width <= 0 || height <= 0)
-	{
-		//_glfwInputError(GLFW_INVALID_VALUE, "Invalid window size");
-		return NULL;
-	}
-
-	// Set up desired framebuffer config
-	fbconfig._redBits			= _windowHints._redBits;
-	fbconfig._greenBits			= _windowHints._greenBits;
-	fbconfig._blueBits			= _windowHints._blueBits;
-	fbconfig._alphaBits			= _windowHints._alphaBits;
-	fbconfig._depthBits			= _windowHints._depthBits;
-	fbconfig._stencilBits		= _windowHints._stencilBits;
-	fbconfig._accumRedBits		= _windowHints._accumRedBits;
-	fbconfig._accumGreenBits	= _windowHints._accumGreenBits;
-	fbconfig._accumBlueBits		= _windowHints._accumBlueBits;
-	fbconfig._accumAlphaBits	= _windowHints._accumAlphaBits;
-	fbconfig._auxBuffers		= _windowHints._auxBuffers;
-	fbconfig._stereo			= _windowHints._stereo;
-	fbconfig._samples			= _windowHints._samples;
-	fbconfig._sRGB				= _windowHints._sRGB;
-	fbconfig._doublebuffer		= _windowHints._doublebuffer;
-
-	// Set up desired window config
-	wndconfig._width		= width;
-	wndconfig._height		= height;
-	wndconfig._title		= title;
-	wndconfig._resizable	= _windowHints._resizable;
-	wndconfig._visible		= _windowHints._visible;
-	wndconfig._decorated	= _windowHints._decorated;
-	wndconfig._focused		= _windowHints._focused;
-	wndconfig._autoIconify	= _windowHints._autoIconify;
-	wndconfig._floating		= _windowHints._floating;
-	wndconfig._monitor		= (_AnimaEngineWindowmonitor*)monitor;
-
-	// Set up desired context config
-	ctxconfig._api			= _windowHints._api;
-	ctxconfig._major		= _windowHints._major;
-	ctxconfig._minor		= _windowHints._minor;
-	ctxconfig._forward		= _windowHints._forward;
-	ctxconfig._debug		= _windowHints._debug;
-	ctxconfig._profile		= _windowHints._profile;
-	ctxconfig._robustness	= _windowHints._robustness;
-	ctxconfig._release		= _windowHints._release;
-	ctxconfig._share		= (AnimaEngineWindow_Base*)share;
-
-	// Check the OpenGL bits of the window config
-	if (!_AnimaEngineWindowIsValidContextConfig(&ctxconfig))
-		return NULL;
-
-	window = (AnimaEngineWindow_Base*)calloc(1, sizeof(AnimaEngineWindow_Base));
-	window->SetEngine(this);
-	window->SetNext(_windowListHead);
-	_windowListHead = window;
-
-	if (wndconfig._monitor)
-	{
-		wndconfig._resizable = true;
-		wndconfig._visible = true;
-		wndconfig._focused = true;
-
-		// Set up desired video mode
-		window->GetVideoMode()->_width			= width;
-		window->GetVideoMode()->_height			= height;
-		window->GetVideoMode()->_redBits		= _windowHints._redBits;
-		window->GetVideoMode()->_greenBits		= _windowHints._greenBits;
-		window->GetVideoMode()->_blueBits		= _windowHints._blueBits;
-		window->GetVideoMode()->_refreshRate	= _windowHints._refreshRate;
-	}
-
-	// Transfer window hints that are persistent settings and not
-	// just initial states
-	window->SetMonitor(wndconfig._monitor);
-	window->SetResizable(wndconfig._resizable);
-	window->SetDecorated(wndconfig._decorated);
-	window->SetAutoIconifiy(wndconfig._autoIconify);
-	window->SetFloating(wndconfig._floating);
-	window->SetCursorMode(ANIMA_ENGINE_CORE_CURSOR_NORMAL);
-
-	// Save the currently current context so it can be restored later
-	previous = _AnimaEngineWindowPlatformGetCurrentContext();
-
-	// Open the actual window and create its context
-	if (!_AnimaEngineWindowPlatformCreateWindow(window, &wndconfig, &ctxconfig, &fbconfig))
-	{
-		DestroyAnimaWindow((AnimaEngineWindow_Base*)window);
-		_AnimaEngineWindowPlatformMakeContextCurrent(previous);
-		return NULL;
-	}
-
-	_AnimaEngineWindowPlatformMakeContextCurrent(window);
-
-	// Retrieve the actual (as opposed to requested) context attributes
-	if (!_AnimaEngineWindowRefreshContextAttribs(&ctxconfig))
-	{
-		DestroyAnimaWindow((AnimaEngineWindow_Base*)window);
-		_AnimaEngineWindowPlatformMakeContextCurrent(previous);
-		return NULL;
-	}
-
-	// Verify the context against the requested parameters
-	if (!_AnimaEngineWindowIsValidContext(&ctxconfig))
-	{
-		DestroyAnimaWindow((AnimaEngineWindow_Base*)window);
-		_AnimaEngineWindowPlatformMakeContextCurrent(previous);
-		return NULL;
-	}
-
-	// Clearing the front buffer to black to avoid garbage pixels left over
-	// from previous uses of our bit of VRAM
-	glClear(GL_COLOR_BUFFER_BIT);
-	_AnimaEngineWindowPlatformSwapBuffers(window);
-
-	// Restore the previously current context (or NULL)
-	_AnimaEngineWindowPlatformMakeContextCurrent(previous);
-
-	if (wndconfig._monitor)
-	{
-		int width, height;
-		_AnimaEngineWindowPlatformGetWindowSize(window, &width, &height);
-
-		window->SetCursorPosX(width / 2);
-		window->SetCursorPosY(height / 2);
-
-		_AnimaEngineWindowPlatformSetCursorPos(window, window->GetCursorPosX(), window->GetCursorPosY());
-	}
-	else
-	{
-		if (wndconfig._visible)
-		{
-			if (wndconfig._focused)
-				_AnimaEngineWindowPlatformShowWindow(window);
-			else
-				_AnimaEngineWindowPlatformUnhideWindow(window);
-		}
-	}
-
-	return (AnimaEngineWindow_Base*)window;
-}
-
 void AnimaEngine::DestroyAnimaWindow(AnimaEngineWindow_Base* handle)
 {
 	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*)handle;
@@ -269,7 +119,8 @@ void AnimaEngine::DestroyAnimaWindow(AnimaEngineWindow_Base* handle)
 
 	*prev = window->GetNext();
 
-	free(window);
+	delete window;
+	window = NULL;
 }
 
 void AnimaEngine::DefaultWindowHints(void)
@@ -497,5 +348,25 @@ bool AnimaEngine::ExtensionSupported(const char* extension)
 	return _AnimaEngineWindowPlatformExtensionSupported(extension);
 }
 
+void AnimaEngine::PollEvents()
+{
+	_AnimaEngineWindowPlatformPollEvents(this);
+}
+
+void AnimaEngine::WaitEvents(void)
+{
+	if (!_windowListHead)
+		return;
+
+	_AnimaEngineWindowPlatformWaitEvents(this);
+}
+
+void AnimaEngine::PostEmptyEvent(void)
+{
+	if (!_windowListHead)
+		return;
+
+	_AnimaEngineWindowPlatformPostEmptyEvent(this);
+}
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

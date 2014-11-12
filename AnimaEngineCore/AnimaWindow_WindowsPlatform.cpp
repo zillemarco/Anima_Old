@@ -685,7 +685,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 	case WM_CLOSE:
 	{
 		if (window->GetCloseRequestCallback())
-			window->GetCloseRequestCallback();
+			window->GetCloseRequestCallback()(window);
 		return 0;
 	}
 

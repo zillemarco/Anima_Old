@@ -848,6 +848,28 @@ bool _AnimaEngineWindowIsValidContext(const _AnimaEngineWindowctxconfig* ctxconf
 	return true;
 }
 
+int AnimaEngineWindow_Base::_windowCount = 0;
+
+void AnimaEngineWindow_Base::InitCallbacks()
+{
+	_windowFocusCallback = AnimaEngineWindow_Base_Focus;
+	_windowPosCallback = AnimaEngineWindow_Base_Pos;
+	_windowSizeCallback = AnimaEngineWindow_Base_Size;
+	_windowIconifyCallback = AnimaEngineWindow_Base_Iconify;
+	_windowVisibilityCallback = AnimaEngineWindow_Base_Visibility;
+	_windowDamageCallback = AnimaEngineWindow_Base_Damage;
+	_windowCloseRequestCallback = AnimaEngineWindow_Base_CloseRequest;
+	_windowKeyCallback = AnimaEngineWindow_Base_Key;
+	_windowCharCallback = AnimaEngineWindow_Base_Char;
+	_windowScrollCallback = AnimaEngineWindow_Base_Scroll;
+	_windowMouseClickCallback = AnimaEngineWindow_Base_MouseClick;
+	_windowCursorMotionCallback = AnimaEngineWindow_Base_CursorMotion;
+	_windowCursoEnterCallback = AnimaEngineWindow_Base_CursorEnter;
+	_windowDropCallback = AnimaEngineWindow_Base_Drop;
+	_frameBufferSizeCallback = AnimaEngineWindow_Base_FrameBufferSize;
+	_GetStringiCallback = NULL;
+}
+
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Focus(AnimaEngineWindow_Base* window, bool focused)
 {
 }
@@ -874,16 +896,17 @@ void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Damage(AnimaEngineWindow_Bas
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CloseRequest(AnimaEngineWindow_Base* window)
 {
+	window->SetShouldClose(true);
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Key(AnimaEngineWindow_Base* window, int key, int scancode, int action, int mods)
 {
-	printf("\nKey");
+	printf("\nKey from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Char(AnimaEngineWindow_Base* window, unsigned int codepoint, int mods, bool plain)
 {
-	printf("\nChar");
+	printf("\nChar from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Scroll(AnimaEngineWindow_Base* window, double x, double y)
@@ -892,20 +915,19 @@ void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Scroll(AnimaEngineWindow_Bas
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_MouseClick(AnimaEngineWindow_Base* window, int button, int action, int mods)
 {
-	printf("\nClick");
+	printf("\nClick from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CursorMotion(AnimaEngineWindow_Base* window, double x, double y)
 {
-	printf("\nMouse move");
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CursorEnter(AnimaEngineWindow_Base* window, bool entered)
 {
 	if (entered)
-		printf("\nEnter");
+		printf("\nEnter from window %d", window->GetWindowID());
 	else
-		printf("\nLeave");
+		printf("\nLeave from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Drop(AnimaEngineWindow_Base* window, int count, const char** names)

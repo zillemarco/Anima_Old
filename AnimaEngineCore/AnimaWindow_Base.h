@@ -106,11 +106,36 @@ typedef struct AnimaEngineWindowContext
 	int		_release;
 } AnimaEngineWindowContext;
 
+#define DECLARE_MESSAGE_MAP()				virtual void InitCallbacks();
+#define BEGIN_MESSAGE_MAP(class, baseClass)	void class::InitCallbacks() { baseClass::InitCallbacks();
+#define END_MESSAGE_MAP()					}
+
+#define ANIMA_WINDOW_EVENT static
+
+#define ANIMA_WINDOW_FOCUS_CHANGED_EVENT(callback)				SetFocusCallback(callback);
+#define ANIMA_WINDOW_POSITION_CHANGED_EVENT(callback)			SetPosCallback(callback);
+#define ANIMA_WINDOW_SIZE_CHANGED_EVENT(callback)				SetSizeCallback(callback);
+#define ANIMA_WINDOW_ICONIFY_EVENT(callback)					SetIconifyCallback(callback);
+#define ANIMA_WINDOW_VISIBILITY_CHANGED_EVENT(callback)			SetVisibilityCallback(callback);
+#define ANIMA_WINDOW_PAINT_EVENT(callback)						SetDamageCallback(callback);
+#define ANIMA_WINDOW_CLOSE_WINDOW_EVENT(callback)				SetCloseRequestCallback(callback);
+#define ANIMA_WINDOW_KEY_EVENT(callback)						SetKeyCallback(callback);
+#define ANIMA_WINDOW_CHAR_EVENT(callback)						SetCharCallback(callback);
+#define ANIMA_WINDOW_MOUSE_SCROLL_EVENT(callback)				SetScrollCallback(callback);
+#define ANIMA_WINDOW_MOUSE_CLICK_EVENT(callback)				SetMouseClickCallback(callback);
+#define ANIMA_WINDOW_CURSOR_MOVE_EVENT(callback)				SetCursorMotionCallback(callback);
+#define ANIMA_WINDOW_CURSOR_ENTER_EVENT(callback)				SetCursorEnterCallback(callback);
+#define ANIMA_WINDOW_DROP_EVENT(callback)						SetDropCallback(callback);
+#define ANIMA_WINDOW_FRAMEBUFFER_SIZE_CHANGED_EVENT(callback)	SetFramebufferSizeCallback(callback);
+
 class ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindow_Base
 {
 public:
 	AnimaEngineWindow_Base() {
 		InternalInit();
+
+		_windowId = _windowCount;
+		_windowCount++;
 	}
 
 	virtual ~AnimaEngineWindow_Base() {
@@ -206,8 +231,12 @@ public:
 	char* GetMouseButtons() { return _mouseButtons; }
 	char* GetKeys()			{ return _keys;			}
 
+	int GetWindowID() { return _windowId; }
+
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
+
+	virtual void InitCallbacks();
 
 protected:
 	virtual void InternalInit() 
@@ -234,28 +263,11 @@ protected:
 		_cursorPosX = 0.0;
 		_cursorPosY = 0.0;
 		_cursorMode = ANIMA_ENGINE_CORE_CURSOR_NORMAL;
-
-		_windowFocusCallback = AnimaEngineWindow_Base_Focus;
-		_windowPosCallback = AnimaEngineWindow_Base_Pos;
-		_windowSizeCallback = AnimaEngineWindow_Base_Size;
-		_windowIconifyCallback = AnimaEngineWindow_Base_Iconify;
-		_windowVisibilityCallback = AnimaEngineWindow_Base_Visibility;
-		_windowDamageCallback = AnimaEngineWindow_Base_Damage;
-		_windowCloseRequestCallback = AnimaEngineWindow_Base_CloseRequest;
-		_windowKeyCallback = AnimaEngineWindow_Base_Key;
-		_windowCharCallback = AnimaEngineWindow_Base_Char;
-		_windowScrollCallback = AnimaEngineWindow_Base_Scroll;
-		_windowMouseClickCallback = AnimaEngineWindow_Base_MouseClick;
-		_windowCursorMotionCallback = AnimaEngineWindow_Base_CursorMotion;
-		_windowCursoEnterCallback = AnimaEngineWindow_Base_CursorEnter;
-		_windowDropCallback = AnimaEngineWindow_Base_Drop;
-		_frameBufferSizeCallback = AnimaEngineWindow_Base_FrameBufferSize;
-		_GetStringiCallback = NULL;
-
+		
 		_INIT_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 		_INIT_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
 	}
-
+	
 private:
 	AnimaEngine*			_engine;
 	AnimaEngineWindow_Base*	_next;
@@ -282,6 +294,9 @@ private:
 	bool	_shouldClose;
 
 	AnimaEngineWindowContext _context;
+
+	int			_windowId;
+	static int	_windowCount;
 
 #if defined(_ANIMA_ENGINE_CORE_USE_OPENGL)
 	PFNGLGETSTRINGIPROC _GetStringiCallback;
