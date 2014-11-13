@@ -20,8 +20,14 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaStackAllocator.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
-    set(AnimaEngineCore_HEADERS	${common_HEADERS})
-    set(AnimaEngineCore_SOURCES	${common_SOURCES})
+    set(AnimaEngineCore_HEADERS	${common_HEADERS}
+                                AnimaWindow_CocoaJoystick.h
+                                AnimaWindow_CocoaPlatform.h
+                                AnimaWindow_CocoaTLS.h)
+    set(AnimaEngineCore_SOURCES	${common_SOURCES}
+                                AnimaWindow_CocoaJoystick.mm
+                                AnimaWindow_CocoaPlatform.mm
+                                AnimaWindow_CocoaTLS.cpp)
 elseif (_ANIMA_ENGINE_WIN32)
     set(AnimaEngineCore_HEADERS	${common_HEADERS} 
 								AnimaWindow_WindowsJoystick.h 
@@ -37,8 +43,8 @@ elseif (_ANIMA_ENGINE_X11)
 endif()
 
 if (_ANIMA_ENGINE_NSGL)
-    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} nsgl_context.h)
-    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} nsgl_context.m)
+    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_NSGLContext.h)
+    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_NSGLContext.mm)
 elseif (_ANIMA_ENGINE_WGL)
     list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_WGLContext.h)
     list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_WGLContext.cpp)

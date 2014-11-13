@@ -24,8 +24,16 @@ extern "C" ANIMA_ENGINE_CORE_EXPORT bool __anima_get_working_dir(char* dest, int
 
 #define ANIMA_ALLOCATOR_DEBUG
 
-#define _ANIMA_ENGINE_CORE_WIN32
-#define _ANIMA_ENGINE_CORE_WGL
+#if defined _MSC_VER
+#	define _ANIMA_ENGINE_CORE_WIN32
+#	define _ANIMA_ENGINE_CORE_WGL
+#else
+#	define _ANIMA_ENGINE_CORE_COCOA
+#	define _ANIMA_ENGINE_CORE_NSGL
+#	define _ANIMA_ENGINE_CORE_USE_MENUBAR
+#	define _ANIMA_ENGINE_CORE_USE_RETINA
+#endif
+
 #define _ANIMA_ENGINE_CORE_USE_OPENGL
 
 #define _ANIMA_ENGINE_CORE_VERSION_MAJOR          0

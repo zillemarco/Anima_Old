@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-	FreeConsole();
+//	FreeConsole();
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 	

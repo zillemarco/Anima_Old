@@ -6,7 +6,7 @@
 #include "AnimaWindow_Data.h"
 
 #if defined(_ANIMA_ENGINE_CORE_USE_OPENGL)
-#	include <GL\glext.h>
+#	include <GL/glext.h>
 #endif
 
 #if defined ANIMA_ENGINE_CORE_APIENTRY_DEFINED
@@ -33,7 +33,7 @@ typedef struct _AnimaEngineWindowcursor			_AnimaEngineWindowcursor;
 END_ANIMA_ENGINE_CORE_NAMESPACE
 
 #if defined(_ANIMA_ENGINE_CORE_COCOA)
-#	include "cocoa_platform.h"
+#	include "AnimaWindow_CocoaPlatform.h"
 #elif defined(_ANIMA_ENGINE_CORE_WIN32)
 #	include "AnimaWindow_WindowsPlatform.h"
 #elif defined(_ANIMA_ENGINE_CORE_X11)

@@ -1,7 +1,7 @@
 project(AnimaEngine C CXX)
 
-set(${PROJECT_NAME}_headers )
-set(${PROJECT_NAME}_sources main.cpp)
+set(${PROJECT_NAME}_headers CustomWindow.h)
+set(${PROJECT_NAME}_sources main.cpp CustomWindow.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/../AnimaEngineCore/)
 include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
