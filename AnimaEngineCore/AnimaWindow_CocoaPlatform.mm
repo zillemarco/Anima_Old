@@ -173,10 +173,10 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 @end
 
-@interface GLFWApplicationDelegate : NSObject
+@interface AnimaEngineWindowApplicationDelegate : NSObject
 @end
 
-@implementation GLFWApplicationDelegate
+@implementation AnimaEngineWindowApplicationDelegate
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender :(Anima::AnimaEngine*) engine
 {
@@ -962,7 +962,7 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate == nil)
 	{
 		_AnimaEngineWindowlibraryNS* libraryWindowState = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE;
-		libraryWindowState->_delegate = [[GLFWApplicationDelegate alloc] init];
+		libraryWindowState->_delegate = [[AnimaEngineWindowApplicationDelegate alloc] init];
 		if (libraryWindowState->_delegate == nil)
 		{
 //			_glfwInputError(GLFW_PLATFORM_ERROR, "Cocoa: Failed to create application delegate");

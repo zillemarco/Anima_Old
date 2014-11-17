@@ -369,4 +369,9 @@ void AnimaEngine::PostEmptyEvent(void)
 	_AnimaEngineWindowPlatformPostEmptyEvent(this);
 }
 
+void AnimaEngine::SwapInterval(int interval)
+{
+	_AnimaEngineWindowPlatformSwapInterval(interval);
+}
+
 END_ANIMA_ENGINE_CORE_NAMESPACE

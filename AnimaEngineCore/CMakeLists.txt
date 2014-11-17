@@ -11,13 +11,21 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaAssert.h 
 					AnimaTypes.h 
 					AnimaAllocator.h 
-					AnimaStackAllocator.h)
+					AnimaStackAllocator.h
+                    AnimaLinearAllocator.h
+                    AnimaFreeListAllocator.h
+                    AnimaPoolAllocator.h
+                    AnimaProxyAllocator.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
 					AnimaAssert.cpp 
 					AnimaWindow_Base.cpp 
-					AnimaStackAllocator.cpp)
+					AnimaStackAllocator.cpp
+                    AnimaLinearAllocator.cpp
+                    AnimaFreeListAllocator.cpp
+                    AnimaPoolAllocator.cpp
+                    AnimaProxyAllocator.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

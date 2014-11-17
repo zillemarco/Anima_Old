@@ -8,12 +8,18 @@ int main(int argc, char** argv)
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 	
-	Anima::AnimaEngineWindow_Base* window1 = engine.CreateAnimaWindow<Anima::AnimaEngineWindow_Base>(500, 300, "AnimaWindow1", NULL, NULL);
-	CustomWindow* window2 = engine.CreateAnimaWindow<CustomWindow>(500, 500, "Custom window", NULL, NULL);
+	CustomWindow* window = engine.CreateAnimaWindow<CustomWindow>(500, 500, "Custom window", NULL, NULL);
 	
-	while (!window1->ShouldClose())
-	{ 
+	window->MakeCurrentContext();
+	engine.SwapInterval(1);
+	window->MakeCurrentContext();
+	window->FrameBufferResizeCallback(window, 500, 500);
+	
+	while (!window->ShouldClose())
+	{
 		engine.PollEvents();
+		
+		window->DrawScene();
 	}
 
 	return 0;

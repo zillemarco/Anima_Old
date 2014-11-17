@@ -106,6 +106,57 @@ typedef struct AnimaEngineWindowContext
 	int		_release;
 } AnimaEngineWindowContext;
 
+
+// Elenco dichiarazioni funzioni di utilizzo specifiche per piattaforma
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformInit(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformTerminate(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetVersionString(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetCursorPos(AnimaEngineWindow_Base* window, double xpos, double ypos);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformApplyCursorMode(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT _AnimaEngineWindowmonitor**	_AnimaEngineWindowPlatformGetMonitors(int* count);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformIsSameMonitor(_AnimaEngineWindowmonitor* first, _AnimaEngineWindowmonitor* second);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetMonitorPos(_AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos);
+extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindowvidmode*	_AnimaEngineWindowPlatformGetVideoModes(_AnimaEngineWindowmonitor* monitor, int* count);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetVideoMode(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowvidmode* mode);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetGammaRamp(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowgammaramp* ramp);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetGammaRamp(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetClipboardString(AnimaEngineWindow_Base* window, const char* string);
+extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetClipboardString(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformJoystickPresent(int joy);
+extern "C" ANIMA_ENGINE_CORE_EXPORT const float*				_AnimaEngineWindowPlatformGetJoystickAxes(int joy, int* count);
+extern "C" ANIMA_ENGINE_CORE_EXPORT const unsigned char*		_AnimaEngineWindowPlatformGetJoystickButtons(int joy, int* count);
+extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetJoystickName(int joy);
+extern "C" ANIMA_ENGINE_CORE_EXPORT double						_AnimaEngineWindowPlatformGetTime(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetTime(double time);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformDestroyWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowTitle(AnimaEngineWindow_Base* window, const char* title);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowPos(AnimaEngineWindow_Base* window, int* xpos, int* ypos);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowPos(AnimaEngineWindow_Base* window, int xpos, int ypos);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowSize(AnimaEngineWindow_Base* window, int* width, int* height);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowSize(AnimaEngineWindow_Base* window, int width, int height);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetFramebufferSize(AnimaEngineWindow_Base* window, int* width, int* height);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowFrameSize(AnimaEngineWindow_Base* window, int* left, int* top, int* right, int* bottom);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformIconifyWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformRestoreWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformShowWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformUnhideWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformHideWindow(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformPollEvents(AnimaEngine* engine);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformWaitEvents(AnimaEngine* engine);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformPostEmptyEvent(AnimaEngine* engine);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformMakeContextCurrent(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindow_Base*		_AnimaEngineWindowPlatformGetCurrentContext(void);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSwapBuffers(AnimaEngineWindow_Base* window);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSwapInterval(int interval);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformExtensionSupported(const char* extension);
+extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindowglproc		_AnimaEngineWindowPlatformGetProcAddress(const char* procname);
+extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformCreateCursor(_AnimaEngineWindowcursor* cursor, const AnimaEngineWindowimage* image, int xhot, int yhot);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformDestroyCursor(_AnimaEngineWindowcursor* cursor);
+extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetCursor(AnimaEngine* engine, AnimaEngineWindow_Base* window, _AnimaEngineWindowcursor* cursor);
+
+extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowInputMonitorChange(AnimaEngine* engine);
+
 #define DECLARE_MESSAGE_MAP()				virtual void InitCallbacks();
 #define BEGIN_MESSAGE_MAP(class, baseClass)	void class::InitCallbacks() { baseClass::InitCallbacks();
 #define END_MESSAGE_MAP()					}
@@ -232,6 +283,11 @@ public:
 	char* GetKeys()			{ return _keys;			}
 
 	int GetWindowID() { return _windowId; }
+	
+	void SwapBuffers() { _AnimaEngineWindowPlatformSwapBuffers(this); }
+	void MakeCurrentContext() { _AnimaEngineWindowPlatformMakeContextCurrent(this); }
+	
+	void* GetOpenGLContext() { return _GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context; }
 
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
@@ -398,56 +454,6 @@ struct _AnimaEngineWindowHints {
 	int		_robustness;	
 	int		_release;		
 };
-
-// Elenco dichiarazioni funzioni di utilizzo specifiche per piattaforma
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformInit(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformTerminate(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetVersionString(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetCursorPos(AnimaEngineWindow_Base* window, double xpos, double ypos);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformApplyCursorMode(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT _AnimaEngineWindowmonitor**	_AnimaEngineWindowPlatformGetMonitors(int* count);
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformIsSameMonitor(_AnimaEngineWindowmonitor* first, _AnimaEngineWindowmonitor* second);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetMonitorPos(_AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos);
-extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindowvidmode*	_AnimaEngineWindowPlatformGetVideoModes(_AnimaEngineWindowmonitor* monitor, int* count);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetVideoMode(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowvidmode* mode);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetGammaRamp(_AnimaEngineWindowmonitor* monitor, AnimaEngineWindowgammaramp* ramp);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetGammaRamp(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetClipboardString(AnimaEngineWindow_Base* window, const char* string);
-extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetClipboardString(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformJoystickPresent(int joy);
-extern "C" ANIMA_ENGINE_CORE_EXPORT const float*				_AnimaEngineWindowPlatformGetJoystickAxes(int joy, int* count);
-extern "C" ANIMA_ENGINE_CORE_EXPORT const unsigned char*		_AnimaEngineWindowPlatformGetJoystickButtons(int joy, int* count);
-extern "C" ANIMA_ENGINE_CORE_EXPORT const char*					_AnimaEngineWindowPlatformGetJoystickName(int joy);
-extern "C" ANIMA_ENGINE_CORE_EXPORT double						_AnimaEngineWindowPlatformGetTime(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetTime(double time);
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindowwndconfig* wndconfig, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformDestroyWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowTitle(AnimaEngineWindow_Base* window, const char* title);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowPos(AnimaEngineWindow_Base* window, int* xpos, int* ypos);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowPos(AnimaEngineWindow_Base* window, int xpos, int ypos);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowSize(AnimaEngineWindow_Base* window, int* width, int* height);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetWindowSize(AnimaEngineWindow_Base* window, int width, int height);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetFramebufferSize(AnimaEngineWindow_Base* window, int* width, int* height);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformGetWindowFrameSize(AnimaEngineWindow_Base* window, int* left, int* top, int* right, int* bottom);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformIconifyWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformRestoreWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformShowWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformUnhideWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformHideWindow(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformPollEvents(AnimaEngine* engine);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformWaitEvents(AnimaEngine* engine);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformPostEmptyEvent(AnimaEngine* engine);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformMakeContextCurrent(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindow_Base*		_AnimaEngineWindowPlatformGetCurrentContext(void);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSwapBuffers(AnimaEngineWindow_Base* window);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSwapInterval(int interval);
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformExtensionSupported(const char* extension);
-extern "C" ANIMA_ENGINE_CORE_EXPORT AnimaEngineWindowglproc		_AnimaEngineWindowPlatformGetProcAddress(const char* procname);
-extern "C" ANIMA_ENGINE_CORE_EXPORT bool						_AnimaEngineWindowPlatformCreateCursor(_AnimaEngineWindowcursor* cursor, const AnimaEngineWindowimage* image, int xhot, int yhot);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformDestroyCursor(_AnimaEngineWindowcursor* cursor);
-extern "C" ANIMA_ENGINE_CORE_EXPORT void						_AnimaEngineWindowPlatformSetCursor(AnimaEngine* engine, AnimaEngineWindow_Base* window, _AnimaEngineWindowcursor* cursor);
-
-extern "C" ANIMA_ENGINE_CORE_EXPORT void _AnimaEngineWindowInputMonitorChange(AnimaEngine* engine);
 
 // Elenco funzioni di utilità
 extern "C" ANIMA_ENGINE_CORE_EXPORT const AnimaEngineWindowvidmode*		_AnimaEngineWindowChooseVideoMode(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowvidmode* desired);

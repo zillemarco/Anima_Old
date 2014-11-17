@@ -38,6 +38,8 @@
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
+typedef AnimaEngineWindow_Base AnimaWindow;
+
 class ANIMA_ENGINE_CORE_EXPORT AnimaEngine
 {
 public:
@@ -48,13 +50,13 @@ public:
 	bool Initialize();
 	void Terminate();
 
-	AnimaEngineWindow_Base* GetWindowListHead() { return _windowListHead;	}
+	AnimaWindow* GetWindowListHead() { return _windowListHead;	}
 
-	AnimaEngineWindow_Base* GetFocusedWindow()			{ return _focusedWindow;	}
-	void SetFocusedWindow(AnimaEngineWindow_Base* w)	{ _focusedWindow = w;		}
+	AnimaWindow* GetFocusedWindow()			{ return _focusedWindow;	}
+	void SetFocusedWindow(AnimaWindow* w)	{ _focusedWindow = w;		}
 
 	template<class T>
-	T* CreateAnimaWindow(int width, int height, const char* title, AnimaEngineWindowmonitor* monitor = NULL, AnimaEngineWindow_Base* share = NULL);
+	T* CreateAnimaWindow(int width, int height, const char* title, AnimaEngineWindowmonitor* monitor = NULL, AnimaWindow* share = NULL);
 
 	void DestroyAnimaWindow(AnimaEngineWindow_Base* window);
 
@@ -64,9 +66,10 @@ public:
 
 	double GetTime(void);
 	void SetTime(double time);
-	void MakeContextCurrent(AnimaEngineWindow_Base* window);
-	AnimaEngineWindow_Base* GetCurrentContext(void);
-	void SwapInterval(int interval);
+	void MakeContextCurrent(AnimaWindow* window);
+	AnimaWindow* GetCurrentContext(void);
+	
+	static void SwapInterval(int interval);
 	
 	static void GetVersion(int* major, int* minor, int* rev);
 	static const char* GetVersionString(void);
@@ -115,8 +118,8 @@ public:
 	static _AnimaEngineWindowMonitorCallbacks _callbacks;
 
 private:	
-	AnimaEngineWindow_Base*	_windowListHead;					/*!< Primo elemento della lista delle finestre istanziate da un'istanza di AnimaEngine */
-	AnimaEngineWindow_Base*	_focusedWindow;						/*!< Puntatore alla finestra attualmente attiva tra la lista di quelle istanziate da un'istanza di AnimaEngine */
+	AnimaWindow*	_windowListHead;					/*!< Primo elemento della lista delle finestre istanziate da un'istanza di AnimaEngine */
+	AnimaWindow*	_focusedWindow;						/*!< Puntatore alla finestra attualmente attiva tra la lista di quelle istanziate da un'istanza di AnimaEngine */
 
 	static _AnimaEngineWindowHints _windowHints;				/*!< Contenitore di dati per inizializzare un contesto di rendering su una finestra */
 	static _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE;	/*!< Contenitore con i puntatore alle funzioni e instanze delle librerie per la gestione delle finestre */
