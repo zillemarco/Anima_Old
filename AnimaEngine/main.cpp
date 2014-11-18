@@ -4,11 +4,14 @@
 
 int main(int argc, char** argv)
 {
-//	FreeConsole();
+#if _MSC_VER
+	FreeConsole();
+#endif
+	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 	
-	CustomWindow* window = engine.CreateAnimaWindow<CustomWindow>(500, 500, "Custom window", NULL, NULL);
+	CustomWindow* window = engine.CreateAnimaWindow<CustomWindow>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
 	
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);

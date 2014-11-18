@@ -288,6 +288,11 @@ public:
 	void MakeCurrentContext() { _AnimaEngineWindowPlatformMakeContextCurrent(this); }
 	
 	void* GetOpenGLContext() { return _GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context; }
+	
+	void SetCursorPos(double x, double y)	{ _AnimaEngineWindowPlatformSetCursorPos(this, x, y);		}
+	void SetWindowPos(int x, int y)			{ _AnimaEngineWindowPlatformSetWindowPos(this, x, y);		}
+	void SetWindowTitle(const char* title)	{ _AnimaEngineWindowPlatformSetWindowTitle(this, title);	}
+	void SetWindowSize(int w, int h)		{ _AnimaEngineWindowPlatformSetWindowSize(this, w, h);		}
 
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;

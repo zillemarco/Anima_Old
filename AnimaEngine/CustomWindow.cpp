@@ -5,6 +5,7 @@ BEGIN_MESSAGE_MAP(CustomWindow, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
 	ANIMA_WINDOW_FRAMEBUFFER_SIZE_CHANGED_EVENT(FrameBufferResizeCallback)
+	ANIMA_WINDOW_CURSOR_MOVE_EVENT(MouseMoveCallback)
 END_MESSAGE_MAP()
 
 CustomWindow::CustomWindow()
@@ -17,7 +18,6 @@ CustomWindow::~CustomWindow()
 
 void CustomWindow::MouseClickCallback(Anima::AnimaEngineWindow_Base* window, int button, int action, int mods)
 {
-	printf("\nMouse click da custom window");
 }
 void CustomWindow::PaintCallback(Anima::AnimaWindow* window)
 {
@@ -29,7 +29,7 @@ void CustomWindow::DrawScene()
 	MakeCurrentContext();
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1.0, 0.0, 0.0, 1.0);
+	glClearColor(0.5, 0.5, 0.5, 1.0);
 	
 	glFlush();
 	
@@ -42,4 +42,12 @@ void CustomWindow::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, 
 	
 	if(ctx)
 		glViewport(0, 0, w, h);
+}
+
+void CustomWindow::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
+{
+//	char title[256];
+//	sprintf(title, "AnimaEngine Custom Window - %.0f:%.0f", x, y);
+//	
+//	window->SetWindowTitle(title);
 }

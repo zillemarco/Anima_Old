@@ -901,12 +901,10 @@ void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CloseRequest(AnimaEngineWind
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Key(AnimaEngineWindow_Base* window, int key, int scancode, int action, int mods)
 {
-	printf("\nKey from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Char(AnimaEngineWindow_Base* window, unsigned int codepoint, int mods, bool plain)
 {
-	printf("\nChar from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Scroll(AnimaEngineWindow_Base* window, double x, double y)
@@ -915,7 +913,6 @@ void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Scroll(AnimaEngineWindow_Bas
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_MouseClick(AnimaEngineWindow_Base* window, int button, int action, int mods)
 {
-	printf("\nClick from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CursorMotion(AnimaEngineWindow_Base* window, double x, double y)
@@ -924,10 +921,6 @@ void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CursorMotion(AnimaEngineWind
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_CursorEnter(AnimaEngineWindow_Base* window, bool entered)
 {
-	if (entered)
-		printf("\nEnter from window %d", window->GetWindowID());
-	else
-		printf("\nLeave from window %d", window->GetWindowID());
 }
 
 void AnimaEngineWindow_Base::AnimaEngineWindow_Base_Drop(AnimaEngineWindow_Base* window, int count, const char** names)
