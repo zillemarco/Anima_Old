@@ -73,36 +73,35 @@ add_library(${PROJECT_NAME} SHARED ${AnimaEngineCore_SOURCES} ${AnimaEngineCore_
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-if (BUILD_SHARED_LIBS)
-    # Include version information in the output
-    set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${ANIMA_ENGINE_VERSION})
-    if (UNIX)
-        set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${ANIMA_ENGINE_VERSION_MAJOR})
-    endif()
-
-    if (WIN32)
-        # The ANIMA_ENGINE DLL needs a special compile-time macro and import library name
-        set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" IMPORT_PREFIX "")
-
-        if (MINGW)
-            set_target_properties(${PROJECT_NAME} PROPERTIES IMPORT_SUFFIX "dll.a")
-        else()
-            set_target_properties(${PROJECT_NAME} PROPERTIES IMPORT_SUFFIX "dll.lib")
-        endif()
-    elseif (APPLE)
-        # Append -fno-common to the compile flags to work around a bug in
-        # Apple's GCC
-        get_target_property(AnimaEngineWS_CFLAGS ${PROJECT_NAME} COMPILE_FLAGS)
-        if (NOT AnimaEngineCore_CFLAGS)
-            set(AnimaEngineCore_CFLAGS "")
-        endif()
-        set_target_properties(${PROJECT_NAME} PROPERTIES
-                              COMPILE_FLAGS "${AnimaEngineCore_CFLAGS} -fno-common"
-                              INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
-    endif()
-
-    target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
+# Include version information in the output
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${ANIMA_ENGINE_VERSION})
+if (UNIX)
+	set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${ANIMA_ENGINE_VERSION_MAJOR})
 endif()
+
+if (WIN32)
+	# The ANIMA_ENGINE DLL needs a special compile-time macro and import library name
+	set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" IMPORT_PREFIX "")
+
+	if (MINGW)
+		set_target_properties(${PROJECT_NAME} PROPERTIES IMPORT_SUFFIX "dll.a")
+	else()
+		set_target_properties(${PROJECT_NAME} PROPERTIES IMPORT_SUFFIX "dll.lib")
+	endif()
+elseif (APPLE)
+	# Append -fno-common to the compile flags to work around a bug in
+	# Apple's GCC
+	get_target_property(AnimaEngineWS_CFLAGS ${PROJECT_NAME} COMPILE_FLAGS)
+	if (NOT AnimaEngineCore_CFLAGS)
+		set(AnimaEngineCore_CFLAGS "")
+	endif()
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+						  COMPILE_FLAGS "${AnimaEngineCore_CFLAGS} -fno-common"
+						  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+endif()
+
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEPS_LIBS_RELEASE} debug ${AnimaEngine_DEPS_LIBS_DEBUG})
 
 #if (ANIMA_ENGINE_INSTALL)
 #    install(TARGETS AnimaEngine EXPORT AnimaEngineTargets DESTINATION lib${LIB_SUFFIX})

@@ -13,7 +13,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Output/bin)
 
 set(LIB_SUFFIX "" CACHE STRING "Takes an empty string or 64. Directory where lib will be installed: lib or lib64")
 
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" ON)
 option(ANIMA_ENGINE_INSTALL "Generate installation target" ON)
 
@@ -378,7 +377,32 @@ endif()
 # Add subdirectories
 #--------------------------------------------------------------------
 
-list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies")
+if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+# sistema a 64 bit
+	if (WIN32)
+		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64")
+	elseif(APPLE)
+	endif()
+else()
+# sistema a 32 bit
+	if (WIN32)
+		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x32")
+	elseif(APPLE)
+	endif()
+endif()
+
+if (WIN32)
+	list(APPEND AnimaEngine_DEPS_LIBS_DEBUG "${AnimaEngine_DEPS_LIB_DIRS}/assimpd.lib")
+	list(APPEND AnimaEngine_DEPS_LIBS_RELEASE "${AnimaEngine_DEPS_LIB_DIRS}/assimp.lib")
+elseif(APPLE)
+endif()
+
+message("Librerie debug utilizzate: " + ${AnimaEngine_DEPS_LIBS_DEBUG})
+message("Librerie release utilizzate: " + ${AnimaEngine_DEPS_LIBS_RELEASE})
+
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Boost")
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp")
 
 add_subdirectory(AnimaEngine)
 add_subdirectory(AnimaEngineCore)
