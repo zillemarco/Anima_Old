@@ -16,7 +16,10 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);
 	window->MakeCurrentContext();
-	window->FrameBufferResizeCallback(window, 500, 500);
+	window->FrameBufferResizeCallback(window, 500 * window->GetResolutionMutiplier(), 500 * window->GetResolutionMutiplier());
+	
+	if(!window->Load())
+		return 0;
 	
 	while (!window->ShouldClose())
 	{

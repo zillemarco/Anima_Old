@@ -66,6 +66,8 @@ public:
 
 	double GetTime(void);
 	void SetTime(double time);
+	double GetTimeResolution() { return _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution; }
+	
 	void MakeContextCurrent(AnimaWindow* window);
 	AnimaWindow* GetCurrentContext(void);
 	

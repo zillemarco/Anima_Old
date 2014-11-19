@@ -921,6 +921,7 @@ static bool createWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindo
 	{
 #if defined(_ANIMA_ENGINE_CORE_USE_RETINA)
 		[platformWindowState->_view setWantsBestResolutionOpenGLSurface:YES];
+		window->SetResolutionMultiplier(2.0);
 #endif
 		
 		if (wndconfig->_resizable)

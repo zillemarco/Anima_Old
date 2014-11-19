@@ -374,4 +374,14 @@ void AnimaEngine::SwapInterval(int interval)
 	_AnimaEngineWindowPlatformSwapInterval(interval);
 }
 
+double AnimaEngine::GetTime(void)
+{
+	return _AnimaEngineWindowPlatformGetTime();
+}
+
+void AnimaEngine::SetTime(double time)
+{
+	_AnimaEngineWindowPlatformSetTime(time);
+}
+
 END_ANIMA_ENGINE_CORE_NAMESPACE

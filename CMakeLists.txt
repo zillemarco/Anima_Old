@@ -378,16 +378,16 @@ endif()
 #--------------------------------------------------------------------
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-# sistema a 64 bit
 	if (WIN32)
 		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64")
 	elseif(APPLE)
+		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64")
 	endif()
 else()
-# sistema a 32 bit
 	if (WIN32)
 		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x32")
 	elseif(APPLE)
+		list(APPEND AnimaEngine_DEPS_LIB_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x32")
 	endif()
 endif()
 
@@ -395,14 +395,13 @@ if (WIN32)
 	list(APPEND AnimaEngine_DEPS_LIBS_DEBUG "${AnimaEngine_DEPS_LIB_DIRS}/assimpd.lib")
 	list(APPEND AnimaEngine_DEPS_LIBS_RELEASE "${AnimaEngine_DEPS_LIB_DIRS}/assimp.lib")
 elseif(APPLE)
+	list(APPEND AnimaEngine_DEPS_LIBS_DEBUG "${AnimaEngine_DEPS_LIB_DIRS}/libassimpd.3.1.1.dylib")
+	list(APPEND AnimaEngine_DEPS_LIBS_RELEASE "${AnimaEngine_DEPS_LIB_DIRS}/libassimp.3.1.1.dylib")
 endif()
-
-message("Librerie debug utilizzate: " + ${AnimaEngine_DEPS_LIBS_DEBUG})
-message("Librerie release utilizzate: " + ${AnimaEngine_DEPS_LIBS_RELEASE})
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Boost")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
-list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp")
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
 
 add_subdirectory(AnimaEngine)
 add_subdirectory(AnimaEngineCore)

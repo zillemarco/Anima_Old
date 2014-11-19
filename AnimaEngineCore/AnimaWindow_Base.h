@@ -293,6 +293,13 @@ public:
 	void SetWindowPos(int x, int y)			{ _AnimaEngineWindowPlatformSetWindowPos(this, x, y);		}
 	void SetWindowTitle(const char* title)	{ _AnimaEngineWindowPlatformSetWindowTitle(this, title);	}
 	void SetWindowSize(int w, int h)		{ _AnimaEngineWindowPlatformSetWindowSize(this, w, h);		}
+	
+	void GetCursorPos(double *x, double *y)	{ *x = GetCursorPosX(); *y = GetCursorPosY();				}
+	void GetWindowPos(int *x, int *y)		{ _AnimaEngineWindowPlatformGetWindowPos(this, x, y);		}
+	void GetWindowSize(int *w, int *h)		{ _AnimaEngineWindowPlatformGetWindowSize(this, w, h);		}
+	
+	double GetResolutionMutiplier()			{ return _resolutionMultiplier; }
+	void SetResolutionMultiplier(double m)	{ _resolutionMultiplier = m;	}
 
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 	_GETD_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
@@ -325,6 +332,8 @@ protected:
 		_cursorPosY = 0.0;
 		_cursorMode = ANIMA_ENGINE_CORE_CURSOR_NORMAL;
 		
+		_resolutionMultiplier = 1.0;
+		
 		_INIT_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
 		_INIT_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
 	}
@@ -341,6 +350,7 @@ private:
 	bool	_visible;
 	bool	_closed;
 	void*	_userPointer;
+	double	_resolutionMultiplier;
 
 	AnimaEngineWindowvidmode	_videoMode;
 	_AnimaEngineWindowmonitor*	_monitor;
