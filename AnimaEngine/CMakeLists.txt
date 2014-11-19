@@ -10,6 +10,8 @@ add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sour
 
 target_link_libraries(${PROJECT_NAME} AnimaEngineCore)
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION bin

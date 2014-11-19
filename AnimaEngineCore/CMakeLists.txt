@@ -16,7 +16,7 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaFreeListAllocator.h
                     AnimaPoolAllocator.h
                     AnimaProxyAllocator.h
-                    AnimaVertex.hpp)
+                    AnimaVertex.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -26,7 +26,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaLinearAllocator.cpp
                     AnimaFreeListAllocator.cpp
                     AnimaPoolAllocator.cpp
-                    AnimaProxyAllocator.cpp)
+                    AnimaProxyAllocator.cpp
+					AnimaVertex.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}
@@ -102,7 +103,8 @@ elseif (APPLE)
 endif()
 
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEPS_LIBS_RELEASE} debug ${AnimaEngine_DEPS_LIBS_DEBUG})
+target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 #if (ANIMA_ENGINE_INSTALL)
 #    install(TARGETS AnimaEngine EXPORT AnimaEngineTargets DESTINATION lib${LIB_SUFFIX})

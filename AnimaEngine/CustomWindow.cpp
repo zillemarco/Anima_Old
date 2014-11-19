@@ -9,6 +9,11 @@
 
 #include <GL/glext.h>
 
+//#include <boost/thread.hpp>
+//#include <boost/date_time.hpp>
+
+const struct aiScene* CustomWindow::_scene;
+
 BEGIN_MESSAGE_MAP(CustomWindow, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
