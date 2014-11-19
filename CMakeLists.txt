@@ -34,9 +34,9 @@ if (MSVC)
     option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON)
 endif()
 
-if (BUILD_SHARED_LIBS)
+#if (BUILD_SHARED_LIBS)
     set(_ANIMA_ENGINE_BUILD_DLL 1)
-endif()
+#endif()
 
 set(_ANIMA_ENGINE_USE_OPENGL 1)
 
@@ -59,9 +59,9 @@ endif()
 if (UNIX)
     add_definitions(-Wall)
 
-    if (BUILD_SHARED_LIBS)
+#    if (BUILD_SHARED_LIBS)
         add_definitions(-fvisibility=hidden)
-    endif()
+#    endif()
 endif()
 
 if (MSVC)
@@ -161,9 +161,10 @@ endif()
 # Use WGL for context creation
 #--------------------------------------------------------------------
 if (_ANIMA_ENGINE_WGL)
-    set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -lopengl32")
+    set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -lopengl32 -lglu32.lib")
     list(APPEND AnimaEngine_INCLUDE_DIRS "${OPENGL_INCLUDE_DIR}")
     list(APPEND AnimaEngine_LIBRARIES "${OPENGL_gl_LIBRARY}")
+	list(APPEND AnimaEngine_LIBRARIES glu32.lib)
 endif()
 
 #--------------------------------------------------------------------
@@ -346,7 +347,8 @@ set(ANIMA_ENGINE_LIBRARIES ${AnimaEngine_LIBRARIES} CACHE STRING "Dependencies o
 #--------------------------------------------------------------------
 # Choose library output name
 #--------------------------------------------------------------------
-if (BUILD_SHARED_LIBS AND UNIX)
+#if (BUILD_SHARED_LIBS AND UNIX)
+if(UNIX)
     # On Unix-like systems, shared libraries can use the soname system.
     set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
 else()

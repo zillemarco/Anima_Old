@@ -110,5 +110,5 @@ target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEPS_LIBS_RELEASE}
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
+		LIBRARY DESTINATION bin
 		ARCHIVE DESTINATION lib/static)

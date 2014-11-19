@@ -8,10 +8,10 @@ include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
 
-target_link_libraries(${PROJECT_NAME} AnimaEngineCore ${EXTRA_LIBS})
+target_link_libraries(${PROJECT_NAME} AnimaEngineCore)
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
+		LIBRARY DESTINATION bin
 		ARCHIVE DESTINATION lib/static)

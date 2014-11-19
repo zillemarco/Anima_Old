@@ -339,7 +339,7 @@ void CustomWindow::DoMotion()
 
 bool CustomWindow::LoadAsset()
 {
-	const char* path = "/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj";
+	const char* path = "D:/Modelli/Big_Dragon/Big_Dragon.fbx";
 	
 	/* we are taking one of the postprocessing presets to avoid
 	 spelling out 20+ single postprocessing flags here. */

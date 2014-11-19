@@ -22,6 +22,12 @@
 extern "C" ANIMA_ENGINE_CORE_EXPORT bool __anima_get_working_dir(char* dest, int length);
 #define ANIMA_WORKING_DIR(dest, len)	__anima_get_working_dir(dest, len)
 
+#if defined _MSC_VER
+#	define ANIMA_ENGINE_CORE_ALIGN_OF(a)	__alignof(a)
+#else
+#	define ANIMA_ENGINE_CORE_ALIGN_OF(a)	__alignof__(a)
+#endif
+
 #define ANIMA_ALLOCATOR_DEBUG
 
 #if defined _MSC_VER
