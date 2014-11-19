@@ -61,7 +61,7 @@
 
 void reportAssertionFailure(const char* expr, const char* fileName, int line)
 {
-	printf("ANIMA_ASSERT: %s", expr);
+	printf("\nANIMA_ASSERT: %s\n", expr);
 //	int argc = 0;
 //
 //	QApplication app(argc, NULL);

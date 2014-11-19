@@ -1,6 +1,12 @@
 #include "CustomWindow.h"
 #include <stdio.h>
+
+#if defined _MSC_VER
+#include <GL/glu.h>
+#else
 #include <OpenGL/glu.h>
+#endif
+
 #include <GL/glext.h>
 
 BEGIN_MESSAGE_MAP(CustomWindow, Anima::AnimaEngineWindow_Base)
@@ -24,25 +30,16 @@ CustomWindow::CustomWindow()
 	_sceneList = 0;
 	_angle = 0.0;
 	_rotationSpeed = 10.0;
+	_scaleFactor = 1.0;
 	_openGLLoaded = false;
 }
 
 CustomWindow::~CustomWindow()
 {
-	if(_scene)
-		aiReleaseImport(_scene);
-	
-	aiDetachAllLogStreams();
 }
 
 bool CustomWindow::Load()
 {
-	_stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT,NULL);
-	aiAttachLogStream(&_stream);
-	
-	_stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE,"assimp_log.txt");
-	aiAttachLogStream(&_stream);
-	
 	GetEngine()->SetTime(0.0);
 	
 	if(!LoadAsset())
@@ -98,7 +95,7 @@ void CustomWindow::DrawScene()
 	tmp = _sceneMax.x-_sceneMin.x;
 	tmp = aisgl_max(_sceneMax.y - _sceneMin.y,tmp);
 	tmp = aisgl_max(_sceneMax.z - _sceneMin.z,tmp);
-	tmp = 1.f / tmp;
+	tmp = 1.f / tmp * _scaleFactor;
 	glScalef(tmp, tmp, tmp);
 	
 	/* center the model */
@@ -342,11 +339,11 @@ void CustomWindow::DoMotion()
 
 bool CustomWindow::LoadAsset()
 {
-	const char* path = "/Users/marco/Desktop/assimp-3.1.1/test/models-nonbsd/X/dwarf.x";
+	const char* path = "/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj";
 	
 	/* we are taking one of the postprocessing presets to avoid
 	 spelling out 20+ single postprocessing flags here. */
-	_scene = aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality);
+	_scene = _importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
 	
 	if (_scene) {
 		GetBBox(&_sceneMin, &_sceneMax);
@@ -370,4 +367,8 @@ void CustomWindow::KeyCallback(Anima::AnimaWindow* window, int key, int scancode
 		((CustomWindow*)window)->_rotationSpeed += 5.0;
 	else if(key == ANIMA_ENGINE_CORE_KEY_DOWN && action == ANIMA_ENGINE_CORE_PRESS)
 		((CustomWindow*)window)->_rotationSpeed -= 5.0;
+	else if(key == ANIMA_ENGINE_CORE_KEY_RIGHT && action == ANIMA_ENGINE_CORE_PRESS)
+		((CustomWindow*)window)->_scaleFactor += 1.0;
+	else if(key == ANIMA_ENGINE_CORE_KEY_LEFT && action == ANIMA_ENGINE_CORE_PRESS)
+		((CustomWindow*)window)->_scaleFactor -= 1.0;
 }

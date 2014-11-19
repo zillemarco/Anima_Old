@@ -2,6 +2,7 @@
 #define _CustomWindow_h
 
 #include <AnimaEngine.h>
+#include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -40,8 +41,9 @@ private:
 	aiVector3D _sceneMax;
 	aiVector3D _sceneCenter;
 	float _angle;
-	aiLogStream _stream;
 	double _rotationSpeed;
+	double _scaleFactor;
+	Assimp::Importer _importer;
 	
 	bool _openGLLoaded;
 	

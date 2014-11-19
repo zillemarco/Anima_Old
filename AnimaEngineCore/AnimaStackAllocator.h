@@ -15,7 +15,7 @@
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
-class ANIMA_ENGINE_CORE_EXPORT AnimaStackAllocator : AnimaAllocator
+class ANIMA_ENGINE_CORE_EXPORT AnimaStackAllocator : public AnimaAllocator
 {
 public:
 	AnimaStackAllocator(ASizeT size, void* start);

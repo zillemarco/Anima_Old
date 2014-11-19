@@ -15,7 +15,8 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaLinearAllocator.h
                     AnimaFreeListAllocator.h
                     AnimaPoolAllocator.h
-                    AnimaProxyAllocator.h)
+                    AnimaProxyAllocator.h
+                    AnimaVertex.hpp)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
