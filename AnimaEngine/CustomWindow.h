@@ -7,6 +7,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/vector3.h>
+#include <boost/thread.hpp>
+#include <boost/date_time.hpp>
 
 class CustomWindow : public Anima::AnimaWindow
 {
@@ -21,7 +23,7 @@ public:
 	bool Load();
 	
 private:
-	bool LoadAsset();
+	static void LoadAsset();
 	void DoMotion();
 	void RecursiveRender(const struct aiScene *sc, const struct aiNode* nd);
 	static void ApplyMaterial(const struct aiMaterial *mtl);
@@ -37,15 +39,20 @@ private:
 	int _frames;
 	static const struct aiScene* _scene;
 	GLint _sceneList;
-	aiVector3D _sceneMin;
-	aiVector3D _sceneMax;
-	aiVector3D _sceneCenter;
+	static aiVector3D _sceneMin;
+	static aiVector3D _sceneMax;
+	static aiVector3D _sceneCenter;
 	float _angle;
 	double _rotationSpeed;
 	double _scaleFactor;
-	Assimp::Importer _importer;
+	static Assimp::Importer _importer;
+	
+	boost::thread _loaderThread;
 	
 	bool _openGLLoaded;
+	
+public:
+	static bool _modelLoaded;
 	
 private:
 	ANIMA_WINDOW_EVENT void MouseClickCallback(Anima::AnimaWindow* window, int button, int action, int mods);

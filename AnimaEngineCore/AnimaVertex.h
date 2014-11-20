@@ -29,8 +29,17 @@ public:
 	AnimaVertex& operator=(const AnimaVertex& src);
 	AnimaVertex& operator=(AnimaVertex&& src);
 	
-	Type& operator[](ASizeT index);
-	const Type& operator[](ASizeT index) const;
+	Type& operator[](ASizeT index)
+	{
+		ANIMA_ASSERT(index >= 0 && index < _size);
+		return _data[index];
+	}
+	
+	const Type& operator[](ASizeT index) const
+	{
+		ANIMA_ASSERT(index >= 0 && index < _size);
+		return const_cast<Type&>(_data[index]);
+	}
 	
 protected:
 	AnimaAllocator* _allocator;
@@ -39,16 +48,22 @@ protected:
 	ASizeT	_size;
 };
 
+template class AnimaVertex<double, 2>;
 template class AnimaVertex<double, 3>;
 template class AnimaVertex<double, 4>;
+
+template class AnimaVertex<float, 2>;
 template class AnimaVertex<float, 3>;
 template class AnimaVertex<float, 4>;
+
 template class AnimaVertex<char, 3>;
 template class AnimaVertex<char, 4>;
 
+typedef AnimaVertex<double, 2> AnimaVertex2d;
 typedef AnimaVertex<double, 3> AnimaVertex3d;
 typedef AnimaVertex<double, 4> AnimaVertex4d;
 
+typedef AnimaVertex<float, 2> AnimaVertex2f;
 typedef AnimaVertex<float, 3> AnimaVertex3f;
 typedef AnimaVertex<float, 4> AnimaVertex4f;
 

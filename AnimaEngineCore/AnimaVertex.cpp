@@ -79,18 +79,4 @@ AnimaVertex<Type, Size>& AnimaVertex<Type, Size>::operator=(AnimaVertex&& src)
 	return *this;
 }
 
-template<class Type, ASizeT Size>
-Type& AnimaVertex<Type, Size>::operator[](ASizeT index)
-{
-	ANIMA_ASSERT(index >= 0 && index < _size);
-	return _data[index];
-}
-
-template<class Type, ASizeT Size>
-const Type& AnimaVertex<Type, Size>::operator[](ASizeT index) const
-{
-	ANIMA_ASSERT(index >= 0 && index < _size);
-	return const_cast<Type&>(_data[index]);
-}
-
 END_ANIMA_ENGINE_CORE_NAMESPACE

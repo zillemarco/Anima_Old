@@ -9,10 +9,12 @@
 
 #include <GL/glext.h>
 
-//#include <boost/thread.hpp>
-//#include <boost/date_time.hpp>
-
 const struct aiScene* CustomWindow::_scene;
+aiVector3D CustomWindow::_sceneMin;
+aiVector3D CustomWindow::_sceneMax;
+aiVector3D CustomWindow::_sceneCenter;
+Assimp::Importer CustomWindow::_importer;
+bool CustomWindow::_modelLoaded;
 
 BEGIN_MESSAGE_MAP(CustomWindow, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
@@ -37,6 +39,7 @@ CustomWindow::CustomWindow()
 	_rotationSpeed = 10.0;
 	_scaleFactor = 1.0;
 	_openGLLoaded = false;
+	_modelLoaded = false;
 }
 
 CustomWindow::~CustomWindow()
@@ -47,8 +50,10 @@ bool CustomWindow::Load()
 {
 	GetEngine()->SetTime(0.0);
 	
-	if(!LoadAsset())
-		return false;
+	_loaderThread = boost::thread(LoadAsset);
+	
+//	if(!LoadAsset())
+//		return false;
 	return true;
 }
 
@@ -85,44 +90,49 @@ void CustomWindow::DrawScene()
 		_openGLLoaded = true;
 	}
 	
-	float tmp;
-	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(0.f,0.f,3.f,0.f,0.f,-5.f,0.f,1.f,0.f);
-	
-	/* rotate it around the y axis */
-	glRotatef(_angle,0.f,1.f,0.f);
-	
-	/* scale the whole asset to fit into our view frustum */
-	tmp = _sceneMax.x-_sceneMin.x;
-	tmp = aisgl_max(_sceneMax.y - _sceneMin.y,tmp);
-	tmp = aisgl_max(_sceneMax.z - _sceneMin.z,tmp);
-	tmp = 1.f / tmp * _scaleFactor;
-	glScalef(tmp, tmp, tmp);
-	
-	/* center the model */
-	glTranslatef( -_sceneCenter.x, -_sceneCenter.y, -_sceneCenter.z );
-	
-	/* if the display list has not been made yet, create a new one and
-	 fill it with scene contents */
-	if(_sceneList == 0) {
-		_sceneList = glGenLists(1);
-		glNewList(_sceneList, GL_COMPILE);
-		/* now begin at the root node of the imported data and traverse
-		 the scenegraph by multiplying subsequent local transforms
-		 together on GL's matrix stack. */
-		RecursiveRender(_scene, _scene->mRootNode);
-		glEndList();
+	if(_modelLoaded)
+	{
+		float tmp;
+		
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		gluLookAt(0.f,0.f,3.f,0.f,0.f,-5.f,0.f,1.f,0.f);
+		
+		/* rotate it around the y axis */
+		glRotatef(_angle,0.f,1.f,0.f);
+		
+		/* scale the whole asset to fit into our view frustum */
+		tmp = _sceneMax.x-_sceneMin.x;
+		tmp = aisgl_max(_sceneMax.y - _sceneMin.y,tmp);
+		tmp = aisgl_max(_sceneMax.z - _sceneMin.z,tmp);
+		tmp = 1.f / tmp * _scaleFactor;
+		glScalef(tmp, tmp, tmp);
+		
+		/* center the model */
+		glTranslatef( -_sceneCenter.x, -_sceneCenter.y, -_sceneCenter.z );
+		
+		/* if the display list has not been made yet, create a new one and
+		 fill it with scene contents */
+		if(_sceneList == 0) {
+			_sceneList = glGenLists(1);
+			glNewList(_sceneList, GL_COMPILE);
+			/* now begin at the root node of the imported data and traverse
+			 the scenegraph by multiplying subsequent local transforms
+			 together on GL's matrix stack. */
+			RecursiveRender(_scene, _scene->mRootNode);
+			glEndList();
+		}
+		
+		glCallList(_sceneList);
+		
+		SwapBuffers();
+		
+		DoMotion();
 	}
-	
-	glCallList(_sceneList);
-	
-	SwapBuffers();
-	
-	DoMotion();
+	else
+		SwapBuffers();
 }
 
 void CustomWindow::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
@@ -342,9 +352,13 @@ void CustomWindow::DoMotion()
 	}
 }
 
-bool CustomWindow::LoadAsset()
+void CustomWindow::LoadAsset()
 {
+#if defined _MSC_VER
 	const char* path = "D:/Modelli/Big_Dragon/Big_Dragon.fbx";
+#else
+	const char* path = "/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj";
+#endif
 	
 	/* we are taking one of the postprocessing presets to avoid
 	 spelling out 20+ single postprocessing flags here. */
@@ -355,9 +369,9 @@ bool CustomWindow::LoadAsset()
 		_sceneCenter.x = (_sceneMin.x + _sceneMax.x) / 2.0f;
 		_sceneCenter.y = (_sceneMin.y + _sceneMax.y) / 2.0f;
 		_sceneCenter.z = (_sceneMin.z + _sceneMax.z) / 2.0f;
-		return true;
+		
+		_modelLoaded = true;
 	}
-	return false;
 }
 
 void CustomWindow::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)

@@ -59,7 +59,7 @@ set(BOOST_INCLUDEDIR ${ANIMA_ENGINE_BOOST_INCLUDE_PATH})
 set(BOOST_LIBRARYDIR ${ANIMA_ENGINE_BOOST_LIBRARY_PATH})
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-find_package(Boost 1.57.0)
+find_package(Boost 1.57.0 COMPONENTS thread system)
 
 if(Boost_FOUND)
 	list(APPEND AnimaEngine_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
