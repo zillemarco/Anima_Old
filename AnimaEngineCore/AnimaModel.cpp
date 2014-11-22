@@ -82,6 +82,10 @@ void AnimaModel::ClearIndices()
 	}
 }
 
+void AnimaModel::ClearChildren()
+{
+}
+
 void AnimaModel::SetVertices(AnimaVertex4f* v, ASizeT n)
 {
 	ANIMA_ASSERT(v != nullptr && n > 0)

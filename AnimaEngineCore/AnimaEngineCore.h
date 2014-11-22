@@ -47,4 +47,6 @@ extern "C" ANIMA_ENGINE_CORE_EXPORT bool __anima_get_working_dir(char* dest, int
 #define _ANIMA_ENGINE_CORE_VERSION_REVISION       0
 #define _ANIMA_ENGINE_CORE_VERSION_NUMBER "0.0.0"
 
+#include <vector>
+
 #endif //_ANIMA_ENGINE_LIB_H

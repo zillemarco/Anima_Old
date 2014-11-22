@@ -2,6 +2,17 @@
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
+template class AnimaVertex<double, 2>;
+template class AnimaVertex<double, 3>;
+template class AnimaVertex<double, 4>;
+
+template class AnimaVertex<float, 2>;
+template class AnimaVertex<float, 3>;
+template class AnimaVertex<float, 4>;
+
+template class AnimaVertex<char, 3>;
+template class AnimaVertex<char, 4>;
+
 template<class Type, ASizeT Size>
 AnimaVertex<Type, Size>::AnimaVertex(AnimaAllocator* allocator)
 {
@@ -77,6 +88,20 @@ AnimaVertex<Type, Size>& AnimaVertex<Type, Size>::operator=(AnimaVertex&& src)
 	}
 
 	return *this;
+}
+
+template<class Type, ASizeT Size>
+Type& AnimaVertex<Type, Size>::operator[](ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _size);
+	return _data[index];
+}
+
+template<class Type, ASizeT Size>
+const Type& AnimaVertex<Type, Size>::operator[](ASizeT index) const
+{
+	ANIMA_ASSERT(index >= 0 && index < _size);
+	return const_cast<Type&>(_data[index]);
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

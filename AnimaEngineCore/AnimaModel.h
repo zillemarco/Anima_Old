@@ -53,9 +53,7 @@ protected:
 	ASizeT _normalsNumber;
 	ASizeT _textureCoordsNumber;
 	ASizeT _indicesNumber;
-	
-
-	
+		
 	AnimaAllocator* _allocator;
 };
 
