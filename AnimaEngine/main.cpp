@@ -2,6 +2,7 @@
 #include <AnimaEngine.h>
 #include <AnimaVertex.h>
 #include <AnimaAllocators.h>
+#include <AnimaModel.h>
 
 #include "CustomWindow.h"
 
@@ -13,6 +14,30 @@ int main(int argc, char** argv)
 	//FreeConsole();
 #endif
 
+	void* mainMem = malloc(MEM_SIZE);
+	Anima::AnimaFreeListAllocator allocator(MEM_SIZE, mainMem);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+	
+	Anima::AnimaVertex4f v(&allocator);
+	v[0] = 1.0;
+	v[1] = 2.0;
+	v[2] = -1.0;
+	v[3] = -10.0;
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+	allocator.Deallocate(&v);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+	
+	Anima::AnimaModel* model = (Anima::AnimaModel*)allocator.Allocate(sizeof(Anima::AnimaModel), ANIMA_ENGINE_CORE_ALIGN_OF(Anima::AnimaModel));
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+	
+	model->SetVertices(&v, 1);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+	
+	
+	allocator.Deallocate(model);
+	
+	
+	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 	
@@ -21,7 +46,7 @@ int main(int argc, char** argv)
 	//engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_FORWARD_COMPAT, true);
 	//engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE, true);
 	//engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_PROFILE, ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE);
-	engine.SetWindowHint(ANIMA_ENGINE_CORE_RESIZABLE, false);
+	//engine.SetWindowHint(ANIMA_ENGINE_CORE_RESIZABLE, false);
 	CustomWindow* window = engine.CreateAnimaWindow<CustomWindow>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
 	
 	window->MakeCurrentContext();
@@ -38,6 +63,8 @@ int main(int argc, char** argv)
 		
 		window->DrawScene();
 	}
+	
+	free(mainMem);
 
 	return 0;
 }

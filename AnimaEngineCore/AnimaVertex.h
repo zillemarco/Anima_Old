@@ -21,25 +21,89 @@ template<class Type, ASizeT Size>
 class ANIMA_ENGINE_CORE_EXPORT AnimaVertex
 {
 public:
-	AnimaVertex(AnimaAllocator* allocator);
-	AnimaVertex(const AnimaVertex& src);
-	AnimaVertex(AnimaVertex&& src);
-	~AnimaVertex();
+	AnimaVertex(AnimaAllocator* allocator)
+	{
+		ANIMA_ASSERT(allocator != nullptr);
+		
+		_allocator = allocator;
+		_size = Size;
+		
+		_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+	}
 	
-	AnimaVertex& operator=(const AnimaVertex& src);
-	AnimaVertex& operator=(AnimaVertex&& src);
+	AnimaVertex(const AnimaVertex& src)
+	{
+		_data = nullptr;
+		_size = src._size;
+		_allocator = src._allocator;
+		
+		_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+		
+		memcpy(_data, src._data, sizeof(Type) * _size);
+	}
 	
-	Type& operator[](ASizeT index);
-	//{
-	//	ANIMA_ASSERT(index >= 0 && index < _size);
-	//	return _data[index];
-	//}
+	AnimaVertex(AnimaVertex&& src)
+	: _allocator(src._allocator)
+	, _data(src._data)
+	, _size(src._size)
+	{
+		src._data = nullptr;
+		src._size = 0;
+	}
 	
-	const Type& operator[](ASizeT index) const;
-	//{
-	//	ANIMA_ASSERT(index >= 0 && index < _size);
-	//	return const_cast<Type&>(_data[index]);
-	//}
+	~AnimaVertex()
+	{
+		ANIMA_ASSERT(_allocator != nullptr);
+		
+		_allocator->Deallocate(_data);
+		_data = nullptr;
+	}
+	
+	AnimaVertex& operator=(const AnimaVertex& src)
+	{
+		if (this != &src)
+		{
+			if (_data != nullptr)
+			{
+				ANIMA_ASSERT(_allocator != nullptr);
+				_allocator->Deallocate(_data);
+				_data = nullptr;
+			}
+			
+			_size = src._size;
+			_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+			
+			memcpy(_data, src._data, sizeof(Type) * _size);
+		}
+		
+		return *this;
+	}
+	
+	AnimaVertex& operator=(AnimaVertex&& src)
+	{
+		if (this != &src)
+		{
+			_data = src._data;
+			_size = src._size;
+			
+			src._data = nullptr;
+			src._size = 0;
+		}
+		
+		return *this;
+	}
+	
+	Type& operator[](ASizeT index)
+	{
+		ANIMA_ASSERT(index >= 0 && index < _size);
+		return _data[index];
+	}
+	
+	const Type& operator[](ASizeT index) const
+	{
+		ANIMA_ASSERT(index >= 0 && index < _size);
+		return const_cast<Type&>(_data[index]);
+	}
 	
 protected:
 	AnimaAllocator* _allocator;

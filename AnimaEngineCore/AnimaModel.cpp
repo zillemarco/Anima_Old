@@ -22,13 +22,50 @@ AnimaModel::AnimaModel(AnimaAllocator* allocator)
 	_vertices = nullptr;
 	_normals = nullptr;
 	_textureCoords = nullptr;
-	_indices = nullptr;
+	_indexes = nullptr;
 	
 	_modelChildrenNumber = 0;
 	_verticesNumber = 0;
 	_normalsNumber = 0;
 	_textureCoordsNumber = 0;
-	_indicesNumber = 0;
+	_indexesNumber = 0;
+}
+
+AnimaModel::AnimaModel(const AnimaModel& src)
+{
+	_allocator = src._allocator;
+	
+	SetVertices(src._vertices, src._verticesNumber);
+	SetNormals(src._normals, src._normalsNumber);
+	SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
+	SetIndexes(src._indexes, src._indexesNumber);
+	SetChildren(src._modelChildren, src._modelChildrenNumber);
+}
+
+AnimaModel::AnimaModel(AnimaModel&& src)
+: _modelChildren(src._modelChildren)
+, _modelChildrenNumber(src._modelChildrenNumber)
+, _vertices(src._vertices)
+, _verticesNumber(src._verticesNumber)
+, _normals(src._normals)
+, _normalsNumber(src._normalsNumber)
+, _textureCoords(src._textureCoords)
+, _textureCoordsNumber(src._textureCoordsNumber)
+, _indexes(src._indexes)
+, _indexesNumber(src._indexesNumber)
+, _allocator(src._allocator)
+{
+	src._vertices = nullptr;
+	src._normals = nullptr;
+	src._textureCoords = nullptr;
+	src._indexes = nullptr;
+	src._modelChildren = nullptr;
+	
+	src._verticesNumber = 0;
+	src._normalsNumber = 0;
+	src._textureCoordsNumber = 0;
+	src._indexesNumber = 0;
+	src._modelChildrenNumber = 0;
 }
 
 AnimaModel::~AnimaModel()
@@ -39,7 +76,57 @@ AnimaModel::~AnimaModel()
 	ClearVertices();
 	ClearNormals();
 	ClearTextureCoords();
-	ClearIndices();
+	ClearIndexes();
+}
+
+AnimaModel& AnimaModel::operator=(const AnimaModel& src)
+{
+	if (this != &src)
+	{
+		_allocator = src._allocator;
+		
+		SetVertices(src._vertices, src._verticesNumber);
+		SetNormals(src._normals, src._normalsNumber);
+		SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
+		SetIndexes(src._indexes, src._indexesNumber);
+		SetChildren(src._modelChildren, src._modelChildrenNumber);
+	}
+	
+	return *this;
+}
+
+AnimaModel& AnimaModel::operator=(AnimaModel&& src)
+{
+	if (this != &src)
+	{
+		_allocator = src._allocator;
+		
+		_vertices = src._vertices;
+		_normals = src._normals;
+		_textureCoords = src._textureCoords;
+		_indexes = src._indexes;
+		_modelChildren = src._modelChildren;
+		
+		_verticesNumber = src._verticesNumber;
+		_normalsNumber = src._normalsNumber;
+		_textureCoordsNumber = src._textureCoordsNumber;
+		_indexesNumber = src._indexesNumber;
+		_modelChildrenNumber = src._modelChildrenNumber;
+		
+		src._vertices = nullptr;
+		src._normals = nullptr;
+		src._textureCoords = nullptr;
+		src._indexes = nullptr;
+		src._modelChildren = nullptr;
+		
+		src._verticesNumber = 0;
+		src._normalsNumber = 0;
+		src._textureCoordsNumber = 0;
+		src._indexesNumber = 0;
+		src._modelChildrenNumber = 0;
+	}
+	
+	return *this;
 }
 
 void AnimaModel::ClearVertices()
@@ -72,18 +159,24 @@ void AnimaModel::ClearTextureCoords()
 	}
 }
 
-void AnimaModel::ClearIndices()
+void AnimaModel::ClearIndexes()
 {
-	if(_indices != nullptr && _indicesNumber > 0)
+	if(_indexes != nullptr && _indexesNumber > 0)
 	{
-		_allocator->Deallocate(_indices);
-		_indices = nullptr;
-		_indicesNumber = 0;
+		_allocator->Deallocate(_indexes);
+		_indexes = nullptr;
+		_indexesNumber = 0;
 	}
 }
 
 void AnimaModel::ClearChildren()
 {
+	if(_modelChildren != nullptr && _modelChildrenNumber > 0)
+	{
+		_allocator->Deallocate(_modelChildren);
+		_modelChildren = nullptr;
+		_modelChildrenNumber = 0;
+	}
 }
 
 void AnimaModel::SetVertices(AnimaVertex4f* v, ASizeT n)
@@ -116,6 +209,41 @@ void AnimaModel::SetVertices(AnimaVertex3f* v, ASizeT n)
 	}
 }
 
+void AnimaModel::AddVertex(const AnimaVertex4f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	AnimaVertex4f* tmpOldVertices = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _verticesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
+	
+	_allocator->Deallocate(_vertices);
+	
+	_verticesNumber++;
+	_vertices = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _verticesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
+	_vertices[_verticesNumber - 1] = v;
+}
+
+void AnimaModel::AddVertex(const AnimaVertex3f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	AnimaVertex4f* tmpOldVertices = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _verticesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
+	
+	_allocator->Deallocate(_vertices);
+	
+	_verticesNumber++;
+	_vertices = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _verticesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
+	_vertices[_verticesNumber - 1][0] = v[0];
+	_vertices[_verticesNumber - 1][1] = v[1];
+	_vertices[_verticesNumber - 1][2] = v[2];
+	_vertices[_verticesNumber - 1][3] = 1.0f;
+}
+
 void AnimaModel::SetNormals(AnimaVertex4f* v, ASizeT n)
 {
 	ANIMA_ASSERT(v != nullptr && n > 0)
@@ -146,6 +274,41 @@ void AnimaModel::SetNormals(AnimaVertex3f* v, ASizeT n)
 	}
 }
 
+void AnimaModel::AddNormal(const AnimaVertex4f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	AnimaVertex4f* tmpOldNormals = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _normalsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(tmpOldNormals, _normals, sizeof(AnimaVertex4f) * _normalsNumber);
+	
+	_allocator->Deallocate(_normals);
+	
+	_normalsNumber++;
+	_normals = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _normalsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(_normals, tmpOldNormals, sizeof(AnimaVertex4f) * (_normalsNumber - 1));
+	_normals[_normalsNumber - 1] = v;
+}
+
+void AnimaModel::AddNormal(const AnimaVertex3f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	AnimaVertex4f* tmpOldNormals = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _normalsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(tmpOldNormals, _normals, sizeof(AnimaVertex4f) * _normalsNumber);
+	
+	_allocator->Deallocate(_normals);
+	
+	_normalsNumber++;
+	_normals = (AnimaVertex4f*)_allocator->Allocate(sizeof(AnimaVertex4f) * _normalsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex4f));
+	
+	memcpy(_normals, tmpOldNormals, sizeof(AnimaVertex4f) * (_normalsNumber - 1));	
+	_normals[_verticesNumber - 1][0] = v[0];
+	_normals[_verticesNumber - 1][1] = v[1];
+	_normals[_verticesNumber - 1][2] = v[2];
+	_normals[_verticesNumber - 1][3] = 1.0f;
+}
+
 void AnimaModel::SetTextureCoords(AnimaVertex2f* v, ASizeT n)
 {
 	ANIMA_ASSERT(v != nullptr && n > 0)
@@ -158,16 +321,77 @@ void AnimaModel::SetTextureCoords(AnimaVertex2f* v, ASizeT n)
 	memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 }
 
-void AnimaModel::SetIndices(ASizeT* indices, ASizeT n)
+void AnimaModel::AddTextureCoord(const AnimaVertex2f& v)
 {
-	ANIMA_ASSERT(indices != nullptr && n > 0)
 	ANIMA_ASSERT(_allocator != nullptr)
-	ClearIndices();
+	AnimaVertex2f* tmpOldTextureCoords = (AnimaVertex2f*)_allocator->Allocate(sizeof(AnimaVertex2f) * _textureCoordsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex2f));
 	
-	_indicesNumber = n;
-	_indices = (ASizeT*)_allocator->Allocate(sizeof(ASizeT) * _indicesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(ASizeT));
+	memcpy(tmpOldTextureCoords, _textureCoords, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 	
-	memcpy(_indices, indices, sizeof(ASizeT) * _indicesNumber);
+	_allocator->Deallocate(_textureCoords);
+	
+	_textureCoordsNumber++;
+	_textureCoords = (AnimaVertex2f*)_allocator->Allocate(sizeof(AnimaVertex2f) * _textureCoordsNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaVertex2f));
+	
+	memcpy(_textureCoords, tmpOldTextureCoords, sizeof(AnimaVertex2f) * (_textureCoordsNumber - 1));
+	_textureCoords[_textureCoordsNumber - 1] = v;
+}
+
+void AnimaModel::SetIndexes(ASizeT* indexes, ASizeT n)
+{
+	ANIMA_ASSERT(indexes != nullptr && n > 0)
+	ANIMA_ASSERT(_allocator != nullptr)
+	ClearIndexes();
+	
+	_indexesNumber = n;
+	_indexes = (ASizeT*)_allocator->Allocate(sizeof(ASizeT) * _indexesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(ASizeT));
+	
+	memcpy(_indexes, indexes, sizeof(ASizeT) * _indexesNumber);
+}
+
+void AnimaModel::AddIndex(const ASizeT& index)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	ASizeT* tmpOldIndexes = (ASizeT*)_allocator->Allocate(sizeof(ASizeT) * _indexesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(ASizeT));
+	
+	memcpy(tmpOldIndexes, _indexes, sizeof(ASizeT) * _indexesNumber);
+	
+	_allocator->Deallocate(_indexes);
+	
+	_indexesNumber++;
+	_indexes = (ASizeT*)_allocator->Allocate(sizeof(ASizeT) * _indexesNumber, ANIMA_ENGINE_CORE_ALIGN_OF(ASizeT));
+	
+	memcpy(_indexes, tmpOldIndexes, sizeof(ASizeT) * (_indexesNumber - 1));
+	_indexes[_indexesNumber - 1] = index;
+}
+
+
+void AnimaModel::SetChildren(AnimaModel* children, ASizeT n)
+{
+	ANIMA_ASSERT(children != nullptr && n > 0)
+	ANIMA_ASSERT(_allocator != nullptr)
+	ClearChildren();
+	
+	_modelChildrenNumber = n;
+	_modelChildren = (AnimaModel*)_allocator->Allocate(sizeof(AnimaModel) * _modelChildrenNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaModel));
+	
+	memcpy(_modelChildren, children, sizeof(AnimaModel) * _modelChildrenNumber);
+}
+
+void AnimaModel::AddChild(const AnimaModel& child)
+{
+	ANIMA_ASSERT(_allocator != nullptr)
+	AnimaModel* tmpOldChildren = (AnimaModel*)_allocator->Allocate(sizeof(AnimaModel) * _modelChildrenNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaModel));
+	
+	memcpy(tmpOldChildren, _modelChildren, sizeof(AnimaModel) * _modelChildrenNumber);
+	
+	_allocator->Deallocate(_modelChildren);
+	
+	_modelChildrenNumber++;
+	_modelChildren = (AnimaModel*)_allocator->Allocate(sizeof(AnimaModel) * _modelChildrenNumber, ANIMA_ENGINE_CORE_ALIGN_OF(AnimaModel));
+	
+	memcpy(_modelChildren, tmpOldChildren, sizeof(AnimaModel) * (_modelChildrenNumber - 1));
+	_modelChildren[_modelChildrenNumber - 1] = child;
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE
