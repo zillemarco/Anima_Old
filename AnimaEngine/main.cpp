@@ -6,6 +6,8 @@
 
 #include "CustomWindow.h"
 
+using namespace Anima::AnimaAllocatorNamespace;
+
 #define MEM_SIZE 2097152
 
 int main(int argc, char** argv)
@@ -18,25 +20,33 @@ int main(int argc, char** argv)
 	Anima::AnimaFreeListAllocator allocator(MEM_SIZE, mainMem);
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	Anima::AnimaVertex4f v(&allocator);
-	v[0] = 1.0;
-	v[1] = 2.0;
-	v[2] = -1.0;
-	v[3] = -10.0;
+	Anima::AnimaVertex4f* v = AllocateNew<Anima::AnimaVertex4f>(allocator, &allocator);
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	allocator.Deallocate(&v);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	
-	Anima::AnimaModel* model = (Anima::AnimaModel*)allocator.Allocate(sizeof(Anima::AnimaModel), ANIMA_ENGINE_CORE_ALIGN_OF(Anima::AnimaModel));
+	(*v)[0] = 1.0;
+	(*v)[1] = 2.0;
+	(*v)[2] = -1.0;
+	(*v)[3] = -10.0;
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	model->SetVertices(&v, 1);
+	Anima::AnimaModel* model = AllocateNew<Anima::AnimaModel>(allocator, &allocator);
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
+	model->SetVertices(v, 1);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	allocator.Deallocate(model);
+	(*v)[0] += 15.0;
+	(*v)[1] += 15.0;
+	(*v)[2] += 15.0;
+	(*v)[3] += 15.0;
+
+	model->AddVertex(*v);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	
+	DeallocateObject(allocator, *model);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
+
+	DeallocateObject(allocator, *v);
+	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();

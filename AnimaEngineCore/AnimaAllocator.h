@@ -94,12 +94,22 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	template<class T> T* AllocateNew(AnimaAllocator& allocator)
 	{
-		return new (allocator.Allocate(sizeof(T), __alignof(T))) T;
+		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_CORE_ALIGN_OF(T))) T;
 	}
 	
 	template<class T> T* AllocateNew(AnimaAllocator& allocator, const T& t)
 	{
-		return new (allocator.Allocate(sizeof(T), __alignof(T))) T(t);
+		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_CORE_ALIGN_OF(T))) T(t);
+	}
+
+	template<class T> T* AllocateNew(AnimaAllocator& allocator, T&& t)
+	{
+		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_CORE_ALIGN_OF(T))) T(t);
+	}
+
+	template<class T, typename... Args> T* AllocateNew(AnimaAllocator& allocator, Args&&... args)
+	{
+		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_CORE_ALIGN_OF(T))) T(std::forward<Args>(args)...);
 	}
 	
 	template<class T> void DeallocateObject(AnimaAllocator& allocator, T& object)
@@ -117,7 +127,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 			headerSize += 1;
 		
 		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
-		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), __alignof(T))) + headerSize;
+		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_CORE_ALIGN_OF(T))) + headerSize;
 		
 		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
 		*(((ASizeT*)p) - 1) = length;
@@ -125,6 +135,66 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		for(ASizeT i = 0; i < length; i++)
 			new (&p[i]) T;
 		
+		return p;
+	}
+
+	template<class T> T* AllocateArray(AnimaAllocator& allocator, ASizeT length, const T& t)
+	{
+		ANIMA_ASSERT(length > 0);
+		AU8 headerSize = sizeof(ASizeT) / sizeof(T);
+
+		if (sizeof(ASizeT) % sizeof(T) > 0)
+			headerSize += 1;
+
+		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
+		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_CORE_ALIGN_OF(T))) + headerSize;
+
+		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
+		*(((ASizeT*)p) - 1) = length;
+
+		for (ASizeT i = 0; i < length; i++)
+			new (&p[i]) T(t);
+
+		return p;
+	}
+
+	template<class T> T* AllocateArray(AnimaAllocator& allocator, ASizeT length, T&& t)
+	{
+		ANIMA_ASSERT(length > 0);
+		AU8 headerSize = sizeof(ASizeT) / sizeof(T);
+
+		if (sizeof(ASizeT) % sizeof(T) > 0)
+			headerSize += 1;
+
+		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
+		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_CORE_ALIGN_OF(T))) + headerSize;
+
+		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
+		*(((ASizeT*)p) - 1) = length;
+
+		for (ASizeT i = 0; i < length; i++)
+			new (&p[i]) T(t);
+
+		return p;
+	}
+
+	template<class T, typename... Args> T* AllocateArray(AnimaAllocator& allocator, ASizeT length, Args&&... args)
+	{
+		ANIMA_ASSERT(length > 0);
+		AU8 headerSize = sizeof(ASizeT) / sizeof(T);
+
+		if (sizeof(ASizeT) % sizeof(T) > 0)
+			headerSize += 1;
+
+		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
+		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_CORE_ALIGN_OF(T))) + headerSize;
+
+		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
+		*(((ASizeT*)p) - 1) = length;
+
+		for (ASizeT i = 0; i < length; i++)
+			new (&p[i]) T(std::forward<Args>(args)...);
+
 		return p;
 	}
 	
