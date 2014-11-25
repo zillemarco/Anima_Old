@@ -1,4 +1,5 @@
 #include "AnimaEngine.h"
+#include "AnimaModelsManager.h"
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
@@ -15,10 +16,22 @@ _AnimaEngineWindowMonitorCallbacks	AnimaEngine::_callbacks;
 int									AnimaEngine::_animaEngineCount = 0;
 _AnimaEngineWindowHints				AnimaEngine::_windowHints;
 
+#define _ANIMA_MEMORY_SIZE			20971520	// 20 MB
+
 AnimaEngine::AnimaEngine()
 {
-	_windowListHead = NULL;
-	_focusedWindow = NULL;
+	_windowListHead = nullptr;
+	_focusedWindow = nullptr;
+
+	_mainMemory = nullptr;
+	_mainMemorySize = 0;
+
+	_mainAllocator = nullptr;
+	_modelDataAllocator = nullptr;
+	_modelsAllocator = nullptr;
+	_genericAllocator = nullptr;
+
+	_modelsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -26,10 +39,39 @@ AnimaEngine::AnimaEngine()
 AnimaEngine::~AnimaEngine()
 {
 	_animaEngineCount--;
+
 	Terminate();
 }
 
 bool AnimaEngine::Initialize()
+{
+	InitializeMemorySystem();
+	InitializeManagers();
+
+	if (!InitializeWindowSystem())
+		return false;
+
+	return true;
+}
+
+void AnimaEngine::InitializeMemorySystem()
+{
+	ANIMA_ASSERT(_mainMemory == nullptr && _mainMemorySize == 0);
+
+	_mainMemorySize = _ANIMA_MEMORY_SIZE;
+	_mainMemory = malloc(_mainMemorySize);
+
+	// L'unica new di AnimaEngine.
+	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
+	_mainAllocator = new AnimaFreeListAllocator(_mainMemorySize, _mainMemory);
+
+	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
+	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
+	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
+	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
+}
+
+bool AnimaEngine::InitializeWindowSystem()
 {
 	if (_animaEngineInitialized)
 		return true;
@@ -50,11 +92,51 @@ bool AnimaEngine::Initialize()
 	_animaEngineInitialized = true;
 
 	DefaultWindowHints();
-	
+
 	return true;
 }
 
+void AnimaEngine::InitializeManagers()
+{
+	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
+}
+
 void AnimaEngine::Terminate()
+{
+	TerminateManagers();
+	TerminateMemorySystem();
+	TerminateWindowSystem();
+}
+
+void AnimaEngine::TerminateMemorySystem()
+{
+	ANIMA_ASSERT(_mainMemory != nullptr && _mainMemorySize > 0);
+	
+	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelDataAllocator, *_mainAllocator);
+	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_mainAllocator);
+	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_mainAllocator);
+	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_mainAllocator);
+	
+	_modelDataAllocator = nullptr;
+	_modelsAllocator = nullptr;
+	_genericAllocator = nullptr;
+	_managersAllocator = nullptr;
+
+	delete _mainAllocator;
+	_mainAllocator = nullptr;
+
+	free(_mainMemory);
+
+	_mainMemory = nullptr;
+	_mainMemorySize = 0;
+}
+
+void AnimaEngine::TerminateManagers()
+{
+	AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _modelsManager);
+}
+
+void AnimaEngine::TerminateWindowSystem()
 {
 	if (!_animaEngineInitialized)
 		return;
@@ -382,6 +464,48 @@ double AnimaEngine::GetTime(void)
 void AnimaEngine::SetTime(double time)
 {
 	_AnimaEngineWindowPlatformSetTime(time);
+}
+
+AnimaAllocator* AnimaEngine::GetModelDataAllocator()
+{
+	ANIMA_ASSERT(_modelDataAllocator != nullptr);
+	return _modelDataAllocator;
+}
+
+AnimaAllocator* AnimaEngine::GetModelsAllocator()
+{
+	ANIMA_ASSERT(_modelsAllocator != nullptr);
+	return _modelsAllocator;
+}
+
+AnimaAllocator* AnimaEngine::GetGenericAllocator()
+{
+	ANIMA_ASSERT(_genericAllocator != nullptr);
+	return _genericAllocator;
+}
+
+AnimaModelsManager* AnimaEngine::GetModelsManager()
+{
+	ANIMA_ASSERT(_modelsManager != nullptr);
+	return _modelsManager;
+}
+
+void AnimaEngine::DumpMemory()
+{
+	printf("Main allocator: \n");
+	_mainAllocator->Dump();
+
+	printf("Model data allocator: \n");
+	_modelDataAllocator->Dump();
+
+	printf("Models allocator: \n");
+	_modelsAllocator->Dump();
+
+	printf("Generic allocator: \n");
+	_genericAllocator->Dump();
+
+	printf("Managers allocator: \n");
+	_managersAllocator->Dump();
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

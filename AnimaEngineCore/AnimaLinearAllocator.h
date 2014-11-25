@@ -38,7 +38,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	inline AnimaLinearAllocator* NewAnimaLinearAllocator(size_t size, AnimaAllocator& allocator)
 	{
-		void* p = allocator.Allocate(size+sizeof(AnimaLinearAllocator), __alignof(AnimaLinearAllocator));
+		void* p = allocator.Allocate(size + sizeof(AnimaLinearAllocator), ANIMA_ENGINE_CORE_ALIGN_OF(AnimaLinearAllocator));
 		return new (p) AnimaLinearAllocator(size, AnimaPointerMath::add(p, sizeof(AnimaLinearAllocator)));
 	}
 	

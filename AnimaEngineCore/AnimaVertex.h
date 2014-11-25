@@ -14,6 +14,7 @@
 #include "AnimaTypes.h"
 #include "AnimaAllocators.h"
 #include "AnimaAssert.h"
+#include "AnimaEngine.h"
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
@@ -21,29 +22,29 @@ template<class Type, ASizeT Size>
 class ANIMA_ENGINE_CORE_EXPORT AnimaVertex
 {
 public:
-	AnimaVertex(AnimaAllocator* allocator)
+	AnimaVertex(AnimaEngine* engine)
 	{
-		ANIMA_ASSERT(allocator != nullptr);
+		ANIMA_ASSERT(engine != nullptr);
 		
-		_allocator = allocator;
+		_engine = engine;
 		_size = Size;
 		
-		_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
 	}
 	
 	AnimaVertex(const AnimaVertex& src)
 	{
 		_data = nullptr;
 		_size = src._size;
-		_allocator = src._allocator;
+		_engine = src._engine;
 		
-		_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
 		
 		memcpy(_data, src._data, sizeof(Type) * _size);
 	}
 	
 	AnimaVertex(AnimaVertex&& src)
-	: _allocator(src._allocator)
+	: _engine(src._engine)
 	, _data(src._data)
 	, _size(src._size)
 	{
@@ -53,9 +54,9 @@ public:
 	
 	~AnimaVertex()
 	{
-		ANIMA_ASSERT(_allocator != nullptr);
+		ANIMA_ASSERT(_engine != nullptr);
 		
-		_allocator->Deallocate(_data);
+		(_engine->GetGenericAllocator())->Deallocate(_data);
 		_data = nullptr;
 	}
 	
@@ -65,13 +66,12 @@ public:
 		{
 			if (_data != nullptr)
 			{
-				ANIMA_ASSERT(_allocator != nullptr);
-				_allocator->Deallocate(_data);
+				(_engine->GetGenericAllocator())->Deallocate(_data);
 				_data = nullptr;
 			}
 			
 			_size = src._size;
-			_data = (Type*)_allocator->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
+			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_CORE_ALIGN_OF(Type));
 			
 			memcpy(_data, src._data, sizeof(Type) * _size);
 		}
@@ -83,6 +83,7 @@ public:
 	{
 		if (this != &src)
 		{
+			_engine = src._engine;
 			_data = src._data;
 			_size = src._size;
 			
@@ -106,7 +107,7 @@ public:
 	}
 	
 protected:
-	AnimaAllocator* _allocator;
+	AnimaEngine* _engine;
 	
 	Type*	_data;
 	ASizeT	_size;

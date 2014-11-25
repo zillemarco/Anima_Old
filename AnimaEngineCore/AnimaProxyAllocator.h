@@ -36,7 +36,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	inline AnimaProxyAllocator* NewAnimaProxyAllocator(AnimaAllocator& allocator)
 	{
-		void* p = allocator.Allocate(sizeof(AnimaProxyAllocator), __alignof(AnimaProxyAllocator));
+		void* p = allocator.Allocate(sizeof(AnimaProxyAllocator), ANIMA_ENGINE_CORE_ALIGN_OF(AnimaProxyAllocator));
 		return new (p) AnimaProxyAllocator(allocator);
 	}
 	

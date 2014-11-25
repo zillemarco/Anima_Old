@@ -12,10 +12,10 @@
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
-AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
+AnimaMesh::AnimaMesh(AnimaEngine* engine)
 {
-	ANIMA_ASSERT(allocator != nullptr)
-	_allocator = allocator;
+	ANIMA_ASSERT(engine != nullptr)
+	_engine = engine;
 	
 	_vertices = nullptr;
 	_normals = nullptr;
@@ -30,7 +30,7 @@ AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
 {
-	_allocator = src._allocator;
+	_engine = src._engine;
 	
 	SetVertices(src._vertices, src._verticesNumber);
 	SetNormals(src._normals, src._normalsNumber);
@@ -47,7 +47,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 , _textureCoordsNumber(src._textureCoordsNumber)
 , _indexes(src._indexes)
 , _indexesNumber(src._indexesNumber)
-, _allocator(src._allocator)
+, _engine(src._engine)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -62,7 +62,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 
 AnimaMesh::~AnimaMesh()
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	ANIMA_ASSERT(_engine != nullptr);
 	
 	ClearVertices();
 	ClearNormals();
@@ -74,7 +74,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		_engine = src._engine;
 		
 		SetVertices(src._vertices, src._verticesNumber);
 		SetNormals(src._normals, src._normalsNumber);
@@ -89,7 +89,7 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		_engine = src._engine;
 		
 		_vertices = src._vertices;
 		_normals = src._normals;
@@ -119,8 +119,7 @@ void AnimaMesh::ClearVertices()
 {
 	if(_vertices != nullptr && _verticesNumber > 0)
 	{
-		//_allocator->Deallocate(_vertices);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _vertices);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _vertices);
 		_vertices = nullptr;
 		_verticesNumber = 0;
 	}
@@ -130,8 +129,7 @@ void AnimaMesh::ClearNormals()
 {
 	if(_normals != nullptr && _normalsNumber > 0)
 	{
-		//_allocator->Deallocate(_normals);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _normals);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _normals);
 		_normals = nullptr;
 		_normalsNumber = 0;
 	}
@@ -141,8 +139,7 @@ void AnimaMesh::ClearTextureCoords()
 {
 	if(_textureCoords != nullptr && _textureCoordsNumber > 0)
 	{
-		//_allocator->Deallocate(_textureCoords);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureCoords);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _textureCoords);
 		_textureCoords = nullptr;
 		_textureCoordsNumber = 0;
 	}
@@ -152,8 +149,7 @@ void AnimaMesh::ClearIndexes()
 {
 	if(_indexes != nullptr && _indexesNumber > 0)
 	{
-		//_allocator->Deallocate(_indexes);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _indexes);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _indexes);
 		_indexes = nullptr;
 		_indexesNumber = 0;
 	}
@@ -161,13 +157,13 @@ void AnimaMesh::ClearIndexes()
 
 void AnimaMesh::SetVertices(AnimaVertex4f* v, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr)
+	ANIMA_ASSERT(_engine != nullptr)
 	ClearVertices();
 	
 	if(v != nullptr && n > 0)
 	{
 		_verticesNumber = n;
-		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, n, _allocator);
+		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), n, _engine);
 	
 		for (int i = 0; i < _verticesNumber; i++)
 			_vertices[i] = v[i];
@@ -177,13 +173,13 @@ void AnimaMesh::SetVertices(AnimaVertex4f* v, ASizeT n)
 
 void AnimaMesh::SetVertices(AnimaVertex3f* v, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr)
+	ANIMA_ASSERT(_engine != nullptr)
 	ClearVertices();
 	
 	if(v != nullptr && n > 0)
 	{
 		_verticesNumber = n;
-		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, n, _allocator);
+		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), n, _engine);
 		
 		for(int i = 0; i < _verticesNumber; i++)
 		{
@@ -197,18 +193,18 @@ void AnimaMesh::SetVertices(AnimaVertex3f* v, ASizeT n)
 
 void AnimaMesh::AddVertex(const AnimaVertex4f& v)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	AnimaVertex4f* tmpOldVertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _verticesNumber, _allocator);
+	ANIMA_ASSERT(_engine != nullptr);
+	AnimaVertex4f* tmpOldVertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _verticesNumber, _engine);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _verticesNumber; i++)
 		tmpOldVertices[i] = _vertices[i];
 	
 	//_allocator->Deallocate(_vertices);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _vertices);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _vertices);
 	
 	_verticesNumber++;
-	_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _verticesNumber, _allocator);
+	_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _verticesNumber, _engine);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _verticesNumber - 1; i++)
@@ -216,23 +212,23 @@ void AnimaMesh::AddVertex(const AnimaVertex4f& v)
 	
 	_vertices[_verticesNumber - 1] = v;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldVertices);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldVertices);
 }
 
 void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	AnimaVertex4f* tmpOldVertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _verticesNumber, _allocator);
+	ANIMA_ASSERT(_engine != nullptr);
+	AnimaVertex4f* tmpOldVertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _verticesNumber, _engine);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _verticesNumber; i++)
 		tmpOldVertices[i] = _vertices[i];
 	
 	//_allocator->Deallocate(_vertices);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _vertices);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _vertices);
 	
 	_verticesNumber++;
-	_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _verticesNumber, _allocator);
+	_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _verticesNumber, _engine);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _verticesNumber - 1; i++)
@@ -243,19 +239,18 @@ void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 	_vertices[_verticesNumber - 1][2] = v[2];
 	_vertices[_verticesNumber - 1][3] = 1.0f;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldVertices);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldVertices);
 }
 
 void AnimaMesh::SetNormals(AnimaVertex4f* v, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr)
+	ANIMA_ASSERT(_engine != nullptr)
 	ClearNormals();
-	
-	
+		
 	if(v != nullptr && n > 0)
 	{
 		_normalsNumber = n;
-		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 		//memcpy(_normals, v, sizeof(AnimaVertex4f) * _normalsNumber);
 		for (int i = 0; i < _normalsNumber; i++)
@@ -265,13 +260,13 @@ void AnimaMesh::SetNormals(AnimaVertex4f* v, ASizeT n)
 
 void AnimaMesh::SetNormals(AnimaVertex3f* v, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr)
+	ANIMA_ASSERT(_engine != nullptr)
 	ClearNormals();
 	
 	if(v != nullptr && n > 0)
 	{
 		_normalsNumber = n;
-		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 		for (int i = 0; i < _normalsNumber; i++)
 		{
@@ -285,18 +280,18 @@ void AnimaMesh::SetNormals(AnimaVertex3f* v, ASizeT n)
 
 void AnimaMesh::AddNormal(const AnimaVertex4f& v)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	AnimaVertex4f* tmpOldNormals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+	ANIMA_ASSERT(_engine != nullptr);
+	AnimaVertex4f* tmpOldNormals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _normalsNumber; i++)
 		tmpOldNormals[i] = _normals[i];
 	
 	//_allocator->Deallocate(_normals);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _normals);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _normals);
 	
 	_normalsNumber++;
-	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _normalsNumber - 1; i++)
@@ -304,23 +299,23 @@ void AnimaMesh::AddNormal(const AnimaVertex4f& v)
 	
 	_normals[_normalsNumber - 1] = v;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldNormals);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldNormals);
 }
 
 void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	AnimaVertex4f* tmpOldNormals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+	ANIMA_ASSERT(_engine != nullptr);
+	AnimaVertex4f* tmpOldNormals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _normalsNumber; i++)
 		tmpOldNormals[i] = _normals[i];
 	
 	//_allocator->Deallocate(_normals);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _normals);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _normals);
 	
 	_normalsNumber++;
-	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*_allocator, _normalsNumber, _allocator);
+	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetModelDataAllocator()), _normalsNumber, _engine);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _normalsNumber - 1; i++)
@@ -331,18 +326,18 @@ void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 	_normals[_normalsNumber - 1][2] = v[2];
 	_normals[_normalsNumber - 1][3] = 1.0;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldNormals);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldNormals);
 }
 
 void AnimaMesh::SetTextureCoords(AnimaVertex2f* v, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	ANIMA_ASSERT(_engine != nullptr);
 	ClearTextureCoords();
 	
 	if(v != nullptr && n > 0)
 	{
 		_textureCoordsNumber = n;
-		_textureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _textureCoordsNumber, _allocator);
+		_textureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetModelDataAllocator()), _textureCoordsNumber, _engine);
 	
 		//memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 		for (int i = 0; i < _textureCoordsNumber; i++)
@@ -352,18 +347,18 @@ void AnimaMesh::SetTextureCoords(AnimaVertex2f* v, ASizeT n)
 
 void AnimaMesh::AddTextureCoord(const AnimaVertex2f& v)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	AnimaVertex2f* tmpOldTextureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _textureCoordsNumber, _allocator);
+	ANIMA_ASSERT(_engine != nullptr);
+	AnimaVertex2f* tmpOldTextureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetModelDataAllocator()), _textureCoordsNumber, _engine);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _textureCoordsNumber; i++)
 		tmpOldTextureCoords[i] = _textureCoords[i];
 	
 	//_allocator->Deallocate(_normals);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureCoords);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _textureCoords);
 	
 	_textureCoordsNumber++;
-	_textureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _textureCoordsNumber, _allocator);
+	_textureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetModelDataAllocator()), _textureCoordsNumber, _engine);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _textureCoordsNumber - 1; i++)
@@ -371,18 +366,18 @@ void AnimaMesh::AddTextureCoord(const AnimaVertex2f& v)
 	
 	_textureCoords[_textureCoordsNumber - 1] = v;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldTextureCoords);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldTextureCoords);
 }
 
 void AnimaMesh::SetIndexes(ASizeT* indexes, ASizeT n)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	ANIMA_ASSERT(_engine != nullptr);
 	ClearIndexes();
 	
 	if(indexes != nullptr && n > 0)
 	{
 		_indexesNumber = n;
-		_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*_allocator, _indexesNumber);
+		_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
 		//memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 		for (int i = 0; i < _indexesNumber; i++)
@@ -392,18 +387,18 @@ void AnimaMesh::SetIndexes(ASizeT* indexes, ASizeT n)
 
 void AnimaMesh::AddIndex(const ASizeT& index)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	ASizeT* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*_allocator, _indexesNumber);
+	ANIMA_ASSERT(_engine != nullptr);
+	ASizeT* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _indexesNumber; i++)
 		tmpOldIndexes[i] = _indexes[i];
 	
 	//_allocator->Deallocate(_normals);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureCoords);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _textureCoords);
 	
 	_indexesNumber++;
-	_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*_allocator, _indexesNumber);
+	_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _indexesNumber - 1; i++)
@@ -411,7 +406,7 @@ void AnimaMesh::AddIndex(const ASizeT& index)
 	
 	_indexes[_indexesNumber - 1] = index;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldIndexes);
+	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldIndexes);
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

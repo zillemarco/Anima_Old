@@ -49,7 +49,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	inline AnimaFreeListAllocator* NewAnimaFreeListAllocator(ASizeT size, AnimaAllocator& allocator)
 	{
-		void* p = allocator.Allocate(size + sizeof(AnimaFreeListAllocator), __alignof(AnimaFreeListAllocator));
+		void* p = allocator.Allocate(size + sizeof(AnimaFreeListAllocator), ANIMA_ENGINE_CORE_ALIGN_OF(AnimaFreeListAllocator));
 		return new (p) AnimaFreeListAllocator(size, AnimaPointerMath::add(p, sizeof(AnimaFreeListAllocator)));
 	}
 	

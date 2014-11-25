@@ -39,7 +39,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	inline AnimaPoolAllocator* NewAnimaPoolAllocator(ASizeT objectSize, AU8 objectAlignment, ASizeT size, AnimaAllocator& allocator)
 	{
-		void* p = allocator.Allocate(size+sizeof(AnimaPoolAllocator), __alignof(AnimaPoolAllocator));
+		void* p = allocator.Allocate(size + sizeof(AnimaPoolAllocator), ANIMA_ENGINE_CORE_ALIGN_OF(AnimaPoolAllocator));
 		return new (p) AnimaPoolAllocator(objectSize, objectAlignment, size, AnimaPointerMath::add(p, sizeof(AnimaPoolAllocator)));
 	}
 	

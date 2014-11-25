@@ -13,6 +13,7 @@
 #include "AnimaAllocators.h"
 #include "AnimaTypes.h"
 #include "AnimaModel.h"
+#include "AnimaEngine.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -25,7 +26,7 @@ BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 class ANIMA_ENGINE_CORE_EXPORT AnimaModelsManager
 {
 public:
-	AnimaModelsManager(AnimaAllocator* allocator);
+	AnimaModelsManager(AnimaEngine* engine);
 	~AnimaModelsManager();
 	
 public:
@@ -35,7 +36,7 @@ private:
 	void RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode);
 	
 private:
-	AnimaAllocator* _allocator;
+	AnimaEngine* _engine;
 	
 	AnimaModel* _models;
 	ASizeT		_modelsNumber;

@@ -51,7 +51,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 {
 	inline AnimaStackAllocator* NewAnimaStackAllocator(ASizeT size, AnimaAllocator& allocator)
 	{
-		void* p = allocator.Allocate(size + sizeof(AnimaStackAllocator), __alignof(AnimaStackAllocator));
+		void* p = allocator.Allocate(size + sizeof(AnimaStackAllocator), ANIMA_ENGINE_CORE_ALIGN_OF(AnimaStackAllocator));
 		return new (p) AnimaStackAllocator(size, AnimaPointerMath::add(p, sizeof(AnimaStackAllocator)));
 	}
 	

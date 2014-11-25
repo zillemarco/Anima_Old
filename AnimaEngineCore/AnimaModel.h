@@ -13,13 +13,14 @@
 #include "AnimaTypes.h"
 #include "AnimaAllocators.h"
 #include "AnimaMesh.h"
+#include "AnimaEngine.h"
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 class ANIMA_ENGINE_CORE_EXPORT AnimaModel
 {
 public:
-	AnimaModel(AnimaAllocator* allocator);
+	AnimaModel(AnimaEngine* engine);
 	AnimaModel(const AnimaModel& src);
 	AnimaModel(AnimaModel&& src);
 	~AnimaModel();
@@ -44,7 +45,7 @@ protected:
 	AnimaMesh*		_modelMeshes;
 	ASizeT			_modelMeshesNumber;
 	
-	AnimaAllocator* _allocator;
+	AnimaEngine* _engine;
 };
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

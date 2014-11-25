@@ -13,13 +13,14 @@
 #include "AnimaTypes.h"
 #include "AnimaAllocators.h"
 #include "AnimaVertex.h"
+#include "AnimaEngine.h"
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 class ANIMA_ENGINE_CORE_EXPORT AnimaMesh
 {
 public:
-	AnimaMesh(AnimaAllocator* allocator);
+	AnimaMesh(AnimaEngine* engine);
 	AnimaMesh(const AnimaMesh& src);
 	AnimaMesh(AnimaMesh&& src);
 	~AnimaMesh();
@@ -48,7 +49,7 @@ public:
 	void ClearNormals();
 	void ClearTextureCoords();
 	void ClearIndexes();
-	
+		
 protected:	
 	AnimaVertex4f*	_vertices;
 	ASizeT			_verticesNumber;
@@ -62,7 +63,7 @@ protected:
 	ASizeT*	_indexes;
 	ASizeT	_indexesNumber;
 	
-	AnimaAllocator* _allocator;
+	AnimaEngine* _engine;
 };
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

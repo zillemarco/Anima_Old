@@ -10,8 +10,7 @@
 #define __Anima__AnimaEngine__
 
 #include "AnimaEngineCore.h"
-#include "AnimaAllocator.h"
-#include "AnimaStackAllocator.h"
+#include "AnimaAllocators.h"
 #include "AnimaWindow_Base.h"
 
 #define _ANIMA_ENGINE_CORE_REQUIRE_INIT()					\
@@ -39,6 +38,8 @@
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
 typedef AnimaEngineWindow_Base AnimaWindow;
+
+class AnimaModelsManager;
 
 class ANIMA_ENGINE_CORE_EXPORT AnimaEngine
 {
@@ -114,6 +115,24 @@ public:
 	static _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE;
 
 public:
+	inline AnimaAllocator* GetModelsAllocator();
+	inline AnimaAllocator* GetGenericAllocator();
+	inline AnimaAllocator* GetModelDataAllocator();
+
+	inline AnimaModelsManager* GetModelsManager();
+
+	void DumpMemory();
+
+private:
+	void InitializeMemorySystem();
+	bool InitializeWindowSystem();
+	void InitializeManagers();
+
+	void TerminateMemorySystem();
+	void TerminateWindowSystem();
+	void TerminateManagers();
+
+public:
 	static _AnimaEngineWindowmonitor**	_monitors;				/*!< Lista dei monitor disponibili per il sistema */
 	static int							_monitorCount;			/*!< Numero di monitor disponibili per il sistema */
 
@@ -131,6 +150,19 @@ private:
 	static _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE;		/*!< Contenitore con dati per la gestione dei thread */
 	static bool _animaEngineInitialized;						/*!< Flag per indicare se AnimaEngine è stato inizializzato con successo */
 	static int	_animaEngineCount;								/*!< Contatore di istanze di AnimaEngine */
+
+	void*	_mainMemory;		/*!< Buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
+	ASizeT	_mainMemorySize;	/*!< Dimensione del buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
+
+	AnimaFreeListAllocator*	_mainAllocator;			/*!< Allocator usato per creare tutti gli altri allocator */
+	AnimaFreeListAllocator* _modelDataAllocator;	/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
+	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
+	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
+
+private:
+	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */
+
+	AnimaModelsManager* _modelsManager;				/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 };
 
 template<class T>
