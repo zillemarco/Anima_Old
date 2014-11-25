@@ -3,12 +3,13 @@
 #include <AnimaVertex.h>
 #include <AnimaAllocators.h>
 #include <AnimaModel.h>
+#include <AnimaModelsManager.h>
 
 #include "CustomWindow.h"
 
 using namespace Anima::AnimaAllocatorNamespace;
 
-#define MEM_SIZE 2097152
+#define MEM_SIZE	8000000
 
 int main(int argc, char** argv)
 {
@@ -20,32 +21,20 @@ int main(int argc, char** argv)
 	Anima::AnimaFreeListAllocator allocator(MEM_SIZE, mainMem);
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	Anima::AnimaVertex4f* v = AllocateNew<Anima::AnimaVertex4f>(allocator, &allocator);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	(*v)[0] = 1.0;
-	(*v)[1] = 2.0;
-	(*v)[2] = -1.0;
-	(*v)[3] = -10.0;
+	Anima::AnimaModelsManager* manager = AllocateNew<Anima::AnimaModelsManager>(allocator, &allocator);
+	
+#if defined _MSC_VER
+	const char* path = "D:/Modelli/Big_Dragon/Big_Dragon.fbx";
+#else
+	const char* path = "/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj";
+#endif
+	
+	if(!manager->LoadModel(path))
+		return 0;
+	
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
-	Anima::AnimaModel* model = AllocateNew<Anima::AnimaModel>(allocator, &allocator);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	
-	model->SetVertices(v, 1);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	
-	(*v)[0] += 15.0;
-	(*v)[1] += 15.0;
-	(*v)[2] += 15.0;
-	(*v)[3] += 15.0;
-
-	model->AddVertex(*v);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-	
-	DeallocateObject(allocator, *model);
-	printf("Used memory: %lu\n", allocator.GetUsedMemory());
-
-	DeallocateObject(allocator, *v);
+	DeallocateObject(allocator, manager);
 	printf("Used memory: %lu\n", allocator.GetUsedMemory());
 	
 	Anima::AnimaEngine engine;

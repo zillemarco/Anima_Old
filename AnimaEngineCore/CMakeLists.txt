@@ -18,7 +18,8 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaProxyAllocator.h
                     AnimaVertex.h
                     AnimaModel.h
-                    AnimaModelsManager.h)
+                    AnimaModelsManager.h
+                    AnimaMesh.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -31,7 +32,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaProxyAllocator.cpp
 					AnimaVertex.cpp
                     AnimaModel.cpp
-                    AnimaModelsManager.cpp)
+                    AnimaModelsManager.cpp
+                    AnimaMesh.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

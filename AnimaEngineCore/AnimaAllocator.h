@@ -118,6 +118,12 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		allocator.Deallocate(&object);
 	}
 	
+	template<class T> void DeallocateObject(AnimaAllocator& allocator, T* object)
+	{
+		object->~T();
+		allocator.Deallocate(object);
+	}
+	
 	template<class T> T* AllocateArray(AnimaAllocator& allocator, ASizeT length)
 	{
 		ANIMA_ASSERT(length > 0);

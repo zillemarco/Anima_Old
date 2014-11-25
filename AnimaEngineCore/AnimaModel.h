@@ -12,7 +12,7 @@
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
 #include "AnimaAllocators.h"
-#include "AnimaVertex.h"
+#include "AnimaMesh.h"
 
 BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
 
@@ -28,47 +28,22 @@ public:
 	AnimaModel& operator=(AnimaModel&& src);
 	
 public:
-	void SetVertices(AnimaVertex4f* v, ASizeT n);
-	void SetVertices(AnimaVertex3f* v, ASizeT n);
-	void AddVertex(const AnimaVertex4f& v);
-	void AddVertex(const AnimaVertex3f& v);
-	
-	void SetNormals(AnimaVertex4f* v, ASizeT n);
-	void SetNormals(AnimaVertex3f* v, ASizeT n);
-	void AddNormal(const AnimaVertex4f& v);
-	void AddNormal(const AnimaVertex3f& v);
-	
-	void SetTextureCoords(AnimaVertex2f* v, ASizeT n);
-	void AddTextureCoord(const AnimaVertex2f& v);
-	
-	void SetIndexes(ASizeT* indexes, ASizeT n);
-	void AddIndex(const ASizeT& index);
-	
 	void SetChildren(AnimaModel* children, ASizeT n);
 	void AddChild(const AnimaModel& child);
 	
+	void SetMeshes(AnimaMesh* meshes, ASizeT n);
+	void AddMesh(const AnimaMesh& mesh);
+	
 	void ClearChildren();
-	void ClearVertices();
-	void ClearNormals();
-	void ClearTextureCoords();
-	void ClearIndexes();
+	void ClearMeshes();
 	
 protected:
 	AnimaModel*		_modelChildren;
 	ASizeT			_modelChildrenNumber;
 	
-	AnimaVertex4f*	_vertices;
-	ASizeT			_verticesNumber;
+	AnimaMesh*		_modelMeshes;
+	ASizeT			_modelMeshesNumber;
 	
-	AnimaVertex4f*	_normals;
-	ASizeT			_normalsNumber;
-	
-	AnimaVertex2f*	_textureCoords;
-	ASizeT			_textureCoordsNumber;
-	
-	ASizeT*	_indexes;
-	ASizeT	_indexesNumber;
-		
 	AnimaAllocator* _allocator;
 };
 
