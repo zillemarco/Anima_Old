@@ -30,6 +30,7 @@ AnimaEngine::AnimaEngine()
 	_modelDataAllocator = nullptr;
 	_modelsAllocator = nullptr;
 	_genericAllocator = nullptr;
+	_stringAllocator = nullptr;
 
 	_modelsManager = nullptr;
 
@@ -65,10 +66,11 @@ void AnimaEngine::InitializeMemorySystem()
 	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
 	_mainAllocator = new AnimaFreeListAllocator(_mainMemorySize, _mainMemory);
 
-	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
-	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
-	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
-	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 4 - 100, *_mainAllocator);
+	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 5 - 100, *_mainAllocator);
+	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 5 - 100, *_mainAllocator);
+	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 5 - 100, *_mainAllocator);
+	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 5 - 100, *_mainAllocator);
+	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 5 - 100, *_mainAllocator);
 }
 
 bool AnimaEngine::InitializeWindowSystem()
@@ -116,11 +118,13 @@ void AnimaEngine::TerminateMemorySystem()
 	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_mainAllocator);
 	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_mainAllocator);
 	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_mainAllocator);
+	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_mainAllocator);
 	
 	_modelDataAllocator = nullptr;
 	_modelsAllocator = nullptr;
 	_genericAllocator = nullptr;
 	_managersAllocator = nullptr;
+	_stringAllocator = nullptr;
 
 	delete _mainAllocator;
 	_mainAllocator = nullptr;
@@ -466,29 +470,29 @@ void AnimaEngine::SetTime(double time)
 	_AnimaEngineWindowPlatformSetTime(time);
 }
 
-AnimaAllocator* AnimaEngine::GetModelDataAllocator()
-{
-	ANIMA_ASSERT(_modelDataAllocator != nullptr);
-	return _modelDataAllocator;
-}
+//AnimaAllocator* AnimaEngine::GetModelDataAllocator()
+//{
+//	ANIMA_ASSERT(_modelDataAllocator != nullptr);
+//	return _modelDataAllocator;
+//}
 
-AnimaAllocator* AnimaEngine::GetModelsAllocator()
-{
-	ANIMA_ASSERT(_modelsAllocator != nullptr);
-	return _modelsAllocator;
-}
+//AnimaAllocator* AnimaEngine::GetModelsAllocator()
+//{
+//	ANIMA_ASSERT(_modelsAllocator != nullptr);
+//	return _modelsAllocator;
+//}
 
-AnimaAllocator* AnimaEngine::GetGenericAllocator()
-{
-	ANIMA_ASSERT(_genericAllocator != nullptr);
-	return _genericAllocator;
-}
+//AnimaAllocator* AnimaEngine::GetGenericAllocator()
+//{
+//	ANIMA_ASSERT(_genericAllocator != nullptr);
+//	return _genericAllocator;
+//}
 
-AnimaModelsManager* AnimaEngine::GetModelsManager()
-{
-	ANIMA_ASSERT(_modelsManager != nullptr);
-	return _modelsManager;
-}
+//AnimaModelsManager* AnimaEngine::GetModelsManager()
+//{
+//	ANIMA_ASSERT(_modelsManager != nullptr);
+//	return _modelsManager;
+//}
 
 void AnimaEngine::DumpMemory()
 {

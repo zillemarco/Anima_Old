@@ -19,7 +19,11 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaVertex.h
                     AnimaModel.h
                     AnimaModelsManager.h
-                    AnimaMesh.h)
+                    AnimaMesh.h
+                    AnimaFace.h
+                    AnimaBenchmarkTimer.h
+                    AnimaMaterialProperty.h
+                    AnimaString.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -33,7 +37,11 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaVertex.cpp
                     AnimaModel.cpp
                     AnimaModelsManager.cpp
-                    AnimaMesh.cpp)
+                    AnimaMesh.cpp
+                    AnimaFace.cpp
+                    AnimaBenchmarkTimer.cpp
+                    AnimaMaterialProperty.cpp
+                    AnimaString.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

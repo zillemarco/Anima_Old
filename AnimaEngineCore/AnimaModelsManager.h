@@ -31,6 +31,13 @@ public:
 	
 public:
 	bool LoadModel(const char* modelPath);
+	void AddModel(const AnimaModel& model);
+	ASizeT GetModelsNumber();
+	AnimaModel GetModel(ASizeT index);
+	AnimaModel* GetPModel(ASizeT index);
+	AnimaModel* GetModels();
+	void ClearModels();
+	
 	
 private:
 	void RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode);

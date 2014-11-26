@@ -115,11 +115,35 @@ public:
 	static _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TLS_STATE;
 
 public:
-	inline AnimaAllocator* GetModelsAllocator();
-	inline AnimaAllocator* GetGenericAllocator();
-	inline AnimaAllocator* GetModelDataAllocator();
+	inline AnimaAllocator* GetModelsAllocator()
+	{
+		ANIMA_ASSERT(_modelsAllocator != nullptr);
+		return _modelsAllocator;
+	}
+	
+	inline AnimaAllocator* GetGenericAllocator()
+	{
+		ANIMA_ASSERT(_genericAllocator != nullptr);
+		return _genericAllocator;
+	}
+	
+	inline AnimaAllocator* GetModelDataAllocator()
+	{
+		ANIMA_ASSERT(_modelDataAllocator != nullptr);
+		return _modelDataAllocator;
+	}
+	
+	inline AnimaAllocator* GetStringAllocator()
+	{
+		ANIMA_ASSERT(_stringAllocator != nullptr);
+		return _stringAllocator;
+	}
 
-	inline AnimaModelsManager* GetModelsManager();
+	inline AnimaModelsManager* GetModelsManager()
+	{
+		ANIMA_ASSERT(_modelsManager != nullptr);
+		return _modelsManager;
+	}
 
 	void DumpMemory();
 
@@ -158,6 +182,7 @@ private:
 	AnimaFreeListAllocator* _modelDataAllocator;	/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
 	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
+	AnimaFreeListAllocator* _stringAllocator;		/*!< Allocator usato dalla classe AnimaString */
 
 private:
 	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */

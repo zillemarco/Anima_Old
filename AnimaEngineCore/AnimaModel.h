@@ -31,11 +31,18 @@ public:
 public:
 	void SetChildren(AnimaModel* children, ASizeT n);
 	void AddChild(const AnimaModel& child);
+	ASizeT GetChildrenNumber();
+	AnimaModel GetChild(ASizeT index);
+	AnimaModel* GetPChild(ASizeT index);
+	AnimaModel* GetChildren();
+	void ClearChildren();
 	
 	void SetMeshes(AnimaMesh* meshes, ASizeT n);
 	void AddMesh(const AnimaMesh& mesh);
-	
-	void ClearChildren();
+	ASizeT GetMeshesNumber();
+	AnimaMesh GetMesh(ASizeT index);
+	AnimaMesh* GetPMesh(ASizeT index);
+	AnimaMesh* GetMeshes();
 	void ClearMeshes();
 	
 protected:

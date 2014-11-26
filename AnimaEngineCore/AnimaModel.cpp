@@ -28,6 +28,12 @@ AnimaModel::AnimaModel(const AnimaModel& src)
 {
 	_engine = src._engine;
 	
+	_modelChildren = nullptr;
+	_modelMeshes = nullptr;
+	
+	_modelChildrenNumber = 0;
+	_modelMeshesNumber = 0;
+	
 	SetChildren(src._modelChildren, src._modelChildrenNumber);
 	SetMeshes(src._modelMeshes, src._modelMeshesNumber);
 }
@@ -129,25 +135,35 @@ void AnimaModel::SetChildren(AnimaModel* children, ASizeT n)
 void AnimaModel::AddChild(const AnimaModel& child)
 {
 	ANIMA_ASSERT(_engine != nullptr);
-	AnimaModel* tmpOldChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
+	if(_modelChildrenNumber > 0)
+	{
+		AnimaModel* tmpOldChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
 
-	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
-	for (int i = 0; i < _modelChildrenNumber; i++)
-		tmpOldChildren[i] = _modelChildren[i];
+		//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
+		for (int i = 0; i < _modelChildrenNumber; i++)
+			tmpOldChildren[i] = _modelChildren[i];
 
-	//_allocator->Deallocate(_normals);
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelChildren);
+		//_allocator->Deallocate(_normals);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelChildren);
 
-	_modelChildrenNumber++;
-	_modelChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
+		_modelChildrenNumber++;
+		_modelChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
 
-	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
-	for (int i = 0; i < _modelChildrenNumber - 1; i++)
-		_modelChildren[i] = tmpOldChildren[i];
+		//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
+		for (int i = 0; i < _modelChildrenNumber - 1; i++)
+			_modelChildren[i] = tmpOldChildren[i];
 
-	_modelChildren[_modelChildrenNumber - 1] = child;
+		_modelChildren[_modelChildrenNumber - 1] = child;
 
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldChildren);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldChildren);
+	}
+	else
+	{
+		_modelChildrenNumber++;
+		_modelChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
+		
+		_modelChildren[_modelChildrenNumber - 1] = child;
+	}
 }
 
 void AnimaModel::SetMeshes(AnimaMesh* meshes, ASizeT n)
@@ -168,22 +184,76 @@ void AnimaModel::SetMeshes(AnimaMesh* meshes, ASizeT n)
 void AnimaModel::AddMesh(const AnimaMesh& mesh)
 {
 	ANIMA_ASSERT(_engine != nullptr);
-	AnimaMesh* tmpOldMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelMeshesNumber, _engine);
+	if(_modelMeshesNumber > 0)
+	{
+		AnimaMesh* tmpOldMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelMeshesNumber, _engine);
 	
-	for (int i = 0; i < _modelMeshesNumber; i++)
-		tmpOldMeshes[i] = _modelMeshes[i];
+		for (int i = 0; i < _modelMeshesNumber; i++)
+			tmpOldMeshes[i] = _modelMeshes[i];
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelMeshes);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelMeshes);
 	
-	_modelMeshesNumber++;
-	_modelMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelMeshesNumber, _engine);
+		_modelMeshesNumber++;
+		_modelMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelMeshesNumber, _engine);
 	
-	for (int i = 0; i < _modelMeshesNumber - 1; i++)
-		_modelMeshes[i] = tmpOldMeshes[i];
+		for (int i = 0; i < _modelMeshesNumber - 1; i++)
+			_modelMeshes[i] = tmpOldMeshes[i];
 	
-	_modelMeshes[_modelMeshesNumber - 1] = mesh;
+		_modelMeshes[_modelMeshesNumber - 1] = mesh;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldMeshes);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldMeshes);
+	}
+	else
+	{
+		_modelMeshesNumber++;
+		_modelMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelMeshesNumber, _engine);
+		
+		_modelMeshes[_modelMeshesNumber - 1] = mesh;
+	}
+}
+
+ASizeT AnimaModel::GetChildrenNumber()
+{
+	return _modelChildrenNumber;
+}
+
+AnimaModel AnimaModel::GetChild(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelChildrenNumber);
+	return _modelChildren[index];
+}
+
+AnimaModel* AnimaModel::GetPChild(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelChildrenNumber);
+	return &_modelChildren[index];
+}
+
+AnimaModel* AnimaModel::GetChildren()
+{
+	return _modelChildren;
+}
+
+ASizeT AnimaModel::GetMeshesNumber()
+{
+	return _modelMeshesNumber;
+}
+
+AnimaMesh AnimaModel::GetMesh(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelMeshesNumber);
+	return _modelMeshes[index];
+}
+
+AnimaMesh* AnimaModel::GetPMesh(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelMeshesNumber);
+	return &_modelMeshes[index];
+}
+
+AnimaMesh* AnimaModel::GetMeshes()
+{
+	return _modelMeshes;
 }
 
 END_ANIMA_ENGINE_CORE_NAMESPACE

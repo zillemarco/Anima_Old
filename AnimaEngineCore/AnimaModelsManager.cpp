@@ -20,12 +20,7 @@ AnimaModelsManager::AnimaModelsManager(AnimaEngine* engine)
 
 AnimaModelsManager::~AnimaModelsManager()
 {
-	if(_models != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
-		_models = nullptr;
-		_modelsNumber = 0;
-	}
+	ClearModels();
 }
 
 bool AnimaModelsManager::LoadModel(const char* modelPath)
@@ -40,10 +35,7 @@ bool AnimaModelsManager::LoadModel(const char* modelPath)
 	
 	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
 	
-	_modelsNumber++;
-	_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
-
-	_models[0] = *newModel;
+	AddModel(*newModel);
 	
 	AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetModelsAllocator()), newModel);
 		
@@ -70,7 +62,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			int numeroVertici = mesh->mNumVertices;
 		
 			AnimaVertex4f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
-			ASizeT* facce = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetGenericAllocator()), numeroFacce * 3);
+			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_engine->GetGenericAllocator()), numeroFacce, _engine);
 		
 			int offsetFacce = 0;
 			int offsetVertici = 0;
@@ -90,9 +82,17 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			for (int t = 0; t < numeroFacce; t++)
 			{
 				const aiFace* face = &mesh->mFaces[t];
-			
-				for(unsigned int i = 0; i < face->mNumIndices && i < 3; i++)
-					facce[offsetFacce++] = face->mIndices[i];
+				
+				int numeroIndiciFaccia = face->mNumIndices;
+				ASizeT* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetGenericAllocator()), numeroIndiciFaccia);
+				
+				int offsetIndiciFaccia = 0;
+				
+				for(unsigned int i = 0; i < numeroIndiciFaccia; i++)
+					indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
+				
+				facce[offsetFacce++].SetIndexes(indiciFaccia, offsetIndiciFaccia);
+				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), indiciFaccia);
 			}
 
 			if (mesh->HasNormals())
@@ -134,7 +134,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			//}
 
 			currentMesh->SetVertices(vertici, offsetVertici);
-			currentMesh->SetIndexes(facce, offsetFacce);
+			currentMesh->SetFaces(facce, offsetFacce);
 			
 			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), vertici);
 			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), facce);
@@ -156,6 +156,71 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 		currentModel->SetChildren(figli, numeroFigli);
 		
 		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), figli);
+	}
+}
+
+void AnimaModelsManager::AddModel(const AnimaModel& model)
+{
+	ANIMA_ASSERT(_engine != nullptr);
+	if(_modelsNumber > 0)
+	{
+		AnimaModel* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
+	
+		//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
+		for (int i = 0; i < _modelsNumber; i++)
+			tmpOldModels[i] = _models[i];
+	
+		//_allocator->Deallocate(_vertices);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
+	
+		_modelsNumber++;
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
+	
+		//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
+		for (int i = 0; i < _modelsNumber - 1; i++)
+			_models[i] = tmpOldModels[i];
+	
+		_models[_modelsNumber - 1] = model;
+		
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldModels);
+	}
+	else
+	{
+		_modelsNumber++;
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
+		_models[_modelsNumber - 1] = model;
+	}
+}
+
+ASizeT AnimaModelsManager::GetModelsNumber()
+{
+	return _modelsNumber;
+}
+
+AnimaModel AnimaModelsManager::GetModel(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelsNumber);
+	return _models[index];
+}
+
+AnimaModel* AnimaModelsManager::GetPModel(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _modelsNumber);
+	return &_models[index];
+}
+
+AnimaModel* AnimaModelsManager::GetModels()
+{
+	return _models;
+}
+
+void AnimaModelsManager::ClearModels()
+{
+	if(_models != nullptr && _modelsNumber > 0)
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
+		_models = nullptr;
+		_modelsNumber = 0;
 	}
 }
 

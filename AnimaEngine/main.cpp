@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <AnimaEngine.h>
-#include <AnimaVertex.h>
-#include <AnimaAllocators.h>
-#include <AnimaModel.h>
 #include <AnimaModelsManager.h>
-
+#include <AnimaBenchmarkTimer.h>
+#include <AnimaString.h>
 #include "CustomWindow.h"
-
-using namespace Anima::AnimaAllocatorNamespace;
 
 int main(int argc, char** argv)
 {		
@@ -19,13 +15,11 @@ int main(int argc, char** argv)
 
 	Anima::AnimaEngine engine;
 	engine.Initialize();
-
-	engine.DumpMemory();
-
+	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
 	if(!manager->LoadModel(path))
 		return 0;
-
+	
 	engine.DumpMemory();
 
 	//Anima::AnimaEngine engine;
