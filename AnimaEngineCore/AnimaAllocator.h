@@ -84,8 +84,8 @@ public:
 
 	void Dump() const
 	{
-		printf("\t- Size:\t\t%.3f MB\n", _size / (1024.0f * 1024.0f));
-		printf("\t- Used memory:\t%.3f MB\n", _usedMemory / (1024.0f * 1024.0f));
+		printf("\t- Size:\t\t%f MB\n", _size / (1024.0f * 1024.0f));
+		printf("\t- Used memory:\t%f MB\n", _usedMemory / (1024.0f * 1024.0f));
 		printf("\t- Allocations:\t%lu\n", _numAllocations);
 	}
 	

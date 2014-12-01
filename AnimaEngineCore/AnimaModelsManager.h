@@ -14,6 +14,7 @@
 #include "AnimaTypes.h"
 #include "AnimaModel.h"
 #include "AnimaEngine.h"
+#include "AnimaString.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -31,6 +32,7 @@ public:
 	
 public:
 	bool LoadModel(const char* modelPath);
+	bool LoadModel(AnimaString& modelPath);
 	void AddModel(const AnimaModel& model);
 	ASizeT GetModelsNumber();
 	AnimaModel GetModel(ASizeT index);

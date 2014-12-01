@@ -44,6 +44,27 @@ bool AnimaModelsManager::LoadModel(const char* modelPath)
 	return true;
 }
 
+bool AnimaModelsManager::LoadModel(AnimaString& modelPath)
+{
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(modelPath.GetBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	
+	if(scene == nullptr)
+		return false;
+	
+	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_engine->GetModelsAllocator()), _engine);
+	
+	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
+	
+	AddModel(*newModel);
+	
+	AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetModelsAllocator()), newModel);
+	
+	importer.FreeScene();
+	
+	return true;
+}
+
 void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode)
 {
 	int numeroMesh = sceneNode->mNumMeshes;

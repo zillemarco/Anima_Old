@@ -49,6 +49,9 @@ public:
 	AnimaString& operator+=(const AnimaString& src);
 	AnimaString& operator+=(const char* src);
 	
+	AChar& operator[](ASizeT index);
+	const AChar& operator[](ASizeT index) const;
+	
 public:
 	void SetString(const char* str);
 	void ClearString();
@@ -57,6 +60,30 @@ public:
 	ASizeT GetBufferLength();
 	
 	void Format(const char* format, ...);
+	
+	void Reserve(ASizeT size);
+	
+	AInt Find(AChar c, AInt startPos = -1);
+	AInt Find(AnimaString str, AInt startPos = -1);
+	AInt Find(const char* str, AInt startPos = -1);
+	
+	AnimaString Substring(AInt startPos, ASizeT len);
+	AnimaString Left(ASizeT len);
+	AnimaString Right(ASizeT len);
+	
+	AnimaString TrimLeft();
+	AnimaString TrimRight();
+	AnimaString Trim();
+	
+	void Replace(AChar find, AChar replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(AChar find, const char* replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(AChar find, const AnimaString& replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const char* find, AChar replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const char* find, const char* replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const char* find, const AnimaString& replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const AnimaString& find, AChar replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const AnimaString& find, const char* replacement, AInt startPos = -1, AInt count = -1);
+	void Replace(const AnimaString& find, const AnimaString& replacement, AInt startPos = -1, AInt count = -1);
 	
 private:
 	ASizeT GetFormatStringLength(const char* format, va_list args);

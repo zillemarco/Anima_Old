@@ -507,6 +507,9 @@ void AnimaEngine::DumpMemory()
 
 	printf("Generic allocator: \n");
 	_genericAllocator->Dump();
+	
+	printf("String allocator: \n");
+	_stringAllocator->Dump();
 
 	printf("Managers allocator: \n");
 	_managersAllocator->Dump();

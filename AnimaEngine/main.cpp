@@ -6,15 +6,15 @@
 #include "CustomWindow.h"
 
 int main(int argc, char** argv)
-{		
-#if defined _MSC_VER
-	const char* path = "D:/Modelli/Big_Dragon/Big_Dragon.fbx";
-#else
-	const char* path = "/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj";
-#endif
-
+{
 	Anima::AnimaEngine engine;
 	engine.Initialize();
+	
+#if defined _MSC_VER
+	Anima::AnimaString path("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
+#else
+	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
+#endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
 	if(!manager->LoadModel(path))
