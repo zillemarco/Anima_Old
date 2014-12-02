@@ -7,48 +7,34 @@ set(ANIMA_ENGINE_VERSION_PATCH "0")
 
 set(ANIMA_ENGINE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Output/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Output/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Output/bin)
+if(WIN32)
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/bin)
+elseif(APPLE)
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/bin)
+else()
+    message(FATAL_ERROR "No supported platform was detected")
+endif()
 
 set(LIB_SUFFIX "" CACHE STRING "Takes an empty string or 64. Directory where lib will be installed: lib or lib64")
 set(ANIMA_ENGINE_BOOST_ROOT_PATH "" CACHE STRING "Path where CMake can find boost")
-#set(ANIMA_ENGINE_BOOST_INCLUDE_PATH "" CACHE STRING "Path where CMake can find boost includes")
-#set(ANIMA_ENGINE_BOOST_LIBRARY_PATH "" CACHE STRING "Path where CMake can find boost libraries")
 
-option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" ON)
-option(ANIMA_ENGINE_INSTALL "Generate installation target" ON)
-
-if (WIN32)
-    option(ANIMA_ENGINE_USE_DWM_SWAP_INTERVAL "Set swap interval even when DWM compositing is enabled" OFF)
-    option(ANIMA_ENGINE_USE_OPTIMUS_HPG "Force use of high-performance GPU on Optimus systems" OFF)
-endif()
-
-if (APPLE)
-    option(ANIMA_ENGINE_BUILD_UNIVERSAL "Build ANIMA_ENGINE as a Universal Binary" OFF)
-    option(ANIMA_ENGINE_USE_CHDIR "Make AnimaEngineInit chdir to Contents/Resources" ON)
-    option(ANIMA_ENGINE_USE_MENUBAR "Populate the menu bar on first window creation" ON)
-    option(ANIMA_ENGINE_USE_RETINA "Use the full resolution of Retina displays" ON)
-else()
-    option(ANIMA_ENGINE_USE_EGL "Use EGL for context creation" OFF)
-endif()
+option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" OFF)
+option(ANIMA_ENGINE_INSTALL "Generate installation target" OFF)
+option(BUILD_SHARED_LIBS "Build AnimaEngine as shared library" OFF)
 
 if (MSVC)
     option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON)
 endif()
 
-#if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
     set(_ANIMA_ENGINE_BUILD_DLL 1)
-#endif()
-
-set(_ANIMA_ENGINE_USE_OPENGL 1)
-
-if (_ANIMA_ENGINE_USE_OPENGL)
-    find_package(OpenGL REQUIRED)
-else()
-    message(FATAL_ERROR "Graphic drivers not specified")
 endif()
 
+find_package(OpenGL REQUIRED)
 find_package(Threads REQUIRED)
 
 if (ANIMA_ENGINE_BUILD_DOCS)
@@ -57,8 +43,6 @@ if (ANIMA_ENGINE_BUILD_DOCS)
 endif()
 
 set(BOOST_ROOT ${ANIMA_ENGINE_BOOST_ROOT_PATH})
-#set(BOOST_INCLUDEDIR ${ANIMA_ENGINE_BOOST_INCLUDE_PATH})
-#set(BOOST_LIBRARYDIR ${ANIMA_ENGINE_BOOST_LIBRARY_PATH})
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 find_package(Boost 1.57.0 REQUIRED COMPONENTS thread system date_time chrono)
@@ -68,22 +52,21 @@ if(Boost_FOUND)
 	set(AnimaEngine_BOOST_LIBS ${Boost_LIBRARIES})
 endif()
 
+set(CMAKE_AUTOMOC ON)
+find_package(Qt5Widgets)
+
+if(NOT Qt5Widgets_FOUND)
+	message("Qt5 not found but is needed to compile CorpusEditor")
+endif()
+
 #--------------------------------------------------------------------
 # Set compiler specific flags
 #--------------------------------------------------------------------
-if (UNIX)
-    add_definitions(-Wall)
-
-#    if (BUILD_SHARED_LIBS)
-        add_definitions(-fvisibility=hidden)
-#    endif()
-endif()
-
 if (MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
     if (NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
-        foreach (flag CMAKE_C_FLAGS
+        foreach (flag 	CMAKE_C_FLAGS
                         CMAKE_C_FLAGS_DEBUG
                         CMAKE_C_FLAGS_RELEASE
                         CMAKE_C_FLAGS_MINSIZEREL
@@ -100,33 +83,6 @@ if (MSVC)
     endif()
 endif()
 
-if (MINGW)
-    # Enable link-time exploit mitigation features enabled by default on MSVC
-
-    include(CheckCCompilerFlag)
-
-    # Compatibility with data execution prevention (DEP)
-    set(CMAKE_REQUIRED_FLAGS "-Wl,--nxcompat")
-    check_c_compiler_flag("" _ANIMA_ENGINE_HAS_DEP)
-    if (_ANIMA_ENGINE_HAS_DEP)
-        set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--nxcompat ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif()
-
-    # Compatibility with address space layout randomization (ASLR)
-    set(CMAKE_REQUIRED_FLAGS "-Wl,--dynamicbase")
-    check_c_compiler_flag("" _ANIMA_ENGINE_HAS_ASLR)
-    if (_ANIMA_ENGINE_HAS_ASLR)
-        set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--dynamicbase ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif()
-
-    # Compatibility with 64-bit address space layout randomization (ASLR)
-    set(CMAKE_REQUIRED_FLAGS "-Wl,--high-entropy-va")
-    check_c_compiler_flag("" _ANIMA_ENGINE_HAS_64ASLR)
-    if (_ANIMA_ENGINE_HAS_64ASLR)
-        set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--high-entropy-va ${CMAKE_SHARED_LINKER_FLAGS}")
-    endif()
-endif()
-
 #--------------------------------------------------------------------
 # Detect and select backend APIs
 #--------------------------------------------------------------------
@@ -140,11 +96,6 @@ elseif (APPLE)
     message(STATUS "Using Cocoa for window creation")
     set(_ANIMA_ENGINE_NSGL 1)
     message(STATUS "Using NSGL for context creation")
-elseif (UNIX)
-    set(_ANIMA_ENGINE_X11 1)
-    message(STATUS "Using X11 for window creation")
-    set(_ANIMA_ENGINE_GLX 1)
-    message(STATUS "Using GLX for context creation")
 else()
     message(FATAL_ERROR "No supported platform was detected")
 endif()
@@ -180,139 +131,6 @@ if (_ANIMA_ENGINE_WGL)
     list(APPEND AnimaEngine_INCLUDE_DIRS "${OPENGL_INCLUDE_DIR}")
     list(APPEND AnimaEngine_LIBRARIES "${OPENGL_gl_LIBRARY}")
 	list(APPEND AnimaEngine_LIBRARIES glu32.lib)
-endif()
-
-#--------------------------------------------------------------------
-# Use X11 for window creation
-#--------------------------------------------------------------------
-if (_ANIMA_ENGINE_X11)
-
-    find_package(X11 REQUIRED)
-
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} x11")
-
-    # Set up library and include paths
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${X11_X11_INCLUDE_PATH}")
-    list(APPEND AnimaEngine_LIBRARIES "${X11_X11_LIB}" "${CMAKE_THREAD_LIBS_INIT}")
-    if (UNIX AND NOT APPLE)
-        list(APPEND AnimaEngine_LIBRARIES "${RT_LIBRARY}")
-    endif()
-
-    # Check for XRandR (modern resolution switching and gamma control)
-    if (NOT X11_Xrandr_FOUND)
-        message(FATAL_ERROR "The RandR library and headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${X11_Xrandr_INCLUDE_PATH}")
-    list(APPEND AnimaEngine_LIBRARIES "${X11_Xrandr_LIB}")
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} xrandr")
-
-    # Check for Xinerama (legacy multi-monitor support)
-    if (NOT X11_Xinerama_FOUND)
-        message(FATAL_ERROR "The Xinerama library and headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${X11_Xinerama_INCLUDE_PATH}")
-    list(APPEND AnimaEngine_LIBRARIES "${X11_Xinerama_LIB}")
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} xinerama")
-
-    # Check for XInput (high-resolution cursor motion)
-    if (NOT X11_Xinput_FOUND)
-        message(FATAL_ERROR "The XInput library and headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${X11_Xinput_INCLUDE_PATH}")
-
-    if (X11_Xinput_LIB)
-        list(APPEND AnimaEngine_LIBRARIES "${X11_Xinput_LIB}")
-    else()
-        # Backwards compatibility (bug in CMake 2.8.7)
-        list(APPEND AnimaEngine_LIBRARIES Xi)
-    endif()
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} xi")
-
-    # Check for Xf86VidMode (fallback gamma control)
-    if (NOT X11_xf86vmode_FOUND)
-        message(FATAL_ERROR "The Xf86VidMode library and headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${X11_xf86vmode_INCLUDE_PATH}")
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} xxf86vm")
-
-    if (X11_Xxf86vm_LIB)
-        list(APPEND AnimaEngine_LIBRARIES "${X11_Xxf86vm_LIB}")
-    else()
-        # Backwards compatibility (see CMake bug 0006976)
-        list(APPEND AnimaEngine_LIBRARIES Xxf86vm)
-    endif()
-
-    # Check for Xkb (X keyboard extension)
-    if (NOT X11_Xkb_FOUND)
-        message(FATAL_ERROR "The X keyboard extension headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIR "${X11_Xkb_INCLUDE_PATH}")
-
-    find_library(RT_LIBRARY rt)
-    mark_as_advanced(RT_LIBRARY)
-    if (RT_LIBRARY)
-        list(APPEND AnimaEngine_LIBRARIES "${RT_LIBRARY}")
-        set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -lrt")
-    endif()
-
-    find_library(MATH_LIBRARY m)
-    mark_as_advanced(MATH_LIBRARY)
-    if (MATH_LIBRARY)
-        list(APPEND AnimaEngine_LIBRARIES "${MATH_LIBRARY}")
-        set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -lm")
-    endif()
-
-    # Check for Xcursor
-    if (NOT X11_Xcursor_FOUND)
-        message(FATAL_ERROR "The Xcursor libraries and headers were not found")
-    endif()
-
-    list(APPEND AnimaEngine_INCLUDE_DIR "${X11_Xcursor_INCLUDE_PATH}")
-    list(APPEND AnimaEngine_LIBRARIES "${X11_Xcursor_LIB}")
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} xcursor")
-
-endif()
-
-#--------------------------------------------------------------------
-# Use GLX for context creation
-#--------------------------------------------------------------------
-if (_ANIMA_ENGINE_GLX)
-
-    list(APPEND AnimaEngine_INCLUDE_DIRS "${OPENGL_INCLUDE_DIR}")
-    list(APPEND AnimaEngine_LIBRARIES "${OPENGL_gl_LIBRARY}")
-
-    set(ANIMA_ENGINE_PKG_DEPS "${ANIMA_ENGINE_PKG_DEPS} gl")
-
-    include(CheckFunctionExists)
-
-    set(CMAKE_REQUIRED_LIBRARIES "${OPENGL_gl_LIBRARY}")
-    check_function_exists(glXGetProcAddress _ANIMA_ENGINE_HAS_GLXGETPROCADDRESS)
-    check_function_exists(glXGetProcAddressARB _ANIMA_ENGINE_HAS_GLXGETPROCADDRESSARB)
-    check_function_exists(glXGetProcAddressEXT _ANIMA_ENGINE_HAS_GLXGETPROCADDRESSEXT)
-
-    if (NOT _ANIMA_ENGINE_HAS_GLXGETPROCADDRESS AND
-        NOT _ANIMA_ENGINE_HAS_GLXGETPROCADDRESSARB AND
-        NOT _ANIMA_ENGINE_HAS_GLXGETPROCADDRESSEXT)
-        message(WARNING "No glXGetProcAddressXXX variant found")
-
-        # Check for dlopen support as a fallback
-        set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_DL_LIBS}")
-        check_function_exists(dlopen _ANIMA_ENGINE_HAS_DLOPEN)
-        if (NOT _ANIMA_ENGINE_HAS_DLOPEN)
-            message(FATAL_ERROR "No entry point retrieval mechanism found")
-        endif()
-
-        if (CMAKE_DL_LIBS)
-            list(APPEND AnimaEngine_LIBRARIES "${CMAKE_DL_LIBS}")
-            set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -l${CMAKE_DL_LIBS}")
-        endif()
-    endif()
-
 endif()
 
 #--------------------------------------------------------------------
@@ -362,38 +180,12 @@ set(ANIMA_ENGINE_LIBRARIES ${AnimaEngine_LIBRARIES} CACHE STRING "Dependencies o
 #--------------------------------------------------------------------
 # Choose library output name
 #--------------------------------------------------------------------
-#if (BUILD_SHARED_LIBS AND UNIX)
-if(UNIX)
-    # On Unix-like systems, shared libraries can use the soname system.
-    set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
-else()
-    set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
-endif()
+set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
+set(CORPUS_EDITOR_NAME CorpusEditor)
 
 #--------------------------------------------------------------------
-# Create generated files
+# AnimaEngine dependencies
 #--------------------------------------------------------------------
-#if (ANIMA_ENGINE_BUILD_DOCS)
-#    configure_file("${ANIMA_ENGINE_SOURCE_DIR}/docs/Doxyfile.in"
-#                   "${ANIMA_ENGINE_BINARY_DIR}/docs/Doxyfile" @ONLY)
-#endif()
-
-#configure_file("${ANIMA_ENGINE_SOURCE_DIR}/src/AnimaEngine_config.h.in"
-#               "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngine_config.h" @ONLY)
-
-#configure_file("${ANIMA_ENGINE_SOURCE_DIR}/src/AnimaEngineConfig.cmake.in"
-#               "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngineConfig.cmake" @ONLY)
-
-#configure_file("${ANIMA_ENGINE_SOURCE_DIR}/src/AnimaEngineConfigVersion.cmake.in"
-#               "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngineConfigVersion.cmake" @ONLY)
-
-#configure_file("${ANIMA_ENGINE_SOURCE_DIR}/src/AnimaEngine3.pc.in"
-#               "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngine3.pc" @ONLY)
-
-#--------------------------------------------------------------------
-# Add subdirectories
-#--------------------------------------------------------------------
-
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 	if (WIN32)	
 		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimpd.lib)
@@ -402,49 +194,17 @@ if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
 		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib)
 		set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib)
 	endif()
-else()
-	if (WIN32)
-		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x32/assimpd.lib)
-		set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x32/assimp.lib)
-	elseif(APPLE)
-		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x32/libassimpd.3.1.1.dylib)
-		set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x32/libassimp.3.1.1.dylib)
-	endif()
 endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
 
+#--------------------------------------------------------------------
+# Add subdirectories
+#--------------------------------------------------------------------
 add_subdirectory(AnimaEngine)
-add_subdirectory(AnimaEngineCore)
+add_subdirectory(CorpusEditor)
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
     add_subdirectory(docs)
-endif()
-
-#--------------------------------------------------------------------
-# Install files other than the library
-# The library is installed by src/CMakeLists.txt
-#--------------------------------------------------------------------
-if (ANIMA_ENGINE_INSTALL)
-#    install(DIRECTORY include/ANIMA_ENGINE DESTINATION include
-#            FILES_MATCHING PATTERN AnimaEngine3.h PATTERN AnimaEngine3native.h)
-#
-#    install(FILES "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngineConfig.cmake"
-#                  "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngineConfigVersion.cmake"
-#            DESTINATION lib${LIB_SUFFIX}/cmake/AnimaEngine)
-
-#    install(EXPORT AnimaEngineTargets DESTINATION lib${LIB_SUFFIX}/cmake/AnimaEngine)
-#    install(FILES "${ANIMA_ENGINE_BINARY_DIR}/src/AnimaEngine3.pc"
-#            DESTINATION lib${LIB_SUFFIX}/pkgconfig)
-
-#    # Only generate this target if no higher-level project already has
-#    if (NOT TARGET uninstall)
-#        configure_file("${ANIMA_ENGINE_SOURCE_DIR}/cmake_uninstall.cmake.in"
-#                       "${ANIMA_ENGINE_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
-
-#        add_custom_target(uninstall
-#                          "${CMAKE_COMMAND}" -P
-#                          "${ANIMA_ENGINE_BINARY_DIR}/cmake_uninstall.cmake")
-#    endif()
 endif()
