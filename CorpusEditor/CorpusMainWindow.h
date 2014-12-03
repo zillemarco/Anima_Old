@@ -17,6 +17,7 @@ class QMenu;
 class QMdiArea;
 class QMdiSubWindow;
 class QSignalMapper;
+class QGridLayout;
 
 class CorpusMainWindow : public QMainWindow
 {
@@ -29,56 +30,28 @@ protected:
 	void closeEvent(QCloseEvent *event);
 	
  private slots:
-	void newFile();
-	void open();
-	void save();
-	void saveAs();
-	void cut();
-	void copy();
-	void paste();
-	void about();
+	void newProject();
 	void updateMenus();
-	void updateWindowMenu();
-	EditWindow *createEditWindow();
+
 	void switchLayoutDirection();
 	void setActiveSubWindow(QWidget *window);
+
+private:
+	bool createNewProject();
 	
 private:
 	void createActions();
 	void createMenus();
-	void createToolBars();
 	void createStatusBar();
 	void readSettings();
 	void writeSettings();
-	EditWindow *activeEditWindow();
-	QMdiSubWindow *findEditWindow(const QString &fileName);
-	
-	QMdiArea *mdiArea;
-	QSignalMapper *windowMapper;
-	
-	QMenu *fileMenu;
-	QMenu *editMenu;
-	QMenu *windowMenu;
-	QMenu *helpMenu;
-	QToolBar *fileToolBar;
-	QToolBar *editToolBar;
-	QAction *newAct;
-	QAction *openAct;
-	QAction *saveAct;
-	QAction *saveAsAct;
-	QAction *exitAct;
-	QAction *cutAct;
-	QAction *copyAct;
-	QAction *pasteAct;
-	QAction *closeAct;
-	QAction *closeAllAct;
-	QAction *tileAct;
-	QAction *cascadeAct;
-	QAction *nextAct;
-	QAction *previousAct;
-	QAction *separatorAct;
-	QAction *aboutAct;
-	QAction *aboutQtAct;
+		
+	QMdiArea*		_mdiArea;
+	QSignalMapper*	_windowMapper;
+		
+	QMenu*		_fileMenu;
+	QAction*	_newAct;
+	QAction*	_exitAct;
 };
 
 #endif /* defined(__Anima__CorpusCorpusMainWindow__) */

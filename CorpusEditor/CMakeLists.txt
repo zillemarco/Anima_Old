@@ -7,11 +7,30 @@ set(${PROJECT_NAME}_sources main.cpp
 							CorpusMainWindow.cpp
 							EditWindow.cpp
 							CorpusOGLWindow.cpp)
+							
+set(UI_FILES "")
+set(RC_FILES CorpusEditor.qrc)
+
+qt5_wrap_ui(UI_HDRS ${UI_FILES})
+qt5_add_resources(RC_SRC_FILES ${RC_FILES})
 
 include_directories(${PROJECT_SOURCE_DIR}/../AnimaEngine/)
 include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
+if(APPLE)
+	set( MACOSX_BUNDLE_BUNDLE_NAME CorpusEditor)
+	set( MACOSX_BUNDLE_GUI_IDENTIFIER "CorpusEditor")
+	set( MACOSX_BUNDLE_ICON_FILE Res/CoprusEditor.icns)
+	set( MACOSX_BUNDLE_INFO_STRING "${CORPUS_EDITOR_VERSION_MAJOR}.${CORPUS_EDITOR_VERSION_MINOR}.${CORPUS_EDITOR_VERSION_PATCH}, Copyright 2014 AnimaEngine team")
+	set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${CORPUS_EDITOR_VERSION_MAJOR}.${CORPUS_EDITOR_VERSION_MINOR}" )
+	set( MACOSX_BUNDLE_LONG_VERSION_STRING "${CORPUS_EDITOR_VERSION_MAJOR}.${CORPUS_EDITOR_VERSION_MINOR}.${CORPUS_EDITOR_VERSION_PATCH}" )
+	set( MACOSX_BUNDLE_BUNDLE_VERSION "${CORPUS_EDITOR_VERSION_MAJOR}.${CORPUS_EDITOR_VERSION_MINOR}.${CORPUS_EDITOR_VERSION_PATCH}" )
+	set( MACOSX_BUNDLE_COPYRIGHT "(C) 2014 Zille Marco")
+	
+	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources} ${RC_SRC_FILES} ${UI_HDRS} )
+else()
+	add_executable(${PROJECT_NAME} WIN32 ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources} ${RC_SRC_FILES} ${UI_HDRS} CorpusEditor.rc)
+endif()
 
 target_link_libraries(${PROJECT_NAME} AnimaEngine)
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})

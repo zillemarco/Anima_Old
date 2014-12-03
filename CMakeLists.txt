@@ -62,6 +62,7 @@ endif()
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_PREFIX_PATH ${ANIMA_ENGINE_QT5_ROOT_PATH})
 find_package(Qt5Widgets)
+find_package(Qt5Declarative)
 
 if(NOT Qt5Widgets_FOUND)
 	message("Qt5 not found but is needed to compile CorpusEditor")
