@@ -1,25 +1,34 @@
 #include <stdio.h>
-#include <AnimaEngine.h>
-#include <AnimaModelsManager.h>
-#include <AnimaBenchmarkTimer.h>
-#include <AnimaString.h>
+//#include <AnimaEngine.h>
+//#include <AnimaModelsManager.h>
+//#include <AnimaBenchmarkTimer.h>
+//#include <AnimaString.h>
+#include <QApplication>
+#include "CorpusMainWindow.h"
 
 int main(int argc, char** argv)
 {
-	Anima::AnimaEngine engine;
-	engine.Initialize();
+	QApplication app(argc, argv);
+	CorpusMainWindow mainWindow;
 	
-#if defined _MSC_VER
-	Anima::AnimaString path("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
-#else
-	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
-#endif
+	mainWindow.show();
+	return app.exec();
 	
-	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	if(!manager->LoadModel(path))
-		return 0;
 	
-	engine.DumpMemory();
+//	Anima::AnimaEngine engine;
+//	engine.Initialize();
+//	
+//#if defined _MSC_VER
+//	Anima::AnimaString path("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
+//#else
+//	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
+//#endif
+//	
+//	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
+//	if(!manager->LoadModel(path))
+//		return 0;
+//	
+//	engine.DumpMemory();
 
 	//Anima::AnimaEngine engine;
 	//engine.Initialize();
@@ -47,5 +56,5 @@ int main(int argc, char** argv)
 	//	window->DrawScene();
 	//}
 		
-	return 0;
+//	return 0;
 }

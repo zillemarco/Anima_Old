@@ -8,15 +8,15 @@
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 
-#define _ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE \
-	_AnimaEngineWindowjoystickIOKit iokit_js[ANIMA_ENGINE_CORE_JOYSTICK_LAST + 1]
+#define _ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE \
+	_AnimaEngineWindowjoystickIOKit iokit_js[ANIMA_ENGINE_JOYSTICK_LAST + 1]
 
-#define _GETD_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE	_AnimaEngineWindowjoystickIOKit* GetPlatformLibraryJoystickState() { return iokit_js; }
-#define _GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE	GetPlatformLibraryJoystickState()
+#define _GETD_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE	_AnimaEngineWindowjoystickIOKit* GetPlatformLibraryJoystickState() { return iokit_js; }
+#define _GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE	GetPlatformLibraryJoystickState()
 
-#define _INIT_STATIC_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE(class) _AnimaEngineWindowjoystickIOKit class::iokit_js[];
+#define _INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE(class) _AnimaEngineWindowjoystickIOKit class::iokit_js[];
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
 typedef struct _AnimaEngineWindowjoystickIOKit
 {
@@ -38,6 +38,6 @@ typedef struct _AnimaEngineWindowjoystickIOKit
 void _AnimaEngineWindowInitJoysticks(void);
 void _AnimaEngineWindowTerminateJoysticks(void);
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE
 
 #endif

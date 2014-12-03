@@ -1,4 +1,4 @@
-#include "AnimaWindow_Base.h"
+#include "AnimaWindow.h"
 #include "AnimaEngine.h"
 
 #include <string.h>
@@ -14,7 +14,7 @@
 #include <sys/param.h>
 #include <mach/mach_time.h>
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
 static void centerCursor(AnimaEngineWindow_Base *window)
 {
@@ -25,7 +25,7 @@ static void centerCursor(AnimaEngineWindow_Base *window)
 
 static NSCursor* getModeCursor(AnimaEngineWindow_Base* window)
 {
-	if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_NORMAL)
+	if (window->GetCursorMode() == ANIMA_ENGINE_CURSOR_NORMAL)
 	{
 		if (window->GetCursor())
 			return (NSCursor*) window->GetCursor()->ns._object;
@@ -33,7 +33,7 @@ static NSCursor* getModeCursor(AnimaEngineWindow_Base* window)
 			return [NSCursor arrowCursor];
 	}
 	else
-		return (NSCursor*) AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor;
+		return (NSCursor*) AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor;
 }
 
 static void updateModeCursor(AnimaEngineWindow_Base* window)
@@ -42,7 +42,7 @@ static void updateModeCursor(AnimaEngineWindow_Base* window)
 	[getModeCursor(window) set];
 	
 	// This is required for the cursor to update if it's outside the window
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object invalidateCursorRectsForView:window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object invalidateCursorRectsForView:window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view];
 }
 
 static bool enterFullscreenMode(AnimaEngineWindow_Base* window)
@@ -53,7 +53,7 @@ static bool enterFullscreenMode(AnimaEngineWindow_Base* window)
 	
 	// NOTE: The window is resized despite mode setting failure to make
 	//       glfwSetWindowSize more robust
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object setFrame:[window->GetMonitor()->ns._screen frame] display:YES];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object setFrame:[window->GetMonitor()->ns._screen frame] display:YES];
 	
 	return status;
 }
@@ -73,13 +73,13 @@ static NSRect convertRectToBacking(AnimaEngineWindow_Base* window, NSRect conten
 {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-		return [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view convertRectToBacking:contentRect];
+		return [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view convertRectToBacking:contentRect];
 	else
 #endif
 		return contentRect;
 }
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE
 
 @interface AnimaEngineWindowWindowDelegate : NSObject
 {
@@ -110,9 +110,9 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 - (void)windowDidResize:(NSNotification *)notification
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context update];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context update];
 	
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 	const NSRect fbRect = convertRectToBacking(window, contentRect);
 
 	if(window->GetFramebufferSizeCallback())
@@ -124,13 +124,13 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	if(window->GetDamageCallback())
 		window->GetDamageCallback()(window);
 	
-	if (window->GetCursorMode()	== ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+	if (window->GetCursorMode()	== ANIMA_ENGINE_CURSOR_DISABLED)
 		centerCursor(window);
 }
 
 - (void)windowDidMove:(NSNotification *)notification
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context update];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context update];
 	
 	int x, y;
 	_AnimaEngineWindowPlatformGetWindowPos(window, &x, &y);
@@ -138,7 +138,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	if(window->GetPosCallback())
 		window->GetPosCallback()(window, x, y);
 	
-	if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+	if (window->GetCursorMode() == ANIMA_ENGINE_CURSOR_DISABLED)
 		centerCursor(window);
 }
 
@@ -208,7 +208,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	
 	for (window = engine->GetWindowListHead();  window;  window = window->GetNext())
 	{
-		if ([window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object isVisible])
+		if ([window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object isVisible])
 		{
 			if(window->GetVisibilityCallback())
 				window->GetVisibilityCallback()(window, true);
@@ -223,20 +223,20 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 @end
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
 static int translateFlags(NSUInteger flags)
 {
 	int mods = 0;
 	
 	if (flags & NSShiftKeyMask)
-		mods |= ANIMA_ENGINE_CORE_MOD_SHIFT;
+		mods |= ANIMA_ENGINE_MOD_SHIFT;
 	if (flags & NSControlKeyMask)
-		mods |= ANIMA_ENGINE_CORE_MOD_CONTROL;
+		mods |= ANIMA_ENGINE_MOD_CONTROL;
 	if (flags & NSAlternateKeyMask)
-		mods |= ANIMA_ENGINE_CORE_MOD_ALT;
+		mods |= ANIMA_ENGINE_MOD_ALT;
 	if (flags & NSCommandKeyMask)
-		mods |= ANIMA_ENGINE_CORE_MOD_SUPER;
+		mods |= ANIMA_ENGINE_MOD_SUPER;
 	
 	return mods;
 }
@@ -246,143 +246,143 @@ static int translateKey(unsigned int key)
 	// Keyboard symbol translation table
 	static const unsigned int table[128] =
 	{
-		/* 00 */ ANIMA_ENGINE_CORE_KEY_A,
-		/* 01 */ ANIMA_ENGINE_CORE_KEY_S,
-		/* 02 */ ANIMA_ENGINE_CORE_KEY_D,
-		/* 03 */ ANIMA_ENGINE_CORE_KEY_F,
-		/* 04 */ ANIMA_ENGINE_CORE_KEY_H,
-		/* 05 */ ANIMA_ENGINE_CORE_KEY_G,
-		/* 06 */ ANIMA_ENGINE_CORE_KEY_Z,
-		/* 07 */ ANIMA_ENGINE_CORE_KEY_X,
-		/* 08 */ ANIMA_ENGINE_CORE_KEY_C,
-		/* 09 */ ANIMA_ENGINE_CORE_KEY_V,
-		/* 0a */ ANIMA_ENGINE_CORE_KEY_WORLD_1,
-		/* 0b */ ANIMA_ENGINE_CORE_KEY_B,
-		/* 0c */ ANIMA_ENGINE_CORE_KEY_Q,
-		/* 0d */ ANIMA_ENGINE_CORE_KEY_W,
-		/* 0e */ ANIMA_ENGINE_CORE_KEY_E,
-		/* 0f */ ANIMA_ENGINE_CORE_KEY_R,
-		/* 10 */ ANIMA_ENGINE_CORE_KEY_Y,
-		/* 11 */ ANIMA_ENGINE_CORE_KEY_T,
-		/* 12 */ ANIMA_ENGINE_CORE_KEY_1,
-		/* 13 */ ANIMA_ENGINE_CORE_KEY_2,
-		/* 14 */ ANIMA_ENGINE_CORE_KEY_3,
-		/* 15 */ ANIMA_ENGINE_CORE_KEY_4,
-		/* 16 */ ANIMA_ENGINE_CORE_KEY_6,
-		/* 17 */ ANIMA_ENGINE_CORE_KEY_5,
-		/* 18 */ ANIMA_ENGINE_CORE_KEY_EQUAL,
-		/* 19 */ ANIMA_ENGINE_CORE_KEY_9,
-		/* 1a */ ANIMA_ENGINE_CORE_KEY_7,
-		/* 1b */ ANIMA_ENGINE_CORE_KEY_MINUS,
-		/* 1c */ ANIMA_ENGINE_CORE_KEY_8,
-		/* 1d */ ANIMA_ENGINE_CORE_KEY_0,
-		/* 1e */ ANIMA_ENGINE_CORE_KEY_RIGHT_BRACKET,
-		/* 1f */ ANIMA_ENGINE_CORE_KEY_O,
-		/* 20 */ ANIMA_ENGINE_CORE_KEY_U,
-		/* 21 */ ANIMA_ENGINE_CORE_KEY_LEFT_BRACKET,
-		/* 22 */ ANIMA_ENGINE_CORE_KEY_I,
-		/* 23 */ ANIMA_ENGINE_CORE_KEY_P,
-		/* 24 */ ANIMA_ENGINE_CORE_KEY_ENTER,
-		/* 25 */ ANIMA_ENGINE_CORE_KEY_L,
-		/* 26 */ ANIMA_ENGINE_CORE_KEY_J,
-		/* 27 */ ANIMA_ENGINE_CORE_KEY_APOSTROPHE,
-		/* 28 */ ANIMA_ENGINE_CORE_KEY_K,
-		/* 29 */ ANIMA_ENGINE_CORE_KEY_SEMICOLON,
-		/* 2a */ ANIMA_ENGINE_CORE_KEY_BACKSLASH,
-		/* 2b */ ANIMA_ENGINE_CORE_KEY_COMMA,
-		/* 2c */ ANIMA_ENGINE_CORE_KEY_SLASH,
-		/* 2d */ ANIMA_ENGINE_CORE_KEY_N,
-		/* 2e */ ANIMA_ENGINE_CORE_KEY_M,
-		/* 2f */ ANIMA_ENGINE_CORE_KEY_PERIOD,
-		/* 30 */ ANIMA_ENGINE_CORE_KEY_TAB,
-		/* 31 */ ANIMA_ENGINE_CORE_KEY_SPACE,
-		/* 32 */ ANIMA_ENGINE_CORE_KEY_GRAVE_ACCENT,
-		/* 33 */ ANIMA_ENGINE_CORE_KEY_BACKSPACE,
-		/* 34 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 35 */ ANIMA_ENGINE_CORE_KEY_ESCAPE,
-		/* 36 */ ANIMA_ENGINE_CORE_KEY_RIGHT_SUPER,
-		/* 37 */ ANIMA_ENGINE_CORE_KEY_LEFT_SUPER,
-		/* 38 */ ANIMA_ENGINE_CORE_KEY_LEFT_SHIFT,
-		/* 39 */ ANIMA_ENGINE_CORE_KEY_CAPS_LOCK,
-		/* 3a */ ANIMA_ENGINE_CORE_KEY_LEFT_ALT,
-		/* 3b */ ANIMA_ENGINE_CORE_KEY_LEFT_CONTROL,
-		/* 3c */ ANIMA_ENGINE_CORE_KEY_RIGHT_SHIFT,
-		/* 3d */ ANIMA_ENGINE_CORE_KEY_RIGHT_ALT,
-		/* 3e */ ANIMA_ENGINE_CORE_KEY_RIGHT_CONTROL,
-		/* 3f */ ANIMA_ENGINE_CORE_KEY_UNKNOWN, /* Function */
-		/* 40 */ ANIMA_ENGINE_CORE_KEY_F17,
-		/* 41 */ ANIMA_ENGINE_CORE_KEY_KP_DECIMAL,
-		/* 42 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 43 */ ANIMA_ENGINE_CORE_KEY_KP_MULTIPLY,
-		/* 44 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 45 */ ANIMA_ENGINE_CORE_KEY_KP_ADD,
-		/* 46 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 47 */ ANIMA_ENGINE_CORE_KEY_NUM_LOCK, /* Really KeypadClear... */
-		/* 48 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN, /* VolumeUp */
-		/* 49 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN, /* VolumeDown */
-		/* 4a */ ANIMA_ENGINE_CORE_KEY_UNKNOWN, /* Mute */
-		/* 4b */ ANIMA_ENGINE_CORE_KEY_KP_DIVIDE,
-		/* 4c */ ANIMA_ENGINE_CORE_KEY_KP_ENTER,
-		/* 4d */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 4e */ ANIMA_ENGINE_CORE_KEY_KP_SUBTRACT,
-		/* 4f */ ANIMA_ENGINE_CORE_KEY_F18,
-		/* 50 */ ANIMA_ENGINE_CORE_KEY_F19,
-		/* 51 */ ANIMA_ENGINE_CORE_KEY_KP_EQUAL,
-		/* 52 */ ANIMA_ENGINE_CORE_KEY_KP_0,
-		/* 53 */ ANIMA_ENGINE_CORE_KEY_KP_1,
-		/* 54 */ ANIMA_ENGINE_CORE_KEY_KP_2,
-		/* 55 */ ANIMA_ENGINE_CORE_KEY_KP_3,
-		/* 56 */ ANIMA_ENGINE_CORE_KEY_KP_4,
-		/* 57 */ ANIMA_ENGINE_CORE_KEY_KP_5,
-		/* 58 */ ANIMA_ENGINE_CORE_KEY_KP_6,
-		/* 59 */ ANIMA_ENGINE_CORE_KEY_KP_7,
-		/* 5a */ ANIMA_ENGINE_CORE_KEY_F20,
-		/* 5b */ ANIMA_ENGINE_CORE_KEY_KP_8,
-		/* 5c */ ANIMA_ENGINE_CORE_KEY_KP_9,
-		/* 5d */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 5e */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 5f */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 60 */ ANIMA_ENGINE_CORE_KEY_F5,
-		/* 61 */ ANIMA_ENGINE_CORE_KEY_F6,
-		/* 62 */ ANIMA_ENGINE_CORE_KEY_F7,
-		/* 63 */ ANIMA_ENGINE_CORE_KEY_F3,
-		/* 64 */ ANIMA_ENGINE_CORE_KEY_F8,
-		/* 65 */ ANIMA_ENGINE_CORE_KEY_F9,
-		/* 66 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 67 */ ANIMA_ENGINE_CORE_KEY_F11,
-		/* 68 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 69 */ ANIMA_ENGINE_CORE_KEY_F13,
-		/* 6a */ ANIMA_ENGINE_CORE_KEY_F16,
-		/* 6b */ ANIMA_ENGINE_CORE_KEY_F14,
-		/* 6c */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 6d */ ANIMA_ENGINE_CORE_KEY_F10,
-		/* 6e */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 6f */ ANIMA_ENGINE_CORE_KEY_F12,
-		/* 70 */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
-		/* 71 */ ANIMA_ENGINE_CORE_KEY_F15,
-		/* 72 */ ANIMA_ENGINE_CORE_KEY_INSERT, /* Really Help... */
-		/* 73 */ ANIMA_ENGINE_CORE_KEY_HOME,
-		/* 74 */ ANIMA_ENGINE_CORE_KEY_PAGE_UP,
-		/* 75 */ ANIMA_ENGINE_CORE_KEY_DELETE,
-		/* 76 */ ANIMA_ENGINE_CORE_KEY_F4,
-		/* 77 */ ANIMA_ENGINE_CORE_KEY_END,
-		/* 78 */ ANIMA_ENGINE_CORE_KEY_F2,
-		/* 79 */ ANIMA_ENGINE_CORE_KEY_PAGE_DOWN,
-		/* 7a */ ANIMA_ENGINE_CORE_KEY_F1,
-		/* 7b */ ANIMA_ENGINE_CORE_KEY_LEFT,
-		/* 7c */ ANIMA_ENGINE_CORE_KEY_RIGHT,
-		/* 7d */ ANIMA_ENGINE_CORE_KEY_DOWN,
-		/* 7e */ ANIMA_ENGINE_CORE_KEY_UP,
-		/* 7f */ ANIMA_ENGINE_CORE_KEY_UNKNOWN,
+		/* 00 */ ANIMA_ENGINE_KEY_A,
+		/* 01 */ ANIMA_ENGINE_KEY_S,
+		/* 02 */ ANIMA_ENGINE_KEY_D,
+		/* 03 */ ANIMA_ENGINE_KEY_F,
+		/* 04 */ ANIMA_ENGINE_KEY_H,
+		/* 05 */ ANIMA_ENGINE_KEY_G,
+		/* 06 */ ANIMA_ENGINE_KEY_Z,
+		/* 07 */ ANIMA_ENGINE_KEY_X,
+		/* 08 */ ANIMA_ENGINE_KEY_C,
+		/* 09 */ ANIMA_ENGINE_KEY_V,
+		/* 0a */ ANIMA_ENGINE_KEY_WORLD_1,
+		/* 0b */ ANIMA_ENGINE_KEY_B,
+		/* 0c */ ANIMA_ENGINE_KEY_Q,
+		/* 0d */ ANIMA_ENGINE_KEY_W,
+		/* 0e */ ANIMA_ENGINE_KEY_E,
+		/* 0f */ ANIMA_ENGINE_KEY_R,
+		/* 10 */ ANIMA_ENGINE_KEY_Y,
+		/* 11 */ ANIMA_ENGINE_KEY_T,
+		/* 12 */ ANIMA_ENGINE_KEY_1,
+		/* 13 */ ANIMA_ENGINE_KEY_2,
+		/* 14 */ ANIMA_ENGINE_KEY_3,
+		/* 15 */ ANIMA_ENGINE_KEY_4,
+		/* 16 */ ANIMA_ENGINE_KEY_6,
+		/* 17 */ ANIMA_ENGINE_KEY_5,
+		/* 18 */ ANIMA_ENGINE_KEY_EQUAL,
+		/* 19 */ ANIMA_ENGINE_KEY_9,
+		/* 1a */ ANIMA_ENGINE_KEY_7,
+		/* 1b */ ANIMA_ENGINE_KEY_MINUS,
+		/* 1c */ ANIMA_ENGINE_KEY_8,
+		/* 1d */ ANIMA_ENGINE_KEY_0,
+		/* 1e */ ANIMA_ENGINE_KEY_RIGHT_BRACKET,
+		/* 1f */ ANIMA_ENGINE_KEY_O,
+		/* 20 */ ANIMA_ENGINE_KEY_U,
+		/* 21 */ ANIMA_ENGINE_KEY_LEFT_BRACKET,
+		/* 22 */ ANIMA_ENGINE_KEY_I,
+		/* 23 */ ANIMA_ENGINE_KEY_P,
+		/* 24 */ ANIMA_ENGINE_KEY_ENTER,
+		/* 25 */ ANIMA_ENGINE_KEY_L,
+		/* 26 */ ANIMA_ENGINE_KEY_J,
+		/* 27 */ ANIMA_ENGINE_KEY_APOSTROPHE,
+		/* 28 */ ANIMA_ENGINE_KEY_K,
+		/* 29 */ ANIMA_ENGINE_KEY_SEMICOLON,
+		/* 2a */ ANIMA_ENGINE_KEY_BACKSLASH,
+		/* 2b */ ANIMA_ENGINE_KEY_COMMA,
+		/* 2c */ ANIMA_ENGINE_KEY_SLASH,
+		/* 2d */ ANIMA_ENGINE_KEY_N,
+		/* 2e */ ANIMA_ENGINE_KEY_M,
+		/* 2f */ ANIMA_ENGINE_KEY_PERIOD,
+		/* 30 */ ANIMA_ENGINE_KEY_TAB,
+		/* 31 */ ANIMA_ENGINE_KEY_SPACE,
+		/* 32 */ ANIMA_ENGINE_KEY_GRAVE_ACCENT,
+		/* 33 */ ANIMA_ENGINE_KEY_BACKSPACE,
+		/* 34 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 35 */ ANIMA_ENGINE_KEY_ESCAPE,
+		/* 36 */ ANIMA_ENGINE_KEY_RIGHT_SUPER,
+		/* 37 */ ANIMA_ENGINE_KEY_LEFT_SUPER,
+		/* 38 */ ANIMA_ENGINE_KEY_LEFT_SHIFT,
+		/* 39 */ ANIMA_ENGINE_KEY_CAPS_LOCK,
+		/* 3a */ ANIMA_ENGINE_KEY_LEFT_ALT,
+		/* 3b */ ANIMA_ENGINE_KEY_LEFT_CONTROL,
+		/* 3c */ ANIMA_ENGINE_KEY_RIGHT_SHIFT,
+		/* 3d */ ANIMA_ENGINE_KEY_RIGHT_ALT,
+		/* 3e */ ANIMA_ENGINE_KEY_RIGHT_CONTROL,
+		/* 3f */ ANIMA_ENGINE_KEY_UNKNOWN, /* Function */
+		/* 40 */ ANIMA_ENGINE_KEY_F17,
+		/* 41 */ ANIMA_ENGINE_KEY_KP_DECIMAL,
+		/* 42 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 43 */ ANIMA_ENGINE_KEY_KP_MULTIPLY,
+		/* 44 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 45 */ ANIMA_ENGINE_KEY_KP_ADD,
+		/* 46 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 47 */ ANIMA_ENGINE_KEY_NUM_LOCK, /* Really KeypadClear... */
+		/* 48 */ ANIMA_ENGINE_KEY_UNKNOWN, /* VolumeUp */
+		/* 49 */ ANIMA_ENGINE_KEY_UNKNOWN, /* VolumeDown */
+		/* 4a */ ANIMA_ENGINE_KEY_UNKNOWN, /* Mute */
+		/* 4b */ ANIMA_ENGINE_KEY_KP_DIVIDE,
+		/* 4c */ ANIMA_ENGINE_KEY_KP_ENTER,
+		/* 4d */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 4e */ ANIMA_ENGINE_KEY_KP_SUBTRACT,
+		/* 4f */ ANIMA_ENGINE_KEY_F18,
+		/* 50 */ ANIMA_ENGINE_KEY_F19,
+		/* 51 */ ANIMA_ENGINE_KEY_KP_EQUAL,
+		/* 52 */ ANIMA_ENGINE_KEY_KP_0,
+		/* 53 */ ANIMA_ENGINE_KEY_KP_1,
+		/* 54 */ ANIMA_ENGINE_KEY_KP_2,
+		/* 55 */ ANIMA_ENGINE_KEY_KP_3,
+		/* 56 */ ANIMA_ENGINE_KEY_KP_4,
+		/* 57 */ ANIMA_ENGINE_KEY_KP_5,
+		/* 58 */ ANIMA_ENGINE_KEY_KP_6,
+		/* 59 */ ANIMA_ENGINE_KEY_KP_7,
+		/* 5a */ ANIMA_ENGINE_KEY_F20,
+		/* 5b */ ANIMA_ENGINE_KEY_KP_8,
+		/* 5c */ ANIMA_ENGINE_KEY_KP_9,
+		/* 5d */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 5e */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 5f */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 60 */ ANIMA_ENGINE_KEY_F5,
+		/* 61 */ ANIMA_ENGINE_KEY_F6,
+		/* 62 */ ANIMA_ENGINE_KEY_F7,
+		/* 63 */ ANIMA_ENGINE_KEY_F3,
+		/* 64 */ ANIMA_ENGINE_KEY_F8,
+		/* 65 */ ANIMA_ENGINE_KEY_F9,
+		/* 66 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 67 */ ANIMA_ENGINE_KEY_F11,
+		/* 68 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 69 */ ANIMA_ENGINE_KEY_F13,
+		/* 6a */ ANIMA_ENGINE_KEY_F16,
+		/* 6b */ ANIMA_ENGINE_KEY_F14,
+		/* 6c */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 6d */ ANIMA_ENGINE_KEY_F10,
+		/* 6e */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 6f */ ANIMA_ENGINE_KEY_F12,
+		/* 70 */ ANIMA_ENGINE_KEY_UNKNOWN,
+		/* 71 */ ANIMA_ENGINE_KEY_F15,
+		/* 72 */ ANIMA_ENGINE_KEY_INSERT, /* Really Help... */
+		/* 73 */ ANIMA_ENGINE_KEY_HOME,
+		/* 74 */ ANIMA_ENGINE_KEY_PAGE_UP,
+		/* 75 */ ANIMA_ENGINE_KEY_DELETE,
+		/* 76 */ ANIMA_ENGINE_KEY_F4,
+		/* 77 */ ANIMA_ENGINE_KEY_END,
+		/* 78 */ ANIMA_ENGINE_KEY_F2,
+		/* 79 */ ANIMA_ENGINE_KEY_PAGE_DOWN,
+		/* 7a */ ANIMA_ENGINE_KEY_F1,
+		/* 7b */ ANIMA_ENGINE_KEY_LEFT,
+		/* 7c */ ANIMA_ENGINE_KEY_RIGHT,
+		/* 7d */ ANIMA_ENGINE_KEY_DOWN,
+		/* 7e */ ANIMA_ENGINE_KEY_UP,
+		/* 7f */ ANIMA_ENGINE_KEY_UNKNOWN,
 	};
 	
 	if (key >= 128)
-		return ANIMA_ENGINE_CORE_KEY_UNKNOWN;
+		return ANIMA_ENGINE_KEY_UNKNOWN;
 	
 	return table[key];
 }
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE
 
 @interface AnimaEngineWindowContentView : NSView
 {
@@ -400,11 +400,11 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 {
 	if (self == [AnimaEngineWindowContentView class])
 	{
-		if (Anima::AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor == nil)
+		if (Anima::AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor == nil)
 		{
 			NSImage* data = [[NSImage alloc] initWithSize:NSMakeSize(16, 16)];
 			
-			id cursor = Anima::AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor;
+			id cursor = Anima::AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor;
 			cursor = [[NSCursor alloc] initWithImage:data hotSpot:NSZeroPoint];
 			[data release];
 		}
@@ -455,7 +455,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 - (void)mouseDown:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_PRESS, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_PRESS, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)mouseDragged:(NSEvent *)event
@@ -466,19 +466,19 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 - (void)mouseUp:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_CORE_RELEASE, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_RELEASE, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)mouseMoved:(NSEvent *)event
 {
-	if (window->GetCursorMode()	== ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+	if (window->GetCursorMode()	== ANIMA_ENGINE_CURSOR_DISABLED)
 	{
 		if(window->GetCursorMotionCallback())
 			window->GetCursorMotionCallback()(window, [event deltaX], [event deltaY]);
 	}
 	else
 	{
-		const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+		const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 		const NSPoint p = [event locationInWindow];
 		
 		if(window->GetCursorMotionCallback())
@@ -489,7 +489,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 - (void)rightMouseDown:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_PRESS, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_PRESS, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)rightMouseDragged:(NSEvent *)event
@@ -500,13 +500,13 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 - (void)rightMouseUp:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, ANIMA_ENGINE_CORE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_CORE_RELEASE, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_RELEASE, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)otherMouseDown:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, (int) [event buttonNumber], ANIMA_ENGINE_CORE_PRESS, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, (int) [event buttonNumber], ANIMA_ENGINE_PRESS, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)otherMouseDragged:(NSEvent *)event
@@ -517,12 +517,12 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 - (void)otherMouseUp:(NSEvent *)event
 {
 	if(window->GetMouseClickCallback())
-		window->GetMouseClickCallback()(window, (int) [event buttonNumber], ANIMA_ENGINE_CORE_RELEASE, Anima::translateFlags([event modifierFlags]));
+		window->GetMouseClickCallback()(window, (int) [event buttonNumber], ANIMA_ENGINE_RELEASE, Anima::translateFlags([event modifierFlags]));
 }
 
 - (void)mouseExited:(NSEvent *)event
 {
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside = false;
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_cursorInside = false;
 	
 	if(window->GetCursorEnterCallback())
 		window->GetCursorEnterCallback()(window, false);
@@ -530,7 +530,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 - (void)mouseEntered:(NSEvent *)event
 {
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside = true;
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_cursorInside = true;
 	
 	if(window->GetCursorEnterCallback())
 		window->GetCursorEnterCallback()(window, true);
@@ -538,7 +538,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 - (void)viewDidChangeBackingProperties
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 	const NSRect fbRect = convertRectToBacking(window, contentRect);
 	
 	if(window->GetFramebufferSizeCallback())
@@ -567,11 +567,11 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	const int mods = Anima::translateFlags([event modifierFlags]);
 	
 	if(window->GetKeyCallback())
-		window->GetKeyCallback()(window, key, [event keyCode], ANIMA_ENGINE_CORE_PRESS, mods);
+		window->GetKeyCallback()(window, key, [event keyCode], ANIMA_ENGINE_PRESS, mods);
 	
 	NSString* characters = [event characters];
 	NSUInteger i, length = [characters length];
-	const int plain = !(mods & ANIMA_ENGINE_CORE_MOD_SUPER);
+	const int plain = !(mods & ANIMA_ENGINE_MOD_SUPER);
 	
 	for (i = 0;  i < length;  i++)
 	{
@@ -588,19 +588,19 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	const int key = Anima::translateKey([event keyCode]);
 	const int mods = Anima::translateFlags(modifierFlags);
 	
-	if (modifierFlags == window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_modifierFlags)
+	if (modifierFlags == window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_modifierFlags)
 	{
-		if (window->GetKeys()[key] == ANIMA_ENGINE_CORE_PRESS)
-			action = ANIMA_ENGINE_CORE_RELEASE;
+		if (window->GetKeys()[key] == ANIMA_ENGINE_PRESS)
+			action = ANIMA_ENGINE_RELEASE;
 		else
-			action = ANIMA_ENGINE_CORE_PRESS;
+			action = ANIMA_ENGINE_PRESS;
 	}
-	else if (modifierFlags > window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_modifierFlags)
-		action = ANIMA_ENGINE_CORE_PRESS;
+	else if (modifierFlags > window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_modifierFlags)
+		action = ANIMA_ENGINE_PRESS;
 	else
-		action = ANIMA_ENGINE_CORE_RELEASE;
+		action = ANIMA_ENGINE_RELEASE;
 	
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_modifierFlags = modifierFlags;
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_modifierFlags = modifierFlags;
 	
 	if(window->GetKeyCallback())
 		window->GetKeyCallback()(window, key, [event keyCode], action, mods);
@@ -612,7 +612,7 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 	const int mods = Anima::translateFlags([event modifierFlags]);
 	
 	if(window->GetKeyCallback())
-		window->GetKeyCallback()(window, key, [event keyCode], ANIMA_ENGINE_CORE_RELEASE, mods);
+		window->GetKeyCallback()(window, key, [event keyCode], ANIMA_ENGINE_RELEASE, mods);
 }
 
 - (void)scrollWheel:(NSEvent *)event
@@ -737,9 +737,9 @@ END_ANIMA_ENGINE_CORE_NAMESPACE
 
 @end
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#if defined(_ANIMA_ENGINE_CORE_USE_MENUBAR)
+#if defined(_ANIMA_ENGINE_USE_MENUBAR)
 
 static NSString* findAppName(void)
 {
@@ -865,7 +865,7 @@ static bool initializeAppKit(void)
 	// In case we are unbundled, make us a proper UI application
 	[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 	
-#if defined(_ANIMA_ENGINE_CORE_USE_MENUBAR)
+#if defined(_ANIMA_ENGINE_USE_MENUBAR)
 	// Menu bar setup must go between sharedApplication above and
 	// finishLaunching below, in order to properly emulate the behavior
 	// of NSApplicationMain
@@ -879,7 +879,7 @@ static bool initializeAppKit(void)
 
 static bool createWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindowwndconfig* wndconfig)
 {
-	_AnimaEngineWindowwindowNS* platformWindowState = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE;
+	_AnimaEngineWindowwindowNS* platformWindowState = window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE;
 	platformWindowState->_delegate = [[AnimaEngineWindowWindowDelegate alloc] initWithAnimaEngineWindowWindow:window];
 	if (platformWindowState->_delegate == nil)
 	{
@@ -919,7 +919,7 @@ static bool createWindow(AnimaEngineWindow_Base* window, const _AnimaEngineWindo
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 	if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
 	{
-#if defined(_ANIMA_ENGINE_CORE_USE_RETINA)
+#if defined(_ANIMA_ENGINE_USE_RETINA)
 		[platformWindowState->_view setWantsBestResolutionOpenGLSurface:YES];
 		window->SetResolutionMultiplier(2.0);
 #endif
@@ -960,9 +960,9 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 	
 	// There can only be one application delegate, but we allocate it the
 	// first time a window is created to keep all window code in this file
-	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate == nil)
+	if (AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate == nil)
 	{
-		_AnimaEngineWindowlibraryNS* libraryWindowState = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE;
+		_AnimaEngineWindowlibraryNS* libraryWindowState = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE;
 		libraryWindowState->_delegate = [[AnimaEngineWindowApplicationDelegate alloc] init];
 		if (libraryWindowState->_delegate == nil)
 		{
@@ -979,7 +979,7 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 	if (!_AnimaEngineWindowCreateContext(window, ctxconfig, fbconfig))
 		return false;
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context setView:window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context setView:window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view];
 	
 	if (wndconfig->_monitor)
 	{
@@ -993,32 +993,32 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 
 void _AnimaEngineWindowPlatformDestroyWindow(AnimaEngineWindow_Base* window)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object orderOut:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object orderOut:nil];
 	
 	if (window->GetMonitor())
 		leaveFullscreenMode(window);
 	
 	_AnimaEngineWindowDestroyContext(window);
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object setDelegate:nil];
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_delegate release];
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_delegate = nil;
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object setDelegate:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_delegate release];
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_delegate = nil;
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view release];
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view = nil;
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view release];
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view = nil;
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object close];
-	window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object = nil;
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object close];
+	window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object = nil;
 }
 
 void _AnimaEngineWindowPlatformSetWindowTitle(AnimaEngineWindow_Base* window, const char *title)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object setTitle:[NSString stringWithUTF8String:title]];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object setTitle:[NSString stringWithUTF8String:title]];
 }
 
 void _AnimaEngineWindowPlatformGetWindowPos(AnimaEngineWindow_Base* window, int* xpos, int* ypos)
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object contentRectForFrameRect:[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object frame]];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object contentRectForFrameRect:[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object frame]];
 	
 	if (xpos)
 		*xpos = contentRect.origin.x;
@@ -1028,15 +1028,15 @@ void _AnimaEngineWindowPlatformGetWindowPos(AnimaEngineWindow_Base* window, int*
 
 void _AnimaEngineWindowPlatformSetWindowPos(AnimaEngineWindow_Base* window, int x, int y)
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 	const NSRect dummyRect = NSMakeRect(x, transformY(y + contentRect.size.height), 0, 0);
-	const NSRect frameRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object frameRectForContentRect:dummyRect];
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object setFrameOrigin:frameRect.origin];
+	const NSRect frameRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object frameRectForContentRect:dummyRect];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object setFrameOrigin:frameRect.origin];
 }
 
 void _AnimaEngineWindowPlatformGetWindowSize(AnimaEngineWindow_Base* window, int* width, int* height)
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 	
 	if (width)
 		*width = contentRect.size.width;
@@ -1046,12 +1046,12 @@ void _AnimaEngineWindowPlatformGetWindowSize(AnimaEngineWindow_Base* window, int
 
 void _AnimaEngineWindowPlatformSetWindowSize(AnimaEngineWindow_Base* window, int width, int height)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object setContentSize:NSMakeSize(width, height)];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object setContentSize:NSMakeSize(width, height)];
 }
 
 void _AnimaEngineWindowPlatformGetFramebufferSize(AnimaEngineWindow_Base* window, int* width, int* height)
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 	const NSRect fbRect = convertRectToBacking(window, contentRect);
 	
 	if (width)
@@ -1062,8 +1062,8 @@ void _AnimaEngineWindowPlatformGetFramebufferSize(AnimaEngineWindow_Base* window
 
 void _AnimaEngineWindowPlatformGetWindowFrameSize(AnimaEngineWindow_Base* window, int* left, int* top, int* right, int* bottom)
 {
-	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
-	const NSRect frameRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object frameRectForContentRect:contentRect];
+	const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
+	const NSRect frameRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object frameRectForContentRect:contentRect];
 	
 	if (left)
 		*left = contentRect.origin.x - frameRect.origin.x;
@@ -1082,12 +1082,12 @@ void _AnimaEngineWindowPlatformIconifyWindow(AnimaEngineWindow_Base* window)
 	if (window->GetMonitor())
 		leaveFullscreenMode(window);
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object miniaturize:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object miniaturize:nil];
 }
 
 void _AnimaEngineWindowPlatformRestoreWindow(AnimaEngineWindow_Base* window)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object deminiaturize:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object deminiaturize:nil];
 }
 
 void _AnimaEngineWindowPlatformShowWindow(AnimaEngineWindow_Base* window)
@@ -1098,19 +1098,19 @@ void _AnimaEngineWindowPlatformShowWindow(AnimaEngineWindow_Base* window)
 	//       should probably not be done every time any window is shown
 	[NSApp activateIgnoringOtherApps:YES];
 	
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object makeKeyAndOrderFront:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object makeKeyAndOrderFront:nil];
 }
 
 void _AnimaEngineWindowPlatformUnhideWindow(AnimaEngineWindow_Base* window)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object orderFront:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object orderFront:nil];
 	if(window->GetVisibilityCallback())
 		window->GetVisibilityCallback()(window, true);
 }
 
 void _AnimaEngineWindowPlatformHideWindow(AnimaEngineWindow_Base* window)
 {
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object orderOut:nil];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object orderOut:nil];
 	if(window->GetVisibilityCallback())
 		window->GetVisibilityCallback()(window, false);
 }
@@ -1126,8 +1126,8 @@ void _AnimaEngineWindowPlatformPollEvents(AnimaEngine*)
 		[NSApp sendEvent:event];
 	}
 	
-	[AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool drain];
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool drain];
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = [[NSAutoreleasePool alloc] init];
 }
 
 void _AnimaEngineWindowPlatformWaitEvents(AnimaEngine* engine)
@@ -1167,9 +1167,9 @@ void _AnimaEngineWindowPlatformSetCursorPos(AnimaEngineWindow_Base* window, doub
 	}
 	else
 	{
-		const NSRect contentRect = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_view frame];
+		const NSRect contentRect = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view frame];
 		const NSPoint localPoint = NSMakePoint(x, contentRect.size.height - y - 1);
-		const NSPoint globalPoint = [window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object convertBaseToScreen:localPoint];
+		const NSPoint globalPoint = [window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object convertBaseToScreen:localPoint];
 		
 		CGWarpMouseCursorPosition(CGPointMake(globalPoint.x, transformY(globalPoint.y)));
 	}
@@ -1179,7 +1179,7 @@ void _AnimaEngineWindowPlatformApplyCursorMode(AnimaEngineWindow_Base* window)
 {
 	updateModeCursor(window);
 	
-	if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_DISABLED)
+	if (window->GetCursorMode() == ANIMA_ENGINE_CURSOR_DISABLED)
 	{
 		CGAssociateMouseAndMouseCursorPosition(false);
 		centerCursor(window);
@@ -1233,7 +1233,7 @@ void _AnimaEngineWindowPlatformDestroyCursor(_AnimaEngineWindowcursor* cursor)
 
 void _AnimaEngineWindowPlatformSetCursor(AnimaEngineWindow_Base* window, _AnimaEngineWindowcursor* cursor)
 {
-	if (window->GetCursorMode() == ANIMA_ENGINE_CORE_CURSOR_NORMAL && window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_cursorInside)
+	if (window->GetCursorMode() == ANIMA_ENGINE_CURSOR_NORMAL && window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_cursorInside)
 	{
 		if (cursor)
 			[(NSCursor*) cursor->ns._object set];
@@ -1268,17 +1268,17 @@ const char* _AnimaEngineWindowPlatformGetClipboardString(AnimaEngineWindow_Base*
 		return NULL;
 	}
 	
-	free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString = strdup([object UTF8String]);
+	free(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString = strdup([object UTF8String]);
 	
-	return AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString;
+	return AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString;
 }
 
 id AnimaEngineWindowGetCocoaWindow(AnimaEngineWindow_Base* handle)
 {
 	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*) handle;
-	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(nil);
-	return window->_GET_ANIMA_ENGINE_CORE_PLATFORM_WINDOW_STATE->_object;
+	_ANIMA_ENGINE_REQUIRE_INIT_OR_RETURN(nil);
+	return window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_object;
 }
 
 static char* getDisplayName(CGDirectDisplayID displayID)
@@ -1634,11 +1634,11 @@ void _AnimaEngineWindowPlatformSetGammaRamp(_AnimaEngineWindowmonitor* monitor, 
 CGDirectDisplayID AnimaEngineWindowGetCocoaMonitor(AnimaEngineWindowmonitor* handle)
 {
 	_AnimaEngineWindowmonitor* monitor = (_AnimaEngineWindowmonitor*) handle;
-	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(kCGNullDirectDisplay);
+	_ANIMA_ENGINE_REQUIRE_INIT_OR_RETURN(kCGNullDirectDisplay);
 	return monitor->ns._displayID;
 }
 
-#if defined(_ANIMA_ENGINE_CORE_USE_CHDIR)
+#if defined(_ANIMA_ENGINE_USE_CHDIR)
 
 static void changeToResourcesDirectory(void)
 {
@@ -1675,17 +1675,17 @@ static void changeToResourcesDirectory(void)
 
 bool _AnimaEngineWindowPlatformInit(void)
 {
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = [[NSAutoreleasePool alloc] init];
 	
 #if defined(_GLFW_USE_CHDIR)
 	changeToResourcesDirectory();
 #endif
 	
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-	if (!AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource)
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+	if (!AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource)
 		return false;
 	
-	CGEventSourceSetLocalEventsSuppressionInterval(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource, 0.0);
+	CGEventSourceSetLocalEventsSuppressionInterval(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource, 0.0);
 	
 	if (!_AnimaEngineWindowInitContextAPI())
 		return false;
@@ -1698,23 +1698,23 @@ bool _AnimaEngineWindowPlatformInit(void)
 
 void _AnimaEngineWindowPlatformTerminate(void)
 {
-	if (AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource)
+	if (AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource)
 	{
-		CFRelease(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource);
-		AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource = NULL;
+		CFRelease(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource);
+		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_eventSource = NULL;
 	}
 	
 	[NSApp setDelegate:nil];
-	[AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate release];
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate = nil;
+	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate release];
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate = nil;
 	
-	[AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
+	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
 	
-	[AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor release];
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor = nil;
+	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor release];
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor = nil;
 	
-	free(AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
+	free(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
 	
 	_AnimaEngineWindowTerminateJoysticks();
 	_AnimaEngineWindowTerminateContextAPI();
@@ -1722,20 +1722,20 @@ void _AnimaEngineWindowPlatformTerminate(void)
 
 const char* _AnimaEngineWindowPlatformGetVersionString(void)
 {
-	const char* version = _ANIMA_ENGINE_CORE_VERSION_NUMBER " Cocoa"
-#if defined(_ANIMA_ENGINE_CORE_NSGL)
+	const char* version = _ANIMA_ENGINE_VERSION_NUMBER " Cocoa"
+#if defined(_ANIMA_ENGINE_NSGL)
 	" NSGL"
 #endif
-#if defined(_ANIMA_ENGINE_CORE_USE_CHDIR)
+#if defined(_ANIMA_ENGINE_USE_CHDIR)
 	" chdir"
 #endif
-#if defined(_ANIMA_ENGINE_CORE_USE_MENUBAR)
+#if defined(_ANIMA_ENGINE_USE_MENUBAR)
 	" menubar"
 #endif
-#if defined(_ANIMA_ENGINE_CORE_USE_RETINA)
+#if defined(_ANIMA_ENGINE_USE_RETINA)
 	" retina"
 #endif
-#if defined(_ANIMA_ENGINE_CORE_BUILD_DLL)
+#if defined(_ANIMA_ENGINE_BUILD_DLL)
 	" dynamic"
 #endif
 	;
@@ -1753,18 +1753,18 @@ void _AnimaEngineWindowInitTimer(void)
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
 	
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution = (double) info.numer / (info.denom * 1.0e9);
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime();
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_resolution = (double) info.numer / (info.denom * 1.0e9);
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime();
 }
 
 double _AnimaEngineWindowPlatformGetTime(void)
 {
-	return (double) (getRawTime() - AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base) * AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution;
+	return (double) (getRawTime() - AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_base) * AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_resolution;
 }
 
 void _AnimaEngineWindowPlatformSetTime(double time)
 {
-	AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime() - (uint64_t) (time / AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_TIME_STATE->_resolution);
+	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_base = getRawTime() - (uint64_t) (time / AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_resolution);
 }
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE

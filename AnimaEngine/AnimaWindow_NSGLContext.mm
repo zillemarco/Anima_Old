@@ -1,14 +1,14 @@
-#include "AnimaWindow_Base.h"
+#include "AnimaWindow.h"
 #include "AnimaEngine.h"
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
 bool _AnimaEngineWindowInitContextAPI(void)
 {
 	if (!_AnimaEngineWindowInitTLS())
 		return false;
 	
-	_AnimaEngineWindowlibraryNSGL* platformLibraryState = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE;
+	_AnimaEngineWindowlibraryNSGL* platformLibraryState = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_CONTEXT_STATE;
 	platformLibraryState->_framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengl"));
 	if (platformLibraryState->_framework == NULL)
 	{
@@ -28,7 +28,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 {
 	unsigned int attributeCount = 0;
 	
-	if (ctxconfig->_api == ANIMA_ENGINE_CORE_OPENGL_ES_API)
+	if (ctxconfig->_api == ANIMA_ENGINE_OPENGL_ES_API)
 	{
 //		_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: This API does not support OpenGL ES");
 		return false;
@@ -49,7 +49,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 			return false;
 		}
 		
-		if (ctxconfig->_profile != ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE)
+		if (ctxconfig->_profile != ANIMA_ENGINE_OPENGL_CORE_PROFILE)
 		{
 //			_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: The targeted version of OS X only " "supports OpenGL 3.2 and later versions if they " "use the core profile");
 			return false;
@@ -85,11 +85,11 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 	else
 #endif
 	{
-		if (fbconfig->_auxBuffers != ANIMA_ENGINE_CORE_DONT_CARE)
+		if (fbconfig->_auxBuffers != ANIMA_ENGINE_DONT_CARE)
 			ADD_ATTR2(NSOpenGLPFAAuxBuffers, fbconfig->_auxBuffers);
 		
-		if (fbconfig->_accumRedBits != ANIMA_ENGINE_CORE_DONT_CARE && fbconfig->_accumGreenBits != ANIMA_ENGINE_CORE_DONT_CARE &&
-			fbconfig->_accumBlueBits != ANIMA_ENGINE_CORE_DONT_CARE && fbconfig->_accumAlphaBits != ANIMA_ENGINE_CORE_DONT_CARE)
+		if (fbconfig->_accumRedBits != ANIMA_ENGINE_DONT_CARE && fbconfig->_accumGreenBits != ANIMA_ENGINE_DONT_CARE &&
+			fbconfig->_accumBlueBits != ANIMA_ENGINE_DONT_CARE && fbconfig->_accumAlphaBits != ANIMA_ENGINE_DONT_CARE)
 		{
 			const int accumBits = fbconfig->_accumRedBits + fbconfig->_accumGreenBits + fbconfig->_accumBlueBits + fbconfig->_accumAlphaBits;
 			
@@ -97,7 +97,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 		}
 	}
 	
-	if (fbconfig->_redBits != ANIMA_ENGINE_CORE_DONT_CARE && fbconfig->_greenBits != ANIMA_ENGINE_CORE_DONT_CARE && fbconfig->_blueBits != ANIMA_ENGINE_CORE_DONT_CARE)
+	if (fbconfig->_redBits != ANIMA_ENGINE_DONT_CARE && fbconfig->_greenBits != ANIMA_ENGINE_DONT_CARE && fbconfig->_blueBits != ANIMA_ENGINE_DONT_CARE)
 	{
 		int colorBits = fbconfig->_redBits + fbconfig->_greenBits + fbconfig->_blueBits;
 		
@@ -110,13 +110,13 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 		ADD_ATTR2(NSOpenGLPFAColorSize, colorBits);
 	}
 	
-	if (fbconfig->_alphaBits != ANIMA_ENGINE_CORE_DONT_CARE)
+	if (fbconfig->_alphaBits != ANIMA_ENGINE_DONT_CARE)
 		ADD_ATTR2(NSOpenGLPFAAlphaSize, fbconfig->_alphaBits);
 	
-	if (fbconfig->_depthBits != ANIMA_ENGINE_CORE_DONT_CARE)
+	if (fbconfig->_depthBits != ANIMA_ENGINE_DONT_CARE)
 		ADD_ATTR2(NSOpenGLPFADepthSize, fbconfig->_depthBits);
 	
-	if (fbconfig->_stencilBits != ANIMA_ENGINE_CORE_DONT_CARE)
+	if (fbconfig->_stencilBits != ANIMA_ENGINE_DONT_CARE)
 		ADD_ATTR2(NSOpenGLPFAStencilSize, fbconfig->_stencilBits);
 	
 	if (fbconfig->_stereo)
@@ -125,7 +125,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 	if (fbconfig->_doublebuffer)
 		ADD_ATTR(NSOpenGLPFADoubleBuffer);
 	
-	if (fbconfig->_samples != ANIMA_ENGINE_CORE_DONT_CARE)
+	if (fbconfig->_samples != ANIMA_ENGINE_DONT_CARE)
 	{
 		if (fbconfig->_samples == 0)
 		{
@@ -146,7 +146,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 #undef ADD_ATTR
 #undef ADD_ATTR2
 	
-	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
+	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE;
 	windowContext->_pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
 	if (windowContext->_pixelFormat == nil)
 	{
@@ -157,7 +157,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 	NSOpenGLContext* share = NULL;
 	
 	if (ctxconfig->_share)
-		share = ctxconfig->_share->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context;
+		share = ctxconfig->_share->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context;
 	
 	windowContext->_context = [[NSOpenGLContext alloc] initWithFormat:windowContext->_pixelFormat shareContext:share];
 	if (windowContext->_context == nil)
@@ -171,7 +171,7 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 
 void _AnimaEngineWindowDestroyContext(AnimaEngineWindow_Base* window)
 {
-	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
+	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE;
 	[windowContext->_pixelFormat release];
 	windowContext->_pixelFormat = nil;
 	
@@ -182,7 +182,7 @@ void _AnimaEngineWindowDestroyContext(AnimaEngineWindow_Base* window)
 void _AnimaEngineWindowPlatformMakeContextCurrent(AnimaEngineWindow_Base* window)
 {
 	if (window)
-		[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context makeCurrentContext];
+		[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context makeCurrentContext];
 	else
 		[NSOpenGLContext clearCurrentContext];
 	
@@ -192,13 +192,13 @@ void _AnimaEngineWindowPlatformMakeContextCurrent(AnimaEngineWindow_Base* window
 void _AnimaEngineWindowPlatformSwapBuffers(AnimaEngineWindow_Base* window)
 {
 	// ARP appears to be unnecessary, but this is future-proof
-	[window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE->_context flushBuffer];
+	[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context flushBuffer];
 }
 
 void _AnimaEngineWindowPlatformSwapInterval(int interval)
 {
 	AnimaEngineWindow_Base* window = _AnimaEngineWindowPlatformGetCurrentContext();
-	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
+	_AnimaEngineWindowcontextNSGL* windowContext = window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE;
 	
 	GLint sync = interval;
 	[windowContext->_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
@@ -214,7 +214,7 @@ AnimaEngineWindowglproc _AnimaEngineWindowPlatformGetProcAddress(const char* pro
 {
 	CFStringRef symbolName = CFStringCreateWithCString(kCFAllocatorDefault, procname, kCFStringEncodingASCII);
 
-	_AnimaEngineWindowlibraryNSGL* platformLibraryContext = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_CONTEXT_STATE;
+	_AnimaEngineWindowlibraryNSGL* platformLibraryContext = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_CONTEXT_STATE;
 	
 	AnimaEngineWindowglproc symbol = (AnimaEngineWindowglproc)CFBundleGetFunctionPointerForName((CFBundleRef)platformLibraryContext->_framework, symbolName);
 	
@@ -226,8 +226,8 @@ AnimaEngineWindowglproc _AnimaEngineWindowPlatformGetProcAddress(const char* pro
 id AnimaEngineWindowGetNSGLContext(AnimaEngineWindow_Base* handle)
 {
 	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*) handle;
-	_ANIMA_ENGINE_CORE_REQUIRE_INIT_OR_RETURN(nil);
-	return (id)window->_GET_ANIMA_ENGINE_CORE_PLATFORM_CONTEXT_STATE;
+	_ANIMA_ENGINE_REQUIRE_INIT_OR_RETURN(nil);
+	return (id)window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE;
 }
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE

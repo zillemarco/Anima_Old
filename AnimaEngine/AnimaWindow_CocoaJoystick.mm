@@ -1,4 +1,4 @@
-#include "AnimaWindow_Base.h"
+#include "AnimaWindow.h"
 #include "AnimaEngine.h"
 
 #include <unistd.h>
@@ -10,7 +10,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <Kernel/IOKit/hidsystem/IOHIDUsageTables.h>
 
-BEGIN_ANIMA_ENGINE_CORE_NAMESPACE
+BEGIN_ANIMA_ENGINE_NAMESPACE
 
 typedef struct
 {
@@ -171,11 +171,11 @@ static void pollJoystickEvents(void)
 {
 	int joy;
 	
-	for (joy = 0;  joy <= ANIMA_ENGINE_CORE_JOYSTICK_LAST;  joy++)
+	for (joy = 0;  joy <= ANIMA_ENGINE_JOYSTICK_LAST;  joy++)
 	{
 		CFIndex i;
 		int buttonIndex = 0;
-		_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
+		_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
 		
 		if (!joystick->_present)
 			continue;
@@ -185,9 +185,9 @@ static void pollJoystickEvents(void)
 			_AnimaEngineWindowjoyelement* button = (_AnimaEngineWindowjoyelement*) CFArrayGetValueAtIndex(joystick->_buttonElements, i);
 			
 			if (getElementValue(joystick, button))
-				joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_CORE_PRESS;
+				joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_PRESS;
 			else
-				joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_CORE_RELEASE;
+				joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_RELEASE;
 		}
 		
 		for (i = 0;  i < CFArrayGetCount(joystick->_axisElements); i++)
@@ -217,9 +217,9 @@ static void pollJoystickEvents(void)
 			for (j = 0;  j < 4;  j++)
 			{
 				if (directions[value] & (1 << j))
-					joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_CORE_PRESS;
+					joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_PRESS;
 				else
-					joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_CORE_RELEASE;
+					joystick->_buttons[buttonIndex++] = ANIMA_ENGINE_RELEASE;
 			}
 		}
 	}
@@ -298,7 +298,7 @@ void _AnimaEngineWindowInitJoysticks(void)
 		if (result != kIOReturnSuccess)
 			continue;
 		
-		_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
+		_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
 		joystick->_present = true;
 		
 		result = IOCreatePlugInInterfaceForService(ioHIDDeviceObject, kIOHIDDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &ppPlugInInterface, &score);
@@ -347,7 +347,7 @@ void _AnimaEngineWindowInitJoysticks(void)
 		joystick->_buttons = (unsigned char*)calloc(CFArrayGetCount(joystick->_buttonElements) + CFArrayGetCount(joystick->_hatElements) * 4, 1);
 		
 		joy++;
-		if (joy > ANIMA_ENGINE_CORE_JOYSTICK_LAST)
+		if (joy > ANIMA_ENGINE_JOYSTICK_LAST)
 			break;
 	}
 }
@@ -356,9 +356,9 @@ void _AnimaEngineWindowTerminateJoysticks(void)
 {
 	int i;
 	
-	for (i = 0;  i < ANIMA_ENGINE_CORE_JOYSTICK_LAST + 1;  i++)
+	for (i = 0;  i < ANIMA_ENGINE_JOYSTICK_LAST + 1;  i++)
 	{
-		_AnimaEngineWindowjoystickIOKit* joystick = &AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[i];
+		_AnimaEngineWindowjoystickIOKit* joystick = &AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE[i];
 		removeJoystick(joystick);
 		
 		if (joystick->_axisElements)
@@ -374,12 +374,12 @@ bool _AnimaEngineWindowPlatformJoystickPresent(int joy)
 {
 	pollJoystickEvents();
 	
-	return AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy]._present;
+	return AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy]._present;
 }
 
 const float* _AnimaEngineWindowPlatformGetJoystickAxes(int joy, int* count)
 {
-	_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
+	_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
 	
 	pollJoystickEvents();
 	
@@ -392,7 +392,7 @@ const float* _AnimaEngineWindowPlatformGetJoystickAxes(int joy, int* count)
 
 const unsigned char* _AnimaEngineWindowPlatformGetJoystickButtons(int joy, int* count)
 {
-	_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
+	_AnimaEngineWindowjoystickIOKit* joystick = AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE + joy;
 	
 	pollJoystickEvents();
 	
@@ -408,7 +408,7 @@ const char* _AnimaEngineWindowPlatformGetJoystickName(int joy)
 {
 	pollJoystickEvents();
 	
-	return AnimaEngine::_GET_ANIMA_ENGINE_CORE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy]._name;
+	return AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE[joy]._name;
 }
 
-END_ANIMA_ENGINE_CORE_NAMESPACE
+END_ANIMA_ENGINE_NAMESPACE

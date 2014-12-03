@@ -1,7 +1,12 @@
 project(CorpusEditor C CXX)
 
-set(${PROJECT_NAME}_headers )
-set(${PROJECT_NAME}_sources main.cpp)
+set(${PROJECT_NAME}_headers CorpusMainWindow.h
+							EditWindow.h
+							CorpusOGLWindow.h)
+set(${PROJECT_NAME}_sources main.cpp 
+							CorpusMainWindow.cpp
+							EditWindow.cpp
+							CorpusOGLWindow.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/../AnimaEngine/)
 include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
@@ -13,7 +18,7 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
-qt5_use_modules(${PROJECT_NAME} Widgets)
+qt5_use_modules(${PROJECT_NAME} Widgets Gui)
 
 if (WIN32)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
@@ -25,27 +30,27 @@ if (WIN32)
 						COMMENT "Copia assimp.dll")
 elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.3.1.1.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.3.1.1.dylib"
 						COMMENT "Copia libassimpd.3.1.1.dylib")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.3.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.3.dylib"
 						COMMENT "Copia libassimpd.3.dylib")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.dylib"
 						COMMENT "Copia libassimpd.dylib")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.1.1.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.1.1.dylib"
 						COMMENT "Copia libassimp.3.1.1.dylib")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.dylib"
 						COMMENT "Copia libassimp.3.dylib")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E cp ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
 						COMMENT "Copia libassimp.dylib")
 endif()
 
@@ -65,6 +70,9 @@ if (ANIMA_ENGINE_INSTALL)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll DESTINATION CorpusEditor/bin/Debug CONFIGURATIONS Debug)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll DESTINATION Anima/bin/Debug CONFIGURATIONS Debug)
 	else()
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/CorpusEditor DESTINATION CorpusEditor/bin/Debug CONFIGURATIONS Debug)
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/CorpusEditor DESTINATION Anima/bin/Debug CONFIGURATIONS Debug)
+
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib DESTINATION CorpusEditor/bin/Debug CONFIGURATIONS Debug)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.dylib DESTINATION CorpusEditor/bin/Debug CONFIGURATIONS Debug)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.dylib DESTINATION CorpusEditor/bin/Debug CONFIGURATIONS Debug)
@@ -81,6 +89,9 @@ if (ANIMA_ENGINE_INSTALL)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll DESTINATION CorpusEditor/bin/Release CONFIGURATIONS Release)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll DESTINATION Anima/bin/Release CONFIGURATIONS Release)
 	else()
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/CorpusEditor DESTINATION CorpusEditor/bin/Release CONFIGURATIONS Release)
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/CorpusEditor DESTINATION Anima/bin/Release CONFIGURATIONS Release)
+
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib DESTINATION CorpusEditor/bin/Release CONFIGURATIONS Release)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib DESTINATION CorpusEditor/bin/Release CONFIGURATIONS Release)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib DESTINATION CorpusEditor/bin/Release CONFIGURATIONS Release)
@@ -101,6 +112,9 @@ if (ANIMA_ENGINE_INSTALL)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll DESTINATION CorpusEditor/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll DESTINATION Anima/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
 	else()
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo/CorpusEditor DESTINATION CorpusEditor/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo/CorpusEditor DESTINATION Anima/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
+
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib DESTINATION CorpusEditor/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.dylib DESTINATION CorpusEditor/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.dylib DESTINATION CorpusEditor/bin/RelWithDebInfo CONFIGURATIONS RelWithDebInfo)
@@ -116,6 +130,9 @@ if (ANIMA_ENGINE_INSTALL)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll DESTINATION CorpusEditor/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll DESTINATION Anima/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
 	else()
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MinSizeRel/CorpusEditor DESTINATION CorpusEditor/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
+		INSTALL(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MinSizeRel/CorpusEditor DESTINATION Anima/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
+
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib DESTINATION CorpusEditor/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib DESTINATION CorpusEditor/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib DESTINATION CorpusEditor/bin/MinSizeRel CONFIGURATIONS MinSizeRel)
