@@ -2,12 +2,20 @@ project(CorpusEditor C CXX)
 
 set(${PROJECT_NAME}_headers CorpusMainWindow.h
 							EditWindow.h
-							CorpusOGLWindow.h)
+							CorpusOGLWindow.h
+							NewProjectWindow.h
+							CorpusDocument.h
+							ResourceManagerTab.h
+							WorldEditorTab.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							CorpusMainWindow.cpp
 							EditWindow.cpp
-							CorpusOGLWindow.cpp)
-							
+							CorpusOGLWindow.cpp
+							NewProjectWindow.cpp
+							CorpusDocument.cpp
+							ResourceManagerTab.cpp
+							WorldEditorTab.cpp)
+
 set(UI_FILES "")
 set(RC_FILES CorpusEditor.qrc)
 

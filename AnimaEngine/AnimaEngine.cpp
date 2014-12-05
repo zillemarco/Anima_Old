@@ -15,6 +15,11 @@ int									AnimaEngine::_monitorCount = 0;
 _AnimaEngineWindowMonitorCallbacks	AnimaEngine::_callbacks;
 int									AnimaEngine::_animaEngineCount = 0;
 _AnimaEngineWindowHints				AnimaEngine::_windowHints;
+bool								AnimaEngine::_platformLibraryWindowStateInitialized = false;
+bool								AnimaEngine::_platformLibraryContextStateInitialized = false;
+bool								AnimaEngine::_platformLibraryTimeStateInitialized = false;
+bool								AnimaEngine::_platformLibraryJoystickStateInitialized = false;
+bool								AnimaEngine::_platformLibraryTLSStateInitialized = false;
 
 #define _ANIMA_MEMORY_SIZE			20971520	// 20 MB
 
@@ -46,6 +51,12 @@ AnimaEngine::~AnimaEngine()
 
 bool AnimaEngine::Initialize()
 {
+	if(!_platformLibraryWindowStateInitialized)
+		_INIT_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE;
+	
+	if(!_platformLibraryTimeStateInitialized)
+		_INIT_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE;
+	
 	InitializeMemorySystem();
 	InitializeManagers();
 
@@ -112,32 +123,58 @@ void AnimaEngine::Terminate()
 
 void AnimaEngine::TerminateMemorySystem()
 {
-	ANIMA_ASSERT(_mainMemory != nullptr && _mainMemorySize > 0);
+	if(_modelDataAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelDataAllocator, *_mainAllocator);
+		_modelDataAllocator = nullptr;
+	}
 	
-	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelDataAllocator, *_mainAllocator);
-	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_mainAllocator);
-	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_mainAllocator);
-	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_mainAllocator);
-	AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_mainAllocator);
+	if(_modelsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_mainAllocator);
+		_modelsAllocator = nullptr;
+	}
 	
-	_modelDataAllocator = nullptr;
-	_modelsAllocator = nullptr;
-	_genericAllocator = nullptr;
-	_managersAllocator = nullptr;
-	_stringAllocator = nullptr;
+	if(_genericAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_mainAllocator);
+		_genericAllocator = nullptr;
+	}
+	
+	if(_managersAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_mainAllocator);
+		_managersAllocator = nullptr;
+	}
+	
+	if(_stringAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_mainAllocator);
+		_stringAllocator = nullptr;
+	}
+	
+	if(_mainAllocator != nullptr)
+	{
+		delete _mainAllocator;
+		_mainAllocator = nullptr;
+	}
 
-	delete _mainAllocator;
-	_mainAllocator = nullptr;
+	if(_mainMemory != nullptr && _mainMemorySize > 0)
+	{
+		free(_mainMemory);
 
-	free(_mainMemory);
-
-	_mainMemory = nullptr;
-	_mainMemorySize = 0;
+		_mainMemory = nullptr;
+		_mainMemorySize = 0;
+	}
 }
 
 void AnimaEngine::TerminateManagers()
 {
-	AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _modelsManager);
+	if(_modelsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _modelsManager);
+		_modelsManager = nullptr;
+	}
 }
 
 void AnimaEngine::TerminateWindowSystem()

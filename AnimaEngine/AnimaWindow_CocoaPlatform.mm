@@ -1705,14 +1705,23 @@ void _AnimaEngineWindowPlatformTerminate(void)
 	}
 	
 	[NSApp setDelegate:nil];
-	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate release];
-	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate = nil;
+	if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate != nil)
+	{
+		[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate release];
+		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate = nil;
+	}
 	
-	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
-	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
+	if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool != nil)
+	{
+		[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
+		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
+	}
 	
-	[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor release];
-	AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor = nil;
+	if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor != nil)
+	{
+		[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor release];
+		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor = nil;
+	}
 	
 	free(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_clipboardString);
 	

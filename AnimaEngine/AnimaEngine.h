@@ -183,6 +183,12 @@ private:
 	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
 	AnimaFreeListAllocator* _stringAllocator;		/*!< Allocator usato dalla classe AnimaString */
+	
+	static bool _platformLibraryWindowStateInitialized;
+	static bool _platformLibraryContextStateInitialized;
+	static bool _platformLibraryTimeStateInitialized;
+	static bool _platformLibraryJoystickStateInitialized;
+	static bool _platformLibraryTLSStateInitialized;
 
 private:
 	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */

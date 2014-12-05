@@ -10,6 +10,9 @@
 #define __Anima__CorpusCorpusMainWindow__
 
 #include <QMainWindow>
+#include "CorpusDocument.h"
+#include "ResourceManagerTab.h"
+#include "WorldEditorTab.h"
 
 class EditWindow;
 class QAction;
@@ -33,11 +36,11 @@ protected:
 	void newProject();
 	void updateMenus();
 
-	void switchLayoutDirection();
 	void setActiveSubWindow(QWidget *window);
 
 private:
-	bool createNewProject();
+	void createNewProject();
+	void closeProject();
 	
 private:
 	void createActions();
@@ -52,6 +55,11 @@ private:
 	QMenu*		_fileMenu;
 	QAction*	_newAct;
 	QAction*	_exitAct;
+	
+	CorpusDocument* _activeDocument;
+	
+	ResourceManagerTab* _resourceManagerTab;
+	WorldEditorTab*		_worldEditorTab;
 };
 
 #endif /* defined(__Anima__CorpusCorpusMainWindow__) */
