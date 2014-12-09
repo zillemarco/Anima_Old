@@ -34,6 +34,7 @@ protected:
 	
  private slots:
 	void newProject();
+	void openProject();
 	void updateMenus();
 
 	void setActiveSubWindow(QWidget *window);
@@ -54,6 +55,7 @@ private:
 		
 	QMenu*		_fileMenu;
 	QAction*	_newAct;
+	QAction*	_openAct;
 	QAction*	_exitAct;
 	
 	CorpusDocument* _activeDocument;

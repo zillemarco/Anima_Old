@@ -11,6 +11,7 @@
 #include <QString>
 #include <AnimaModelsManager.h>
 #include <AnimaString.h>
+#include <QMessageBox>
 
 CorpusDocument::CorpusDocument()
 {
@@ -69,7 +70,7 @@ bool CorpusDocument::OpenDocument(QString path)
 		{
 			if(xmlReader->name() == QString("CorpusProject"))
 			{
-				bHasError = ReadProjectFile(xmlReader);
+				bHasError = !ReadProjectFile(xmlReader);
 			}
 		}
 		else
@@ -77,8 +78,16 @@ bool CorpusDocument::OpenDocument(QString path)
 	}
 	
 	delete xmlReader;
+	xmlReader = nullptr;
 	
-	return true;
+	if(!bHasError)
+	{
+		if(!_engine.Initialize())
+			return false;
+		return true;
+	}
+	else
+		return false;
 }
 
 void CorpusDocument::CloseDocument()
@@ -114,6 +123,9 @@ bool CorpusDocument::CreateProjectFolderStructure()
 				QString buildMacRel = buildMac + QString("/Release");
 				QString buildMacRelDeb = buildMac + QString("/RelWithDebInfo");
 				QString buildMacMinRel = buildMac + QString("/MinSizeRel");
+			QString data = root + QString("/") + _projectName + QString("_Data");
+				QString dataModels = data + QString("/Models");
+				QString dataTextures = data + QString("/Textures");
 	
 	if(!QDir().mkdir(root))
 		return false;
@@ -167,6 +179,12 @@ bool CorpusDocument::CreateProjectFolderStructure()
 		return false;
 	if(!QDir().mkdir(buildMacMinRel))
 		return false;
+	if(!QDir().mkdir(data))
+		return false;
+	if(!QDir().mkdir(dataModels))
+		return false;
+	if(!QDir().mkdir(dataTextures))
+		return false;
 	
 	return true;
 }
@@ -200,6 +218,56 @@ bool CorpusDocument::CreateProjectFile()
 
 bool CorpusDocument::ReadProjectFile(QXmlStreamReader* xmlReader)
 {
+	int nodeRead = 0;
+	int maxNodesToRead = 2;
+	
+	if(xmlReader->atEnd() || xmlReader->hasError())
+		return false;
+	
+	QXmlStreamReader::TokenType token = xmlReader->readNext();
+	
+	if (!xmlReader->atEnd() && !xmlReader->hasError() && token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Project"))
+	{
+		while(nodeRead < maxNodesToRead && !xmlReader->atEnd() && !xmlReader->hasError())
+		{
+			token = xmlReader->readNext();
+			
+			if(token == QXmlStreamReader::EndElement)
+				continue;
+			
+			if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("RootPath"))
+			{
+				token = xmlReader->readNext();
+				
+				if(token != QXmlStreamReader::Characters)
+					return false;
+				
+				_projectRootPath = xmlReader->text().toString();
+				
+				nodeRead++;
+			}
+			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Name"))
+			{
+				token = xmlReader->readNext();
+				
+				if(token != QXmlStreamReader::Characters)
+					return false;
+				
+				_projectName = xmlReader->text().toString();
+				
+				nodeRead++;
+			}
+			else
+				return false;
+		}
+	}
+	else
+		return false;
+	
+	if(_projectRootPath.isEmpty() || _projectName.isEmpty())
+		return false;
+	
+	return true;
 }
 
 

@@ -32,6 +32,14 @@ public:
 		return &_engine;
 	}
 	
+	QString projectName() {
+		return _projectName;
+	}
+	
+	QString projectRootPath() {
+		return _projectRootPath;
+	}
+	
 private:
 	bool CreateProjectFile();
 	bool CreateProjectFolderStructure();
