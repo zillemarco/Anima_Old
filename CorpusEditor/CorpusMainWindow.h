@@ -10,10 +10,10 @@
 #define __Anima__CorpusCorpusMainWindow__
 
 #include <QMainWindow>
-#include "CorpusDocument.h"
-#include "ResourceManagerTab.h"
-#include "WorldEditorTab.h"
 
+class CorpusDocument;
+class ResourceManagerTab;
+class WorldEditorTab;
 class EditWindow;
 class QAction;
 class QMenu;

@@ -39,7 +39,7 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 		return false;
 	
 	#if defined _MSC_VER
-		Anima::AnimaString modelpath("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
+		Anima::AnimaString modelpath("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &_engine);
 	#else
 		Anima::AnimaString modelpath("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &_engine);
 	#endif

@@ -7,6 +7,9 @@
 //
 
 #include "CorpusMainWindow.h"
+#include "CorpusDocument.h"
+#include "ResourceManagerTab.h"
+#include "WorldEditorTab.h"
 #include <QObject>
 #include <QMdiArea>
 #include <QSignalMapper>
@@ -31,6 +34,10 @@
 
 CorpusMainWindow::CorpusMainWindow()
 {
+	_activeDocument = nullptr;
+	_resourceManagerTab = nullptr;
+	_worldEditorTab = nullptr;
+
 	_mdiArea = new QMdiArea;
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	_mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -50,10 +57,6 @@ CorpusMainWindow::CorpusMainWindow()
 	
 	setWindowTitle(tr("CoprusEditor"));
 	setUnifiedTitleAndToolBarOnMac(true);
-	
-	_activeDocument = nullptr;
-	_resourceManagerTab = nullptr;
-	_worldEditorTab = nullptr;
 }
 
 void CorpusMainWindow::closeEvent(QCloseEvent *event)
