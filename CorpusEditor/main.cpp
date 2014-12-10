@@ -7,7 +7,14 @@
 #include <QStyleFactory>
 #include <QDateTime>
 #include "CorpusMainWindow.h"
+
+#ifndef _MSC_VER
 #include <sys/syslimits.h>
+#endif
+
+#if defined _MSC_VER
+#define PATH_MAX MAX_PATH
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

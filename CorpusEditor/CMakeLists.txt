@@ -87,12 +87,8 @@ elseif(APPLE)
 endif()
 
 if (ANIMA_ENGINE_INSTALL)										
-	SET(plugin_dest_dir bin)
-	SET(qtconf_dest_dir bin)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/bin/${PROJECT_NAME}")
-	
 	IF(APPLE)
-		SET(plugin_dest_dir ${PROJECT_NAME}.app/Contents)
+		SET(plugin_dest_dir ${PROJECT_NAME}.app/Contents/plugins)
 		SET(qtconf_dest_dir ${PROJECT_NAME}.app/Contents/Resources)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin" 
@@ -101,16 +97,18 @@ if (ANIMA_ENGINE_INSTALL)
 	ENDIF(APPLE)
 	
 	IF(WIN32)
-		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/bin/${PROJECT_NAME}.exe")
+		SET(plugin_dest_dir ${CMAKE_INSTALL_PREFIX}/AnimaCorpus/plugins)
+		SET(qtconf_dest_dir AnimaCorpus)
+		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.exe")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin"
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64" 
 					"\${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
 
-    INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION . COMPONENT Runtime
-    								RUNTIME DESTINATION bin COMPONENT Runtime)
+    INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION AnimaCorpus COMPONENT Runtime
+    								RUNTIME DESTINATION AnimaCorpus COMPONENT Runtime)
 
-	INSTALL(DIRECTORY "${ANIMA_ENGINE_QT5_ROOT_PATH}/plugins/platforms" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+	INSTALL(DIRECTORY "${ANIMA_ENGINE_QT5_ROOT_PATH}/plugins/platforms" DESTINATION ${plugin_dest_dir} COMPONENT Runtime)
 
 	INSTALL(CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")" COMPONENT Runtime)
 					
