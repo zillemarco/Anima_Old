@@ -19,6 +19,9 @@
 #include <QStandardItem>
 #include <QPushButton>
 #include <QSettings>
+#include <QPoint>
+#include <QAction>
+#include <QMenu>
 
 class CorpusDocument;
 
@@ -33,11 +36,21 @@ public:
 	
 public:
 	void LoadResourcesTree();
-	
-private:
 	void LoadModelsTree();
 	void LoadMaterialsTree();
 	void LoadTexturesTree();
+	
+private:
+	void createActions();
+	void createMenus();
+	
+protected:
+	void resourceTreeContextMenu(const QPoint& point);
+	
+private slots:
+	void importModel();
+	void importTexture();
+	void addNewMaterial();
 	
 private:
 	CorpusDocument* _document;
@@ -46,6 +59,12 @@ private:
 	QTreeView* _resourcesTree;
 	
 	QListView* _tmp;
+	
+	QAction* _importModelAct;
+	QAction* _importTextureAct;
+	QAction* _addNewMaterialAct;
+	
+	QMenu*	_resourceTreeContextMenu;
 	
 	QStandardItemModel* _resourcesTreeModel;
 	QStandardItem* _modelResourcesTreeItem;

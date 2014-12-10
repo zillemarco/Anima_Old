@@ -67,6 +67,10 @@ public:
 	AInt Find(AnimaString str, AInt startPos = -1);
 	AInt Find(const char* str, AInt startPos = -1);
 	
+	AInt ReverseFind(AChar c, AInt startPos = -1);
+	AInt ReverseFind(AnimaString str, AInt startPos = -1);
+	AInt ReverseFind(const char* str, AInt startPos = -1);
+	
 	AnimaString Substring(AInt startPos, ASizeT len);
 	AnimaString Left(ASizeT len);
 	AnimaString Right(ASizeT len);

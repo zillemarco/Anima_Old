@@ -9,10 +9,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "AnimaModel.h"
+#include "AnimaModelsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModel::AnimaModel(AnimaEngine* engine)
+: _modelName(engine)
+, _modelFileName(engine)
 {
 	ANIMA_ASSERT(engine != nullptr)
 	_engine = engine;
@@ -22,9 +25,12 @@ AnimaModel::AnimaModel(AnimaEngine* engine)
 	
 	_modelChildrenNumber = 0;
 	_modelMeshesNumber = 0;
+	_modelName = "AnimaModel";
 }
 
 AnimaModel::AnimaModel(const AnimaModel& src)
+: _modelName(src._modelName)
+, _modelFileName(src._modelFileName)
 {
 	_engine = src._engine;
 	
@@ -43,6 +49,8 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _modelChildrenNumber(src._modelChildrenNumber)
 , _modelMeshes(src._modelMeshes)
 , _modelMeshesNumber(src._modelMeshesNumber)
+, _modelName(src._modelName)
+, _modelFileName(src._modelFileName)
 , _engine(src._engine)
 {
 	src._modelChildren = nullptr;
@@ -66,6 +74,8 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 	{
 		_engine = src._engine;
 		
+		SetModelName(src._modelName);
+		SetModelFileName(src._modelFileName);
 		SetChildren(src._modelChildren, src._modelChildrenNumber);
 		SetMeshes(src._modelMeshes, src._modelMeshesNumber);
 	}
@@ -84,6 +94,9 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		
 		_modelChildrenNumber = src._modelChildrenNumber;
 		_modelMeshesNumber = src._modelMeshesNumber;
+		
+		_modelName = src._modelName;
+		_modelFileName = src._modelFileName;
 		
 		src._modelChildren = nullptr;
 		src._modelMeshes = nullptr;
@@ -254,6 +267,46 @@ AnimaMesh* AnimaModel::GetPMesh(ASizeT index)
 AnimaMesh* AnimaModel::GetMeshes()
 {
 	return _modelMeshes;
+}
+
+void AnimaModel::SetModelName(const AnimaString& name)
+{
+	_modelName = name;
+}
+
+void AnimaModel::SetModelName(const char* name)
+{
+	_modelName = name;
+}
+
+AnimaString AnimaModel::GetAnimaModelName()
+{
+	return _modelName;
+}
+
+const char* AnimaModel::GetModelName()
+{
+	return _modelName.GetBuffer();
+}
+
+void AnimaModel::SetModelFileName(const AnimaString& name)
+{
+	_modelFileName = name;
+}
+
+void AnimaModel::SetModelFileName(const char* name)
+{
+	_modelFileName = name;
+}
+
+AnimaString AnimaModel::GetAnimaModelFileName()
+{
+	return _modelFileName;
+}
+
+const char* AnimaModel::GetModelFileName()
+{
+	return _modelFileName.GetBuffer();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

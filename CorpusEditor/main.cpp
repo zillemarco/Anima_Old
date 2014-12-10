@@ -1,32 +1,36 @@
 #include <stdio.h>
-//#include <AnimaEngine.h>
+#include <AnimaEngine.h>
 //#include <AnimaModelsManager.h>
 //#include <AnimaBenchmarkTimer.h>
 //#include <AnimaString.h>
 #include <QApplication>
 #include <QStyleFactory>
+#include <QDateTime>
 #include "CorpusMainWindow.h"
+#include <sys/syslimits.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+char outputFileName[PATH_MAX];
+
+void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-	freopen ("/Users/marco/Desktop/logs/CorpusEditor.log", "a", stderr);
+	freopen (outputFileName, "a", stderr);
 	
 	QByteArray localMsg = msg.toLocal8Bit();
 	switch (type) {
 		case QtDebugMsg:
-			fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			fprintf(stderr, "Debug: %s\n\tFile: %s\n\tLine: %u\n\tFunction: %s\n", localMsg.constData(), context.file, context.line, context.function);
 			break;
 		case QtWarningMsg:
-			fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			fprintf(stderr, "Warning: %s\n\tFile: %s\n\tLine: %u\n\tFunction: %s\n", localMsg.constData(), context.file, context.line, context.function);
 			break;
 		case QtCriticalMsg:
-			fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			fprintf(stderr, "Critical: %s\n\tFile: %s\n\tLine: %u\n\tFunction: %s\n", localMsg.constData(), context.file, context.line, context.function);
 			break;
 		case QtFatalMsg:
-			fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+			fprintf(stderr, "Fatal: %s\n\tFile: %s\n\tLine: %u\n\tFunction: %s\n", localMsg.constData(), context.file, context.line, context.function);
 			abort();
 	}
 	
@@ -35,10 +39,18 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char** argv)
 {
-	FILE* f = fopen("/Users/marco/Desktop/logs/CorpusEditor.log", "w");
+	Anima::AnimaEngine::SetUsedExternal();
+	
+	QDateTime dateTime = QDateTime::currentDateTime();
+	QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
+	QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
+	
+	sprintf(outputFileName, "%s.log", dateTimeByteArray.constData());
+	
+	FILE* f = fopen(outputFileName, "w");
 	fclose(f);
 	
-	qInstallMessageHandler(myMessageOutput);
+	qInstallMessageHandler(messageOutput);
 	
 	QApplication app(argc, argv);
 	

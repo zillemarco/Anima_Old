@@ -16,6 +16,8 @@ AnimaModelsManager::AnimaModelsManager(AnimaEngine* engine)
 	
 	_models = nullptr;
 	_modelsNumber = 0;
+	
+	_nextModelID = 0;
 }
 
 AnimaModelsManager::~AnimaModelsManager()
@@ -23,38 +25,41 @@ AnimaModelsManager::~AnimaModelsManager()
 	ClearModels();
 }
 
-bool AnimaModelsManager::LoadModel(const char* modelPath)
+AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 {
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath, aiProcessPreset_TargetRealtime_Quality);
-	
-	if(scene == nullptr)
-		return false;
-	
-	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_engine->GetModelsAllocator()), _engine);
-	
-	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
-	
-	AddModel(*newModel);
-	
-	AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetModelsAllocator()), newModel);
-		
-	importer.FreeScene();
-
-	return true;
+	AnimaString str(modelPath, _engine);
+	return LoadModel(str);
 }
 
-bool AnimaModelsManager::LoadModel(AnimaString& modelPath)
+AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 {
+	
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(modelPath.GetBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
 	if(scene == nullptr)
-		return false;
+		return nullptr;
 	
 	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_engine->GetModelsAllocator()), _engine);
 	
 	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
+	
+	AnimaString tmpName(_engine);
+	tmpName.Format("AnimaModel_%lu", GetNextModelID());
+	newModel->SetModelName(tmpName);
+	
+	AInt pos = modelPath.ReverseFind('/');
+	
+	if(pos == -1)
+		pos = modelPath.ReverseFind('\\');
+	
+	if(pos != -1)
+		pos++;
+	
+	AnimaString modelFileName(_engine);
+	modelFileName = modelPath.Substring(pos, modelPath.GetBufferLength());
+	
+	newModel->SetModelFileName(modelFileName);
 	
 	AddModel(*newModel);
 	
@@ -62,7 +67,7 @@ bool AnimaModelsManager::LoadModel(AnimaString& modelPath)
 	
 	importer.FreeScene();
 	
-	return true;
+	return &_models[_modelsNumber - 1];
 }
 
 void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode)
@@ -243,6 +248,11 @@ void AnimaModelsManager::ClearModels()
 		_models = nullptr;
 		_modelsNumber = 0;
 	}
+}
+
+ASizeT AnimaModelsManager::GetNextModelID()
+{
+	return _nextModelID++;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

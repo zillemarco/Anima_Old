@@ -31,8 +31,8 @@ public:
 	~AnimaModelsManager();
 	
 public:
-	bool LoadModel(const char* modelPath);
-	bool LoadModel(AnimaString& modelPath);
+	AnimaModel* LoadModel(const char* modelPath);
+	AnimaModel* LoadModel(AnimaString& modelPath);
 	void AddModel(const AnimaModel& model);
 	ASizeT GetModelsNumber();
 	AnimaModel GetModel(ASizeT index);
@@ -40,6 +40,7 @@ public:
 	AnimaModel* GetModels();
 	void ClearModels();
 	
+	ASizeT GetNextModelID();
 	
 private:
 	void RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode);
@@ -49,6 +50,8 @@ private:
 	
 	AnimaModel* _models;
 	ASizeT		_modelsNumber;
+	
+	ASizeT		_nextModelID;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

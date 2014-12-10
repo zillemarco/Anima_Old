@@ -105,6 +105,9 @@ public:
 	static const char* GetJoystickName(int joy);
 	static bool ExtensionSupported(const char* extension);
 	
+	static void SetUsedExternal(bool bUsedExternal = true) { _usedExternal = bUsedExternal; }
+	static bool IsUsedExteral() { return _usedExternal; }
+	
 public:
 	static bool IsInitialized() { return _animaEngineInitialized; }
 
@@ -189,6 +192,8 @@ private:
 	static bool _platformLibraryTimeStateInitialized;
 	static bool _platformLibraryJoystickStateInitialized;
 	static bool _platformLibraryTLSStateInitialized;
+	
+	static bool _usedExternal;						/*!< Flag that has to be set to true if AnimaEngine is being used inside an external app. This flag is false ONLY IF AnimaEngine is the one who controls the windowing system */
 
 private:
 	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */

@@ -98,11 +98,14 @@ void AnimaString::SetString(const char* str)
 	
 	ClearString();
 	
-	_stringLength = strlen(str) + 1;
-	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), _stringLength);
-	memset(_string, 0, _stringLength);
+	if(str != nullptr)
+	{
+		_stringLength = strlen(str) + 1;
+		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), _stringLength);
+		memset(_string, 0, _stringLength);
 	
-	strcpy(_string, str);
+		strcpy(_string, str);
+	}
 }
 
 void AnimaString::ClearString()
@@ -255,6 +258,7 @@ AInt AnimaString::Find(const char* str, AInt startPos)
 		startPos = 0;
 	
 	int offsetStr = 0;
+	int offsetInteralStr = 0;
 	int posizioneInizio = startPos;
 	
 	for(int i = startPos; i < _stringLength; i++)
@@ -262,15 +266,71 @@ AInt AnimaString::Find(const char* str, AInt startPos)
 		if(_string[i] == str[offsetStr])
 		{
 			posizioneInizio = i;
+			offsetInteralStr = i;
 			
-			for(; offsetStr < lunghezzaStr && i < _stringLength; i++, offsetStr++)
+			for(; offsetStr < lunghezzaStr && offsetInteralStr < _stringLength; offsetInteralStr++, offsetStr++)
 			{
-				if(str[offsetStr] != _string[i])
+				if(str[offsetStr] != _string[offsetInteralStr])
 					break;
 			}
 			
 			if(offsetStr < lunghezzaStr - 1)
 				offsetStr = 0;
+			else
+				return posizioneInizio;
+		}
+	}
+	return -1;
+}
+
+AInt AnimaString::ReverseFind(AChar c, AInt startPos)
+{
+	if(startPos <= -1)
+		startPos = _stringLength - 1;
+	
+	for(int i = startPos; i >= 0; i--)
+		if(_string[i] == c)
+			return i;
+	return -1;
+}
+
+AInt AnimaString::ReverseFind(AnimaString str, AInt startPos)
+{
+	return ReverseFind(str.GetBuffer(), startPos);
+}
+
+AInt AnimaString::ReverseFind(const char* str, AInt startPos)
+{
+	ASizeT lunghezzaStr = strlen(str);
+	
+	if(lunghezzaStr == 0)
+		return -1;
+	
+	if(lunghezzaStr == 1)
+		return Find(str[0], startPos);
+	
+	if(startPos <= -1)
+		startPos = _stringLength - 1;
+	
+	int offsetStr = lunghezzaStr - 1;
+	int offsetInteralStr = _stringLength - 1;
+	int posizioneInizio = startPos;
+	
+	for(int i = startPos; i >= 0; i--)
+	{
+		if(_string[i] == str[offsetStr])
+		{
+			posizioneInizio = i;
+			offsetInteralStr = i;
+			
+			for(; offsetStr >= 0 && offsetInteralStr >= 0; offsetInteralStr--, offsetStr--)
+			{
+				if(str[offsetStr] != _string[offsetInteralStr])
+					break;
+			}
+			
+			if(offsetStr > 0)
+				offsetStr = lunghezzaStr - 1;
 			else
 				return posizioneInizio;
 		}

@@ -14,6 +14,7 @@
 #include "AnimaAllocators.h"
 #include "AnimaMesh.h"
 #include "AnimaEngine.h"
+#include "AnimaString.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -45,12 +46,27 @@ public:
 	AnimaMesh* GetMeshes();
 	void ClearMeshes();
 	
+	void SetModelName(const AnimaString& name);
+	void SetModelName(const char* name);
+	
+	void SetModelFileName(const AnimaString& name);
+	void SetModelFileName(const char* name);
+	
+	AnimaString GetAnimaModelName();
+	const char* GetModelName();
+	
+	AnimaString GetAnimaModelFileName();
+	const char* GetModelFileName();
+	
 protected:
 	AnimaModel*		_modelChildren;
 	ASizeT			_modelChildrenNumber;
 	
 	AnimaMesh*		_modelMeshes;
 	ASizeT			_modelMeshesNumber;
+	
+	AnimaString		_modelName;
+	AnimaString		_modelFileName;
 	
 	AnimaEngine* _engine;
 };

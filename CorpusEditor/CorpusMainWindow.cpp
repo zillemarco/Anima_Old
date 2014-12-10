@@ -27,6 +27,8 @@
 #include <QGridLayout>
 #include <QTreeView>
 #include <QDebug>
+#include <QShortcut>
+#include <QKeySequence>
 
 #include "EditWindow.h"
 
@@ -61,18 +63,73 @@ CorpusMainWindow::CorpusMainWindow()
 
 void CorpusMainWindow::closeEvent(QCloseEvent *event)
 {
-	_mdiArea->closeAllSubWindows();
-	if (_mdiArea->currentSubWindow()) {
-		event->ignore();
-	} else {
-		writeSettings();
-		event->accept();
+	if(_activeDocument && _activeDocument->HasModifications())
+	{
+		QMessageBox::StandardButton btn = QMessageBox::question(this, tr("Warning"), tr("The opened project has modification.\nSave it?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+		
+		if(btn == QMessageBox::Cancel)
+		{
+			event->ignore();
+			return;
+		}
+		else if(btn == QMessageBox::Yes)
+		{
+			_activeDocument->SaveDocument();
+		}
 	}
+	
+	writeSettings();
+	closeProject();
 }
 
 void CorpusMainWindow::newProject()
 {
-	createNewProject();
+	NewProjectWindow dlg;
+	if(dlg.exec())
+	{
+		if(_activeDocument != nullptr)
+		{
+			if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the new project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+			{
+				return;
+			}
+			
+			closeProject();
+		}
+		
+		_activeDocument = new CorpusDocument;
+		if(!_activeDocument->NewDocument(dlg.getProjectName(), dlg.getProjectFolderPath()))
+		{
+			QMessageBox msg;
+			msg.setText(tr("Error during project creation."));
+			msg.setStandardButtons(QMessageBox::Ok);
+			msg.exec();
+			
+			setWindowTitle(tr("CorpusEditor"));
+			
+			return;
+		}
+		
+		_resourceManagerTab = new ResourceManagerTab(_activeDocument);
+		_worldEditorTab = new WorldEditorTab(_activeDocument);
+		
+		_mdiArea->addSubWindow(_resourceManagerTab);
+		_mdiArea->addSubWindow(_worldEditorTab);
+		
+		_worldEditorTab->show();
+		_resourceManagerTab->show();
+		
+		_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
+		
+		QSettings settings("ZEB", "CorpusEditor");
+		if(_resourceManagerTab != nullptr)
+			_resourceManagerTab->readSettings(&settings);
+		
+		if(_worldEditorTab != nullptr)
+			_worldEditorTab->readSettings(&settings);
+		
+		setWindowTitle(tr("CorpusEditor - ") + _activeDocument->projectName());
+	}
 }
 
 void CorpusMainWindow::openProject()
@@ -100,7 +157,9 @@ void CorpusMainWindow::openProject()
 		if(_activeDocument != nullptr)
 		{
 			if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+			{
 				return;
+			}
 			
 			closeProject();
 		}
@@ -142,53 +201,15 @@ void CorpusMainWindow::openProject()
 
 void CorpusMainWindow::updateMenus()
 {
-}
-
-void CorpusMainWindow::createNewProject()
-{
-	NewProjectWindow dlg;
-	if(dlg.exec())
+	if(_activeDocument)
 	{
-		if(_activeDocument != nullptr)
-		{
-			if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the new project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-				return;
-			
-			closeProject();
-		}
-		
-		_activeDocument = new CorpusDocument;
-		if(!_activeDocument->NewDocument(dlg.getProjectName(), dlg.getProjectFolderPath()))
-		{
-			QMessageBox msg;
-			msg.setText(tr("Error during project creation."));
-			msg.setStandardButtons(QMessageBox::Ok);
-			msg.exec();
-			
-			setWindowTitle(tr("CorpusEditor"));
-		
-			return;
-		}
-		
-		_resourceManagerTab = new ResourceManagerTab(_activeDocument);
-		_worldEditorTab = new WorldEditorTab(_activeDocument);
-
-		_mdiArea->addSubWindow(_resourceManagerTab);
-		_mdiArea->addSubWindow(_worldEditorTab);
-		
-		_worldEditorTab->show();
-		_resourceManagerTab->show();
-		
-		_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
-		
-		QSettings settings("ZEB", "CorpusEditor");
-		if(_resourceManagerTab != nullptr)
-			_resourceManagerTab->readSettings(&settings);
-		
-		if(_worldEditorTab != nullptr)
-			_worldEditorTab->readSettings(&settings);
-		
-		setWindowTitle(tr("CorpusEditor - ") + _activeDocument->projectName());
+		_resourcesMenu->setEnabled(true);
+		_closeProjectAct->setEnabled(true);
+	}
+	else
+	{
+		_resourcesMenu->setEnabled(false);
+		_closeProjectAct->setEnabled(false);
 	}
 }
 
@@ -204,10 +225,27 @@ void CorpusMainWindow::createActions()
 	_openAct->setStatusTip(tr("Open a project"));
 	connect(_openAct, SIGNAL(triggered()), this, SLOT(openProject()));
 	
+	_closeProjectAct = new QAction(tr("&Close project"), this);
+	_closeProjectAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_W);
+	_closeProjectAct->setStatusTip(tr("Close the current project"));
+	connect(_closeProjectAct, SIGNAL(triggered()), this, SLOT(closeProject()));
+	
 	_exitAct = new QAction(tr("E&xit"), this);
 	_exitAct->setShortcuts(QKeySequence::Quit);
 	_exitAct->setStatusTip(tr("Exit from CorpusEditor"));
 	connect(_exitAct, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
+	
+	_importModelAct = new QAction(tr("Import &model"), this);
+	_importModelAct->setStatusTip(tr("Import a new model into the resources"));
+	connect(_importModelAct, SIGNAL(triggered()), this, SLOT(importModel()));
+	
+	_importTextureAct = new QAction(tr("Import &texture"), this);
+	_importTextureAct->setStatusTip(tr("Import a new texture into the resources"));
+	connect(_importTextureAct, SIGNAL(triggered()), this, SLOT(importTexture()));
+	
+	_addNewMaterialAct = new QAction(tr("Add m&aterial"), this);
+	_addNewMaterialAct->setStatusTip(tr("Add a new material into the resources"));
+	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewTexture()));
 }
 
 void CorpusMainWindow::createMenus()
@@ -216,7 +254,15 @@ void CorpusMainWindow::createMenus()
 	_fileMenu->addAction(_newAct);
 	_fileMenu->addAction(_openAct);
 	_fileMenu->addSeparator();
+	_fileMenu->addAction(_closeProjectAct);
+	_fileMenu->addSeparator();
 	_fileMenu->addAction(_exitAct);
+	
+	_resourcesMenu = menuBar()->addMenu(tr("&Resources"));
+	_resourcesMenu->addAction(_importModelAct);
+	_resourcesMenu->addAction(_importTextureAct);
+	_resourcesMenu->addSeparator();
+	_resourcesMenu->addAction(_addNewMaterialAct);
 }
 
 void CorpusMainWindow::createStatusBar()
@@ -268,6 +314,7 @@ void CorpusMainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window)
 		return;
+	
 	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
@@ -284,4 +331,24 @@ void CorpusMainWindow::closeProject()
 	
 	delete _worldEditorTab;
 	_worldEditorTab = nullptr;
+	
+	setWindowTitle(tr("CorpusEditor"));
+}
+
+void CorpusMainWindow::importModel()
+{
+	if(_activeDocument->ImportModel())
+	{
+		_resourceManagerTab->LoadModelsTree();
+	}
+}
+
+void CorpusMainWindow::importTexture()
+{
+	
+}
+
+void CorpusMainWindow::addNewMaterial()
+{
+	
 }

@@ -1711,10 +1711,13 @@ void _AnimaEngineWindowPlatformTerminate(void)
 		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_delegate = nil;
 	}
 	
-	if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool != nil)
+	if(!AnimaEngine::IsUsedExteral())
 	{
-		[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
-		AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
+		if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool != nil)
+		{
+			[AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool release];
+			AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_autoreleasePool = nil;
+		}
 	}
 	
 	if(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE->_cursor != nil)

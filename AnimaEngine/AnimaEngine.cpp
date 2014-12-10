@@ -20,6 +20,7 @@ bool								AnimaEngine::_platformLibraryContextStateInitialized = false;
 bool								AnimaEngine::_platformLibraryTimeStateInitialized = false;
 bool								AnimaEngine::_platformLibraryJoystickStateInitialized = false;
 bool								AnimaEngine::_platformLibraryTLSStateInitialized = false;
+bool								AnimaEngine::_usedExternal = false;
 
 #define _ANIMA_MEMORY_SIZE			20971520	// 20 MB
 
