@@ -86,16 +86,13 @@ elseif(APPLE)
 						COMMENT "Copia libassimp.dylib")
 endif()
 
-if (ANIMA_ENGINE_INSTALL)	
-    INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION . COMPONENT Runtime
-    								RUNTIME DESTINATION bin COMPONENT Runtime)
-									
+if (ANIMA_ENGINE_INSTALL)										
 	SET(plugin_dest_dir bin)
 	SET(qtconf_dest_dir bin)
 	SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/bin/${PROJECT_NAME}")
 	
 	IF(APPLE)
-		SET(plugin_dest_dir ${PROJECT_NAME}.app/Contents/MacOS)
+		SET(plugin_dest_dir ${PROJECT_NAME}.app/Contents)
 		SET(qtconf_dest_dir ${PROJECT_NAME}.app/Contents/Resources)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin" 
@@ -109,9 +106,19 @@ if (ANIMA_ENGINE_INSTALL)
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64" 
 					"\${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
+
+    INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION . COMPONENT Runtime
+    								RUNTIME DESTINATION bin COMPONENT Runtime)
+
+	INSTALL(DIRECTORY "${ANIMA_ENGINE_QT5_ROOT_PATH}/plugins/platforms" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+
+	INSTALL(CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")" COMPONENT Runtime)
 					
 	INSTALL(CODE "file(GLOB_RECURSE QTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 			include(BundleUtilities)
 			fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")" 
 			COMPONENT Runtime)
+
+	set(CPACK_BINARY_DRAGNDROP ON)
+	include(CPack)
 endif()
