@@ -88,12 +88,12 @@ endif()
 
 if (ANIMA_ENGINE_INSTALL)										
 	IF(APPLE)
-		SET(plugin_dest_dir ${PROJECT_NAME}.app/Contents/plugins)
-		SET(qtconf_dest_dir ${PROJECT_NAME}.app/Contents/Resources)
-		SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
+		SET(plugin_dest_dir ${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.app/Contents/plugins)
+		SET(qtconf_dest_dir AnimaCorpus/${PROJECT_NAME}.app/Contents/Resources)
+		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.app")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin" 
-					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64" 
-					"\${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
+					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64"
+					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/lib")
 	ENDIF(APPLE)
 	
 	IF(WIN32)
@@ -102,7 +102,7 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.exe")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin"
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64" 
-					"\${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
+					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
 
     INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION AnimaCorpus COMPONENT Runtime
@@ -112,7 +112,7 @@ if (ANIMA_ENGINE_INSTALL)
 
 	INSTALL(CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")" COMPONENT Runtime)
 					
-	INSTALL(CODE "file(GLOB_RECURSE QTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+	INSTALL(CODE "file(GLOB_RECURSE QTPLUGINS \"${plugin_dest_dir}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 			include(BundleUtilities)
 			fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")" 
 			COMPONENT Runtime)

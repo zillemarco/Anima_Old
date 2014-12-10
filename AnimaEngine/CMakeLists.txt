@@ -104,7 +104,7 @@ if(BUILD_SHARED_LIBS)
 		endif()
 		set_target_properties(${PROJECT_NAME} PROPERTIES
 							COMPILE_FLAGS "${AnimaEngineCore_CFLAGS} -fno-common"
-							INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
+							INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/AnimaEngine/lib${LIB_SUFFIX}")
 		set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${ANIMA_ENGINE_VERSION})
 	endif()
 endif()
@@ -116,12 +116,12 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 if (ANIMA_ENGINE_INSTALL)
 	FILE(GLOB install_include "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 	INSTALL(FILES ${install_include} DESTINATION AnimaEngine/include)
-	
-    INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngine/bin
-									LIBRARY DESTINATION AnimaEngine/lib
-									ARCHIVE DESTINATION AnimaEngine/lib)
 
-	if(WIN32)		
+		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngine/bin
+										LIBRARY DESTINATION AnimaEngine/lib
+										ARCHIVE DESTINATION AnimaEngine/lib)
+
+	if(WIN32)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll 	DESTINATION AnimaEngine/bin CONFIGURATIONS Debug)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimpd.dll 	DESTINATION AnimaEngine/bin CONFIGURATIONS RelWithDebInfo)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll 	DESTINATION AnimaEngine/bin CONFIGURATIONS Release)
