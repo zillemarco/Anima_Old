@@ -76,6 +76,11 @@ void CorpusMainWindow::closeEvent(QCloseEvent *event)
 		{
 			_activeDocument->SaveDocument();
 		}
+		else if (btn == QMessageBox::No && _activeDocument->IsNewDocument())
+		{
+			if (QMessageBox::question(this, tr("Warning"), tr("The opened project was a new one.\nCompletely remove the create directories?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+				_activeDocument->DeleteProject();
+		}
 	}
 	
 	writeSettings();
@@ -320,18 +325,42 @@ void CorpusMainWindow::setActiveSubWindow(QWidget *window)
 
 void CorpusMainWindow::closeProject()
 {
-	_activeDocument->CloseDocument();
-	delete _activeDocument;
-	_activeDocument = nullptr;
-	
+	if (_activeDocument && _activeDocument->HasModifications())
+	{
+		QMessageBox::StandardButton btn = QMessageBox::question(this, tr("Warning"), tr("The opened project has modification.\nSave it?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+		if (btn == QMessageBox::Cancel)
+			return;
+		else if (btn == QMessageBox::Yes)
+			_activeDocument->SaveDocument();
+		else if (btn == QMessageBox::No && _activeDocument->IsNewDocument())
+		{
+			if (QMessageBox::question(this, tr("Warning"), tr("The opened project was a new one.\nCompletely remove the create directories?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+				_activeDocument->DeleteProject();
+		}
+	}
+
+	if (_activeDocument)
+	{
+		_activeDocument->CloseDocument();
+		delete _activeDocument;
+		_activeDocument = nullptr;
+	}
+
 	_mdiArea->closeAllSubWindows();
 	
-	delete _resourceManagerTab;
-	_resourceManagerTab = nullptr;
-	
-	delete _worldEditorTab;
-	_worldEditorTab = nullptr;
-	
+	if (_resourceManagerTab)
+	{
+		delete _resourceManagerTab;
+		_resourceManagerTab = nullptr;
+	}
+
+	if (_worldEditorTab)
+	{
+		delete _worldEditorTab;
+		_worldEditorTab = nullptr;
+	}
+
 	setWindowTitle(tr("CorpusEditor"));
 }
 

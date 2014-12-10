@@ -19,16 +19,18 @@ class CorpusDocument
 public:
 	CorpusDocument();
 	~CorpusDocument();
-	
+
 	bool NewDocument(QString name, QString path);
 	bool OpenDocument(QString path);
 	bool SaveDocument();
 	void CloseDocument();
-	
+
+	void DeleteProject();
+
 	QString projectFilePath() {
 		return _projectPath + QString("/") + _projectName + QString("/") + _projectName + QString(".ceproj");
 	}
-	
+
 	Anima::AnimaEngine* GetEngine() {
 		return _engine;
 	}
@@ -37,12 +39,20 @@ public:
 		return _projectName;
 	}
 	
-	QString projectRootPath() {
+	QString projectPath() {
 		return _projectPath;
 	}
 	
 	bool HasModifications() {
 		return _hasModifications;
+	}
+
+	void SetMofications() {
+		_hasModifications = true;
+	}
+
+	bool IsNewDocument() {
+		return _newDocument;
 	}
 	
 private:
@@ -95,6 +105,7 @@ private:
 	QString _projectDataTexturesPath;
 	
 	bool _hasModifications;
+	bool _newDocument;
 	
 	Anima::AnimaEngine* _engine;
 };

@@ -10,9 +10,42 @@
 #include "CorpusDocument.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QMessageBox>
 #include <AnimaModelsManager.h>
 #include <QMenu>
 #include <AnimaModel.h>
+
+Q_DECLARE_METATYPE(Anima::AnimaModel*)
+
+ResourceTreeItemModel::ResourceTreeItemModel(CorpusDocument* doc, QObject *parent)
+	: QStandardItemModel(parent)
+{
+	_document = doc;
+}
+
+ResourceTreeItemModel::ResourceTreeItemModel(CorpusDocument* doc, int rows, int columns, QObject *parent)
+	: QStandardItemModel(rows, columns, parent)
+{
+	_document = doc;
+}
+
+ResourceTreeItemModel::~ResourceTreeItemModel()
+{
+}
+
+bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+	if (role == Qt::EditRole)
+	{
+		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
+		model->SetModelName(value.toString().toLocal8Bit().constData());
+
+		_document->SetMofications();
+		//for (int i = 0; i < _engine->GetModelsManager()->GetModelsNumber(); i++)
+	}
+
+	return QStandardItemModel::setData(index, value, role);
+}
 
 ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 {
@@ -28,7 +61,7 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	dims.push_back(300);
 	dims.push_back(1);
 	
-	_resourcesTreeModel = new QStandardItemModel(0, 2);
+	_resourcesTreeModel = new ResourceTreeItemModel(_document, 0, 2);
 	_resourcesTree->setModel(_resourcesTreeModel);
 	
 	_modelResourcesTreeItem = new QStandardItem(tr("Models"));
@@ -41,6 +74,7 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	
 	_resourcesTreeModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Resource name")));
 	_resourcesTreeModel->setHorizontalHeaderItem(1, new QStandardItem(tr("File name")));
+	connect(_resourcesTreeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(resourceTreeItemDataChanged(QStandardItem*)));
 	
 	_resourcesTree->setColumnWidth(0, 150);
 	_resourcesTree->setColumnWidth(1, 100);
@@ -78,9 +112,11 @@ void ResourceManagerTab::LoadModelsTree()
 		QList<QStandardItem*> newItem;
 		
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelName()));
+		resourceNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ResourceManagerTabRole);
 		resourceNameItem->setEditable(true);
 		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelFileName()));
-		resourceNameItem->setEditable(true);
+		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ResourceManagerTabRole);
+		resourceFileNameItem->setEditable(true);
 		
 		newItem.append(resourceNameItem);
 		newItem.append(resourceFileNameItem);
@@ -156,5 +192,6 @@ void ResourceManagerTab::createMenus()
 	_resourcesTree->addAction(_addNewMaterialAct);
 }
 
-
-
+void ResourceManagerTab::resourceTreeItemDataChanged(QStandardItem* item)
+{
+}

@@ -25,6 +25,21 @@
 
 class CorpusDocument;
 
+class ResourceTreeItemModel : public QStandardItemModel
+{
+	Q_OBJECT
+public:
+	ResourceTreeItemModel(CorpusDocument* doc, QObject *parent = 0);
+	ResourceTreeItemModel(CorpusDocument* doc, int rows, int columns, QObject *parent = 0);
+	~ResourceTreeItemModel();
+
+public:
+	virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+
+private:
+	CorpusDocument* _document;
+};
+
 class ResourceManagerTab : public QFrame
 {
 	Q_OBJECT
@@ -34,6 +49,11 @@ public:
 	void saveSettings(QSettings* settings);
 	void readSettings(QSettings* settings);
 	
+protected:
+	enum ResourceManagerTabRoles {
+		ResourceManagerTabRole = Qt::UserRole + 1
+	};
+
 public:
 	void LoadResourcesTree();
 	void LoadModelsTree();
@@ -51,6 +71,7 @@ private slots:
 	void importModel();
 	void importTexture();
 	void addNewMaterial();
+	void resourceTreeItemDataChanged(QStandardItem* item);
 	
 private:
 	CorpusDocument* _document;
@@ -66,7 +87,7 @@ private:
 	
 	QMenu*	_resourceTreeContextMenu;
 	
-	QStandardItemModel* _resourcesTreeModel;
+	ResourceTreeItemModel* _resourcesTreeModel;
 	QStandardItem* _modelResourcesTreeItem;
 	QStandardItem* _materialResourcesTreeItem;
 	QStandardItem* _textureResourcesTreeItem;

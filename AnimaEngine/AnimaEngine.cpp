@@ -22,7 +22,7 @@ bool								AnimaEngine::_platformLibraryJoystickStateInitialized = false;
 bool								AnimaEngine::_platformLibraryTLSStateInitialized = false;
 bool								AnimaEngine::_usedExternal = false;
 
-#define _ANIMA_MEMORY_SIZE			20971520	// 20 MB
+#define _ANIMA_MEMORY_SIZE			41943040	// 40 MB
 
 AnimaEngine::AnimaEngine()
 {

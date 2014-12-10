@@ -55,6 +55,7 @@ CorpusDocument::CorpusDocument()
 	_engine = nullptr;
 	
 	_hasModifications = false;
+	_newDocument = false;
 }
 
 CorpusDocument::~CorpusDocument()
@@ -81,6 +82,7 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 		return false;
 	
 	_hasModifications = true;
+	_newDocument = true;
 	
 	return true;
 }
@@ -99,6 +101,7 @@ bool CorpusDocument::OpenDocument(QString path)
 		return false;
 	
 	_hasModifications = false;
+	_newDocument = false;
 	
 	bool bHasError = false;
 	
@@ -300,6 +303,8 @@ bool CorpusDocument::SaveProjectFile()
 	xmlWriter->writeEndDocument();
 	
 	delete xmlWriter;
+
+	_newDocument = false;
 	
 	return true;
 }
@@ -638,6 +643,18 @@ bool CorpusDocument::ImportModel()
 	
 	QFileInfo fileInfo(originalFilePath);
 	QString copiedFilePath = _projectDataModelsPath + "/" + fileInfo.fileName();
+
+	QFileInfo fileInfoCopied(copiedFilePath);
+
+	if (fileInfoCopied.exists())
+	{
+		QMessageBox::StandardButton btn = QMessageBox::question(NULL, QString("Warning"), QString("A model with this file name already exists.\nReplace it with this new one?"), QMessageBox::Yes | QMessageBox::No);
+		
+		if (btn == QMessageBox::No)
+			return false;
+		else
+			QFile::remove(copiedFilePath);
+	}
 	
 	if(!QFile::copy(originalFilePath, copiedFilePath))
 	{
@@ -795,6 +812,8 @@ bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileNam
 	return true;
 }
 
-
-
-
+void CorpusDocument::DeleteProject()
+{
+	QDir dir(_projectRootPath);
+	dir.removeRecursively();
+}
