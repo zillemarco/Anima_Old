@@ -52,6 +52,11 @@ public:
 	AChar& operator[](ASizeT index);
 	const AChar& operator[](ASizeT index) const;
 	
+	bool operator==(const AnimaString& left);
+	bool operator!=(const AnimaString& left);
+	bool operator==(const char* left);
+	bool operator!=(const char* left);
+	
 public:
 	void SetString(const char* str);
 	void ClearString();
@@ -88,6 +93,11 @@ public:
 	void Replace(const AnimaString& find, AChar replacement, AInt startPos = -1, AInt count = -1);
 	void Replace(const AnimaString& find, const char* replacement, AInt startPos = -1, AInt count = -1);
 	void Replace(const AnimaString& find, const AnimaString& replacement, AInt startPos = -1, AInt count = -1);
+	
+	bool Compare(const AnimaString& left);
+	bool CompareNoCase(const AnimaString& left);
+	bool Compare(const char* left);
+	bool CompareNoCase(const char* left);
 	
 private:
 	ASizeT GetFormatStringLength(const char* format, va_list args);

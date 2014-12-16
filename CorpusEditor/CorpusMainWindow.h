@@ -22,6 +22,13 @@ class QMdiSubWindow;
 class QSignalMapper;
 class QGridLayout;
 class QShortcut;
+#include <QList>
+
+struct RecentFileElement
+{
+	QString _filePath;
+	QString _fileName;
+};
 
 class CorpusMainWindow : public QMainWindow
 {
@@ -36,7 +43,7 @@ protected:
 private slots:
 	void newProject();
 	void openProject();
-	void closeProject();
+	bool closeProject();
 	void updateMenus();
 	
 	void importModel();
@@ -44,6 +51,11 @@ private slots:
 	void addNewMaterial();
 
 	void setActiveSubWindow(QWidget *window);
+	
+	void readRecentFileList();
+	void saveRecentFileList();
+	
+	void loadProjectFromRecentFiles(int index);
 
 private:
 	void createActions();
@@ -54,14 +66,18 @@ private:
 		
 	QMdiArea*		_mdiArea;
 	QSignalMapper*	_windowMapper;
+	QSignalMapper*	_recentFilesMapper;
 		
 	QMenu*		_fileMenu;
 	QMenu*		_resourcesMenu;
+	QMenu*		_recentFilesMenu;
 	
 	QAction*	_newAct;
 	QAction*	_openAct;
 	QAction*	_closeProjectAct;
 	QAction*	_exitAct;
+	
+	QList<QAction*> _recentFilesAction;
 	
 	QAction*	_importModelAct;
 	QAction*	_importTextureAct;
@@ -71,6 +87,8 @@ private:
 	
 	ResourceManagerTab* _resourceManagerTab;
 	WorldEditorTab*		_worldEditorTab;
+	
+	QList<RecentFileElement> _recentFiles;
 };
 
 #endif /* defined(__Anima__CorpusCorpusMainWindow__) */

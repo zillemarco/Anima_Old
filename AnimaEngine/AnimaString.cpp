@@ -7,6 +7,7 @@
 //
 
 #include "AnimaString.h"
+#include <boost/algorithm/string/predicate.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -90,6 +91,26 @@ AnimaString& AnimaString::operator=(const char* src)
 	SetString(src);
 	
 	return *this;
+}
+
+bool AnimaString::operator==(const AnimaString& left)
+{
+	return CompareNoCase(left);
+}
+
+bool AnimaString::operator!=(const AnimaString& left)
+{
+	return !CompareNoCase(left);
+}
+
+bool AnimaString::operator==(const char* left)
+{
+	return CompareNoCase(left);
+}
+
+bool AnimaString::operator!=(const char* left)
+{
+	return !CompareNoCase(left);
 }
 
 void AnimaString::SetString(const char* str)
@@ -554,6 +575,25 @@ void AnimaString::Replace(const AnimaString& find, const AnimaString& replacemen
 	Replace(find._string, replacement, startPos, count);
 }
 
+bool AnimaString::Compare(const AnimaString& left)
+{
+	return Compare(left._string);
+}
+
+bool AnimaString::CompareNoCase(const AnimaString& left)
+{
+	return CompareNoCase(left._string);
+}
+
+bool AnimaString::Compare(const char* left)
+{
+	return boost::equals(this->_string, left);
+}
+
+bool AnimaString::CompareNoCase(const char* left)
+{
+	return boost::iequals(this->_string, left);
+}
 
 END_ANIMA_ENGINE_NAMESPACE
 

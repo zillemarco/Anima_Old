@@ -37,11 +37,64 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 {
 	if (role == Qt::EditRole)
 	{
+		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine());
 		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
-		model->SetModelName(value.toString().toLocal8Bit().constData());
-
-		_document->SetMofications();
-		//for (int i = 0; i < _engine->GetModelsManager()->GetModelsNumber(); i++)
+		
+		if(index.column() == 0)
+		{
+			if(model->GetAnimaModelName() == newString)
+				return false;
+			
+			bool bFound = false;
+			for (int i = 0; i < _document->GetEngine()->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			{
+				if(_document->GetEngine()->GetModelsManager()->GetPModel(i)->GetAnimaModelName() == newString)
+					bFound = true;
+			}
+		
+			if(bFound)
+			{
+				QMessageBox msg;
+				msg.setWindowTitle(QString("Error"));
+				msg.setText(QString("A model with this name alredy exists."));
+				msg.exec();
+			
+				return false;
+			}
+		
+			model->SetModelName(newString);
+			_document->SetMofications();
+		}
+		else if(index.column() == 1)
+		{
+			if(model->GetAnimaModelFileName() == newString)
+				return false;
+			
+			bool bFound = false;
+			for (int i = 0; i < _document->GetEngine()->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			{
+				if(_document->GetEngine()->GetModelsManager()->GetPModel(i)->GetAnimaModelFileName() == newString)
+					bFound = true;
+			}
+			
+			if(bFound)
+			{
+				QMessageBox msg;
+				msg.setWindowTitle(QString("Error"));
+				msg.setText(QString("A model with this file name alredy exists."));
+				msg.exec();
+				
+				return false;
+			}
+			
+			QString oldFileName = QString("%0/%1").arg(_document->projectDataModelsPath()).arg(model->GetModelFileName());
+			QString newFileName = QString("%0/%1").arg(_document->projectDataModelsPath()).arg(value.toString());
+			
+			QFile::rename(oldFileName, newFileName);
+			
+			model->SetModelFileName(newString);
+			_document->SetMofications();
+		}
 	}
 
 	return QStandardItemModel::setData(index, value, role);

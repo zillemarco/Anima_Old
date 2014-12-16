@@ -35,14 +35,6 @@ public:
 		return _engine;
 	}
 	
-	QString projectName() {
-		return _projectName;
-	}
-	
-	QString projectPath() {
-		return _projectPath;
-	}
-	
 	bool HasModifications() {
 		return _hasModifications;
 	}
@@ -55,10 +47,139 @@ public:
 		return _newDocument;
 	}
 	
+	QString projectName() {
+		return _projectName;
+	}
+	
+	QString projectPath() {
+		return _projectPath;
+	}
+	
+	QString projectRootPath() {
+		return _projectRootPath;
+	}
+	
+	QString projectCodePath() {
+		return _projectCodePath;
+	}
+	
+	QString projectSourcesPath() {
+		return _projectSourcesPath;
+	}
+	
+	QString projectSrcPath() {
+		return _projectSrcPath;
+	}
+	
+	QString projectIncludePath() {
+		return _projectIncludePath;
+	}
+	
+	QString projectDependsPath() {
+		return _projectDependsPath;
+	}
+	
+	QString projectDependsWinPath() {
+		return _projectDependsWinPath;
+	}
+	
+	QString projectDependsWinDebPath() {
+		return _projectDependsWinDebPath;
+	}
+	
+	QString projectDependsWinRelPath() {
+		return _projectDependsWinRelPath;
+	}
+	
+	QString projectDependsWinRelDebPath() {
+		return _projectDependsWinRelDebPath;
+	}
+	
+	QString projectDependsWinMinRelPath() {
+		return _projectDependsWinMinRelPath;
+	}
+	
+	QString projectDependsMacPath() {
+		return _projectDependsMacPath;
+	}
+	
+	QString projectDependsMacDebPath() {
+		return _projectDependsMacDebPath;
+	}
+	
+	QString projectDependsMacRelPath() {
+		return _projectDependsMacRelPath;
+	}
+	
+	QString projectDependsMacRelDebPath() {
+		return _projectDependsMacRelDebPath;
+	}
+	
+	QString projectDependsMacMinRelPath() {
+		return _projectDependsMacMinRelPath;
+	}
+	
+	QString projectBuildPath() {
+		return _projectBuildPath;
+	}
+	
+	QString projectBuildWinPath() {
+		return _projectBuildWinPath;
+	}
+	
+	QString projectBuildWinDebPath() {
+		return _projectBuildWinDebPath;
+	}
+	
+	QString projectBuildWinRelPath() {
+		return _projectBuildWinRelPath;
+	}
+	
+	QString projectBuildWinRelDebPath() {
+		return _projectBuildWinRelDebPath;
+	}
+	
+	QString projectBuildWinMinRelPath() {
+		return _projectBuildWinMinRelPath;
+	}
+	
+	QString projectBuildMacPath() {
+		return _projectBuildMacPath;
+	}
+	
+	QString projectBuildMacDebPath() {
+		return _projectBuildMacDebPath;
+	}
+	
+	QString projectBuildMacRelPath() {
+		return _projectBuildMacRelPath;
+	}
+	
+	QString projectBuildMacRelDebPath() {
+		return _projectBuildMacRelDebPath;
+	}
+	
+	QString projectBuildMacMinRelPath() {
+		return _projectBuildMacMinRelPath;
+	}
+	
+	QString projectDataPath() {
+		return _projectDataPath;
+	}
+	
+	QString projectDataModelsPath() {
+		return _projectDataModelsPath;
+	}
+	
+	QString projectDataTexturesPath() {
+		return _projectDataTexturesPath;
+	}
+	
 private:
-	bool SaveProjectFile();
 	bool CreateProjectFolderStructure();
-	bool ReadProjectFile(QXmlStreamReader* xmlReader);
+	
+	void SaveProjectData(QXmlStreamWriter* xmlWriter);
+	bool ReadProjectData(QXmlStreamReader* xmlReader);
 	
 	void SaveModels(QXmlStreamWriter* xmlWriter);
 	bool ReadModels(QXmlStreamReader* xmlReader);

@@ -116,13 +116,19 @@ bool CorpusDocument::OpenDocument(QString path)
 	{
 		QXmlStreamReader::TokenType token = xmlReader->readNext();
 		
-		if(token == QXmlStreamReader::StartDocument)
+		if(token == QXmlStreamReader::StartDocument || token == QXmlStreamReader::EndDocument || token == QXmlStreamReader::EndElement)
 			continue;
 		else if (token == QXmlStreamReader::StartElement)
 		{
 			if(xmlReader->name() == QString("CorpusProject"))
+				continue;
+			else if(xmlReader->name() == QString("Project"))
 			{
-				bHasError = !ReadProjectFile(xmlReader);
+				bHasError = !ReadProjectData(xmlReader);
+			}
+			else if(xmlReader->name() == QString("Models"))
+			{
+				bHasError = !ReadModels(xmlReader);
 			}
 		}
 		else
@@ -144,11 +150,29 @@ bool CorpusDocument::OpenDocument(QString path)
 
 bool CorpusDocument::SaveDocument()
 {
-	return SaveProjectFile();
-}
-
-void CorpusDocument::CloseDocument()
-{
+	QFile file(projectFilePath());
+	
+	if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return false;
+	
+	QXmlStreamWriter* xmlWriter = new QXmlStreamWriter();
+	
+	xmlWriter->setDevice(&file);
+	
+	xmlWriter->writeStartDocument();
+	xmlWriter->writeStartElement("CorpusProject");
+	
+	SaveProjectData(xmlWriter);
+	SaveModels(xmlWriter);
+	
+	xmlWriter->writeEndElement();
+	xmlWriter->writeEndDocument();
+	
+	delete xmlWriter;
+	
+	_newDocument = false;
+	
+	return true;
 }
 
 bool CorpusDocument::CreateProjectFolderStructure()
@@ -248,20 +272,8 @@ bool CorpusDocument::CreateProjectFolderStructure()
 	return true;
 }
 
-bool CorpusDocument::SaveProjectFile()
+void CorpusDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
 {
-	QFile file(projectFilePath());
-	
-	if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
-		return false;
-	
-	QXmlStreamWriter* xmlWriter = new QXmlStreamWriter();
-
-	xmlWriter->setDevice(&file);
-	
-	xmlWriter->writeStartDocument();
-	xmlWriter->writeStartElement("CorpusProject");
-	
 	xmlWriter->writeStartElement("Project");
 	xmlWriter->writeTextElement("Path", _projectPath);
 	xmlWriter->writeTextElement("Name", _projectName);
@@ -296,20 +308,9 @@ bool CorpusDocument::SaveProjectFile()
 	xmlWriter->writeTextElement("DataModelsPath", _projectDataModelsPath);
 	xmlWriter->writeTextElement("DataTexturesPath", _projectDataTexturesPath);
 	xmlWriter->writeEndElement();
-	
-	SaveModels(xmlWriter);
-	
-	xmlWriter->writeEndElement();
-	xmlWriter->writeEndDocument();
-	
-	delete xmlWriter;
-
-	_newDocument = false;
-	
-	return true;
 }
 
-bool CorpusDocument::ReadProjectFile(QXmlStreamReader* xmlReader)
+bool CorpusDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 {
 	int nodeRead = 0;
 	int maxNodesToRead = 32;
@@ -317,282 +318,277 @@ bool CorpusDocument::ReadProjectFile(QXmlStreamReader* xmlReader)
 	if(xmlReader->atEnd() || xmlReader->hasError())
 		return false;
 	
-	QXmlStreamReader::TokenType token = xmlReader->readNext();
+	QXmlStreamReader::TokenType token;
 	
-	if (!xmlReader->atEnd() && !xmlReader->hasError() && token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Project"))
+	while(nodeRead < maxNodesToRead && !xmlReader->atEnd() && !xmlReader->hasError())
 	{
-		while(nodeRead < maxNodesToRead && !xmlReader->atEnd() && !xmlReader->hasError())
+		token = xmlReader->readNext();
+		
+		if(token == QXmlStreamReader::EndElement)
+			continue;
+		
+		if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Path"))
 		{
 			token = xmlReader->readNext();
-			
-			if(token == QXmlStreamReader::EndElement)
-				continue;
-			
-			if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Path"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Name"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectName = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("RootPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectRootPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodePath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectCodePath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectSourcesPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesSrcPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectSrcPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesIncludePath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectIncludePath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsWinPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsWinDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsWinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinRelDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsWinRelDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinMinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsWinMinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsMacPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsMacDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsMacRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacRelDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsMacRelDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacMinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDependsMacMinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildWinPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildWinDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildWinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinRelDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildWinRelDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinMinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildWinMinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildMacPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildMacDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildMacRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacRelDebPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildMacRelDebPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacMinRelPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectBuildMacMinRelPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDataPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataModelsPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDataModelsPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataTexturesPath"))
-			{
-				token = xmlReader->readNext();
-				if(token != QXmlStreamReader::Characters)
-					return false;
-				_projectDataTexturesPath = xmlReader->text().toString();
-				nodeRead++;
-			}
-			else
-			{
-				qDebug() << xmlReader->name();
+			if(token != QXmlStreamReader::Characters)
 				return false;
-			}
+			_projectPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Name"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectName = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("RootPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectRootPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodePath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectCodePath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectSourcesPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesSrcPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectSrcPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("CodeSourcesIncludePath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectIncludePath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsWinPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsWinDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsWinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinRelDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsWinRelDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsWinMinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsWinMinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsMacPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsMacDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsMacRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacRelDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsMacRelDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DependsMacMinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDependsMacMinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildWinPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildWinDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildWinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinRelDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildWinRelDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildWinMinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildWinMinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildMacPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildMacDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildMacRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacRelDebPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildMacRelDebPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("BuildMacMinRelPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectBuildMacMinRelPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDataPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataModelsPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDataModelsPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("DataTexturesPath"))
+		{
+			token = xmlReader->readNext();
+			if(token != QXmlStreamReader::Characters)
+				return false;
+			_projectDataTexturesPath = xmlReader->text().toString();
+			nodeRead++;
+		}
+		else
+		{
+			qDebug() << xmlReader->name();
+			return false;
 		}
 	}
-	else
-		return false;
 	
 	if(_projectPath.isEmpty()					||
 	   _projectName.isEmpty()					||
@@ -628,7 +624,7 @@ bool CorpusDocument::ReadProjectFile(QXmlStreamReader* xmlReader)
 	   _projectDataTexturesPath.isEmpty())
 		return false;
 	
-	return ReadModels(xmlReader);
+	return true;
 }
 
 bool CorpusDocument::ImportModel()
@@ -717,32 +713,19 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 	if(xmlReader->atEnd() || xmlReader->hasError())
 		return false;
 	
-	bool foundModelsNode = false;
-	
-	QXmlStreamReader::TokenType token = xmlReader->readNext();
-	
-	while (!xmlReader->atEnd() && !xmlReader->hasError() && !foundModelsNode)
-	{
-		if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("Models"))
-			foundModelsNode = true;
-		else
-			token = xmlReader->readNext();
-	}
-	
-	if(!foundModelsNode)
-		return false;
-	
+	QXmlStreamReader::TokenType token;
 	QXmlStreamAttributes attributes = xmlReader->attributes();
 	
 	if(!attributes.hasAttribute(QString("N")))
 	   return false;
 	
 	int savedModelsNumber = attributes.value(QString("N")).toInt();
+	int readModelsNumber = 0;
 	
 	QString name;
 	QString fileName;
 	
-	while(!xmlReader->atEnd() && !xmlReader->hasError())
+	while(!xmlReader->atEnd() && !xmlReader->hasError() && readModelsNumber < savedModelsNumber)
 	{
 		token = xmlReader->readNext();
 		
@@ -767,6 +750,7 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 				
 				name = "";
 				fileName = "";
+				readModelsNumber++;
 			}
 		}
 		else if(token == QXmlStreamReader::StartElement && xmlReader->name() == QString("FileName"))
@@ -787,12 +771,10 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 				
 				name = "";
 				fileName = "";
+				readModelsNumber++;
 			}
 		}
 	}
-	
-	if(_engine->GetModelsManager()->GetModelsNumber() != savedModelsNumber)
-		return false;
 	
 	return true;
 }
