@@ -309,12 +309,20 @@ void CorpusMainWindow::readSettings()
 	QPoint pos = settings.value("pos", QPoint(0, 0)).toPoint();
 	QSize size = settings.value("size", QSize(600, 500)).toSize();
 	settings.endGroup();
-	
-	move(pos);
-	resize(size);
-	
-	if(fullScreen)
+		
+	if (fullScreen)
+	{
+#if defined WIN32
+		showMaximized();
+#else
 		showFullScreen();
+#endif
+	}
+	else
+	{
+		move(pos);
+		resize(size);
+	}
 	
 	if(_resourceManagerTab != nullptr)
 		_resourceManagerTab->readSettings(&settings);
@@ -327,10 +335,21 @@ void CorpusMainWindow::writeSettings()
 {
 	QSettings settings("ZEB", "CorpusEditor");
 	
+#if defined WIN32
+	bool bMax = isMaximized();
+#else
+	bool bMax = isFullScreen();
+#endif
+
 	settings.beginGroup("CorpusMainWindow");
-	settings.setValue("pos", pos());
-	settings.setValue("size", size());
-	settings.setValue("full", isFullScreen());
+	settings.setValue("full", bMax);
+
+	if (!bMax)
+	{
+		settings.setValue("pos", pos());
+		settings.setValue("size", size());
+	}
+
 	settings.endGroup();
 	
 	if(_resourceManagerTab != nullptr)

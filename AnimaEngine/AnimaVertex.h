@@ -34,13 +34,16 @@ public:
 	
 	AnimaVertex(const AnimaVertex& src)
 	{
-		_data = nullptr;
-		_size = src._size;
-		_engine = src._engine;
-		
-		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
-		
-		memcpy(_data, src._data, sizeof(Type) * _size);
+		if (&src != this)
+		{
+			_data = nullptr;
+			_size = src._size;
+			_engine = src._engine;
+
+			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
+
+			memcpy(_data, src._data, sizeof(Type) * _size);
+		}
 	}
 	
 	AnimaVertex(AnimaVertex&& src)
