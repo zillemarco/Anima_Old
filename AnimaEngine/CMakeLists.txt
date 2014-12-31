@@ -24,7 +24,8 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaBenchmarkTimer.h
                     AnimaMaterialProperty.h
                     AnimaString.h
-					AnimaMatrix.h)
+					AnimaMatrix.h
+					AnimaMath.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -43,7 +44,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaBenchmarkTimer.cpp
                     AnimaMaterialProperty.cpp
                     AnimaString.cpp
-					AnimaMatrix.cpp)
+					AnimaMatrix.cpp
+					AnimaMath.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

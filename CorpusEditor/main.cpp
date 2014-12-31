@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <AnimaEngine.h>
 //#include <AnimaModelsManager.h>
-//#include <AnimaBenchmarkTimer.h>
+#include <AnimaBenchmarkTimer.h>
+#include <AnimaMatrix.h>
 //#include <AnimaString.h>
 #include <QApplication>
 #include <QStyleFactory>
@@ -46,6 +47,34 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char** argv)
 {
+	Anima::AnimaEngine engine;
+	engine.Initialize();
+	
+	float data1[16] = {	1, 9, 0, 3,
+						0, 1, 0, 0,
+						8, 9, 6, 1,
+						0, 0, 0, 1};
+	
+	float data2[16] = {	6, 8, 3, 0,
+						1, 5, -4, 6,
+						2, 3, 0, 9,
+						0, 1, 0, 0};
+	
+	Anima::AnimaMatrix matrix1(&engine, data1);
+	Anima::AnimaMatrix matrix2(&engine, data2);
+	
+	matrix1.DumpMemory();
+	matrix2.DumpMemory();
+	
+	Anima::AnimaMatrix matrix3 = matrix1 * matrix2;
+	
+	matrix3.DumpMemory();
+	
+	matrix1 = matrix1.Inverse();
+	matrix1.DumpMemory();
+	
+	return 0;
+	
 	Anima::AnimaEngine::SetUsedExternal();
 	
 	QDateTime dateTime = QDateTime::currentDateTime();
