@@ -32,8 +32,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 }
 
 AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
-{
-	
+{	
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(modelPath.GetBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
@@ -43,11 +42,11 @@ AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_engine->GetModelsAllocator()), _engine);
 	
 	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
-	
+
 	AnimaString tmpName(_engine);
 	tmpName.Format("AnimaModel_%lu", GetNextModelID());
 	newModel->SetModelName(tmpName);
-	
+
 	AInt pos = modelPath.ReverseFind('/');
 	
 	if(pos == -1)
@@ -72,6 +71,15 @@ AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 
 void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode)
 {
+	if (sceneNode->mName.length > 0)
+		currentModel->SetModelName(sceneNode->mName.C_Str());
+
+	AnimaMatrix* modelMatrix = currentModel->GetPTransformationMatrix();
+	modelMatrix->SetData(sceneNode->mTransformation.a1, 0); modelMatrix->SetData(sceneNode->mTransformation.a2, 1); modelMatrix->SetData(sceneNode->mTransformation.a3, 2); modelMatrix->SetData(sceneNode->mTransformation.a4, 3);
+	modelMatrix->SetData(sceneNode->mTransformation.b1, 4); modelMatrix->SetData(sceneNode->mTransformation.b2, 5); modelMatrix->SetData(sceneNode->mTransformation.b3, 6); modelMatrix->SetData(sceneNode->mTransformation.b4, 7);
+	modelMatrix->SetData(sceneNode->mTransformation.c1, 8); modelMatrix->SetData(sceneNode->mTransformation.c2, 9); modelMatrix->SetData(sceneNode->mTransformation.c3, 10); modelMatrix->SetData(sceneNode->mTransformation.c4, 11);
+	modelMatrix->SetData(sceneNode->mTransformation.d1, 12); modelMatrix->SetData(sceneNode->mTransformation.d2, 13); modelMatrix->SetData(sceneNode->mTransformation.d3, 14); modelMatrix->SetData(sceneNode->mTransformation.d4, 15);
+
 	int numeroMesh = sceneNode->mNumMeshes;
 	
 	if(numeroMesh > 0)

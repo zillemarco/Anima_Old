@@ -16,6 +16,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaModel::AnimaModel(AnimaEngine* engine)
 : _modelName(engine)
 , _modelFileName(engine)
+, _trasnsformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr)
 	_engine = engine;
@@ -31,6 +32,7 @@ AnimaModel::AnimaModel(AnimaEngine* engine)
 AnimaModel::AnimaModel(const AnimaModel& src)
 : _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
+, _trasnsformationMatrix(src._trasnsformationMatrix)
 {
 	_engine = src._engine;
 	
@@ -52,6 +54,7 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
 , _engine(src._engine)
+, _trasnsformationMatrix(src._trasnsformationMatrix)
 {
 	src._modelChildren = nullptr;
 	src._modelMeshes = nullptr;
@@ -74,6 +77,7 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 	{
 		_engine = src._engine;
 		
+		SetTransformationMatrix(src._trasnsformationMatrix);
 		SetModelName(src._modelName);
 		SetModelFileName(src._modelFileName);
 		SetChildren(src._modelChildren, src._modelChildrenNumber);
@@ -97,6 +101,8 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		
 		_modelName = src._modelName;
 		_modelFileName = src._modelFileName;
+
+		_trasnsformationMatrix = src._trasnsformationMatrix;
 		
 		src._modelChildren = nullptr;
 		src._modelMeshes = nullptr;
@@ -307,6 +313,36 @@ AnimaString AnimaModel::GetAnimaModelFileName()
 const char* AnimaModel::GetModelFileName()
 {
 	return _modelFileName.GetBuffer();
+}
+
+AnimaMatrix AnimaModel::GetTransformationMatrix()
+{
+	return _trasnsformationMatrix;
+}
+
+AnimaMatrix* AnimaModel::GetPTransformationMatrix()
+{
+	return &_trasnsformationMatrix;
+}
+
+const AFloat* AnimaModel::GetTransformationMatrixFlt()
+{
+	return _trasnsformationMatrix.GetConstData();
+}
+
+void AnimaModel::GetTransformationMatrixFlt(AFloat* m)
+{
+	_trasnsformationMatrix.GetData(m);
+}
+
+void AnimaModel::SetTransformationMatrix(AnimaMatrix m)
+{
+	_trasnsformationMatrix = m;
+}
+
+void AnimaModel::SetTransformationMatrix(AFloat* m)
+{
+	_trasnsformationMatrix.SetData(m);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

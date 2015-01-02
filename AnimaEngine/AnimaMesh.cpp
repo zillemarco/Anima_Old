@@ -13,6 +13,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMesh::AnimaMesh(AnimaEngine* engine)
+: _meshName(engine)
 {
 	ANIMA_ASSERT(engine != nullptr)
 	_engine = engine;
@@ -26,9 +27,11 @@ AnimaMesh::AnimaMesh(AnimaEngine* engine)
 	_normalsNumber = 0;
 	_textureCoordsNumber = 0;
 	_facesNumber = 0;
+	_meshName = "_mesh_";
 }
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
+	: _meshName(src._meshName)
 {
 	_engine = src._engine;
 	
@@ -58,6 +61,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 , _faces(src._faces)
 , _facesNumber(src._facesNumber)
 , _engine(src._engine)
+, _meshName(src._meshName)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -86,6 +90,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 	{
 		_engine = src._engine;
 		
+		SetMeshName(src._meshName);
 		SetVertices(src._vertices, src._verticesNumber);
 		SetNormals(src._normals, src._normalsNumber);
 		SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
@@ -110,6 +115,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_normalsNumber = src._normalsNumber;
 		_textureCoordsNumber = src._textureCoordsNumber;
 		_facesNumber = src._facesNumber;
+
+		_meshName = src._meshName;
 		
 		src._vertices = nullptr;
 		src._normals = nullptr;
@@ -571,6 +578,26 @@ AnimaFace* AnimaMesh::GetPFace(ASizeT index)
 AnimaFace* AnimaMesh::GetFaces()
 {
 	return _faces;
+}
+
+void AnimaMesh::SetMeshName(const AnimaString& name)
+{
+	_meshName = name;
+}
+
+void AnimaMesh::SetMeshName(const char* name)
+{
+	_meshName = name;
+}
+
+AnimaString AnimaMesh::GetAnimaMeshName()
+{
+	return _meshName;
+}
+
+const char* AnimaMesh::GetMeshName()
+{
+	return _meshName.GetBuffer();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

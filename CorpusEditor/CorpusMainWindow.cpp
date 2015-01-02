@@ -273,7 +273,7 @@ void CorpusMainWindow::createActions()
 	
 	_addNewMaterialAct = new QAction(tr("Add m&aterial"), this);
 	_addNewMaterialAct->setStatusTip(tr("Add a new material into the resources"));
-	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewTexture()));
+	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewMaterial()));
 }
 
 void CorpusMainWindow::createMenus()

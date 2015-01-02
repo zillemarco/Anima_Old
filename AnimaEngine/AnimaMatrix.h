@@ -1,9 +1,9 @@
 #pragma once
 
 #include "AnimaEngineCore.h"
-#include "AnimaVertex.h"
 #include "AnimaEngine.h"
 #include "AnimaTypes.h"
+#include "AnimaVertex.h"
 
 #define ANIMA_MATRIX_SIZE	16
 
@@ -20,70 +20,16 @@ public:
 
 	AnimaMatrix& operator=(const AnimaMatrix& src);
 	AnimaMatrix& operator=(AnimaMatrix&& src);
+		
+	inline AFloat& operator[](ASizeT index);
+	inline const AFloat& operator[](ASizeT index) const;
 	
-	AnimaMatrix& operator+=(const AnimaMatrix& src);
-	friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m += srcb;
-		return m;
-	}
-	
-	AnimaMatrix& operator-=(const AnimaMatrix& src);
-	friend AnimaMatrix operator-(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m -= srcb;
-		return m;
-	}
-	
-	AnimaMatrix& operator*=(const AnimaMatrix& src);
-	friend AnimaMatrix operator*(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m *= srcb;
-		return m;
-	}
-	
-	AnimaMatrix& operator/=(const AnimaMatrix& src);
-	friend AnimaMatrix operator/(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m /= srcb;
-		return m;
-	}
-	
-	AnimaMatrix& operator+=(const AFloat& add);
-	friend AnimaMatrix operator+(const AnimaMatrix& srca, const AFloat& add) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m += add;
-		return m;
-	}
-	
-	AnimaMatrix& operator-=(const AFloat& sub);
-	friend AnimaMatrix operator-(const AnimaMatrix& srca, const AFloat& sub) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m -= sub;
-		return m;
-	}
-	
-	AnimaMatrix& operator*=(const AFloat& mul);
-	friend AnimaMatrix operator*(const AnimaMatrix& srca, const AFloat& mul) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m *= mul;
-		return m;
-	}
-	
-	AnimaMatrix& operator/=(const AFloat& div);
-	friend AnimaMatrix operator/(const AnimaMatrix& srca, const AFloat& div) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m /= div;
-		return m;
-	}
-	
-	AFloat& operator[](ASizeT index);
-	const AFloat& operator[](ASizeT index) const;
-	
-	bool operator==(const AnimaMatrix& left);
-	bool operator==(const AFloat left[ANIMA_MATRIX_SIZE]);
-	bool operator!=(const AnimaMatrix& left);
-	bool operator!=(const AFloat left[ANIMA_MATRIX_SIZE]);
+	inline bool operator==(const AnimaMatrix& left);
+	inline bool operator==(const AFloat left[ANIMA_MATRIX_SIZE]);
+	inline bool operator!=(const AnimaMatrix& left);
+	inline bool operator!=(const AFloat left[ANIMA_MATRIX_SIZE]);
+	inline operator AFloat*();
+	inline operator const AFloat*();
 	
 public:
 	void SetData(AFloat data[ANIMA_MATRIX_SIZE]);
@@ -93,11 +39,75 @@ public:
 	AFloat GetElement(ASizeT row, ASizeT col);
 	void GetRow(AFloat* row, ASizeT index);
 	void GetColumn(AFloat* col, ASizeT index);
+
+	inline AFloat* GetData() const;
+	inline void GetData(AFloat m[ANIMA_MATRIX_SIZE]) const;
+	inline const AFloat* GetConstData() const;
 	
 	void SetIdentity();
 	
+	// Operations
+public:
 	AnimaMatrix Inverse() const;
-	
+	AnimaMatrix Transpose() const;
+	inline float Determinant() const;
+
+	inline AnimaMatrix& operator+=(const AnimaMatrix& src);
+	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m += srcb;
+		return m;
+	}
+
+	inline AnimaMatrix& operator-=(const AnimaMatrix& src);
+	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m -= srcb;
+		return m;
+	}
+
+	inline AnimaMatrix& operator*=(const AnimaMatrix& src);
+	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m *= srcb;
+		return m;
+	}
+
+	inline AnimaMatrix& operator/=(const AnimaMatrix& src);
+	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m /= srcb;
+		return m;
+	}
+
+	inline AnimaMatrix& operator+=(const AFloat& add);
+	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AFloat& add) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m += add;
+		return m;
+	}
+
+	inline AnimaMatrix& operator-=(const AFloat& sub);
+	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AFloat& sub) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m -= sub;
+		return m;
+	}
+
+	inline AnimaMatrix& operator*=(const AFloat& mul);
+	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AFloat& mul) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m *= mul;
+		return m;
+	}
+
+	inline AnimaMatrix& operator/=(const AFloat& div);
+	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AFloat& div) {
+		AnimaMatrix m(srca._engine, srca._matrixData);
+		m /= div;
+		return m;
+	}
+		
 	void DumpMemory();
 
 private:

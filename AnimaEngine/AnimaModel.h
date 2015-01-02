@@ -15,6 +15,7 @@
 #include "AnimaMesh.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
+#include "AnimaMatrix.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -57,6 +58,14 @@ public:
 	
 	AnimaString GetAnimaModelFileName();
 	const char* GetModelFileName();
+
+	AnimaMatrix GetTransformationMatrix();
+	AnimaMatrix* GetPTransformationMatrix();
+	const AFloat* GetTransformationMatrixFlt();
+	void GetTransformationMatrixFlt(AFloat* m);
+
+	void SetTransformationMatrix(AnimaMatrix m);
+	void SetTransformationMatrix(AFloat* m);
 	
 protected:
 	AnimaModel*		_modelChildren;
@@ -67,6 +76,8 @@ protected:
 	
 	AnimaString		_modelName;
 	AnimaString		_modelFileName;
+
+	AnimaMatrix		_trasnsformationMatrix;
 	
 	AnimaEngine* _engine;
 };

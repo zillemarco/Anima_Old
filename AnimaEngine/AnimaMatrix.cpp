@@ -4,6 +4,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+#define _mm_shufd(xmm, mask) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(xmm), mask))
+
 AnimaMatrix::AnimaMatrix(AnimaEngine* engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
@@ -118,6 +120,31 @@ bool AnimaMatrix::operator!=(const AFloat left[ANIMA_MATRIX_SIZE])
 	return !operator==(left);
 }
 
+inline AnimaMatrix::operator AFloat*()
+{
+	return _matrixData;
+}
+
+inline AnimaMatrix::operator const AFloat*()
+{
+	return const_cast<AFloat*>(_matrixData);
+}
+
+inline AFloat* AnimaMatrix::GetData() const
+{
+	return _matrixData;
+}
+
+inline void AnimaMatrix::GetData(AFloat m[ANIMA_MATRIX_SIZE]) const
+{
+	memcpy(m, _matrixData, sizeof(AFloat) * ANIMA_MATRIX_SIZE);
+}
+
+inline const AFloat* AnimaMatrix::GetConstData() const
+{
+	return const_cast<AFloat*>(_matrixData);
+}
+
 void AnimaMatrix::SetData(AFloat data[ANIMA_MATRIX_SIZE])
 {
 	memcpy(_matrixData, data, sizeof(AFloat) * ANIMA_MATRIX_SIZE);
@@ -183,35 +210,52 @@ AnimaMatrix& AnimaMatrix::operator-=(const AnimaMatrix& src)
 
 AnimaMatrix& AnimaMatrix::operator*=(const AnimaMatrix& src)
 {
-	__m128 row1 = _mm_load_ps(&src._matrixData[0]);
-	__m128 row2 = _mm_load_ps(&src._matrixData[4]);
-	__m128 row3 = _mm_load_ps(&src._matrixData[8]);
-	__m128 row4 = _mm_load_ps(&src._matrixData[12]);
-	
-	for(int i = 0; i < 4; i++)
-	{
-		__m128 brod1 = _mm_set1_ps(this->_matrixData[4*i + 0]);
-		__m128 brod2 = _mm_set1_ps(this->_matrixData[4*i + 1]);
-		__m128 brod3 = _mm_set1_ps(this->_matrixData[4*i + 2]);
-		__m128 brod4 = _mm_set1_ps(this->_matrixData[4*i + 3]);
-		__m128 row = _mm_add_ps(
-								_mm_add_ps(
-										   _mm_mul_ps(brod1, row1),
-										   _mm_mul_ps(brod2, row2)),
-								_mm_add_ps(
-										   _mm_mul_ps(brod3, row3),
-										   _mm_mul_ps(brod4, row4)));
-		_mm_store_ps(&this->_matrixData[4*i], row);
-	}
-	
+	AFloat* srcV = src._matrixData;
+
+	__m128 src1 = _mm_loadu_ps(&srcV[0]);
+	__m128 src2 = _mm_loadu_ps(&srcV[4]);
+	__m128 src3 = _mm_loadu_ps(&srcV[8]);
+	__m128 src4 = _mm_loadu_ps(&srcV[12]);
+
+	__m128 r1 = _mm_loadu_ps(&_matrixData[0]);
+	__m128 r2 = _mm_loadu_ps(&_matrixData[4]);
+	__m128 r3 = _mm_loadu_ps(&_matrixData[8]);
+	__m128 r4 = _mm_loadu_ps(&_matrixData[12]);
+
+	r1 = _mm_add_ps(_mm_add_ps(
+					_mm_add_ps(	_mm_mul_ps(_mm_shufd(r1, 0x00), src1),
+								_mm_mul_ps(_mm_shufd(r1, 0x55), src2)),
+								_mm_mul_ps(_mm_shufd(r1, 0xAA), src3)),
+								_mm_mul_ps(_mm_shufd(r1, 0xFF), src4));
+	r2 = _mm_add_ps(_mm_add_ps(						 
+					_mm_add_ps(	_mm_mul_ps(_mm_shufd(r2, 0x00), src1),
+								_mm_mul_ps(_mm_shufd(r2, 0x55), src2)),
+								_mm_mul_ps(_mm_shufd(r2, 0xAA), src3)),
+								_mm_mul_ps(_mm_shufd(r2, 0xFF), src4));
+	r3 = _mm_add_ps(_mm_add_ps(						 
+					_mm_add_ps(	_mm_mul_ps(_mm_shufd(r3, 0x00), src1),
+								_mm_mul_ps(_mm_shufd(r3, 0x55), src2)),
+								_mm_mul_ps(_mm_shufd(r3, 0xAA), src3)),
+								_mm_mul_ps(_mm_shufd(r3, 0xFF), src4));
+	r4 = _mm_add_ps(_mm_add_ps(						 
+					_mm_add_ps(	_mm_mul_ps(_mm_shufd(r4, 0x00), src1),
+								_mm_mul_ps(_mm_shufd(r4, 0x55), src2)),
+								_mm_mul_ps(_mm_shufd(r4, 0xAA), src3)),
+								_mm_mul_ps(_mm_shufd(r4, 0xFF), src4));
+
+	_mm_storeu_ps(&_matrixData[0], r1);
+	_mm_storeu_ps(&_matrixData[4], r2);
+	_mm_storeu_ps(&_matrixData[8], r3);
+	_mm_storeu_ps(&_matrixData[12], r4);
+
 	return *this;
 }
 
 AnimaMatrix& AnimaMatrix::operator/=(const AnimaMatrix& src)
 {
-	AnimaMatrix inverse = src.Inverse();
-	this->operator*=(inverse);
-	
+	AnimaMatrix srcInverse = src.Inverse();
+	this->operator*=(srcInverse);
+
 	return *this;
 }
 
@@ -246,205 +290,109 @@ AnimaMatrix& AnimaMatrix::operator/=(const AFloat& div)
 AnimaMatrix AnimaMatrix::Inverse() const
 {
 	AnimaMatrix resultMatrix(_engine, _matrixData);
+	AFloat* src = resultMatrix._matrixData;
+
+	__m128 m1 = _mm_loadu_ps(&src[0]);
+	__m128 m2 = _mm_loadu_ps(&src[4]);
+	__m128 m3 = _mm_loadu_ps(&src[8]);
+	__m128 m4 = _mm_loadu_ps(&src[12]);
+
+	__m128 f1 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0xAA), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
+	 						_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
+	__m128 f2 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x55), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
+	 						_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
+	__m128 f3 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x55), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80)),
+							_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80), _mm_shuffle_ps(m3, m2, 0xAA)));
+	__m128 f4 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
+	 						_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
+	__m128 f5 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80)),
+	 						_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0xAA)));
+	__m128 f6 = _mm_sub_ps(	_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80)),
+	 						_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0x55)));
+
+	__m128 v1 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0x00), 0xA8);
+	__m128 v2 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0x55), 0xA8);
+	__m128 v3 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0xAA), 0xA8);
+	__m128 v4 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0xFF), 0xA8);
+	__m128 s1 = _mm_set_ps(-0.0f, 0.0f, -0.0f, 0.0f);
+	__m128 s2 = _mm_set_ps(0.0f, -0.0f, 0.0f, -0.0f);
+	__m128 i1 = _mm_xor_ps(s1, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v2, f1), _mm_mul_ps(v3, f2)), _mm_mul_ps(v4, f3)));
+	__m128 i2 = _mm_xor_ps(s2, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f1), _mm_mul_ps(v3, f4)), _mm_mul_ps(v4, f5)));
+	__m128 i3 = _mm_xor_ps(s1, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f2), _mm_mul_ps(v2, f4)), _mm_mul_ps(v4, f6)));
+	__m128 i4 = _mm_xor_ps(s2, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f3), _mm_mul_ps(v2, f5)), _mm_mul_ps(v3, f6)));
+	
+	__m128 d = _mm_mul_ps(m1, _mm_movelh_ps(_mm_unpacklo_ps(i1, i2), _mm_unpacklo_ps(i3, i4)));
+	d = _mm_add_ps(d, _mm_shufd(d, 0x4E));
+	d = _mm_add_ps(d, _mm_shufd(d, 0x11));
+	d = _mm_div_ps(_mm_set1_ps(1.0f), d);
+
+	__m128 r1 = _mm_mul_ps(i1, d);
+	__m128 r2 = _mm_mul_ps(i2, d);
+	__m128 r3 = _mm_mul_ps(i3, d);
+	__m128 r4 = _mm_mul_ps(i4, d);
+
+	_mm_storeu_ps(&src[0], r1);
+	_mm_storeu_ps(&src[4], r2);
+	_mm_storeu_ps(&src[8], r3);
+	_mm_storeu_ps(&src[12], r4);
+
+	return resultMatrix;
+}
+
+float AnimaMatrix::Determinant() const
+{
 	AFloat* src = _matrixData;
+
+	__m128 m1 = _mm_loadu_ps(&src[0]);
+	__m128 m2 = _mm_loadu_ps(&src[4]);
+	__m128 m3 = _mm_loadu_ps(&src[8]);
+	__m128 m4 = _mm_loadu_ps(&src[12]);
+
+	__m128 r = _mm_shufd(m3, 0x39);
+	__m128 v1 = _mm_mul_ps(r, m4);
+	__m128 v2 = _mm_mul_ps(r, _mm_shufd(m4, 0x4E));
+	__m128 v3 = _mm_mul_ps(r, _mm_shufd(m4, 0x93));
+
+	__m128 r1 = _mm_sub_ps(_mm_shufd(v2, 0x39), _mm_shufd(v1, 0x4E));
+	__m128 r2 = _mm_sub_ps(_mm_shufd(v3, 0x4E), v3);
+	__m128 r3 = _mm_sub_ps(v2, _mm_shufd(v1, 0x39));
 	
-	__m128 minor0,minor1,minor2,minor3;
-	__m128 row0,row1,row2,row3;
-	__m128 det,tmp1;
+
+	v1 = _mm_shufd(m2, 0x93);
+	v2 = _mm_shufd(m2, 0x39);
+	v3 = _mm_shufd(m2, 0x4E);
 	
-	tmp1= _mm_loadh_pi(_mm_loadl_pi(tmp1, (__m64*)(src)), (__m64*)(src+ 4));
-	row1= _mm_loadh_pi(_mm_loadl_pi(row1, (__m64*)(src+8)), (__m64*)(src+12));
-	row0= _mm_shuffle_ps(tmp1, row1, 0x88);
-	row1= _mm_shuffle_ps(row1, tmp1, 0xDD);
-	tmp1= _mm_loadh_pi(_mm_loadl_pi(tmp1, (__m64*)(src+ 2)), (__m64*)(src+ 6));
-	row3= _mm_loadh_pi(_mm_loadl_pi(row3, (__m64*)(src+10)), (__m64*)(src+14));
-	row2= _mm_shuffle_ps(tmp1, row3, 0x88);
-	row3= _mm_shuffle_ps(row3, tmp1, 0xDD);
+	__m128 d = _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(v2, r1), _mm_mul_ps(v3, r2)), _mm_mul_ps(v1, r3)), m1);
+	d = _mm_add_ps(d, _mm_shufd(d, 0x4E));
+	d = _mm_sub_ss(d, _mm_shufd(d, 0x11));
+	return _mm_cvtss_f32(d);
+}
+
+AnimaMatrix AnimaMatrix::Transpose() const
+{
+	AnimaMatrix resultMatrix(_engine, _matrixData);
+	AFloat* src = resultMatrix._matrixData;
+
+	__m128 m1 = _mm_loadu_ps(&src[0]);
+	__m128 m2 = _mm_loadu_ps(&src[4]);
+	__m128 m3 = _mm_loadu_ps(&src[8]);
+	__m128 m4 = _mm_loadu_ps(&src[12]);
+
+	__m128 t1 = _mm_unpacklo_ps(m1, m2);
+	__m128 t2 = _mm_unpacklo_ps(m3, m4);
+	__m128 t3 = _mm_unpackhi_ps(m1, m2);
+	__m128 t4 = _mm_unpackhi_ps(m3, m4);
 	
-	tmp1= _mm_mul_ps(row2, row3);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	minor0= _mm_mul_ps(row1, tmp1);
-	minor1= _mm_mul_ps(row0, tmp1);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor0= _mm_sub_ps(_mm_mul_ps(row1, tmp1), minor0);
-	minor1= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor1);
-	minor1= _mm_shuffle_ps(minor1, minor1, 0x4E);
+	__m128 r1 = _mm_movelh_ps(t1, t2);
+	__m128 r2 = _mm_movehl_ps(t2, t1);
+	__m128 r3 = _mm_movelh_ps(t3, t4);
+	__m128 r4 = _mm_movehl_ps(t4, t3);
 	
-	tmp1= _mm_mul_ps(row1, row2);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	minor0= _mm_add_ps(_mm_mul_ps(row3, tmp1), minor0);
-	minor3= _mm_mul_ps(row0, tmp1);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor0= _mm_sub_ps(minor0, _mm_mul_ps(row3, tmp1));
-	minor3= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor3);
-	minor3= _mm_shuffle_ps(minor3, minor3, 0x4E);
-	
-	tmp1= _mm_mul_ps(_mm_shuffle_ps(row1, row1, 0x4E), row3);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	row2= _mm_shuffle_ps(row2, row2, 0x4E);
-	minor0= _mm_add_ps(_mm_mul_ps(row2, tmp1), minor0);
-	minor2= _mm_mul_ps(row0, tmp1);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor0= _mm_sub_ps(minor0, _mm_mul_ps(row2, tmp1));
-	minor2= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor2);
-	minor2= _mm_shuffle_ps(minor2, minor2, 0x4E);
-	
-	tmp1= _mm_mul_ps(row0, row1);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	
-	minor2= _mm_add_ps(_mm_mul_ps(row3, tmp1), minor2);
-	minor3= _mm_sub_ps(_mm_mul_ps(row2, tmp1), minor3);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor2= _mm_sub_ps(_mm_mul_ps(row3, tmp1), minor2);
-	minor3= _mm_sub_ps(minor3, _mm_mul_ps(row2, tmp1));
-	
-	tmp1= _mm_mul_ps(row0, row3);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	minor1= _mm_sub_ps(minor1, _mm_mul_ps(row2, tmp1));
-	minor2= _mm_add_ps(_mm_mul_ps(row1, tmp1), minor2);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor1= _mm_add_ps(_mm_mul_ps(row2, tmp1), minor1);
-	minor2= _mm_sub_ps(minor2, _mm_mul_ps(row1, tmp1));
-	
-	tmp1= _mm_mul_ps(row0, row2);
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-	minor1= _mm_add_ps(_mm_mul_ps(row3, tmp1), minor1);
-	minor3= _mm_sub_ps(minor3, _mm_mul_ps(row1, tmp1));
-	tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-	minor1= _mm_sub_ps(minor1, _mm_mul_ps(row3, tmp1));
-	minor3= _mm_add_ps(_mm_mul_ps(row1, tmp1), minor3);
-	// -----------------------------------------------
-	// -----------------------------------------------
-	// -----------------------------------------------
-	det= _mm_mul_ps(row0, minor0);
-	det= _mm_add_ps(_mm_shuffle_ps(det, det, 0x4E), det);
-	det= _mm_add_ss(_mm_shuffle_ps(det, det, 0xB1), det);
-	tmp1= _mm_rcp_ss(det);
-	det= _mm_sub_ss(_mm_add_ss(tmp1, tmp1), _mm_mul_ss(det, _mm_mul_ss(tmp1, tmp1)));
-	det= _mm_shuffle_ps(det, det, 0x00);
-	minor0 = _mm_mul_ps(det, minor0);
-	_mm_storel_pi((__m64*)(src), minor0);
-	_mm_storeh_pi((__m64*)(src+2), minor0);
-	minor1 = _mm_mul_ps(det, minor1);
-	_mm_storel_pi((__m64*)(src+4), minor1);
-	_mm_storeh_pi((__m64*)(src+6), minor1);
-	minor2 = _mm_mul_ps(det, minor2);
-	_mm_storel_pi((__m64*)(src+ 8), minor2);
-	_mm_storeh_pi((__m64*)(src+10), minor2);
-	minor3 = _mm_mul_ps(det, minor3);
-	_mm_storel_pi((__m64*)(src+12), minor3);
-	_mm_storeh_pi((__m64*)(src+14), minor3);
-	
-//	__m128 minor0, minor1, minor2, minor3;
-//	__m128 row0, row1, row2, row3;
-//	__m128 det, tmp1;
-//
-//	tmp1 = _mm_loadh_pi(_mm_loadl_pi(tmp1, (__m64*)(src)), (__m64*)(src + 4));
-//	row1 = _mm_loadh_pi(_mm_loadl_pi(row1, (__m64*)(src + 8)), (__m64*)(src + 12));
-//	
-//	row0 = _mm_shuffle_ps(tmp1, row1, 0x88);
-//	row1 = _mm_shuffle_ps(row1, tmp1, 0xDD);
-//	
-//	tmp1 = _mm_loadh_pi(_mm_loadl_pi(tmp1, (__m64*)(src + 2)), (__m64*)(src + 6));
-//	row3 = _mm_loadh_pi(_mm_loadl_pi(row3, (__m64*)(src + 10)), (__m64*)(src + 14));
-//	
-//	row2 = _mm_shuffle_ps(tmp1, row3, 0x88);
-//	row3 = _mm_shuffle_ps(row3, tmp1, 0xDD);
-//	
-//	tmp1 = _mm_mul_ps(row2, row3);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	
-//	minor0 = _mm_mul_ps(row1, tmp1);
-//	minor1 = _mm_mul_ps(row0, tmp1);
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor0 = _mm_sub_ps(_mm_mul_ps(row1, tmp1), minor0);
-//	minor1 = _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor1);
-//	minor1 = _mm_shuffle_ps(minor1, minor1, 0x4E);
-//	
-//	tmp1 = _mm_mul_ps(row1, row2);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	
-//	minor0 = _mm_add_ps(_mm_mul_ps(row3, tmp1), minor0);
-//	minor3 = _mm_mul_ps(row0, tmp1);
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor0 = _mm_sub_ps(minor0, _mm_mul_ps(row3, tmp1));
-//	minor3 = _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor3);
-//	minor3 = _mm_shuffle_ps(minor3, minor3, 0x4E);
-//	
-//	tmp1 = _mm_mul_ps(_mm_shuffle_ps(row1, row1, 0x4E), row3);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	row2 = _mm_shuffle_ps(row2, row2, 0x4E);
-//	
-//	minor0 = _mm_add_ps(_mm_mul_ps(row2, tmp1), minor0);
-//	minor2 = _mm_mul_ps(row0, tmp1);
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor0 = _mm_sub_ps(minor0, _mm_mul_ps(row2, tmp1));
-//	minor2 = _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor2);
-//	minor2 = _mm_shuffle_ps(minor2, minor2, 0x4E);
-//	
-//	tmp1 = _mm_mul_ps(row0, row1);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	
-//	minor2 = _mm_add_ps(_mm_mul_ps(row3, tmp1), minor2);
-//	minor3 = _mm_sub_ps(_mm_mul_ps(row2, tmp1), minor3);
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor2 = _mm_sub_ps(_mm_mul_ps(row3, tmp1), minor2);
-//	minor3 = _mm_sub_ps(minor3, _mm_mul_ps(row2, tmp1));
-//	
-//	tmp1 = _mm_mul_ps(row0, row3);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	
-//	minor1 = _mm_sub_ps(minor1, _mm_mul_ps(row2, tmp1));
-//	minor2 = _mm_add_ps(_mm_mul_ps(row1, tmp1), minor2);
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor1 = _mm_add_ps(_mm_mul_ps(row2, tmp1), minor1);
-//	minor2 = _mm_sub_ps(minor2, _mm_mul_ps(row1, tmp1));
-//	
-//	tmp1 = _mm_mul_ps(row0, row2);
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
-//	
-//	minor1 = _mm_add_ps(_mm_mul_ps(row3, tmp1), minor1);
-//	minor3 = _mm_sub_ps(minor3, _mm_mul_ps(row1, tmp1));
-//	
-//	tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
-//	
-//	minor1 = _mm_sub_ps(minor1, _mm_mul_ps(row3, tmp1));
-//	minor3 = _mm_add_ps(_mm_mul_ps(row1, tmp1), minor3);
-//	
-//	det = _mm_mul_ps(row0, minor0);
-//	det = _mm_add_ps(_mm_shuffle_ps(det, det, 0x4E), det);
-//	det = _mm_add_ss(_mm_shuffle_ps(det, det, 0xB1), det);
-//	tmp1 = _mm_rcp_ss(det);
-//	
-//	det = _mm_sub_ss(_mm_add_ss(tmp1, tmp1), _mm_mul_ss(det, _mm_mul_ss(tmp1, tmp1)));
-//	det = _mm_shuffle_ps(det, det, 0x00);
-//	
-//	minor0 = _mm_mul_ps(det, minor0);
-//	_mm_storel_pi((__m64*)(src), minor0);
-//	_mm_storeh_pi((__m64*)(src + 2), minor0);
-//	
-//	minor1 = _mm_mul_ps(det, minor1);
-//	_mm_storel_pi((__m64*)(src + 4), minor1);
-//	_mm_storeh_pi((__m64*)(src + 6), minor1);
-//	
-//	minor2 = _mm_mul_ps(det, minor2);
-//	_mm_storel_pi((__m64*)(src + 8), minor2);
-//	_mm_storeh_pi((__m64*)(src + 10), minor2);
-//	
-//	minor3 = _mm_mul_ps(det, minor3);
-//	_mm_storel_pi((__m64*)(src + 12), minor3);
-//	_mm_storeh_pi((__m64*)(src + 14), minor3);
-	
+	_mm_storeu_ps(&src[0], r1);
+	_mm_storeu_ps(&src[4], r2);
+	_mm_storeu_ps(&src[8], r3);
+	_mm_storeu_ps(&src[12], r4);
+
 	return resultMatrix;
 }
 
@@ -455,6 +403,8 @@ void AnimaMatrix::DumpMemory()
 	printf("%f\t%f\t%f\t%f\n", _matrixData[8], _matrixData[9], _matrixData[10], _matrixData[11]);
 	printf("%f\t%f\t%f\t%f\n\n", _matrixData[12], _matrixData[13], _matrixData[14], _matrixData[15]);
 }
+
+#undef _mm_shufd
 
 END_ANIMA_ENGINE_NAMESPACE
 

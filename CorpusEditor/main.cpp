@@ -1,16 +1,14 @@
 #include <stdio.h>
-#include <AnimaEngine.h>
-//#include <AnimaModelsManager.h>
-#include <AnimaBenchmarkTimer.h>
-#include <AnimaMatrix.h>
-//#include <AnimaString.h>
 #include <QApplication>
 #include <QStyleFactory>
 #include <QDateTime>
+#include <AnimaEngine.h>
 #include "CorpusMainWindow.h"
 
 #ifndef _MSC_VER
 #include <sys/syslimits.h>
+#else
+#include <windows.h>
 #endif
 
 #if defined _MSC_VER
@@ -47,33 +45,43 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char** argv)
 {
-	Anima::AnimaEngine engine;
-	engine.Initialize();
+	//Anima::AnimaEngine engine;
+	//engine.Initialize();
+
+	//freopen("C:/Users/Marco/Desktop/output/out.txt", "w", stdout);
+
+	////float data1[16] = {	1, 9, 0, 3,
+	////					0, 1, 0, 0,
+	////					8, 9, 6, 1,
+	////					0, 0, 0, 1};
+	////
+	////float data2[16] = {	6, 8, 3, 0,
+	////					1, 5, -4, 6,
+	////					2, 3, 0, 9,
+	////					0, 1, 0, 0};
+	////
+	////Anima::AnimaMatrix matrixA(&engine, data1);
+	////Anima::AnimaMatrix matrixB(&engine, data2);
+	////
+	////matrixBInv.DumpMemory();
+	////matrixFinal1.DumpMemory();
+	////matrixFinal2.DumpMemory();
+
+
+	//float data1[4] = { 1, 9, 0, 3 };	
+	//float data2[4] = { 6, 8, 3, 0 };
+	//
+	//Anima::AnimaVertex4f vA(&engine, data1);
+	//Anima::AnimaVertex4f vB(&engine, data2);
+	//Anima::AnimaVertex4f vC = vA ^ vB;
+
+	//vA.DumpMemory();
+	//vB.DumpMemory();
+	//vC.DumpMemory();
+
+	//fclose(stdout);
 	
-	float data1[16] = {	1, 9, 0, 3,
-						0, 1, 0, 0,
-						8, 9, 6, 1,
-						0, 0, 0, 1};
-	
-	float data2[16] = {	6, 8, 3, 0,
-						1, 5, -4, 6,
-						2, 3, 0, 9,
-						0, 1, 0, 0};
-	
-	Anima::AnimaMatrix matrix1(&engine, data1);
-	Anima::AnimaMatrix matrix2(&engine, data2);
-	
-	matrix1.DumpMemory();
-	matrix2.DumpMemory();
-	
-	Anima::AnimaMatrix matrix3 = matrix1 * matrix2;
-	
-	matrix3.DumpMemory();
-	
-	matrix1 = matrix1.Inverse();
-	matrix1.DumpMemory();
-	
-	return 0;
+	//return 0;
 	
 	Anima::AnimaEngine::SetUsedExternal();
 	

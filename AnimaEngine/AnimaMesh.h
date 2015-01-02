@@ -15,6 +15,7 @@
 #include "AnimaVertex.h"
 #include "AnimaFace.h"
 #include "AnimaEngine.h"
+#include "AnimaString.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -65,6 +66,11 @@ public:
 	AnimaFace* GetPFace(ASizeT index);
 	AnimaFace* GetFaces();
 	void ClearFaces();
+
+	void SetMeshName(const AnimaString& name);
+	void SetMeshName(const char* name);
+	AnimaString GetAnimaMeshName();
+	const char* GetMeshName();
 		
 protected:	
 	AnimaVertex4f*	_vertices;
@@ -78,6 +84,8 @@ protected:
 	
 	AnimaFace*		_faces;
 	ASizeT			_facesNumber;
+
+	AnimaString		_meshName;
 	
 	AnimaEngine* _engine;
 };
