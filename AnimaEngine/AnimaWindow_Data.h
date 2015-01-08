@@ -60,30 +60,12 @@
 #		include <OpenGL/glu.h>
 #	endif
 #else
-#	if defined(ANIMA_ENGINE_INCLUDE_GLCOREARB)
-#		include <GL/glcorearb.h>
-#	elif defined(ANIMA_ENGINE_INCLUDE_ES1)
-#		include <GLES/gl.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <GLES/glext.h>
+#	if !defined(ANIMA_ENGINE_INCLUDE_NONE)
+#		if !defined ANIMA_ENGINE_INCLUDED_GLEW
+#			include <GL/glew.h>
+#			define ANIMA_ENGINE_INCLUDED_GLEW
 #		endif
-#	elif defined(ANIMA_ENGINE_INCLUDE_ES2)
-#		include <GLES2/gl2.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <GLES2/gl2ext.h>
-#		endif
-#	elif defined(ANIMA_ENGINE_INCLUDE_ES3)
-#		include <GLES3/gl3.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <GLES3/gl2ext.h>
-#		endif
-#	elif defined(ANIMA_ENGINE_INCLUDE_ES31)
-#		include <GLES3/gl31.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <GLES3/gl2ext.h>
-#		endif
-#	elif !defined(ANIMA_ENGINE_INCLUDE_NONE)
-#		include <GL/gl.h>
+//#		include <GL/gl.h>
 #		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
 #			include <GL/glext.h>
 #		endif

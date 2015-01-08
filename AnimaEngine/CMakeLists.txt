@@ -3,6 +3,7 @@ project(AnimaEngine C CXX)
 include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 
 add_definitions(-DANIMA_ENGINE_EXPORT_ENABLED)
+add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 set(common_HEADERS	AnimaEngineCore.h
 					AnimaEngine.h
@@ -25,7 +26,10 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaMaterialProperty.h
                     AnimaString.h
 					AnimaMatrix.h
-					AnimaMath.h)
+					AnimaMath.h
+					AnimaShadersManager.h
+					AnimaShader.h
+					AnimaShaderProgram.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -45,7 +49,10 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaMaterialProperty.cpp
                     AnimaString.cpp
 					AnimaMatrix.cpp
-					AnimaMath.cpp)
+					AnimaMath.cpp
+					AnimaShadersManager.cpp
+					AnimaShader.cpp
+					AnimaShaderProgram.cpp)
 		
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}
@@ -115,6 +122,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_GLEW})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 if (ANIMA_ENGINE_INSTALL)

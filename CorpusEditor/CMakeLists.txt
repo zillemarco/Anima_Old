@@ -2,19 +2,21 @@ project(CorpusEditor C CXX)
 
 set(${PROJECT_NAME}_headers CorpusMainWindow.h
 							EditWindow.h
-							CorpusOGLWindow.h
+							CorpusOGLWindowBase.h
 							NewProjectWindow.h
 							CorpusDocument.h
 							ResourceManagerTab.h
-							WorldEditorTab.h)
+							WorldEditorTab.h
+							CRModelViewer.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							CorpusMainWindow.cpp
 							EditWindow.cpp
-							CorpusOGLWindow.cpp
+							CorpusOGLWindowBase.cpp
 							NewProjectWindow.cpp
 							CorpusDocument.cpp
 							ResourceManagerTab.cpp
-							WorldEditorTab.cpp)
+							WorldEditorTab.cpp
+							CRModelViewer.cpp)
 
 set(UI_FILES "")
 set(RC_FILES CorpusEditor.qrc)
@@ -50,7 +52,7 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
-qt5_use_modules(${PROJECT_NAME} Widgets Gui)
+qt5_use_modules(${PROJECT_NAME} Widgets Gui OpenGL)
 
 if (WIN32)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
@@ -59,6 +61,10 @@ if (WIN32)
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/assimp.dll"
+						COMMENT "Copia assimp.dll")
+						
+	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Bin/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
 						COMMENT "Copia assimp.dll")
 elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
@@ -101,7 +107,8 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(qtconf_dest_dir AnimaCorpus)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.exe")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin"
-					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64" 
+					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64"
+					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Bin" 
 					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
 

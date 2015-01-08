@@ -61,6 +61,7 @@ public:
 	void SetString(const char* str);
 	void ClearString();
 	
+	const AChar* GetConstBuffer();
 	AChar* GetBuffer();
 	ASizeT GetBufferLength();
 	

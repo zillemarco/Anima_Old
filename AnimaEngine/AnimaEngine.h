@@ -40,6 +40,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 typedef AnimaEngineWindow_Base AnimaWindow;
 
 class AnimaModelsManager;
+class AnimaShadersManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -107,6 +108,10 @@ public:
 	
 	static void SetUsedExternal(bool bUsedExternal = true) { _usedExternal = bUsedExternal; }
 	static bool IsUsedExteral() { return _usedExternal; }
+
+	static bool InitializeGlewExtensions();
+	static bool IsGlewExtensionsInitialized()			{ return _glewExtensionsInitialized; }
+	static void SetGlewExtensionsInitialized(bool bSet) { _glewExtensionsInitialized = bSet; }
 	
 public:
 	static bool IsInitialized() { return _animaEngineInitialized; }
@@ -142,10 +147,22 @@ public:
 		return _stringAllocator;
 	}
 
+	inline AnimaAllocator* GetShadersAllocator()
+	{
+		ANIMA_ASSERT(_shadersAllocator != nullptr);
+		return _shadersAllocator;
+	}
+
 	inline AnimaModelsManager* GetModelsManager()
 	{
 		ANIMA_ASSERT(_modelsManager != nullptr);
 		return _modelsManager;
+	}
+
+	inline AnimaShadersManager* GetShadersManager()
+	{
+		ANIMA_ASSERT(_shadersManager != nullptr);
+		return _shadersManager;
 	}
 
 	void DumpMemory();
@@ -186,12 +203,14 @@ private:
 	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
 	AnimaFreeListAllocator* _stringAllocator;		/*!< Allocator usato dalla classe AnimaString */
+	AnimaFreeListAllocator* _shadersAllocator;		/*!< Allocator usato dalla classe AnimaShaderProgram e AnimaShadersManager */
 	
 	static bool _platformLibraryWindowStateInitialized;
 	static bool _platformLibraryContextStateInitialized;
 	static bool _platformLibraryTimeStateInitialized;
 	static bool _platformLibraryJoystickStateInitialized;
 	static bool _platformLibraryTLSStateInitialized;
+	static bool _glewExtensionsInitialized;
 	
 	static bool _usedExternal;						/*!< Flag that has to be set to true if AnimaEngine is being used inside an external app. This flag is false ONLY IF AnimaEngine is the one who controls the windowing system */
 
@@ -199,6 +218,7 @@ private:
 	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */
 
 	AnimaModelsManager* _modelsManager;				/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
+	AnimaShadersManager* _shadersManager;			/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
 };
 
 template<class T>

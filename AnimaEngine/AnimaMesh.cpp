@@ -597,7 +597,7 @@ AnimaString AnimaMesh::GetAnimaMeshName()
 
 const char* AnimaMesh::GetMeshName()
 {
-	return _meshName.GetBuffer();
+	return _meshName.GetConstBuffer();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

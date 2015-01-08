@@ -2,7 +2,7 @@
 #define _AnimaWindow_WGLContext_h
 
 #include "AnimaEngineCore.h"
-#include <GL\wglext.h>
+#include <GL/wglew.h>
 
 #define _ANIMA_ENGINE_PLATFORM_FBCONFIG                 int							wgl
 #define _ANIMA_ENGINE_PLATFORM_CONTEXT_STATE            _AnimaEngineWindowcontextWGL	wgl
@@ -73,6 +73,8 @@ extern "C" ANIMA_ENGINE_EXPORT bool _AnimaEngineWindowCreateContext(AnimaEngineW
 
 extern "C" ANIMA_ENGINE_EXPORT void _AnimaEngineWindowDestroyContext(AnimaEngineWindow_Base* window);
 extern "C" ANIMA_ENGINE_EXPORT int _AnimaEngineWindowAnalyzeContext(AnimaEngineWindow_Base* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
+
+extern "C" ANIMA_ENGINE_EXPORT bool	_AnimaEngineWindowInitializeGlewExtensions();
 
 END_ANIMA_ENGINE_NAMESPACE
 

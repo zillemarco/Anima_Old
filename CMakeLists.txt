@@ -195,14 +195,13 @@ set(CORPUS_EDITOR_NAME CorpusEditor)
 #--------------------------------------------------------------------
 # AnimaEngine dependencies
 #--------------------------------------------------------------------
-if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-	if (WIN32)	
-		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimpd.lib)
-		set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimp.lib)
-	elseif(APPLE)
-		set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib)
-		set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib)
-	endif()
+if (WIN32)	
+	set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimpd.lib)
+	set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimp.lib)
+	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
+elseif(APPLE)
+	set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib)
+	set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib)
 endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")

@@ -1,41 +1,45 @@
 //
-//  CorpusOGLWindow.cpp
+//  CorpusOGLWindowBase.cpp
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
 //
 //
 
-#include "CorpusOGLWindow.h"
+#include <AnimaEngine.h>
+#include "CorpusOGLWindowBase.h"
 #include <QtCore/QCoreApplication>
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
 #include <QPainter>
+#include <qmessagebox>
 
-CorpusOGLWindow::CorpusOGLWindow(QWindow* parent)
+CorpusOGLWindowBase::CorpusOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
 : QWindow(parent)
 , _updatePending(false)
+, _animating(true)
 , _context(nullptr)
 , _device(nullptr)
+, _engine(engine)
 {
 	setSurfaceType(QWindow::OpenGLSurface);
 }
 
-CorpusOGLWindow::~CorpusOGLWindow()
+CorpusOGLWindowBase::~CorpusOGLWindowBase()
 {
 	delete _device;
 }
 
-void CorpusOGLWindow::Render(QPainter* painter)
+void CorpusOGLWindowBase::Render(QPainter* painter)
 {
 	Q_UNUSED(painter);
 }
 
-void CorpusOGLWindow::Initialize()
+void CorpusOGLWindowBase::Initialize()
 {
 }
 
-void CorpusOGLWindow::Render()
+void CorpusOGLWindowBase::Render()
 {
 	if(!_device)
 		_device = new QOpenGLPaintDevice;
@@ -48,7 +52,7 @@ void CorpusOGLWindow::Render()
 	Render(&painter);
 }
 
-void CorpusOGLWindow::RenderLater()
+void CorpusOGLWindowBase::RenderLater()
 {
 	if(!_updatePending)
 	{
@@ -57,7 +61,7 @@ void CorpusOGLWindow::RenderLater()
 	}
 }
 
-bool CorpusOGLWindow::event(QEvent* event)
+bool CorpusOGLWindowBase::event(QEvent* event)
 {
 	switch (event->type()) {
 		case QEvent::UpdateRequest:
@@ -70,7 +74,7 @@ bool CorpusOGLWindow::event(QEvent* event)
 	}
 }
 
-void CorpusOGLWindow::exposeEvent(QExposeEvent* event)
+void CorpusOGLWindowBase::exposeEvent(QExposeEvent* event)
 {
 	Q_UNUSED(event);
 	
@@ -78,7 +82,7 @@ void CorpusOGLWindow::exposeEvent(QExposeEvent* event)
 		RenderNow();
 }
 
-void CorpusOGLWindow::RenderNow()
+void CorpusOGLWindowBase::RenderNow()
 {
 	if (!isExposed())
 		return;
@@ -99,10 +103,15 @@ void CorpusOGLWindow::RenderNow()
 	if(needsInitialize)
 	{
 		initializeOpenGLFunctions();
+		Anima::AnimaEngine::InitializeGlewExtensions();
+
 		Initialize();
 	}
 	
 	Render();
 	
 	_context->swapBuffers(this);
+
+	if (_animating)
+		RenderLater();
 }

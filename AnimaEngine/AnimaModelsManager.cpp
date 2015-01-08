@@ -34,7 +34,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 {	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
 	if(scene == nullptr)
 		return nullptr;
@@ -122,7 +122,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				
 				int offsetIndiciFaccia = 0;
 				
-				for(unsigned int i = 0; i < numeroIndiciFaccia; i++)
+				for(int i = 0; i < numeroIndiciFaccia; i++)
 					indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
 				
 				facce[offsetFacce++].SetIndexes(indiciFaccia, offsetIndiciFaccia);

@@ -24,6 +24,7 @@
 #include <QMenu>
 
 class CorpusDocument;
+class CRModelViewer;
 
 class ResourceTreeItemModel : public QStandardItemModel
 {
@@ -79,7 +80,7 @@ private:
 	QSplitter* _mainSplitter;
 	QTreeView* _resourcesTree;
 	
-	QListView* _tmp;
+	CRModelViewer* _modelViewer;
 	
 	QAction* _importModelAct;
 	QAction* _importTextureAct;

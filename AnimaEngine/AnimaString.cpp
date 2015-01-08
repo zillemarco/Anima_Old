@@ -139,6 +139,11 @@ void AnimaString::ClearString()
 	}
 }
 
+const AChar* AnimaString::GetConstBuffer()
+{
+	return const_cast<AChar*>(_string);
+}
+
 AChar* AnimaString::GetBuffer()
 {
 	return _string;
@@ -307,7 +312,7 @@ AInt AnimaString::Find(const char* str, AInt startPos)
 AInt AnimaString::ReverseFind(AChar c, AInt startPos)
 {
 	if(startPos <= -1)
-		startPos = _stringLength - 1;
+		startPos = (int)_stringLength - 1;
 	
 	for(int i = startPos; i >= 0; i--)
 		if(_string[i] == c)
@@ -317,7 +322,7 @@ AInt AnimaString::ReverseFind(AChar c, AInt startPos)
 
 AInt AnimaString::ReverseFind(AnimaString str, AInt startPos)
 {
-	return ReverseFind(str.GetBuffer(), startPos);
+	return ReverseFind(str.GetConstBuffer(), startPos);
 }
 
 AInt AnimaString::ReverseFind(const char* str, AInt startPos)
@@ -331,10 +336,10 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos)
 		return Find(str[0], startPos);
 	
 	if(startPos <= -1)
-		startPos = _stringLength - 1;
+		startPos = (int)_stringLength - 1;
 	
-	int offsetStr = lunghezzaStr - 1;
-	int offsetInteralStr = _stringLength - 1;
+	int offsetStr = (int)lunghezzaStr - 1;
+	int offsetInteralStr = (int)_stringLength - 1;
 	int posizioneInizio = startPos;
 	
 	for(int i = startPos; i >= 0; i--)
@@ -351,7 +356,7 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos)
 			}
 			
 			if(offsetStr > 0)
-				offsetStr = lunghezzaStr - 1;
+				offsetStr = (int)lunghezzaStr - 1;
 			else
 				return posizioneInizio;
 		}
@@ -391,7 +396,7 @@ AnimaString AnimaString::Left(ASizeT len)
 
 AnimaString AnimaString::Right(ASizeT len)
 {
-	int startPos = _stringLength - len - 1;
+	int startPos = (int)_stringLength - (int)len - 1;
 	return Substring(startPos, len);
 }
 
@@ -415,7 +420,7 @@ AnimaString AnimaString::TrimRight()
 	if(_stringLength - 1 <= 0)
 		return *this;
 	
-	int length = _stringLength - 2;
+	int length = (int)_stringLength - 2;
 	for(; length >= 0; length--)
 	{
 		if(_string[length] != ' ')
@@ -471,7 +476,7 @@ void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AI
 		for(int i = 0; i < replacementLength; i++)
 			tmpString[offsetString++] = replacement[i];
 		
-		for(int i = pos + findLength; i < _stringLength - 1; i++)
+		for (int i = pos + (int)findLength; i < (int)_stringLength - 1; i++)
 			tmpString[offsetString++] = _string[i];
 		
 		SetString(tmpString._string);
@@ -510,7 +515,7 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 		for(int i = 0; i < replacementLength; i++)
 			tmpString[offsetString++] = replacement;
 		
-		for(int i = pos + findLength; i < _stringLength - 1; i++)
+		for (int i = pos + (int)findLength; i < (int)_stringLength - 1; i++)
 			tmpString[offsetString++] = _string[i];
 		
 		SetString(tmpString._string);
@@ -544,7 +549,7 @@ void AnimaString::Replace(const char* find, const char* replacement, AInt startP
 		for(int i = 0; i < replacementLength; i++)
 			tmpString[offsetString++] = replacement[i];
 		
-		for(int i = pos + findLength; i < _stringLength - 1; i++)
+		for (int i = pos + (int)findLength; i < (int)_stringLength - 1; i++)
 			tmpString[offsetString++] = _string[i];
 		
 		SetString(tmpString._string);

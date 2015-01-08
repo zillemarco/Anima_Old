@@ -85,6 +85,24 @@ static void initWGLExtensions(AnimaEngineWindow_Base* window)
 		window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_ARB_context_flush_control = true;
 }
 
+static bool initGlewExtensions()
+{
+	if (AnimaEngine::IsGlewExtensionsInitialized())
+		return true;
+
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
+	{
+		char str[4096];
+		sprintf(str, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		fprintf(stderr, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		return false;
+	}
+
+	AnimaEngine::SetGlewExtensionsInitialized(true);
+	return true;
+}
+
 static int getPixelFormatAttrib(AnimaEngineWindow_Base* window, int pixelFormat, int attrib)
 {
 	int value = 0;
@@ -230,6 +248,11 @@ static bool choosePixelFormat(AnimaEngineWindow_Base* window, const _AnimaEngine
 	return true;
 }
 
+bool _AnimaEngineWindowInitializeGlewExtensions()
+{
+	return initGlewExtensions();
+}
+
 bool _AnimaEngineWindowInitContextAPI(void)
 {
 	if (!_AnimaEngineWindowInitTLS())
@@ -241,7 +264,7 @@ bool _AnimaEngineWindowInitContextAPI(void)
 		//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to load opengl32.dll");
 		return false;
 	}
-
+	
 	return true;
 }
 

@@ -8,6 +8,7 @@
 
 #include "ResourceManagerTab.h"
 #include "CorpusDocument.h"
+#include "CRModelViewer.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -108,7 +109,7 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	setWindowTitle(tr("Resources manager"));
 
 	_resourcesTree = new QTreeView;
-	_tmp = new QListView;
+	_modelViewer = new CRModelViewer(_document->GetEngine());
 	
 	QList<int> dims;
 	dims.push_back(300);
@@ -134,7 +135,7 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	
 	_mainSplitter = new QSplitter(Qt::Horizontal);
 	_mainSplitter->addWidget(_resourcesTree);
-	_mainSplitter->addWidget(_tmp);
+	_mainSplitter->addWidget(QWidget::createWindowContainer(_modelViewer));
 	_mainSplitter->setSizes(dims);
 	_mainSplitter->setStretchFactor(1, 1);
 	

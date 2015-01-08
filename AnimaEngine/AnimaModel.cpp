@@ -292,7 +292,7 @@ AnimaString AnimaModel::GetAnimaModelName()
 
 const char* AnimaModel::GetModelName()
 {
-	return _modelName.GetBuffer();
+	return _modelName.GetConstBuffer();
 }
 
 void AnimaModel::SetModelFileName(const AnimaString& name)
@@ -312,7 +312,7 @@ AnimaString AnimaModel::GetAnimaModelFileName()
 
 const char* AnimaModel::GetModelFileName()
 {
-	return _modelFileName.GetBuffer();
+	return _modelFileName.GetConstBuffer();
 }
 
 AnimaMatrix AnimaModel::GetTransformationMatrix()

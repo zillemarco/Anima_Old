@@ -6,7 +6,8 @@
 #include "AnimaWindow_Data.h"
 
 #if defined(_ANIMA_ENGINE_USE_OPENGL)
-#	include <GL/glext.h>
+//#	include <GL/glext.h>
+//#	include <GL/glew.h>
 #endif
 
 #if defined ANIMA_ENGINE_APIENTRY_DEFINED
@@ -473,19 +474,18 @@ struct _AnimaEngineWindowHints {
 // Elenco funzioni di utilità
 extern "C" ANIMA_ENGINE_EXPORT const AnimaEngineWindowvidmode*		_AnimaEngineWindowChooseVideoMode(_AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowvidmode* desired);
 extern "C" ANIMA_ENGINE_EXPORT int									_AnimaEngineWindowCompareVideoModes(const AnimaEngineWindowvidmode* first, const AnimaEngineWindowvidmode* second);
-extern "C" ANIMA_ENGINE_EXPORT void								_AnimaEngineWindowSplitBPP(int bpp, int* red, int* green, int* blue);
-extern "C" ANIMA_ENGINE_EXPORT bool								_AnimaEngineWindowStringInExtensionString(const char* string, const GLubyte* extensions);
+extern "C" ANIMA_ENGINE_EXPORT void									_AnimaEngineWindowSplitBPP(int bpp, int* red, int* green, int* blue);
+extern "C" ANIMA_ENGINE_EXPORT bool									_AnimaEngineWindowStringInExtensionString(const char* string, const GLubyte* extensions);
 extern "C" ANIMA_ENGINE_EXPORT const _AnimaEngineWindowfbconfig*	_AnimaEngineWindowChooseFBConfig(const _AnimaEngineWindowfbconfig* desired, const _AnimaEngineWindowfbconfig* alternatives, unsigned int count);
-extern "C" ANIMA_ENGINE_EXPORT bool								_AnimaEngineWindowRefreshContextAttribs(const _AnimaEngineWindowctxconfig* ctxconfig);
-extern "C" ANIMA_ENGINE_EXPORT bool								_AnimaEngineWindowIsValidContextConfig(const _AnimaEngineWindowctxconfig* ctxconfig);
-extern "C" ANIMA_ENGINE_EXPORT bool								_AnimaEngineWindowIsValidContext(const _AnimaEngineWindowctxconfig* ctxconfig);
-extern "C" ANIMA_ENGINE_EXPORT void								_AnimaEngineWindowAllocGammaArrays(AnimaEngineWindowgammaramp* ramp, unsigned int size);
-extern "C" ANIMA_ENGINE_EXPORT void								_AnimaEngineWindowFreeGammaArrays(AnimaEngineWindowgammaramp* ramp);
+extern "C" ANIMA_ENGINE_EXPORT bool									_AnimaEngineWindowRefreshContextAttribs(const _AnimaEngineWindowctxconfig* ctxconfig);
+extern "C" ANIMA_ENGINE_EXPORT bool									_AnimaEngineWindowIsValidContextConfig(const _AnimaEngineWindowctxconfig* ctxconfig);
+extern "C" ANIMA_ENGINE_EXPORT bool									_AnimaEngineWindowIsValidContext(const _AnimaEngineWindowctxconfig* ctxconfig);
+extern "C" ANIMA_ENGINE_EXPORT void									_AnimaEngineWindowAllocGammaArrays(AnimaEngineWindowgammaramp* ramp, unsigned int size);
+extern "C" ANIMA_ENGINE_EXPORT void									_AnimaEngineWindowFreeGammaArrays(AnimaEngineWindowgammaramp* ramp);
 extern "C" ANIMA_ENGINE_EXPORT _AnimaEngineWindowmonitor*			_AnimaEngineWindowAllocMonitor(const char* name, int widthMM, int heightMM);
-extern "C" ANIMA_ENGINE_EXPORT void								_AnimaEngineWindowFreeMonitor(_AnimaEngineWindowmonitor* monitor);
-extern "C" ANIMA_ENGINE_EXPORT void								_AnimaEngineWindowFreeMonitors(_AnimaEngineWindowmonitor** monitors, int count);
+extern "C" ANIMA_ENGINE_EXPORT void									_AnimaEngineWindowFreeMonitor(_AnimaEngineWindowmonitor* monitor);
+extern "C" ANIMA_ENGINE_EXPORT void									_AnimaEngineWindowFreeMonitors(_AnimaEngineWindowmonitor** monitors, int count);
 extern "C" ANIMA_ENGINE_EXPORT AnimaEngineWindowglproc				_AnimaEngineWindowGetProcAddress(const char* procname);
-
 
 END_ANIMA_ENGINE_NAMESPACE
 
