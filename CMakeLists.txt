@@ -202,6 +202,7 @@ if (WIN32)
 elseif(APPLE)
 	set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib)
 	set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib)
+	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.dylib)
 endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")

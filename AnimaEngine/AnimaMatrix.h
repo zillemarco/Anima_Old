@@ -40,9 +40,9 @@ public:
 	void GetRow(AFloat* row, ASizeT index);
 	void GetColumn(AFloat* col, ASizeT index);
 
-	inline AFloat* GetData() const;
-	inline void GetData(AFloat m[ANIMA_MATRIX_SIZE]) const;
-	inline const AFloat* GetConstData() const;
+	AFloat* GetData() const;
+	void GetData(AFloat m[ANIMA_MATRIX_SIZE]) const;
+	const AFloat* GetConstData() const;
 	
 	void SetIdentity();
 	
@@ -52,56 +52,56 @@ public:
 	AnimaMatrix Transpose() const;
 	inline float Determinant() const;
 
-	inline AnimaMatrix& operator+=(const AnimaMatrix& src);
+	AnimaMatrix& operator+=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m += srcb;
 		return m;
 	}
 
-	inline AnimaMatrix& operator-=(const AnimaMatrix& src);
+	AnimaMatrix& operator-=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m -= srcb;
 		return m;
 	}
 
-	inline AnimaMatrix& operator*=(const AnimaMatrix& src);
+	AnimaMatrix& operator*=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m *= srcb;
 		return m;
 	}
 
-	inline AnimaMatrix& operator/=(const AnimaMatrix& src);
+	AnimaMatrix& operator/=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m /= srcb;
 		return m;
 	}
 
-	inline AnimaMatrix& operator+=(const AFloat& add);
+	AnimaMatrix& operator+=(const AFloat& add);
 	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AFloat& add) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m += add;
 		return m;
 	}
 
-	inline AnimaMatrix& operator-=(const AFloat& sub);
+	AnimaMatrix& operator-=(const AFloat& sub);
 	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AFloat& sub) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m -= sub;
 		return m;
 	}
 
-	inline AnimaMatrix& operator*=(const AFloat& mul);
+	AnimaMatrix& operator*=(const AFloat& mul);
 	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AFloat& mul) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m *= mul;
 		return m;
 	}
 
-	inline AnimaMatrix& operator/=(const AFloat& div);
+	AnimaMatrix& operator/=(const AFloat& div);
 	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AFloat& div) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
 		m /= div;

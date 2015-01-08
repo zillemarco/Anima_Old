@@ -99,6 +99,7 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.app")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin" 
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64"
+					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib”
 					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/lib")
 	ENDIF(APPLE)
 	
@@ -108,7 +109,7 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.exe")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin"
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64"
-					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Bin" 
+					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib” 
 					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
 

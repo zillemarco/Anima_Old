@@ -40,6 +40,8 @@ void _AnimaEngineWindowTerminateContextAPI(void);
 bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig);
 void _AnimaEngineWindowDestroyContext(AnimaEngineWindow_Base* window);
 
+extern "C" ANIMA_ENGINE_EXPORT bool	_AnimaEngineWindowInitializeGlewExtensions();
+
 END_ANIMA_ENGINE_NAMESPACE
 
 #endif

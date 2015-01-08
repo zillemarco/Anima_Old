@@ -44,36 +44,44 @@
 #	include <stddef.h>
 #endif
 
-#if defined(__APPLE_CC__)
-#	if defined(ANIMA_ENGINE_INCLUDE_GLCOREARB)
-#		include <OpenGL/gl3.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <OpenGL/gl3ext.h>
-#		endif
-#	elif !defined(ANIMA_ENGINE_INCLUDE_NONE)
-#		if !defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			define GL_GLEXT_LEGACY
-#		endif
-#		include <OpenGL/gl.h>
-#	endif
-#	if defined(ANIMA_ENGINE_INCLUDE_GLU)
-#		include <OpenGL/glu.h>
-#	endif
-#else
-#	if !defined(ANIMA_ENGINE_INCLUDE_NONE)
-#		if !defined ANIMA_ENGINE_INCLUDED_GLEW
-#			include <GL/glew.h>
-#			define ANIMA_ENGINE_INCLUDED_GLEW
-#		endif
-//#		include <GL/gl.h>
-#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
-#			include <GL/glext.h>
-#		endif
-#	endif
-#	if defined(ANIMA_ENGINE_INCLUDE_GLU)
-#		include <GL/glu.h>
-#	endif
+#if !defined ANIMA_ENGINE_INCLUDED_GLEW
+#	include <GL/glew.h>
+#	define ANIMA_ENGINE_INCLUDED_GLEW
 #endif
+
+//#if defined(__APPLE_CC__)
+//#	if defined(ANIMA_ENGINE_INCLUDE_GLCOREARB)
+//#		include <OpenGL/gl3.h>
+//#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
+//#			include <OpenGL/gl3ext.h>
+//#		endif
+//#	elif !defined(ANIMA_ENGINE_INCLUDE_NONE)
+////#		include <OpenGL/gl.h>
+//#		if !defined(ANIMA_ENGINE_INCLUDE_GLEXT)
+//#			define GL_GLEXT_LEGACY
+//#			include <OpenGL/gl3ext.h>
+//#			include <OpenGL/gl3.h>
+////#			include <GL/_glext.h>
+//#		endif
+//#	endif
+//#	if defined(ANIMA_ENGINE_INCLUDE_GLU)
+//#		include <OpenGL/glu.h>
+//#	endif
+//#else
+//#	if !defined(ANIMA_ENGINE_INCLUDE_NONE)
+//#		if !defined ANIMA_ENGINE_INCLUDED_GLEW
+//#			include <GL/glew.h>
+//#			define ANIMA_ENGINE_INCLUDED_GLEW
+//#		endif
+////#		include <GL/gl.h>
+//#		if defined(ANIMA_ENGINE_INCLUDE_GLEXT)
+//#			include <GL/glext.h>
+//#		endif
+//#	endif
+//#	if defined(ANIMA_ENGINE_INCLUDE_GLU)
+//#		include <GL/glu.h>
+//#	endif
+//#endif
 
 // Definizione delle chiavi per la tastiera
 #define ANIMA_ENGINE_KEY_UNKNOWN            -1

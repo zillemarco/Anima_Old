@@ -57,14 +57,6 @@ void CRModelViewer::Initialize()
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "matrix");
 	_posAttr = glGetAttribLocation(_program->GetID(), "posAttr");
 	_colAttr = glGetAttribLocation(_program->GetID(), "colAttr");
-
-	//_program = new QOpenGLShaderProgram(this);
-	//_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-	//_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
-	//_program->link();
-	//_posAttr = _program->attributeLocation("posAttr");
-	//_colAttr = _program->attributeLocation("colAttr");
-	//_matrixUniform = _program->uniformLocation("matrix");
 }
 
 void CRModelViewer::Render()
@@ -72,7 +64,8 @@ void CRModelViewer::Render()
 	const qreal retinaScale = devicePixelRatio();
 	glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	GLenum error = glGetError();
 
 	_program->Use();
 
@@ -82,12 +75,7 @@ void CRModelViewer::Render()
 	matrix.rotate(100.0f * _frame / screen()->refreshRate(), 0, 1, 0);
 	
 	_program->SetUniformValue(_matrixUniform, matrix.data());
-
-	if (glGetError() != GL_NO_ERROR)
-	{
-		ANIMA_ASSERT(false);
-	}
-
+	
 	GLfloat vertices[] = {
 		0.0f, 0.707f,
 		-0.5f, -0.5f,

@@ -1,5 +1,4 @@
 #include "AnimaShader.h"
-//#include <GL/glext.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

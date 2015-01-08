@@ -130,17 +130,17 @@ inline AnimaMatrix::operator const AFloat*()
 	return const_cast<AFloat*>(_matrixData);
 }
 
-inline AFloat* AnimaMatrix::GetData() const
+AFloat* AnimaMatrix::GetData() const
 {
 	return _matrixData;
 }
 
-inline void AnimaMatrix::GetData(AFloat m[ANIMA_MATRIX_SIZE]) const
+void AnimaMatrix::GetData(AFloat m[ANIMA_MATRIX_SIZE]) const
 {
 	memcpy(m, _matrixData, sizeof(AFloat) * ANIMA_MATRIX_SIZE);
 }
 
-inline const AFloat* AnimaMatrix::GetConstData() const
+const AFloat* AnimaMatrix::GetConstData() const
 {
 	return const_cast<AFloat*>(_matrixData);
 }

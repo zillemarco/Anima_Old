@@ -44,9 +44,10 @@ void CorpusOGLWindowBase::Render()
 	if(!_device)
 		_device = new QOpenGLPaintDevice;
 	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
 	_device->setSize(size());
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	GLenum error = glGetError();
 	
 	QPainter painter(_device);
 	Render(&painter);

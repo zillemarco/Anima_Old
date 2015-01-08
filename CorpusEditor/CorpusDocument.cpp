@@ -84,6 +84,8 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	_hasModifications = true;
 	_newDocument = true;
 	
+	SaveDocument();
+	
 	return true;
 }
 

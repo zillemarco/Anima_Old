@@ -19,9 +19,32 @@ bool _AnimaEngineWindowInitContextAPI(void)
 	return true;
 }
 
+static bool initGlewExtensions()
+{
+	if (AnimaEngine::IsGlewExtensionsInitialized())
+		return true;
+	
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
+	{
+		char str[4096];
+		sprintf(str, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		fprintf(stderr, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		return false;
+	}
+	
+	AnimaEngine::SetGlewExtensionsInitialized(true);
+	return true;
+}
+
 void _AnimaEngineWindowTerminateContextAPI(void)
 {
 	_AnimaEngineWindowTerminateTLS();
+}
+
+bool _AnimaEngineWindowInitializeGlewExtensions()
+{
+	return initGlewExtensions();
 }
 
 bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _AnimaEngineWindowctxconfig* ctxconfig, const _AnimaEngineWindowfbconfig* fbconfig)
@@ -165,6 +188,8 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 //		_glfwInputError(GLFW_PLATFORM_ERROR, "NSGL: Failed to create OpenGL context");
 		return false;
 	}
+	
+	initGlewExtensions();
 	
 	return true;
 }

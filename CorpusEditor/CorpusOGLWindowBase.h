@@ -13,6 +13,7 @@
 #include <qopenglfunctions>
 #include <qevent>
 #include <qexposeEvent>
+#include <qopenglpaintdevice>
 
 namespace Anima {
 	class AnimaEngine;

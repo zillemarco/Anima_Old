@@ -62,7 +62,7 @@ CorpusMainWindow::CorpusMainWindow()
 	createStatusBar();
 	updateMenus();
 	
-	setWindowTitle(tr("CoprusEditor"));
+	setWindowTitle(tr("CorpusEditor"));
 	setUnifiedTitleAndToolBarOnMac(true);
 }
 

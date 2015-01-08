@@ -25,11 +25,11 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
-	: _shaders(src._shaders)
+: _engine(src._engine)
+	, _shaders(src._shaders)
 	, _shadersNumber(src._shadersNumber)
 	, _id(src._id)
 	, _linked(src._linked)
-	, _engine(src._engine)
 {
 	src._shaders = nullptr;
 	src._shadersNumber = 0;
