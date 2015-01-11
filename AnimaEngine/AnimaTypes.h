@@ -15,10 +15,11 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-typedef size_t	ASizeT;
-typedef float   AFloat;
-typedef int		AInt;
-typedef char    AChar;
+typedef size_t			ASizeT;
+typedef float			AFloat;
+typedef int				AInt;
+typedef char			AChar;
+typedef unsigned int	AUint;
 
 typedef uint8_t		AU8;
 typedef uint16_t	AU16;

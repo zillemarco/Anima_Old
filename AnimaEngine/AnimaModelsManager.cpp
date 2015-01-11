@@ -34,7 +34,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 {	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Fast);
 	
 	if(scene == nullptr)
 		return nullptr;
@@ -95,7 +95,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			int numeroFacce = mesh->mNumFaces;
 			int numeroVertici = mesh->mNumVertices;
 		
-			AnimaVertex4f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
+			AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
 			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_engine->GetGenericAllocator()), numeroFacce, _engine);
 		
 			int offsetFacce = 0;
@@ -108,7 +108,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				vertici[offsetVertici][0] = vert->x;
 				vertici[offsetVertici][1] = vert->y;
 				vertici[offsetVertici][2] = vert->z;
-				vertici[offsetVertici][3] = 1.0;
+				//vertici[offsetVertici][3] = 1.0;
 			
 				offsetVertici++;
 			}
@@ -131,7 +131,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 
 			if (mesh->HasNormals())
 			{
-				AnimaVertex4f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex4f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
+				AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
 				int offsetNormali = 0;
 				for (int t = 0; t < numeroVertici; t++)
 				{
@@ -140,7 +140,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 					normali[offsetNormali][0] = norm->x;
 					normali[offsetNormali][1] = norm->y;
 					normali[offsetNormali][2] = norm->z;
-					normali[offsetNormali][3] = 1.0;
+					//normali[offsetNormali][3] = 1.0;
 
 					offsetNormali++;
 				}

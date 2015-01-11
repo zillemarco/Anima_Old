@@ -13,6 +13,16 @@
 #include "AnimaAllocators.h"
 #include "AnimaWindow.h"
 
+//#ifndef _MSC_VER
+//#include <sys/syslimits.h>
+//#else
+//#include <windows.h>
+//#endif
+
+#if defined _MSC_VER
+#define PATH_MAX MAX_PATH
+#endif
+
 #define _ANIMA_ENGINE_REQUIRE_INIT()					\
     if (!Anima::AnimaEngine::IsInitialized())				\
 		{													\
@@ -113,6 +123,9 @@ public:
 	static bool IsGlewExtensionsInitialized()			{ return _glewExtensionsInitialized; }
 	static void SetGlewExtensionsInitialized(bool bSet) { _glewExtensionsInitialized = bSet; }
 	
+	static void SetLogFilePath(const AChar* path);
+	static AChar* GetLogFilePath();
+
 public:
 	static bool IsInitialized() { return _animaEngineInitialized; }
 
@@ -165,7 +178,7 @@ public:
 		return _shadersManager;
 	}
 
-	void DumpMemory();
+	void DumpMemory(const char* fileName);
 
 private:
 	void InitializeMemorySystem();
@@ -219,6 +232,8 @@ private:
 
 	AnimaModelsManager* _modelsManager;				/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaShadersManager* _shadersManager;			/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
+
+	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 };
 
 template<class T>

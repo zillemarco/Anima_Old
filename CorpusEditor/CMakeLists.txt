@@ -7,7 +7,8 @@ set(${PROJECT_NAME}_headers CorpusMainWindow.h
 							CorpusDocument.h
 							ResourceManagerTab.h
 							WorldEditorTab.h
-							CRModelViewer.h)
+							CRModelViewer.h
+							Window.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							CorpusMainWindow.cpp
 							EditWindow.cpp
@@ -16,7 +17,8 @@ set(${PROJECT_NAME}_sources main.cpp
 							CorpusDocument.cpp
 							ResourceManagerTab.cpp
 							WorldEditorTab.cpp
-							CRModelViewer.cpp)
+							CRModelViewer.cpp
+							Window.cpp)
 
 set(UI_FILES "")
 set(RC_FILES CorpusEditor.qrc)
@@ -64,7 +66,7 @@ if (WIN32)
 						COMMENT "Copia assimp.dll")
 						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Bin/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
 						COMMENT "Copia assimp.dll")
 elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
@@ -99,7 +101,7 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.app")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin" 
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64"
-					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib”
+					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib"
 					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/lib")
 	ENDIF(APPLE)
 	
@@ -109,7 +111,7 @@ if (ANIMA_ENGINE_INSTALL)
 		SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaCorpus/${PROJECT_NAME}.exe")
 		set(DIRS 	"${ANIMA_ENGINE_QT5_ROOT_PATH}/bin"
 					"${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64"
-					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib” 
+					"${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib" 
 					"${CMAKE_INSTALL_PREFIX}/AnimaEngine/bin")
 	ENDIF(WIN32)
 

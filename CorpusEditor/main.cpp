@@ -3,26 +3,16 @@
 #include <QStyleFactory>
 #include <QDateTime>
 #include <AnimaEngine.h>
+#include <AnimaWindow.h>
 #include "CorpusMainWindow.h"
-
-#ifndef _MSC_VER
-#include <sys/syslimits.h>
-#else
-#include <windows.h>
-#endif
-
-#if defined _MSC_VER
-#define PATH_MAX MAX_PATH
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-
-char outputFileName[PATH_MAX];
+#include "CorpusDocument.h"
+#include <AnimaString.h>
+#include <AnimaModelsManager.h>
+#include "Window.h"
 
 void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-	freopen (outputFileName, "a", stderr);
+	freopen(Anima::AnimaEngine::GetLogFilePath(), "a", stderr);
 	
 	QByteArray localMsg = msg.toLocal8Bit();
 	switch (type) {
@@ -44,126 +34,97 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 }
 
 int main(int argc, char** argv)
-{
-	//Anima::AnimaEngine engine;
-	//engine.Initialize();
-
-	//freopen("C:/Users/Marco/Desktop/output/out.txt", "w", stdout);
-
-	////float data1[16] = {	1, 9, 0, 3,
-	////					0, 1, 0, 0,
-	////					8, 9, 6, 1,
-	////					0, 0, 0, 1};
-	////
-	////float data2[16] = {	6, 8, 3, 0,
-	////					1, 5, -4, 6,
-	////					2, 3, 0, 9,
-	////					0, 1, 0, 0};
-	////
-	////Anima::AnimaMatrix matrixA(&engine, data1);
-	////Anima::AnimaMatrix matrixB(&engine, data2);
-	////
-	////matrixBInv.DumpMemory();
-	////matrixFinal1.DumpMemory();
-	////matrixFinal2.DumpMemory();
-
-
-	//float data1[4] = { 1, 9, 0, 3 };	
-	//float data2[4] = { 6, 8, 3, 0 };
+{	
+	//Anima::AnimaEngine::SetUsedExternal();
 	//
-	//Anima::AnimaVertex4f vA(&engine, data1);
-	//Anima::AnimaVertex4f vB(&engine, data2);
-	//Anima::AnimaVertex4f vC = vA ^ vB;
-
-	//vA.DumpMemory();
-	//vB.DumpMemory();
-	//vC.DumpMemory();
-
-	//fclose(stdout);
-	
-	//return 0;
-	
-	Anima::AnimaEngine::SetUsedExternal();
-	
-	QDateTime dateTime = QDateTime::currentDateTime();
-	QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
-	QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
-	
-	sprintf(outputFileName, "%s.log", dateTimeByteArray.constData());
-	
-	FILE* f = fopen(outputFileName, "w");
-	fclose(f);
-	
-	qInstallMessageHandler(messageOutput);
-	
-	QApplication app(argc, argv);
-	
-	qApp->setStyle(QStyleFactory::create("fusion"));
-
-	QPalette palette;
-	palette.setColor(QPalette::Window, QColor(53, 53, 53));
-	palette.setColor(QPalette::WindowText, Qt::white);
-	palette.setColor(QPalette::Base, QColor(15, 15, 15));
-	palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-	palette.setColor(QPalette::ToolTipBase, Qt::white);
-	palette.setColor(QPalette::ToolTipText, Qt::white);
-	palette.setColor(QPalette::Text, Qt::white);
-	palette.setColor(QPalette::Disabled, QPalette::Text, QColor(255, 255, 255).darker());
-	palette.setColor(QPalette::Button, QColor(53, 53, 53));
-	palette.setColor(QPalette::ButtonText, Qt::white);
-	palette.setColor(QPalette::BrightText, Qt::red);
-	palette.setColor(QPalette::Light, QColor(15, 15, 15));
-
-	palette.setColor(QPalette::Highlight, QColor(0, 152, 217).lighter());
-	palette.setColor(QPalette::HighlightedText, Qt::black);
-	qApp->setPalette(palette);
-
-	CorpusMainWindow mainWindow;
-	
-	mainWindow.show();
-	return app.exec();
-	
-	
-//	Anima::AnimaEngine engine;
-//	engine.Initialize();
-//	
-//#if defined _MSC_VER
-//	Anima::AnimaString path("D:/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
-//#else
-//	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
-//#endif
-//	
-//	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-//	if(!manager->LoadModel(path))
-//		return 0;
-//	
-//	engine.DumpMemory();
-
-	//Anima::AnimaEngine engine;
-	//engine.Initialize();
+	//QDateTime dateTime = QDateTime::currentDateTime();
+	//QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
+	//QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
 	//
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_CONTEXT_VERSION_MAJOR, 4);
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_CONTEXT_VERSION_MINOR, 3);
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_FORWARD_COMPAT, true);
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE, true);
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_OPENGL_PROFILE, ANIMA_ENGINE_CORE_OPENGL_CORE_PROFILE);
-	////engine.SetWindowHint(ANIMA_ENGINE_CORE_RESIZABLE, false);
-	//CustomWindow* window = engine.CreateAnimaWindow<CustomWindow>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
+	//Anima::AChar tmpFileName[PATH_MAX];
+	//sprintf(tmpFileName, "%s.log", dateTimeByteArray.constData());
+	//Anima::AnimaEngine::SetLogFilePath(tmpFileName);
 	//
-	//window->MakeCurrentContext();
-	//engine.SwapInterval(1);
-	//window->MakeCurrentContext();
-	//window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
+	//FILE* f = fopen(Anima::AnimaEngine::GetLogFilePath(), "w");
+	//fclose(f);
 	//
-	//if(!window->Load())
-	//	return 0;
+	//qInstallMessageHandler(messageOutput);
 	//
-	//while (!window->ShouldClose())
-	//{
-	//	engine.PollEvents();
-	//	
-	//	window->DrawScene();
-	//}
+	//QApplication app(argc, argv);
+	//
+	//qApp->setStyle(QStyleFactory::create("fusion"));
+
+	//QPalette palette;
+	//palette.setColor(QPalette::Window, QColor(53, 53, 53));
+	//palette.setColor(QPalette::WindowText, Qt::white);
+	//palette.setColor(QPalette::Base, QColor(15, 15, 15));
+	//palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+	//palette.setColor(QPalette::ToolTipBase, Qt::white);
+	//palette.setColor(QPalette::ToolTipText, Qt::white);
+	//palette.setColor(QPalette::Text, Qt::white);
+	//palette.setColor(QPalette::Disabled, QPalette::Text, QColor(255, 255, 255).darker());
+	//palette.setColor(QPalette::Button, QColor(53, 53, 53));
+	//palette.setColor(QPalette::ButtonText, Qt::white);
+	//palette.setColor(QPalette::BrightText, Qt::red);
+	//palette.setColor(QPalette::Light, QColor(15, 15, 15));
+
+	//palette.setColor(QPalette::Highlight, QColor(0, 152, 217).lighter());
+	//palette.setColor(QPalette::HighlightedText, Qt::black);
+	//qApp->setPalette(palette);
+
+	//CorpusMainWindow mainWindow;
+	//
+	//mainWindow.show();
+	//return app.exec();
+	
+	
+	Anima::AnimaEngine engine;
+	engine.Initialize();
+	GLenum error = glGetError();
+	
+#if defined _MSC_VER
+	Anima::AnimaString path("D:/Modelli/untitled.obj", &engine);
+#else
+	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
+#endif
+	
+	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
+	error = glGetError();
+	if(!manager->LoadModel(path))
+		return 0;
+	error = glGetError();
+	
+	//engine.DumpMemory();
 		
-//	return 0;
+	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
+	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 3);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, true);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
+	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, false);
+	error = glGetError();
+	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
+	error = glGetError();
+	
+	window->MakeCurrentContext();
+	error = glGetError();
+	engine.SwapInterval(1);
+	error = glGetError();
+	window->MakeCurrentContext();
+	error = glGetError();
+	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
+	error = glGetError();
+	
+	window->Load();
+	error = glGetError();
+
+	while (!window->ShouldClose())
+	{
+		engine.PollEvents();
+		
+		window->DrawScene();
+		error = glGetError();
+	}
+		
+	return 0;
 }

@@ -118,4 +118,36 @@ void AnimaFace::ClearIndexes()
 	}
 }
 
+ASizeT AnimaFace::GetIndexesCount()
+{
+	return _indexesNumber;
+}
+
+ASizeT* AnimaFace::GetIndexes()
+{
+	return _indexes;
+}
+
+const ASizeT* AnimaFace::GetConstIndexes()
+{
+	return const_cast<ASizeT*>(_indexes);
+}
+
+bool AnimaFace::GetIndexes(ASizeT* outIndexes, ASizeT& outIndexesSize)
+{
+	if (outIndexesSize < _indexesNumber)
+		return false;
+	outIndexes = _indexes;
+	return true;
+}
+
+bool AnimaFace::GetConstIndexes(ASizeT* outIndexes, ASizeT& outIndexesSize)
+{
+	if (outIndexesSize < _indexesNumber)
+		return false;
+
+	memcpy(outIndexes, _indexes, sizeof(ASizeT) * _indexesNumber);
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

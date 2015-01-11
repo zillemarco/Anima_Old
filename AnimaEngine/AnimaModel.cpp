@@ -345,6 +345,15 @@ void AnimaModel::SetTransformationMatrix(AFloat* m)
 	_trasnsformationMatrix.SetData(m);
 }
 
+void AnimaModel::Draw(AnimaMatrix transformationMatrix)
+{
+	for (int i = 0; i < _modelMeshesNumber; i++)
+		_modelMeshes[i].Draw(transformationMatrix * _trasnsformationMatrix);
+
+	for (int i = 0; i < _modelChildrenNumber; i++)
+		_modelChildren[i].Draw(transformationMatrix * _trasnsformationMatrix);
+}
+
 END_ANIMA_ENGINE_NAMESPACE
 
 

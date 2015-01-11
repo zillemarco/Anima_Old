@@ -32,6 +32,13 @@ public:
 	void AddIndex(const ASizeT& index);
 	
 	void ClearIndexes();
+
+	ASizeT GetIndexesCount();
+
+	ASizeT* GetIndexes();
+	const ASizeT* GetConstIndexes();
+	bool GetIndexes(ASizeT* outIndexes, ASizeT& inOutSize);
+	bool GetConstIndexes(ASizeT* outIndexes, ASizeT& inOutSize);
 	
 protected:
 	ASizeT* _indexes;

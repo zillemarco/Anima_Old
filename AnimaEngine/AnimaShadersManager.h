@@ -19,15 +19,20 @@ public:
 
 	AnimaShader* LoadShader(AnimaString text, AnimaShader::AnimaShaderType type);
 	AnimaShader* LoadShader(const AChar* text, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(AnimaString filePath, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const AChar* filePath, AnimaShader::AnimaShaderType type);
 	AnimaShader* LoadShader(AnimaShaderProgram::AnimaShaderInfo info);
 	bool LoadShaders(const AnimaShaderProgram::AnimaShaderInfo* info, ASizeT count, AnimaShader** output);
 
-	AnimaShader* CreateShader(bool allocate = true);
-	AnimaShaderProgram* CreateProgram(bool allocate = true);
+	AnimaShader* CreateShader();
+	AnimaShaderProgram* CreateProgram();
 
 private:
 	AnimaShader* AddShader(const AnimaShader& shader);
 	AnimaShaderProgram* AddProgram(const AnimaShaderProgram& program);
+
+	void ClearShaders(bool bDeleteObjects = true, bool bResetNumber = true);
+	void ClearPrograms(bool bDeleteObjects = true, bool bResetNumber = true);
 
 private:
 	AnimaEngine* _engine;

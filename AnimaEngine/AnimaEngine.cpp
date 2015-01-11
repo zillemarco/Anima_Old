@@ -23,6 +23,7 @@ bool								AnimaEngine::_platformLibraryJoystickStateInitialized = false;
 bool								AnimaEngine::_platformLibraryTLSStateInitialized = false;
 bool								AnimaEngine::_usedExternal = false;
 bool								AnimaEngine::_glewExtensionsInitialized = false;
+AChar								AnimaEngine::_logFilePath[PATH_MAX] = "";
 
 #define _ANIMA_MEMORY_SIZE			125829120	// 120 MB
 
@@ -533,8 +534,13 @@ bool AnimaEngine::InitializeGlewExtensions()
 	return _AnimaEngineWindowInitializeGlewExtensions();
 }
 
-void AnimaEngine::DumpMemory()
+void AnimaEngine::DumpMemory(const char* fileName)
 {
+	bool bCanClose = true;
+	if(!freopen(fileName, "a", stdout))
+		bCanClose = false;
+
+	printf("\n\n------- AnimaEngine Memory Dump -------\n");
 	printf("Main allocator: \n");
 	_mainAllocator->Dump();
 
@@ -555,6 +561,19 @@ void AnimaEngine::DumpMemory()
 
 	printf("Managers allocator: \n");
 	_managersAllocator->Dump();
+	
+	if (bCanClose)
+		fclose(stdout);
+}
+
+void AnimaEngine::SetLogFilePath(const AChar* path)
+{
+	strcpy(_logFilePath, path);
+}
+
+AChar* AnimaEngine::GetLogFilePath()
+{
+	return _logFilePath;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

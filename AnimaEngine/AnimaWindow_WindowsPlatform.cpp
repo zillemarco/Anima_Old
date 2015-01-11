@@ -1244,6 +1244,7 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 		// ...and then create them again, this time with better APIs
 		if (!createWindow(window, wndconfig, ctxconfig, fbconfig))
 			return false;
+		_AnimaEngineWindowInitializeGlewExtensions();
 	}
 
 	if (window->GetMonitor())

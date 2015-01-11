@@ -66,6 +66,8 @@ public:
 
 	void SetTransformationMatrix(AnimaMatrix m);
 	void SetTransformationMatrix(AFloat* m);
+
+	void Draw(AnimaMatrix transformationMatrix);
 	
 protected:
 	AnimaModel*		_modelChildren;

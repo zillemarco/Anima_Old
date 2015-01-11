@@ -16,6 +16,7 @@
 #include "AnimaFace.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
+#include "AnimaMatrix.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -31,24 +32,24 @@ public:
 	AnimaMesh& operator=(AnimaMesh&& src);
 	
 public:
-	void SetVertices(AnimaVertex4f* v, ASizeT n);
+	//void SetVertices(AnimaVertex4f* v, ASizeT n);
 	void SetVertices(AnimaVertex3f* v, ASizeT n);
-	void AddVertex(const AnimaVertex4f& v);
+	//void AddVertex(const AnimaVertex4f& v);
 	void AddVertex(const AnimaVertex3f& v);
 	ASizeT GetVerticesNumber();
-	AnimaVertex4f GetVertex(ASizeT index);
-	AnimaVertex4f* GetPVertex(ASizeT index);
-	AnimaVertex4f* GetVertices();
+	AnimaVertex3f GetVertex(ASizeT index);
+	AnimaVertex3f* GetPVertex(ASizeT index);
+	AnimaVertex3f* GetVertices();
 	void ClearVertices();
 	
-	void SetNormals(AnimaVertex4f* v, ASizeT n);
+	//void SetNormals(AnimaVertex4f* v, ASizeT n);
 	void SetNormals(AnimaVertex3f* v, ASizeT n);
-	void AddNormal(const AnimaVertex4f& v);
+	//void AddNormal(const AnimaVertex4f& v);
 	void AddNormal(const AnimaVertex3f& v);
 	ASizeT GetNormalsNumber();
-	AnimaVertex4f GetNormal(ASizeT index);
-	AnimaVertex4f* GetPNormal(ASizeT index);
-	AnimaVertex4f* GetNormals();
+	AnimaVertex3f GetNormal(ASizeT index);
+	AnimaVertex3f* GetPNormal(ASizeT index);
+	AnimaVertex3f* GetNormals();
 	void ClearNormals();
 	
 	void SetTextureCoords(AnimaVertex2f* v, ASizeT n);
@@ -71,12 +72,34 @@ public:
 	void SetMeshName(const char* name);
 	AnimaString GetAnimaMeshName();
 	const char* GetMeshName();
-		
+
+	void Draw(AnimaMatrix transformMatrix);
+
+	bool CreateBuffers();
+	void UpdateBuffers();
+
+	void SetUpdateBuffers(bool bUpdate = true);
+	bool NeedsBuffersUpdate();
+
+private:
+	bool AreBuffersCreated();
+	bool IsIndicesBufferCreated();
+	bool IsVerticesBufferCreated();
+
+	bool CreateIndicesBuffer();
+	bool CreateVerticesBuffer();
+
+	AUint GetTotalIndexesCount();
+	ASizeT* GetFacesIndexes();
+
+	AUint GetVerticesCountInternal();
+	float* GetVerticesInternal();
+
 protected:	
-	AnimaVertex4f*	_vertices;
+	AnimaVertex3f*	_vertices;
 	ASizeT			_verticesNumber;
 	
-	AnimaVertex4f*	_normals;
+	AnimaVertex3f*	_normals;
 	ASizeT			_normalsNumber;
 	
 	AnimaVertex2f*	_textureCoords;
@@ -86,8 +109,14 @@ protected:
 	ASizeT			_facesNumber;
 
 	AnimaString		_meshName;
+
+	AUint			_indexesBufferObject;
+	AUint			_verticesBufferObject;
+	AUint			_vertexArrayObject;
 	
 	AnimaEngine* _engine;
+
+	bool _needsBuffersUpdate;
 };
 
 END_ANIMA_ENGINE_NAMESPACE
