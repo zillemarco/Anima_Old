@@ -32,9 +32,7 @@ public:
 	AnimaMesh& operator=(AnimaMesh&& src);
 	
 public:
-	//void SetVertices(AnimaVertex4f* v, ASizeT n);
 	void SetVertices(AnimaVertex3f* v, ASizeT n);
-	//void AddVertex(const AnimaVertex4f& v);
 	void AddVertex(const AnimaVertex3f& v);
 	ASizeT GetVerticesNumber();
 	AnimaVertex3f GetVertex(ASizeT index);
@@ -42,9 +40,7 @@ public:
 	AnimaVertex3f* GetVertices();
 	void ClearVertices();
 	
-	//void SetNormals(AnimaVertex4f* v, ASizeT n);
 	void SetNormals(AnimaVertex3f* v, ASizeT n);
-	//void AddNormal(const AnimaVertex4f& v);
 	void AddNormal(const AnimaVertex3f& v);
 	ASizeT GetNormalsNumber();
 	AnimaVertex3f GetNormal(ASizeT index);
@@ -90,7 +86,7 @@ private:
 	bool CreateVerticesBuffer();
 
 	AUint GetTotalIndexesCount();
-	ASizeT* GetFacesIndexes();
+	AUint* GetFacesIndexes();
 
 	AUint GetVerticesCountInternal();
 	float* GetVerticesInternal();
@@ -113,7 +109,6 @@ protected:
 	AUint			_indexesBufferObject;
 	AUint			_verticesBufferObject;
 	AUint			_colorsBufferObject;
-	AUint			_vertexArrayObject;
 	
 	AnimaEngine* _engine;
 

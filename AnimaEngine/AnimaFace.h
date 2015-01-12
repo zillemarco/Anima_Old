@@ -28,20 +28,20 @@ public:
 	AnimaFace& operator=(AnimaFace&& src);
 	
 public:
-	void SetIndexes(ASizeT* indexes, ASizeT n);
-	void AddIndex(const ASizeT& index);
+	void SetIndexes(AUint* indexes, ASizeT n);
+	void AddIndex(const AUint& index);
 	
 	void ClearIndexes();
 
 	ASizeT GetIndexesCount();
 
-	ASizeT* GetIndexes();
-	const ASizeT* GetConstIndexes();
-	bool GetIndexes(ASizeT* outIndexes, ASizeT& inOutSize);
-	bool GetConstIndexes(ASizeT* outIndexes, ASizeT& inOutSize);
+	AUint* GetIndexes();
+	const AUint* GetConstIndexes();
+	bool GetIndexes(AUint* outIndexes, ASizeT& inOutSize);
+	bool GetConstIndexes(AUint* outIndexes, ASizeT& inOutSize);
 	
 protected:
-	ASizeT* _indexes;
+	AUint*	_indexes;
 	ASizeT	_indexesNumber;
 	
 	AnimaEngine* _engine;

@@ -69,7 +69,7 @@ AnimaFace& AnimaFace::operator=(AnimaFace&& src)
 	return *this;
 }
 
-void AnimaFace::SetIndexes(ASizeT* indexes, ASizeT n)
+void AnimaFace::SetIndexes(AUint* indexes, ASizeT n)
 {
 	ANIMA_ASSERT(_engine != nullptr);
 	ClearIndexes();
@@ -77,7 +77,7 @@ void AnimaFace::SetIndexes(ASizeT* indexes, ASizeT n)
 	if(indexes != nullptr && n > 0)
 	{
 		_indexesNumber = n;
-		_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 		
 		//memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 		for (int i = 0; i < _indexesNumber; i++)
@@ -85,10 +85,10 @@ void AnimaFace::SetIndexes(ASizeT* indexes, ASizeT n)
 	}
 }
 
-void AnimaFace::AddIndex(const ASizeT& index)
+void AnimaFace::AddIndex(const AUint& index)
 {
 	ANIMA_ASSERT(_engine != nullptr);
-	ASizeT* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+	AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
 	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _indexesNumber; i++)
@@ -97,7 +97,7 @@ void AnimaFace::AddIndex(const ASizeT& index)
 	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _indexes);
 	
 	_indexesNumber++;
-	_indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+	_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
 	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _indexesNumber - 1; i++)
@@ -123,17 +123,17 @@ ASizeT AnimaFace::GetIndexesCount()
 	return _indexesNumber;
 }
 
-ASizeT* AnimaFace::GetIndexes()
+AUint* AnimaFace::GetIndexes()
 {
 	return _indexes;
 }
 
-const ASizeT* AnimaFace::GetConstIndexes()
+const AUint* AnimaFace::GetConstIndexes()
 {
-	return const_cast<ASizeT*>(_indexes);
+	return const_cast<AUint*>(_indexes);
 }
 
-bool AnimaFace::GetIndexes(ASizeT* outIndexes, ASizeT& outIndexesSize)
+bool AnimaFace::GetIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
 {
 	if (outIndexesSize < _indexesNumber)
 		return false;
@@ -141,12 +141,12 @@ bool AnimaFace::GetIndexes(ASizeT* outIndexes, ASizeT& outIndexesSize)
 	return true;
 }
 
-bool AnimaFace::GetConstIndexes(ASizeT* outIndexes, ASizeT& outIndexesSize)
+bool AnimaFace::GetConstIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
 {
 	if (outIndexesSize < _indexesNumber)
 		return false;
 
-	memcpy(outIndexes, _indexes, sizeof(ASizeT) * _indexesNumber);
+	memcpy(outIndexes, _indexes, sizeof(AUint) * _indexesNumber);
 	return true;
 }
 

@@ -17,6 +17,7 @@ END_MESSAGE_MAP()
 Window::Window()
 {
 	rotX = rotY = 0.0;
+	tx = ty = tz = 0.0;
 }
 
 Window::~Window()
@@ -38,6 +39,11 @@ void Window::DrawScene()
 	GLenum error = glGetError();
 	MakeCurrentContext();
 
+	int w, h;
+	GetWindowSize(&w, &h);
+
+	glViewport(0, 0, w, h);
+
 	error = glGetError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	error = glGetError();
@@ -54,8 +60,8 @@ void Window::DrawScene()
 	error = glGetError();
 
 	QMatrix4x4 matrix;
-//	matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	//matrix.translate(0, 0, -2);
+	matrix.perspective(60.0f, w / h, 0.01f, 1000.0f);
+	matrix.translate(tx, ty, tz);
 	matrix.rotate(rotY, QVector3D(0.0, 1.0, 0.0));
 	matrix.rotate(rotX, QVector3D(1.0, 0.0, 0.0));
 	matrix.scale(0.5, 0.5, 0.5);
@@ -82,6 +88,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 		GLenum error = glGetError();
 		glViewport(0, 0, w, h);
 		error = glGetError();
+		int i = 0;
 	}
 }
 
@@ -106,6 +113,24 @@ void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, 
   case ANIMA_ENGINE_KEY_DOWN:
 			wnd->rotX -= 1;
 			break;
+  case ANIMA_ENGINE_KEY_W:
+		  wnd->ty += 1;
+		  break;
+  case ANIMA_ENGINE_KEY_S:
+	  wnd->ty -= 1;
+	  break;
+  case ANIMA_ENGINE_KEY_D:
+	  wnd->tx += 1;
+	  break;
+  case ANIMA_ENGINE_KEY_A:
+	  wnd->tx -= 1;
+	  break;
+  case ANIMA_ENGINE_KEY_PAGE_DOWN:
+	  wnd->tz -= 1;
+	  break;
+  case ANIMA_ENGINE_KEY_PAGE_UP:
+	  wnd->tz += 1;
+	  break;
 			
   default:
 			break;
@@ -116,9 +141,9 @@ void Window::Load()
 {
 	GLenum error = glGetError();
 #if defined _MSC_VER
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("C:/Users/Marco/Desktop/ogldev-source/tutorial10/shader.vs", Anima::AnimaShader::VERTEX);
+	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
 	error = glGetError();
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("C:/Users/Marco/Desktop/ogldev-source/tutorial10/shader.fs", Anima::AnimaShader::FRAGMENT);
+	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 	error = glGetError();
 #else
 	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Shaders/shader.vs", Anima::AnimaShader::VERTEX);

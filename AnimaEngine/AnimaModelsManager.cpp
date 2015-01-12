@@ -118,7 +118,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				const aiFace* face = &mesh->mFaces[t];
 				
 				int numeroIndiciFaccia = face->mNumIndices;
-				ASizeT* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetGenericAllocator()), numeroIndiciFaccia);
+				AUint* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetGenericAllocator()), numeroIndiciFaccia);
 				
 				int offsetIndiciFaccia = 0;
 				
