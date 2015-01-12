@@ -26,6 +26,7 @@ AnimaMesh::AnimaMesh(AnimaEngine* engine)
 	_indexesBufferObject = 0;
 	_verticesBufferObject = 0;
 	_colorsBufferObject = 0;
+	_vertexArrayObject = 0;
 	_needsBuffersUpdate = true;
 
 	_verticesNumber = 0;
@@ -43,6 +44,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	_colorsBufferObject = src._colorsBufferObject;
+	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	
 	_vertices = nullptr;
@@ -76,6 +78,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 , _verticesBufferObject(src._verticesBufferObject)
 , _needsBuffersUpdate(src._needsBuffersUpdate)
 , _colorsBufferObject(src._colorsBufferObject)
+, _vertexArrayObject(src._vertexArrayObject)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -106,6 +109,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_colorsBufferObject = src._colorsBufferObject;
+		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		
 		SetMeshName(src._meshName);
@@ -137,6 +141,7 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_colorsBufferObject = src._colorsBufferObject;
+		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 
 		_meshName = src._meshName;
@@ -507,6 +512,8 @@ void AnimaMesh::Draw(AnimaMatrix transformMatrix)
 {
 	if (NeedsBuffersUpdate())
 		UpdateBuffers();
+	
+	glBindVertexArray(_vertexArrayObject);
 		
 	glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
 	glEnableVertexAttribArray(0);
@@ -544,6 +551,8 @@ void AnimaMesh::UpdateBuffers()
 		glInvalidateBufferData(_verticesBufferObject);
 		glInvalidateBufferData(_indexesBufferObject);
 	}
+	
+	glBindVertexArray(_vertexArrayObject);
 	
 	AUint* indexes = GetFacesIndexes();
 	ANIMA_ASSERT(indexes != nullptr);
@@ -599,7 +608,7 @@ bool AnimaMesh::CreateIndicesBuffer()
 		return true;
 
 	glGenBuffers(1, &_indexesBufferObject);
-	if (_indexesBufferObject <= 0 || glGetError() != GL_NO_ERROR)
+	if (_indexesBufferObject <= 0)// || glGetError() != GL_NO_ERROR)
 		return false;
 
 	return true;
@@ -609,13 +618,17 @@ bool AnimaMesh::CreateVerticesBuffer()
 {
 	if (IsVerticesBufferCreated())
 		return true;
+	
+	glGenVertexArrays(1, &_vertexArrayObject);
+	if (_vertexArrayObject <= 0)// || glGetError() != GL_NO_ERROR)
+		return false;
 
 	glGenBuffers(1, &_verticesBufferObject);
-	if (_verticesBufferObject <= 0 || glGetError() != GL_NO_ERROR)
+	if (_verticesBufferObject <= 0)// || glGetError() != GL_NO_ERROR)
 		return false;
 	
 	glGenBuffers(1, &_colorsBufferObject);	
-	if (_colorsBufferObject <= 0 || glGetError() != GL_NO_ERROR)
+	if (_colorsBufferObject <= 0)// || glGetError() != GL_NO_ERROR)
 		return false;
 	
 	return true;

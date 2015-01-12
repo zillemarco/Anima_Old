@@ -404,6 +404,121 @@ void AnimaMatrix::DumpMemory()
 	printf("%f\t%f\t%f\t%f\n\n", _matrixData[12], _matrixData[13], _matrixData[14], _matrixData[15]);
 }
 
+AnimaMatrix AnimaMatrix::_Translate(float tx, float ty, float tz, AnimaEngine* engine)
+{
+	AnimaMatrix result(engine);
+	
+	result[0] = 1.0f;	result[1] = 0.0f;	result[2] = 0.0f;	result[3] = tx;
+	result[4] = 0.0f;	result[5] = 1.0f;	result[6] = 0.0f;	result[7] = ty;
+	result[8] = 0.0f;	result[9] = 0.0f;	result[10] = 1.0f;	result[11] = tz;
+	result[12] = 0.0f;	result[13] = 0.0f;	result[14] = 0.0f;	result[15] = 1.0f;
+	
+	return result;
+}
+
+AnimaMatrix AnimaMatrix::_Scale(float sx, float sy, float sz, AnimaEngine* engine)
+{
+	AnimaMatrix result(engine);
+	
+	result[0] = sx;		result[1] = 0.0f;	result[2] = 0.0f;	result[3] = 0.0f;
+	result[4] = 0.0f;	result[5] = sy;		result[6] = 0.0f;	result[7] = 0.0f;
+	result[8] = 0.0f;	result[9] = 0.0f;	result[10] = sz;	result[11] = 0.0f;
+	result[12] = 0.0f;	result[13] = 0.0f;	result[14] = 0.0f;	result[15] = 1.0f;
+	
+	return result;
+}
+
+AnimaMatrix AnimaMatrix::_RotateX(float angle, AnimaEngine* engine)
+{
+	AnimaMatrix result(engine);
+	
+	result[0] = 1.0f;	result[1] = 0.0f;			result[2] = 0.0f;			result[3] = 0.0f;
+	result[4] = 0.0f;	result[5] = cosf(angle);	result[6] = -sinf(angle);	result[7] = 0.0f;
+	result[8] = 0.0f;	result[9] = sinf(angle);	result[10] = cosf(angle);	result[11] = 0.0f;
+	result[12] = 0.0f;	result[13] = 0.0f;			result[14] = 0.0f;			result[15] = 1.0f;
+	
+	return result;
+}
+
+AnimaMatrix AnimaMatrix::_RotateXDeg(float angle, AnimaEngine* engine)
+{
+	return _RotateX(angle * 3.1415f / 180.0f, engine);
+}
+
+AnimaMatrix AnimaMatrix::_RotateY(float angle, AnimaEngine* engine)
+{
+	AnimaMatrix result(engine);
+	
+	result[0] = cosf(angle);	result[1] = 0.0f;	result[2] = sinf(angle);	result[3] = 0.0f;
+	result[4] = 0.0f;			result[5] = 1.0f;	result[6] = 0.0f;			result[7] = 0.0f;
+	result[8] = -sinf(angle);	result[9] = 0.0f;	result[10] = cosf(angle);	result[11] = 0.0f;
+	result[12] = 0.0f;			result[13] = 0.0f;	result[14] = 0.0f;			result[15] = 1.0f;
+	
+	return result;
+}
+
+AnimaMatrix AnimaMatrix::_RotateYDeg(float angle, AnimaEngine* engine)
+{
+	return _RotateY(angle * 3.1415f / 180.0f, engine);
+}
+
+AnimaMatrix AnimaMatrix::_RotateZ(float angle, AnimaEngine* engine)
+{
+	AnimaMatrix result(engine);
+	
+	result[0] = cosf(angle);	result[1] = -sinf(angle);	result[2] = 0.0f;	result[3] = 0.0f;
+	result[4] = sinf(angle);	result[5] = cosf(angle);	result[6] = 0.0f;	result[7] = 0.0f;
+	result[8] = 0.0f;			result[9] = 0.0f;			result[10] = 1.0f;	result[11] = 0.0f;
+	result[12] = 0.0f;			result[13] = 0.0f;			result[14] = 0.0f;	result[15] = 1.0f;
+	
+	return result;
+}
+
+AnimaMatrix AnimaMatrix::_RotateZDeg(float angle, AnimaEngine* engine)
+{
+	return _RotateZ(angle * 3.1415f / 180.0f, engine);
+}
+
+void AnimaMatrix::Translate(float tx, float ty, float tz)
+{
+	this->operator*=(_Translate(tx, ty, tz, _engine));
+}
+
+void AnimaMatrix::Scale(float sx, float sy, float sz)
+{
+	this->operator*=(_Scale(sx, sy, sz, _engine));
+}
+
+void AnimaMatrix::RotateX(float angle)
+{
+	this->operator*=(_RotateX(angle, _engine));
+}
+
+void AnimaMatrix::RotateXDeg(float angle)
+{
+	this->operator*=(_RotateXDeg(angle, _engine));
+}
+
+void AnimaMatrix::RotateY(float angle)
+{
+	this->operator*=(_RotateY(angle, _engine));
+}
+
+void AnimaMatrix::RotateYDeg(float angle)
+{
+	this->operator*=(_RotateYDeg(angle, _engine));
+}
+
+void AnimaMatrix::RotateZ(float angle)
+{
+	this->operator*=(_RotateZ(angle, _engine));
+}
+
+void AnimaMatrix::RotateZDeg(float angle)
+{
+	this->operator*=(_RotateZDeg(angle, _engine));
+}
+
 #undef _mm_shufd
 
 END_ANIMA_ENGINE_NAMESPACE

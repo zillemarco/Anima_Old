@@ -51,6 +51,24 @@ public:
 	AnimaMatrix Inverse() const;
 	AnimaMatrix Transpose() const;
 	inline float Determinant() const;
+	
+	static AnimaMatrix _Translate(float tx, float ty, float tz, AnimaEngine* engine);
+	static AnimaMatrix _Scale(float sx, float sy, float sz, AnimaEngine* engine);
+	static AnimaMatrix _RotateX(float angle, AnimaEngine* engine);
+	static AnimaMatrix _RotateXDeg(float angle, AnimaEngine* engine);
+	static AnimaMatrix _RotateY(float angle, AnimaEngine* engine);
+	static AnimaMatrix _RotateYDeg(float angle, AnimaEngine* engine);
+	static AnimaMatrix _RotateZ(float angle, AnimaEngine* engine);
+	static AnimaMatrix _RotateZDeg(float angle, AnimaEngine* engine);
+
+	void Translate(float tx, float ty, float tz);
+	void Scale(float sx, float sy, float sz);
+	void RotateX(float angle);
+	void RotateXDeg(float angle);
+	void RotateY(float angle);
+	void RotateYDeg(float angle);
+	void RotateZ(float angle);
+	void RotateZDeg(float angle);
 
 	AnimaMatrix& operator+=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {

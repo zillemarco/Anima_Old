@@ -36,38 +36,51 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 
 void Window::DrawScene()
 {
-	GLenum error = glGetError();
 	MakeCurrentContext();
 
 	int w, h;
 	GetWindowSize(&w, &h);
 
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, w * GetResolutionMutiplier(), h * GetResolutionMutiplier());
 
-	error = glGetError();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	error = glGetError();
+	GLenum error = glGetError();
 	glClearColor(0.5, 0.5, 0.5, 1.0);
-	error = glGetError();
 	
 	glFrontFace(GL_CW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
+//	glCullFace(GL_BACK);
+//	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	error = glGetError();
 	_program->Use();
-	error = glGetError();
 
 	QMatrix4x4 matrix;
 	matrix.perspective(60.0f, w / h, 0.01f, 1000.0f);
-	matrix.translate(tx, ty, tz);
-	matrix.rotate(rotY, QVector3D(0.0, 1.0, 0.0));
-	matrix.rotate(rotX, QVector3D(1.0, 0.0, 0.0));
-	matrix.scale(0.5, 0.5, 0.5);
+//	matrix.translate(tx, ty, tz);
+//	matrix.rotate(rotY, QVector3D(0.0, 1.0, 0.0));
+//	matrix.rotate(rotX, QVector3D(1.0, 0.0, 0.0));
+//	matrix.scale(0.01, 0.01, 0.01);
+	
+	Anima::AnimaMatrix animaMatrix(GetEngine(), matrix.data());
+	
+	animaMatrix.DumpMemory();
+	animaMatrix = animaMatrix.Transpose();
+	animaMatrix.DumpMemory();
+	animaMatrix.Translate(tx, ty, tz);
+	animaMatrix.DumpMemory();
+	animaMatrix.RotateY(rotY);
+	animaMatrix.DumpMemory();
+	animaMatrix.RotateX(rotX);
+	animaMatrix.DumpMemory();
+	animaMatrix.Scale(0.01, 0.01, 0.01);
+	animaMatrix.DumpMemory();
+	animaMatrix = animaMatrix.Transpose();
+	animaMatrix.DumpMemory();
+	
+//	float* qtData = matrix.data();
+	float* aeData = animaMatrix.GetData();
 
-	_program->SetUniformValue(_matrixUniform, matrix.data());
-	error = glGetError();
+	_program->SetUniformValue(_matrixUniform, aeData);
 
 	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
 	Anima::AnimaMatrix m(GetEngine());
@@ -86,9 +99,8 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		GLenum error = glGetError();
-		glViewport(0, 0, w, h);
+		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
 		error = glGetError();
-		int i = 0;
 	}
 }
 
@@ -125,10 +137,10 @@ void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, 
   case ANIMA_ENGINE_KEY_A:
 	  wnd->tx -= 1;
 	  break;
-  case ANIMA_ENGINE_KEY_PAGE_DOWN:
+  case ANIMA_ENGINE_KEY_L:
 	  wnd->tz -= 1;
 	  break;
-  case ANIMA_ENGINE_KEY_PAGE_UP:
+  case ANIMA_ENGINE_KEY_O:
 	  wnd->tz += 1;
 	  break;
 			
@@ -139,32 +151,20 @@ void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, 
 
 void Window::Load()
 {
-	GLenum error = glGetError();
 #if defined _MSC_VER
 	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	error = glGetError();
 	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
-	error = glGetError();
 #else
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Shaders/shader.vs", Anima::AnimaShader::VERTEX);
-	error = glGetError();
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Shaders/shader.fs", Anima::AnimaShader::FRAGMENT);
-	error = glGetError();
+	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
+	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #endif
 
 	_program = GetEngine()->GetShadersManager()->CreateProgram();
-	error = glGetError();
 	_program->Create();
-	error = glGetError();
 	_program->AddShader(vs);
-	error = glGetError();
 	_program->AddShader(fs);
-	error = glGetError();
 	_program->Link();
-	error = glGetError();
 
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
-	error = glGetError();
 	_posAttr = glGetAttribLocation(_program->GetID(), "posAttr");
-	error = glGetError();
 }

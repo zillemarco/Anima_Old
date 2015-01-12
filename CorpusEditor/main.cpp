@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 #if defined _MSC_VER
 	Anima::AnimaString path("D:/Modelli/ninja/ninja.3ds", &engine);
 #else
-	Anima::AnimaString path("/Users/marco/Documents/Modelli/untitled.obj", &engine);
+	Anima::AnimaString path("/Users/marco/Documents/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
 #endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
@@ -93,11 +93,11 @@ int main(int argc, char** argv)
 	
 	//engine.DumpMemory();
 		
-	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 3);
-	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 3);
-	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, false);
+	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
+	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
-	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_COMPAT_PROFILE);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 
 	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);

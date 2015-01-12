@@ -106,6 +106,7 @@ protected:
 
 	AnimaString		_meshName;
 
+	AUint			_vertexArrayObject;
 	AUint			_indexesBufferObject;
 	AUint			_verticesBufferObject;
 	AUint			_colorsBufferObject;
