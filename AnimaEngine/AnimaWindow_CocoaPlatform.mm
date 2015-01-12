@@ -981,6 +981,11 @@ bool _AnimaEngineWindowPlatformCreateWindow(AnimaEngineWindow_Base* window, cons
 	
 	[window->_GET_ANIMA_ENGINE_PLATFORM_CONTEXT_STATE->_context setView:window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->_view];
 	
+	AnimaEngineWindow_Base* oldContext = _AnimaEngineWindowPlatformGetCurrentContext();
+	_AnimaEngineWindowPlatformMakeContextCurrent(window);
+	_AnimaEngineWindowInitializeGlewExtensions();
+	_AnimaEngineWindowPlatformMakeContextCurrent(oldContext);	
+	
 	if (wndconfig->_monitor)
 	{
 		_AnimaEngineWindowPlatformShowWindow(window);

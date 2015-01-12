@@ -80,50 +80,40 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
-	GLenum error = glGetError();
 	
 #if defined _MSC_VER
 	Anima::AnimaString path("D:/Modelli/untitled.obj", &engine);
 #else
-	Anima::AnimaString path("/Users/marco/Documents/Modelli/ALDIUN/OBJ/alduin.obj", &engine);
+	Anima::AnimaString path("/Users/marco/Documents/Modelli/untitled.obj", &engine);
 #endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	error = glGetError();
 	if(!manager->LoadModel(path))
 		return 0;
-	error = glGetError();
 	
 	//engine.DumpMemory();
 		
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
-	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 3);
+	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 0);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
-	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, true);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, false);
-	error = glGetError();
+
 	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
-	error = glGetError();
 	
 	window->MakeCurrentContext();
-	error = glGetError();
 	engine.SwapInterval(1);
-	error = glGetError();
 	window->MakeCurrentContext();
-	error = glGetError();
 	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
-	error = glGetError();
 	
 	window->Load();
-	error = glGetError();
 
 	while (!window->ShouldClose())
 	{
 		engine.PollEvents();
 		
 		window->DrawScene();
-		error = glGetError();
 	}
 		
 	return 0;

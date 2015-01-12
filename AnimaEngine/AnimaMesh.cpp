@@ -25,6 +25,7 @@ AnimaMesh::AnimaMesh(AnimaEngine* engine)
 
 	_indexesBufferObject = 0;
 	_verticesBufferObject = 0;
+	_colorsBufferObject = 0;
 	_vertexArrayObject = 0;
 	_needsBuffersUpdate = true;
 
@@ -42,6 +43,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
+	_colorsBufferObject = src._colorsBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	
@@ -76,6 +78,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 , _verticesBufferObject(src._verticesBufferObject)
 , _needsBuffersUpdate(src._needsBuffersUpdate)
 , _vertexArrayObject(src._vertexArrayObject)
+, _colorsBufferObject(src._colorsBufferObject)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -105,6 +108,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_engine = src._engine;
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
+		_colorsBufferObject = src._colorsBufferObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_vertexArrayObject = src._vertexArrayObject;
 		
@@ -136,6 +140,7 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
+		_colorsBufferObject = src._colorsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 
@@ -628,15 +633,24 @@ void AnimaMesh::Draw(AnimaMatrix transformMatrix)
 	if (NeedsBuffersUpdate())
 		UpdateBuffers();
 
+	GLenum error = glGetError();
+	
+	glBindVertexArray(_vertexArrayObject);
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-
+	
 	glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//glDrawElements(GL_TRIANGLES, (AUint)GetTotalIndexesCount(), GL_UNSIGNED_INT, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 9);
-
+	glDrawElements(GL_TRIANGLES, (AUint)36, GL_UNSIGNED_INT, 0);
+//	glDrawArrays(GL_TRIANGLES, 0, 9);
+	
+	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 }
 
@@ -661,22 +675,41 @@ void AnimaMesh::UpdateBuffers()
 		glInvalidateBufferData(_indexesBufferObject);
 	}
 	
-	//glBindVertexArray(_vertexArrayObject);
+	glBindVertexArray(_vertexArrayObject);
 
 	ASizeT* indexes = GetFacesIndexes();
 	ANIMA_ASSERT(indexes != nullptr);
+	
+	GLenum error = glGetError();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ASizeT) * GetTotalIndexesCount(), indexes, GL_STATIC_DRAW);
+	error = glGetError();
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ASizeT) * 36, indexes, GL_STATIC_DRAW);
+	error = glGetError();
 	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), indexes);
 	indexes = nullptr;
 
 	float* vertices = GetVerticesInternal();
 	ANIMA_ASSERT(vertices != nullptr);
 	glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetVerticesCountInternal(), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	error = glGetError();
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, vertices, GL_STATIC_DRAW);
+	error = glGetError();
 	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), vertices);
 	vertices = nullptr;
+	
+	float colors[24];
+	
+	colors[0] = 0.0;	colors[1] = 0.0;	colors[2] = 1.0;
+	colors[3] = 0.0;	colors[4] = 1.0;	colors[5] = 1.0;
+	colors[6] = 1.0;	colors[5] = 1.0;	colors[8] = 1.0;
+	colors[9] = 1.0;	colors[10] = 0.0;	colors[11] = 1.0;
+	colors[12] = 0.0;	colors[13] = 0.0;	colors[14] = 0.0;
+	colors[15] = 0.0;	colors[16] = 1.0;	colors[17] = 0.0;
+	colors[18] = 1.0;	colors[19] = 1.0;	colors[20] = 0.0;
+	colors[21] = 1.0;	colors[22] = 0.0;	colors[23] = 0.0;
+	
+	glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, colors, GL_STATIC_DRAW);
 
 	_needsBuffersUpdate = false;
 }
@@ -713,15 +746,21 @@ bool AnimaMesh::CreateVerticesBuffer()
 	if (IsVerticesBufferCreated())
 		return true;
 
-	//glGenVertexArrays(1, &_vertexArrayObject);
+	glGenVertexArrays(1, &_vertexArrayObject);
 
-	//if (_vertexArrayObject <= 0 || glGetError() != GL_NO_ERROR)
-	//	return false;
+	if (_vertexArrayObject <= 0 || glGetError() != GL_NO_ERROR)
+		return false;
 
 	glGenBuffers(1, &_verticesBufferObject);
 
 	if (_verticesBufferObject <= 0 || glGetError() != GL_NO_ERROR)
 		return false;
+	
+	glGenBuffers(1, &_colorsBufferObject);
+	
+	if (_colorsBufferObject <= 0 || glGetError() != GL_NO_ERROR)
+		return false;
+	
 	return true;
 }
 
@@ -746,7 +785,7 @@ AUint AnimaMesh::GetTotalIndexesCount()
 ASizeT* AnimaMesh::GetFacesIndexes()
 {
 	ASizeT* indexes = nullptr;
-	ASizeT count = 3; // GetTotalIndexesCount();
+	ASizeT count = 36;//GetTotalIndexesCount();
 	ASizeT copied = 0;
 	ASizeT offset = 0;
 
@@ -754,16 +793,28 @@ ASizeT* AnimaMesh::GetFacesIndexes()
 	{
 		indexes = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*(_engine->GetGenericAllocator()), count);
 
-		indexes[0] = 2;
-		indexes[1] = 1;
-		indexes[2] = 0;
+		indexes[0] = 0;		indexes[1] = 1;		indexes[2] = 3;
+		indexes[3] = 3;		indexes[4] = 1;		indexes[5] = 2;
+		indexes[6] = 4;		indexes[5] = 5;		indexes[8] = 1;
+		indexes[9] = 4;		indexes[10] = 1;	indexes[11] = 0;
+		indexes[12] = 7;	indexes[13] = 4;	indexes[14] = 5;
+		indexes[15] = 7;	indexes[16] = 5;	indexes[17] = 6;
+		indexes[18] = 3;	indexes[19] = 6;	indexes[20] = 7;
+		indexes[21] = 3;	indexes[22] = 2;	indexes[23] = 6;
+		indexes[24] = 4;	indexes[25] = 0;	indexes[26] = 3;
+		indexes[27] = 4;	indexes[28] = 3;	indexes[29] = 7;
+		indexes[30] = 1;	indexes[31] = 5;	indexes[32] = 2;
+		indexes[33] = 2;	indexes[34] = 5;	indexes[35] = 6;
 
-		//for (int i = 0; i < _facesNumber; i++)
-		//{
-		//	copied = _faces[i].GetIndexesCount();
-		//	_faces[i].GetConstIndexes(indexes + offset, copied);
-		//	offset += copied;
-		//}
+//		for (int i = 0; i < _facesNumber; i++)
+//		{
+//			copied = _faces[i].GetIndexesCount();
+//			_faces[i].GetConstIndexes(indexes + offset, copied);
+//			int tmp = indexes[offset];
+//			indexes[offset] = indexes[offset + 2];
+//			indexes[offset + 2] = tmp;
+//			offset += copied;
+//		}
 	}
 
 	return indexes;
@@ -777,28 +828,27 @@ AUint AnimaMesh::GetVerticesCountInternal()
 float* AnimaMesh::GetVerticesInternal()
 {
 	float* vertices = nullptr;
-	ASizeT count = 9;// GetVerticesCountInternal();
+	ASizeT count = 24;//GetVerticesCountInternal();
 	ASizeT offset = 0;
 
 	if (count > 0)
 	{
 		vertices = AnimaAllocatorNamespace::AllocateArray<float>(*(_engine->GetGenericAllocator()), count);
+		
+		vertices[0] = -1.0;		vertices[1] = -1.0;		vertices[2] = 1.0;
+		vertices[3] = -1.0;		vertices[4] = 1.0;		vertices[5] = 1.0;
+		vertices[6] = 1.0;		vertices[5] = 1.0;		vertices[8] = 1.0;
+		vertices[9] = 1.0;		vertices[10] = -1.0;	vertices[11] = 1.0;
+		vertices[12] = -1.0;	vertices[13] = -1.0;	vertices[14] = -1.0;
+		vertices[15] = -1.0;	vertices[16] = 1.0;		vertices[17] = -1.0;
+		vertices[18] = 1.0;		vertices[19] = 1.0;		vertices[20] = -1.0;
+		vertices[21] = 1.0;		vertices[22] = -1.0;	vertices[23] = -1.0;
 
-		vertices[0] = -1.0f;
-		vertices[1] = 0.0f;
-		vertices[2] = 0.0f;
-		vertices[3] = 0.0f;
-		vertices[4] = 1.0f;
-		vertices[5] = 0.0f;
-		vertices[6] = 1.0f;
-		vertices[7] = 0.0f;
-		vertices[8] = 0.0f;
-
-		//for (int i = 0; i < _verticesNumber; i++)
-		//{
-		//	_vertices[i].CopyData(vertices + offset);
-		//	offset += 3;
-		//}
+		for (int i = 0; i < _verticesNumber; i++)
+		{
+			_vertices[i].CopyData(vertices + offset);
+			offset += 3;
+		}
 	}
 
 	return vertices;

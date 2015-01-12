@@ -11,10 +11,12 @@ BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
 	ANIMA_WINDOW_FRAMEBUFFER_SIZE_CHANGED_EVENT(FrameBufferResizeCallback)
 	ANIMA_WINDOW_CURSOR_MOVE_EVENT(MouseMoveCallback)
+	ANIMA_WINDOW_KEY_EVENT(Key)
 END_MESSAGE_MAP()
 
 Window::Window()
 {
+	rotX = rotY = 0.0;
 }
 
 Window::~Window()
@@ -23,7 +25,9 @@ Window::~Window()
 
 void Window::MouseClickCallback(Anima::AnimaEngineWindow_Base* window, int button, int action, int mods)
 {
+	
 }
+
 void Window::PaintCallback(Anima::AnimaWindow* window)
 {
 	((Window*)window)->DrawScene();
@@ -50,8 +54,11 @@ void Window::DrawScene()
 	error = glGetError();
 
 	QMatrix4x4 matrix;
-	matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+//	matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	//matrix.translate(0, 0, -2);
+	matrix.rotate(rotY, QVector3D(0.0, 1.0, 0.0));
+	matrix.rotate(rotX, QVector3D(1.0, 0.0, 0.0));
+	matrix.scale(0.5, 0.5, 0.5);
 
 	_program->SetUniformValue(_matrixUniform, matrix.data());
 	error = glGetError();
@@ -82,13 +89,43 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 {
 }
 
+void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, int mods)
+{
+	Window* wnd = (Window*)window;
+	
+	switch (key) {
+  case ANIMA_ENGINE_KEY_LEFT:
+			wnd->rotY -= 1;
+			break;
+  case ANIMA_ENGINE_KEY_RIGHT:
+			wnd->rotY += 1;
+			break;
+  case ANIMA_ENGINE_KEY_UP:
+			wnd->rotX += 1;
+			break;
+  case ANIMA_ENGINE_KEY_DOWN:
+			wnd->rotX -= 1;
+			break;
+			
+  default:
+			break;
+	}
+}
+
 void Window::Load()
 {
 	GLenum error = glGetError();
+#if defined _MSC_VER
 	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("C:/Users/Marco/Desktop/ogldev-source/tutorial10/shader.vs", Anima::AnimaShader::VERTEX);
 	error = glGetError();
 	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("C:/Users/Marco/Desktop/ogldev-source/tutorial10/shader.fs", Anima::AnimaShader::FRAGMENT);
 	error = glGetError();
+#else
+	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Shaders/shader.vs", Anima::AnimaShader::VERTEX);
+	error = glGetError();
+	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Shaders/shader.fs", Anima::AnimaShader::FRAGMENT);
+	error = glGetError();
+#endif
 
 	_program = GetEngine()->GetShadersManager()->CreateProgram();
 	error = glGetError();

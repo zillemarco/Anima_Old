@@ -34,7 +34,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 {	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Fast);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
 	
 	if(scene == nullptr)
 		return nullptr;

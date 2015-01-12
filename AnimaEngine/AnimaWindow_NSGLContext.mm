@@ -24,6 +24,7 @@ static bool initGlewExtensions()
 	if (AnimaEngine::IsGlewExtensionsInitialized())
 		return true;
 	
+	glewExperimental = GL_TRUE;
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 	{
@@ -188,8 +189,6 @@ bool _AnimaEngineWindowCreateContext(AnimaEngineWindow_Base* window, const _Anim
 //		_glfwInputError(GLFW_PLATFORM_ERROR, "NSGL: Failed to create OpenGL context");
 		return false;
 	}
-	
-	initGlewExtensions();
 	
 	return true;
 }

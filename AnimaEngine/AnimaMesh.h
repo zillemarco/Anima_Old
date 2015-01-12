@@ -112,6 +112,7 @@ protected:
 
 	AUint			_indexesBufferObject;
 	AUint			_verticesBufferObject;
+	AUint			_colorsBufferObject;
 	AUint			_vertexArrayObject;
 	
 	AnimaEngine* _engine;
