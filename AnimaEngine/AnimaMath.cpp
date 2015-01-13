@@ -164,6 +164,49 @@ AnimaVertex4f AnimaMath::Cross(const AnimaVertex4f& v1, const AnimaVertex4f& v2)
 	return result;
 }
 
+AnimaVertex3f AnimaMath::RotateVector(const AnimaColor3f& v, AFloat angle, const AnimaColor3f& axis)
+{
+	float sinHalfAngle = sinf(angle / 2.0f);
+	float cosHalfAngle = cosf(angle / 2.0f);
+
+	float rx = axis[0] * sinHalfAngle;
+	float ry = axis[1] * sinHalfAngle;
+	float rz = axis[2] * sinHalfAngle;
+	float rw = cosHalfAngle;
+
+	AnimaQuaternion rotation(v.GetEngine(), rx, ry, rz, rw);
+	AnimaQuaternion conjugate = rotation.Conjugate();
+
+	AnimaQuaternion w = QuaternionMulQuaternion(QuaternionMulVector(rotation, v), conjugate);
+
+	AnimaVertex3f res(v.GetEngine());
+	res[0] = w[0];
+	res[1] = w[1];
+	res[2] = w[2];
+
+	return res;
+}
+
+void AnimaMath::RotateVector(AnimaColor3f& v, AFloat angle, const AnimaColor3f& axis)
+{
+	float sinHalfAngle = sinf(angle / 2.0f);
+	float cosHalfAngle = cosf(angle / 2.0f);
+
+	float rx = axis[0] * sinHalfAngle;
+	float ry = axis[1] * sinHalfAngle;
+	float rz = axis[2] * sinHalfAngle;
+	float rw = cosHalfAngle;
+
+	AnimaQuaternion rotation(v.GetEngine(), rx, ry, rz, rw);
+	AnimaQuaternion conjugate = rotation.Conjugate();
+
+	AnimaQuaternion w = QuaternionMulQuaternion(QuaternionMulVector(rotation, v), conjugate);
+
+	v[0] = w[0];
+	v[1] = w[1];
+	v[2] = w[2];
+}
+
 #undef _mm_shufd
 
 END_ANIMA_ENGINE_NAMESPACE

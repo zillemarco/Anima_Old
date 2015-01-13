@@ -220,6 +220,7 @@ public:
 	void DumpMemory(bool bLogFile = true)
 	{
 		char szBuff[1024];
+		memset(szBuff, 0, 1024);
 
 		for (int i = 0; i < _size; i++)
 			sprintf(szBuff, "%s%f\t", szBuff, _data[i]);

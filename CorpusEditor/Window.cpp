@@ -4,6 +4,7 @@
 #include <AnimaModel.h>
 #include <AnimaMatrix.h>
 #include <AnimaShadersManager.h>
+#include <AnimaAllocators.h>
 #include <QtGui/QMatrix4x4>
 
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
@@ -19,10 +20,13 @@ Window::Window()
 	rotX = rotY = 0.0;
 	tx = ty = tz = 0.0;
 	projection = true;
+
+	_camera = nullptr;
 }
 
 Window::~Window()
 {
+	delete _camera;
 }
 
 void Window::MouseClickCallback(Anima::AnimaEngineWindow_Base* window, int button, int action, int mods)
@@ -41,9 +45,7 @@ void Window::DrawScene()
 
 	int w, h;
 	GetWindowSize(&w, &h);
-
-	glViewport(0, 0, w * GetResolutionMutiplier(), h * GetResolutionMutiplier());
-
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLenum error = glGetError();
 	glClearColor(0.5, 0.5, 0.5, 1.0);
@@ -55,18 +57,18 @@ void Window::DrawScene()
 
 	_program->Use();
 	
-	Anima::AnimaMatrix matrix(GetEngine());
+	Anima::AnimaMatrix projection(GetEngine());
+	projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
 
-	if (projection)
-		matrix.Perspective(60.0f, w / h, 0.01f, 1000.0f);
-	else
-		matrix.Ortho(-1, 1, -1, 1, -1000, 1000);
-
-	matrix.Translate(tx, ty, tz);
-	matrix.RotateYDeg(rotY);
-	matrix.RotateXDeg(rotX);
-	matrix.Scale(0.5, 0.5, 0.5);
-	_program->SetUniformValue(_matrixUniform, (float*)matrix);
+	Anima::AnimaMatrix camera(GetEngine());
+	camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
+	
+	Anima::AnimaMatrix model(GetEngine());
+	//model.Translate(tx, ty, tz);
+	//model.RotateYDeg(rotY);
+	//model.RotateXDeg(rotX);
+	model.Scale(0.5, 0.5, 0.5);
+	_program->SetUniformValue(_matrixUniform, (model * camera * projection).GetData());
 
 	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
 	Anima::AnimaMatrix m(GetEngine());
@@ -88,6 +90,10 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
 		error = glGetError();
 	}
+	else
+	{
+		OutputDebugStringA("ctx not valid\n");
+	}
 }
 
 void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
@@ -98,43 +104,51 @@ void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, 
 {
 	Window* wnd = (Window*)window;
 	
-	switch (key) {
-  case ANIMA_ENGINE_KEY_LEFT:
-			wnd->rotY -= 1;
-			break;
-  case ANIMA_ENGINE_KEY_RIGHT:
-			wnd->rotY += 1;
-			break;
-  case ANIMA_ENGINE_KEY_UP:
-			wnd->rotX += 1;
-			break;
-  case ANIMA_ENGINE_KEY_DOWN:
-			wnd->rotX -= 1;
-			break;
-  case ANIMA_ENGINE_KEY_W:
-		  wnd->ty += 1;
-		  break;
-  case ANIMA_ENGINE_KEY_S:
-	  wnd->ty -= 1;
-	  break;
-  case ANIMA_ENGINE_KEY_D:
-	  wnd->tx += 1;
-	  break;
-  case ANIMA_ENGINE_KEY_A:
-	  wnd->tx -= 1;
-	  break;
-  case ANIMA_ENGINE_KEY_L:
-	  wnd->tz -= 1;
-	  break;
-  case ANIMA_ENGINE_KEY_O:
-	  wnd->tz += 1;
-	  break;
-  case ANIMA_ENGINE_KEY_P:
-	  wnd->projection = !wnd->projection;
-	  break;
-			
-  default:
-			break;
+	switch (key)
+	{
+	case ANIMA_ENGINE_KEY_LEFT:
+		//wnd->rotY -= 1;
+		wnd->_camera->RotateYDeg(-1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_RIGHT:
+		//wnd->rotY += 1;
+		wnd->_camera->RotateYDeg(1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_UP:
+		//wnd->rotX += 1;
+		wnd->_camera->RotateXDeg(-1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_DOWN:
+		//wnd->rotX -= 1;
+		wnd->_camera->RotateXDeg(1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_W:
+		//wnd->ty += 1;
+		wnd->_camera->Move(0.0f, 1.0f, 0.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_S:
+		//wnd->ty -= 1;
+		wnd->_camera->Move(0.0f, -1.0f, 0.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_D:
+		//wnd->tx += 1;
+		wnd->_camera->Move(-1.0f, 0.0f, 0.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_A:
+		//wnd->tx -= 1;
+		wnd->_camera->Move(1.0f, 0.0f, 0.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_L:
+		//wnd->tz -= 1;
+		wnd->_camera->Move(0.0f, 0.0f, -1.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_O:
+		//wnd->tz += 1;
+		wnd->_camera->Move(0.0f, 0.0f, 1.0f, 1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_P:
+		wnd->projection = !wnd->projection;
+		break;
 	}
 }
 
@@ -156,4 +170,12 @@ void Window::Load()
 
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
 	_posAttr = glGetAttribLocation(_program->GetID(), "posAttr");
+
+	Anima::AnimaVertex3f pos(GetEngine());
+	pos[0] = 0;
+	pos[1] = 0;
+	pos[2] = -5;
+
+	_camera = new Anima::AnimaFPSCamera(GetEngine());
+	_camera->SetPosition(pos);
 }

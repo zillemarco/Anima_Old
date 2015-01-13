@@ -2,6 +2,7 @@
 
 #include <AnimaEngine.h>
 #include <AnimaWindow.h>
+#include <AnimaFPSCamera.h>
 #include <AnimaShaderProgram.h>
 
 class Window : public Anima::AnimaWindow
@@ -23,6 +24,7 @@ private:
 	ANIMA_WINDOW_EVENT void Key(Anima::AnimaWindow* window, int key, int scancode, int action, int mods);
 
 	Anima::AnimaShaderProgram* _program;
+	Anima::AnimaFPSCamera* _camera;
 
 	int _matrixUniform;
 	int _posAttr;

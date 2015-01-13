@@ -66,7 +66,7 @@ public:
 	void RotateZDeg(float angle);
 	void Perspective(float fov, float ratio, float zNear, float zFar);
 	void Ortho(float left, float right, float bottom, float top, float zNear, float zFar);
-	void LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& center, const AnimaVertex3f& up);
+	void LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward, const AnimaVertex3f& up);
 	void Viewport(float left, float bottom, float width, float height, float zNear, float zFar);
 	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
 

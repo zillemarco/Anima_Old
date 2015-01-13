@@ -37,7 +37,7 @@ AnimaQuaternion::~AnimaQuaternion()
 
 AnimaQuaternion AnimaQuaternion::Conjugate()
 {
-	AnimaQuaternion conj(_engine, -_data[0], -_data[1], -_data[2], -_data[3]);
+	AnimaQuaternion conj(_engine, -_data[0], -_data[1], -_data[2], _data[3]);
 	return conj;
 }
 

@@ -618,13 +618,11 @@ void AnimaMatrix::Ortho(float left, float right, float bottom, float top, float 
 	*this *= m;
 }
 
-void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& center, const AnimaVertex3f& up)
+void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward, const AnimaVertex3f& up)
 {
 	AnimaVertex3f invrseEye = eye;
 	invrseEye.Reverse();
 
-	AnimaVertex3f forward = center - eye;
-	forward.Normalize();
 	AnimaVertex3f side = forward ^ up;
 	side.Normalize();
 	AnimaVertex3f upVector = side ^ forward;
@@ -637,7 +635,7 @@ void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& center, 
 	m._matrixData[12] = 0.0f;		m._matrixData[13] = 0.0f;		m._matrixData[14] = 0.0f;			m._matrixData[15] = 1.0f;
 
 	*this *= m;
-	Translate(invrseEye);
+	Translate(-eye[0], -eye[1], -eye[2]);
 }
 
 void AnimaMatrix::Viewport(float left, float bottom, float width, float height, float zNear, float zFar)

@@ -79,7 +79,6 @@ void AnimaFace::SetIndexes(AUint* indexes, ASizeT n)
 		_indexesNumber = n;
 		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 		
-		//memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 		for (int i = 0; i < _indexesNumber; i++)
 			_indexes[i] = indexes[i];
 	}
@@ -90,7 +89,6 @@ void AnimaFace::AddIndex(const AUint& index)
 	ANIMA_ASSERT(_engine != nullptr);
 	AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
-	//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 	for (int i = 0; i < _indexesNumber; i++)
 		tmpOldIndexes[i] = _indexes[i];
 	
@@ -99,7 +97,6 @@ void AnimaFace::AddIndex(const AUint& index)
 	_indexesNumber++;
 	_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
 	
-	//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 	for (int i = 0; i < _indexesNumber - 1; i++)
 		_indexes[i] = tmpOldIndexes[i];
 	

@@ -9,6 +9,7 @@
 #include <AnimaString.h>
 #include <AnimaModelsManager.h>
 #include "Window.h"
+#include <AnimaMath.h>
 
 void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
-	
+		
 #if defined _MSC_VER
 	Anima::AnimaString path("D:/Modelli/ninja/ninja.3ds", &engine);
 	Anima::AChar tmpFileName[PATH_MAX];
@@ -93,9 +94,7 @@ int main(int argc, char** argv)
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
 	if(!manager->LoadModel(path))
 		return 0;
-	
-	//engine.DumpMemory();
-		
+			
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);

@@ -37,6 +37,9 @@ public:
 
 	static AnimaVertex3f Cross(const AnimaVertex3f& v1, const AnimaVertex3f& v2);
 	static AnimaVertex4f Cross(const AnimaVertex4f& v1, const AnimaVertex4f& v2);
+
+	static AnimaVertex3f RotateVector(const AnimaColor3f& v, AFloat angle, const AnimaColor3f& axis);
+	static void RotateVector(AnimaColor3f& v, AFloat angle, const AnimaColor3f& axis);
 };
 
 END_ANIMA_ENGINE_NAMESPACE
