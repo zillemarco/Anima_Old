@@ -29,7 +29,7 @@ public:
 		_engine = engine;
 		_size = Size;
 
-		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
+		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
 		memset(_data, 0, sizeof(Type) * Size);
 	}
 
@@ -40,8 +40,8 @@ public:
 		_engine = engine;
 		_size = Size;
 
-		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
-		memcpy(_data, data, sizeof(Type) * _size);
+		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		SetData(data);
 	}
 
 	AnimaVertex(const AnimaVertex& src)
@@ -52,18 +52,17 @@ public:
 			_size = src._size;
 			_engine = src._engine;
 
-			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
-			memcpy(_data, src._data, sizeof(Type) * _size);
+			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			SetData(src._data);
 		}
 	}
 
 	AnimaVertex(AnimaVertex&& src)
 		: _engine(src._engine)
-		, _data(src._data)
 		, _size(src._size)
 	{
-		src._data = nullptr;
-		src._size = 0;
+		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		SetData(src._data);
 	}
 
 	~AnimaVertex()
@@ -72,7 +71,7 @@ public:
 
 		if (_data != nullptr)
 		{
-			(_engine->GetGenericAllocator())->Deallocate(_data);
+			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
 			_data = nullptr;
 		}
 	}
@@ -83,14 +82,13 @@ public:
 		{
 			if (_data != nullptr)
 			{
-				(_engine->GetGenericAllocator())->Deallocate(_data);
+				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
 				_data = nullptr;
 			}
 
 			_size = src._size;
-			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
-
-			memcpy(_data, src._data, sizeof(Type) * _size);
+			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			SetData(src._data);
 		}
 
 		return *this;
@@ -104,13 +102,19 @@ public:
 			_data = src._data;
 			_size = src._size;
 
-			src._data = nullptr;
-			src._size = 0;
+			if (_data != nullptr)
+			{
+				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+				_data = nullptr;
+			}
+
+			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			SetData(src._data);
 		}
 
 		return *this;
 	}
-	
+
 	Type& operator[](ASizeT index)
 	{
 		ANIMA_ASSERT(index >= 0 && index < _size);
@@ -122,7 +126,57 @@ public:
 		ANIMA_ASSERT(index >= 0 && index < _size);
 		return const_cast<Type&>(_data[index]);
 	}
-	
+
+	AnimaVertex& operator+=(const AnimaVertex& v)
+	{
+		for (ASizeT i = 0; i < _size; i++)
+			_data[i] += v[i];
+		return *this;
+	}
+	inline friend AnimaVertex operator+(const AnimaVertex& v1, const AnimaVertex& v2) {
+		AnimaVertex res(v1._engine, v1._data);
+		res += v2;
+		return res;
+	}
+	AnimaVertex& operator-=(const AnimaVertex& v)
+	{
+		for (ASizeT i = 0; i < _size; i++)
+			_data[i] -= v[i];
+		return *this;
+	}
+	inline friend AnimaVertex operator-(const AnimaVertex& v1, const AnimaVertex& v2) {
+		AnimaVertex res(v1._engine, v1._data);
+		res -= v2;
+		return res;
+	}
+	AnimaVertex& operator*=(const Type& mul)
+	{
+		for (ASizeT i = 0; i < _size; i++)
+			_data[i] *= mul;
+		return *this;
+	}
+	inline friend AnimaVertex operator*(const AnimaVertex& v, const Type& mul) {
+		AnimaVertex res(v._engine, v._data);
+		res *= mul;
+		return res;
+	}
+	AnimaVertex& operator/=(const Type& div)
+	{
+		for (ASizeT i = 0; i < _size; i++)
+			_data[i] /= div;
+		return *this;
+	}
+	inline friend AnimaVertex operator/(const AnimaVertex& v, const Type& div) {
+		AnimaVertex res(v._engine, v._data);
+		res /= div;
+		return res;
+	}
+	inline friend AnimaVertex operator*(const Type& mul, const AnimaVertex& v) {
+		AnimaVertex res(v._engine, v._data);
+		res *= mul;
+		return res;
+	}
+		
 	inline operator Type*()
 	{
 		return _data;
@@ -133,7 +187,7 @@ public:
 		return const_cast<Type*>(_data);
 	}
 
-	inline void SetData(Type* data[Size])
+	inline void SetData(Type data[Size])
 	{
 		memcpy(_data, data, sizeof(Type) * _size);
 	}
@@ -163,11 +217,33 @@ public:
 		}
 	}
 
-	void DumpMemory()
+	void DumpMemory(bool bLogFile = true)
 	{
+		char szBuff[1024];
+
 		for (int i = 0; i < _size; i++)
-			printf("%f\t", _data[i]);
-		printf("\n");
+			sprintf(szBuff, "%s%f\t", szBuff, _data[i]);
+		sprintf(szBuff, "%s\n", szBuff);
+
+		if (bLogFile)
+		{
+			bool bCanClose = true;
+			if (!freopen(_engine->GetLogFilePath(), "a", stdout))
+				bCanClose = false;
+
+			printf(szBuff);
+
+			if (bCanClose)
+				fclose(stdout);
+		}
+		else
+		{
+			#if defined _MSC_VER
+				OutputDebugStringA(szBuff);
+			#else
+				printf(szBuff);
+			#endif
+		}
 	}
 
 	AnimaEngine* GetEngine() const

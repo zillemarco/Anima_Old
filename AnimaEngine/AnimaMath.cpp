@@ -102,6 +102,28 @@ AChar AnimaMath::Dot(const AnimaColor4b& v1, const AnimaColor4b& v2)
 	return rv;
 }
 
+AnimaQuaternion AnimaMath::QuaternionMulQuaternion(const AnimaQuaternion& q1, const AnimaQuaternion& q2)
+{
+	float w = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
+	float x = q1[0] * q2[3] + q1[3] * q2[0] + q1[1] * q2[2] - q1[2] * q2[1];
+	float y = q1[1] * q2[3] + q1[3] * q2[1] + q1[2] * q2[0] - q1[0] * q2[2];
+	float z = q1[2] * q2[3] + q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0];
+
+	AnimaQuaternion res(q1.GetEngine(), x, y, z, w);
+	return res;
+}
+
+AnimaQuaternion AnimaMath::QuaternionMulVector(const AnimaQuaternion& q, const AnimaVertex3f& v)
+{
+	float w = -q[0] * v[0] - q[1] * v[1] - q[2] * v[2];
+	float x =  q[3] * v[0] + q[1] * v[2] - q[2] * v[1];
+	float y =  q[3] * v[1] + q[2] * v[0] - q[0] * v[2];
+	float z =  q[3] * v[2] + q[0] * v[1] - q[1] * v[0];
+
+	AnimaQuaternion res(q.GetEngine(), x, y, z, w);
+	return res;
+}
+
 AnimaVertex3f AnimaMath::Cross(const AnimaVertex3f& v1, const AnimaVertex3f& v2)
 {
 	AnimaVertex4f v1_4(v1.GetEngine(), v1.GetData());
@@ -169,29 +191,21 @@ Anima::AnimaVertex4f operator/(const Anima::AnimaMatrix& m, const Anima::AnimaVe
 void operator*=(Anima::AnimaVertex3f& v, const Anima::AnimaMatrix& m)
 {
 	v = m * v;
-	//Anima::AnimaVertex3f tmp = v * m;
-	//v = tmp;
 }
 
 void operator*=(Anima::AnimaVertex4f& v, const Anima::AnimaMatrix& m)
 {
 	v = m * v;
-	//Anima::AnimaVertex3f tmp = v * m;
-	//v = tmp;
 }
 
 void operator/=(Anima::AnimaVertex3f& v, const Anima::AnimaMatrix& m)
 {
 	v = m / v;
-	//Anima::AnimaVertex3f tmp = v / m;
-	//v = tmp;
 }
 
 void operator/=(Anima::AnimaVertex4f& v, const Anima::AnimaMatrix& m)
 {
 	v = m / v;
-	//Anima::AnimaVertex3f tmp = v / m;
-	//v = tmp;
 }
 
 Anima::AFloat operator*(const Anima::AnimaVertex2f& v1, const Anima::AnimaVertex2f& v2)
@@ -227,4 +241,24 @@ Anima::AnimaVertex3f operator^(const Anima::AnimaVertex3f& v1, const Anima::Anim
 Anima::AnimaVertex4f operator^(const Anima::AnimaVertex4f& v1, const Anima::AnimaVertex4f& v2)
 {
 	return Anima::AnimaMath::Cross(v1, v2);
+}
+
+void operator*=(Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v)
+{
+	q = q * v;
+}
+
+void operator*=(Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2)
+{
+	q1 = q1 * q2;
+}
+
+Anima::AnimaQuaternion operator*(const Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2)
+{
+	return Anima::AnimaMath::QuaternionMulQuaternion(q1, q2);
+}
+
+Anima::AnimaQuaternion operator*(const Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v)
+{
+	return Anima::AnimaMath::QuaternionMulVector(q, v);
 }

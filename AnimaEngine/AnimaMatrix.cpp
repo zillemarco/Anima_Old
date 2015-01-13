@@ -1,6 +1,10 @@
 #include "AnimaMatrix.h"
 #include "AnimaAssert.h"
+#include "AnimaMath.h"
 #include <xmmintrin.h>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -35,10 +39,11 @@ AnimaMatrix::AnimaMatrix(const AnimaMatrix& src)
 }
 
 AnimaMatrix::AnimaMatrix(AnimaMatrix&& src)
-: _matrixData(src._matrixData)
-, _engine(src._engine)
+: _engine(src._engine)
 {
-	src._matrixData = nullptr;
+	_matrixData = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * ANIMA_MATRIX_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+
+	SetData(src._matrixData);
 }
 
 AnimaMatrix::~AnimaMatrix()
@@ -70,9 +75,11 @@ AnimaMatrix& AnimaMatrix::operator=(AnimaMatrix&& src)
 	if (this != &src)
 	{
 		_engine = src._engine;
-		_matrixData = src._matrixData;
+
+		if (_matrixData == nullptr)
+			_matrixData = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * ANIMA_MATRIX_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 		
-		src._matrixData = nullptr;
+		SetData(src._matrixData);
 	}
 	
 	return *this;
@@ -396,127 +403,273 @@ AnimaMatrix AnimaMatrix::Transpose() const
 	return resultMatrix;
 }
 
-void AnimaMatrix::DumpMemory()
+void AnimaMatrix::DumpMemory(bool bLogFile)
 {
-	printf("%f\t%f\t%f\t%f\n", _matrixData[0], _matrixData[1], _matrixData[2], _matrixData[3]);
-	printf("%f\t%f\t%f\t%f\n", _matrixData[4], _matrixData[5], _matrixData[6], _matrixData[7]);
-	printf("%f\t%f\t%f\t%f\n", _matrixData[8], _matrixData[9], _matrixData[10], _matrixData[11]);
-	printf("%f\t%f\t%f\t%f\n\n", _matrixData[12], _matrixData[13], _matrixData[14], _matrixData[15]);
-}
+	char szBuff[1024];
+	sprintf(szBuff, "%f\t%f\t%f\t%f\n %f\t%f\t%f\t%f\n %f\t%f\t%f\t%f\n %f\t%f\t%f\t%f\n\n", 
+			_matrixData[0], _matrixData[1], _matrixData[2], _matrixData[3], 
+			_matrixData[4], _matrixData[5], _matrixData[6], _matrixData[7], 
+			_matrixData[8], _matrixData[9], _matrixData[10], _matrixData[11], 
+			_matrixData[12], _matrixData[13], _matrixData[14], _matrixData[15]);
 
-AnimaMatrix AnimaMatrix::_Translate(float tx, float ty, float tz, AnimaEngine* engine)
-{
-	AnimaMatrix result(engine);
-	
-	result[0] = 1.0f;	result[1] = 0.0f;	result[2] = 0.0f;	result[3] = tx;
-	result[4] = 0.0f;	result[5] = 1.0f;	result[6] = 0.0f;	result[7] = ty;
-	result[8] = 0.0f;	result[9] = 0.0f;	result[10] = 1.0f;	result[11] = tz;
-	result[12] = 0.0f;	result[13] = 0.0f;	result[14] = 0.0f;	result[15] = 1.0f;
-	
-	return result;
-}
+	if (bLogFile)
+	{
+		bool bCanClose = true;
+		if (!freopen(_engine->GetLogFilePath(), "a", stdout))
+			bCanClose = false;
 
-AnimaMatrix AnimaMatrix::_Scale(float sx, float sy, float sz, AnimaEngine* engine)
-{
-	AnimaMatrix result(engine);
-	
-	result[0] = sx;		result[1] = 0.0f;	result[2] = 0.0f;	result[3] = 0.0f;
-	result[4] = 0.0f;	result[5] = sy;		result[6] = 0.0f;	result[7] = 0.0f;
-	result[8] = 0.0f;	result[9] = 0.0f;	result[10] = sz;	result[11] = 0.0f;
-	result[12] = 0.0f;	result[13] = 0.0f;	result[14] = 0.0f;	result[15] = 1.0f;
-	
-	return result;
-}
+		printf(szBuff);
 
-AnimaMatrix AnimaMatrix::_RotateX(float angle, AnimaEngine* engine)
-{
-	AnimaMatrix result(engine);
-	
-	result[0] = 1.0f;	result[1] = 0.0f;			result[2] = 0.0f;			result[3] = 0.0f;
-	result[4] = 0.0f;	result[5] = cosf(angle);	result[6] = -sinf(angle);	result[7] = 0.0f;
-	result[8] = 0.0f;	result[9] = sinf(angle);	result[10] = cosf(angle);	result[11] = 0.0f;
-	result[12] = 0.0f;	result[13] = 0.0f;			result[14] = 0.0f;			result[15] = 1.0f;
-	
-	return result;
-}
-
-AnimaMatrix AnimaMatrix::_RotateXDeg(float angle, AnimaEngine* engine)
-{
-	return _RotateX(angle * 3.1415f / 180.0f, engine);
-}
-
-AnimaMatrix AnimaMatrix::_RotateY(float angle, AnimaEngine* engine)
-{
-	AnimaMatrix result(engine);
-	
-	result[0] = cosf(angle);	result[1] = 0.0f;	result[2] = sinf(angle);	result[3] = 0.0f;
-	result[4] = 0.0f;			result[5] = 1.0f;	result[6] = 0.0f;			result[7] = 0.0f;
-	result[8] = -sinf(angle);	result[9] = 0.0f;	result[10] = cosf(angle);	result[11] = 0.0f;
-	result[12] = 0.0f;			result[13] = 0.0f;	result[14] = 0.0f;			result[15] = 1.0f;
-	
-	return result;
-}
-
-AnimaMatrix AnimaMatrix::_RotateYDeg(float angle, AnimaEngine* engine)
-{
-	return _RotateY(angle * 3.1415f / 180.0f, engine);
-}
-
-AnimaMatrix AnimaMatrix::_RotateZ(float angle, AnimaEngine* engine)
-{
-	AnimaMatrix result(engine);
-	
-	result[0] = cosf(angle);	result[1] = -sinf(angle);	result[2] = 0.0f;	result[3] = 0.0f;
-	result[4] = sinf(angle);	result[5] = cosf(angle);	result[6] = 0.0f;	result[7] = 0.0f;
-	result[8] = 0.0f;			result[9] = 0.0f;			result[10] = 1.0f;	result[11] = 0.0f;
-	result[12] = 0.0f;			result[13] = 0.0f;			result[14] = 0.0f;	result[15] = 1.0f;
-	
-	return result;
-}
-
-AnimaMatrix AnimaMatrix::_RotateZDeg(float angle, AnimaEngine* engine)
-{
-	return _RotateZ(angle * 3.1415f / 180.0f, engine);
+		if (bCanClose)
+			fclose(stdout);
+	}
+	else
+	{
+	#if defined _MSC_VER
+		OutputDebugStringA(szBuff);
+	#else
+		printf(szBuff);
+	#endif
+	}
 }
 
 void AnimaMatrix::Translate(float tx, float ty, float tz)
 {
-	this->operator*=(_Translate(tx, ty, tz, _engine));
+	AnimaVertex4f m0(_engine, _matrixData);
+	AnimaVertex4f m1(_engine, _matrixData + 4);
+	AnimaVertex4f m2(_engine, _matrixData + 8);
+	AnimaVertex4f m3(_engine, _matrixData + 12);
+
+	AnimaVertex4f res = m0 * tx + m1 * ty + m2 * tz + m3;
+
+	_matrixData[12] = res[0];
+	_matrixData[13] = res[1];
+	_matrixData[14] = res[2];
+	_matrixData[15] = res[3];
+}
+
+void AnimaMatrix::Translate(const AnimaVertex3f& translation)
+{
+	Translate(translation[0], translation[10], translation[2]);
 }
 
 void AnimaMatrix::Scale(float sx, float sy, float sz)
 {
-	this->operator*=(_Scale(sx, sy, sz, _engine));
+	AnimaVertex4f m0(_engine, _matrixData);
+	AnimaVertex4f m1(_engine, _matrixData + 4);
+	AnimaVertex4f m2(_engine, _matrixData + 8);
+	AnimaVertex4f m3(_engine, _matrixData + 12);
+
+	AnimaVertex4f r0 = m0 * sx;
+	AnimaVertex4f r1 = m1 * sy;
+	AnimaVertex4f r2 = m2 * sz;
+	AnimaVertex4f r3 = m3;
+
+	_matrixData[0] = r0[0];		_matrixData[1] = r0[1];		_matrixData[2] = r0[2];		_matrixData[3] = r0[3];
+	_matrixData[4] = r1[0];		_matrixData[5] = r1[1];		_matrixData[6] = r1[2];		_matrixData[7] = r1[3];
+	_matrixData[8] = r2[0];		_matrixData[9] = r2[1];		_matrixData[10] = r2[2];	_matrixData[11] = r2[3];
+	_matrixData[12] = r3[0];	_matrixData[13] = r3[1];	_matrixData[14] = r3[2];	_matrixData[15] = r3[3];
+}
+
+void AnimaMatrix::Scale(const AnimaVertex3f& scale)
+{
+	Scale(scale[0], scale[10], scale[2]);
+}
+
+void AnimaMatrix::Rotate(float angle, AnimaVertex3f axis)
+{
+	float a = angle;
+	float c = cosf(a);
+	float s = sinf(a);
+
+	AnimaVertex3f ax = axis;
+	ax.Normalize();
+	AnimaVertex3f temp = ((float(1) - c) * axis);
+
+	AnimaMatrix rotMatrix(_engine);
+	rotMatrix[0] = c + temp[0] * axis[0];
+	rotMatrix[1] = 0 + temp[0] * axis[1] + s * axis[2];
+	rotMatrix[2] = 0 + temp[0] * axis[2] - s * axis[1];
+	
+	rotMatrix[4] = 0 + temp[1] * axis[0] - s * axis[2];
+	rotMatrix[5] = c + temp[1] * axis[1];
+	rotMatrix[6] = 0 + temp[1] * axis[2] + s * axis[0];
+				 
+	rotMatrix[8] = 0 + temp[2] * axis[0] + s * axis[1];
+	rotMatrix[9] = 0 + temp[2] * axis[1] - s * axis[0];
+	rotMatrix[10] = c + temp[2] * axis[2];
+
+	AnimaVertex4f m0(_engine, _matrixData);
+	AnimaVertex4f m1(_engine, _matrixData + 4);
+	AnimaVertex4f m2(_engine, _matrixData + 8);
+	AnimaVertex4f m3(_engine, _matrixData + 12);
+
+	AnimaVertex4f r0 = m0 * rotMatrix[0] + m1 * rotMatrix[1] + m2 * rotMatrix[2];
+	AnimaVertex4f r1 = m0 * rotMatrix[4] + m1 * rotMatrix[5] + m2 * rotMatrix[6];
+	AnimaVertex4f r2 = m0 * rotMatrix[8] + m1 * rotMatrix[9] + m2 * rotMatrix[10];
+	AnimaVertex4f r3 = m3;
+
+	_matrixData[0] = r0[0];		_matrixData[1] = r0[1];		_matrixData[2] = r0[2];		_matrixData[3] = r0[3];
+	_matrixData[4] = r1[0];		_matrixData[5] = r1[1];		_matrixData[6] = r1[2];		_matrixData[7] = r1[3];
+	_matrixData[8] = r2[0];		_matrixData[9] = r2[1];		_matrixData[10] = r2[2];	_matrixData[11] = r2[3];
+	_matrixData[12] = r3[0];	_matrixData[13] = r3[1];	_matrixData[14] = r3[2];	_matrixData[15] = r3[3];
+}
+
+void AnimaMatrix::RotateDeg(float angle, AnimaVertex3f axis)
+{
+	Rotate(angle * (float)M_PI / 180.0f, axis);
 }
 
 void AnimaMatrix::RotateX(float angle)
 {
-	this->operator*=(_RotateX(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 1.0f;
+	dir[1] = 0.0f;
+	dir[2] = 0.0f;
+
+	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateXDeg(float angle)
 {
-	this->operator*=(_RotateXDeg(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 1.0f;
+	dir[1] = 0.0f;
+	dir[2] = 0.0f;
+
+	Rotate(angle *(float)M_PI / 180.0f, dir);
 }
 
 void AnimaMatrix::RotateY(float angle)
 {
-	this->operator*=(_RotateY(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 0.0f;
+	dir[1] = 1.0f;
+	dir[2] = 0.0f;
+
+	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateYDeg(float angle)
 {
-	this->operator*=(_RotateYDeg(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 0.0f;
+	dir[1] = 1.0f;
+	dir[2] = 0.0f;
+
+	Rotate(angle *(float)M_PI / 180.0f, dir);
 }
 
 void AnimaMatrix::RotateZ(float angle)
 {
-	this->operator*=(_RotateZ(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 0.0f;
+	dir[1] = 0.0f;
+	dir[2] = 1.0f;
+
+	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateZDeg(float angle)
 {
-	this->operator*=(_RotateZDeg(angle, _engine));
+	AnimaVertex3f dir(_engine);
+	dir[0] = 0.0f;
+	dir[1] = 0.0f;
+	dir[2] = 1.0f;
+
+	Rotate(angle *(float)M_PI / 180.0f, dir);
+}
+
+void AnimaMatrix::Perspective(float fov, float ratio, float zNear, float zFar)
+{
+	float radians = (fov / 2.0f) *(float)M_PI / 180.0f;
+	float sine = sinf(radians);
+
+	if (sine == 0.0f)
+		return;
+
+	float cotan = cosf(radians) / sine;
+	float clip = zFar - zNear;
+	
+	AnimaMatrix m(_engine);
+	m._matrixData[0] = cotan / ratio;	m._matrixData[1] = 0.0f;	m._matrixData[2] = 0.0f;							m._matrixData[3] = 0.0f;
+	m._matrixData[4] = 0.0f;			m._matrixData[5] = cotan;	m._matrixData[6] = 0.0f;							m._matrixData[7] = 0.0f;
+	m._matrixData[8] = 0.0f;			m._matrixData[9] = 0.0f;	m._matrixData[10] = -(zNear + zFar) / clip;			m._matrixData[11] = -1.0f;
+	m._matrixData[12] = 0.0f;			m._matrixData[13] = 0.0f;	m._matrixData[14] = -(2.0f * zNear * zFar) / clip;	m._matrixData[15] = 0.0f;
+
+	*this *= m;
+}
+
+void AnimaMatrix::Ortho(float left, float right, float bottom, float top, float zNear, float zFar)
+{
+	if (left == right || bottom == top || zNear == zFar)
+		return;
+
+	float width = right - left;
+	float invheight = top - bottom;
+	float clip = zFar - zNear;
+
+	AnimaMatrix m(_engine);
+	m._matrixData[0] = 2.0f / width;	m._matrixData[1] = 0.0f;				m._matrixData[2] = 0.0f;			m._matrixData[3] = -(left + right) / width;
+	m._matrixData[4] = 0.0f;			m._matrixData[5] = 2.0f / invheight;	m._matrixData[6] = 0.0f;			m._matrixData[7] = -(top + bottom) / invheight;
+	m._matrixData[8] = 0.0f;			m._matrixData[9] = 0.0f;				m._matrixData[10] = -2.0f / clip;	m._matrixData[11] = -(zNear + zFar) / clip;
+	m._matrixData[12] = 0.0f;			m._matrixData[13] = 0.0f;				m._matrixData[14] = 0.0f;			m._matrixData[15] = 1.0f;
+
+	*this *= m;
+}
+
+void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& center, const AnimaVertex3f& up)
+{
+	AnimaVertex3f invrseEye = eye;
+	invrseEye.Reverse();
+
+	AnimaVertex3f forward = center - eye;
+	forward.Normalize();
+	AnimaVertex3f side = forward ^ up;
+	side.Normalize();
+	AnimaVertex3f upVector = side ^ forward;
+	upVector.Normalize();
+
+	AnimaMatrix m(_engine);
+	m._matrixData[0] = side[0];		m._matrixData[1] = side[1];		m._matrixData[2] = side[2];			m._matrixData[3] = 0.0f;
+	m._matrixData[4] = upVector[0];	m._matrixData[5] = upVector[1];	m._matrixData[6] = upVector[2];		m._matrixData[7] = 0.0f;
+	m._matrixData[8] = -forward[0];	m._matrixData[9] = -forward[1];	m._matrixData[10] = -forward[2];	m._matrixData[11] = 0.0f;
+	m._matrixData[12] = 0.0f;		m._matrixData[13] = 0.0f;		m._matrixData[14] = 0.0f;			m._matrixData[15] = 1.0f;
+
+	*this *= m;
+	Translate(invrseEye);
+}
+
+void AnimaMatrix::Viewport(float left, float bottom, float width, float height, float zNear, float zFar)
+{
+	const float w2 = width / 2.0f;
+	const float h2 = height / 2.0f;
+
+	AnimaMatrix m(_engine);
+	m._matrixData[0] = w2;		m._matrixData[1] = 0.0f;	m._matrixData[2] = 0.0f;					m._matrixData[3] = left + w2;
+	m._matrixData[4] = 0.0f;	m._matrixData[5] = h2;		m._matrixData[6] = 0.0f;					m._matrixData[7] = bottom + h2;
+	m._matrixData[8] = 0.0f;	m._matrixData[9] = 0.0f;	m._matrixData[10] = (zFar - zNear) / 2.0f;	m._matrixData[11] = (zNear + zFar) / 2.0f;
+	m._matrixData[12] = 0.0f;	m._matrixData[13] = 0.0f;	m._matrixData[14] = 0.0f;					m._matrixData[15] = 1.0f;
+
+	*this *= m;
+}
+
+void AnimaMatrix::Frustum(float left, float right, float bottom, float top, float zNear, float zFar)
+{
+	if (left == right || bottom == top || zNear == zFar)
+		return;
+
+	float width = right - left;
+	float invheight = top - bottom;
+	float clip = zFar - zNear;
+
+	AnimaMatrix m(_engine);
+	m._matrixData[0] = 2.0f * zNear / width;	m._matrixData[1] = 0.0f;						m._matrixData[2] = (left + right) / width;		m._matrixData[3] = 0.0f;
+	m._matrixData[4] = 0.0f;					m._matrixData[5] = 2.0f * zNear / invheight;	m._matrixData[6] = (top + bottom) / invheight;	m._matrixData[7] = 0.0f;
+	m._matrixData[8] = 0.0f;					m._matrixData[9] = 0.0f;						m._matrixData[10] = -(zNear + zFar) / clip;		m._matrixData[11] = -2.0f * zNear * zFar / clip;
+	m._matrixData[12] = 0.0f;					m._matrixData[13] = 0.0f;						m._matrixData[14] = -1.0f;						m._matrixData[15] = 0.0f;
+
+	*this *= m;
 }
 
 #undef _mm_shufd

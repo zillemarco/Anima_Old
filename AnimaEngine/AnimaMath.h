@@ -14,6 +14,7 @@
 #include "AnimaTypes.h"
 #include "AnimaVertex.h"
 #include "AnimaMatrix.h"
+#include "AnimaQuaternion.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -30,6 +31,9 @@ public:
 	static AFloat Dot(const AnimaVertex4f& v1, const AnimaVertex4f& v2);
 	static AChar Dot(const AnimaColor3b& v1, const AnimaColor3b& v2);
 	static AChar Dot(const AnimaColor4b& v1, const AnimaColor4b& v2);
+
+	static AnimaQuaternion QuaternionMulQuaternion(const AnimaQuaternion& q1, const AnimaQuaternion& q2);
+	static AnimaQuaternion QuaternionMulVector(const AnimaQuaternion& q, const AnimaVertex3f& v);
 
 	static AnimaVertex3f Cross(const AnimaVertex3f& v1, const AnimaVertex3f& v2);
 	static AnimaVertex4f Cross(const AnimaVertex4f& v1, const AnimaVertex4f& v2);
@@ -55,5 +59,10 @@ Anima::AChar ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaColor4b& v1, const 
 
 Anima::AnimaVertex3f ANIMA_ENGINE_EXPORT operator^(const Anima::AnimaVertex3f& v1, const Anima::AnimaVertex3f& v2);
 Anima::AnimaVertex4f ANIMA_ENGINE_EXPORT operator^(const Anima::AnimaVertex4f& v1, const Anima::AnimaVertex4f& v2);
+
+void ANIMA_ENGINE_EXPORT operator*=(Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v);
+void ANIMA_ENGINE_EXPORT operator*=(Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2);
+Anima::AnimaQuaternion ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2);
+Anima::AnimaQuaternion ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v);
 
 #endif /* defined(__Anima__AnimaMath__) */

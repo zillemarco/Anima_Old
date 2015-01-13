@@ -30,6 +30,8 @@ private:
 	float rotX, rotY;
 	float tx, ty, tz;
 
+	bool projection;
+
 public:
 	ANIMA_WINDOW_EVENT void FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h);
 };

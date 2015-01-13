@@ -43,7 +43,7 @@ public:
 	AFloat* GetData() const;
 	void GetData(AFloat m[ANIMA_MATRIX_SIZE]) const;
 	const AFloat* GetConstData() const;
-	
+		
 	void SetIdentity();
 	
 	// Operations
@@ -52,23 +52,23 @@ public:
 	AnimaMatrix Transpose() const;
 	inline float Determinant() const;
 	
-	static AnimaMatrix _Translate(float tx, float ty, float tz, AnimaEngine* engine);
-	static AnimaMatrix _Scale(float sx, float sy, float sz, AnimaEngine* engine);
-	static AnimaMatrix _RotateX(float angle, AnimaEngine* engine);
-	static AnimaMatrix _RotateXDeg(float angle, AnimaEngine* engine);
-	static AnimaMatrix _RotateY(float angle, AnimaEngine* engine);
-	static AnimaMatrix _RotateYDeg(float angle, AnimaEngine* engine);
-	static AnimaMatrix _RotateZ(float angle, AnimaEngine* engine);
-	static AnimaMatrix _RotateZDeg(float angle, AnimaEngine* engine);
-
 	void Translate(float tx, float ty, float tz);
+	void Translate(const AnimaVertex3f& translation);
 	void Scale(float sx, float sy, float sz);
+	void Scale(const AnimaVertex3f& scale);
+	void Rotate(float angle, AnimaVertex3f axis);
+	void RotateDeg(float angle, AnimaVertex3f axis);
 	void RotateX(float angle);
 	void RotateXDeg(float angle);
 	void RotateY(float angle);
 	void RotateYDeg(float angle);
 	void RotateZ(float angle);
 	void RotateZDeg(float angle);
+	void Perspective(float fov, float ratio, float zNear, float zFar);
+	void Ortho(float left, float right, float bottom, float top, float zNear, float zFar);
+	void LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& center, const AnimaVertex3f& up);
+	void Viewport(float left, float bottom, float width, float height, float zNear, float zFar);
+	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
 
 	AnimaMatrix& operator+=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
@@ -126,7 +126,7 @@ public:
 		return m;
 	}
 		
-	void DumpMemory();
+	void DumpMemory(bool bLogFile = true);
 
 private:
 	// _matrixData memory structure

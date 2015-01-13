@@ -118,7 +118,6 @@ void AnimaModel::ClearChildren()
 {
 	if(_modelChildren != nullptr && _modelChildrenNumber > 0)
 	{
-		//_allocator->Deallocate(_modelChildren);
 		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelChildren);
 		_modelChildren = nullptr;
 		_modelChildrenNumber = 0;
@@ -145,7 +144,6 @@ void AnimaModel::SetChildren(AnimaModel* children, ASizeT n)
 		_modelChildrenNumber = n;
 		_modelChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
 
-		//memcpy(_textureCoords, v, sizeof(AnimaVertex2f) * _textureCoordsNumber);
 		for (int i = 0; i < _modelChildrenNumber; i++)
 			_modelChildren[i] = children[i];
 	}
@@ -158,17 +156,14 @@ void AnimaModel::AddChild(const AnimaModel& child)
 	{
 		AnimaModel* tmpOldChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
 
-		//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 		for (int i = 0; i < _modelChildrenNumber; i++)
 			tmpOldChildren[i] = _modelChildren[i];
 
-		//_allocator->Deallocate(_normals);
 		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _modelChildren);
 
 		_modelChildrenNumber++;
 		_modelChildren = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelChildrenNumber, _engine);
 
-		//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 		for (int i = 0; i < _modelChildrenNumber - 1; i++)
 			_modelChildren[i] = tmpOldChildren[i];
 

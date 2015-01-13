@@ -83,6 +83,9 @@ int main(int argc, char** argv)
 	
 #if defined _MSC_VER
 	Anima::AnimaString path("D:/Modelli/ninja/ninja.3ds", &engine);
+	Anima::AChar tmpFileName[PATH_MAX];
+	sprintf(tmpFileName, "C:/Users/Marco/Desktop/output/log.log");
+	Anima::AnimaEngine::SetLogFilePath(tmpFileName);
 #else
 	Anima::AnimaString path("/Users/marco/Documents/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
 #endif

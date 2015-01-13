@@ -18,6 +18,7 @@ Window::Window()
 {
 	rotX = rotY = 0.0;
 	tx = ty = tz = 0.0;
+	projection = true;
 }
 
 Window::~Window()
@@ -53,34 +54,19 @@ void Window::DrawScene()
 	glEnable(GL_DEPTH_TEST);
 
 	_program->Use();
+	
+	Anima::AnimaMatrix matrix(GetEngine());
 
-	QMatrix4x4 matrix;
-	matrix.perspective(60.0f, w / h, 0.01f, 1000.0f);
-//	matrix.translate(tx, ty, tz);
-//	matrix.rotate(rotY, QVector3D(0.0, 1.0, 0.0));
-//	matrix.rotate(rotX, QVector3D(1.0, 0.0, 0.0));
-//	matrix.scale(0.01, 0.01, 0.01);
-	
-	Anima::AnimaMatrix animaMatrix(GetEngine(), matrix.data());
-	
-	animaMatrix.DumpMemory();
-	animaMatrix = animaMatrix.Transpose();
-	animaMatrix.DumpMemory();
-	animaMatrix.Translate(tx, ty, tz);
-	animaMatrix.DumpMemory();
-	animaMatrix.RotateY(rotY);
-	animaMatrix.DumpMemory();
-	animaMatrix.RotateX(rotX);
-	animaMatrix.DumpMemory();
-	animaMatrix.Scale(0.01, 0.01, 0.01);
-	animaMatrix.DumpMemory();
-	animaMatrix = animaMatrix.Transpose();
-	animaMatrix.DumpMemory();
-	
-//	float* qtData = matrix.data();
-	float* aeData = animaMatrix.GetData();
+	if (projection)
+		matrix.Perspective(60.0f, w / h, 0.01f, 1000.0f);
+	else
+		matrix.Ortho(-1, 1, -1, 1, -1000, 1000);
 
-	_program->SetUniformValue(_matrixUniform, aeData);
+	matrix.Translate(tx, ty, tz);
+	matrix.RotateYDeg(rotY);
+	matrix.RotateXDeg(rotX);
+	matrix.Scale(0.5, 0.5, 0.5);
+	_program->SetUniformValue(_matrixUniform, (float*)matrix);
 
 	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
 	Anima::AnimaMatrix m(GetEngine());
@@ -142,6 +128,9 @@ void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, 
 	  break;
   case ANIMA_ENGINE_KEY_O:
 	  wnd->tz += 1;
+	  break;
+  case ANIMA_ENGINE_KEY_P:
+	  wnd->projection = !wnd->projection;
 	  break;
 			
   default:
