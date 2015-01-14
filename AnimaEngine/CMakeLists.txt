@@ -32,7 +32,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaShaderProgram.h
 					AnimaQuaternion.h
 					AnimaCamera.h
-					AnimaFPSCamera.h)
+					AnimaFPSCamera.h
+					AnimaCamerasManager.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -58,8 +59,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaShaderProgram.cpp
 					AnimaQuaternion.cpp
 					AnimaCamera.cpp
-					AnimaFPSCamera.cpp)
-		
+					AnimaFPSCamera.cpp
+					AnimaCamerasManager.cpp)
+
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}
                                 AnimaWindow_CocoaJoystick.h

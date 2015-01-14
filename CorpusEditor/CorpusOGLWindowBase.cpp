@@ -47,7 +47,7 @@ void CorpusOGLWindowBase::Render()
 	_device->setSize(size());
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	GLenum error = glGetError();
+	glGetError();
 	
 	QPainter painter(_device);
 	Render(&painter);

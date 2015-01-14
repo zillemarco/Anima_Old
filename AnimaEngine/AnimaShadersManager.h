@@ -28,9 +28,6 @@ public:
 	AnimaShaderProgram* CreateProgram();
 
 private:
-	AnimaShader* AddShader(const AnimaShader& shader);
-	AnimaShaderProgram* AddProgram(const AnimaShaderProgram& program);
-
 	void ClearShaders(bool bDeleteObjects = true, bool bResetNumber = true);
 	void ClearPrograms(bool bDeleteObjects = true, bool bResetNumber = true);
 

@@ -418,7 +418,7 @@ void AnimaMatrix::DumpMemory(bool bLogFile)
 		if (!freopen(_engine->GetLogFilePath(), "a", stdout))
 			bCanClose = false;
 
-		printf(szBuff);
+		puts(szBuff);
 
 		if (bCanClose)
 			fclose(stdout);
@@ -428,7 +428,7 @@ void AnimaMatrix::DumpMemory(bool bLogFile)
 	#if defined _MSC_VER
 		OutputDebugStringA(szBuff);
 	#else
-		printf(szBuff);
+		puts(szBuff);
 	#endif
 	}
 }

@@ -119,10 +119,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AChar* filePath, Anim
 		is.read(str.GetBuffer(), length);
 
 		if (!is)
-		{
-			std::streamsize read = is.gcount();
 			readCompletely = false;
-		}
 
 		is.close();
 	}
@@ -162,10 +159,7 @@ AnimaShader* AnimaShadersManager::LoadShader(AnimaShaderProgram::AnimaShaderInfo
 			is.read(str.GetBuffer(), length);
 
 			if (!is)
-			{
-				std::streamsize read = is.gcount();
 				readCompletely = false;
-			}
 
 			is.close();
 		}

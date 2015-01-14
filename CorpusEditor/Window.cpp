@@ -47,7 +47,7 @@ void Window::DrawScene()
 	GetWindowSize(&w, &h);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	GLenum error = glGetError();
+	glGetError();
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 	
 	glFrontFace(GL_CW);
@@ -64,10 +64,7 @@ void Window::DrawScene()
 	camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
 	
 	Anima::AnimaMatrix model(GetEngine());
-	//model.Translate(tx, ty, tz);
-	//model.RotateYDeg(rotY);
-	//model.RotateXDeg(rotX);
-	model.Scale(0.5, 0.5, 0.5);
+	model.Scale(0.01, 0.01, 0.01);
 	_program->SetUniformValue(_matrixUniform, (model * camera * projection).GetData());
 
 	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
@@ -92,7 +89,11 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	}
 	else
 	{
+#if defined _MSC_VER
 		OutputDebugStringA("ctx not valid\n");
+#else
+		printf("ctx not valid\n");
+#endif
 	}
 }
 

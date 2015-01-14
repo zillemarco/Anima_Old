@@ -14,14 +14,16 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaCamera.h"
+#include "AnimaAllocators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaFPSCamera : public AnimaCamera
 {
 public:
+	AnimaFPSCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
 	AnimaFPSCamera(AnimaEngine* engine);
-	AnimaFPSCamera(AnimaEngine* engine, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
+	AnimaFPSCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
 	AnimaFPSCamera(const AnimaFPSCamera& src);
 	AnimaFPSCamera(AnimaFPSCamera&& src);
 	~AnimaFPSCamera();

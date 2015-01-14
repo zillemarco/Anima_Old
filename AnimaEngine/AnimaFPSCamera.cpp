@@ -8,14 +8,24 @@
 
 #include "AnimaFPSCamera.h"
 #include "AnimaMath.h"
+#include "AnimaCamerasManager.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+AnimaFPSCamera::AnimaFPSCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
+	: AnimaCamera(engine, camerasManager)
+, _forward(engine)
+{
+	_forward[0] = 0.0f;
+	_forward[1] = 0.0f;
+	_forward[2] = 1.0f;
+}
+
 AnimaFPSCamera::AnimaFPSCamera(AnimaEngine* engine)
-	: AnimaCamera(engine)
+	: AnimaCamera(engine, nullptr)
 	, _forward(engine)
 {
 	_forward[0] = 0.0f;
@@ -23,8 +33,8 @@ AnimaFPSCamera::AnimaFPSCamera(AnimaEngine* engine)
 	_forward[2] = 1.0f;
 }
 
-AnimaFPSCamera::AnimaFPSCamera(AnimaEngine* engine, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up)
-	: AnimaCamera(engine, position, up)
+AnimaFPSCamera::AnimaFPSCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up)
+	: AnimaCamera(engine, camerasManager, position, up)
 	, _forward(forward)
 {
 	_forward.Normalize();
@@ -109,7 +119,7 @@ void AnimaFPSCamera::RotateX(AFloat angle)
 {
 	AnimaVertex3f hAxis = _yAxis ^ _forward;
 	hAxis.Normalize();
-
+	
 	AnimaMath::RotateVector(_forward, angle, hAxis);
 	_forward.Normalize();
 
@@ -127,7 +137,7 @@ void AnimaFPSCamera::RotateY(AFloat angle)
 {
 	AnimaVertex3f hAxis = _yAxis ^ _forward;
 	hAxis.Normalize();
-
+	
 	AnimaMath::RotateVector(_forward, angle, _yAxis);
 	_forward.Normalize();
 

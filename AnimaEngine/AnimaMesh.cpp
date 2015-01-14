@@ -72,13 +72,13 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 , _textureCoordsNumber(src._textureCoordsNumber)
 , _faces(src._faces)
 , _facesNumber(src._facesNumber)
-, _engine(src._engine)
 , _meshName(src._meshName)
+, _vertexArrayObject(src._vertexArrayObject)
 , _indexesBufferObject(src._indexesBufferObject)
 , _verticesBufferObject(src._verticesBufferObject)
-, _needsBuffersUpdate(src._needsBuffersUpdate)
 , _colorsBufferObject(src._colorsBufferObject)
-, _vertexArrayObject(src._vertexArrayObject)
+, _engine(src._engine)
+, _needsBuffersUpdate(src._needsBuffersUpdate)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;

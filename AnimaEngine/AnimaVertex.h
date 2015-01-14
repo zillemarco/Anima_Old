@@ -29,7 +29,8 @@ public:
 		_engine = engine;
 		_size = Size;
 
-		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 		memset(_data, 0, sizeof(Type) * Size);
 	}
 
@@ -39,8 +40,9 @@ public:
 
 		_engine = engine;
 		_size = Size;
-
-		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		
+		//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 		SetData(data);
 	}
 
@@ -51,8 +53,9 @@ public:
 			_data = nullptr;
 			_size = src._size;
 			_engine = src._engine;
-
-			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			
+			//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 			SetData(src._data);
 		}
 	}
@@ -61,7 +64,8 @@ public:
 		: _engine(src._engine)
 		, _size(src._size)
 	{
-		_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+		_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 		SetData(src._data);
 	}
 
@@ -71,7 +75,8 @@ public:
 
 		if (_data != nullptr)
 		{
-			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+			//AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+			(_engine->GetGenericAllocator())->Deallocate(_data);
 			_data = nullptr;
 		}
 	}
@@ -82,12 +87,14 @@ public:
 		{
 			if (_data != nullptr)
 			{
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+				//AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+				(_engine->GetGenericAllocator())->Deallocate(_data);
 				_data = nullptr;
 			}
 
 			_size = src._size;
-			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 			SetData(src._data);
 		}
 
@@ -104,11 +111,13 @@ public:
 
 			if (_data != nullptr)
 			{
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+				//AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), _data);
+				(_engine->GetGenericAllocator())->Deallocate(_data);
 				_data = nullptr;
 			}
-
-			_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			
+			//_data = AnimaAllocatorNamespace::AllocateArray<Type>(*(_engine->GetGenericAllocator()), _size);
+			_data = (Type*)(_engine->GetGenericAllocator())->Allocate(sizeof(Type) * _size, ANIMA_ENGINE_ALIGN_OF(Type));
 			SetData(src._data);
 		}
 

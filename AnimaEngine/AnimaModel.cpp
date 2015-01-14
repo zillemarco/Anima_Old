@@ -53,8 +53,8 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _modelMeshesNumber(src._modelMeshesNumber)
 , _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
-, _engine(src._engine)
 , _trasnsformationMatrix(src._trasnsformationMatrix)
+, _engine(src._engine)
 {
 	src._modelChildren = nullptr;
 	src._modelMeshes = nullptr;
