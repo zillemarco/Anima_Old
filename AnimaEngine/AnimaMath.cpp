@@ -8,6 +8,9 @@
 
 #include "AnimaMath.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 #define _mm_shufd(xmm, mask) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(xmm), mask))
@@ -162,6 +165,30 @@ AnimaVertex4f AnimaMath::Cross(const AnimaVertex4f& v1, const AnimaVertex4f& v2)
 	AnimaVertex4f result(v1.GetEngine(), r);
 	delete[] r;
 	return result;
+}
+
+AFloat AnimaMath::AngleBetweenVectors(const AnimaVertex3f& v1, const AnimaVertex3f& v2)
+{
+	ANIMA_ASSERT(!v1.IsNull() && !v2.IsNull());
+	AnimaVertex3f nv1 = v1;
+	AnimaVertex3f nv2 = v2;
+
+	nv1.Normalize();
+	nv2.Normalize();
+
+	return acosf(Dot(nv1, nv1) / (nv1.Length() * nv1.Length()));
+}
+
+AFloat AnimaMath::AngleBetweenVectorsDeg(const AnimaVertex3f& v1, const AnimaVertex3f& v2)
+{
+	ANIMA_ASSERT(!v1.IsNull() && !v2.IsNull());
+	AnimaVertex3f nv1 = v1;
+	AnimaVertex3f nv2 = v2;
+
+	nv1.Normalize();
+	nv2.Normalize();
+
+	return acosf(Dot(nv1, nv1) / (nv1.Length() * nv1.Length())) * 180.0f / (float)M_PI;
 }
 
 AnimaVertex3f AnimaMath::RotateVector(const AnimaColor3f& v, AFloat angle, const AnimaColor3f& axis)

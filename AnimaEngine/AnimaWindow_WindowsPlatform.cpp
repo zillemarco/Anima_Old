@@ -823,17 +823,17 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 		ReleaseCapture();
 
-		if (uMsg == WM_LBUTTONDOWN)
+		if (uMsg == WM_LBUTTONUP)
 		{
 			if (window->GetMouseClickCallback())
 				window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_LEFT, ANIMA_ENGINE_RELEASE, mods);
 		}
-		else if (uMsg == WM_RBUTTONDOWN)
+		else if (uMsg == WM_RBUTTONUP)
 		{
 			if (window->GetMouseClickCallback())
 				window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_RIGHT, ANIMA_ENGINE_RELEASE, mods);
 		}
-		else if (uMsg == WM_MBUTTONDOWN)
+		else if (uMsg == WM_MBUTTONUP)
 		{
 			if (window->GetMouseClickCallback())
 				window->GetMouseClickCallback()(window, ANIMA_ENGINE_MOUSE_BUTTON_MIDDLE, ANIMA_ENGINE_RELEASE, mods);

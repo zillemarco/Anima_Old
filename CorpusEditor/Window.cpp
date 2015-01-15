@@ -12,7 +12,8 @@ BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
 	ANIMA_WINDOW_FRAMEBUFFER_SIZE_CHANGED_EVENT(FrameBufferResizeCallback)
 	ANIMA_WINDOW_CURSOR_MOVE_EVENT(MouseMoveCallback)
-	ANIMA_WINDOW_KEY_EVENT(Key)
+	ANIMA_WINDOW_KEY_EVENT(KeyCallback)
+	ANIMA_WINDOW_MOUSE_SCROLL_EVENT(ScrollCallback)
 END_MESSAGE_MAP()
 
 Window::Window()
@@ -22,16 +23,14 @@ Window::Window()
 	projection = true;
 
 	_camera = nullptr;
+
+	_lastPTX = 0.0;
+	_lastPTY = 0.0;
 }
 
 Window::~Window()
 {
 	delete _camera;
-}
-
-void Window::MouseClickCallback(Anima::AnimaEngineWindow_Base* window, int button, int action, int mods)
-{
-	
 }
 
 void Window::PaintCallback(Anima::AnimaWindow* window)
@@ -60,11 +59,10 @@ void Window::DrawScene()
 	Anima::AnimaMatrix projection(GetEngine());
 	projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
 
-	Anima::AnimaMatrix camera(GetEngine());
-	camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
+	Anima::AnimaMatrix camera = _camera->GetViewMatrix();
+	//camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
 	
 	Anima::AnimaMatrix model(GetEngine());
-	model.Scale(0.01, 0.01, 0.01);
 	_program->SetUniformValue(_matrixUniform, (model * camera * projection).GetData());
 
 	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
@@ -99,58 +97,79 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 
 void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 {
+	Window* wnd = (Window*)window;
+
+	if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_LEFT] == ANIMA_ENGINE_PRESS)
+	{
+		double dy = wnd->_lastPTY - y;
+		wnd->_camera->RotateXDeg(dy * 0.1);
+	}
+	if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_RIGHT] == ANIMA_ENGINE_PRESS)
+	{
+		double dx = wnd->_lastPTX - x;
+		wnd->_camera->RotateYDeg(dx * 0.1);
+	}
+
+	wnd->_lastPTX = x;
+	wnd->_lastPTY = y;
 }
 
-void Window::Key(Anima::AnimaWindow* window, int key, int scancode, int action, int mods)
+void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods)
 {
 	Window* wnd = (Window*)window;
 	
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		//wnd->rotY -= 1;
-		wnd->_camera->RotateYDeg(-1.0f);
+		wnd->_camera->RotateYDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		//wnd->rotY += 1;
-		wnd->_camera->RotateYDeg(1.0f);
+		wnd->_camera->RotateYDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_UP:
-		//wnd->rotX += 1;
-		wnd->_camera->RotateXDeg(-1.0f);
+		wnd->_camera->RotateXDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		//wnd->rotX -= 1;
-		wnd->_camera->RotateXDeg(1.0f);
+		wnd->_camera->RotateXDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_W:
-		//wnd->ty += 1;
 		wnd->_camera->Move(0.0f, 1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_S:
-		//wnd->ty -= 1;
 		wnd->_camera->Move(0.0f, -1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_D:
-		//wnd->tx += 1;
 		wnd->_camera->Move(-1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_A:
-		//wnd->tx -= 1;
 		wnd->_camera->Move(1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_L:
-		//wnd->tz -= 1;
-		wnd->_camera->Move(0.0f, 0.0f, -1.0f, 1.0f);
+		//wnd->_camera->Move(0.0f, 0.0f, -1.0f, 1.0f);
+		wnd->_camera->Zoom(-1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_O:
-		//wnd->tz += 1;
-		wnd->_camera->Move(0.0f, 0.0f, 1.0f, 1.0f);
-		break;
-	case ANIMA_ENGINE_KEY_P:
-		wnd->projection = !wnd->projection;
+		//wnd->_camera->Move(0.0f, 0.0f, 1.0f, 1.0f);
+		wnd->_camera->Zoom(1.0f);
 		break;
 	}
+}
+
+void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int action, int mods)
+{
+	window->GetMouseButtons()[button] = action;
+
+	if (action == ANIMA_ENGINE_PRESS)
+		window->SetWindowTitle("press");
+	else if (action == ANIMA_ENGINE_RELEASE)
+		window->SetWindowTitle("release");
+}
+
+void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
+{
+	Window* wnd = (Window*)window;
+
+	wnd->_camera->Zoom(y * 0.1);
 }
 
 void Window::Load()
@@ -175,8 +194,9 @@ void Window::Load()
 	Anima::AnimaVertex3f pos(GetEngine());
 	pos[0] = 0;
 	pos[1] = 0;
-	pos[2] = -5;
+	pos[2] = -10;
 
-	_camera = new Anima::AnimaFPSCamera(GetEngine());
+	//_camera = new Anima::AnimaABCamera(GetEngine());
+	_camera = new Anima::AnimaFPCamera(GetEngine());
 	_camera->SetPosition(pos);
 }

@@ -13,6 +13,7 @@
 #include "AnimaVertex.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
+#include "AnimaMatrix.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -46,12 +47,14 @@ public:
 	virtual bool IsActive();
 
 public:
+	virtual void Zoom(AFloat amount) = 0;
 	virtual void Move(const AnimaVertex3f& direction, AFloat amount) = 0;
 	virtual void Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount) = 0;
 	virtual void RotateX(AFloat angle) = 0;
 	virtual void RotateXDeg(AFloat angle) = 0;
 	virtual void RotateY(AFloat angle) = 0;
 	virtual void RotateYDeg(AFloat angle) = 0;
+	virtual AnimaMatrix GetViewMatrix() = 0;
 	
 	virtual void Activate();
 	virtual void Deactivate();
@@ -60,12 +63,13 @@ protected:
 	AnimaVertex3f _position;
 	AnimaVertex3f _up;
 
+	AnimaVertex3f _xAxis;
 	AnimaVertex3f _yAxis;
+	AnimaVertex3f _zAxis;
 	
 	bool _active;
 
-	AnimaEngine* _engine;
-	
+	AnimaEngine* _engine;	
 	AnimaCamerasManager* _camerasManager;
 };
 

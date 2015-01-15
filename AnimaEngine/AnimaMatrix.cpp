@@ -450,7 +450,7 @@ void AnimaMatrix::Translate(float tx, float ty, float tz)
 
 void AnimaMatrix::Translate(const AnimaVertex3f& translation)
 {
-	Translate(translation[0], translation[10], translation[2]);
+	Translate(translation[0], translation[1], translation[2]);
 }
 
 void AnimaMatrix::Scale(float sx, float sy, float sz)
@@ -620,9 +620,6 @@ void AnimaMatrix::Ortho(float left, float right, float bottom, float top, float 
 
 void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward, const AnimaVertex3f& up)
 {
-	AnimaVertex3f invrseEye = eye;
-	invrseEye.Reverse();
-
 	AnimaVertex3f side = forward ^ up;
 	side.Normalize();
 	AnimaVertex3f upVector = side ^ forward;
@@ -668,6 +665,81 @@ void AnimaMatrix::Frustum(float left, float right, float bottom, float top, floa
 	m._matrixData[12] = 0.0f;					m._matrixData[13] = 0.0f;						m._matrixData[14] = -1.0f;						m._matrixData[15] = 0.0f;
 
 	*this *= m;
+}
+
+void AnimaMatrix::FromHeadPitchRoll(AFloat head, AFloat pitch, AFloat roll)
+{
+	float cosH = cosf(head);
+	float cosP = cosf(pitch);
+	float cosR = cosf(roll);
+	float sinH = sinf(head);
+	float sinP = sinf(pitch);
+	float sinR = sinf(roll);
+
+	_matrixData[0] = cosR * cosH - sinR * sinP * sinH;
+	_matrixData[1] = sinR * cosH + cosR * sinP * sinH;
+	_matrixData[2] = -cosP * sinH;
+	_matrixData[3] = 0.0f;
+
+	_matrixData[4] = -sinR * cosP;
+	_matrixData[5] = cosR * cosP;
+	_matrixData[6] = sinP;
+	_matrixData[7] = 0.0f;
+
+	_matrixData[8] = cosR * sinH + sinR * sinP * cosH;
+	_matrixData[9] = sinR * sinH - cosR * sinP * cosH;
+	_matrixData[10] = cosP * cosH;
+	_matrixData[11] = 0.0f;
+
+	_matrixData[12] = 0.0f;
+	_matrixData[13] = 0.0f;
+	_matrixData[14] = 0.0f;
+	_matrixData[15] = 1.0f;
+}
+
+void AnimaMatrix::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
+{
+	FromHeadPitchRoll(head * (AFloat)M_PI / 180.0f, pitch * (AFloat)M_PI / 180.0f, roll * (AFloat)M_PI / 180.0f);
+}
+
+void AnimaMatrix::GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) const
+{
+	float thetaX = asinf(_matrixData[6]);
+	float thetaY = 0.0f;
+	float thetaZ = 0.0f;
+
+	if (thetaX < ((AFloat)M_PI / 2.0f))
+	{
+		if (thetaX >((AFloat)M_PI / -2.0f))
+		{
+			thetaZ = atan2f(-_matrixData[4], _matrixData[5]);
+			thetaY = atan2f(-_matrixData[2], _matrixData[10]);
+		}
+		else
+		{
+			// Not a unique solution.
+			thetaZ = -atan2f(_matrixData[8], _matrixData[0]);
+			thetaY = 0.0f;
+		}
+	}
+	else
+	{
+		// Not a unique solution.
+		thetaZ = atan2f(_matrixData[8], _matrixData[0]);
+		thetaY = 0.0f;
+	}
+
+	head = thetaY;
+	pitch = thetaX;
+	roll = thetaZ;
+}
+
+void AnimaMatrix::GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll) const
+{
+	GetHeadPitchRoll(head, pitch, roll);
+	head = head * 180.0f / (AFloat)M_PI;
+	pitch = pitch * 180.0f / (AFloat)M_PI;
+	roll = roll * 180.0f / (AFloat)M_PI;
 }
 
 #undef _mm_shufd

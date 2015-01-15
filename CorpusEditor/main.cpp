@@ -11,6 +11,10 @@
 #include "Window.h"
 #include <AnimaMath.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+
 void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 	freopen(Anima::AnimaEngine::GetLogFilePath(), "a", stderr);
@@ -81,7 +85,7 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
-		
+			
 #if defined _MSC_VER
 	Anima::AnimaString path("D:/Modelli/ninja/ninja.3ds", &engine);
 	Anima::AChar tmpFileName[PATH_MAX];

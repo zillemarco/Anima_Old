@@ -25,7 +25,7 @@ AnimaCamerasManager::~AnimaCamerasManager()
 	ClearCameras();
 }
 
-AnimaFPSCamera* AnimaCamerasManager::CreateNewFpsCamera()
+AnimaFPCamera* AnimaCamerasManager::CreateNewFPCamera()
 {
 	ANIMA_ASSERT(_engine != nullptr);
 	if (_camerasNumber > 0)
@@ -52,8 +52,8 @@ AnimaFPSCamera* AnimaCamerasManager::CreateNewFpsCamera()
 		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetShadersAllocator()), _camerasNumber);
 	}
 	
-	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFPSCamera>(*(_engine->GetShadersAllocator()), _engine, this);
-	return (AnimaFPSCamera*)_cameras[_camerasNumber - 1];
+	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFPCamera>(*(_engine->GetShadersAllocator()), _engine, this);
+	return (AnimaFPCamera*)_cameras[_camerasNumber - 1];
 }
 
 void AnimaCamerasManager::ClearCameras(bool bDeleteObjects, bool bResetNumber)

@@ -70,6 +70,11 @@ public:
 	void Viewport(float left, float bottom, float width, float height, float zNear, float zFar);
 	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
 
+	void FromHeadPitchRoll(AFloat head, AFloat pitch, AFloat roll);
+	void FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
+	void GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) const;
+	void GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll) const;
+
 	AnimaMatrix& operator+=(const AnimaMatrix& src);
 	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
 		AnimaMatrix m(srca._engine, srca._matrixData);
