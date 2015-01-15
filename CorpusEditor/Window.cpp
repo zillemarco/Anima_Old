@@ -60,6 +60,7 @@ void Window::DrawScene()
 	projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
 
 	Anima::AnimaMatrix camera = _camera->GetViewMatrix();
+	camera.DumpMemory(false);
 	//camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
 	
 	Anima::AnimaMatrix model(GetEngine());
@@ -103,9 +104,9 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 	{
 		double dy = wnd->_lastPTY - y;
 		wnd->_camera->RotateXDeg(dy * 0.1);
-	}
-	if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_RIGHT] == ANIMA_ENGINE_PRESS)
-	{
+	//}
+	//if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_RIGHT] == ANIMA_ENGINE_PRESS)
+	//{
 		double dx = wnd->_lastPTX - x;
 		wnd->_camera->RotateYDeg(dx * 0.1);
 	}
@@ -196,7 +197,13 @@ void Window::Load()
 	pos[1] = 0;
 	pos[2] = -10;
 
+	Anima::AnimaVertex3f tar(GetEngine());
+	tar[0] = 0;
+	tar[1] = 0;
+	tar[2] = 0;
+
 	//_camera = new Anima::AnimaABCamera(GetEngine());
 	_camera = new Anima::AnimaFPCamera(GetEngine());
+	//_camera->LookAt(pos, tar);
 	_camera->SetPosition(pos);
 }

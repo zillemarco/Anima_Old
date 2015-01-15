@@ -18,52 +18,39 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaABCamera::AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
 	: AnimaCamera(engine, camerasManager)
 	, _target(engine)
-	, _rotation(engine)
+	, _viewMatrix(engine)
 {
 	_target[0] = 0.0f;
 	_target[1] = 0.0f;
 	_target[2] = 0.0f;
-
-	_rotation[0] = 0.0f;
-	_rotation[1] = 0.0f;
-	_rotation[2] = 0.0f;
 }
 
 AnimaABCamera::AnimaABCamera(AnimaEngine* engine)
-	: AnimaCamera(engine, nullptr)
-	, _target(engine)
-	, _rotation(engine)
+	: AnimaABCamera(engine, nullptr)
 {
-	_target[0] = 0.0f;
-	_target[1] = 0.0f;
-	_target[2] = 0.0f;
-
-	_rotation[0] = 0.0f;
-	_rotation[1] = 0.0f;
-	_rotation[2] = 0.0f;
 }
 
 AnimaABCamera::AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target, const AnimaVertex3f& up)
 	: AnimaCamera(engine, camerasManager, position, up)
 	, _target(target)
-	, _rotation(engine)
+	, _viewMatrix(engine)
 {
-	_rotation[0] = 0.0f;
-	_rotation[1] = 0.0f;
-	_rotation[2] = 0.0f;
+	_target[0] = 0.0f;
+	_target[1] = 0.0f;
+	_target[2] = 0.0f;
 }
 
 AnimaABCamera::AnimaABCamera(const AnimaABCamera& src)
 	: AnimaCamera(src)
 	, _target(src._target)
-	, _rotation(src._rotation)
+	, _viewMatrix(src._viewMatrix)
 {
 }
 
 AnimaABCamera::AnimaABCamera(AnimaABCamera&& src)
 	: AnimaCamera(src)
 	, _target(src._target)
-	, _rotation(src._rotation)
+	, _viewMatrix(src._viewMatrix)
 {
 }
 
@@ -78,7 +65,7 @@ AnimaABCamera& AnimaABCamera::operator=(const AnimaABCamera& src)
 		AnimaCamera::operator=(src);
 
 		_target = src._target;
-		_rotation = src._rotation;
+		_viewMatrix = src._viewMatrix;
 	}
 
 	return *this;
@@ -91,16 +78,20 @@ AnimaABCamera& AnimaABCamera::operator=(AnimaABCamera&& src)
 		AnimaCamera::operator=(src);
 
 		_target = src._target;
-		_rotation = src._rotation;
+		_viewMatrix = src._viewMatrix;
 	}
 
 	return *this;
 }
 
+AnimaMatrix AnimaABCamera::GetViewMatrix()
+{
+	return _viewMatrix;
+}
+
 AnimaVertex3f AnimaABCamera::GetForward()
 {
 	AnimaVertex3f forward = _target - _position;
-	//forward[0] *= -1.0f;
 	forward.Normalize();
 	forward.DumpMemory(false);
 	return forward;
@@ -120,55 +111,52 @@ AnimaVertex3f AnimaABCamera::GetRight()
 	return right;
 }
 
-AnimaVertex3f AnimaABCamera::GetCenter()
+AnimaVertex3f AnimaABCamera::GetTarget()
 {
 	return _target;
 }
 
 void AnimaABCamera::Zoom(AFloat amount)
 {
-	if (amount >= 0.0f && GetDistance() <= 0.001f)
-		return;
+	_position -= _target;
 
-	AnimaVertex3f dir = GetForward();
-	dir.Normalize();
-	dir *= amount;
+	if (amount < 0)
+		_position += _position * 0.1f;
 
-	AnimaVertex3f newPos = _position + dir;
-	AFloat dist = (_target - newPos).Length();
+	if (amount > 0 && _position.Length() > 0.05f)
+		_position -= _position * 0.1f;
 
-	if (fabs(dist) <= 0.00001f)
-		return;
+	_position += _target;
 
-	_position += dir;
+	CalculateViewMatrix();
 }
 
 void AnimaABCamera::Move(const AnimaVertex3f& direction, AFloat amount)
 {
 	AnimaVertex3f dir = direction;
+	AnimaVertex3f Up = _worldYAxis;
+	AnimaVertex3f Right = _xAxis;
+	AnimaVertex3f Forward = Up ^ Right;
+
 	dir.Normalize();
-	dir *= amount;
 
-	//_position += direction * amount;
-	//_target += direction * amount;
+	Up *= amount;
+	Right *= amount;
+	Forward *= amount;
 
-	AnimaVertex3f t = GetForward();
-	t.Normalize();
+	AnimaVertex3f movement(_engine);
 
-	_up.Normalize();
-	_up = _up - (t * AnimaMath::Dot(t, _up));
-	_up.Normalize();
+	if (dir[2] > 0.0f) movement += Forward;
+	if (dir[2] < 0.0f) movement -= Forward;
+	if (dir[0] > 0.0f) movement -= Right;
+	if (dir[0] < 0.0f) movement += Right;
+	if (dir[1] > 0.0f) movement += Up;
+	if (dir[1] < 0.0f) movement -= Up;
+	
+	_position += movement;
+	_target += movement;
 
-	AnimaVertex3f b = _up ^ t;
-	b.Normalize();
-
-	_position += b * dir[0];
-	_position += _up * dir[1];
-	_position -= t * dir[2];
-
-	_target += b * dir[0];
-	_target += _up * dir[1];
-	_target -= t * dir[2];
+	CalculateViewMatrix();
 }
 
 void AnimaABCamera::Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount)
@@ -183,34 +171,27 @@ void AnimaABCamera::Move(const AFloat& xDirection, const AFloat& yDirection, con
 
 void AnimaABCamera::RotateX(AFloat angle)
 {
-	//AnimaVertex3f hAxis = _yAxis ^ GetForward();
-	//hAxis.Normalize();
+	_position -= _target;
 
-	//AnimaMath::RotateVector(_position, angle, hAxis);
-	//_position += _target;
+	AnimaMath::RotateVector(_yAxis, angle, _xAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _xAxis);
 
-	AnimaMatrix matrix(_engine);
+	if (_yAxis[1] < 0.0f)
+	{
+		_zAxis[0] = 0.0f;
+		_zAxis[1] = _zAxis[1] > 0.0f ? 1.0f : 0.0f;
+		_zAxis[2] = 0.0f;
 
-	matrix.RotateX(-_rotation[0]);
-	matrix.RotateY(-_rotation[1]);
-	matrix.RotateZ(-_rotation[2]);
-	matrix.Translate(-_target[0], -_target[1], -_target[2]);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
+		_yAxis = _zAxis ^ _xAxis;
+	}
 
-	matrix.SetIdentity();
-	matrix.RotateX(angle);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
-	
-	matrix.SetIdentity();
-	matrix.Translate(_target[0], _target[1], _target[2]);
-	matrix.RotateZ(_rotation[2]);
-	matrix.RotateY(_rotation[1]);
-	matrix.RotateX(_rotation[0]);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
+	if (_zAxis.Length() != 0.0f)
+	{
+		float dist = _position.Length();
+		_position = _target + _zAxis * dist;
+	}
 
-	_rotation[0] += angle;
-
-	RecalculateVectors();
+	CalculateViewMatrix();
 }
 
 void AnimaABCamera::RotateXDeg(AFloat angle)
@@ -220,34 +201,16 @@ void AnimaABCamera::RotateXDeg(AFloat angle)
 
 void AnimaABCamera::RotateY(AFloat angle)
 {
-	//AnimaVertex3f rotAxis = GetRight() ^ GetForward();
-	//rotAxis.Normalize();
+	_position -= _target;
 
-	//AnimaMath::RotateVector(_position, angle, rotAxis);
-	//_position += _target;
+	AnimaMath::RotateVector(_xAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_yAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
 
-	AnimaMatrix matrix(_engine);
+	float dist = _position.Length();
+	_position = _target + _zAxis * dist;
 
-	matrix.RotateX(-_rotation[0]);
-	matrix.RotateY(-_rotation[1]);
-	matrix.RotateZ(-_rotation[2]);
-	matrix.Translate(-_target[0], -_target[1], -_target[2]);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
-
-	matrix.SetIdentity();
-	matrix.RotateY(angle);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
-
-	matrix.SetIdentity();
-	matrix.Translate(_target[0], _target[1], _target[2]);
-	matrix.RotateZ(_rotation[2]);
-	matrix.RotateY(_rotation[1]);
-	matrix.RotateX(_rotation[0]);
-	_position = AnimaMath::MatrixMulVector(matrix, _position);
-
-	_rotation[1] += angle;
-	
-	RecalculateVectors();
+	CalculateViewMatrix();
 }
 
 void AnimaABCamera::RotateYDeg(AFloat angle)
@@ -267,7 +230,7 @@ void AnimaABCamera::SetDistance(AFloat dist)
 		return;
 
 	AnimaVertex3f dir = GetForward();
-	dir.Reverse();
+	dir.Inverse();
 	dir.Normalize();
 	dir *= dist;
 
@@ -283,6 +246,31 @@ void AnimaABCamera::RecalculateVectors()
 	_up[1] = 1.0f;
 	_up[2] = -(v[1] * v[2]) / d;
 	_up.Normalize();
+}
+
+void AnimaABCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target)
+{
+	_position = position;
+	_target = target;
+
+	_zAxis = _position - _target;
+	_zAxis.Normalize();
+
+	_xAxis = _worldYAxis ^ _zAxis;
+	_xAxis.Normalize();
+
+	_yAxis = _zAxis ^ _xAxis;
+	_yAxis.Normalize();
+
+	CalculateViewMatrix();
+}
+
+void AnimaABCamera::CalculateViewMatrix()
+{
+	_viewMatrix[0] = _xAxis[0];								_viewMatrix[1] = _yAxis[0];								_viewMatrix[2] = _zAxis[0];								_viewMatrix[3] = 0.0f;
+	_viewMatrix[4] = _xAxis[1];								_viewMatrix[5] = _yAxis[1];								_viewMatrix[6] = _zAxis[1];								_viewMatrix[7] = 0.0f;
+	_viewMatrix[8] = _xAxis[2];								_viewMatrix[9] = _yAxis[2];								_viewMatrix[10] = _zAxis[2];							_viewMatrix[11] = 0.0f;
+	_viewMatrix[12] = -AnimaMath::Dot(_xAxis, _position);	_viewMatrix[13] = -AnimaMath::Dot(_yAxis, _position);	_viewMatrix[14] = -AnimaMath::Dot(_zAxis, _position);	_viewMatrix[15] = 1.0f;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

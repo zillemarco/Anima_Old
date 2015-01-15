@@ -24,7 +24,20 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 					_zAxis[1] = 0.0f;	\
 					_zAxis[2] = 1.0f;
 
-#define INIT_AXIS	INIT_X_AXIS INIT_Y_AXIS INIT_Z_AXIS
+#define INIT_WORLD_X_AXIS	_worldXAxis[0] = 1.0f;	\
+							_worldXAxis[1] = 0.0f;	\
+							_worldXAxis[2] = 0.0f;
+
+#define INIT_WORLD_Y_AXIS	_worldYAxis[0] = 0.0f;	\
+							_worldYAxis[1] = 1.0f;	\
+							_worldYAxis[2] = 0.0f;
+
+#define INIT_WORLD_Z_AXIS	_worldZAxis[0] = 0.0f;	\
+							_worldZAxis[1] = 0.0f;	\
+							_worldZAxis[2] = 1.0f;
+
+#define INIT_AXIS			INIT_X_AXIS			INIT_Y_AXIS			INIT_Z_AXIS
+#define INIT_WORLD_AXIS		INIT_WORLD_X_AXIS	INIT_WORLD_Y_AXIS	INIT_WORLD_Z_AXIS
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
 	: _position(engine)
@@ -32,6 +45,9 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _xAxis(engine)
 	, _yAxis(engine)
 	, _zAxis(engine)
+	, _worldXAxis(engine)
+	, _worldYAxis(engine)
+	, _worldZAxis(engine)
 	, _active(false)
 	, _camerasManager(camerasManager)
 {
@@ -46,7 +62,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	_up[1] = 1.0f;
 	_up[2] = 0.0f;
 
-	INIT_AXIS
+	INIT_AXIS;
+	INIT_WORLD_AXIS;
 }
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& up)
@@ -55,6 +72,9 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _xAxis(engine)
 	, _yAxis(engine)
 	, _zAxis(engine)
+	, _worldXAxis(engine)
+	, _worldYAxis(engine)
+	, _worldZAxis(engine)
 	, _active(false)
 	, _camerasManager(camerasManager)
 {
@@ -63,7 +83,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 
 	_up.Normalize();
 
-	INIT_AXIS
+	INIT_AXIS;
+	INIT_WORLD_AXIS;
 }
 
 AnimaCamera::AnimaCamera(const AnimaCamera& src)
@@ -72,6 +93,9 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _xAxis(src._xAxis)
 	, _yAxis(src._yAxis)
 	, _zAxis(src._zAxis)
+	, _worldXAxis(src._worldXAxis)
+	, _worldYAxis(src._worldYAxis)
+	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
 	, _camerasManager(src._camerasManager)
 {
@@ -79,7 +103,8 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 
 	_up.Normalize();
 
-	INIT_AXIS
+	INIT_AXIS;
+	INIT_WORLD_AXIS;
 }
 
 AnimaCamera::AnimaCamera(AnimaCamera&& src)
@@ -88,13 +113,17 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _xAxis(src._xAxis)
 	, _yAxis(src._yAxis)
 	, _zAxis(src._zAxis)
+	, _worldXAxis(src._worldXAxis)
+	, _worldYAxis(src._worldYAxis)
+	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
 	, _engine(src._engine)
 	, _camerasManager(src._camerasManager)
 {
 	_up.Normalize();
 
-	INIT_AXIS
+	INIT_AXIS;
+	INIT_WORLD_AXIS;
 }
 
 AnimaCamera::~AnimaCamera()
@@ -113,7 +142,8 @@ AnimaCamera& AnimaCamera::operator=(const AnimaCamera& src)
 
 		_up.Normalize();
 
-		INIT_AXIS
+		INIT_AXIS;
+		INIT_WORLD_AXIS;
 	}
 
 	return *this;
@@ -131,7 +161,8 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 
 		_up.Normalize();
 
-		INIT_AXIS
+		INIT_AXIS;
+		INIT_WORLD_AXIS;
 	}
 
 	return *this;

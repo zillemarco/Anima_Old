@@ -318,16 +318,6 @@ void operator*=(Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v)
 	q = q * v;
 }
 
-void operator*=(Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2)
-{
-	q1 = q1 * q2;
-}
-
-Anima::AnimaQuaternion operator*(const Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2)
-{
-	return Anima::AnimaMath::QuaternionMulQuaternion(q1, q2);
-}
-
 Anima::AnimaQuaternion operator*(const Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v)
 {
 	return Anima::AnimaMath::QuaternionMulVector(q, v);

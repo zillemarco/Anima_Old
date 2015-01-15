@@ -620,6 +620,8 @@ void AnimaMatrix::Ortho(float left, float right, float bottom, float top, float 
 
 void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward, const AnimaVertex3f& up)
 {
+	SetIdentity();
+
 	AnimaVertex3f side = forward ^ up;
 	side.Normalize();
 	AnimaVertex3f upVector = side ^ forward;
@@ -695,6 +697,25 @@ void AnimaMatrix::FromHeadPitchRoll(AFloat head, AFloat pitch, AFloat roll)
 	_matrixData[13] = 0.0f;
 	_matrixData[14] = 0.0f;
 	_matrixData[15] = 1.0f;
+	//_matrixData[0] = cosR * cosH - sinR * sinP * sinH;
+	//_matrixData[4] = sinR * cosH + cosR * sinP * sinH;
+	//_matrixData[8] = -cosP * sinH;
+	//_matrixData[12] = 0.0f;
+
+	//_matrixData[1] = -sinR * cosP;
+	//_matrixData[5] = cosR * cosP;
+	//_matrixData[9] = sinP;
+	//_matrixData[13] = 0.0f;
+
+	//_matrixData[2] = cosR * sinH + sinR * sinP * cosH;
+	//_matrixData[6] = sinR * sinH - cosR * sinP * cosH;
+	//_matrixData[10] = cosP * cosH;
+	//_matrixData[14] = 0.0f;
+
+	//_matrixData[3] = 0.0f;
+	//_matrixData[7] = 0.0f;
+	//_matrixData[11] = 0.0f;
+	//_matrixData[15] = 1.0f;
 }
 
 void AnimaMatrix::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
@@ -714,11 +735,14 @@ void AnimaMatrix::GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) co
 		{
 			thetaZ = atan2f(-_matrixData[4], _matrixData[5]);
 			thetaY = atan2f(-_matrixData[2], _matrixData[10]);
+			//thetaZ = atan2f(-_matrixData[1], _matrixData[5]);
+			//thetaY = atan2f(-_matrixData[8], _matrixData[10]);
 		}
 		else
 		{
 			// Not a unique solution.
 			thetaZ = -atan2f(_matrixData[8], _matrixData[0]);
+			//thetaZ = -atan2f(_matrixData[2], _matrixData[0]);
 			thetaY = 0.0f;
 		}
 	}
@@ -726,6 +750,7 @@ void AnimaMatrix::GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) co
 	{
 		// Not a unique solution.
 		thetaZ = atan2f(_matrixData[8], _matrixData[0]);
+		//thetaZ = atan2f(_matrixData[2], _matrixData[0]);
 		thetaY = 0.0f;
 	}
 

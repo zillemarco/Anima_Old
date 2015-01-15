@@ -1,4 +1,5 @@
 #include "AnimaQuaternion.h"
+#include "AnimaMath.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -131,17 +132,23 @@ const AFloat& AnimaQuaternion::operator[](ASizeT index) const
 	return const_cast<AFloat&>(_data[index]);
 }
 
-AnimaQuaternion& AnimaQuaternion::operator+=(const AnimaQuaternion& v)
+AnimaQuaternion& AnimaQuaternion::operator+=(const AnimaQuaternion& q)
 {
 	for (ASizeT i = 0; i < QUATERNION_SIZE; i++)
-		_data[i] += v[i];
+		_data[i] += q[i];
 	return *this;
 }
 
-AnimaQuaternion& AnimaQuaternion::operator-=(const AnimaQuaternion& v)
+AnimaQuaternion& AnimaQuaternion::operator-=(const AnimaQuaternion& q)
 {
 	for (ASizeT i = 0; i < QUATERNION_SIZE; i++)
-		_data[i] -= v[i];
+		_data[i] -= q[i];
+	return *this;
+}
+
+AnimaQuaternion& AnimaQuaternion::operator*=(const AnimaQuaternion& q)
+{
+	operator*(*this, q);
 	return *this;
 }
 
@@ -266,44 +273,43 @@ void AnimaQuaternion::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat rol
 void AnimaQuaternion::FromMatrix(const AnimaMatrix& matrix)
 {
 	float s = 0.0f;
-	float q[4] = { 0.0f };
 	float trace = matrix[0] + matrix[5] + matrix[10];
 
 	if (trace > 0.0f)
 	{
-		s = sqrtf(trace + 1.0f);
-		q[3] = s * 0.5f;
-		s = 0.5f / s;
-		q[0] = (matrix[6] - matrix[9]) * s;
-		q[1] = (matrix[8] - matrix[2]) * s;
-		q[2] = (matrix[1] - matrix[4]) * s;
+		s = 0.5f / sqrtf(trace + 1.0f);
+		_data[3] = 0.25f / s;
+		_data[0] = (matrix[9] - matrix[6]) * s;
+		_data[1] = (matrix[2] - matrix[8]) * s;
+		_data[2] = (matrix[4] - matrix[1]) * s;
 	}
 	else
 	{
-		int nxt[3] = { 1, 2, 0 };
-		int i = 0, j = 0, k = 0;
-
-		if (matrix[5] > matrix[0])
-			i = 1;
-
-		if (matrix[10] > matrix[4 * i + i])
-			i = 2;
-
-		j = nxt[i];
-		k = nxt[j];
-		s = sqrtf((matrix[4 * i + i] - (matrix[4 * j + j] + matrix[4 * k + k])) + 1.0f);
-
-		q[i] = s * 0.5f;
-		s = 0.5f / s;
-		q[3] = (matrix[4 * j + k] - matrix[4 * k + j]) * s;
-		q[j] = (matrix[4 * i + j] + matrix[4 * j + i]) * s;
-		q[k] = (matrix[4 * i + k] + matrix[4 * k + i]) * s;
+		if (matrix[0] > matrix[5] && matrix[0] > matrix[10])
+		{
+			s = 2.0f * sqrtf(1.0f + matrix[0] - matrix[5] - matrix[10]);
+			_data[3] = (matrix[9] - matrix[6]) / s;
+			_data[0] = 0.25f * s;
+			_data[1] = (matrix[1] + matrix[4]) / s;
+			_data[2] = (matrix[2] + matrix[8]) / s;
+		}
+		else if (_data[5] > _data[10])
+		{
+			s = 2.0f * sqrtf(1.0f + matrix[5] - matrix[0] - matrix[10]);
+			_data[3] = (matrix[2] - matrix[8]) / s;
+			_data[0] = (matrix[1] + matrix[4]) / s;
+			_data[1] = 0.25f * s;
+			_data[2] = (matrix[6] + matrix[9]) / s;
+		}
+		else
+		{
+			s = 2.0f * sqrtf(1.0f + matrix[10] - matrix[0] - matrix[5]);
+			_data[3] = (matrix[4] - matrix[1]) / s;
+			_data[0] = (matrix[2] + matrix[8]) / s;
+			_data[1] = (matrix[6] + matrix[9]) / s; 
+			_data[2] = 0.25f * s;
+		}
 	}
-
-	_data[0] = q[0];
-	_data[1] = q[1];
-	_data[2] = q[2];
-	_data[3] = q[3];
 }
 
 void AnimaQuaternion::SetIdentity()
@@ -330,23 +336,23 @@ void AnimaQuaternion::GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& r
 
 void AnimaQuaternion::GetAxisAngle(AnimaVertex3f& axis, AFloat angle) const
 {
-	float sinHalfThetaSq = 1.0f - _data[3] * _data[3];
+	AnimaQuaternion q = *this;
+	q.Normalize();
 
-	if (sinHalfThetaSq <= 0.0f)
+	angle = 2.0f * acosf(q[3]);
+	float s = sqrtf(1.0f - q[3] * q[3]);
+
+	if (s < 0.001f)
 	{
-		axis[0] = 1.0f;
-		axis[1] = 0.0f;
-		axis[2] = 0.0f;
-		angle = 0.0f;
+		axis[0] = q[0];
+		axis[1] = q[1];
+		axis[2] = q[2];
 	}
 	else
 	{
-		float invSinHalfTheta = 1.0f / sqrtf(sinHalfThetaSq);
-
-		axis[0] = _data[0] * invSinHalfTheta;
-		axis[1] = _data[1] * invSinHalfTheta;
-		axis[2] = _data[2] * invSinHalfTheta;
-		angle = 2.0f * acosf(_data[3]);
+		axis[0] = q[0] / s;
+		axis[1] = q[1] / s;
+		axis[2] = q[2] / s;
 	}
 }
 
@@ -354,6 +360,16 @@ void AnimaQuaternion::GetAxisAngleDeg(AnimaVertex3f& axis, AFloat angle) const
 {
 	GetAxisAngle(axis, angle);
 	angle = angle * 180.0f / (AFloat)M_PI;
+}
+
+AnimaVertex3f AnimaQuaternion::GetVector() const
+{
+	AnimaVertex3f vec(_engine);
+	vec[0] = _data[0];
+	vec[1] = _data[1];
+	vec[2] = _data[2];
+
+	return vec;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

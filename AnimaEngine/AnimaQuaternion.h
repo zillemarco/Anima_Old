@@ -13,7 +13,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 #define QUATERNION_SIZE	4
 
-class AnimaQuaternion
+class AnimaMath;
+
+class ANIMA_ENGINE_EXPORT AnimaQuaternion
 {
 public:
 	AnimaQuaternion(AnimaEngine* engine);
@@ -29,38 +31,50 @@ public:
 	AFloat& operator[](ASizeT index);
 	const AFloat& operator[](ASizeT index) const;
 
-	AnimaQuaternion& operator+=(const AnimaQuaternion& v);
-	inline friend AnimaQuaternion operator+(const AnimaQuaternion& v1, const AnimaQuaternion& v2) {
-		AnimaQuaternion res(v1._engine, v1._data);
-		res += v2;
+	AnimaQuaternion& operator+=(const AnimaQuaternion& q);
+	inline friend AnimaQuaternion operator+(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
+		AnimaQuaternion res(q1._engine, q1._data);
+		res += q2;
 		return res;
 	}
 
-	AnimaQuaternion& operator-=(const AnimaQuaternion& v);
-	inline friend AnimaQuaternion operator-(const AnimaQuaternion& v1, const AnimaQuaternion& v2) {
-		AnimaQuaternion res(v1._engine, v1._data);
-		res -= v2;
+	AnimaQuaternion& operator-=(const AnimaQuaternion& q);
+	inline friend AnimaQuaternion operator-(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
+		AnimaQuaternion res(q1._engine, q1._data);
+		res -= q2;
+		return res;
+	}
+
+	AnimaQuaternion& operator*=(const AnimaQuaternion& q);
+	inline friend AnimaQuaternion operator*(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
+
+		float w = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
+		float x = q1[0] * q2[3] + q1[3] * q2[0] + q1[1] * q2[2] - q1[2] * q2[1];
+		float y = q1[1] * q2[3] + q1[3] * q2[1] + q1[2] * q2[0] - q1[0] * q2[2];
+		float z = q1[2] * q2[3] + q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0];
+
+		AnimaQuaternion res(q1.GetEngine(), x, y, z, w);
 		return res;
 	}
 
 	AnimaQuaternion& operator/=(const AFloat& div);
-	inline friend AnimaQuaternion operator/(const AnimaQuaternion& v, const AFloat& div) {
-		AnimaQuaternion res(v._engine, v._data);
+	inline friend AnimaQuaternion operator/(const AnimaQuaternion& q, const AFloat& div) {
+		AnimaQuaternion res(q._engine, q._data);
 		res /= div;
 		return res;
 	}
 
 	AnimaQuaternion& operator*=(const AFloat& mul);
-	inline friend AnimaQuaternion operator*(const AFloat& mul, const AnimaQuaternion& v) {
-		AnimaQuaternion res(v._engine, v._data);
+	inline friend AnimaQuaternion operator*(const AFloat& mul, const AnimaQuaternion& q) {
+		AnimaQuaternion res(q._engine, q._data);
 		res *= mul;
 		return res;
 	}
 
-	inline friend AnimaQuaternion operator*(const AnimaQuaternion& v, const AFloat& mul) {
-		return operator*(mul, v);
+	inline friend AnimaQuaternion operator*(const AnimaQuaternion& q, const AFloat& mul) {
+		return operator*(mul, q);
 	}
-
+		
 	inline operator AFloat*();
 	inline operator const AFloat*();
 
@@ -87,6 +101,7 @@ public:
 	void GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll) const;
 	void GetAxisAngle(AnimaVertex3f& axis, AFloat angle) const;
 	void GetAxisAngleDeg(AnimaVertex3f& axis, AFloat angle) const;
+	AnimaVertex3f GetVector() const;
 
 	AFloat Length() const;
 	bool IsNull() const;

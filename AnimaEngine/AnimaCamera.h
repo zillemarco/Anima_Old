@@ -66,6 +66,10 @@ protected:
 	AnimaVertex3f _xAxis;
 	AnimaVertex3f _yAxis;
 	AnimaVertex3f _zAxis;
+
+	AnimaVertex3f _worldXAxis;
+	AnimaVertex3f _worldYAxis;
+	AnimaVertex3f _worldZAxis;
 	
 	bool _active;
 

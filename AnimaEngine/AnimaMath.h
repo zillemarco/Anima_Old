@@ -66,9 +66,7 @@ Anima::AChar ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaColor4b& v1, const 
 Anima::AnimaVertex3f ANIMA_ENGINE_EXPORT operator^(const Anima::AnimaVertex3f& v1, const Anima::AnimaVertex3f& v2);
 Anima::AnimaVertex4f ANIMA_ENGINE_EXPORT operator^(const Anima::AnimaVertex4f& v1, const Anima::AnimaVertex4f& v2);
 
-void ANIMA_ENGINE_EXPORT operator*=(Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v);
-void ANIMA_ENGINE_EXPORT operator*=(Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2);
-Anima::AnimaQuaternion ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaQuaternion& q1, const Anima::AnimaQuaternion& q2);
+//void ANIMA_ENGINE_EXPORT operator*=(Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v);
 Anima::AnimaQuaternion ANIMA_ENGINE_EXPORT operator*(const Anima::AnimaQuaternion& q, const Anima::AnimaVertex3f& v);
 
 #endif /* defined(__Anima__AnimaMath__) */
