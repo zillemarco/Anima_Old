@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CorpusOGLWindowBase.h"
-#include <QtGui/QMatrix4x4>
-#include <QtGui/QOpenGLShaderProgram>
+
+class QMouseEvent;
 
 namespace Anima
 {
@@ -18,6 +18,9 @@ public:
 	void Initialize() Q_DECL_OVERRIDE;
 	void Render() Q_DECL_OVERRIDE;
 
+	void mouseMoveEvent(QMouseEvent* mevent);
+
+
 private:
 	GLuint loadShader(GLenum type, const char *source);
 
@@ -27,5 +30,8 @@ private:
 
 	Anima::AnimaShaderProgram* _program;
 	int _frame;
+
+	int _lastMouseXPos;
+	int _lastMouseYPos;
 };
 

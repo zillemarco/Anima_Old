@@ -23,7 +23,7 @@ class ANIMA_ENGINE_EXPORT AnimaCamera
 {
 protected:
 	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
-	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& up);
+	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position);
 	
 public:
 	AnimaCamera(const AnimaCamera& src);
@@ -38,11 +38,10 @@ public:
 	virtual void SetPosition(const AnimaVertex3f& position);
 	virtual void SetPosition(const AFloat& x, const AFloat& y, const AFloat& z);
 	
-	AnimaVertex3f GetUp();
-
-	virtual AnimaVertex3f GetForward() = 0;
-	virtual AnimaVertex3f GetLeft() = 0;
-	virtual AnimaVertex3f GetRight() = 0;
+	virtual AnimaVertex3f GetUp();
+	virtual AnimaVertex3f GetForward();
+	virtual AnimaVertex3f GetLeft();
+	virtual AnimaVertex3f GetRight();
 	
 	virtual bool IsActive();
 
@@ -54,14 +53,18 @@ public:
 	virtual void RotateXDeg(AFloat angle) = 0;
 	virtual void RotateY(AFloat angle) = 0;
 	virtual void RotateYDeg(AFloat angle) = 0;
-	virtual AnimaMatrix GetViewMatrix() = 0;
+
+	virtual void LookAt(const AnimaVertex3f& position, const AnimaVertex3f& value) = 0;
+	virtual void LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xValue, AFloat yValue, AFloat zValue) = 0;
+
+	virtual void CalculateViewMatrix() = 0;
+	virtual AnimaMatrix GetViewMatrix();
 	
 	virtual void Activate();
 	virtual void Deactivate();
 
 protected:
 	AnimaVertex3f _position;
-	AnimaVertex3f _up;
 
 	AnimaVertex3f _xAxis;
 	AnimaVertex3f _yAxis;
@@ -72,6 +75,8 @@ protected:
 	AnimaVertex3f _worldZAxis;
 	
 	bool _active;
+
+	AnimaMatrix _viewMatrix;
 
 	AnimaEngine* _engine;	
 	AnimaCamerasManager* _camerasManager;

@@ -25,12 +25,12 @@ AnimaCamerasManager::~AnimaCamerasManager()
 	ClearCameras();
 }
 
-AnimaFPCamera* AnimaCamerasManager::CreateNewFPCamera()
+AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera()
 {
 	ANIMA_ASSERT(_engine != nullptr);
 	if (_camerasNumber > 0)
 	{
-		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetShadersAllocator()), _camerasNumber);
+		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
 		
 		for (int i = 0; i < _camerasNumber; i++)
 			tmpOldCameras[i] = _cameras[i];
@@ -38,22 +38,53 @@ AnimaFPCamera* AnimaCamerasManager::CreateNewFPCamera()
 		ClearCameras(false, false);
 		
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetShadersAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
 		
 		for (int i = 0; i < _camerasNumber - 1; i++)
 			_cameras[i] = tmpOldCameras[i];
 		
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), tmpOldCameras);
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetCamerasAllocator()), tmpOldCameras);
 		tmpOldCameras = nullptr;
 	}
 	else
 	{
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetShadersAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
 	}
 	
-	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFPCamera>(*(_engine->GetShadersAllocator()), _engine, this);
-	return (AnimaFPCamera*)_cameras[_camerasNumber - 1];
+	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+	return (AnimaFirstPersonCamera*)_cameras[_camerasNumber - 1];
+}
+
+AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera()
+{
+	ANIMA_ASSERT(_engine != nullptr);
+	if (_camerasNumber > 0)
+	{
+		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+
+		for (int i = 0; i < _camerasNumber; i++)
+			tmpOldCameras[i] = _cameras[i];
+
+		ClearCameras(false, false);
+
+		_camerasNumber++;
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+
+		for (int i = 0; i < _camerasNumber - 1; i++)
+			_cameras[i] = tmpOldCameras[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetCamerasAllocator()), tmpOldCameras);
+		tmpOldCameras = nullptr;
+	}
+	else
+	{
+		_camerasNumber++;
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+	}
+
+	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+	return (AnimaThirdPersonCamera*)_cameras[_camerasNumber - 1];
 }
 
 void AnimaCamerasManager::ClearCameras(bool bDeleteObjects, bool bResetNumber)
@@ -64,12 +95,12 @@ void AnimaCamerasManager::ClearCameras(bool bDeleteObjects, bool bResetNumber)
 		{
 			for (int i = 0; i < (int)_camerasNumber; i++)
 			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetShadersAllocator()), _cameras[i]);
+				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetCamerasAllocator()), _cameras[i]);
 				_cameras[i] = nullptr;
 			}
 		}
 		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaCamera*>(*(_engine->GetShadersAllocator()), _cameras);
+		AnimaAllocatorNamespace::DeallocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _cameras);
 		_cameras = nullptr;
 	}
 	
@@ -101,6 +132,10 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 		}
 	}
 	
+	// Se ho trovato la camera attiva, torno il suo puntatore
+	if (_activeCamera != nullptr)
+		return _activeCamera;
+
 	// Se anche dopo il ciclo non si è trovata una camera attiva ed esiste almeno una camera
 	// attivo quella camera e torno _activeCamera che verrà aggiornato da NotifyCameraActivation
 	if(_activeCamera == nullptr && _camerasNumber > 0)

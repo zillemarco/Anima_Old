@@ -1,12 +1,12 @@
 //
-//  AnimaABCamera.cpp
+//  AnimaThirdPersonCamera.cpp
 //  Anima
 //
 //  Created by Marco Zille on 26/11/14.
 //
 //
 
-#include "AnimaABCamera.h"
+#include "AnimaThirdPersonCamera.h"
 #include "AnimaMath.h"
 #include "AnimaCamerasManager.h"
 
@@ -15,108 +15,66 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaABCamera::AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
+AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
 	: AnimaCamera(engine, camerasManager)
 	, _target(engine)
-	, _viewMatrix(engine)
 {
-	_target[0] = 0.0f;
-	_target[1] = 0.0f;
-	_target[2] = 0.0f;
+	LookAt(0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-AnimaABCamera::AnimaABCamera(AnimaEngine* engine)
-	: AnimaABCamera(engine, nullptr)
+AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine)
+	: AnimaThirdPersonCamera(engine, nullptr)
 {
 }
 
-AnimaABCamera::AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target, const AnimaVertex3f& up)
-	: AnimaCamera(engine, camerasManager, position, up)
-	, _target(target)
-	, _viewMatrix(engine)
+AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target)
+	: AnimaCamera(engine, camerasManager)
+	, _target(engine)
 {
-	_target[0] = 0.0f;
-	_target[1] = 0.0f;
-	_target[2] = 0.0f;
+	LookAt(position, target);
 }
 
-AnimaABCamera::AnimaABCamera(const AnimaABCamera& src)
+AnimaThirdPersonCamera::AnimaThirdPersonCamera(const AnimaThirdPersonCamera& src)
 	: AnimaCamera(src)
 	, _target(src._target)
-	, _viewMatrix(src._viewMatrix)
 {
 }
 
-AnimaABCamera::AnimaABCamera(AnimaABCamera&& src)
+AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaThirdPersonCamera&& src)
 	: AnimaCamera(src)
 	, _target(src._target)
-	, _viewMatrix(src._viewMatrix)
 {
 }
 
-AnimaABCamera::~AnimaABCamera()
+AnimaThirdPersonCamera::~AnimaThirdPersonCamera()
 {
 }
 
-AnimaABCamera& AnimaABCamera::operator=(const AnimaABCamera& src)
+AnimaThirdPersonCamera& AnimaThirdPersonCamera::operator=(const AnimaThirdPersonCamera& src)
 {
 	if (this != &src)
 	{
 		AnimaCamera::operator=(src);
 
 		_target = src._target;
-		_viewMatrix = src._viewMatrix;
 	}
 
 	return *this;
 }
 
-AnimaABCamera& AnimaABCamera::operator=(AnimaABCamera&& src)
+AnimaThirdPersonCamera& AnimaThirdPersonCamera::operator=(AnimaThirdPersonCamera&& src)
 {
 	if (this != &src)
 	{
 		AnimaCamera::operator=(src);
 
 		_target = src._target;
-		_viewMatrix = src._viewMatrix;
 	}
 
 	return *this;
 }
 
-AnimaMatrix AnimaABCamera::GetViewMatrix()
-{
-	return _viewMatrix;
-}
-
-AnimaVertex3f AnimaABCamera::GetForward()
-{
-	AnimaVertex3f forward = _target - _position;
-	forward.Normalize();
-	forward.DumpMemory(false);
-	return forward;
-}
-
-AnimaVertex3f AnimaABCamera::GetLeft()
-{
-	AnimaVertex3f left = _up ^ GetForward();
-	left.Normalize();
-	return left;
-}
-
-AnimaVertex3f AnimaABCamera::GetRight()
-{
-	AnimaVertex3f right = GetForward() ^ _up;
-	right.Normalize();
-	return right;
-}
-
-AnimaVertex3f AnimaABCamera::GetTarget()
-{
-	return _target;
-}
-
-void AnimaABCamera::Zoom(AFloat amount)
+void AnimaThirdPersonCamera::Zoom(AFloat amount)
 {
 	_position -= _target;
 
@@ -128,10 +86,10 @@ void AnimaABCamera::Zoom(AFloat amount)
 
 	_position += _target;
 
-	CalculateViewMatrix();
+	LookAt(_position, _target);
 }
 
-void AnimaABCamera::Move(const AnimaVertex3f& direction, AFloat amount)
+void AnimaThirdPersonCamera::Move(const AnimaVertex3f& direction, AFloat amount)
 {
 	AnimaVertex3f dir = direction;
 	AnimaVertex3f Up = _worldYAxis;
@@ -156,10 +114,10 @@ void AnimaABCamera::Move(const AnimaVertex3f& direction, AFloat amount)
 	_position += movement;
 	_target += movement;
 
-	CalculateViewMatrix();
+	LookAt(_position, _target);
 }
 
-void AnimaABCamera::Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount)
+void AnimaThirdPersonCamera::Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount)
 {
 	AnimaVertex3f dir(_engine);
 	dir[0] = xDirection;
@@ -169,7 +127,7 @@ void AnimaABCamera::Move(const AFloat& xDirection, const AFloat& yDirection, con
 	Move(dir, amount);
 }
 
-void AnimaABCamera::RotateX(AFloat angle)
+void AnimaThirdPersonCamera::RotateX(AFloat angle)
 {
 	_position -= _target;
 
@@ -194,12 +152,12 @@ void AnimaABCamera::RotateX(AFloat angle)
 	CalculateViewMatrix();
 }
 
-void AnimaABCamera::RotateXDeg(AFloat angle)
+void AnimaThirdPersonCamera::RotateXDeg(AFloat angle)
 {
 	RotateX(angle * (float)M_PI / 180.0f);
 }
 
-void AnimaABCamera::RotateY(AFloat angle)
+void AnimaThirdPersonCamera::RotateY(AFloat angle)
 {
 	_position -= _target;
 
@@ -213,18 +171,18 @@ void AnimaABCamera::RotateY(AFloat angle)
 	CalculateViewMatrix();
 }
 
-void AnimaABCamera::RotateYDeg(AFloat angle)
+void AnimaThirdPersonCamera::RotateYDeg(AFloat angle)
 {
 	RotateY(angle * (float)M_PI / 180.0f);
 }
 
-AFloat AnimaABCamera::GetDistance()
+AFloat AnimaThirdPersonCamera::GetDistance()
 {
 	AnimaVertex3f direction = _position - _target;
 	return direction.Length();
 }
 
-void AnimaABCamera::SetDistance(AFloat dist)
+void AnimaThirdPersonCamera::SetDistance(AFloat dist)
 {
 	if (dist <= 0.0f)
 		return;
@@ -235,20 +193,11 @@ void AnimaABCamera::SetDistance(AFloat dist)
 	dir *= dist;
 
 	_position = _target + dir;
+
+	LookAt(_position, _target);
 }
 
-void AnimaABCamera::RecalculateVectors()
-{
-	AnimaVertex3f v = _target - _position;
-	float d = v[0] * v[0] + v[2] * v[2];
-
-	_up[0] = -(v[1] * v[0]) / d;
-	_up[1] = 1.0f;
-	_up[2] = -(v[1] * v[2]) / d;
-	_up.Normalize();
-}
-
-void AnimaABCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target)
+void AnimaThirdPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target)
 {
 	_position = position;
 	_target = target;
@@ -265,7 +214,23 @@ void AnimaABCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& t
 	CalculateViewMatrix();
 }
 
-void AnimaABCamera::CalculateViewMatrix()
+void AnimaThirdPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xTarget, AFloat yTarget, AFloat zTarget)
+{
+	AnimaVertex3f position(_engine);
+	AnimaVertex3f target(_engine);
+
+	position[0] = xPosition;
+	position[1] = yPosition;
+	position[2] = zPosition;
+
+	target[0] = xTarget;
+	target[1] = yTarget;
+	target[2] = zTarget;
+
+	LookAt(position, target);
+}
+
+void AnimaThirdPersonCamera::CalculateViewMatrix()
 {
 	_viewMatrix[0] = _xAxis[0];								_viewMatrix[1] = _yAxis[0];								_viewMatrix[2] = _zAxis[0];								_viewMatrix[3] = 0.0f;
 	_viewMatrix[4] = _xAxis[1];								_viewMatrix[5] = _yAxis[1];								_viewMatrix[6] = _zAxis[1];								_viewMatrix[7] = 0.0f;

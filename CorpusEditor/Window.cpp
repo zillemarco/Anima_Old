@@ -6,6 +6,7 @@
 #include <AnimaShadersManager.h>
 #include <AnimaAllocators.h>
 #include <QtGui/QMatrix4x4>
+#include <AnimaCamerasManager.h>
 
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
@@ -22,15 +23,12 @@ Window::Window()
 	tx = ty = tz = 0.0;
 	projection = true;
 
-	_camera = nullptr;
-
 	_lastPTX = 0.0;
 	_lastPTY = 0.0;
 }
 
 Window::~Window()
 {
-	delete _camera;
 }
 
 void Window::PaintCallback(Anima::AnimaWindow* window)
@@ -59,10 +57,7 @@ void Window::DrawScene()
 	Anima::AnimaMatrix projection(GetEngine());
 	projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
 
-	Anima::AnimaMatrix camera = _camera->GetViewMatrix();
-	camera.DumpMemory(false);
-	//camera.LookAt(_camera->GetPosition(), _camera->GetForward(), _camera->GetUp());
-	
+	Anima::AnimaMatrix camera = GetEngine()->GetCamerasManager()->GetActiveCamera()->GetViewMatrix();	
 	Anima::AnimaMatrix model(GetEngine());
 	_program->SetUniformValue(_matrixUniform, (model * camera * projection).GetData());
 
@@ -103,12 +98,10 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 	if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_LEFT] == ANIMA_ENGINE_PRESS)
 	{
 		double dy = wnd->_lastPTY - y;
-		wnd->_camera->RotateXDeg(dy * 0.1);
-	//}
-	//if (window->GetMouseButtons()[ANIMA_ENGINE_MOUSE_BUTTON_RIGHT] == ANIMA_ENGINE_PRESS)
-	//{
 		double dx = wnd->_lastPTX - x;
-		wnd->_camera->RotateYDeg(dx * 0.1);
+
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * 0.1);
 	}
 
 	wnd->_lastPTX = x;
@@ -117,41 +110,50 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 
 void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods)
 {
+	if (action == ANIMA_ENGINE_RELEASE)
+		return;
+
 	Window* wnd = (Window*)window;
 	
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		wnd->_camera->RotateYDeg(-0.5f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		wnd->_camera->RotateYDeg(0.5f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_UP:
-		wnd->_camera->RotateXDeg(-0.5f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		wnd->_camera->RotateXDeg(0.5f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_W:
-		wnd->_camera->Move(0.0f, 1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_S:
-		wnd->_camera->Move(0.0f, -1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(0.0f, -1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_D:
-		wnd->_camera->Move(-1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(-1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_A:
-		wnd->_camera->Move(1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_L:
-		//wnd->_camera->Move(0.0f, 0.0f, -1.0f, 1.0f);
-		wnd->_camera->Zoom(-1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(-1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_O:
-		//wnd->_camera->Move(0.0f, 0.0f, 1.0f, 1.0f);
-		wnd->_camera->Zoom(1.0f);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(1.0f);
+		break;
+	case ANIMA_ENGINE_KEY_C:
+
+		if (wnd->_tpcamera->IsActive())
+			wnd->_fpcamera->Activate();
+		else if (wnd->_fpcamera->IsActive())
+			wnd->_tpcamera->Activate();
+
 		break;
 	}
 }
@@ -169,8 +171,7 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
 	Window* wnd = (Window*)window;
-
-	wnd->_camera->Zoom(y * 0.1);
+	wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
 }
 
 void Window::Load()
@@ -191,19 +192,4 @@ void Window::Load()
 
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
 	_posAttr = glGetAttribLocation(_program->GetID(), "posAttr");
-
-	Anima::AnimaVertex3f pos(GetEngine());
-	pos[0] = 0;
-	pos[1] = 0;
-	pos[2] = -10;
-
-	Anima::AnimaVertex3f tar(GetEngine());
-	tar[0] = 0;
-	tar[1] = 0;
-	tar[2] = 0;
-
-	//_camera = new Anima::AnimaABCamera(GetEngine());
-	_camera = new Anima::AnimaFPCamera(GetEngine());
-	//_camera->LookAt(pos, tar);
-	_camera->SetPosition(pos);
 }

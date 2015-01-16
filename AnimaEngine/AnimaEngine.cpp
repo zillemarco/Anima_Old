@@ -1,6 +1,7 @@
 #include "AnimaEngine.h"
 #include "AnimaModelsManager.h"
 #include "AnimaShadersManager.h"
+#include "AnimaCamerasManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -25,7 +26,10 @@ bool								AnimaEngine::_usedExternal = false;
 bool								AnimaEngine::_glewExtensionsInitialized = false;
 AChar								AnimaEngine::_logFilePath[PATH_MAX] = "";
 
-#define _ANIMA_MEMORY_SIZE			125829120	// 120 MB
+#define _ANIMA_MEMORY_SIZE					125829120	// 120 MB
+#define _ANIMA_MODELS_MEMORY_SIZE			41943040	// 40 MB
+#define _ANIMA_ALLOCATORS_NUMBER			6
+#define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_MEMORY_SIZE - _ANIMA_MODELS_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
 {
@@ -41,9 +45,11 @@ AnimaEngine::AnimaEngine()
 	_genericAllocator = nullptr;
 	_stringAllocator = nullptr;
 	_shadersAllocator = nullptr;
+	_camerasAllocator = nullptr;
 	
 	_modelsManager = nullptr; 
 	_shadersManager = nullptr;
+	_camerasManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -83,14 +89,15 @@ void AnimaEngine::InitializeMemorySystem()
 	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
 	_mainAllocator = new AnimaFreeListAllocator(_mainMemorySize, _mainMemory);
 
-	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 3 - 100, *_mainAllocator);
-	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 8 - 100, *_mainAllocator);
-	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 8 - 100, *_mainAllocator);
-	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 8 - 100, *_mainAllocator);
-	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 8 - 100, *_mainAllocator);
-	_shadersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_mainMemorySize / 8 - 100, *_mainAllocator);
+	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(	_ANIMA_MODELS_MEMORY_SIZE,				*_mainAllocator);
+	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(		_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
+	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(		_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
+	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(	_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
+	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(		_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
+	_shadersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(		_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
+	_camerasAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(		_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE,	*_mainAllocator);
 
-	ANIMA_ASSERT((_modelDataAllocator->GetSize() + _modelsAllocator->GetSize() + _genericAllocator->GetSize() + _managersAllocator->GetSize() + _stringAllocator->GetSize() + _shadersAllocator->GetSize()) < _mainMemorySize - 1000);
+	ANIMA_ASSERT((_modelDataAllocator->GetSize() + _modelsAllocator->GetSize() + _genericAllocator->GetSize() + _managersAllocator->GetSize() + _stringAllocator->GetSize() + _shadersAllocator->GetSize() + _camerasAllocator->GetSize()) < _mainMemorySize - 1000);
 }
 
 bool AnimaEngine::InitializeWindowSystem()
@@ -122,6 +129,7 @@ void AnimaEngine::InitializeManagers()
 {
 	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
+	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -168,6 +176,12 @@ void AnimaEngine::TerminateMemorySystem()
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_shadersAllocator, *_mainAllocator);
 		_shadersAllocator = nullptr;
 	}
+
+	if (_camerasAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_camerasAllocator, *_mainAllocator);
+		_camerasAllocator = nullptr;
+	}
 	
 	if(_mainAllocator != nullptr)
 	{
@@ -196,6 +210,12 @@ void AnimaEngine::TerminateManagers()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _shadersManager);
 		_shadersManager = nullptr;
+	}
+
+	if (_camerasManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _camerasManager);
+		_camerasManager = nullptr;
 	}
 }
 
@@ -558,6 +578,9 @@ void AnimaEngine::DumpMemory(const char* fileName)
 
 	printf("Shaders allocator: \n");
 	_shadersAllocator->Dump();
+
+	printf("Cameras allocator: \n");
+	_camerasAllocator->Dump();
 
 	printf("Managers allocator: \n");
 	_managersAllocator->Dump();

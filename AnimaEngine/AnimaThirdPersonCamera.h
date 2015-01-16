@@ -1,5 +1,5 @@
 //
-//  AnimaABCamera.h
+//  AnimaThirdPersonCamera.h
 //  Anima
 //
 //  Created by Marco Zille on 26/11/14.
@@ -19,34 +19,27 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class ANIMA_ENGINE_EXPORT AnimaABCamera : public AnimaCamera
+class ANIMA_ENGINE_EXPORT AnimaThirdPersonCamera : public AnimaCamera
 {
 public:
-	AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
-	AnimaABCamera(AnimaEngine* engine);
-	AnimaABCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target, const AnimaVertex3f& up);
-	AnimaABCamera(const AnimaABCamera& src);
-	AnimaABCamera(AnimaABCamera&& src);
-	~AnimaABCamera();
+	AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
+	AnimaThirdPersonCamera(AnimaEngine* engine);
+	AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target);
+	AnimaThirdPersonCamera(const AnimaThirdPersonCamera& src);
+	AnimaThirdPersonCamera(AnimaThirdPersonCamera&& src);
+	~AnimaThirdPersonCamera();
 
-	AnimaABCamera& operator=(const AnimaABCamera& src);
-	AnimaABCamera& operator=(AnimaABCamera&& src);
+	AnimaThirdPersonCamera& operator=(const AnimaThirdPersonCamera& src);
+	AnimaThirdPersonCamera& operator=(AnimaThirdPersonCamera&& src);
 
 public:
-	AnimaVertex3f GetForward() override;
-	AnimaVertex3f GetLeft() override;
-	AnimaVertex3f GetRight() override;
 	AnimaVertex3f GetTarget();
 
-	AnimaMatrix GetViewMatrix() override;
+	void CalculateViewMatrix() override;
 
 	AFloat GetDistance();
 	void SetDistance(AFloat dist);
-
-	void RecalculateVectors();
-
-	void CalculateViewMatrix();
-
+	
 public:
 	void Zoom(AFloat amount) override;
 	void Move(const AnimaVertex3f& direction, AFloat amount) override;
@@ -56,12 +49,11 @@ public:
 	void RotateY(AFloat angle) override;
 	void RotateYDeg(AFloat angle) override;
 
-	void LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target);
+	void LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target) override;
+	void LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xTarget, AFloat yTarget, AFloat zTarget) override;
 
 protected:
 	AnimaVertex3f _target;
-
-	AnimaMatrix _viewMatrix;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

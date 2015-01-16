@@ -15,20 +15,22 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaCamera.h"
-#include "AnimaFPCamera.h"
+#include "AnimaFirstPersonCamera.h"
+#include "AnimaThirdPersonCamera.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 {
 	friend AnimaCamera;
-	friend AnimaFPCamera;
+	friend AnimaFirstPersonCamera;
 	
 public:
 	AnimaCamerasManager(AnimaEngine* engine);
 	~AnimaCamerasManager();
 	
-	AnimaFPCamera* CreateNewFPCamera();
+	AnimaFirstPersonCamera* CreateNewFirstPersonCamera();
+	AnimaThirdPersonCamera* CreateNewThirdPersonCamera();
 	
 	AnimaCamera* GetActiveCamera();
 	
