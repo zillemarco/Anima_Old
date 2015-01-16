@@ -48,8 +48,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _worldYAxis(engine)
 	, _worldZAxis(engine)
 	, _active(false)
-	, _camerasManager(camerasManager)
 	, _viewMatrix(engine)
+	, _camerasManager(camerasManager)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -71,8 +71,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _worldYAxis(engine)
 	, _worldZAxis(engine)
 	, _active(false)
-	, _camerasManager(camerasManager)
 	, _viewMatrix(engine)
+	, _camerasManager(camerasManager)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -90,8 +90,8 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _worldYAxis(src._worldYAxis)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
-	, _camerasManager(src._camerasManager)
 	, _viewMatrix(src._viewMatrix)
+	, _camerasManager(src._camerasManager)
 {
 	_engine = src._engine;
 
@@ -107,9 +107,9 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _worldYAxis(src._worldYAxis)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
+	, _viewMatrix(src._viewMatrix)
 	, _engine(src._engine)
 	, _camerasManager(src._camerasManager)
-	, _viewMatrix(src._viewMatrix)
 {
 
 	INIT_WORLD_AXIS;

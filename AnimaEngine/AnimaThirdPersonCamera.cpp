@@ -23,8 +23,10 @@ AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCameras
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine)
-	: AnimaThirdPersonCamera(engine, nullptr)
+	: AnimaCamera(engine, nullptr)
+	, _target(engine)
 {
+	LookAt(0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target)

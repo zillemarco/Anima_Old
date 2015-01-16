@@ -92,9 +92,23 @@ void CorpusOGLWindowBase::RenderNow()
 	
 	if(!_context)
 	{
+		QSurfaceFormat format;
+		format.setDepthBufferSize( 24 );
+		format.setMajorVersion( 4 );
+		format.setMinorVersion( 1 );
+		format.setSamples( 4 );
+		format.setProfile( QSurfaceFormat::CoreProfile );
+		setFormat( format );
+		create();
+		
 		_context = new QOpenGLContext(this);
-		_context->setFormat(requestedFormat());
-		_context->create();
+		_context->setFormat(format);
+
+		if(!_context->create())
+		{
+			int i = 0;
+			i++;
+		}
 		
 		needsInitialize = true;
 	}

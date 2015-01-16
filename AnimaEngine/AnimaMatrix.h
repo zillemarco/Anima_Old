@@ -21,8 +21,8 @@ public:
 	AnimaMatrix& operator=(const AnimaMatrix& src);
 	AnimaMatrix& operator=(AnimaMatrix&& src);
 		
-	inline AFloat& operator[](ASizeT index);
-	inline const AFloat& operator[](ASizeT index) const;
+	AFloat& operator[](ASizeT index);
+	const AFloat& operator[](ASizeT index) const;
 	
 	inline bool operator==(const AnimaMatrix& left);
 	inline bool operator==(const AFloat left[ANIMA_MATRIX_SIZE]);

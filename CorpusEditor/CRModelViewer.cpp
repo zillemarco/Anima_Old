@@ -27,10 +27,7 @@ CRModelViewer::~CRModelViewer()
 
 GLuint CRModelViewer::loadShader(GLenum type, const char *source)
 {
-	GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, 0);
-	glCompileShader(shader);
-	return shader;
+	return 0;
 }
 
 void CRModelViewer::Initialize()
@@ -39,18 +36,27 @@ void CRModelViewer::Initialize()
 	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
 	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #else
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
+	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
+	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #endif
 
+	char str[1024];
+	sprintf(str, "%s", glGetString(GL_VERSION));
+	
+	GLenum error = glGetError();
 	_program = _engine->GetShadersManager()->CreateProgram();
 	_program->Create();
 	_program->AddShader(vs);
 	_program->AddShader(fs);
 	_program->Link();
+	error = glGetError();
 
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
-	_posAttr = glGetAttribLocation(_program->GetID(), "posAttr");
+	error = glGetError();
+	_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");
+	error = glGetError();
+	
+	error = glGetError();
 }
 
 void CRModelViewer::Render()
@@ -58,10 +64,13 @@ void CRModelViewer::Render()
 	const qreal retinaScale = devicePixelRatio();
 	int w = width() * retinaScale;
 	int h = height() * retinaScale;
+	
+	GLenum error = glGetError();
 	glViewport(0, 0, w, h);
+	error = glGetError();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	GLenum error = glGetError();
+	error = glGetError();
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glFrontFace(GL_CW);
@@ -82,7 +91,9 @@ void CRModelViewer::Render()
 	Anima::AnimaMatrix m(_engine);
 	if (mgr->GetModelsNumber() > 0)
 	{
+		error = glGetError();
 		mgr->GetPModel(0)->Draw(m);
+		error = glGetError();
 	}
 
 	++_frame;
