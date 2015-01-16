@@ -12,7 +12,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine)
 
 	_engine = engine;
 
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 
 	SetIdentity();
@@ -24,7 +24,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine, AFloat data[4])
 	
 	_engine = engine;
 	
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 	SetData(data);
 }
@@ -35,7 +35,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine, AFloat x, AFloat y, AFloat
 	
 	_engine = engine;
 	
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 	
 	_data[0] = x;
@@ -50,7 +50,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine, const AnimaVertex3f& axis,
 	
 	_engine = engine;
 	
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 	
 	if (angleInRadians)
@@ -65,7 +65,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine, AFloat head, AFloat pitch,
 	
 	_engine = engine;
 	
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 	
 	if (angleInRadians)
@@ -80,7 +80,7 @@ AnimaQuaternion::AnimaQuaternion(AnimaEngine* engine, AnimaMatrix matrix)
 	
 	_engine = engine;
 	
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	memset(_data, 0, sizeof(AFloat) * QUATERNION_SIZE);
 	
 	FromMatrix(matrix);
@@ -91,7 +91,7 @@ AnimaQuaternion::AnimaQuaternion(const AnimaQuaternion& src)
 	if (&src != this)
 	{
 		_engine = src._engine;
-		_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+		_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 		SetData(src._data);
 	}
 }
@@ -99,7 +99,7 @@ AnimaQuaternion::AnimaQuaternion(const AnimaQuaternion& src)
 AnimaQuaternion::AnimaQuaternion(AnimaQuaternion&& src)
 {
 	_engine = src._engine;
-	_data = (AFloat*)(_engine->GetShadersAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
+	_data = (AFloat*)(_engine->GetGenericAllocator())->Allocate(sizeof(AFloat) * QUATERNION_SIZE, ANIMA_ENGINE_ALIGN_OF(AFloat));
 	SetData(src._data);
 }
 
@@ -109,7 +109,7 @@ AnimaQuaternion::~AnimaQuaternion()
 
 	if (_data != nullptr)
 	{
-		(_engine->GetShadersAllocator())->Deallocate(_data);
+		(_engine->GetGenericAllocator())->Deallocate(_data);
 		_data = nullptr;
 	}
 }

@@ -25,6 +25,7 @@ static bool initGlewExtensions()
 		return true;
 	
 	glewExperimental = GL_TRUE;
+	
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 	{
@@ -35,6 +36,7 @@ static bool initGlewExtensions()
 	}
 	
 	AnimaEngine::SetGlewExtensionsInitialized(true);
+	glGetError();	
 	return true;
 }
 

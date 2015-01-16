@@ -118,7 +118,10 @@ void CorpusOGLWindowBase::RenderNow()
 	if(needsInitialize)
 	{
 		initializeOpenGLFunctions();
+		
+		GLenum error = glGetError();
 		Anima::AnimaEngine::InitializeGlewExtensions();
+		error = glGetError();
 
 		Initialize();
 	}

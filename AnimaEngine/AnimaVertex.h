@@ -250,7 +250,7 @@ public:
 			if (!freopen(_engine->GetLogFilePath(), "a", stdout))
 				bCanClose = false;
 
-			printf(szBuff);
+			puts(szBuff);
 
 			if (bCanClose)
 				fclose(stdout);
@@ -260,7 +260,7 @@ public:
 			#if defined _MSC_VER
 				OutputDebugStringA(szBuff);
 			#else
-				printf(szBuff);
+				puts(szBuff);
 			#endif
 		}
 	}

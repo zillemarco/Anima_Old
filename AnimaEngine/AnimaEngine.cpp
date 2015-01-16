@@ -554,12 +554,21 @@ bool AnimaEngine::InitializeGlewExtensions()
 	return _AnimaEngineWindowInitializeGlewExtensions();
 }
 
-void AnimaEngine::DumpMemory(const char* fileName)
+void AnimaEngine::DumpMemory(const char* fileName, bool bLogToFile)
 {
 	bool bCanClose = true;
-	if(!freopen(fileName, "a", stdout))
+	
+	if(bLogToFile)
+	{
+		if(!freopen(fileName, "a", stdout))
+		{
+			fclose(stdout);
+			bCanClose = false;
+		}
+	}
+	else
 		bCanClose = false;
-
+	
 	printf("\n\n------- AnimaEngine Memory Dump -------\n");
 	printf("Main allocator: \n");
 	_mainAllocator->Dump();

@@ -11,12 +11,16 @@
 #include "CRModelViewer.h"
 #include <qscreen>
 #include <qmessagebox>
+#include <QCoreApplication>
+
+#define UPDATE_VIEW QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
 
 CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
 	: CorpusOGLWindowBase(engine, parent)
 	, _program(nullptr)
 	, _frame(0)
 {
+//	_animating = false;
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
 }
@@ -39,24 +43,15 @@ void CRModelViewer::Initialize()
 	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
 	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #endif
-
-	char str[1024];
-	sprintf(str, "%s", glGetString(GL_VERSION));
 	
-	GLenum error = glGetError();
 	_program = _engine->GetShadersManager()->CreateProgram();
 	_program->Create();
 	_program->AddShader(vs);
 	_program->AddShader(fs);
 	_program->Link();
-	error = glGetError();
 
 	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
-	error = glGetError();
 	_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");
-	error = glGetError();
-	
-	error = glGetError();
 }
 
 void CRModelViewer::Render()
@@ -65,14 +60,11 @@ void CRModelViewer::Render()
 	int w = width() * retinaScale;
 	int h = height() * retinaScale;
 	
-	GLenum error = glGetError();
 	glViewport(0, 0, w, h);
-	error = glGetError();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	error = glGetError();
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.4, 0.4, 0.4, 1.0);
 	glFrontFace(GL_CW);
 	//glCullFace(GL_BACK);
 	//glEnable(GL_CULL_FACE);
@@ -91,9 +83,7 @@ void CRModelViewer::Render()
 	Anima::AnimaMatrix m(_engine);
 	if (mgr->GetModelsNumber() > 0)
 	{
-		error = glGetError();
 		mgr->GetPModel(0)->Draw(m);
-		error = glGetError();
 	}
 
 	++_frame;
@@ -108,6 +98,8 @@ void CRModelViewer::mouseMoveEvent(QMouseEvent* mevent)
 
 		_engine->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
 		_engine->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
+		
+		UPDATE_VIEW;
 	}
 
 	_lastMouseXPos = mevent->x();

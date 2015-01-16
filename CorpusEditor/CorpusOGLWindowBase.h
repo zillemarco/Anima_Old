@@ -41,9 +41,11 @@ protected:
 	bool event(QEvent* event);
 	void exposeEvent(QExposeEvent* event);
 	
+protected:
+	bool _animating;
+	
 private:
 	bool _updatePending;
-	bool _animating;
 	
 	QOpenGLContext* _context;
 	QOpenGLPaintDevice* _device;

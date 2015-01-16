@@ -191,7 +191,7 @@ public:
 		return _camerasManager;
 	}
 
-	void DumpMemory(const char* fileName);
+	void DumpMemory(const char* fileName, bool bLogToFile = true);
 
 private:
 	void InitializeMemorySystem();

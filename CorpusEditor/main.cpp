@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 	
 	mainWindow.show();
 	return app.exec();
-		
+	
 //	Anima::AnimaEngine engine;
 //	engine.Initialize();
 //			
@@ -95,11 +95,13 @@ int main(int argc, char** argv)
 //	Anima::AnimaString path("/Users/marco/Documents/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
 //#endif
 //	
-//	engine.DumpMemory(tmpFileName);
+//	engine.DumpMemory(nullptr, false);
 //
 //	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
 //	if(!manager->LoadModel(path))
 //		return 0;
+//	
+//	engine.DumpMemory(nullptr, false);
 //				
 //	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 //	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -109,43 +111,61 @@ int main(int argc, char** argv)
 //	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 //
 //	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
+//	
+//	engine.DumpMemory(nullptr, false);
 //
 //	Anima::AnimaCamerasManager* camMan = engine.GetCamerasManager();
 //	window->_tpcamera = camMan->CreateNewThirdPersonCamera();
 //	window->_fpcamera = camMan->CreateNewFirstPersonCamera();
+//	
+//	engine.DumpMemory(nullptr, false);
 //
 //	Anima::AnimaVertex3f pos(&engine);
 //	pos[0] = 0;
 //	pos[1] = 0;
 //	pos[2] = -10;
+//	
+//	engine.DumpMemory(nullptr, false);
 //
 //	Anima::AnimaVertex3f tar(&engine);
 //	tar[0] = 0;
 //	tar[1] = 0;
 //	tar[2] = 0;
+//	
+//	engine.DumpMemory(nullptr, false);
 //
 //	Anima::AnimaVertex3f forw(&engine);
 //	forw[0] = 0;
 //	forw[1] = 0;
 //	forw[2] = 1.0;
+//	
+//	engine.DumpMemory(nullptr, false);
 //
 //	window->_tpcamera->LookAt(pos, tar);
+//	engine.DumpMemory(nullptr, false);
 //	window->_fpcamera->LookAt(pos, forw);
+//	engine.DumpMemory(nullptr, false);
 //
 //	window->_tpcamera->Activate();
+//	engine.DumpMemory(nullptr, false);
 //
 //	window->MakeCurrentContext();
 //	engine.SwapInterval(1);
 //	window->MakeCurrentContext();
+//	engine.DumpMemory(nullptr, false);
 //	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
+//	engine.DumpMemory(nullptr, false);
 //	
 //	window->Load();
+//	engine.DumpMemory(nullptr, false);
 //
 //	while (!window->ShouldClose())
 //	{
 //		engine.PollEvents();
 //		
+//		engine.DumpMemory(nullptr, false);
 //		window->DrawScene();
+//		engine.DumpMemory(nullptr, false);
 //	}
 //		
 //	return 0;
