@@ -95,22 +95,22 @@ AnimaString& AnimaString::operator=(const char* src)
 
 bool AnimaString::operator==(const AnimaString& left)
 {
-	return CompareNoCase(left);
+	return Compare(left);
 }
 
 bool AnimaString::operator!=(const AnimaString& left)
 {
-	return !CompareNoCase(left);
+	return !Compare(left);
 }
 
 bool AnimaString::operator==(const char* left)
 {
-	return CompareNoCase(left);
+	return Compare(left);
 }
 
 bool AnimaString::operator!=(const char* left)
 {
-	return !CompareNoCase(left);
+	return !Compare(left);
 }
 
 void AnimaString::SetString(const char* str)
@@ -139,12 +139,12 @@ void AnimaString::ClearString()
 	}
 }
 
-const AChar* AnimaString::GetConstBuffer()
+const AChar* AnimaString::GetConstBuffer() const
 {
 	return const_cast<AChar*>(_string);
 }
 
-AChar* AnimaString::GetBuffer()
+AChar* AnimaString::GetBuffer() const
 {
 	return _string;
 }
@@ -179,7 +179,7 @@ ASizeT AnimaString::GetFormatStringLength(const char* format, va_list args)
 	return retval;
 }
 
-ASizeT AnimaString::GetBufferLength()
+ASizeT AnimaString::GetBufferLength() const
 {
 	if(_stringLength == 0)
 		return 0;
@@ -254,7 +254,7 @@ void AnimaString::Reserve(ASizeT size)
 	memset(_string, 0, _stringLength);
 }
 
-AInt AnimaString::Find(AChar c, AInt startPos)
+AInt AnimaString::Find(AChar c, AInt startPos) const
 {
 	if(startPos <= -1)
 		startPos = 0;
@@ -265,12 +265,12 @@ AInt AnimaString::Find(AChar c, AInt startPos)
 	return -1;
 }
 
-AInt AnimaString::Find(AnimaString str, AInt startPos)
+AInt AnimaString::Find(AnimaString str, AInt startPos) const
 {
 	return Find(str._string, startPos);
 }
 
-AInt AnimaString::Find(const char* str, AInt startPos)
+AInt AnimaString::Find(const char* str, AInt startPos) const
 {
 	ASizeT lunghezzaStr = strlen(str);
 	
@@ -309,7 +309,7 @@ AInt AnimaString::Find(const char* str, AInt startPos)
 	return -1;
 }
 
-AInt AnimaString::ReverseFind(AChar c, AInt startPos)
+AInt AnimaString::ReverseFind(AChar c, AInt startPos) const
 {
 	if(startPos <= -1)
 		startPos = (int)_stringLength - 1;
@@ -320,12 +320,12 @@ AInt AnimaString::ReverseFind(AChar c, AInt startPos)
 	return -1;
 }
 
-AInt AnimaString::ReverseFind(AnimaString str, AInt startPos)
+AInt AnimaString::ReverseFind(AnimaString str, AInt startPos) const
 {
 	return ReverseFind(str.GetConstBuffer(), startPos);
 }
 
-AInt AnimaString::ReverseFind(const char* str, AInt startPos)
+AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 {
 	ASizeT lunghezzaStr = strlen(str);
 	
@@ -364,7 +364,7 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos)
 	return -1;
 }
 
-AnimaString AnimaString::Substring(AInt startPos, ASizeT len)
+AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
 {
 	if(startPos < 0)
 		startPos = 0;
@@ -389,18 +389,18 @@ AnimaString AnimaString::Substring(AInt startPos, ASizeT len)
 	return resultString;
 }
 
-AnimaString AnimaString::Left(ASizeT len)
+AnimaString AnimaString::Left(ASizeT len) const
 {
 	return Substring(0, len);
 }
 
-AnimaString AnimaString::Right(ASizeT len)
+AnimaString AnimaString::Right(ASizeT len) const
 {
 	int startPos = (int)_stringLength - (int)len - 1;
 	return Substring(startPos, len);
 }
 
-AnimaString AnimaString::TrimLeft()
+AnimaString AnimaString::TrimLeft() const
 {
 	if(_stringLength - 1 <= 0)
 		return *this;
@@ -415,7 +415,7 @@ AnimaString AnimaString::TrimLeft()
 	return Substring(startPos, _stringLength);
 }
 
-AnimaString AnimaString::TrimRight()
+AnimaString AnimaString::TrimRight() const
 {
 	if(_stringLength - 1 <= 0)
 		return *this;
@@ -430,7 +430,7 @@ AnimaString AnimaString::TrimRight()
 	return Substring(0, length + 1);
 }
 
-AnimaString AnimaString::Trim()
+AnimaString AnimaString::Trim() const
 {
 	AnimaString ltrim = TrimLeft();
 	return ltrim.TrimRight();
@@ -580,22 +580,22 @@ void AnimaString::Replace(const AnimaString& find, const AnimaString& replacemen
 	Replace(find._string, replacement, startPos, count);
 }
 
-bool AnimaString::Compare(const AnimaString& left)
+bool AnimaString::Compare(const AnimaString& left) const
 {
 	return Compare(left._string);
 }
 
-bool AnimaString::CompareNoCase(const AnimaString& left)
+bool AnimaString::CompareNoCase(const AnimaString& left) const
 {
 	return CompareNoCase(left._string);
 }
 
-bool AnimaString::Compare(const char* left)
+bool AnimaString::Compare(const char* left) const
 {
 	return boost::equals(this->_string, left);
 }
 
-bool AnimaString::CompareNoCase(const char* left)
+bool AnimaString::CompareNoCase(const char* left) const
 {
 	return boost::iequals(this->_string, left);
 }

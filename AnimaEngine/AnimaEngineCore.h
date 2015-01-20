@@ -4,14 +4,18 @@
 #if defined ANIMA_ENGINE_EXPORT_ENABLED
 #	if _MSC_VER
 #		define ANIMA_ENGINE_EXPORT __declspec(dllexport)
+#		define ANIMA_ENGINE_EXPIMP_TEMPLATE extern
 #	else
 #		define ANIMA_ENGINE_EXPORT __attribute__ ((visibility ("default")))
+#		define ANIMA_ENGINE_EXPIMP_TEMPLATE
 #	endif
 #else
 #	if _MSC_VER
 #		define ANIMA_ENGINE_EXPORT __declspec(dllimport)
+#		define ANIMA_ENGINE_EXPIMP_TEMPLATE
 #	else
 #		define ANIMA_ENGINE_EXPORT
+#		define ANIMA_ENGINE_EXPIMP_TEMPLATE
 #	endif
 #endif
 

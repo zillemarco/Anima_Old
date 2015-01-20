@@ -3,6 +3,7 @@
 #include "CorpusOGLWindowBase.h"
 
 class QMouseEvent;
+class QWheelEvent;
 
 namespace Anima
 {
@@ -18,8 +19,8 @@ public:
 	void Initialize() Q_DECL_OVERRIDE;
 	void Render() Q_DECL_OVERRIDE;
 
-	void mouseMoveEvent(QMouseEvent* mevent);
-
+	void mouseMoveEvent(QMouseEvent* mEvent);
+	void wheelEvent(QWheelEvent* wEvent);
 
 private:
 	GLuint loadShader(GLenum type, const char *source);

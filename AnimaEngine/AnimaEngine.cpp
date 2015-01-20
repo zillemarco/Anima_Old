@@ -2,6 +2,7 @@
 #include "AnimaModelsManager.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
+#include "AnimaTexturesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -50,6 +51,7 @@ AnimaEngine::AnimaEngine()
 	_modelsManager = nullptr; 
 	_shadersManager = nullptr;
 	_camerasManager = nullptr;
+	_texturesManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -130,6 +132,7 @@ void AnimaEngine::InitializeManagers()
 	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
 	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_managersAllocator, this);
+	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -216,6 +219,12 @@ void AnimaEngine::TerminateManagers()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _camerasManager);
 		_camerasManager = nullptr;
+	}
+
+	if (_texturesManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _texturesManager);
+		_texturesManager = nullptr;
 	}
 }
 

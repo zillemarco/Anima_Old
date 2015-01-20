@@ -12,11 +12,63 @@
 #include "AnimaEngineCore.h"
 #include "AnimaEngine.h"
 #include "AnimaTypes.h"
+#include <boost\unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaString
 {
+public:
+	struct Hasher
+	{
+		std::size_t operator()(const Anima::AnimaString& stringKey) const
+		{
+			unsigned int seed = 5;
+			const void* key = stringKey.GetConstBuffer();
+			size_t len = stringKey.GetBufferLength() + 1;
+
+			const uint64_t m = 0xc6a4a7935bd1e995;
+			const int r = 47;
+
+			uint64_t h = seed ^ len;
+
+			const uint64_t * data = (const uint64_t *)key;
+			const uint64_t * end = data + (len / 8);
+
+			while (data != end)
+			{
+				uint64_t k = *data++;
+
+				k *= m;
+				k ^= k >> r;
+				k *= m;
+
+				h ^= k;
+				h *= m;
+			}
+
+			const unsigned char * data2 = (const unsigned char*)data;
+
+			switch (len & 7)
+			{
+			case 7: h ^= uint64_t(data2[6]) << 48;
+			case 6: h ^= uint64_t(data2[5]) << 40;
+			case 5: h ^= uint64_t(data2[4]) << 32;
+			case 4: h ^= uint64_t(data2[3]) << 24;
+			case 3: h ^= uint64_t(data2[2]) << 16;
+			case 2: h ^= uint64_t(data2[1]) << 8;
+			case 1: h ^= uint64_t(data2[0]);
+				h *= m;
+			};
+
+			h ^= h >> r;
+			h *= m;
+			h ^= h >> r;
+
+			return h;
+		}
+	};
+
 public:
 	AnimaString(AnimaEngine* engine);
 	AnimaString(const char* src, AnimaEngine* engine);
@@ -56,34 +108,58 @@ public:
 	bool operator!=(const AnimaString& left);
 	bool operator==(const char* left);
 	bool operator!=(const char* left);
+
+	friend bool operator==(const AnimaString& left, const AnimaString& right) {
+		return left.Compare(right);
+	}
+
+	friend bool operator!=(const AnimaString& left, const AnimaString& right) {
+		return left.Compare(right);
+	}
+
+	friend bool operator==(const char* left, const AnimaString& right) {
+		return right.Compare(left);
+	}
+
+	friend bool operator!=(const char* left, const AnimaString& right) {
+		return right.Compare(left);
+	}
+
+	friend bool operator==(const AnimaString& left, const char* right) {
+		return left.Compare(right);
+	}
+
+	friend bool operator!=(const AnimaString& left, const char* right) {
+		return left.Compare(right);
+	}
 	
 public:
 	void SetString(const char* str);
 	void ClearString();
 	
-	const AChar* GetConstBuffer();
-	AChar* GetBuffer();
-	ASizeT GetBufferLength();
+	const AChar* GetConstBuffer() const;
+	AChar* GetBuffer() const;
+	ASizeT GetBufferLength() const;
 	
 	void Format(const char* format, ...);
 	
 	void Reserve(ASizeT size);
 	
-	AInt Find(AChar c, AInt startPos = -1);
-	AInt Find(AnimaString str, AInt startPos = -1);
-	AInt Find(const char* str, AInt startPos = -1);
+	AInt Find(AChar c, AInt startPos = -1) const;
+	AInt Find(AnimaString str, AInt startPos = -1) const;
+	AInt Find(const char* str, AInt startPos = -1) const;
 	
-	AInt ReverseFind(AChar c, AInt startPos = -1);
-	AInt ReverseFind(AnimaString str, AInt startPos = -1);
-	AInt ReverseFind(const char* str, AInt startPos = -1);
+	AInt ReverseFind(AChar c, AInt startPos = -1) const;
+	AInt ReverseFind(AnimaString str, AInt startPos = -1) const;
+	AInt ReverseFind(const char* str, AInt startPos = -1) const;
 	
-	AnimaString Substring(AInt startPos, ASizeT len);
-	AnimaString Left(ASizeT len);
-	AnimaString Right(ASizeT len);
+	AnimaString Substring(AInt startPos, ASizeT len) const;
+	AnimaString Left(ASizeT len) const;
+	AnimaString Right(ASizeT len) const;
 	
-	AnimaString TrimLeft();
-	AnimaString TrimRight();
-	AnimaString Trim();
+	AnimaString TrimLeft() const;
+	AnimaString TrimRight() const;
+	AnimaString Trim() const;
 	
 	void Replace(AChar find, AChar replacement, AInt startPos = -1, AInt count = -1);
 	void Replace(AChar find, const char* replacement, AInt startPos = -1, AInt count = -1);
@@ -95,10 +171,10 @@ public:
 	void Replace(const AnimaString& find, const char* replacement, AInt startPos = -1, AInt count = -1);
 	void Replace(const AnimaString& find, const AnimaString& replacement, AInt startPos = -1, AInt count = -1);
 	
-	bool Compare(const AnimaString& left);
-	bool CompareNoCase(const AnimaString& left);
-	bool Compare(const char* left);
-	bool CompareNoCase(const char* left);
+	bool Compare(const AnimaString& left) const;
+	bool CompareNoCase(const AnimaString& left) const;
+	bool Compare(const char* left) const;
+	bool CompareNoCase(const char* left) const;
 	
 private:
 	ASizeT GetFormatStringLength(const char* format, va_list args);
@@ -111,5 +187,7 @@ private:
 };
 
 END_ANIMA_ENGINE_NAMESPACE
+
+//template class ANIMA_ENGINE_EXPORT boost::unordered_map<Anima::AnimaString, Anima::AUint, Anima::AnimaString::Hasher>;
 
 #endif /* defined(__Anima__AnimaString__) */

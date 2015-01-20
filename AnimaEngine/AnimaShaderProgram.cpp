@@ -279,9 +279,83 @@ AInt AnimaShaderProgram::GetID()
 	return _id;
 }
 
-void AnimaShaderProgram::SetUniformValue(int uniformIndex, float* value)
+bool AnimaShaderProgram::AddUniform(const AnimaString& uniformName)
 {
-	glUniformMatrix4fv(uniformIndex, 1, false, value);
+	if (!IsLinked())
+	{
+		if (!Link())
+			return false;
+	}
+
+	int location = glGetUniformLocation(_id, uniformName.GetConstBuffer());
+
+	if (location == -1)
+		return false;
+
+	_uniforms[uniformName] = location;
+
+	return true;
+}
+
+bool AnimaShaderProgram::AddUniform(const char* uniformName)
+{
+	AnimaString str(uniformName, _engine);
+	return AddUniform(str);
+}
+
+void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
+{
+	glUniform1i(_uniforms.at(uniformName), value);
+}
+
+void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniformi(str, value);
+}
+
+void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat value)
+{
+	glUniform1f(_uniforms.at(uniformName), value);
+}
+
+void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniformf(str, value);
+}
+
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
+{
+	glUniform3f(_uniforms.at(uniformName), value[0], value[1], value[2]);
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, value);
+}
+
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c)
+{
+	glUniform3f(_uniforms.at(uniformName), a, b, c);
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, a, b, c);
+}
+
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value)
+{
+	glUniformMatrix4fv(_uniforms.at(uniformName), 1, GL_FALSE, value.GetConstData());
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, value);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

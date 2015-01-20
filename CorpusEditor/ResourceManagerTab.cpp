@@ -116,7 +116,6 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	dims.push_back(1);
 	
 	_resourcesTreeModel = new ResourceTreeItemModel(_document, 0, 2);
-	sleep(1);
 	_resourcesTree->setModel(_resourcesTreeModel);
 	
 	_modelResourcesTreeItem = new QStandardItem(tr("Models"));

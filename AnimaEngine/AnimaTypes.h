@@ -19,6 +19,7 @@ typedef size_t			ASizeT;
 typedef float			AFloat;
 typedef int				AInt;
 typedef char			AChar;
+typedef unsigned char	AUchar;
 typedef unsigned int	AUint;
 
 typedef uint8_t		AU8;

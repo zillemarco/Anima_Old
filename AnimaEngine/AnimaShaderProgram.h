@@ -5,6 +5,9 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaShader.h"
+#include "AnimaVertex.h"
+#include "AnimaMatrix.h"
+#include <boost\unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -60,12 +63,28 @@ public:
 	AInt GetID();
 
 public:
-	void SetUniformValue(int uniformIndex, float* value);
+	bool AddUniform(const AnimaString& uniformName);
+	bool AddUniform(const char* uniformName);
+
+	void SetUniformi(const AnimaString& uniformName, int value);
+	void SetUniformi(const char* uniformName, int value);
+	void SetUniformf(const AnimaString& uniformName, AFloat value);
+	void SetUniformf(const char* uniformName, AFloat value);
+	void SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value);
+	void SetUniform(const char* uniformName, const AnimaVertex3f& value);
+	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c);
+	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c);
+	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value);
+	void SetUniform(const char* uniformName, const AnimaMatrix& value);
 
 private:
 	AnimaEngine*	_engine;
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;
+
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _uniforms;
+#pragma warning (default: 4251) 
 
 	AInt			_id;
 	bool			_linked;

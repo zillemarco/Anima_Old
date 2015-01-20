@@ -7,6 +7,7 @@
 #include <AnimaShader.h>
 #include <AnimaEngine.h>
 #include <QMouseEvent>
+#include <QWheelEvent>
 
 #include "CRModelViewer.h"
 #include <qscreen>
@@ -50,8 +51,11 @@ void CRModelViewer::Initialize()
 	_program->AddShader(fs);
 	_program->Link();
 
-	_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
-	_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");
+	_program->AddUniform("gWorld");
+	_program->AddUniform("uniformColor");
+
+	//_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
+	//_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");
 }
 
 void CRModelViewer::Render()
@@ -64,7 +68,7 @@ void CRModelViewer::Render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glClearColor(0.4, 0.4, 0.4, 1.0);
+	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
 	glFrontFace(GL_CW);
 	//glCullFace(GL_BACK);
 	//glEnable(GL_CULL_FACE);
@@ -77,7 +81,8 @@ void CRModelViewer::Render()
 
 	Anima::AnimaMatrix camera = _engine->GetCamerasManager()->GetActiveCamera()->GetViewMatrix();
 	Anima::AnimaMatrix model(_engine);
-	_program->SetUniformValue(_matrixUniform, (model * camera * projection).GetData());
+	_program->SetUniform("gWorld", model * camera * projection);
+	_program->SetUniform("uniformColor", 0.0, 1.0, 1.0);
 	
 	Anima::AnimaModelsManager* mgr = _engine->GetModelsManager();
 	Anima::AnimaMatrix m(_engine);
@@ -89,19 +94,76 @@ void CRModelViewer::Render()
 	++_frame;
 }
 
-void CRModelViewer::mouseMoveEvent(QMouseEvent* mevent)
+void CRModelViewer::mouseMoveEvent(QMouseEvent* mEvent)
 {
-	if ((mevent->buttons() & Qt::LeftButton) == Qt::LeftButton)
+	const float translateDivisor = -50.0f;
+	if ((mEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton)
 	{
-		double dx = _lastMouseXPos - mevent->x();
-		double dy = _lastMouseYPos - mevent->y();
+		if ((mEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+		{
+			double dx = _lastMouseXPos - mEvent->x();
+			double dy = _lastMouseYPos - mEvent->y();
 
-		_engine->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
-		_engine->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
-		
-		UPDATE_VIEW;
+			_engine->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
+			_engine->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
+
+			UPDATE_VIEW;
+		}
+		else
+		{
+			double dx = _lastMouseXPos - mEvent->x();
+			double dy = _lastMouseYPos - mEvent->y();
+
+			_engine->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
+			_engine->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
+
+			UPDATE_VIEW;
+		}
+	}
+	else if ((mEvent->buttons() & Qt::LeftButton) == Qt::LeftButton)
+	{
+		if ((mEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+		{
+			double dx = _lastMouseXPos - mEvent->x();
+			double dy = _lastMouseYPos - mEvent->y();
+
+			_engine->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
+			_engine->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
+
+			UPDATE_VIEW;
+		}
+		else if ((mEvent->modifiers() & Qt::AltModifier) == Qt::AltModifier)
+		{
+			double dx = _lastMouseXPos - mEvent->x();
+			double dy = _lastMouseYPos - mEvent->y();
+
+			_engine->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
+			_engine->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
+
+			UPDATE_VIEW;
+		}
 	}
 
-	_lastMouseXPos = mevent->x();
-	_lastMouseYPos = mevent->y();
+	_lastMouseXPos = mEvent->x();
+	_lastMouseYPos = mEvent->y();
+}
+
+void CRModelViewer::wheelEvent(QWheelEvent* wEvent)
+{
+	QPoint numPixels = wEvent->pixelDelta();
+	QPoint numDegrees = wEvent->angleDelta() / 8;
+
+	float zoomAmount = 0.0f;
+
+	if (!numPixels.isNull()) 
+	{
+		zoomAmount = (float)numPixels.y();
+	}
+	else if (!numDegrees.isNull()) 
+	{
+		QPoint numSteps = numDegrees / 15;
+		zoomAmount = (float)numSteps.y();
+	}
+
+	_engine->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
 }

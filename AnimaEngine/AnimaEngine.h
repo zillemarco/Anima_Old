@@ -52,6 +52,7 @@ typedef AnimaEngineWindow_Base AnimaWindow;
 class AnimaModelsManager;
 class AnimaShadersManager;
 class AnimaCamerasManager;
+class AnimaTexturesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -191,6 +192,12 @@ public:
 		return _camerasManager;
 	}
 
+	inline AnimaTexturesManager* GetTexturesManager()
+	{
+		ANIMA_ASSERT(_texturesManager != nullptr);
+		return _texturesManager;
+	}
+
 	void DumpMemory(const char* fileName, bool bLogToFile = true);
 
 private:
@@ -246,6 +253,7 @@ private:
 	AnimaModelsManager* _modelsManager;				/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaShadersManager* _shadersManager;			/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
 	AnimaCamerasManager* _camerasManager;			/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
+	AnimaTexturesManager* _texturesManager;			/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
 
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 };

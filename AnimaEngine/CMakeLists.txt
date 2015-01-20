@@ -34,7 +34,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaCamera.h
 					AnimaFirstPersonCamera.h
 					AnimaThirdPersonCamera.h
-					AnimaCamerasManager.h)
+					AnimaCamerasManager.h
+					AnimaTexturesManager.h
+					AnimaTexture.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -62,7 +64,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaCamera.cpp
 					AnimaFirstPersonCamera.cpp
 					AnimaThirdPersonCamera.cpp
-					AnimaCamerasManager.cpp)
+					AnimaCamerasManager.cpp
+					AnimaTexturesManager.cpp
+					AnimaTexture.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

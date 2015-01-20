@@ -34,7 +34,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
 AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 {	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
 	if(scene == nullptr)
 		return nullptr;
@@ -108,7 +108,6 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				vertici[offsetVertici][0] = vert->x;
 				vertici[offsetVertici][1] = vert->y;
 				vertici[offsetVertici][2] = vert->z;
-				//vertici[offsetVertici][3] = 1.0;
 			
 				offsetVertici++;
 			}
@@ -140,32 +139,39 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 					normali[offsetNormali][0] = norm->x;
 					normali[offsetNormali][1] = norm->y;
 					normali[offsetNormali][2] = norm->z;
-					//normali[offsetNormali][3] = 1.0;
 
 					offsetNormali++;
 				}
 
+				for (int mio = 0; mio < offsetNormali; mio++)
+					normali[mio].DumpMemory(false);
+
 				currentMesh->SetNormals(normali, offsetNormali);
+
+				for (int mio = 0; mio < currentMesh->GetNormalsNumber(); mio++)
+					currentMesh->GetPNormal(mio)->DumpMemory(false);
+
 				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), normali);
+
+				for (int mio = 0; mio < currentMesh->GetNormalsNumber(); mio++)
+					currentMesh->GetPNormal(mio)->DumpMemory(false);
 			}
 
-			//if (mesh->HasTextureCoords())
-			//{
-			//	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
-			//	int offsetTextCoords = 0;
-			//	for (int t = 0; t < numeroVertici; t++)
-			//	{
-			//		const aiVector3D* coord = &mesh->mNormals[t];
+			if (mesh->HasTextureCoords(0))
+			{
+				AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
+				int offsetTextCoords = 0;
+				for (int t = 0; t < numeroVertici; t++)
+				{
+					textCoords[offsetTextCoords][0] = mesh->mTextureCoords[0][t].x;
+					textCoords[offsetTextCoords][1] = mesh->mTextureCoords[0][t].y;
 
-			//		textCoords[offsetTextCoords][0] = coord->x;
-			//		textCoords[offsetTextCoords][1] = coord->y;
+					offsetTextCoords++;
+				}
 
-			//		offsetTextCoords++;
-			//	}
-
-			//	currentMesh->SetTextureCoords(textCoords, offsetTextCoords);
-			//	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), textCoords);
-			//}
+				currentMesh->SetTextureCoords(textCoords, offsetTextCoords);
+				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), textCoords);
+			}
 
 			currentMesh->SetVertices(vertici, offsetVertici);
 			currentMesh->SetFaces(facce, offsetFacce);
