@@ -12,6 +12,8 @@ AnimaShadersManager::AnimaShadersManager(AnimaEngine* engine)
 
 	_programs = nullptr;
 	_programsNumber = 0;
+
+	_activeProgram = nullptr;
 }
 
 AnimaShadersManager::~AnimaShadersManager()
@@ -78,7 +80,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram()
 		_programs = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_engine->GetShadersAllocator()), _programsNumber);
 	}
 
-	_programs[_programsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), _engine);
+	_programs[_programsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), _engine, this);
 	return _programs[_programsNumber - 1];
 }
 
@@ -229,6 +231,32 @@ void AnimaShadersManager::ClearPrograms(bool bDeleteObjects, bool bResetNumber)
 	}
 
 	_programsNumber = 0;
+}
+
+AnimaShaderProgram* AnimaShadersManager::GetProgram(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _programsNumber);
+	return _programs[index];
+}
+
+void AnimaShadersManager::NotifyProgramActivation(AnimaShaderProgram* program)
+{
+	_activeProgram = program;
+}
+
+void AnimaShadersManager::NotifyProgramDeactivation(AnimaShaderProgram* program)
+{
+	_activeProgram = nullptr;
+}
+
+void AnimaShadersManager::SetActiveProgram(AnimaShaderProgram* program)
+{
+	_activeProgram = program;
+}
+
+AnimaShaderProgram* AnimaShadersManager::GetActiveProgram()
+{
+	return _activeProgram;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

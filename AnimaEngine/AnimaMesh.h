@@ -17,6 +17,7 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaMatrix.h"
+#include "AnimaMaterial.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -69,15 +70,16 @@ public:
 	AnimaString GetAnimaMeshName();
 	const char* GetMeshName();
 
-	void Draw(AnimaMatrix transformMatrix);
-
 	bool CreateBuffers();
 	void UpdateBuffers();
 
 	void SetUpdateBuffers(bool bUpdate = true);
 	bool NeedsBuffersUpdate();
 
-private:
+	void SetMaterial(AnimaMaterial* material);
+	AnimaMaterial* GetMaterial();
+	
+public:
 	bool AreBuffersCreated();
 	
 	bool IsIndicesBufferCreated();
@@ -93,6 +95,13 @@ private:
 	bool CreateNormalsBuffer();
 	bool CreateTextureCoordsBuffer();
 	bool CreateVertexArrayObject();
+
+	AUint GetVertexArrayObject();
+	AUint GetIndexesBufferObject();
+	AUint GetVerticesBufferObject();
+	AUint GetNormalsBufferObject();
+	//AUint GetColorsBufferObject();
+	AUint GetTextureCoordsBufferObject();
 
 	AUint GetFacesIndicesCount();
 	AUint* GetFacesIndices();
@@ -121,6 +130,8 @@ protected:
 	
 	AnimaFace*		_faces;
 	ASizeT			_facesNumber;
+
+	AnimaMaterial*	_material;
 
 	AnimaString		_meshName;
 

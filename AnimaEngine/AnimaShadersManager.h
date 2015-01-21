@@ -13,6 +13,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaShadersManager
 {
+	friend AnimaShaderProgram;
+
 public:
 	AnimaShadersManager(AnimaEngine* engine);
 	~AnimaShadersManager();
@@ -27,15 +29,25 @@ public:
 	AnimaShader* CreateShader();
 	AnimaShaderProgram* CreateProgram();
 
+	AnimaShaderProgram* GetProgram(ASizeT index);
+
+	void SetActiveProgram(AnimaShaderProgram* program);
+	AnimaShaderProgram* GetActiveProgram();
+
 private:
 	void ClearShaders(bool bDeleteObjects = true, bool bResetNumber = true);
 	void ClearPrograms(bool bDeleteObjects = true, bool bResetNumber = true);
+
+	void NotifyProgramActivation(AnimaShaderProgram* program);
+	void NotifyProgramDeactivation(AnimaShaderProgram* program);
 
 private:
 	AnimaEngine* _engine;
 
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;
+
+	AnimaShaderProgram* _activeProgram;
 
 	AnimaShaderProgram**	_programs;
 	ASizeT					_programsNumber;

@@ -44,7 +44,7 @@ public:
 
 	void Unload();
 
-	void Bind();
+	void Bind(AUint unit);
 
 private:
 	AnimaEngine* _engine;
@@ -52,7 +52,9 @@ private:
 	AUchar* _data;
 	ASizeT _dataSize;
 
-	AUint _id;
+	AUint _textureId;
+	AUint _samplerId;
+
 	AUint _width;
 	AUint _height;
 	AUint _mipMapLevels;

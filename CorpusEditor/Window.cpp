@@ -8,6 +8,8 @@
 #include <QtGui/QMatrix4x4>
 #include <AnimaCamerasManager.h>
 #include <AnimaTexturesManager.h>
+#include <AnimaRenderingManager.h>
+#include <AnimaDataGeneratorsManager.h>
 
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
@@ -41,77 +43,88 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
-	GLenum error = glGetError();
+	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
-	int w, h;
-	GetWindowSize(&w, &h);
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glGetError();
-	glClearColor(0.5, 0.5, 0.5, 1.0);
-	
-	error = glGetError();
-	
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
+	Anima::AnimaRenderingManager::Start(GetEngine());
 
-	error = glGetError();
+	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(0), GetEngine()->GetShadersManager()->GetProgram(0));
 
-	_program->Use();
-	
-	error = glGetError();
+	Anima::AnimaRenderingManager::Finish(GetEngine());
 
-	Anima::AnimaCamera* camera = GetEngine()->GetCamerasManager()->GetActiveCamera();
-	Anima::AnimaMatrix viewMatrix = camera->GetViewMatrix();
-	Anima::AnimaMatrix modelMatrix(GetEngine());
-	modelMatrix.RotateYDeg(rotY);
-	rotY += 0.05;
-	Anima::AnimaMatrix projectionMatrix(GetEngine());
-	projectionMatrix.Perspective(60.0f, w / h, 0.01f, 1000.0f);
-	
-	Anima::AnimaMatrix modelViewMatrix = modelMatrix * viewMatrix;
-	Anima::AnimaMatrix mvpMatrix = modelViewMatrix * projectionMatrix;
-	Anima::AnimaMatrix normalMatrix = modelMatrix;
+	//GLenum error = glGetError();
 
-	Anima::AnimaVertex3f lightDir(GetEngine());
-	lightDir[0] = -1.0;
-	lightDir[1] = -1.0;
-	lightDir[2] = -1.0;
+	//int w, h;
+	//GetWindowSize(&w, &h);
+	//
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glGetError();
+	//glClearColor(0.5, 0.5, 0.5, 1.0);
+	//
+	//error = glGetError();
+	//
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
+	//
+	//error = glGetError();
 
-	lightDir.Normalize();
+	//glEnable(GL_TEXTURE_2D);
 
-	_program->SetUniform("mvpMatrix", mvpMatrix);
-	_program->SetUniform("normalMatrix", normalMatrix);
-	_program->SetUniform("materialColor", 1.0, 1.0, 1.0);
-	_program->SetUniform("ambientLight", 0.0, 0.0, 0.0);
-	_program->SetUniform("directionalLight.base.color", 1.0, 1.0, 1.0);
-	_program->SetUniformf("directionalLight.base.intensity", 1.0);
-	_program->SetUniform("directionalLight.direction", lightDir);
-	_program->SetUniformf("specularIntensity", 2.0);
-	_program->SetUniformf("specularPower", 32.0);
-	_program->SetUniform("eyePosition", camera->GetPosition());
+	//error = glGetError();
 
-	error = glGetError();
+	//program->Use();
+	//
+	//error = glGetError();
 
-	Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
-	Anima::AnimaMatrix m(GetEngine());
-	if (mgr->GetModelsNumber() > 0)
-	{
-		error = glGetError();
+	//Anima::AnimaCamera* camera = GetEngine()->GetCamerasManager()->GetActiveCamera();
+	//Anima::AnimaMatrix viewMatrix = camera->GetViewMatrix();
+	//Anima::AnimaMatrix modelMatrix(GetEngine());
+	//modelMatrix.RotateYDeg(rotY);
+	//rotY += 0.05;
+	//Anima::AnimaMatrix projectionMatrix(GetEngine());
+	//projectionMatrix.Perspective(60.0f, w / h, 0.01f, 1000.0f);
+	//
+	//Anima::AnimaMatrix modelViewMatrix = modelMatrix * viewMatrix;
+	//Anima::AnimaMatrix mvpMatrix = modelViewMatrix * projectionMatrix;
+	//Anima::AnimaMatrix normalMatrix = modelMatrix;
 
-		_texture->Bind();
-		//_program->SetUniformi("sampler", _texture->GetID());
-		mgr->GetPModel(0)->Draw(m);
+	//Anima::AnimaVertex3f lightDir(GetEngine());
+	//lightDir[0] = -1.0;
+	//lightDir[1] = -1.0;
+	//lightDir[2] = -1.0;
 
-		error = glGetError();
-	}
+	//lightDir.Normalize();
 
-	error = glGetError();
+	//program->SetUniform("mvpMatrix", mvpMatrix);
+	//program->SetUniform("normalMatrix", normalMatrix);
+	//program->SetUniform("materialColor", 1.0, 1.0, 1.0);
+	//program->SetUniform("ambientLight", 0.0, 0.0, 0.0);
+	//program->SetUniform("directionalLight.base.color", 1.0, 1.0, 1.0);
+	//program->SetUniformf("directionalLight.base.intensity", 1.0);
+	//program->SetUniform("directionalLight.direction", lightDir);
+	//program->SetUniformf("specularIntensity", 2.0);
+	//program->SetUniformf("specularPower", 32.0);
+	//program->SetUniform("eyePosition", camera->GetPosition());
 
-	glDisable(GL_TEXTURE_2D);
+	//error = glGetError();
+
+	//Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
+	//Anima::AnimaMatrix m(GetEngine());
+	//if (mgr->GetModelsNumber() > 0)
+	//{
+	//	error = glGetError();
+
+	//	texture->Bind();
+	//	//_program->SetUniformi("sampler", _texture->GetID());
+	//	mgr->GetPModel(0)->Draw(m);
+
+	//	error = glGetError();
+	//}
+
+	//error = glGetError();
+
+	//glDisable(GL_TEXTURE_2D);
 
 	SwapBuffers();
 }
@@ -125,6 +138,11 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 		GLenum error = glGetError();
 		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
 		error = glGetError();
+		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1, 1000.0);
+		error = glGetError();
+
+		int i = 0;
+		i++;
 	}
 	else
 	{
@@ -229,26 +247,35 @@ void Window::Load()
 	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #endif
 
-	_program = GetEngine()->GetShadersManager()->CreateProgram();
-	_program->Create();
-	_program->AddShader(vs);
-	_program->AddShader(fs);
-	_program->Link();
+	GLenum error = glGetError();
+	
+	program = GetEngine()->GetShadersManager()->CreateProgram();
+	program->Create();
+	program->AddShader(vs);
+	program->AddShader(fs);
+	program->Link();
 
-	//_program->Use();
-	_program->AddUniform("mvpMatrix");
-	_program->AddUniform("normalMatrix");
-	_program->AddUniform("materialColor");
-	_program->AddUniform("materialDiffuseTexture");
-	_program->AddUniform("ambientLight");
-	_program->AddUniform("directionalLight.base.color");
-	_program->AddUniform("directionalLight.base.intensity");
-	_program->AddUniform("directionalLight.direction");
-	_program->AddUniform("specularIntensity");
-	_program->AddUniform("specularPower");
-	_program->AddUniform("eyePosition");
-	//_program->AddUniform("uniformColor");
+	program->AddUniform("viewProjectionMatrix");
+	program->AddUniform("modelMatrix");
+	program->AddUniform("materialColor");
+	program->AddUniform("materialDiffuseTexture");
+	program->AddUniform("ambientLight");
+	program->AddUniform("directionalLight.base.color");
+	program->AddUniform("directionalLight.base.intensity");
+	program->AddUniform("directionalLight.direction");
+	program->AddUniform("specularIntensity");
+	program->AddUniform("specularPower");
+	program->AddUniform("eyePosition");
 
-	_texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Modelli/cubo.bmp");
-	_texture->Load();
+	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/cubo.bmp", "texture-cubo");
+	texture->Load();
+
+	//material = new Anima::AnimaMaterial(GetEngine());
+	//material->AddFloat("lightIntensity", 1.0f);
+	//material->AddFloat("specInt", 2.0f);
+	//material->AddFloat("specPow", 32.0f);
+	//material->AddTexture("diffuse", texture);
+	//material->AddColor("materialColor", 1.0, 1.0, 1.0);
+	//material->AddColor("lightColor", 1.0, 1.0, 1.0);
+	//material->AddColor("ambientColor", 0.0, 0.0, 0.0);
 }

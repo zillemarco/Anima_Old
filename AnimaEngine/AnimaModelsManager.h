@@ -44,6 +44,7 @@ public:
 	
 private:
 	void RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode);
+	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
 	
 private:
 	AnimaEngine* _engine;

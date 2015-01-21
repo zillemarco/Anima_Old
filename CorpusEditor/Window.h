@@ -6,6 +6,7 @@
 #include <AnimaFirstPersonCamera.h>
 #include <AnimaShaderProgram.h>
 #include <AnimaTexture.h>
+#include <AnimaMaterial.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -30,11 +31,13 @@ private:
 	ANIMA_WINDOW_EVENT void KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods);
 	ANIMA_WINDOW_EVENT void ScrollCallback(Anima::AnimaWindow* window, double x, double y);
 
-	Anima::AnimaShaderProgram* _program;
-	Anima::AnimaTexture* _texture;
+	Anima::AnimaShaderProgram* program;
+	Anima::AnimaTexture* texture;
 
 	int _matrixUniform;
 	int _posAttr;
+
+	Anima::AnimaMaterial* material;
 	
 	float rotX, rotY;
 	float tx, ty, tz;

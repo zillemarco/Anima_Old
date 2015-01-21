@@ -49,7 +49,9 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _worldZAxis(engine)
 	, _active(false)
 	, _viewMatrix(engine)
+	, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
+	, _projectionType(PERSPECTIVE)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -72,7 +74,9 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	, _worldZAxis(engine)
 	, _active(false)
 	, _viewMatrix(engine)
+	, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
+	, _projectionType(PERSPECTIVE)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -91,7 +95,9 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
 	, _viewMatrix(src._viewMatrix)
+	, _projectionMatrix(src._projectionMatrix)
 	, _camerasManager(src._camerasManager)
+	, _projectionType(src._projectionType)
 {
 	_engine = src._engine;
 
@@ -108,8 +114,10 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
 	, _viewMatrix(src._viewMatrix)
+	, _projectionMatrix(src._projectionMatrix)
 	, _engine(src._engine)
 	, _camerasManager(src._camerasManager)
+	, _projectionType(src._projectionType)
 {
 
 	INIT_WORLD_AXIS;
@@ -127,6 +135,11 @@ AnimaCamera& AnimaCamera::operator=(const AnimaCamera& src)
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;
+
+		_viewMatrix = src._viewMatrix;
+		_projectionMatrix = src._projectionMatrix;
+		_projectionType = src._projectionType;
+
 		_xAxis = src._xAxis;
 		_yAxis = src._yAxis;
 		_zAxis = src._zAxis;
@@ -145,6 +158,10 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;
+
+		_viewMatrix = src._viewMatrix;
+		_projectionMatrix = src._projectionMatrix;
+		_projectionType = src._projectionType;
 
 		_xAxis = src._xAxis;
 		_yAxis = src._yAxis;
@@ -216,6 +233,35 @@ AnimaVertex3f AnimaCamera::GetRight()
 AnimaMatrix AnimaCamera::GetViewMatrix()
 {
 	return _viewMatrix;
+}
+
+AnimaMatrix AnimaCamera::GetProjectionMatrix()
+{
+	return _projectionMatrix;
+}
+
+void AnimaCamera::CalculateProjectionMatrix(float fov, float ratio, float zNear, float zFar)
+{
+	_projectionMatrix.SetIdentity();
+	_projectionMatrix.Perspective(fov, ratio, zNear, zFar);
+	_projectionType = PERSPECTIVE;
+}
+
+void AnimaCamera::CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar)
+{
+	_projectionMatrix.SetIdentity();
+	_projectionMatrix.Ortho(left, right, bottom, top, zNear, zFar);
+	_projectionType = ORTHO;
+}
+
+bool AnimaCamera::IsPerspectiveProjectionType()
+{
+	return _projectionType == PERSPECTIVE;
+}
+
+bool AnimaCamera::IsOrthoProjectionType()
+{
+	return _projectionType == ORTHO;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

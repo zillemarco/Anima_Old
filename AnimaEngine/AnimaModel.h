@@ -67,8 +67,6 @@ public:
 	void SetTransformationMatrix(AnimaMatrix m);
 	void SetTransformationMatrix(AFloat* m);
 
-	void Draw(AnimaMatrix transformationMatrix);
-	
 protected:
 	AnimaModel*		_modelChildren;
 	ASizeT			_modelChildrenNumber;
@@ -79,7 +77,7 @@ protected:
 	AnimaString		_modelName;
 	AnimaString		_modelFileName;
 
-	AnimaMatrix		_trasnsformationMatrix;
+	AnimaMatrix		_transformationMatrix;
 	
 	AnimaEngine* _engine;
 };

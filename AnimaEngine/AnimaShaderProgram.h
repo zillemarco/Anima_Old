@@ -34,7 +34,7 @@ public:
 	};
 
 public:
-	AnimaShaderProgram(AnimaEngine* engine);
+	AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager);
 	AnimaShaderProgram(const AnimaShaderProgram& src);
 	AnimaShaderProgram(AnimaShaderProgram&& src);
 	~AnimaShaderProgram();
@@ -79,8 +79,11 @@ public:
 
 private:
 	AnimaEngine*	_engine;
+	
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;
+
+	AnimaShadersManager* _shadersManager;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _uniforms;

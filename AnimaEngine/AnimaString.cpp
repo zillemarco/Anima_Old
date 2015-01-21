@@ -6,6 +6,7 @@
 //
 //
 
+#include "AnimaEngine.h"
 #include "AnimaString.h"
 #include <boost/algorithm/string/predicate.hpp>
 

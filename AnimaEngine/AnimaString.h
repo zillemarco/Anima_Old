@@ -10,11 +10,12 @@
 #define __Anima__AnimaString__
 
 #include "AnimaEngineCore.h"
-#include "AnimaEngine.h"
 #include "AnimaTypes.h"
 #include <boost\unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaEngine;
 
 class ANIMA_ENGINE_EXPORT AnimaString
 {

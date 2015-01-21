@@ -148,4 +148,22 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 	return nullptr;
 }
 
+void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, float ratio, float zNear, float zFar)
+{
+	for (ASizeT i = 0; i < _camerasNumber; i++)
+	{
+		if (_cameras[i]->IsPerspectiveProjectionType())
+			_cameras[i]->CalculateProjectionMatrix(fov, ratio, zNear, zFar);
+	}
+}
+
+void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar)
+{
+	for (ASizeT i = 0; i < _camerasNumber; i++)
+	{
+		if (_cameras[i]->IsOrthoProjectionType())
+			_cameras[i]->CalculateProjectionMatrix(left, right, bottom, top, zNear, zFar);
+	}
+}
+
 END_ANIMA_ENGINE_NAMESPACE

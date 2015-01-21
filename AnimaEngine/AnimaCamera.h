@@ -21,6 +21,12 @@ class AnimaCamerasManager;
 
 class ANIMA_ENGINE_EXPORT AnimaCamera
 {
+public:
+	enum AnimaCameraProjectionType {
+		PERSPECTIVE,
+		ORTHO
+	};
+
 protected:
 	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
 	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position);
@@ -59,9 +65,16 @@ public:
 
 	virtual void CalculateViewMatrix() = 0;
 	virtual AnimaMatrix GetViewMatrix();
+
+	virtual void CalculateProjectionMatrix(float fov, float ratio, float zNear, float zFar);
+	virtual void CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar);
+	virtual AnimaMatrix GetProjectionMatrix();
 	
 	virtual void Activate();
 	virtual void Deactivate();
+
+	bool IsPerspectiveProjectionType();
+	bool IsOrthoProjectionType();
 
 protected:
 	AnimaVertex3f _position;
@@ -75,8 +88,10 @@ protected:
 	AnimaVertex3f _worldZAxis;
 	
 	bool _active;
+	AnimaCameraProjectionType _projectionType;
 
 	AnimaMatrix _viewMatrix;
+	AnimaMatrix _projectionMatrix;
 
 	AnimaEngine* _engine;	
 	AnimaCamerasManager* _camerasManager;

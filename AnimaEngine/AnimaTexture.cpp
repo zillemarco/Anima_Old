@@ -5,7 +5,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaTexture::AnimaTexture(AnimaEngine* engine)
 {
 	_engine = engine;
-	_id = 0;
+	_textureId = 0;
+	_samplerId = 0;
 	_width = 0;
 	_height = 0;
 	_mipMapLevels = 0;
@@ -19,7 +20,8 @@ AnimaTexture::AnimaTexture(AnimaEngine* engine)
 AnimaTexture::AnimaTexture(AnimaEngine* engine, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format)
 {
 	_engine = engine;
-	_id = 0;
+	_textureId = 0;
+	_samplerId = 0;
 	_width = width;
 	_height = height;
 	_mipMapLevels = mipMapLevels;
@@ -35,7 +37,8 @@ AnimaTexture::AnimaTexture(AnimaEngine* engine, AUchar* data, ASizeT dataSize, A
 AnimaTexture::AnimaTexture(const AnimaTexture& src)
 {
 	_engine = src._engine;
-	_id = src._id;
+	_textureId = src._textureId;
+	_samplerId = src._samplerId;
 	_width = src._width;
 	_height = src._height;
 	_mipMapLevels = src._mipMapLevels;
@@ -51,7 +54,8 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 AnimaTexture::AnimaTexture(AnimaTexture&& src)
 {
 	_engine = src._engine;
-	_id = src._id;
+	_textureId = src._textureId;
+	_samplerId = src._samplerId;
 	_width = src._width;
 	_height = src._height;
 	_mipMapLevels = src._mipMapLevels;
@@ -75,6 +79,12 @@ AnimaTexture::~AnimaTexture()
 
 		_dataSize = 0;
 	}
+
+	_width = 0;
+	_height = 0;
+	_mipMapLevels = 0;
+	_format = 0;
+	_isLoaded = false;
 }
 
 AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
@@ -82,7 +92,8 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 	if (this != &src)
 	{
 		_engine = src._engine;
-		_id = src._id;
+		_textureId = src._textureId;
+		_samplerId = src._samplerId;
 		_width = src._width;
 		_height = src._height;
 		_mipMapLevels = src._mipMapLevels;
@@ -103,7 +114,8 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 	if (this != &src)
 	{
 		_engine = src._engine;
-		_id = src._id;
+		_textureId = src._textureId;
+		_samplerId = src._samplerId;
 		_width = src._width;
 		_height = src._height;
 		_mipMapLevels = src._mipMapLevels;
@@ -121,7 +133,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 
 AUint AnimaTexture::GetID() const
 {
-	return _id;
+	return _textureId;
 }
 
 void AnimaTexture::SetWidth(AUint width)
@@ -184,12 +196,21 @@ bool AnimaTexture::Load()
 	if (IsLoaded())
 		return true;
 
-	glGenTextures(1, &_id);
+	//glGenSamplers(1, &_samplerId);
+	//if (_samplerId <= 0)
+	//	return false;
 
-	if (glGetError() != GL_NO_ERROR)
+	//glSamplerParameteri(_samplerId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glSamplerParameteri(_samplerId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glSamplerParameteri(_samplerId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glSamplerParameteri(_samplerId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//glSamplerParameteri(_samplerId, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+	glGenTextures(1, &_textureId);
+	if (_textureId <= 0)
 		return false;
 
-	glBindTexture(GL_TEXTURE_2D, _id);
+	glBindTexture(GL_TEXTURE_2D, _textureId);
 
 	if (_mipMapLevels == 0)
 	{
@@ -223,6 +244,8 @@ bool AnimaTexture::Load()
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	_isLoaded = true;
 	return true;
 }
@@ -237,13 +260,18 @@ void AnimaTexture::Unload()
 	if (!IsLoaded())
 		return;
 
-	glDeleteTextures(1, &_id);
+	glDeleteTextures(1, &_textureId);
+	//glDeleteSamplers(1, &_samplerId);
 }
 
-void AnimaTexture::Bind()
+void AnimaTexture::Bind(AUint unit)
 {
 	if (IsLoaded())
-		glBindTexture(GL_TEXTURE_2D, _id);
+	{
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(GL_TEXTURE_2D, _textureId);
+		//glBindSampler(unit, _samplerId);
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

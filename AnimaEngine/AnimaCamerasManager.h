@@ -24,6 +24,7 @@ class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 {
 	friend AnimaCamera;
 	friend AnimaFirstPersonCamera;
+	friend AnimaThirdPersonCamera;
 	
 public:
 	AnimaCamerasManager(AnimaEngine* engine);
@@ -33,6 +34,9 @@ public:
 	AnimaThirdPersonCamera* CreateNewThirdPersonCamera();
 	
 	AnimaCamera* GetActiveCamera();
+
+	void UpdatePerspectiveCameras(float fov, float ratio, float zNear, float zFar);
+	void UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar);
 	
 private:
 	void ClearCameras(bool bDeleteObjects = true, bool bResetNumber = true);

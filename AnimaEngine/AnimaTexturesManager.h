@@ -39,34 +39,56 @@ public:
 	AnimaTexturesManager(AnimaEngine* engine);
 	~AnimaTexturesManager();
 	
-	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath);
-	AnimaTexture* LoadTextureFromFile(const char* filePath);
+	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromFile(const char* filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const char* textureName);
+	AnimaTexture* LoadTextureFromFile(const char* filePath, const char* textureName);
 
-	AnimaTexture* LoadTextureFromBMPFile(const AnimaString& filePath);
-	AnimaTexture* LoadTextureFromBMPFile(const char* filePath);
+	AnimaTexture* LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromBMPFile(const char* filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromBMPFile(const AnimaString& filePath, const char* textureName);
+	AnimaTexture* LoadTextureFromBMPFile(const char* filePath, const char* textureName);
 
-	AnimaTexture* LoadTextureFromTGAFile(const AnimaString& filePath);
-	AnimaTexture* LoadTextureFromTGAFile(const char* filePath);
+	AnimaTexture* LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromTGAFile(const char* filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromTGAFile(const AnimaString& filePath, const char* textureName);
+	AnimaTexture* LoadTextureFromTGAFile(const char* filePath, const char* textureName);
 
-	AnimaTexture* LoadTextureFromDDSFile(const AnimaString& filePath);
-	AnimaTexture* LoadTextureFromDDSFile(const char* filePath);
+	AnimaTexture* LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromDDSFile(const char* filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromDDSFile(const AnimaString& filePath, const char* textureName);
+	AnimaTexture* LoadTextureFromDDSFile(const char* filePath, const char* textureName);
 
-	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height);
-	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint format);
+	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint format, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, const char* textureName);
+	AnimaTexture* LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint format, const char* textureName);
+
+	AnimaTexture* GetTexture(AUint index);
+	AnimaTexture* GetTexture(const AnimaString& textureName);
+	AnimaTexture* GetTexture(const char* textureName);
 	
 private:
 	void ClearTextures(bool bDeleteObjects = true, bool bResetNumber = true);
-	AnimaTexture* CreateTexture();
-	AnimaTexture* CreateTexture(AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format);
+	AnimaTexture* CreateTexture(const AnimaString& textureName);
+	AnimaTexture* CreateTexture(const char* textureName);
+	AnimaTexture* CreateTexture(AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format, const AnimaString& textureName);
+	AnimaTexture* CreateTexture(AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format, const char* textureName);
 
-	AnimaTexture* LoadUncompressedTGA(FILE* file);
-	AnimaTexture* LoadCompressedTGA(FILE* file);
+	AnimaTexture* LoadUncompressedTGA(FILE* file, const AnimaString& textureName);
+	AnimaTexture* LoadUncompressedTGA(FILE* file, const char* textureName);
+	AnimaTexture* LoadCompressedTGA(FILE* file, const AnimaString& textureName);
+	AnimaTexture* LoadCompressedTGA(FILE* file, const char* textureName);
 		
 private:
 	AnimaEngine* _engine;
 
 	AnimaTexture**	_textures;
 	ASizeT			_texturesNumber;
+
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _texturesMap;
+#pragma warning (default: 4251) 
 };
 
 END_ANIMA_ENGINE_NAMESPACE

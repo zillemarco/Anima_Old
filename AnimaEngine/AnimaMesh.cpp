@@ -36,6 +36,8 @@ AnimaMesh::AnimaMesh(AnimaEngine* engine)
 	_textureCoordsNumber = 0;
 	_facesNumber = 0;
 	_meshName = "_mesh_";
+
+	_material = nullptr;
 }
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
@@ -50,6 +52,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_textureCoordsBufferObject = src._textureCoordsBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
+	_material = src._material;
 	
 	_vertices = nullptr;
 	_normals = nullptr;
@@ -68,23 +71,24 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 }
 
 AnimaMesh::AnimaMesh(AnimaMesh&& src)
-: _vertices(src._vertices)
-, _verticesNumber(src._verticesNumber)
-, _normals(src._normals)
-, _normalsNumber(src._normalsNumber)
-, _textureCoords(src._textureCoords)
-, _textureCoordsNumber(src._textureCoordsNumber)
-, _faces(src._faces)
-, _facesNumber(src._facesNumber)
-, _meshName(src._meshName)
-, _vertexArrayObject(src._vertexArrayObject)
-, _indexesBufferObject(src._indexesBufferObject)
-, _verticesBufferObject(src._verticesBufferObject)
-//, _colorsBufferObject(src._colorsBufferObject)
-, _normalsBufferObject(src._normalsBufferObject)
-, _textureCoordsBufferObject(src._textureCoordsBufferObject)
-, _engine(src._engine)
-, _needsBuffersUpdate(src._needsBuffersUpdate)
+	: _vertices(src._vertices)
+	, _verticesNumber(src._verticesNumber)
+	, _normals(src._normals)
+	, _normalsNumber(src._normalsNumber)
+	, _textureCoords(src._textureCoords)
+	, _textureCoordsNumber(src._textureCoordsNumber)
+	, _faces(src._faces)
+	, _facesNumber(src._facesNumber)
+	, _meshName(src._meshName)
+	, _vertexArrayObject(src._vertexArrayObject)
+	, _indexesBufferObject(src._indexesBufferObject)
+	, _verticesBufferObject(src._verticesBufferObject)
+	//, _colorsBufferObject(src._colorsBufferObject)
+	, _normalsBufferObject(src._normalsBufferObject)
+	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
+	, _engine(src._engine)
+	, _needsBuffersUpdate(src._needsBuffersUpdate)
+	, _material(src._material)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -119,6 +123,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
+		_material = src._material;
 		
 		SetMeshName(src._meshName);
 		SetVertices(src._vertices, src._verticesNumber);
@@ -145,6 +150,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_normalsNumber = src._normalsNumber;
 		_textureCoordsNumber = src._textureCoordsNumber;
 		_facesNumber = src._facesNumber;
+
+		_material = src._material;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -518,66 +525,6 @@ const char* AnimaMesh::GetMeshName()
 	return _meshName.GetConstBuffer();
 }
 
-void AnimaMesh::Draw(AnimaMatrix transformMatrix)
-{
-	if (NeedsBuffersUpdate())
-		UpdateBuffers();
-
-	bool bEnabled_0 = true;
-	bool bEnabled_1 = false;
-	bool bEnabled_2 = false;
-	bool bEnabled_3 = false;
-
-	glBindVertexArray(_vertexArrayObject);
-		
-	glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	
-	if (GetFloatVerticesNormalCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, _normalsBufferObject);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_1 = true;
-	}
-
-	if (GetFloatVerticesTextureCoordCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, _textureCoordsBufferObject);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_2 = true;
-	}
-
-	//if (GetFloatVerticesColorCount() > 0)
-	//{
-	//	glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
-	//	glEnableVertexAttribArray(3);
-	//	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//	bEnabled_3 = true;
-	//}
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-
-	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-
-	if (bEnabled_3)
-		glDisableVertexAttribArray(3);
-
-	if(bEnabled_2)
-		glDisableVertexAttribArray(2);
-
-	if (bEnabled_1)
-		glDisableVertexAttribArray(1);
-
-	if (bEnabled_0)
-		glDisableVertexAttribArray(0);
-}
-
 bool AnimaMesh::CreateBuffers()
 {
 	if (!CreateVertexArrayObject())
@@ -893,6 +840,46 @@ float* AnimaMesh::GetFloatVerticesTextureCoord()
 	}
 
 	return textureCoords;
+}
+
+void AnimaMesh::SetMaterial(AnimaMaterial* material)
+{
+	_material = material;
+}
+
+AnimaMaterial* AnimaMesh::GetMaterial()
+{
+	return _material;
+}
+
+AUint AnimaMesh::GetVertexArrayObject()
+{
+	return _vertexArrayObject;
+}
+
+AUint AnimaMesh::GetIndexesBufferObject()
+{
+	return _indexesBufferObject;
+}
+
+AUint AnimaMesh::GetVerticesBufferObject()
+{
+	return _verticesBufferObject;
+}
+
+AUint AnimaMesh::GetNormalsBufferObject()
+{
+	return _normalsBufferObject;
+}
+
+//AUint AnimaMesh::GetColorsBufferObject()
+//{
+//	return _colorsBufferObject;
+//}
+
+AUint AnimaMesh::GetTextureCoordsBufferObject()
+{
+	return _textureCoordsBufferObject;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

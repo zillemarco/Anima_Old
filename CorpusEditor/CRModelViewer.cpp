@@ -66,30 +66,30 @@ void CRModelViewer::Render()
 	
 	glViewport(0, 0, w, h);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-	glFrontFace(GL_CW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+	//glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+	//glFrontFace(GL_CW);
+	////glCullFace(GL_BACK);
+	////glEnable(GL_CULL_FACE);
+	//glEnable(GL_DEPTH_TEST);
 
-	_program->Use();
+	//_program->Use();
 
-	Anima::AnimaMatrix projection(_engine);
-	projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
+	//Anima::AnimaMatrix projection(_engine);
+	//projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
 
-	Anima::AnimaMatrix camera = _engine->GetCamerasManager()->GetActiveCamera()->GetViewMatrix();
-	Anima::AnimaMatrix model(_engine);
-	_program->SetUniform("gWorld", model * camera * projection);
-	_program->SetUniform("uniformColor", 0.0, 1.0, 1.0);
-	
-	Anima::AnimaModelsManager* mgr = _engine->GetModelsManager();
-	Anima::AnimaMatrix m(_engine);
-	if (mgr->GetModelsNumber() > 0)
-	{
-		mgr->GetPModel(0)->Draw(m);
-	}
+	//Anima::AnimaMatrix camera = _engine->GetCamerasManager()->GetActiveCamera()->GetViewMatrix();
+	//Anima::AnimaMatrix model(_engine);
+	//_program->SetUniform("gWorld", model * camera * projection);
+	//_program->SetUniform("uniformColor", 0.0, 1.0, 1.0);
+	//
+	//Anima::AnimaModelsManager* mgr = _engine->GetModelsManager();
+	//Anima::AnimaMatrix m(_engine);
+	//if (mgr->GetModelsNumber() > 0)
+	//{
+	//	mgr->GetPModel(0)->Draw(m);
+	//}
 
 	++_frame;
 }

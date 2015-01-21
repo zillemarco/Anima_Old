@@ -53,6 +53,8 @@ class AnimaModelsManager;
 class AnimaShadersManager;
 class AnimaCamerasManager;
 class AnimaTexturesManager;
+class AnimaDataGeneratorsManager;
+class AnimaMaterialsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -198,6 +200,18 @@ public:
 		return _texturesManager;
 	}
 
+	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()
+	{
+		ANIMA_ASSERT(_dataGeneratorsManager != nullptr);
+		return _dataGeneratorsManager;
+	}
+
+	inline AnimaMaterialsManager* GetMaterialsManager()
+	{
+		ANIMA_ASSERT(_materialsManager != nullptr);
+		return _materialsManager;
+	}
+
 	void DumpMemory(const char* fileName, bool bLogToFile = true);
 
 private:
@@ -250,11 +264,13 @@ private:
 	static bool _usedExternal;						/*!< Flag that has to be set to true if AnimaEngine is being used inside an external app. This flag is false ONLY IF AnimaEngine is the one who controls the windowing system */
 
 private:
-	AnimaModelsManager* _modelsManager;				/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
-	AnimaShadersManager* _shadersManager;			/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
-	AnimaCamerasManager* _camerasManager;			/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
-	AnimaTexturesManager* _texturesManager;			/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
-
+	AnimaModelsManager* _modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
+	AnimaShadersManager* _shadersManager;				/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
+	AnimaCamerasManager* _camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
+	AnimaTexturesManager* _texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
+	AnimaDataGeneratorsManager* _dataGeneratorsManager;
+	AnimaMaterialsManager* _materialsManager;
+	
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 };
 

@@ -7,6 +7,7 @@
 //
 
 #include "AnimaModelsManager.h"
+#include "AnimaMaterialsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -80,6 +81,8 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 	modelMatrix->SetData(sceneNode->mTransformation.c1, 8); modelMatrix->SetData(sceneNode->mTransformation.c2, 9); modelMatrix->SetData(sceneNode->mTransformation.c3, 10); modelMatrix->SetData(sceneNode->mTransformation.c4, 11);
 	modelMatrix->SetData(sceneNode->mTransformation.d1, 12); modelMatrix->SetData(sceneNode->mTransformation.d2, 13); modelMatrix->SetData(sceneNode->mTransformation.d3, 14); modelMatrix->SetData(sceneNode->mTransformation.d4, 15);
 
+	(*modelMatrix) = modelMatrix->Transpose();
+
 	int numeroMesh = sceneNode->mNumMeshes;
 	
 	if(numeroMesh > 0)
@@ -91,6 +94,8 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			const aiMesh* mesh = scene->mMeshes[sceneNode->mMeshes[n]];
 		
 			AnimaMesh* currentMesh = &meshes[n];
+
+			LoadMaterial(currentMesh, scene->mMaterials[mesh->mMaterialIndex]);
 		
 			int numeroFacce = mesh->mNumFaces;
 			int numeroVertici = mesh->mNumVertices;
@@ -267,6 +272,76 @@ void AnimaModelsManager::ClearModels()
 ASizeT AnimaModelsManager::GetNextModelID()
 {
 	return _nextModelID++;
+}
+
+void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
+{
+	AnimaMaterial* material = mesh->GetMaterial();
+
+	if (material == nullptr)
+	{
+		int i = 1;
+
+		AnimaString prefix = mesh->GetAnimaMeshName();
+		AnimaString suffix(_engine);
+		suffix.Format(".material.%d", i);
+
+		while (material == nullptr)
+		{
+			material = _engine->GetMaterialsManager()->CreateMaterial(prefix + suffix);
+
+			i++;
+			suffix.Format(".material.%d", i);
+		}
+
+		mesh->SetMaterial(material);
+	}
+
+	int ret1, ret2;
+	aiColor4D diffuse;
+	aiColor4D specular;
+	aiColor4D ambient;
+	aiColor4D emission;
+	float shininess, strength;
+	unsigned int max;
+	
+	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == AI_SUCCESS)
+		material->AddColor("diffuseColor", diffuse.r, diffuse.g, diffuse.b);
+	else
+		material->AddColor("diffuseColor", 0.8, 0.8, 0.8);
+
+	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular) == AI_SUCCESS)
+		material->AddColor("specularColor", specular.r, specular.g, specular.b);
+	else
+		material->AddColor("specularColor", 0.0, 0.0, 0.0);
+
+	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient) == AI_SUCCESS)
+		material->AddColor("ambientColor", ambient.r, ambient.g, ambient.b);
+	else
+		material->AddColor("ambientColor", 0.2, 0.2, 0.2);
+
+	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission) == AI_SUCCESS)
+		material->AddColor("emissionColor", emission.r, emission.g, emission.b);
+	else
+		material->AddColor("emissionColor", 0.0, 0.0, 0.0);
+	
+	max = 1;
+	ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
+	if (ret1 == AI_SUCCESS) 
+	{
+		max = 1;
+		ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
+
+		if (ret2 == AI_SUCCESS)
+			material->AddFloat("shiness", shininess * strength);
+		else
+			material->AddFloat("shiness", shininess);
+	}
+	else 
+	{
+		material->AddFloat("shiness", shininess);
+		//material->AddColor("specularColor", 0.0, 0.0, 0.0);
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

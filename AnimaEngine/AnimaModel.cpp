@@ -16,7 +16,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaModel::AnimaModel(AnimaEngine* engine)
 : _modelName(engine)
 , _modelFileName(engine)
-, _trasnsformationMatrix(engine)
+, _transformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr)
 	_engine = engine;
@@ -32,7 +32,7 @@ AnimaModel::AnimaModel(AnimaEngine* engine)
 AnimaModel::AnimaModel(const AnimaModel& src)
 : _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
-, _trasnsformationMatrix(src._trasnsformationMatrix)
+, _transformationMatrix(src._transformationMatrix)
 {
 	_engine = src._engine;
 	
@@ -53,7 +53,7 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _modelMeshesNumber(src._modelMeshesNumber)
 , _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
-, _trasnsformationMatrix(src._trasnsformationMatrix)
+, _transformationMatrix(src._transformationMatrix)
 , _engine(src._engine)
 {
 	src._modelChildren = nullptr;
@@ -77,7 +77,7 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 	{
 		_engine = src._engine;
 		
-		SetTransformationMatrix(src._trasnsformationMatrix);
+		SetTransformationMatrix(src._transformationMatrix);
 		SetModelName(src._modelName);
 		SetModelFileName(src._modelFileName);
 		SetChildren(src._modelChildren, src._modelChildrenNumber);
@@ -102,7 +102,7 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		_modelName = src._modelName;
 		_modelFileName = src._modelFileName;
 
-		_trasnsformationMatrix = src._trasnsformationMatrix;
+		_transformationMatrix = src._transformationMatrix;
 		
 		src._modelChildren = nullptr;
 		src._modelMeshes = nullptr;
@@ -312,41 +312,32 @@ const char* AnimaModel::GetModelFileName()
 
 AnimaMatrix AnimaModel::GetTransformationMatrix()
 {
-	return _trasnsformationMatrix;
+	return _transformationMatrix;
 }
 
 AnimaMatrix* AnimaModel::GetPTransformationMatrix()
 {
-	return &_trasnsformationMatrix;
+	return &_transformationMatrix;
 }
 
 const AFloat* AnimaModel::GetTransformationMatrixFlt()
 {
-	return _trasnsformationMatrix.GetConstData();
+	return _transformationMatrix.GetConstData();
 }
 
 void AnimaModel::GetTransformationMatrixFlt(AFloat* m)
 {
-	_trasnsformationMatrix.GetData(m);
+	_transformationMatrix.GetData(m);
 }
 
 void AnimaModel::SetTransformationMatrix(AnimaMatrix m)
 {
-	_trasnsformationMatrix = m;
+	_transformationMatrix = m;
 }
 
 void AnimaModel::SetTransformationMatrix(AFloat* m)
 {
-	_trasnsformationMatrix.SetData(m);
-}
-
-void AnimaModel::Draw(AnimaMatrix transformationMatrix)
-{
-	for (int i = 0; i < _modelMeshesNumber; i++)
-		_modelMeshes[i].Draw(transformationMatrix * _trasnsformationMatrix);
-
-	for (int i = 0; i < _modelChildrenNumber; i++)
-		_modelChildren[i].Draw(transformationMatrix * _trasnsformationMatrix);
+	_transformationMatrix.SetData(m);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

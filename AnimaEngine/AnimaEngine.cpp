@@ -1,8 +1,11 @@
+#include "AnimaString.h"
 #include "AnimaEngine.h"
 #include "AnimaModelsManager.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
+#include "AnimaDataGeneratorsManager.h"
+#include "AnimaMaterialsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -52,6 +55,8 @@ AnimaEngine::AnimaEngine()
 	_shadersManager = nullptr;
 	_camerasManager = nullptr;
 	_texturesManager = nullptr;
+	_dataGeneratorsManager = nullptr;
+	_materialsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -133,6 +138,8 @@ void AnimaEngine::InitializeManagers()
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
 	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_managersAllocator, this);
 	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_managersAllocator, this);
+	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, this);
+	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -225,6 +232,18 @@ void AnimaEngine::TerminateManagers()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _texturesManager);
 		_texturesManager = nullptr;
+	}
+
+	if (_dataGeneratorsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _dataGeneratorsManager);
+		_dataGeneratorsManager = nullptr;
+	}
+
+	if (_materialsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _materialsManager);
+		_materialsManager = nullptr;
 	}
 }
 
@@ -616,5 +635,77 @@ AChar* AnimaEngine::GetLogFilePath()
 {
 	return _logFilePath;
 }
+
+//AnimaRenderingManager* AnimaEngine::GetRenderingManager(const AnimaString& name)
+//{
+//	return GetRenderingManager(name.GetConstBuffer());
+//}
+//
+//AnimaRenderingManager* AnimaEngine::GetRenderingManager(const char* name)
+//{
+//	//return _renderingManagers[_renderingManagersMap[name]];
+//}
+//
+//AnimaRenderingManager* AnimaEngine::AddRenderingEngine(const AnimaString& name)
+//{
+//	return AddRenderingEngine(name.GetConstBuffer());
+//}
+//
+//AnimaRenderingManager* AnimaEngine::AddRenderingEngine(const char* name)
+//{
+//	//if (_renderingManagersMap.find(name) != _renderingManagersMap.end())
+//	//	return _renderingManagers[_renderingManagersMap[name]];
+//
+//	if (_renderingManagersNumber > 0)
+//	{
+//		AnimaRenderingManager** tmpOldRenderingManagers = AnimaAllocatorNamespace::AllocateArray<AnimaRenderingManager*>(*(GetGenericAllocator()), _renderingManagersNumber);
+//
+//		for (int i = 0; i < _renderingManagersNumber; i++)
+//			tmpOldRenderingManagers[i] = _renderingManagers[i];
+//
+//		ClearRenderingManagers(false, false);
+//
+//		_renderingManagersNumber++;
+//		_renderingManagers = AnimaAllocatorNamespace::AllocateArray<AnimaRenderingManager*>(*(GetGenericAllocator()), _renderingManagersNumber);
+//
+//		for (int i = 0; i < _renderingManagersNumber - 1; i++)
+//			_renderingManagers[i] = tmpOldRenderingManagers[i];
+//
+//		AnimaAllocatorNamespace::DeallocateArray(*(GetGenericAllocator()), tmpOldRenderingManagers);
+//		tmpOldRenderingManagers = nullptr;
+//	}
+//	else
+//	{
+//		_renderingManagersNumber++;
+//		_renderingManagers = AnimaAllocatorNamespace::AllocateArray<AnimaRenderingManager*>(*(GetGenericAllocator()), _renderingManagersNumber);
+//	}
+//
+//	_renderingManagers[_renderingManagersNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaRenderingManager>(*(GetGenericAllocator()), this);
+//
+//	//_renderingManagersMap[name] = (AUint)_renderingManagersNumber - 1;
+//
+//	return _renderingManagers[_renderingManagersNumber - 1];
+//}
+//
+//void AnimaEngine::ClearRenderingManagers(bool bDeleteObjects, bool bResetNumber)
+//{
+//	if (_renderingManagers != nullptr)
+//	{
+//		if (bDeleteObjects)
+//		{
+//			for (int i = 0; i < (int)_renderingManagers; i++)
+//			{
+//				AnimaAllocatorNamespace::DeallocateObject(*(GetGenericAllocator()), _renderingManagers[i]);
+//				_renderingManagers[i] = nullptr;
+//			}
+//		}
+//
+//		AnimaAllocatorNamespace::DeallocateArray<AnimaRenderingManager*>(*(GetGenericAllocator()), _renderingManagers);
+//		_renderingManagers = nullptr;
+//	}
+//
+//	if (bResetNumber)
+//		_renderingManagersNumber = 0;
+//}
 
 END_ANIMA_ENGINE_NAMESPACE

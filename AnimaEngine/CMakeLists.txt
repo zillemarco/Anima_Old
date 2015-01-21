@@ -23,7 +23,7 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaMesh.h
                     AnimaFace.h
                     AnimaBenchmarkTimer.h
-                    AnimaMaterialProperty.h
+                    AnimaMaterial.h
                     AnimaString.h
 					AnimaMatrix.h
 					AnimaMath.h
@@ -36,7 +36,13 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaThirdPersonCamera.h
 					AnimaCamerasManager.h
 					AnimaTexturesManager.h
-					AnimaTexture.h)
+					AnimaTexture.h
+					AnimaRenderingManager.h
+					AnimaStringUnorderedMap.h
+					AnimaDataGenerator.h
+					AnimaColorGenerator.h
+					AnimaDataGeneratorsManager.h
+					AnimaMaterialsManager.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -53,7 +59,7 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaMesh.cpp
                     AnimaFace.cpp
                     AnimaBenchmarkTimer.cpp
-                    AnimaMaterialProperty.cpp
+                    AnimaMaterial.cpp
                     AnimaString.cpp
 					AnimaMatrix.cpp
 					AnimaMath.cpp
@@ -66,7 +72,13 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaThirdPersonCamera.cpp
 					AnimaCamerasManager.cpp
 					AnimaTexturesManager.cpp
-					AnimaTexture.cpp)
+					AnimaTexture.cpp
+					AnimaRenderingManager.cpp
+					AnimaStringUnorderedMap.cpp
+					AnimaDataGenerator.cpp
+					AnimaColorGenerator.cpp
+					AnimaDataGeneratorsManager.cpp
+					AnimaMaterialsManager.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

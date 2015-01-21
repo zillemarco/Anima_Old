@@ -62,9 +62,9 @@ void main()
 {
 	vec4 totalLight = vec4(ambientLight, 1.0);
 	vec4 color = vec4(materialColor, 1.0);
-    vec4 textureColor = texture2D(materialDiffuseTexture, frag_textureCoord.xy);
+    vec4 textureColor = texture(materialDiffuseTexture, frag_textureCoord.xy);
 	
-	if(textureColor != vec4(0.0, 0.0, 0.0, 0.0))
+	if(textureColor != vec4(0.0, 0.0, 0.0, 1.0))
 		color *= textureColor;
 		
 	vec3 normal = normalize(frag_normal);

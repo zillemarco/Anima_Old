@@ -3,13 +3,15 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine)
+AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager)
 {
 	_engine = engine;
 	_shaders = nullptr;
 	_shadersNumber = 0;
 	_id = 0;
 	_linked = false;
+
+	_shadersManager = shadersManager;
 }
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
@@ -21,6 +23,8 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_shaders = nullptr;
 	_shadersNumber = 0;
 
+	_shadersManager = src._shadersManager;
+
 	SetShaders(src._shaders, src._shadersNumber);
 }
 
@@ -31,6 +35,11 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	, _id(src._id)
 	, _linked(src._linked)
 {
+	_uniforms.clear();
+	_uniforms = src._uniforms;
+
+	_shadersManager = src._shadersManager;
+
 	src._shaders = nullptr;
 	src._shadersNumber = 0;
 	src._id = 0;
@@ -56,6 +65,11 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 	{
 		SetShaders(src._shaders, src._shadersNumber);
 
+		_uniforms.clear();
+		_uniforms = src._uniforms;
+
+		_shadersManager = src._shadersManager;
+
 		_engine = src._engine;
 		_id = src._id;
 		_linked = src._linked;
@@ -69,6 +83,11 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	if (this != &src)
 	{
 		SetShaders(src._shaders, src._shadersNumber);
+
+		_uniforms.clear();
+		_uniforms = src._uniforms;
+
+		_shadersManager = src._shadersManager;
 
 		_engine = src._engine;
 		_id = src._id;
@@ -86,6 +105,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return false;
+	if (_shadersManager != left._shadersManager) return false;
 	if (_engine != left._engine) return false;
 	if (_shadersNumber != left._shadersNumber) return false; 
 	if (_linked != left._linked) return false;
@@ -102,6 +122,7 @@ inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 inline bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return true;
+	if (_shadersManager != left._shadersManager) return true;
 	if (_engine != left._engine) return true;
 	if (_shadersNumber != left._shadersNumber) return true;
 	if (_linked != left._linked) return true;
@@ -248,6 +269,7 @@ bool AnimaShaderProgram::Use()
 			return false;
 	}
 
+	_shadersManager->NotifyProgramActivation(this);
 	glUseProgram(_id);
 
 	return true;
