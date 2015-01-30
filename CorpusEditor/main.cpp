@@ -87,8 +87,12 @@ int main(int argc, char** argv)
 	engine.Initialize();
 			
 #if defined _MSC_VER
-	//Anima::AnimaString path("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmia.3ds", &engine);
-	Anima::AnimaString path("D:/Git/AnimaEngine/AnimaEngine/data/models/nurse.obj", &engine);
+	Anima::AnimaString path1("D:/Git/AnimaEngine/AnimaEngine/data/models/piano.3ds", &engine);
+	Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
+	Anima::AnimaString path3("D:/Git/AnimaEngine/AnimaEngine/data/models/x.3ds", &engine);
+	Anima::AnimaString path4("D:/Git/AnimaEngine/AnimaEngine/data/models/y.3ds", &engine);
+	Anima::AnimaString path5("D:/Git/AnimaEngine/AnimaEngine/data/models/z.3ds", &engine);
+	//Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/nurse.obj", &engine);
 	Anima::AChar tmpFileName[PATH_MAX];
 	sprintf(tmpFileName, "log.log");
 	Anima::AnimaEngine::SetLogFilePath(tmpFileName);
@@ -97,7 +101,15 @@ int main(int argc, char** argv)
 #endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	if(!manager->LoadModel(path))
+	//if(!manager->LoadModel(path1))
+	//	return 0;
+	if (!manager->LoadModel(path2, "origine"))
+		return 0;
+	if (!manager->LoadModel(path3, "x-cubo"))
+		return 0;
+	if (!manager->LoadModel(path4, "y-sfera"))
+		return 0;
+	if (!manager->LoadModel(path5, "z-toro"))
 		return 0;
 				
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
@@ -126,7 +138,7 @@ int main(int argc, char** argv)
 	Anima::AnimaVertex3f forw(&engine);
 	forw[0] = 0;
 	forw[1] = 0;
-	forw[2] = 1.0;
+	forw[2] = -1.0;
 	
 	window->_tpcamera->LookAt(pos, tar);
 	window->_fpcamera->LookAt(pos, forw);

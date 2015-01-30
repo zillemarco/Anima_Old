@@ -673,16 +673,16 @@ bool CorpusDocument::ImportModel()
 		return false;
 	}
 	
-	if(!_engine->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData()))
-	{
-		QMessageBox msg;
-		msg.setWindowTitle(QString("CorpusEditor"));
-		msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
-		msg.exec();
-		
-		QFile::remove(copiedFilePath);
-		return false;
-	}
+	//if(!_engine->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData()))
+	//{
+	//	QMessageBox msg;
+	//	msg.setWindowTitle(QString("CorpusEditor"));
+	//	msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
+	//	msg.exec();
+	//	
+	//	QFile::remove(copiedFilePath);
+	//	return false;
+	//}
 	
 	_hasModifications = true;
 	
@@ -793,15 +793,15 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 
 bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileName)
 {
-	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
-	
-	Anima::AnimaModel* model = _engine->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData());
-	
-	if(!model)
-		return false;
-	
-	model->SetModelName(modelName.toLocal8Bit().constData());
-	model->SetModelFileName(modelFileName.toLocal8Bit().constData());
+	//QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
+	//
+	//Anima::AnimaModel* model = _engine->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData());
+	//
+	//if(!model)
+	//	return false;
+	//
+	//model->SetModelName(modelName.toLocal8Bit().constData());
+	//model->SetModelFileName(modelFileName.toLocal8Bit().constData());
 	
 	return true;
 }

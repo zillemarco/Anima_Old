@@ -19,19 +19,35 @@ public:
 	AnimaShadersManager(AnimaEngine* engine);
 	~AnimaShadersManager();
 
-	AnimaShader* LoadShader(AnimaString text, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShader(const AChar* text, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(AnimaString filePath, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const AChar* filePath, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShader(AnimaShaderProgram::AnimaShaderInfo info);
-	bool LoadShaders(const AnimaShaderProgram::AnimaShaderInfo* info, ASizeT count, AnimaShader** output);
+	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShader(const AnimaString& name, const AChar* text, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShader(const char* name, const AnimaString& text, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShader(const char* name, const AChar* text, AnimaShader::AnimaShaderType type);
+	
+	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AnimaString& filePath, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const char* name, const AnimaString& filePath, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShader::AnimaShaderType type);
+	
+	AnimaShader* LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info);
+	AnimaShader* LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info);
+	
+	//bool LoadShaders(const AnimaShaderProgram::AnimaShaderInfo* info, ASizeT count, AnimaShader** output);
 
-	AnimaShader* CreateShader();
-	AnimaShaderProgram* CreateProgram();
+	AnimaShader* CreateShader(const AnimaString& name);
+	AnimaShader* CreateShader(const char* name);
+
+	AnimaShaderProgram* CreateProgram(const AnimaString& name);
+	AnimaShaderProgram* CreateProgram(const char* name);
 
 	AnimaShaderProgram* GetProgram(ASizeT index);
+	AnimaShaderProgram* GetProgramFromName(const AnimaString& name);
+	AnimaShaderProgram* GetProgramFromName(const char* name);
 
 	void SetActiveProgram(AnimaShaderProgram* program);
+	void SetActiveProgramFromName(const AnimaString& name);
+	void SetActiveProgramFromName(const char* name);
+
 	AnimaShaderProgram* GetActiveProgram();
 
 private:
@@ -51,6 +67,11 @@ private:
 
 	AnimaShaderProgram**	_programs;
 	ASizeT					_programsNumber;
+
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _shadersMap;
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _programsMap;
+#pragma warning (default: 4251)
 };
 
 END_ANIMA_ENGINE_NAMESPACE

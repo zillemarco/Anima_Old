@@ -31,13 +31,24 @@ public:
 	~AnimaModelsManager();
 	
 public:
-	AnimaModel* LoadModel(const char* modelPath);
-	AnimaModel* LoadModel(AnimaString& modelPath);
-	void AddModel(const AnimaModel& model);
+	AnimaModel* LoadModel(const char* modelPath, const AnimaString& name);
+	AnimaModel* LoadModel(const char* modelPath, const char* name);
+	AnimaModel* LoadModel(const AnimaString& modelPath, const AnimaString& name);
+	AnimaModel* LoadModel(const AnimaString& modelPath, const char* name);
+	void AddModel(const AnimaModel& model, const AnimaString& name);
+	void AddModel(const AnimaModel& model, const char* name);
+
 	ASizeT GetModelsNumber();
+
 	AnimaModel GetModel(ASizeT index);
 	AnimaModel* GetPModel(ASizeT index);
+	AnimaModel GetModelFromName(const AnimaString& name);
+	AnimaModel GetModelFromName(const char* name);
+	AnimaModel* GetPModelFromName(const AnimaString& name);
+	AnimaModel* GetPModelFromName(const char* name);
+	
 	AnimaModel* GetModels();
+
 	void ClearModels();
 	
 	ASizeT GetNextModelID();
@@ -53,6 +64,10 @@ private:
 	ASizeT		_modelsNumber;
 	
 	ASizeT		_nextModelID;
+
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _modelsMap;
+#pragma warning (default: 4251) 
 };
 
 END_ANIMA_ENGINE_NAMESPACE

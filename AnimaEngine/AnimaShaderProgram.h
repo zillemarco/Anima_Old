@@ -33,6 +33,11 @@ public:
 		}
 	};
 
+	struct AnimaUniformInfo {
+		AInt _location;
+		AUint _type;
+	};
+
 public:
 	AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager);
 	AnimaShaderProgram(const AnimaShaderProgram& src);
@@ -63,8 +68,7 @@ public:
 	AInt GetID();
 
 public:
-	bool AddUniform(const AnimaString& uniformName);
-	bool AddUniform(const char* uniformName);
+	void ScanVariables();
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
@@ -72,11 +76,15 @@ public:
 	void SetUniformf(const char* uniformName, AFloat value);
 	void SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value);
 	void SetUniform(const char* uniformName, const AnimaVertex3f& value);
+	void SetUniform(const AnimaString& uniformName, const AnimaColor4f& value);
+	void SetUniform(const char* uniformName, const AnimaColor4f& value);
 	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c);
 	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c);
+	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
+	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value);
 	void SetUniform(const char* uniformName, const AnimaMatrix& value);
-
+	
 private:
 	AnimaEngine*	_engine;
 	
@@ -86,7 +94,7 @@ private:
 	AnimaShadersManager* _shadersManager;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _uniforms;
+	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaString::Hasher> _uniforms;
 #pragma warning (default: 4251) 
 
 	AInt			_id;

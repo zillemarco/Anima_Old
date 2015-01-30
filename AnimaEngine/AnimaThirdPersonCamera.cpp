@@ -204,14 +204,18 @@ void AnimaThirdPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVe
 	_position = position;
 	_target = target;
 
-	_zAxis = _position - _target;
+	_zAxis = _target - _position;
 	_zAxis.Normalize();
 
-	_xAxis = _worldYAxis ^ _zAxis;
+	_xAxis = _zAxis ^ _worldYAxis;
 	_xAxis.Normalize();
 
-	_yAxis = _zAxis ^ _xAxis;
+	_yAxis = _worldYAxis;// _zAxis ^ _xAxis;
 	_yAxis.Normalize();
+
+	//_xAxis.DumpMemory(false);
+	//_yAxis.DumpMemory(false);
+	//_zAxis.DumpMemory(false);
 
 	CalculateViewMatrix();
 }
@@ -234,10 +238,29 @@ void AnimaThirdPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat z
 
 void AnimaThirdPersonCamera::CalculateViewMatrix()
 {
-	_viewMatrix[0] = _xAxis[0];								_viewMatrix[1] = _yAxis[0];								_viewMatrix[2] = _zAxis[0];								_viewMatrix[3] = 0.0f;
-	_viewMatrix[4] = _xAxis[1];								_viewMatrix[5] = _yAxis[1];								_viewMatrix[6] = _zAxis[1];								_viewMatrix[7] = 0.0f;
-	_viewMatrix[8] = _xAxis[2];								_viewMatrix[9] = _yAxis[2];								_viewMatrix[10] = _zAxis[2];							_viewMatrix[11] = 0.0f;
-	_viewMatrix[12] = -AnimaMath::Dot(_xAxis, _position);	_viewMatrix[13] = -AnimaMath::Dot(_yAxis, _position);	_viewMatrix[14] = -AnimaMath::Dot(_zAxis, _position);	_viewMatrix[15] = 1.0f;
+	//_xAxis[0] = 1.0f;
+	//_xAxis[1] = 0.0f;
+	//_xAxis[2] = 0.0f;
+
+	//_yAxis[0] = 0.0f;
+	//_yAxis[1] = 1.0f;
+	//_yAxis[2] = 0.0f;
+
+	//_zAxis[0] = 0.0f;
+	//_zAxis[1] = 0.0f;
+	//_zAxis[2] = -1.0f;
+	
+	_viewMatrix[0] = _xAxis[0];		_viewMatrix[1] = _yAxis[0];		_viewMatrix[2] = -_zAxis[0];	_viewMatrix[3] = 0.0f;
+	_viewMatrix[4] = _xAxis[1];		_viewMatrix[5] = _yAxis[1];		_viewMatrix[6] = -_zAxis[1];	_viewMatrix[7] = 0.0f;
+	_viewMatrix[8] = _xAxis[2];		_viewMatrix[9] = _yAxis[2];		_viewMatrix[10] = -_zAxis[2];	_viewMatrix[11] = 0.0f;
+	_viewMatrix[12] = 0.0f;			_viewMatrix[13] = 0.0f;			_viewMatrix[14] = 0.0f;			_viewMatrix[15] = 1.0f;
+
+	_viewMatrix.Translate(-_position[0], -_position[1], -_position[2]);
+
+	//_viewMatrix[0] = _xAxis[0];								_viewMatrix[1] = _yAxis[0];								_viewMatrix[2] = _zAxis[0];								_viewMatrix[3] = 0.0f;
+	//_viewMatrix[4] = _xAxis[1];								_viewMatrix[5] = _yAxis[1];								_viewMatrix[6] = _zAxis[1];								_viewMatrix[7] = 0.0f;
+	//_viewMatrix[8] = _xAxis[2];								_viewMatrix[9] = _yAxis[2];								_viewMatrix[10] = _zAxis[2];							_viewMatrix[11] = 0.0f;
+	//_viewMatrix[12] = -AnimaMath::Dot(_xAxis, _position);	_viewMatrix[13] = -AnimaMath::Dot(_yAxis, _position);	_viewMatrix[14] = -AnimaMath::Dot(_zAxis, _position);	_viewMatrix[15] = 1.0f;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

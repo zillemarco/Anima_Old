@@ -23,6 +23,8 @@ public:
 	AnimaColorGenerator(AnimaEngine* engine);
 	AnimaColorGenerator(AnimaEngine* engine, const AnimaColor3f& color);
 	AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b);
+	AnimaColorGenerator(AnimaEngine* engine, const AnimaColor4f& color);
+	AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b, AFloat a);
 	AnimaColorGenerator(const AnimaColorGenerator& src);
 	AnimaColorGenerator(AnimaColorGenerator&& src);
 	~AnimaColorGenerator();
@@ -33,12 +35,15 @@ public:
 public:
 	void UpdateValue() override;
 
-	void SetColor3f(const AnimaColor3f& color) override;
-	void SetColor3f(AFloat r, AFloat g, AFloat b) override;
+	void SetColor(const AnimaColor3f& color) override;
+	void SetColor(AFloat r, AFloat g, AFloat b) override;
+	void SetColor(const AnimaColor4f& color) override;
+	void SetColor(AFloat r, AFloat g, AFloat b, AFloat a) override;
 	AnimaColor3f GetColor3f() override;
+	AnimaColor4f GetColor4f() override;
 
 protected:
-	AnimaColor3f _color;
+	AnimaColor4f _color;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

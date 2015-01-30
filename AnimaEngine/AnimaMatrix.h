@@ -52,6 +52,15 @@ public:
 	AnimaMatrix Transpose() const;
 	inline float Determinant() const;
 	
+	void InitTranslation(float tx, float ty, float tz);
+	void InitTranslation(const AnimaVertex3f& translation);
+	void InitRotation(float rx, float ry, float rz);
+	void InitRotation(const AnimaVertex3f& rotation);
+	void InitRotationDeg(float rx, float ry, float rz);
+	void InitRotationDeg(const AnimaVertex3f& rotation);
+	void InitScale(float sx, float sy, float sz);
+	void InitScale(const AnimaVertex3f& scale);
+
 	void Translate(float tx, float ty, float tz);
 	void Translate(const AnimaVertex3f& translation);
 	void Scale(float sx, float sy, float sz);

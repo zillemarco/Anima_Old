@@ -26,14 +26,29 @@ AnimaModelsManager::~AnimaModelsManager()
 	ClearModels();
 }
 
-AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath)
+AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const char* name)
 {
-	AnimaString str(modelPath, _engine);
-	return LoadModel(str);
+	AnimaString str(name, _engine);
+	return LoadModel(modelPath, str);
 }
 
-AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
-{	
+AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const AnimaString& name)
+{
+	AnimaString str(modelPath, _engine);
+	return LoadModel(str, name);
+}
+
+AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const char* name)
+{
+	AnimaString str(name, _engine);
+	return LoadModel(modelPath, str);
+}
+
+AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const AnimaString& name)
+{
+	if (_modelsMap.find(name) != _modelsMap.end())
+		return nullptr;
+
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
@@ -61,11 +76,13 @@ AnimaModel* AnimaModelsManager::LoadModel(AnimaString& modelPath)
 	
 	newModel->SetModelFileName(modelFileName);
 	
-	AddModel(*newModel);
+	AddModel(*newModel, name);
 	
 	AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetModelsAllocator()), newModel);
 	
 	importer.FreeScene();
+
+	_modelsMap[name] = (AUint)_modelsNumber - 1;
 	
 	return &_models[_modelsNumber - 1];
 }
@@ -75,13 +92,13 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 	if (sceneNode->mName.length > 0)
 		currentModel->SetModelName(sceneNode->mName.C_Str());
 
-	AnimaMatrix* modelMatrix = currentModel->GetPTransformationMatrix();
-	modelMatrix->SetData(sceneNode->mTransformation.a1, 0); modelMatrix->SetData(sceneNode->mTransformation.a2, 1); modelMatrix->SetData(sceneNode->mTransformation.a3, 2); modelMatrix->SetData(sceneNode->mTransformation.a4, 3);
-	modelMatrix->SetData(sceneNode->mTransformation.b1, 4); modelMatrix->SetData(sceneNode->mTransformation.b2, 5); modelMatrix->SetData(sceneNode->mTransformation.b3, 6); modelMatrix->SetData(sceneNode->mTransformation.b4, 7);
-	modelMatrix->SetData(sceneNode->mTransformation.c1, 8); modelMatrix->SetData(sceneNode->mTransformation.c2, 9); modelMatrix->SetData(sceneNode->mTransformation.c3, 10); modelMatrix->SetData(sceneNode->mTransformation.c4, 11);
-	modelMatrix->SetData(sceneNode->mTransformation.d1, 12); modelMatrix->SetData(sceneNode->mTransformation.d2, 13); modelMatrix->SetData(sceneNode->mTransformation.d3, 14); modelMatrix->SetData(sceneNode->mTransformation.d4, 15);
+	AnimaMatrix modelMatrix(_engine);
+	modelMatrix.SetData(sceneNode->mTransformation.a1, 0);	modelMatrix.SetData(sceneNode->mTransformation.a2, 1);	modelMatrix.SetData(sceneNode->mTransformation.a3, 2);	modelMatrix.SetData(sceneNode->mTransformation.a4, 3);
+	modelMatrix.SetData(sceneNode->mTransformation.b1, 4);	modelMatrix.SetData(sceneNode->mTransformation.b2, 5);	modelMatrix.SetData(sceneNode->mTransformation.b3, 6);	modelMatrix.SetData(sceneNode->mTransformation.b4, 7);
+	modelMatrix.SetData(sceneNode->mTransformation.c1, 8);	modelMatrix.SetData(sceneNode->mTransformation.c2, 9);	modelMatrix.SetData(sceneNode->mTransformation.c3, 10); modelMatrix.SetData(sceneNode->mTransformation.c4, 11);
+	modelMatrix.SetData(sceneNode->mTransformation.d1, 12); modelMatrix.SetData(sceneNode->mTransformation.d2, 13); modelMatrix.SetData(sceneNode->mTransformation.d3, 14); modelMatrix.SetData(sceneNode->mTransformation.d4, 15);
 
-	(*modelMatrix) = modelMatrix->Transpose();
+	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transpose());
 
 	int numeroMesh = sceneNode->mNumMeshes;
 	
@@ -128,7 +145,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				
 				for(int i = 0; i < numeroIndiciFaccia; i++)
 					indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
-				
+								
 				facce[offsetFacce++].SetIndexes(indiciFaccia, offsetIndiciFaccia);
 				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), indiciFaccia);
 			}
@@ -204,24 +221,27 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 	}
 }
 
-void AnimaModelsManager::AddModel(const AnimaModel& model)
+void AnimaModelsManager::AddModel(const AnimaModel& model, const char* name)
+{
+	AnimaString str(name, _engine);
+	AddModel(model, str);
+}
+
+void AnimaModelsManager::AddModel(const AnimaModel& model, const AnimaString& name)
 {
 	ANIMA_ASSERT(_engine != nullptr);
 	if(_modelsNumber > 0)
 	{
 		AnimaModel* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
 	
-		//memcpy(tmpOldVertices, _vertices, sizeof(AnimaVertex4f) * _verticesNumber);
 		for (int i = 0; i < _modelsNumber; i++)
 			tmpOldModels[i] = _models[i];
 	
-		//_allocator->Deallocate(_vertices);
 		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
 	
 		_modelsNumber++;
 		_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine);
 	
-		//memcpy(_vertices, tmpOldVertices, sizeof(AnimaVertex4f) * (_verticesNumber - 1));
 		for (int i = 0; i < _modelsNumber - 1; i++)
 			_models[i] = tmpOldModels[i];
 	
@@ -274,6 +294,32 @@ ASizeT AnimaModelsManager::GetNextModelID()
 	return _nextModelID++;
 }
 
+AnimaModel AnimaModelsManager::GetModelFromName(const AnimaString& name)
+{
+	if (_modelsMap.find(name) == _modelsMap.end())
+		return nullptr;
+	return GetModel((ASizeT)_modelsMap[name]);
+}
+
+AnimaModel AnimaModelsManager::GetModelFromName(const char* name)
+{
+	AnimaString str(name, _engine);
+	return GetModelFromName(str);
+}
+
+AnimaModel* AnimaModelsManager::GetPModelFromName(const AnimaString& name)
+{
+	if (_modelsMap.find(name) == _modelsMap.end())
+		return nullptr;
+	return GetPModel((ASizeT)_modelsMap[name]);
+}
+
+AnimaModel* AnimaModelsManager::GetPModelFromName(const char* name)
+{
+	AnimaString str(name, _engine);
+	return GetPModelFromName(str);
+}
+
 void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 {
 	AnimaMaterial* material = mesh->GetMaterial();
@@ -304,26 +350,27 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 	aiColor4D emission;
 	float shininess, strength;
 	unsigned int max;
+	int two_sided;
 	
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == AI_SUCCESS)
-		material->AddColor("diffuseColor", diffuse.r, diffuse.g, diffuse.b);
+		material->AddColor("diffuseColor", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
 	else
-		material->AddColor("diffuseColor", 0.8, 0.8, 0.8);
+		material->AddColor("diffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular) == AI_SUCCESS)
-		material->AddColor("specularColor", specular.r, specular.g, specular.b);
+		material->AddColor("specularColor", specular.r, specular.g, specular.b, specular.a);
 	else
-		material->AddColor("specularColor", 0.0, 0.0, 0.0);
+		material->AddColor("specularColor", 0.0f, 0.0f, 0.0f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient) == AI_SUCCESS)
-		material->AddColor("ambientColor", ambient.r, ambient.g, ambient.b);
+		material->AddColor("ambientColor", ambient.r, ambient.g, ambient.b, ambient.a);
 	else
-		material->AddColor("ambientColor", 0.2, 0.2, 0.2);
+		material->AddColor("ambientColor", 0.2f, 0.2f, 0.2f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission) == AI_SUCCESS)
-		material->AddColor("emissionColor", emission.r, emission.g, emission.b);
+		material->AddColor("emissionColor", emission.r, emission.g, emission.b, emission.a);
 	else
-		material->AddColor("emissionColor", 0.0, 0.0, 0.0);
+		material->AddColor("emissionColor", 0.0f, 0.0f, 0.0f, 1.0f);
 	
 	max = 1;
 	ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
@@ -339,9 +386,15 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 	}
 	else 
 	{
-		material->AddFloat("shiness", shininess);
-		//material->AddColor("specularColor", 0.0, 0.0, 0.0);
+		material->AddFloat("shiness", 0.0f);
+		material->SetColor("specularColor", 0.0, 0.0, 0.0, 1.0f);
 	}
+
+	max = 1;
+	if ((aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max) == AI_SUCCESS) && two_sided)
+		material->AddBoolean("twoSided", true);
+	else
+		material->AddBoolean("twoSided", false);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

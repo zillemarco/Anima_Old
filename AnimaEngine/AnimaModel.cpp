@@ -16,7 +16,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaModel::AnimaModel(AnimaEngine* engine)
 : _modelName(engine)
 , _modelFileName(engine)
-, _transformationMatrix(engine)
+//, _transformationMatrix(engine)
+, _transformation(engine)
 {
 	ANIMA_ASSERT(engine != nullptr)
 	_engine = engine;
@@ -32,7 +33,8 @@ AnimaModel::AnimaModel(AnimaEngine* engine)
 AnimaModel::AnimaModel(const AnimaModel& src)
 : _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
-, _transformationMatrix(src._transformationMatrix)
+//, _transformationMatrix(src._transformationMatrix)
+, _transformation(src._transformation)
 {
 	_engine = src._engine;
 	
@@ -53,7 +55,8 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _modelMeshesNumber(src._modelMeshesNumber)
 , _modelName(src._modelName)
 , _modelFileName(src._modelFileName)
-, _transformationMatrix(src._transformationMatrix)
+//, _transformationMatrix(src._transformationMatrix)
+, _transformation(src._transformation)
 , _engine(src._engine)
 {
 	src._modelChildren = nullptr;
@@ -77,7 +80,10 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 	{
 		_engine = src._engine;
 		
-		SetTransformationMatrix(src._transformationMatrix);
+		//SetTransformationMatrix(src._transformationMatrix);
+
+		_transformation = src._transformation;
+		
 		SetModelName(src._modelName);
 		SetModelFileName(src._modelFileName);
 		SetChildren(src._modelChildren, src._modelChildrenNumber);
@@ -102,7 +108,8 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		_modelName = src._modelName;
 		_modelFileName = src._modelFileName;
 
-		_transformationMatrix = src._transformationMatrix;
+		//_transformationMatrix = src._transformationMatrix;
+		_transformation = src._transformation;
 		
 		src._modelChildren = nullptr;
 		src._modelMeshes = nullptr;
@@ -310,34 +317,44 @@ const char* AnimaModel::GetModelFileName()
 	return _modelFileName.GetConstBuffer();
 }
 
-AnimaMatrix AnimaModel::GetTransformationMatrix()
+//AnimaMatrix AnimaModel::GetTransformationMatrix()
+//{
+//	return _transformationMatrix;
+//}
+//
+//AnimaMatrix* AnimaModel::GetPTransformationMatrix()
+//{
+//	return &_transformationMatrix;
+//}
+//
+//const AFloat* AnimaModel::GetTransformationMatrixFlt()
+//{
+//	return _transformationMatrix.GetConstData();
+//}
+//
+//void AnimaModel::GetTransformationMatrixFlt(AFloat* m)
+//{
+//	_transformationMatrix.GetData(m);
+//}
+//
+//void AnimaModel::SetTransformationMatrix(AnimaMatrix m)
+//{
+//	_transformationMatrix = m;
+//}
+//
+//void AnimaModel::SetTransformationMatrix(AFloat* m)
+//{
+//	_transformationMatrix.SetData(m);
+//}
+
+AnimaTransformation* AnimaModel::GetTransformation()
 {
-	return _transformationMatrix;
+	return &_transformation;
 }
 
-AnimaMatrix* AnimaModel::GetPTransformationMatrix()
+AnimaTransformation AnimaModel::GetTransformationCopy()
 {
-	return &_transformationMatrix;
-}
-
-const AFloat* AnimaModel::GetTransformationMatrixFlt()
-{
-	return _transformationMatrix.GetConstData();
-}
-
-void AnimaModel::GetTransformationMatrixFlt(AFloat* m)
-{
-	_transformationMatrix.GetData(m);
-}
-
-void AnimaModel::SetTransformationMatrix(AnimaMatrix m)
-{
-	_transformationMatrix = m;
-}
-
-void AnimaModel::SetTransformationMatrix(AFloat* m)
-{
-	_transformationMatrix.SetData(m);
+	return _transformation;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

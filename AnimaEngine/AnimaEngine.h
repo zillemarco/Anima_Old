@@ -55,6 +55,7 @@ class AnimaCamerasManager;
 class AnimaTexturesManager;
 class AnimaDataGeneratorsManager;
 class AnimaMaterialsManager;
+class AnimaLightsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -66,10 +67,10 @@ public:
 	bool Initialize();
 	void Terminate();
 
-	AnimaWindow* GetWindowListHead() { return _windowListHead;	}
+	AnimaWindow* GetWindowListHead() { return _windowListHead; }
 
-	AnimaWindow* GetFocusedWindow()			{ return _focusedWindow;	}
-	void SetFocusedWindow(AnimaWindow* w)	{ _focusedWindow = w;		}
+	AnimaWindow* GetFocusedWindow()			{ return _focusedWindow; }
+	void SetFocusedWindow(AnimaWindow* w)	{ _focusedWindow = w; }
 
 	template<class T>
 	T* CreateAnimaWindow(int width, int height, const char* title, AnimaEngineWindowmonitor* monitor = NULL, AnimaWindow* share = NULL);
@@ -83,12 +84,12 @@ public:
 	double GetTime(void);
 	void SetTime(double time);
 	double GetTimeResolution() { return _GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE->_resolution; }
-	
+
 	void MakeContextCurrent(AnimaWindow* window);
 	AnimaWindow* GetCurrentContext(void);
-	
+
 	static void SwapInterval(int interval);
-	
+
 	static void GetVersion(int* major, int* minor, int* rev);
 	static const char* GetVersionString(void);
 
@@ -100,33 +101,33 @@ public:
 	static void GetMonitorPos(AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos);
 	static void GetMonitorPhysicalSize(AnimaEngineWindowmonitor* monitor, int* width, int* height);
 	static const char* GetMonitorName(AnimaEngineWindowmonitor* monitor);
-	
+
 	static AnimaEngineWindowmonitorfun SetMonitorCallback(AnimaEngineWindowmonitorfun cbfun);
-	
+
 	static const AnimaEngineWindowvidmode* GetVideoModes(AnimaEngineWindowmonitor* monitor, int* count);
 	static const AnimaEngineWindowvidmode* GetVideoMode(AnimaEngineWindowmonitor* monitor);
-	
+
 	static void SetGamma(AnimaEngineWindowmonitor* monitor, float gamma);
 	static const AnimaEngineWindowgammaramp* GetGammaRamp(AnimaEngineWindowmonitor* monitor);
 	static void SetGammaRamp(AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp);
-	
+
 	static AnimaEngineWindowcursor* CreateCursor(const AnimaEngineWindowimage* image, int xhot, int yhot);
 	static void DestroyCursor(AnimaEngineWindowcursor* cursor);
 
 	static bool JoystickPresent(int joy);
-	
+
 	static const float* GetJoystickAxes(int joy, int* count);
 	static const unsigned char* GetJoystickButtons(int joy, int* count);
 	static const char* GetJoystickName(int joy);
 	static bool ExtensionSupported(const char* extension);
-	
+
 	static void SetUsedExternal(bool bUsedExternal = true) { _usedExternal = bUsedExternal; }
 	static bool IsUsedExteral() { return _usedExternal; }
 
 	static bool InitializeGlewExtensions();
 	static bool IsGlewExtensionsInitialized()			{ return _glewExtensionsInitialized; }
 	static void SetGlewExtensionsInitialized(bool bSet) { _glewExtensionsInitialized = bSet; }
-	
+
 	static void SetLogFilePath(const AChar* path);
 	static AChar* GetLogFilePath();
 
@@ -145,19 +146,19 @@ public:
 		ANIMA_ASSERT(_modelsAllocator != nullptr);
 		return _modelsAllocator;
 	}
-	
+
 	inline AnimaAllocator* GetGenericAllocator()
 	{
 		ANIMA_ASSERT(_genericAllocator != nullptr);
 		return _genericAllocator;
 	}
-	
+
 	inline AnimaAllocator* GetModelDataAllocator()
 	{
 		ANIMA_ASSERT(_modelDataAllocator != nullptr);
 		return _modelDataAllocator;
 	}
-	
+
 	inline AnimaAllocator* GetStringAllocator()
 	{
 		ANIMA_ASSERT(_stringAllocator != nullptr);
@@ -210,6 +211,12 @@ public:
 	{
 		ANIMA_ASSERT(_materialsManager != nullptr);
 		return _materialsManager;
+	}
+
+	inline AnimaLightsManager* GetLightsManager()
+	{
+		ANIMA_ASSERT(_lightsManager != nullptr);
+		return _lightsManager;
 	}
 
 	void DumpMemory(const char* fileName, bool bLogToFile = true);
@@ -270,6 +277,7 @@ private:
 	AnimaTexturesManager* _texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
 	AnimaDataGeneratorsManager* _dataGeneratorsManager;
 	AnimaMaterialsManager* _materialsManager;
+	AnimaLightsManager* _lightsManager;
 	
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 };

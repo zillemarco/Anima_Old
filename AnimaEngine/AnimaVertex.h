@@ -286,6 +286,13 @@ public:
 			_data[i] /= len;
 	}
 
+	AnimaVertex Normalized()
+	{
+		AnimaVertex rv(this->_engine, this->_data);
+		rv.Normalize();
+		return rv;
+	}
+
 	ASizeT GetSize() const
 	{
 		return _size;

@@ -10,6 +10,9 @@
 #include <AnimaTexturesManager.h>
 #include <AnimaRenderingManager.h>
 #include <AnimaDataGeneratorsManager.h>
+#include <AnimaLight.h>
+#include <AnimaLightsManager.h>
+#include <AnimaMath.h>
 
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
@@ -43,88 +46,33 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
+	Anima::AnimaMatrix rm0(GetEngine());
+	Anima::AnimaMatrix rm1(GetEngine());
+	rm0.RotateY(rotY);
+	rotY += 0.00001;
+
+	//GetEngine()->GetModelsManager()->GetPModel(1)->GetTransformation()->RotateX(rotX);
+	//rm1.RotateX(rotX);
+	//rotX += 0.00001;
+
+	//Anima::AnimaVertex3f p0 = pointL0->GetPosition();
+	//p0 = Anima::AnimaMath::MatrixMulVector(rm0, p0);
+	//pointL0->SetPosition(p0);
+
+	//Anima::AnimaVertex3f p1 = pointL1->GetPosition();
+	//p1 = Anima::AnimaMath::MatrixMulVector(rm1, p1);
+	//pointL1->SetPosition(p1);
+
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
 	Anima::AnimaRenderingManager::Start(GetEngine());
 
-	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(0), GetEngine()->GetShadersManager()->GetProgram(0));
+	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(0), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
+	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(1), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
+	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(2), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
+	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(3), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
 
 	Anima::AnimaRenderingManager::Finish(GetEngine());
-
-	//GLenum error = glGetError();
-
-	//int w, h;
-	//GetWindowSize(&w, &h);
-	//
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glGetError();
-	//glClearColor(0.5, 0.5, 0.5, 1.0);
-	//
-	//error = glGetError();
-	//
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
-	//
-	//error = glGetError();
-
-	//glEnable(GL_TEXTURE_2D);
-
-	//error = glGetError();
-
-	//program->Use();
-	//
-	//error = glGetError();
-
-	//Anima::AnimaCamera* camera = GetEngine()->GetCamerasManager()->GetActiveCamera();
-	//Anima::AnimaMatrix viewMatrix = camera->GetViewMatrix();
-	//Anima::AnimaMatrix modelMatrix(GetEngine());
-	//modelMatrix.RotateYDeg(rotY);
-	//rotY += 0.05;
-	//Anima::AnimaMatrix projectionMatrix(GetEngine());
-	//projectionMatrix.Perspective(60.0f, w / h, 0.01f, 1000.0f);
-	//
-	//Anima::AnimaMatrix modelViewMatrix = modelMatrix * viewMatrix;
-	//Anima::AnimaMatrix mvpMatrix = modelViewMatrix * projectionMatrix;
-	//Anima::AnimaMatrix normalMatrix = modelMatrix;
-
-	//Anima::AnimaVertex3f lightDir(GetEngine());
-	//lightDir[0] = -1.0;
-	//lightDir[1] = -1.0;
-	//lightDir[2] = -1.0;
-
-	//lightDir.Normalize();
-
-	//program->SetUniform("mvpMatrix", mvpMatrix);
-	//program->SetUniform("normalMatrix", normalMatrix);
-	//program->SetUniform("materialColor", 1.0, 1.0, 1.0);
-	//program->SetUniform("ambientLight", 0.0, 0.0, 0.0);
-	//program->SetUniform("directionalLight.base.color", 1.0, 1.0, 1.0);
-	//program->SetUniformf("directionalLight.base.intensity", 1.0);
-	//program->SetUniform("directionalLight.direction", lightDir);
-	//program->SetUniformf("specularIntensity", 2.0);
-	//program->SetUniformf("specularPower", 32.0);
-	//program->SetUniform("eyePosition", camera->GetPosition());
-
-	//error = glGetError();
-
-	//Anima::AnimaModelsManager* mgr = GetEngine()->GetModelsManager();
-	//Anima::AnimaMatrix m(GetEngine());
-	//if (mgr->GetModelsNumber() > 0)
-	//{
-	//	error = glGetError();
-
-	//	texture->Bind();
-	//	//_program->SetUniformi("sampler", _texture->GetID());
-	//	mgr->GetPModel(0)->Draw(m);
-
-	//	error = glGetError();
-	//}
-
-	//error = glGetError();
-
-	//glDisable(GL_TEXTURE_2D);
 
 	SwapBuffers();
 }
@@ -135,14 +83,8 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 
 	if (ctx)
 	{
-		GLenum error = glGetError();
 		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
-		error = glGetError();
-		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1, 1000.0);
-		error = glGetError();
-
-		int i = 0;
-		i++;
+		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
 	}
 	else
 	{
@@ -240,8 +182,8 @@ void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 void Window::Load()
 {
 #if defined _MSC_VER
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
+	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("basic-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
+	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("basic-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #else
 	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
 	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
@@ -249,33 +191,40 @@ void Window::Load()
 
 	GLenum error = glGetError();
 	
-	program = GetEngine()->GetShadersManager()->CreateProgram();
+	program = GetEngine()->GetShadersManager()->CreateProgram("basic");
 	program->Create();
 	program->AddShader(vs);
 	program->AddShader(fs);
 	program->Link();
 
-	program->AddUniform("viewProjectionMatrix");
-	program->AddUniform("modelMatrix");
-	program->AddUniform("materialColor");
-	program->AddUniform("materialDiffuseTexture");
-	program->AddUniform("ambientLight");
-	program->AddUniform("directionalLight.base.color");
-	program->AddUniform("directionalLight.base.intensity");
-	program->AddUniform("directionalLight.direction");
-	program->AddUniform("specularIntensity");
-	program->AddUniform("specularPower");
-	program->AddUniform("eyePosition");
-
-	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/cubo.bmp", "texture-cubo");
+	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
 	texture->Load();
+	
+	Anima::AnimaAmbientLight* ambL = GetEngine()->GetLightsManager()->CreateAmbientLight("ambient");
+	ambL->SetColor(1.0, 1.0, 1.0);
 
-	//material = new Anima::AnimaMaterial(GetEngine());
-	//material->AddFloat("lightIntensity", 1.0f);
-	//material->AddFloat("specInt", 2.0f);
-	//material->AddFloat("specPow", 32.0f);
-	//material->AddTexture("diffuse", texture);
-	//material->AddColor("materialColor", 1.0, 1.0, 1.0);
-	//material->AddColor("lightColor", 1.0, 1.0, 1.0);
-	//material->AddColor("ambientColor", 0.0, 0.0, 0.0);
+	//Anima::AnimaDirectionalLight* dirL = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
+	//dirL->SetColor(1.0f, 1.0f, 1.0f);
+	//dirL->SetIntensity(1.0f);
+	//dirL->SetDirection(-1.0f, -1.0f, -1.0f);
+	
+	//pointL0 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight0");
+	//pointL0->SetColor(0.0f, 0.0f, 1.0f);
+	//pointL0->SetConstantAttenuation(0.0f);
+	//pointL0->SetLinearAttenuation(0.0f);
+	//pointL0->SetExponentAttenuation(0.01f);
+	//pointL0->SetIntensity(1.0f);
+	//pointL0->SetPosition(-10.0f, 0.0f, 0.0f);
+
+	//pointL1 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight1");
+	//pointL1->SetColor(1.0f, 0.0f, 0.0f);
+	//pointL1->SetConstantAttenuation(0.0f);
+	//pointL1->SetLinearAttenuation(0.0f);
+	//pointL1->SetExponentAttenuation(0.01f);
+	//pointL1->SetIntensity(1.0f);
+	//pointL1->SetPosition(0.0f, 0.0f, -10.0f);
+
+	GetEngine()->GetModelsManager()->GetPModelFromName("x-cubo")->GetTransformation()->TranslateX(10.0f);
+	GetEngine()->GetModelsManager()->GetPModelFromName("y-sfera")->GetTransformation()->TranslateY(10.0f);
+	GetEngine()->GetModelsManager()->GetPModelFromName("z-toro")->GetTransformation()->TranslateZ(10.0f);
 }

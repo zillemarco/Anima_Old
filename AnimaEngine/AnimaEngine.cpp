@@ -6,6 +6,7 @@
 #include "AnimaTexturesManager.h"
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaMaterialsManager.h"
+#include "AnimaLightsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -57,6 +58,7 @@ AnimaEngine::AnimaEngine()
 	_texturesManager = nullptr;
 	_dataGeneratorsManager = nullptr;
 	_materialsManager = nullptr;
+	_lightsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -140,6 +142,7 @@ void AnimaEngine::InitializeManagers()
 	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_managersAllocator, this);
 	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, this);
 	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_managersAllocator, this);
+	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -244,6 +247,12 @@ void AnimaEngine::TerminateManagers()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _materialsManager);
 		_materialsManager = nullptr;
+	}
+
+	if (_lightsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _lightsManager);
+		_lightsManager = nullptr;
 	}
 }
 

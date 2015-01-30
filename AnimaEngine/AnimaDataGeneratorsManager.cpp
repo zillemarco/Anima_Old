@@ -66,6 +66,49 @@ AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char
 	return CreateColorGenerator(str);
 }
 
+AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const AnimaString& name)
+{
+	if (_generatorsMap.find(name) != _generatorsMap.end())
+		return nullptr;
+
+	ANIMA_ASSERT(_engine != nullptr);
+	if (_generatorsNumber > 0)
+	{
+		AnimaDataGenerator** tmpOldGenerators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_engine->GetGenericAllocator()), _generatorsNumber);
+
+		for (int i = 0; i < _generatorsNumber; i++)
+			tmpOldGenerators[i] = _generators[i];
+
+		ClearGenerators(false, false);
+
+		_generatorsNumber++;
+		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_engine->GetGenericAllocator()), _generatorsNumber);
+
+		for (int i = 0; i < _generatorsNumber - 1; i++)
+			_generators[i] = tmpOldGenerators[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldGenerators);
+		tmpOldGenerators = nullptr;
+	}
+	else
+	{
+		_generatorsNumber++;
+		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_engine->GetGenericAllocator()), _generatorsNumber);
+	}
+
+	_generators[_generatorsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*(_engine->GetGenericAllocator()), _engine);
+
+	_generatorsMap[name] = (AUint)(_generatorsNumber - 1);
+
+	return (AnimaVectorGenerator*)_generators[_generatorsNumber - 1];
+}
+
+AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const char* name)
+{
+	AnimaString str(name, _engine);
+	return CreateVectorGenerator(str);
+}
+
 void AnimaDataGeneratorsManager::ClearGenerators(bool bDeleteObjects, bool bResetNumber)
 {
 	if (_generators != nullptr)

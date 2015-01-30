@@ -38,11 +38,15 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaTexturesManager.h
 					AnimaTexture.h
 					AnimaRenderingManager.h
-					AnimaStringUnorderedMap.h
 					AnimaDataGenerator.h
 					AnimaColorGenerator.h
 					AnimaDataGeneratorsManager.h
-					AnimaMaterialsManager.h)
+					AnimaMaterialsManager.h
+					AnimaTransformation.h
+					AnimaMappedValues.h
+					AnimaLight.h
+					AnimaLightsManager.h
+					AnimaVectorGenerator.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -74,11 +78,15 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaTexturesManager.cpp
 					AnimaTexture.cpp
 					AnimaRenderingManager.cpp
-					AnimaStringUnorderedMap.cpp
 					AnimaDataGenerator.cpp
 					AnimaColorGenerator.cpp
 					AnimaDataGeneratorsManager.cpp
-					AnimaMaterialsManager.cpp)
+					AnimaMaterialsManager.cpp
+					AnimaTransformation.cpp
+					AnimaMappedValues.cpp
+					AnimaLight.cpp
+					AnimaLightsManager.cpp
+					AnimaVectorGenerator.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

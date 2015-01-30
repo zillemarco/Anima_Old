@@ -23,13 +23,16 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_shaders = nullptr;
 	_shadersNumber = 0;
 
+	_uniforms.clear();
+	_uniforms = src._uniforms;
+
 	_shadersManager = src._shadersManager;
 
 	SetShaders(src._shaders, src._shadersNumber);
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
-: _engine(src._engine)
+	: _engine(src._engine)
 	, _shaders(src._shaders)
 	, _shadersNumber(src._shadersNumber)
 	, _id(src._id)
@@ -256,6 +259,8 @@ bool AnimaShaderProgram::Link()
 	else
 	{
 		_linked = true;
+
+		ScanVariables();
 	}
 
 	return _linked;
@@ -301,33 +306,9 @@ AInt AnimaShaderProgram::GetID()
 	return _id;
 }
 
-bool AnimaShaderProgram::AddUniform(const AnimaString& uniformName)
-{
-	if (!IsLinked())
-	{
-		if (!Link())
-			return false;
-	}
-
-	int location = glGetUniformLocation(_id, uniformName.GetConstBuffer());
-
-	if (location == -1)
-		return false;
-
-	_uniforms[uniformName] = location;
-
-	return true;
-}
-
-bool AnimaShaderProgram::AddUniform(const char* uniformName)
-{
-	AnimaString str(uniformName, _engine);
-	return AddUniform(str);
-}
-
 void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 {
-	glUniform1i(_uniforms.at(uniformName), value);
+	glUniform1i(_uniforms.at(uniformName)._location, value);
 }
 
 void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
@@ -338,7 +319,7 @@ void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
 
 void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat value)
 {
-	glUniform1f(_uniforms.at(uniformName), value);
+	glUniform1f(_uniforms.at(uniformName)._location, value);
 }
 
 void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
@@ -349,7 +330,7 @@ void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
 {
-	glUniform3f(_uniforms.at(uniformName), value[0], value[1], value[2]);
+	glUniform3f(_uniforms.at(uniformName)._location, value[0], value[1], value[2]);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
@@ -358,9 +339,20 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f
 	SetUniform(str, value);
 }
 
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaColor4f& value)
+{
+	glUniform4f(_uniforms.at(uniformName)._location, value[0], value[1], value[2], value[3]);
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, value);
+}
+
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c)
 {
-	glUniform3f(_uniforms.at(uniformName), a, b, c);
+	glUniform3f(_uniforms.at(uniformName)._location, a, b, c);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
@@ -369,15 +361,54 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b,
 	SetUniform(str, a, b, c);
 }
 
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
+{
+	glUniform4f(_uniforms.at(uniformName)._location, a, b, c, d);
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, a, b, c, d);
+}
+
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value)
 {
-	glUniformMatrix4fv(_uniforms.at(uniformName), 1, GL_FALSE, value.GetConstData());
+	glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, GL_FALSE, value.GetConstData());
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value)
 {
 	AnimaString str(uniformName, _engine);
 	SetUniform(str, value);
+}
+
+void AnimaShaderProgram::ScanVariables()
+{
+	_uniforms.clear();
+
+	GLint numActiveUniforms = 0;
+	glGetProgramInterfaceiv(_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+
+	const int propertiesSize = 3;
+
+	AnimaString uniformName(_engine);
+	GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
+	GLint values[propertiesSize];
+
+	for (int i = 0; i < numActiveUniforms; i++)
+	{
+		glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+		uniformName.Reserve(values[0] - 1);
+		glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, uniformName.GetBuffer());
+
+		AnimaUniformInfo info;
+		info._location = values[2];
+		info._type = values[1];
+
+		_uniforms[uniformName] = info;
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

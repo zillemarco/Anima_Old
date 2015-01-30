@@ -30,9 +30,22 @@ public:
 public:
 	virtual void UpdateValue() = 0;
 
-	virtual void SetColor3f(const AnimaColor3f& color);
-	virtual void SetColor3f(AFloat r, AFloat g, AFloat b);
+	virtual void SetColor(const AnimaColor3f& color);
+	virtual void SetColor(AFloat r, AFloat g, AFloat b);
+	virtual void SetColor(const AnimaColor4f& color);
+	virtual void SetColor(AFloat r, AFloat g, AFloat b, AFloat a);
 	virtual AnimaColor3f GetColor3f();
+	virtual AnimaColor4f GetColor4f();
+
+	virtual void SetVector(const AnimaVertex2f& color);
+	virtual void SetVector(AFloat x, AFloat y);
+	virtual void SetVector(const AnimaVertex3f& color);
+	virtual void SetVector(AFloat x, AFloat y, AFloat z);
+	virtual void SetVector(const AnimaVertex4f& color);
+	virtual void SetVector(AFloat x, AFloat y, AFloat z, AFloat w);
+	virtual AnimaVertex2f GetVector2f();
+	virtual AnimaVertex3f GetVector3f();
+	virtual AnimaVertex4f GetVector4f();
 
 	virtual void StopValueUpdate();
 	virtual void StartValueUpdate();

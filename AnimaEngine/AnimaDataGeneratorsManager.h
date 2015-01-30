@@ -15,6 +15,7 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaColorGenerator.h"
+#include "AnimaVectorGenerator.h"
 #include "AnimaDataGenerator.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -27,6 +28,9 @@ public:
 	
 	AnimaColorGenerator* CreateColorGenerator(const AnimaString& name);
 	AnimaColorGenerator* CreateColorGenerator(const char* name);
+
+	AnimaVectorGenerator* CreateVectorGenerator(const AnimaString& name);
+	AnimaVectorGenerator* CreateVectorGenerator(const char* name);
 
 	AnimaDataGenerator* GetGenerator(AUint index);
 	AnimaDataGenerator* GetGenerator(const AnimaString& name);

@@ -38,21 +38,21 @@ GLuint CRModelViewer::loadShader(GLenum type, const char *source)
 void CRModelViewer::Initialize()
 {
 #if defined _MSC_VER
-	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
+	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("basic-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
+	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("basic-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #else
 	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
 	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
 #endif
 	
-	_program = _engine->GetShadersManager()->CreateProgram();
+	_program = _engine->GetShadersManager()->CreateProgram("basic");
 	_program->Create();
 	_program->AddShader(vs);
 	_program->AddShader(fs);
 	_program->Link();
 
-	_program->AddUniform("gWorld");
-	_program->AddUniform("uniformColor");
+	//_program->AddUniform("gWorld");
+	//_program->AddUniform("uniformColor");
 
 	//_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
 	//_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");

@@ -3,9 +3,11 @@
 #include "AnimaCamera.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaTexture.h"
+#include "AnimaLight.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
+#include "AnimaLightsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -16,6 +18,23 @@ void AnimaRenderingManager::DrawAllModels(AnimaEngine* engine)
 void AnimaRenderingManager::DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
 	if (engine == nullptr || model == nullptr || program == nullptr)
+		return;
+	
+	model->GetTransformation()->RotateYDeg(0.01);
+	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
+
+	ASizeT meshNumber = model->GetMeshesNumber();
+	for (ASizeT i = 0; i < meshNumber; i++)
+		DrawModelMesh(engine, model->GetPMesh(i), program, modelMatrix);
+
+	ASizeT childrenNumber = model->GetChildrenNumber();
+	for (ASizeT i = 0; i < childrenNumber; i++)
+		DrawModel(engine, model->GetPChild(i), program, modelMatrix);
+}
+
+void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
+{
+	if (engine == nullptr || mesh == nullptr || program == nullptr)
 		return;
 
 	AnimaShaderProgram* activeProgram = engine->GetShadersManager()->GetActiveProgram();
@@ -38,71 +57,47 @@ void AnimaRenderingManager::DrawModel(AnimaEngine* engine, AnimaModel* model, An
 
 		program->Use();
 
+		AnimaLight* ambL = engine->GetLightsManager()->GetLight("ambient");
+		if (ambL != nullptr)
+		{
+			program->SetUniform("ambientLight", ambL->GetColor());
+		}
+
+		AnimaLight* dirL = engine->GetLightsManager()->GetLight("directional");
+		if (dirL != nullptr)
+		{
+			program->SetUniform("directionalLight.base.color", dirL->GetColor());
+			program->SetUniformf("directionalLight.base.intensity", dirL->GetIntensity());
+			program->SetUniform("directionalLight.direction", dirL->GetDirection().Normalized());
+		}
+
+		AnimaLight* pointL = engine->GetLightsManager()->GetLight("pointLight0");
+		if (pointL != nullptr)
+		{
+			program->SetUniform("pointLights[0].base.color", pointL->GetColor());
+			program->SetUniformf("pointLights[0].base.intensity", pointL->GetIntensity());
+			program->SetUniformf("pointLights[0].attenuation.constant", pointL->GetConstantAttenuation());
+			program->SetUniformf("pointLights[0].attenuation.linear", pointL->GetLinearAttenuation());
+			program->SetUniformf("pointLights[0].attenuation.exponent", pointL->GetExponentAttenuation());
+			program->SetUniform("pointLights[0].position", pointL->GetPosition());
+			program->SetUniformf("pointLights[0].range", pointL->GetRange());
+		}
+
+		pointL = engine->GetLightsManager()->GetLight("pointLight1");
+		if (pointL != nullptr)
+		{
+			program->SetUniform("pointLights[1].base.color", pointL->GetColor());
+			program->SetUniformf("pointLights[1].base.intensity", pointL->GetIntensity());
+			program->SetUniformf("pointLights[1].attenuation.constant", pointL->GetConstantAttenuation());
+			program->SetUniformf("pointLights[1].attenuation.linear", pointL->GetLinearAttenuation());
+			program->SetUniformf("pointLights[1].attenuation.exponent", pointL->GetExponentAttenuation());
+			program->SetUniform("pointLights[1].position", pointL->GetPosition());
+			program->SetUniformf("pointLights[1].range", pointL->GetRange());
+		}
+
 		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
 		program->SetUniform("eyePosition", camera->GetPosition());
-		program->SetUniform("ambientLight", 0.8, 0.8, 0.8);
-		program->SetUniform("directionalLight.base.color", 1.0, 0.0, 0.0);
-		program->SetUniformf("directionalLight.base.intensity", 0.8);
-		program->SetUniform("directionalLight.direction", lightDir);
 	}
-
-	AnimaMatrix modelMatrix = model->GetTransformationMatrix() * parentTransformation;
-
-	ASizeT meshNumber = model->GetMeshesNumber();
-	for (ASizeT i = 0; i < meshNumber; i++)
-		DrawModelMesh(engine, model->GetPMesh(i), program, modelMatrix);
-
-	ASizeT childrenNumber = model->GetChildrenNumber();
-	for (ASizeT i = 0; i < childrenNumber; i++)
-		DrawModel(engine, model->GetPChild(i), program, modelMatrix);
-
-	//AnimaCamera* camera = engine->GetCamerasManager()->GetActiveCamera();
-	//AnimaShaderProgram* program = engine->GetShadersManager()->GetProgram(0);
-	//
-	//AnimaMatrix modelMatrix = AnimaMatrix(engine);//object->GetTransformationMatrix();
-	//AnimaMatrix viewMatrix = camera->GetViewMatrix();
-	//AnimaMatrix projectionMatrix = camera->GetProjectionMatrix();
-
-	//AnimaMatrix mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
-	//AnimaMatrix normalMatrix = modelMatrix;
-
-	//AnimaVertex3f lightDir(engine);
-	//lightDir[0] = -1.0;
-	//lightDir[1] = -1.0;
-	//lightDir[2] = -1.0;
-
-	//lightDir.Normalize();
-
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glGetError();
-	//glClearColor(0.5, 0.5, 0.5, 1.0);
-
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	//glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
-
-	//program->Use();
-	//
-	//program->SetUniformi("materialDiffuseTexture", 0);
-	//
-	//material->GetTexture("diffuse")->Bind(0);
-
-	//AnimaColor3f colorMat = material->GetColor("materialColor");
-	//AnimaColor3f colorLight = material->GetColor("lightColor");
-	//AnimaColor3f colorAmb = material->GetColor("ambientColor");
-
-	//program->SetUniform("materialColor", colorMat);
-	//program->SetUniformf("specularIntensity", material->GetFloat("specInt"));
-	//program->SetUniformf("specularPower", material->GetFloat("specPow"));
-
-	//object->Draw();
-}
-
-void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
-{
-	if (engine == nullptr || mesh == nullptr || program == nullptr)
-		return;
 
 	AnimaMaterial* material = mesh->GetMaterial();
 	if (material == nullptr)
@@ -110,7 +105,11 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 	
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
+
+	//if (material->GetBoolean("twoSided"))
+		glDisable(GL_CULL_FACE);
+	//else
+	//	glEnable(GL_CULL_FACE);
 
 	program->SetUniform("modelMatrix", parentTransformation);
 
@@ -121,7 +120,10 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 		texture->Bind(0);
 	}
 
-	program->SetUniform("materialColor", material->GetColor("diffuseColor"));
+	program->SetUniform("materialColor", material->GetColor4f("diffuseColor"));
+
+	program->SetUniformf("specularIntensity", 2.0f);
+	program->SetUniformf("specularPower", 32.0f);
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();

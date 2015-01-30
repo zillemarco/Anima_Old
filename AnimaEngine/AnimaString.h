@@ -189,6 +189,4 @@ private:
 
 END_ANIMA_ENGINE_NAMESPACE
 
-//template class ANIMA_ENGINE_EXPORT boost::unordered_map<Anima::AnimaString, Anima::AUint, Anima::AnimaString::Hasher>;
-
 #endif /* defined(__Anima__AnimaString__) */

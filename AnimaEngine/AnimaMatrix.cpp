@@ -597,6 +597,8 @@ void AnimaMatrix::Perspective(float fov, float ratio, float zNear, float zFar)
 	m._matrixData[8] = 0.0f;			m._matrixData[9] = 0.0f;	m._matrixData[10] = -(zNear + zFar) / clip;			m._matrixData[11] = -1.0f;
 	m._matrixData[12] = 0.0f;			m._matrixData[13] = 0.0f;	m._matrixData[14] = -(2.0f * zNear * zFar) / clip;	m._matrixData[15] = 0.0f;
 
+	//m = m.Transpose();
+
 	*this *= m;
 }
 
@@ -765,6 +767,90 @@ void AnimaMatrix::GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll)
 	head = head * 180.0f / (AFloat)M_PI;
 	pitch = pitch * 180.0f / (AFloat)M_PI;
 	roll = roll * 180.0f / (AFloat)M_PI;
+}
+
+void AnimaMatrix::InitTranslation(float tx, float ty, float tz)
+{
+	_matrixData[0] =	1.0f;	_matrixData[1] =	0.0f;	_matrixData[2] =	0.0f;	_matrixData[3] = 0.0f;
+	_matrixData[4] =	0.0f;	_matrixData[5] =	1.0f;	_matrixData[6] =	0.0f;	_matrixData[7] = 0.0f;
+	_matrixData[8] =	0.0f;	_matrixData[9] =	0.0f;	_matrixData[10] =	1.0f;	_matrixData[11] = 0.0f;
+	_matrixData[12] =	tx;		_matrixData[13] =	ty;		_matrixData[14] =	tz;		_matrixData[15] = 1.0f;
+}
+
+void AnimaMatrix::InitTranslation(const AnimaVertex3f& translation)
+{
+	InitTranslation(translation[0], translation[1], translation[2]);
+}
+
+void AnimaMatrix::InitRotation(float rx, float ry, float rz)
+{
+	AnimaMatrix mx(_engine);
+	AnimaMatrix my(_engine);
+	AnimaMatrix mz(_engine);
+	
+	//mz._matrixData[0] = cosf(rz);	mz._matrixData[1] = -sinf(rz);	mz._matrixData[2] = 0.0f;	mz._matrixData[3] = 0.0f;
+	//mz._matrixData[4] = sinf(rz);	mz._matrixData[5] = cosf(rz);	mz._matrixData[6] = 0.0f;	mz._matrixData[7] = 0.0f;
+	//mz._matrixData[8] = 0.0f;		mz._matrixData[9] = 0.0f;		mz._matrixData[10] = 1.0f;	mz._matrixData[11] = 0.0f;
+	//mz._matrixData[12] = 0.0f;		mz._matrixData[13] = 0.0f;		mz._matrixData[14] = 0.0f;	mz._matrixData[15] = 1.0f;
+
+	//mx._matrixData[0] = 1.0f;	mx._matrixData[1] = 0.0f;		mx._matrixData[2] = 0.0f;		mx._matrixData[3] = 0.0f;
+	//mx._matrixData[4] = 0.0f;	mx._matrixData[5] = cosf(rx);	mx._matrixData[6] = -sinf(rx);	mx._matrixData[7] = 0.0f;
+	//mx._matrixData[8] = 0.0f;	mx._matrixData[9] = sinf(rx);	mx._matrixData[10] = cosf(rx);	mx._matrixData[11] = 0.0f;
+	//mx._matrixData[12] = 0.0f;	mx._matrixData[13] = 0.0f;		mx._matrixData[14] = 0.0f;		mx._matrixData[15] = 1.0f;
+
+	//my._matrixData[0] = cosf(ry);	my._matrixData[1] = 0.0f;	my._matrixData[2] = -sinf(ry);	my._matrixData[3] = 0.0f;
+	//my._matrixData[4] = 0.0f;		my._matrixData[5] = 1.0f;	my._matrixData[6] = 0.0f;		my._matrixData[7] = 0.0f;
+	//my._matrixData[8] = sinf(ry);	my._matrixData[9] = 0.0f;	my._matrixData[10] = cosf(ry);	my._matrixData[11] = 0.0f;
+	//my._matrixData[12] = 0.0f;		my._matrixData[13] = 0.0f;	my._matrixData[14] = 0.0f;		my._matrixData[15] = 1.0f;
+
+	mz._matrixData[0] = cosf(rz);	mz._matrixData[4] = -sinf(rz);	mz._matrixData[8] = 0.0f;	mz._matrixData[12] = 0.0f;
+	mz._matrixData[1] = sinf(rz);	mz._matrixData[5] = cosf(rz);	mz._matrixData[9] = 0.0f;	mz._matrixData[13] = 0.0f;
+	mz._matrixData[2] = 0.0f;		mz._matrixData[6] = 0.0f;		mz._matrixData[10] = 1.0f;	mz._matrixData[14] = 0.0f;
+	mz._matrixData[3] = 0.0f;		mz._matrixData[7] = 0.0f;		mz._matrixData[11] = 0.0f;	mz._matrixData[15] = 1.0f;
+
+	mx._matrixData[0] = 1.0f;	mx._matrixData[4] = 0.0f;		mx._matrixData[8] = 0.0f;		mx._matrixData[12] = 0.0f;
+	mx._matrixData[1] = 0.0f;	mx._matrixData[5] = cosf(rx);	mx._matrixData[9] = -sinf(rx);	mx._matrixData[13] = 0.0f;
+	mx._matrixData[2] = 0.0f;	mx._matrixData[6] = sinf(rx);	mx._matrixData[10] = cosf(rx);	mx._matrixData[14] = 0.0f;
+	mx._matrixData[3] = 0.0f;	mx._matrixData[7] = 0.0f;		mx._matrixData[11] = 0.0f;		mx._matrixData[15] = 1.0f;
+
+	my._matrixData[0] = cosf(ry);	my._matrixData[4] = 0.0f;	my._matrixData[8] = -sinf(ry);	my._matrixData[12] = 0.0f;
+	my._matrixData[1] = 0.0f;		my._matrixData[5] = 1.0f;	my._matrixData[9] = 0.0f;		my._matrixData[13] = 0.0f;
+	my._matrixData[2] = sinf(ry);	my._matrixData[6] = 0.0f;	my._matrixData[10] = cosf(ry);	my._matrixData[14] = 0.0f;
+	my._matrixData[3] = 0.0f;		my._matrixData[7] = 0.0f;	my._matrixData[11] = 0.0f;		my._matrixData[15] = 1.0f;
+
+	SetIdentity();
+	*this =  mz * my * mx;
+}
+
+void AnimaMatrix::InitRotation(const AnimaVertex3f& rotation)
+{
+	InitRotation(rotation[0], rotation[1], rotation[2]);
+}
+
+void AnimaMatrix::InitRotationDeg(float rx, float ry, float rz)
+{
+	rx = rx * (float)M_PI / 180.0f;
+	ry = ry * (float)M_PI / 180.0f;
+	rz = rz * (float)M_PI / 180.0f;
+	InitRotation(rx, ry, rz);
+}
+
+void AnimaMatrix::InitRotationDeg(const AnimaVertex3f& rotation)
+{
+	InitRotation(rotation * ((float)M_PI / 180.0f));
+}
+
+void AnimaMatrix::InitScale(float sx, float sy, float sz)
+{
+	_matrixData[0] = sx;	_matrixData[1] = 0.0f;	_matrixData[2] = 0.0f;	_matrixData[3] = 0.0f;
+	_matrixData[4] = 0.0f;	_matrixData[5] = sy;	_matrixData[6] = 0.0f;	_matrixData[7] = 0.0f;
+	_matrixData[8] = 0.0f;	_matrixData[9] = 0.0f;	_matrixData[10] = sz;	_matrixData[11] = 0.0f;
+	_matrixData[12] = 0.0f;	_matrixData[13] = 0.0f;	_matrixData[14] = 0.0f;	_matrixData[15] = 1.0f;
+}
+
+void AnimaMatrix::InitScale(const AnimaVertex3f& scale)
+{
+	InitScale(scale[0], scale[1], scale[2]);
 }
 
 #undef _mm_shufd

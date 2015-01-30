@@ -75,6 +75,8 @@ void AnimaFirstPersonCamera::Zoom(AFloat amount)
 void AnimaFirstPersonCamera::Move(const AnimaVertex3f& direction, AFloat amount)
 {
 	_position += direction * amount;
+
+	LookAt(_position, _zAxis);
 }
 
 void AnimaFirstPersonCamera::Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount)
@@ -126,24 +128,6 @@ void AnimaFirstPersonCamera::RotateYDeg(AFloat angle)
 	RotateY(angle * (float)M_PI / 180.0f);
 }
 
-//AnimaMatrix AnimaFirstPersonCamera::GetViewMatrix()
-//{
-//	AnimaVertex3f side = _zAxis ^ _yAxis;
-//	side.Normalize();
-//	AnimaVertex3f upVector = side ^ _zAxis;
-//	upVector.Normalize();
-//
-//	AnimaMatrix m(_engine);
-//	m[0] = side[0];		m[1] = side[1];		m[2] = side[2];		m[3] = 0.0f;
-//	m[4] = upVector[0];	m[5] = upVector[1];	m[6] = upVector[2];	m[7] = 0.0f;
-//	m[8] = -_zAxis[0];	m[9] = -_zAxis[1];	m[10] = -_zAxis[2];	m[11] = 0.0f;
-//	m[12] = 0.0f;		m[13] = 0.0f;		m[14] = 0.0f;		m[15] = 1.0f;
-//
-//	m.Translate(-_position[0], -_position[1], -_position[2]);
-//
-//	return m;
-//}
-
 void AnimaFirstPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& forward)
 {
 	_position = position;
@@ -156,15 +140,6 @@ void AnimaFirstPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVe
 
 	_yAxis = _xAxis ^ _zAxis;
 	_yAxis.Normalize();
-
-	//_zAxis = _position - _target;
-	//_zAxis.Normalize();
-
-	//_xAxis = _worldYAxis ^ _zAxis;
-	//_xAxis.Normalize();
-
-	//_yAxis = _zAxis ^ _xAxis;
-	//_yAxis.Normalize();
 
 	CalculateViewMatrix();
 }
@@ -189,7 +164,7 @@ void AnimaFirstPersonCamera::CalculateViewMatrix()
 {
 	_viewMatrix[0] = _xAxis[0];		_viewMatrix[1] = _xAxis[1];		_viewMatrix[2] = _xAxis[2];		_viewMatrix[3] = 0.0f;
 	_viewMatrix[4] = _yAxis[0];		_viewMatrix[5] = _yAxis[1];		_viewMatrix[6] = _yAxis[2];		_viewMatrix[7] = 0.0f;
-	_viewMatrix[8] = -_zAxis[0];	_viewMatrix[9] = -_zAxis[1];	_viewMatrix[10] = -_zAxis[2];	_viewMatrix[11] = 0.0f;
+	_viewMatrix[8] = _zAxis[0];		_viewMatrix[9] = _zAxis[1];		_viewMatrix[10] = _zAxis[2];	_viewMatrix[11] = 0.0f;
 	_viewMatrix[12] = 0.0f;			_viewMatrix[13] = 0.0f;			_viewMatrix[14] = 0.0f;			_viewMatrix[15] = 1.0f;
 
 	_viewMatrix.Translate(-_position[0], -_position[1], -_position[2]);

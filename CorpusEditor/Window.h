@@ -7,6 +7,7 @@
 #include <AnimaShaderProgram.h>
 #include <AnimaTexture.h>
 #include <AnimaMaterial.h>
+#include <AnimaLight.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -33,6 +34,8 @@ private:
 
 	Anima::AnimaShaderProgram* program;
 	Anima::AnimaTexture* texture;
+	Anima::AnimaPointLight* pointL0;
+	Anima::AnimaPointLight* pointL1;
 
 	int _matrixUniform;
 	int _posAttr;
