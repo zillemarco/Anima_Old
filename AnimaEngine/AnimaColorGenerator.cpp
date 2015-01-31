@@ -12,52 +12,32 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaEngine* engine)
 	: AnimaDataGenerator(engine)
-	, _color(engine)
+	, _color(0.0f, 0.0f, 0.0f, 1.0f)
 {
-	_color[0] = 0.0f;
-	_color[1] = 0.0f;
-	_color[2] = 0.0f;
-	_color[3] = 1.0f;
 }
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaEngine* engine, const AnimaColor3f& color)
 	: AnimaDataGenerator(engine)
-	, _color(engine)
+	, _color(color.r, color.g, color.b, 1.0f)
 {
-	_color[0] = color[0];
-	_color[1] = color[1];
-	_color[2] = color[2];
-	_color[3] = 1.0f;
 }
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b)
 	: AnimaDataGenerator(engine)
-	, _color(engine)
+	, _color(r, g, b, 1.0f)
 {
-	_color[0] = r;
-	_color[1] = g;
-	_color[2] = b;
-	_color[3] = 1.0f;
 }
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaEngine* engine, const AnimaColor4f& color)
 	: AnimaDataGenerator(engine)
-	, _color(engine)
+	, _color(color)
 {
-	_color[0] = color[0];
-	_color[1] = color[1];
-	_color[2] = color[2];
-	_color[3] = color[3];
 }
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b, AFloat a)
 	: AnimaDataGenerator(engine)
-	, _color(engine)
+	, _color(r, g, b, a)
 {
-	_color[0] = r;
-	_color[1] = g;
-	_color[2] = b;
-	_color[3] = a;
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaColorGenerator& src)
@@ -106,43 +86,36 @@ void AnimaColorGenerator::UpdateValue()
 
 void AnimaColorGenerator::SetColor(const AnimaColor3f& color)
 {
-	_color[0] = color[0];
-	_color[1] = color[1];
-	_color[2] = color[2];
-	_color[3] = 1.0f;
+	_color.r = color.r;
+	_color.g = color.g;
+	_color.b = color.b;
+	_color.a = 1.0f;
 }
 
 void AnimaColorGenerator::SetColor(AFloat r, AFloat g, AFloat b)
 {
-	_color[0] = r;
-	_color[1] = g;
-	_color[2] = b;
-	_color[3] = 1.0f;
+	_color.r = r;
+	_color.g = g;
+	_color.b = b;
+	_color.a = 1.0f;
 }
 
 void AnimaColorGenerator::SetColor(const AnimaColor4f& color)
 {
-	_color[0] = color[0];
-	_color[1] = color[1];
-	_color[2] = color[2];
-	_color[3] = color[3];
+	_color = color;
 }
 
 void AnimaColorGenerator::SetColor(AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	_color[0] = r;
-	_color[1] = g;
-	_color[2] = b;
-	_color[3] = a;
+	_color.r = r;
+	_color.g = g;
+	_color.b = b;
+	_color.a = a;
 }
 
 AnimaColor3f AnimaColorGenerator::GetColor3f()
 {
-	AnimaColor3f c(_engine);
-	c[0] = _color[0];
-	c[1] = _color[1];
-	c[2] = _color[2];
-
+	AnimaColor3f c(_color.r, _color.g, _color.b);
 	return c;
 }
 

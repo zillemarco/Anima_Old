@@ -435,45 +435,45 @@ void AnimaMatrix::DumpMemory(bool bLogFile)
 
 void AnimaMatrix::Translate(float tx, float ty, float tz)
 {
-	AnimaVertex4f m0(_engine, _matrixData);
-	AnimaVertex4f m1(_engine, _matrixData + 4);
-	AnimaVertex4f m2(_engine, _matrixData + 8);
-	AnimaVertex4f m3(_engine, _matrixData + 12);
+	AnimaVertex4f m0(_matrixData);
+	AnimaVertex4f m1(_matrixData + 4);
+	AnimaVertex4f m2(_matrixData + 8);
+	AnimaVertex4f m3(_matrixData + 12);
 
 	AnimaVertex4f res = m0 * tx + m1 * ty + m2 * tz + m3;
 
-	_matrixData[12] = res[0];
-	_matrixData[13] = res[1];
-	_matrixData[14] = res[2];
-	_matrixData[15] = res[3];
+	_matrixData[12] = res.x;
+	_matrixData[13] = res.y;
+	_matrixData[14] = res.z;
+	_matrixData[15] = res.w;
 }
 
 void AnimaMatrix::Translate(const AnimaVertex3f& translation)
 {
-	Translate(translation[0], translation[1], translation[2]);
+	Translate(translation.x, translation.y, translation.z);
 }
 
 void AnimaMatrix::Scale(float sx, float sy, float sz)
 {
-	AnimaVertex4f m0(_engine, _matrixData);
-	AnimaVertex4f m1(_engine, _matrixData + 4);
-	AnimaVertex4f m2(_engine, _matrixData + 8);
-	AnimaVertex4f m3(_engine, _matrixData + 12);
+	AnimaVertex4f m0(_matrixData);
+	AnimaVertex4f m1(_matrixData + 4);
+	AnimaVertex4f m2(_matrixData + 8);
+	AnimaVertex4f m3(_matrixData + 12);
 
 	AnimaVertex4f r0 = m0 * sx;
 	AnimaVertex4f r1 = m1 * sy;
 	AnimaVertex4f r2 = m2 * sz;
 	AnimaVertex4f r3 = m3;
 
-	_matrixData[0] = r0[0];		_matrixData[1] = r0[1];		_matrixData[2] = r0[2];		_matrixData[3] = r0[3];
-	_matrixData[4] = r1[0];		_matrixData[5] = r1[1];		_matrixData[6] = r1[2];		_matrixData[7] = r1[3];
-	_matrixData[8] = r2[0];		_matrixData[9] = r2[1];		_matrixData[10] = r2[2];	_matrixData[11] = r2[3];
-	_matrixData[12] = r3[0];	_matrixData[13] = r3[1];	_matrixData[14] = r3[2];	_matrixData[15] = r3[3];
+	_matrixData[0] = r0.x;	_matrixData[1] = r0.y;	_matrixData[2] = r0.z;	_matrixData[3] = r0.w;
+	_matrixData[4] = r1.x;	_matrixData[5] = r1.y;	_matrixData[6] = r1.z;	_matrixData[7] = r1.w;
+	_matrixData[8] = r2.x;	_matrixData[9] = r2.y;	_matrixData[10] = r2.z;	_matrixData[11] = r2.w;
+	_matrixData[12] = r3.x;	_matrixData[13] = r3.y;	_matrixData[14] = r3.z;	_matrixData[15] = r3.w;
 }
 
 void AnimaMatrix::Scale(const AnimaVertex3f& scale)
 {
-	Scale(scale[0], scale[10], scale[2]);
+	Scale(scale.x, scale.y, scale.z);
 }
 
 void AnimaMatrix::Rotate(float angle, AnimaVertex3f axis)
@@ -487,32 +487,32 @@ void AnimaMatrix::Rotate(float angle, AnimaVertex3f axis)
 	AnimaVertex3f temp = ((float(1) - c) * axis);
 
 	AnimaMatrix rotMatrix(_engine);
-	rotMatrix[0] = c + temp[0] * axis[0];
-	rotMatrix[1] = 0 + temp[0] * axis[1] + s * axis[2];
-	rotMatrix[2] = 0 + temp[0] * axis[2] - s * axis[1];
+	rotMatrix[0] = c + temp.x * axis.x;
+	rotMatrix[1] = 0 + temp.x * axis.y + s * axis.z;
+	rotMatrix[2] = 0 + temp.x * axis.z - s * axis.y;
 	
-	rotMatrix[4] = 0 + temp[1] * axis[0] - s * axis[2];
-	rotMatrix[5] = c + temp[1] * axis[1];
-	rotMatrix[6] = 0 + temp[1] * axis[2] + s * axis[0];
+	rotMatrix[4] = 0 + temp.y * axis.x - s * axis.z;
+	rotMatrix[5] = c + temp.y * axis.y;
+	rotMatrix[6] = 0 + temp.y * axis.z + s * axis.x;
 				 
-	rotMatrix[8] = 0 + temp[2] * axis[0] + s * axis[1];
-	rotMatrix[9] = 0 + temp[2] * axis[1] - s * axis[0];
-	rotMatrix[10] = c + temp[2] * axis[2];
+	rotMatrix[8] = 0 + temp.z * axis.x + s * axis.y;
+	rotMatrix[9] = 0 + temp.z * axis.y - s * axis.x;
+	rotMatrix[10] = c + temp.z * axis.z;
 
-	AnimaVertex4f m0(_engine, _matrixData);
-	AnimaVertex4f m1(_engine, _matrixData + 4);
-	AnimaVertex4f m2(_engine, _matrixData + 8);
-	AnimaVertex4f m3(_engine, _matrixData + 12);
+	AnimaVertex4f m0(_matrixData);
+	AnimaVertex4f m1(_matrixData + 4);
+	AnimaVertex4f m2(_matrixData + 8);
+	AnimaVertex4f m3(_matrixData + 12);
 
 	AnimaVertex4f r0 = m0 * rotMatrix[0] + m1 * rotMatrix[1] + m2 * rotMatrix[2];
 	AnimaVertex4f r1 = m0 * rotMatrix[4] + m1 * rotMatrix[5] + m2 * rotMatrix[6];
 	AnimaVertex4f r2 = m0 * rotMatrix[8] + m1 * rotMatrix[9] + m2 * rotMatrix[10];
 	AnimaVertex4f r3 = m3;
 
-	_matrixData[0] = r0[0];		_matrixData[1] = r0[1];		_matrixData[2] = r0[2];		_matrixData[3] = r0[3];
-	_matrixData[4] = r1[0];		_matrixData[5] = r1[1];		_matrixData[6] = r1[2];		_matrixData[7] = r1[3];
-	_matrixData[8] = r2[0];		_matrixData[9] = r2[1];		_matrixData[10] = r2[2];	_matrixData[11] = r2[3];
-	_matrixData[12] = r3[0];	_matrixData[13] = r3[1];	_matrixData[14] = r3[2];	_matrixData[15] = r3[3];
+	_matrixData[0] = r0.x;	_matrixData[1] = r0.y;	_matrixData[2] = r0.z;	_matrixData[3] = r0.w;
+	_matrixData[4] = r1.x;	_matrixData[5] = r1.y;	_matrixData[6] = r1.z;	_matrixData[7] = r1.w;
+	_matrixData[8] = r2.x;	_matrixData[9] = r2.y;	_matrixData[10] = r2.z;	_matrixData[11] = r2.w;
+	_matrixData[12] = r3.x;	_matrixData[13] = r3.y;	_matrixData[14] = r3.z;	_matrixData[15] = r3.w;
 }
 
 void AnimaMatrix::RotateDeg(float angle, AnimaVertex3f axis)
@@ -522,61 +522,37 @@ void AnimaMatrix::RotateDeg(float angle, AnimaVertex3f axis)
 
 void AnimaMatrix::RotateX(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 1.0f;
-	dir[1] = 0.0f;
-	dir[2] = 0.0f;
-
+	AnimaVertex3f dir(1.0f, 0.0f, 0.0f);
 	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateXDeg(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 1.0f;
-	dir[1] = 0.0f;
-	dir[2] = 0.0f;
-
+	AnimaVertex3f dir(1.0f, 0.0f, 0.0f);
 	Rotate(angle *(float)M_PI / 180.0f, dir);
 }
 
 void AnimaMatrix::RotateY(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 0.0f;
-	dir[1] = 1.0f;
-	dir[2] = 0.0f;
-
+	AnimaVertex3f dir(0.0f, 1.0f, 0.0f);
 	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateYDeg(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 0.0f;
-	dir[1] = 1.0f;
-	dir[2] = 0.0f;
-
+	AnimaVertex3f dir(0.0f, 1.0f, 0.0f);
 	Rotate(angle *(float)M_PI / 180.0f, dir);
 }
 
 void AnimaMatrix::RotateZ(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 0.0f;
-	dir[1] = 0.0f;
-	dir[2] = 1.0f;
-
+	AnimaVertex3f dir(0.0f, 0.0f, 1.0f);
 	Rotate(angle, dir);
 }
 
 void AnimaMatrix::RotateZDeg(float angle)
 {
-	AnimaVertex3f dir(_engine);
-	dir[0] = 0.0f;
-	dir[1] = 0.0f;
-	dir[2] = 1.0f;
-
+	AnimaVertex3f dir(0.0f, 0.0f, 1.0f);
 	Rotate(angle *(float)M_PI / 180.0f, dir);
 }
 
@@ -630,13 +606,13 @@ void AnimaMatrix::LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward,
 	upVector.Normalize();
 
 	AnimaMatrix m(_engine);
-	m._matrixData[0] = side[0];		m._matrixData[1] = side[1];		m._matrixData[2] = side[2];			m._matrixData[3] = 0.0f;
-	m._matrixData[4] = upVector[0];	m._matrixData[5] = upVector[1];	m._matrixData[6] = upVector[2];		m._matrixData[7] = 0.0f;
-	m._matrixData[8] = -forward[0];	m._matrixData[9] = -forward[1];	m._matrixData[10] = -forward[2];	m._matrixData[11] = 0.0f;
+	m._matrixData[0] = side.x;		m._matrixData[1] = side.y;		m._matrixData[2] = side.z;			m._matrixData[3] = 0.0f;
+	m._matrixData[4] = upVector.x;	m._matrixData[5] = upVector.y;	m._matrixData[6] = upVector.z;		m._matrixData[7] = 0.0f;
+	m._matrixData[8] = -forward.x;	m._matrixData[9] = -forward.y;	m._matrixData[10] = -forward.z;	m._matrixData[11] = 0.0f;
 	m._matrixData[12] = 0.0f;		m._matrixData[13] = 0.0f;		m._matrixData[14] = 0.0f;			m._matrixData[15] = 1.0f;
 
 	*this *= m;
-	Translate(-eye[0], -eye[1], -eye[2]);
+	Translate(-eye.x, -eye.y, -eye.z);
 }
 
 void AnimaMatrix::Viewport(float left, float bottom, float width, float height, float zNear, float zFar)
@@ -779,7 +755,7 @@ void AnimaMatrix::InitTranslation(float tx, float ty, float tz)
 
 void AnimaMatrix::InitTranslation(const AnimaVertex3f& translation)
 {
-	InitTranslation(translation[0], translation[1], translation[2]);
+	InitTranslation(translation.x, translation.y, translation.z);
 }
 
 void AnimaMatrix::InitRotation(float rx, float ry, float rz)
@@ -824,7 +800,7 @@ void AnimaMatrix::InitRotation(float rx, float ry, float rz)
 
 void AnimaMatrix::InitRotation(const AnimaVertex3f& rotation)
 {
-	InitRotation(rotation[0], rotation[1], rotation[2]);
+	InitRotation(rotation.x, rotation.y, rotation.z);
 }
 
 void AnimaMatrix::InitRotationDeg(float rx, float ry, float rz)
@@ -850,7 +826,7 @@ void AnimaMatrix::InitScale(float sx, float sy, float sz)
 
 void AnimaMatrix::InitScale(const AnimaVertex3f& scale)
 {
-	InitScale(scale[0], scale[1], scale[2]);
+	InitScale(scale.x, scale.y, scale.z);
 }
 
 #undef _mm_shufd

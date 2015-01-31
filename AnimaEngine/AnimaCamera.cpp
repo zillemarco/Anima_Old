@@ -12,42 +12,42 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#define INIT_X_AXIS _xAxis[0] = 1.0f;	\
-					_xAxis[1] = 0.0f;	\
-					_xAxis[2] = 0.0f;
+#define INIT_X_AXIS _xAxis.x = 1.0f;	\
+					_xAxis.y = 0.0f;	\
+					_xAxis.z = 0.0f;
 
-#define INIT_Y_AXIS _yAxis[0] = 0.0f;	\
-					_yAxis[1] = 1.0f;	\
-					_yAxis[2] = 0.0f;
+#define INIT_Y_AXIS _yAxis.x = 0.0f;	\
+					_yAxis.y = 1.0f;	\
+					_yAxis.z = 0.0f;
 
-#define INIT_Z_AXIS _zAxis[0] = 0.0f;	\
-					_zAxis[1] = 0.0f;	\
-					_zAxis[2] = 1.0f;
+#define INIT_Z_AXIS _zAxis.x = 0.0f;	\
+					_zAxis.y = 0.0f;	\
+					_zAxis.z = 1.0f;
 
-#define INIT_WORLD_X_AXIS	_worldXAxis[0] = 1.0f;	\
-							_worldXAxis[1] = 0.0f;	\
-							_worldXAxis[2] = 0.0f;
+#define INIT_WORLD_X_AXIS	_worldXAxis.x = 1.0f;	\
+							_worldXAxis.y = 0.0f;	\
+							_worldXAxis.z = 0.0f;
 
-#define INIT_WORLD_Y_AXIS	_worldYAxis[0] = 0.0f;	\
-							_worldYAxis[1] = 1.0f;	\
-							_worldYAxis[2] = 0.0f;
+#define INIT_WORLD_Y_AXIS	_worldYAxis.x = 0.0f;	\
+							_worldYAxis.y = 1.0f;	\
+							_worldYAxis.z = 0.0f;
 
-#define INIT_WORLD_Z_AXIS	_worldZAxis[0] = 0.0f;	\
-							_worldZAxis[1] = 0.0f;	\
-							_worldZAxis[2] = 1.0f;
+#define INIT_WORLD_Z_AXIS	_worldZAxis.x = 0.0f;	\
+							_worldZAxis.y = 0.0f;	\
+							_worldZAxis.z = 1.0f;
 
 #define INIT_AXIS			INIT_X_AXIS			INIT_Y_AXIS			INIT_Z_AXIS
 #define INIT_WORLD_AXIS		INIT_WORLD_X_AXIS	INIT_WORLD_Y_AXIS	INIT_WORLD_Z_AXIS
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
-	: _position(engine)
-	, _xAxis(engine)
-	, _yAxis(engine)
-	, _zAxis(engine)
-	, _worldXAxis(engine)
-	, _worldYAxis(engine)
-	, _worldZAxis(engine)
-	, _active(false)
+	//: _position(engine)
+	//, _xAxis(engine)
+	//, _yAxis(engine)
+	//, _zAxis(engine)
+	//, _worldXAxis(engine)
+	//, _worldYAxis(engine)
+	//, _worldZAxis(engine)
+	: _active(false)
 	, _viewMatrix(engine)
 	, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
@@ -56,9 +56,9 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
 
-	_position[0] = 0.0f;
-	_position[1] = 0.0f;
-	_position[2] = 5.0f;
+	_position.x = 0.0f;
+	_position.y = 0.0f;
+	_position.z = 5.0f;
 	
 	INIT_AXIS;
 	INIT_WORLD_AXIS;
@@ -66,12 +66,12 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
 	: _position(position)
-	, _xAxis(engine)
-	, _yAxis(engine)
-	, _zAxis(engine)
-	, _worldXAxis(engine)
-	, _worldYAxis(engine)
-	, _worldZAxis(engine)
+	//, _xAxis(engine)
+	//, _yAxis(engine)
+	//, _zAxis(engine)
+	//, _worldXAxis(engine)
+	//, _worldYAxis(engine)
+	//, _worldZAxis(engine)
 	, _active(false)
 	, _viewMatrix(engine)
 	, _projectionMatrix(engine)
@@ -185,9 +185,9 @@ void AnimaCamera::SetPosition(const AnimaVertex3f& position)
 
 void AnimaCamera::SetPosition(const AFloat& x, const AFloat& y, const AFloat& z)
 {
-	_position[0] = x;
-	_position[1] = y;
-	_position[2] = z;
+	_position.x = x;
+	_position.y = y;
+	_position.z = z;
 }
 
 void AnimaCamera::Activate()
@@ -222,7 +222,7 @@ AnimaVertex3f AnimaCamera::GetForward()
 
 AnimaVertex3f AnimaCamera::GetLeft()
 {
-	return _xAxis * -1.0f;
+	return -_xAxis;
 }
 
 AnimaVertex3f AnimaCamera::GetRight()

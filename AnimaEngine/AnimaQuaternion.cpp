@@ -276,9 +276,9 @@ void AnimaQuaternion::FromAxisAndAngle(const AnimaVertex3f& axis, AFloat angle)
 	float sinHalfAngle = sinf(angle / 2.0f);
 	float cosHalfAngle = cosf(angle / 2.0f);
 
-	_data[0] = axis[0] * sinHalfAngle;
-	_data[1] = axis[1] * sinHalfAngle;
-	_data[2] = axis[2] * sinHalfAngle;
+	_data[0] = axis.x * sinHalfAngle;
+	_data[1] = axis.y * sinHalfAngle;
+	_data[2] = axis.z * sinHalfAngle;
 	_data[3] = cosHalfAngle;
 }
 
@@ -373,15 +373,15 @@ void AnimaQuaternion::GetAxisAngle(AnimaVertex3f& axis, AFloat angle) const
 
 	if (s < 0.001f)
 	{
-		axis[0] = q[0];
-		axis[1] = q[1];
-		axis[2] = q[2];
+		axis.x = q[0];
+		axis.y = q[1];
+		axis.z = q[2];
 	}
 	else
 	{
-		axis[0] = q[0] / s;
-		axis[1] = q[1] / s;
-		axis[2] = q[2] / s;
+		axis.x = q[0] / s;
+		axis.y = q[1] / s;
+		axis.z = q[2] / s;
 	}
 }
 
@@ -393,11 +393,7 @@ void AnimaQuaternion::GetAxisAngleDeg(AnimaVertex3f& axis, AFloat angle) const
 
 AnimaVertex3f AnimaQuaternion::GetVector() const
 {
-	AnimaVertex3f vec(_engine);
-	vec[0] = _data[0];
-	vec[1] = _data[1];
-	vec[2] = _data[2];
-
+	AnimaVertex3f vec(_data[0], _data[1], _data[2]);
 	return vec;
 }
 

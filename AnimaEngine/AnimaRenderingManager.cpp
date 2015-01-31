@@ -20,7 +20,7 @@ void AnimaRenderingManager::DrawModel(AnimaEngine* engine, AnimaModel* model, An
 	if (engine == nullptr || model == nullptr || program == nullptr)
 		return;
 	
-	model->GetTransformation()->RotateYDeg(0.01);
+	model->GetTransformation()->RotateYDeg(0.01f);
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
 
 	ASizeT meshNumber = model->GetMeshesNumber();
@@ -48,11 +48,7 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 
 		AnimaMatrix viewProjectionMatrix = camera->GetViewMatrix() * camera->GetProjectionMatrix();
 
-		AnimaVertex3f lightDir(engine);
-		lightDir[0] = -1.0;
-		lightDir[1] = -1.0;
-		lightDir[2] = -1.0;
-
+		AnimaVertex3f lightDir(-1.0f, -1.0, -1.0);
 		lightDir.Normalize();
 
 		program->Use();

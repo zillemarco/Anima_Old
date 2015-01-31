@@ -330,7 +330,7 @@ void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
 {
-	glUniform3f(_uniforms.at(uniformName)._location, value[0], value[1], value[2]);
+	glUniform3f(_uniforms.at(uniformName)._location, value.x, value.y, value.z);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
@@ -341,7 +341,7 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaColor4f& value)
 {
-	glUniform4f(_uniforms.at(uniformName)._location, value[0], value[1], value[2], value[3]);
+	glUniform4f(_uniforms.at(uniformName)._location, value.x, value.y, value.z, value.w);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)

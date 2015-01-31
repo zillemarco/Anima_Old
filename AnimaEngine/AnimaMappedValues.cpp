@@ -108,12 +108,7 @@ void AnimaMappedValues::AddColor(const char* propertyName, AnimaColorGenerator* 
 
 void AnimaMappedValues::AddColor(AnimaString propertyName, AnimaColor3f value)
 {
-	AnimaColor4f color(_engine);
-	color[0] = value[0];
-	color[1] = value[1];
-	color[2] = value[2];
-	color[3] = 1.0f;
-
+	AnimaColor4f color(value, 1.0f);
 	AddColor(propertyName, color);
 }
 
@@ -125,23 +120,13 @@ void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor3f value)
 
 void AnimaMappedValues::AddColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaColor3f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = 1.0f;
-
+	AnimaColor3f color(r, g, b);
 	AddColor(propertyName, color);
 }
 
 void AnimaMappedValues::AddColor(const char* propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaColor4f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = 1.0f;
-
+	AnimaColor4f color(r, g, b, 1.0f);
 	AddColor(propertyName, color);
 }
 
@@ -178,23 +163,13 @@ void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor4f value)
 
 void AnimaMappedValues::AddColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaColor4f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = a;
-
+	AnimaColor4f color(r, g, b, a);
 	AddColor(propertyName, color);
 }
 
 void AnimaMappedValues::AddColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaColor4f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = a;
-
+	AnimaColor4f color(r, g, b, a);
 	AddColor(propertyName, color);
 }
 
@@ -213,12 +188,7 @@ void AnimaMappedValues::AddVector(const char* propertyName, AnimaVectorGenerator
 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex2f value)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = value[0];
-	vector[1] = value[1];
-	vector[2] = 0.0f;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(value, 0.0f, 0.0f);
 	AddVector(propertyName, vector);
 }
 
@@ -230,34 +200,19 @@ void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex2f value)
 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AFloat x, AFloat y)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = 0.0f;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, 0.0f, 0.0f);
 	AddVector(propertyName, vector);
 }
 
 void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = 0.0f;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, 0.0f, 0.0f);
 	AddVector(propertyName, vector);
 }
 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex3f value)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = value[0];
-	vector[1] = value[1];
-	vector[2] = value[2];
-	vector[3] = 1.0f;
-
+	AnimaVertex4f vector(value, 1.0f);
 	AddVector(propertyName, vector);
 }
 
@@ -269,23 +224,13 @@ void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex3f value)
 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, z, 1.0f);
 	AddVector(propertyName, vector);
 }
 
 void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, z, 1.0f);
 	AddVector(propertyName, vector);
 }
 
@@ -322,23 +267,13 @@ void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex4f value)
 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = w;
-
+	AnimaVertex4f vector(x, y, z, w);
 	AddVector(propertyName, vector);
 }
 
 void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = w;
-
+	AnimaVertex4f vector(x, y, z, w);
 	AddVector(propertyName, vector);
 }
 
@@ -398,12 +333,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AnimaColorGenerator* 
 
 void AnimaMappedValues::SetColor(AnimaString propertyName, AnimaColor3f value)
 {
-	AnimaColor4f color(_engine);
-	color[0] = value[0];
-	color[1] = value[1];
-	color[2] = value[2];
-	color[3] = 1.0f;
-
+	AnimaColor4f color(value, 1.0f);
 	AddColor(propertyName, color);
 }
 
@@ -415,12 +345,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor3f value)
 
 void AnimaMappedValues::SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaColor4f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = 1.0f;
-
+	AnimaColor4f color(r, g, b, 1.0f);
 	SetColor(propertyName, color);
 }
 
@@ -463,12 +388,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor4f value)
 
 void AnimaMappedValues::SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaColor4f color(_engine);
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
-	color[3] = a;
-
+	AnimaColor4f color(r, g, b, a);
 	SetColor(propertyName, color);
 }
 
@@ -494,12 +414,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AnimaVectorGenerator
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex2f value)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = value[0];
-	vector[1] = value[1];
-	vector[2] = value[2];
-	vector[3] = 1.0f;
-
+	AnimaVertex4f vector(value, 0.0f, 0.0f);
 	SetVector(propertyName, vector);
 }
 
@@ -511,12 +426,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex2f value)
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = 0.0f;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, 0.0f, 0.0f);
 	SetVector(propertyName, vector);
 }
 
@@ -528,12 +438,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y)
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex3f value)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = value[0];
-	vector[1] = value[1];
-	vector[2] = value[2];
-	vector[3] = 1.0f;
-
+	AnimaVertex4f vector(value, 1.0f);
 	SetVector(propertyName, vector);
 }
 
@@ -545,12 +450,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex3f value)
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = 0.0f;
-
+	AnimaVertex4f vector(x, y, z, 1.0f);
 	SetVector(propertyName, vector);
 }
 
@@ -593,12 +493,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex4f value)
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaVertex4f vector(_engine);
-	vector[0] = x;
-	vector[1] = y;
-	vector[2] = z;
-	vector[3] = w;
-
+	AnimaVertex4f vector(x, y, z, w);
 	SetVector(propertyName, vector);
 }
 
@@ -654,11 +549,7 @@ AnimaColor3f AnimaMappedValues::GetColor3f(AnimaString propertyName)
 	if (_colorsMap.find(propertyName) != _colorsMap.end())
 		return _colorsMap[propertyName]->GetColor3f();
 
-	AnimaColor3f color(_engine);
-	color[0] = 0.0f;
-	color[1] = 0.0f;
-	color[2] = 0.0f;
-
+	AnimaColor3f color(0.0f, 0.0f, 0.0f);
 	return color;
 }
 
@@ -673,12 +564,7 @@ AnimaColor4f AnimaMappedValues::GetColor4f(AnimaString propertyName)
 	if (_colorsMap.find(propertyName) != _colorsMap.end())
 		return _colorsMap[propertyName]->GetColor4f();
 
-	AnimaColor4f color(_engine);
-	color[0] = 0.0f;
-	color[1] = 0.0f;
-	color[2] = 0.0f;
-	color[3] = 1.0f;
-
+	AnimaColor4f color(0.0f, 0.0f, 0.0f, 1.0f);
 	return color;
 }
 
@@ -693,9 +579,7 @@ AnimaVertex2f AnimaMappedValues::GetVector2f(AnimaString propertyName)
 	if (_vectorsMap.find(propertyName) != _vectorsMap.end())
 		return _vectorsMap[propertyName]->GetVector2f();
 
-	AnimaVertex2f vector(_engine);
-	vector[0] = 0.0f;
-	vector[1] = 0.0f;
+	AnimaVertex2f vector(0.0f, 0.0f);
 	return vector;
 }
 
@@ -710,10 +594,7 @@ AnimaVertex3f AnimaMappedValues::GetVector3f(AnimaString propertyName)
 	if (_vectorsMap.find(propertyName) != _vectorsMap.end())
 		return _vectorsMap[propertyName]->GetVector3f();
 
-	AnimaVertex3f vector(_engine);
-	vector[0] = 0.0f;
-	vector[1] = 0.0f;
-	vector[2] = 0.0f;
+	AnimaVertex3f vector(0.0f, 0.0f, 0.0f);
 	return vector;
 }
 
@@ -728,11 +609,7 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(AnimaString propertyName)
 	if (_vectorsMap.find(propertyName) != _vectorsMap.end())
 		return _vectorsMap[propertyName]->GetVector4f();
 
-	AnimaVertex4f vector(_engine);
-	vector[0] = 0.0f;
-	vector[1] = 0.0f;
-	vector[2] = 0.0f;
-	vector[3] = 0.0f;
+	AnimaVertex4f vector(0.0f, 0.0f, 0.0f, 0.0f);
 	return vector;
 }
 

@@ -12,72 +12,44 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(0.0f, 0.0f, 0.0f, 0.0f)
 {
-	_vector[0] = 0.0f;
-	_vector[1] = 0.0f;
-	_vector[2] = 0.0f;
-	_vector[3] = 0.0f;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex2f& vector)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(vector, 0.0f, 0.0f)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = 0.0f;
-	_vector[3] = 0.0f;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(x, y, 0.0f, 0.0f)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = 0.0f;
-	_vector[3] = 0.0f;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex3f& vector)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(vector, 1.0f)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = vector[2];
-	_vector[3] = 0.0f;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y, AFloat z)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(x, y, z, 1.0f)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = z;
-	_vector[3] = 0.0f;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex4f& vector)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(vector)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = vector[2];
-	_vector[3] = vector[3];
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y, AFloat z, AFloat w)
 	: AnimaDataGenerator(engine)
-	, _vector(engine)
+	, _vector(x, y, z, w)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = z;
-	_vector[3] = w;
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaVectorGenerator& src)
@@ -126,68 +98,58 @@ void AnimaVectorGenerator::UpdateValue()
 
 void AnimaVectorGenerator::SetVector(const AnimaVertex2f& vector)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = 0.0f;
-	_vector[3] = 0.0f;
+	_vector.x = vector.x;
+	_vector.y = vector.y;
+	_vector.z = 0.0f;
+	_vector.w = 0.0f;
 }
 
 void AnimaVectorGenerator::SetVector(AFloat x, AFloat y)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = 0.0f;
-	_vector[3] = 0.0f;
+	_vector.x = x;
+	_vector.y = y;
+	_vector.z = 0.0f;
+	_vector.w = 0.0f;
 }
 
 void AnimaVectorGenerator::SetVector(const AnimaVertex3f& vector)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = vector[2];
-	_vector[3] = 0.0f;
+	_vector.x = vector.x;
+	_vector.y = vector.y;
+	_vector.z = vector.z;
+	_vector.w = 0.0f;
 }
 
 void AnimaVectorGenerator::SetVector(AFloat x, AFloat y, AFloat z)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = z;
-	_vector[3] = 0.0f;
+	_vector.x = x;
+	_vector.y = y;
+	_vector.z = z;
+	_vector.w = 0.0f;
 }
 
 void AnimaVectorGenerator::SetVector(const AnimaVertex4f& vector)
 {
-	_vector[0] = vector[0];
-	_vector[1] = vector[1];
-	_vector[2] = vector[2];
-	_vector[3] = vector[3];
+	_vector = vector;
 }
 
 void AnimaVectorGenerator::SetVector(AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	_vector[0] = x;
-	_vector[1] = y;
-	_vector[2] = z;
-	_vector[3] = w;
+	_vector.x = x;
+	_vector.y = y;
+	_vector.z = z;
+	_vector.w = w;
 }
 
 AnimaVertex2f AnimaVectorGenerator::GetVector2f()
 {
-	AnimaVertex2f c(_engine);
-	c[0] = _vector[0];
-	c[1] = _vector[1];
-
+	AnimaVertex2f c(_vector.x, _vector.y);
 	return c;
 }
 
 AnimaVertex3f AnimaVectorGenerator::GetVector3f()
 {
-	AnimaVertex3f c(_engine);
-	c[0] = _vector[0];
-	c[1] = _vector[1];
-	c[2] = _vector[2];
-
+	AnimaVertex3f c(_vector.x, _vector.y, _vector.z);
 	return c;
 }
 

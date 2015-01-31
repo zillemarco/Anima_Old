@@ -15,51 +15,47 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaTransformation::AnimaTransformation(AnimaEngine* engine)
-	: _translation(engine)
-	, _rotation(engine)
-	, _scale(engine)
-	, _transformationMatrix(engine)
+	//: _translation(engine)
+	//, _rotation(engine)
+	//, _scale(engine)
+	: _transformationMatrix(engine)
 	, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
 
-	_translation[0] = 0.0f;	_translation[1] = 0.0f;	_translation[2] = 0.0f;
-	_rotation[0] = 0.0f;	_rotation[1] = 0.0f;	_rotation[2] = 0.0f;
-	_scale[0] = 1.0f;		_scale[1] = 1.0f;		_scale[2] = 1.0f;
+	_translation.x = 0.0f;	_translation.y = 0.0f;	_translation.z = 0.0f;
+	_rotation.x = 0.0f;		_rotation.y = 0.0f;		_rotation.z = 0.0f;
+	_scale.x = 1.0f;		_scale.y = 1.0f;		_scale.z = 1.0f;
 
 	_transformationMatrix.SetIdentity();
 	_initialTransformationMatrix.SetIdentity();
 }
 
 AnimaTransformation::AnimaTransformation(AnimaEngine* engine, const AnimaMatrix& initialTransformationMatrix)
-	: _translation(engine)
-	, _rotation(engine)
-	, _scale(engine)
-	, _transformationMatrix(initialTransformationMatrix)
+	//: _translation(engine)
+	//, _rotation(engine)
+	//, _scale(engine)
+	: _transformationMatrix(initialTransformationMatrix)
 	, _initialTransformationMatrix(initialTransformationMatrix)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
 
-	_translation[0] = 0.0f;	_translation[1] = 0.0f;	_translation[2] = 0.0f;
-	_rotation[0] = 0.0f;	_rotation[1] = 0.0f;	_rotation[2] = 0.0f;
-	_scale[0] = 1.0f;		_scale[1] = 1.0f;		_scale[2] = 1.0f;
+	_translation.x = 0.0f;	_translation.y = 0.0f;	_translation.z = 0.0f;
+	_rotation.x = 0.0f;		_rotation.y = 0.0f;		_rotation.z = 0.0f;
+	_scale.x = 1.0f;		_scale.y = 1.0f;		_scale.z = 1.0f;
 }
 
 AnimaTransformation::AnimaTransformation(AnimaEngine* engine, const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s)
-	: _translation(engine)
-	, _rotation(engine)
-	, _scale(engine)
+	: _translation(t)
+	, _rotation(r)
+	, _scale(s)
 	, _transformationMatrix(engine)
 	, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
-
-	_translation[0] = t[0];	_translation[1] = t[1];	_translation[2] = t[2];
-	_rotation[0] = r[0];	_rotation[1] = r[1];	_rotation[2] = r[2];
-	_scale[0] = s[0];		_scale[1] = s[1];		_scale[2] = s[2];
 
 	_initialTransformationMatrix.SetIdentity();
 
@@ -67,18 +63,14 @@ AnimaTransformation::AnimaTransformation(AnimaEngine* engine, const AnimaVertex3
 }
 
 AnimaTransformation::AnimaTransformation(AnimaEngine* engine, AFloat tx, AFloat ty, AFloat tz, AFloat rx, AFloat ry, AFloat rz, AFloat sx, AFloat sy, AFloat sz)
-	: _translation(engine)
-	, _rotation(engine)
-	, _scale(engine)
+	: _translation(tx, ty, tz)
+	, _rotation(rx, ry, rz)
+	, _scale(sx, sy, sz)
 	, _transformationMatrix(engine)
 	, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
-
-	_translation[0] = tx;	_translation[1] = ty;	_translation[2] = tz;
-	_rotation[0] = rx;		_rotation[1] = ry;		_rotation[2] = rz;
-	_scale[0] = sx;			_scale[1] = sy;			_scale[2] = sz;
 
 	_initialTransformationMatrix.SetIdentity();
 
@@ -86,7 +78,7 @@ AnimaTransformation::AnimaTransformation(AnimaEngine* engine, AFloat tx, AFloat 
 }
 
 AnimaTransformation::AnimaTransformation(const AnimaTransformation& src)
-	: _translation(src._engine)
+	: _translation(src._translation)
 	, _rotation(src._rotation)
 	, _scale(src._scale)
 	, _transformationMatrix(src._transformationMatrix)
@@ -141,79 +133,66 @@ AnimaTransformation& AnimaTransformation::operator=(AnimaTransformation&& src)
 
 void AnimaTransformation::Translate(const AnimaVertex3f& t)
 {
-	_translation[0] += t[0];	
-	_translation[1] += t[1];	
-	_translation[2] += t[2];
-
+	_translation += t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::Translate(AFloat tx, AFloat ty, AFloat tz)
 {
-	_translation[0] += tx;
-	_translation[1] += ty;
-	_translation[2] += tz;
+	_translation.x += tx;
+	_translation.y += ty;
+	_translation.z += tz;
 
 	UpdateMatrix();
 }
 
 void AnimaTransformation::TranslateX(AFloat tx)
 {
-	_translation[0] += tx;
-
+	_translation.x += tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::TranslateY(AFloat ty)
 {
-	_translation[1] += ty;
-
+	_translation.y += ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::TranslateZ(AFloat tz)
 {
-	_translation[2] += tz;
-
+	_translation.z += tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetTranslation(const AnimaVertex3f& t)
 {
-	_translation[0] = t[0];
-	_translation[1] = t[1];
-	_translation[2] = t[2];
-
+	_translation = t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetTranslation(AFloat tx, AFloat ty, AFloat tz)
 {
-	_translation[0] = tx;
-	_translation[1] = ty;
-	_translation[2] = tz;
-
+	_translation.x = tx;
+	_translation.y = ty;
+	_translation.z = tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetTranslationX(AFloat tx)
 {
-	_translation[0] = tx;
-
+	_translation.x = tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetTranslationY(AFloat ty)
 {
-	_translation[1] = ty;
-
+	_translation.y = ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetTranslationZ(AFloat tz)
 {
-	_translation[2] = tz;
-
+	_translation.z = tz;
 	UpdateMatrix();
 }
 
@@ -224,94 +203,80 @@ AnimaVertex3f AnimaTransformation::GetTranslation()
 
 AFloat AnimaTransformation::GetTranslationX()
 {
-	return _translation[0];
+	return _translation.x;
 }
 
 AFloat AnimaTransformation::GetTranslationY()
 {
-	return _translation[1];
+	return _translation.y;
 }
 
 AFloat AnimaTransformation::GetTranslationZ()
 {
-	return _translation[2];
+	return _translation.z;
 }
 
 void AnimaTransformation::Rotate(const AnimaVertex3f& t)
 {
-	_rotation[0] += t[0];
-	_rotation[1] += t[1];
-	_rotation[2] += t[2];
-
+	_rotation += t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::Rotate(AFloat tx, AFloat ty, AFloat tz)
 {
-	_rotation[0] += tx;
-	_rotation[1] += ty;
-	_rotation[2] += tz;
-
+	_rotation.x += tx;
+	_rotation.y += ty;
+	_rotation.z += tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::RotateX(AFloat tx)
 {
-	_rotation[0] += tx;
-
+	_rotation.x += tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::RotateY(AFloat ty)
 {
-	_rotation[1] += ty;
-
+	_rotation.y += ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::RotateZ(AFloat tz)
 {
-	_rotation[2] += tz;
-
+	_rotation.z += tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetRotation(const AnimaVertex3f& t)
 {
-	_rotation[0] = t[0];
-	_rotation[1] = t[1];
-	_rotation[2] = t[2];
-
+	_rotation = t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetRotation(AFloat tx, AFloat ty, AFloat tz)
 {
-	_rotation[0] = tx;
-	_rotation[1] = ty;
-	_rotation[2] = tz;
-
+	_rotation.x = tx;
+	_rotation.y = ty;
+	_rotation.z = tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetRotationX(AFloat tx)
 {
-	_rotation[0] = tx;
-
+	_rotation.x = tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetRotationY(AFloat ty)
 {
-	_rotation[1] = ty;
-
+	_rotation.y = ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetRotationZ(AFloat tz)
 {
-	_rotation[2] = tz;
-
+	_rotation.z = tz;
 	UpdateMatrix();
 }
 
@@ -384,94 +349,80 @@ AnimaVertex3f AnimaTransformation::GetRotation()
 
 AFloat AnimaTransformation::GetRotationX()
 {
-	return _rotation[0];
+	return _rotation.x;
 }
 
 AFloat AnimaTransformation::GetRotationY()
 {
-	return _rotation[1];
+	return _rotation.y;
 }
 
 AFloat AnimaTransformation::GetRotationZ()
 {
-	return _rotation[2];
+	return _rotation.z;
 }
 
 void AnimaTransformation::Scale(const AnimaVertex3f& t)
 {
-	_scale[0] += t[0];
-	_scale[1] += t[1];
-	_scale[2] += t[2];
-
+	_scale += t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::Scale(AFloat tx, AFloat ty, AFloat tz)
 {
-	_scale[0] += tx;
-	_scale[1] += ty;
-	_scale[2] += tz;
-
+	_scale.x += tx;
+	_scale.y += ty;
+	_scale.z += tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::ScaleX(AFloat tx)
 {
-	_scale[0] += tx;
-
+	_scale.x += tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::ScaleY(AFloat ty)
 {
-	_scale[1] += ty;
-
+	_scale.y += ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::ScaleZ(AFloat tz)
 {
-	_scale[2] += tz;
-
+	_scale.z += tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetScale(const AnimaVertex3f& t)
 {
-	_scale[0] = t[0];
-	_scale[1] = t[1];
-	_scale[2] = t[2];
-
+	_scale = t;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetScale(AFloat tx, AFloat ty, AFloat tz)
 {
-	_scale[0] = tx;
-	_scale[1] = ty;
-	_scale[2] = tz;
-
+	_scale.x = tx;
+	_scale.y = ty;
+	_scale.z = tz;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetScaleX(AFloat tx)
 {
-	_scale[0] = tx;
-
+	_scale.x = tx;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetScaleY(AFloat ty)
 {
-	_scale[1] = ty;
-
+	_scale.y = ty;
 	UpdateMatrix();
 }
 
 void AnimaTransformation::SetScaleZ(AFloat tz)
 {
-	_scale[2] = tz;
-
+	_scale.z = tz;
 	UpdateMatrix();
 }
 
@@ -482,17 +433,17 @@ AnimaVertex3f AnimaTransformation::GetScale()
 
 AFloat AnimaTransformation::GetScaleX()
 {
-	return _scale[0];
+	return _scale.x;
 }
 
 AFloat AnimaTransformation::GetScaleY()
 {
-	return _scale[1];
+	return _scale.y;
 }
 
 AFloat AnimaTransformation::GetScaleZ()
 {
-	return _scale[2];
+	return _scale.z;
 }
 
 void AnimaTransformation::UpdateMatrix()
@@ -501,9 +452,9 @@ void AnimaTransformation::UpdateMatrix()
 	AnimaMatrix rotationMatrix(_engine);
 	AnimaMatrix scaleMatrix(_engine);
 
-	translationMatrix.InitTranslation(_translation[0], _translation[1], _translation[2]);
-	scaleMatrix.InitScale(_scale[0], _scale[1], _scale[2]);
-	rotationMatrix.InitRotation(_rotation[0], _rotation[1], _rotation[2]);
+	translationMatrix.InitTranslation(_translation.x, _translation.y, _translation.z);
+	scaleMatrix.InitScale(_scale.x, _scale.y, _scale.z);
+	rotationMatrix.InitRotation(_rotation.x, _rotation.y, _rotation.z);
 
 	//_transformationMatrix = _initialTransformationMatrix * scaleMatrix * rotationMatrix * translationMatrix;
 	_transformationMatrix =  translationMatrix * rotationMatrix * scaleMatrix * _initialTransformationMatrix;
