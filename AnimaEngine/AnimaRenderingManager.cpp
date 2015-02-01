@@ -46,7 +46,7 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 		if (camera == nullptr)
 			return;
 
-		AnimaMatrix viewProjectionMatrix = camera->GetViewMatrix() * camera->GetProjectionMatrix();
+		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 
 		AnimaVertex3f lightDir(-1.0f, -1.0, -1.0);
 		lightDir.Normalize();
@@ -181,7 +181,7 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 
 void AnimaRenderingManager::DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program)
 {
-	AnimaMatrix identityMatrix(engine);
+	AnimaMatrix identityMatrix;
 	DrawModel(engine, model, program, identityMatrix);
 }
 

@@ -12,145 +12,119 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMatrix
 {
 public:
-	AnimaMatrix(AnimaEngine* engine);
-	AnimaMatrix(AnimaEngine* engine, AFloat data[ANIMA_MATRIX_SIZE]);
+	union
+	{
+		float m[16];
+		struct
+		{
+			float x[4];
+			float y[4];
+			float z[4];
+			float w[4];
+		};
+	};
+
+public:
+	AnimaMatrix();
 	AnimaMatrix(const AnimaMatrix& src);
 	AnimaMatrix(AnimaMatrix&& src);
+	AnimaMatrix(const AFloat mat[16]);
 	~AnimaMatrix();
-
+	
 	AnimaMatrix& operator=(const AnimaMatrix& src);
 	AnimaMatrix& operator=(AnimaMatrix&& src);
-		
-	AFloat& operator[](ASizeT index);
-	const AFloat& operator[](ASizeT index) const;
-	
-	inline bool operator==(const AnimaMatrix& left);
-	inline bool operator==(const AFloat left[ANIMA_MATRIX_SIZE]);
-	inline bool operator!=(const AnimaMatrix& left);
-	inline bool operator!=(const AFloat left[ANIMA_MATRIX_SIZE]);
-	inline operator AFloat*();
-	inline operator const AFloat*();
-	
-public:
-	void SetData(AFloat data[ANIMA_MATRIX_SIZE]);
-	void SetData(AFloat data, ASizeT index);
-	
-	AFloat GetElement(ASizeT index);
-	AFloat GetElement(ASizeT row, ASizeT col);
-	void GetRow(AFloat* row, ASizeT index);
-	void GetColumn(AFloat* col, ASizeT index);
 
-	AFloat* GetData() const;
-	void GetData(AFloat m[ANIMA_MATRIX_SIZE]) const;
-	const AFloat* GetConstData() const;
-		
+	AnimaVertex3f operator*(const AnimaVertex3f& p) const;
+	AnimaMatrix operator*(const AnimaMatrix& p) const;
+	AnimaMatrix& operator*=(const AnimaMatrix& p);
+	AnimaMatrix operator*(const AFloat p[16]) const;
+	AnimaMatrix& operator*=(const AFloat p[16]);
+	
+	bool operator==(const AnimaMatrix& p) const;
+	bool operator!=(const AnimaMatrix& p) const;
+	bool operator==(const AFloat p[16]) const;
+	bool operator!=(const AFloat p[16]) const;
+
+	void Fill(const AFloat p[16]);
+
+	AnimaVertex3f GetXVector() const;
+	AnimaVertex3f GetYVector() const;
+	AnimaVertex3f GetZVector() const;
+	AnimaVertex3f GetPosition() const;
+
 	void SetIdentity();
+	void Keep3x3();
 	
-	// Operations
-public:
-	AnimaMatrix Inverse() const;
-	AnimaMatrix Transpose() const;
-	inline float Determinant() const;
-	
-	void InitTranslation(float tx, float ty, float tz);
-	void InitTranslation(const AnimaVertex3f& translation);
-	void InitRotation(float rx, float ry, float rz);
-	void InitRotation(const AnimaVertex3f& rotation);
-	void InitRotationDeg(float rx, float ry, float rz);
-	void InitRotationDeg(const AnimaVertex3f& rotation);
-	void InitScale(float sx, float sy, float sz);
-	void InitScale(const AnimaVertex3f& scale);
+	void Transpose();
+	void TransposeSSE();
+	AnimaMatrix Transposed() const;
+	AnimaMatrix TransposedSSE() const;
 
-	void Translate(float tx, float ty, float tz);
-	void Translate(const AnimaVertex3f& translation);
-	void Scale(float sx, float sy, float sz);
-	void Scale(const AnimaVertex3f& scale);
-	void Rotate(float angle, AnimaVertex3f axis);
-	void RotateDeg(float angle, AnimaVertex3f axis);
-	void RotateX(float angle);
-	void RotateXDeg(float angle);
-	void RotateY(float angle);
-	void RotateYDeg(float angle);
-	void RotateZ(float angle);
-	void RotateZDeg(float angle);
-	void Perspective(float fov, float ratio, float zNear, float zFar);
-	void Ortho(float left, float right, float bottom, float top, float zNear, float zFar);
-	void LookAt(const AnimaVertex3f& eye, const AnimaVertex3f& forward, const AnimaVertex3f& up);
-	void Viewport(float left, float bottom, float width, float height, float zNear, float zFar);
-	void Frustum(float left, float right, float bottom, float top, float zNear, float zFar);
+	void Inverse();
+	void InverseSSE();
+	AnimaMatrix Inversed() const;
+	AnimaMatrix InversedSSE() const;
 
-	void FromHeadPitchRoll(AFloat head, AFloat pitch, AFloat roll);
-	void FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
-	void GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) const;
-	void GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll) const;
+	AFloat Determinant() const;
 
-	AnimaMatrix& operator+=(const AnimaMatrix& src);
-	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m += srcb;
-		return m;
-	}
+	void MultiplyMatrix(const AnimaMatrix& p);
+	void MultiplyMatrixSSE(const AnimaMatrix& p);
 
-	AnimaMatrix& operator-=(const AnimaMatrix& src);
-	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m -= srcb;
-		return m;
-	}
+	void LookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up);
+	void LookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp);
+	static AnimaMatrix MakeLookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up);
+	static AnimaMatrix MakeLookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp);
 
-	AnimaMatrix& operator*=(const AnimaMatrix& src);
-	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m *= srcb;
-		return m;
-	}
+	void Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar);
+	static AnimaMatrix MakePerspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar);
 
-	AnimaMatrix& operator/=(const AnimaMatrix& src);
-	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AnimaMatrix& srcb) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m /= srcb;
-		return m;
-	}
+	void Ortho(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar);
+	static AnimaMatrix MakeOrtho(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar);
 
-	AnimaMatrix& operator+=(const AFloat& add);
-	inline friend AnimaMatrix operator+(const AnimaMatrix& srca, const AFloat& add) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m += add;
-		return m;
-	}
+	void Translate(const AnimaVertex3f& v);
+	void Translate(const AFloat x, const AFloat y, const AFloat z);
+	static AnimaMatrix MakeTranslation(const AnimaVertex3f& v);
+	static AnimaMatrix MakeTranslation(const AFloat x, const AFloat y, const AFloat z);
 
-	AnimaMatrix& operator-=(const AFloat& sub);
-	inline friend AnimaMatrix operator-(const AnimaMatrix& srca, const AFloat& sub) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m -= sub;
-		return m;
-	}
+	void Scale(const AnimaVertex4f& v);
+	void Scale(const AFloat x, const AFloat y, const AFloat z, const AFloat w);
+	static AnimaMatrix MakeScale(const AnimaVertex4f& v);
+	static AnimaMatrix MakeScale(const AFloat x, const AFloat y, const AFloat z, const AFloat w);
 
-	AnimaMatrix& operator*=(const AFloat& mul);
-	inline friend AnimaMatrix operator*(const AnimaMatrix& srca, const AFloat& mul) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m *= mul;
-		return m;
-	}
+	void RotateRad(const AnimaVertex3f& v, AFloat rad);
+	void RotateDeg(const AnimaVertex3f& v, AFloat deg);
+	void RotateRad(const AFloat x, const AFloat y, const AFloat z, AFloat rad);
+	void RotateDeg(const AFloat x, const AFloat y, const AFloat z, AFloat deg);
+	static AnimaMatrix MakeRotationRad(const AnimaVertex3f& v, AFloat rad);
+	static AnimaMatrix MakeRotationDeg(const AnimaVertex3f& v, AFloat deg);
+	static AnimaMatrix MakeRotationRad(const AFloat x, const AFloat y, const AFloat z, AFloat rad);
+	static AnimaMatrix MakeRotationDeg(const AFloat x, const AFloat y, const AFloat z, AFloat deg);
 
-	AnimaMatrix& operator/=(const AFloat& div);
-	inline friend AnimaMatrix operator/(const AnimaMatrix& srca, const AFloat& div) {
-		AnimaMatrix m(srca._engine, srca._matrixData);
-		m /= div;
-		return m;
-	}
-		
-	void DumpMemory(bool bLogFile = true);
+	void RotateXRad(AFloat rad);
+	void RotateXDeg(AFloat deg);
+	static AnimaMatrix MakeRotationXRad(AFloat rad);
+	static AnimaMatrix MakeRotationXDeg(AFloat deg);
 
-private:
-	// _matrixData memory structure
-	//	[0]		[1]		[2]		[3]
-	//	[4]		[5]		[6]		[7]
-	//	[8]		[9]		[10]	[11]
-	//	[12]	[13]	[14]	[15]
-	AFloat* _matrixData;
+	void RotateYRad(AFloat rad);
+	void RotateYDeg(AFloat deg);
+	static AnimaMatrix MakeRotationYRad(AFloat rad);
+	static AnimaMatrix MakeRotationYDeg(AFloat deg);
 
-	AnimaEngine* _engine;
+	void RotateZRad(AFloat rad);
+	void RotateZDeg(AFloat deg);
+	static AnimaMatrix MakeRotationZRad(AFloat rad);
+	static AnimaMatrix MakeRotationZDeg(AFloat deg);
+
+	AnimaVertex3f GetRotationAxes() const;
+
+	void Transform4x4(AnimaVertex3f& dest, const AnimaVertex3f& src) const;
+	AnimaVertex3f Transform4x4(const AnimaVertex3f& p) const;
+	void Transform4x3(AnimaVertex3f& dest, const AnimaVertex3f& src) const;
+	AnimaVertex3f Transform4x3(const AnimaVertex3f& p) const;
+	void Transform3x3(AnimaVertex3f& dest, const AnimaVertex3f& src) const;
+	AnimaVertex3f Transform3x3(AnimaVertex3f& p) const;
+
+	void DumpMemory() const;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

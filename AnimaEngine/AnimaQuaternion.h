@@ -11,108 +11,81 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#define QUATERNION_SIZE	4
-
-class AnimaMath;
+//#define QUATERNION_SIZE	4
+//
+//class AnimaMath;
 
 class ANIMA_ENGINE_EXPORT AnimaQuaternion
 {
 public:
-	AnimaQuaternion(AnimaEngine* engine);
-	AnimaQuaternion(AnimaEngine* engine, AFloat data[QUATERNION_SIZE]);
-	AnimaQuaternion(AnimaEngine* engine, AFloat x, AFloat y, AFloat z, AFloat w);
-	AnimaQuaternion(AnimaEngine* engine, const AnimaVertex3f& axis, AFloat angle, bool angleInRadians = true);
-	AnimaQuaternion(AnimaEngine* engine, AFloat head, AFloat pitch, AFloat roll, bool angleInRadians = true);
-	AnimaQuaternion(AnimaEngine* engine, AnimaMatrix matrix);
-	AnimaQuaternion(const AnimaQuaternion& src);
-	AnimaQuaternion(AnimaQuaternion&& src);
-	~AnimaQuaternion();
-
-	AFloat& operator[](ASizeT index);
-	const AFloat& operator[](ASizeT index) const;
-
-	AnimaQuaternion& operator+=(const AnimaQuaternion& q);
-	inline friend AnimaQuaternion operator+(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
-		AnimaQuaternion res(q1._engine, q1._data);
-		res += q2;
-		return res;
-	}
-
-	AnimaQuaternion& operator-=(const AnimaQuaternion& q);
-	inline friend AnimaQuaternion operator-(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
-		AnimaQuaternion res(q1._engine, q1._data);
-		res -= q2;
-		return res;
-	}
-
-	AnimaQuaternion& operator*=(const AnimaQuaternion& q);
-	inline friend AnimaQuaternion operator*(const AnimaQuaternion& q1, const AnimaQuaternion& q2) {
-
-		float w = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
-		float x = q1[0] * q2[3] + q1[3] * q2[0] + q1[1] * q2[2] - q1[2] * q2[1];
-		float y = q1[1] * q2[3] + q1[3] * q2[1] + q1[2] * q2[0] - q1[0] * q2[2];
-		float z = q1[2] * q2[3] + q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0];
-
-		AnimaQuaternion res(q1.GetEngine(), x, y, z, w);
-		return res;
-	}
-
-	AnimaQuaternion& operator/=(const AFloat& div);
-	inline friend AnimaQuaternion operator/(const AnimaQuaternion& q, const AFloat& div) {
-		AnimaQuaternion res(q._engine, q._data);
-		res /= div;
-		return res;
-	}
-
-	AnimaQuaternion& operator*=(const AFloat& mul);
-	inline friend AnimaQuaternion operator*(const AFloat& mul, const AnimaQuaternion& q) {
-		AnimaQuaternion res(q._engine, q._data);
-		res *= mul;
-		return res;
-	}
-
-	inline friend AnimaQuaternion operator*(const AnimaQuaternion& q, const AFloat& mul) {
-		return operator*(mul, q);
-	}
-		
-	inline operator AFloat*();
-	inline operator const AFloat*();
+	union
+	{
+		AFloat vec[4];
+		struct
+		{
+			AFloat x, y, z, w;
+		};
+	};
 
 public:
-	void SetData(AFloat value, ASizeT index);
-	void SetData(AFloat x, AFloat y, AFloat z, AFloat w);
-	inline void SetData(AFloat data[QUATERNION_SIZE]);
-	inline AFloat* GetData() const;
-	inline const AFloat* GetConstData() const;
-	inline void CopyData(AFloat* d) const;
-	
-	void FromAxisAndAngle(const AnimaVertex3f& axis, AFloat angle);
-	void FromAxisAndAngleDeg(const AnimaVertex3f& axis, AFloat angle);
-	void FromHeadPitchRoll(AFloat head, AFloat pitch, AFloat roll);
-	void FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
-	void FromMatrix(const AnimaMatrix& matrix);
-	void SetIdentity();
-	
-	AnimaQuaternion Conjugate() const;
-	AnimaQuaternion Inverse() const;
+	AnimaQuaternion();
+	AnimaQuaternion(const AnimaQuaternion& src);
+	AnimaQuaternion(AnimaQuaternion&& src);
+	AnimaQuaternion(const AFloat x, const AFloat y, const AFloat z, const AFloat w);
+	AnimaQuaternion(const AnimaVertex3f& axis, AFloat rad);
+	AnimaQuaternion(const AFloat axis[3], AFloat rad);
+	AnimaQuaternion(const AnimaMatrix& mat);
+	AnimaQuaternion(const AFloat mat[16]);
+	~AnimaQuaternion();
+
+	AnimaQuaternion& operator=(const AnimaQuaternion& src);
+	AnimaQuaternion& operator=(AnimaQuaternion&& src);
+
+	AnimaQuaternion operator+(const AnimaQuaternion& p) const;
+	AnimaQuaternion& operator+=(const AnimaQuaternion& p);
+
+	AnimaQuaternion operator*(const AnimaQuaternion& p) const;
+	AnimaQuaternion& operator*=(const AnimaQuaternion& p);
+	AnimaQuaternion& operator*=(const AFloat p);
+	AnimaVertex3f operator*(const AnimaVertex3f& v) const;
+
+	bool operator==(const AnimaQuaternion& p) const;
+	bool operator!=(const AnimaQuaternion& p) const;
+
+	void Set(const AFloat x, const AFloat y, const AFloat z, const AFloat w);
+
+	void FromAxisAndAngleRad(const AnimaVertex3f& axis, AFloat rad);
+	void FromAxisAndAngleDeg(const AnimaVertex3f& axis, AFloat deg);
+	void FromAxisAndAngleRad(const AFloat axis[3], AFloat rad);
+	void FromAxisAndAngleDeg(const AFloat axis[3], AFloat deg);
+
+	void FromMatrix(const AnimaMatrix& mat);
+	void FromMatrix(const AFloat mat[16]);
 
 	AnimaMatrix GetMatrix() const;
-	void GetHeadPitchRoll(AFloat& head, AFloat& pitch, AFloat& roll) const;
-	void GetHeadPitchRollDeg(AFloat& head, AFloat& pitch, AFloat& roll) const;
-	void GetAxisAngle(AnimaVertex3f& axis, AFloat angle) const;
-	void GetAxisAngleDeg(AnimaVertex3f& axis, AFloat angle) const;
-	AnimaVertex3f GetVector() const;
+	void GetMatrix(AFloat mat[16]) const;
+	AnimaMatrix GetMatrix4x3() const;
+	void GetMatrix4x3(AFloat mat[12]) const;
 
-	AFloat Length() const;
-	bool IsNull() const;
+	void SetIdentity();
+
+	void Slerp(const AnimaQuaternion& q, const AFloat c);
+	AnimaQuaternion Slerped(const AnimaQuaternion& q, const AFloat c) const;
+
+	void Conjugate();
+	AnimaQuaternion Conjugated() const;
+
+	void Inverse();
+	AnimaQuaternion Inversed() const;
+
+	AFloat Magnitude() const;
+	AFloat Magnitude2() const;
 
 	void Normalize();
+	AnimaQuaternion Normalized() const;
 
-	AnimaEngine* GetEngine() const;
-
-protected:
-	AnimaEngine* _engine;
-	AFloat*	_data;
+	void Scale(const AFloat s);
+	AnimaQuaternion Scaled(const AFloat s) const;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

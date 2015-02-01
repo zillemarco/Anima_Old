@@ -18,8 +18,8 @@ AnimaTransformation::AnimaTransformation(AnimaEngine* engine)
 	//: _translation(engine)
 	//, _rotation(engine)
 	//, _scale(engine)
-	: _transformationMatrix(engine)
-	, _initialTransformationMatrix(engine)
+	//: _transformationMatrix(engine)
+	//, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -51,8 +51,8 @@ AnimaTransformation::AnimaTransformation(AnimaEngine* engine, const AnimaVertex3
 	: _translation(t)
 	, _rotation(r)
 	, _scale(s)
-	, _transformationMatrix(engine)
-	, _initialTransformationMatrix(engine)
+	//, _transformationMatrix(engine)
+	//, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -66,8 +66,8 @@ AnimaTransformation::AnimaTransformation(AnimaEngine* engine, AFloat tx, AFloat 
 	: _translation(tx, ty, tz)
 	, _rotation(rx, ry, rz)
 	, _scale(sx, sy, sz)
-	, _transformationMatrix(engine)
-	, _initialTransformationMatrix(engine)
+	//, _transformationMatrix(engine)
+	//, _initialTransformationMatrix(engine)
 {
 	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
@@ -448,13 +448,9 @@ AFloat AnimaTransformation::GetScaleZ()
 
 void AnimaTransformation::UpdateMatrix()
 {
-	AnimaMatrix translationMatrix(_engine);
-	AnimaMatrix rotationMatrix(_engine);
-	AnimaMatrix scaleMatrix(_engine);
-
-	translationMatrix.InitTranslation(_translation.x, _translation.y, _translation.z);
-	scaleMatrix.InitScale(_scale.x, _scale.y, _scale.z);
-	rotationMatrix.InitRotation(_rotation.x, _rotation.y, _rotation.z);
+	AnimaMatrix translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
+	AnimaMatrix rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x);
+	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
 
 	//_transformationMatrix = _initialTransformationMatrix * scaleMatrix * rotationMatrix * translationMatrix;
 	_transformationMatrix =  translationMatrix * rotationMatrix * scaleMatrix * _initialTransformationMatrix;
@@ -475,8 +471,8 @@ void AnimaTransformation::SetTransformationMatrix(const AnimaMatrix& m)
 
 void AnimaTransformation::SetTransformationMatrix(AFloat m[16])
 {
-	_initialTransformationMatrix.SetData(m);
-	_transformationMatrix.SetData(m);
+	_initialTransformationMatrix.Fill(m);
+	_transformationMatrix.Fill(m);
 }
 
 AnimaMatrix AnimaTransformation::GetTransformationMatrix()

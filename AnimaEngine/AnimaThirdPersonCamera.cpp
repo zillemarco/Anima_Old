@@ -237,10 +237,10 @@ void AnimaThirdPersonCamera::CalculateViewMatrix()
 	//_zAxis[1] = 0.0f;
 	//_zAxis[2] = -1.0f;
 	
-	_viewMatrix[0] = _xAxis.x;		_viewMatrix[1] = _yAxis.x;		_viewMatrix[2] = -_zAxis.x;	_viewMatrix[3] = 0.0f;
-	_viewMatrix[4] = _xAxis.y;		_viewMatrix[5] = _yAxis.y;		_viewMatrix[6] = -_zAxis.y;	_viewMatrix[7] = 0.0f;
-	_viewMatrix[8] = _xAxis.z;		_viewMatrix[9] = _yAxis.z;		_viewMatrix[10] = -_zAxis.z;	_viewMatrix[11] = 0.0f;
-	_viewMatrix[12] = 0.0f;			_viewMatrix[13] = 0.0f;			_viewMatrix[14] = 0.0f;			_viewMatrix[15] = 1.0f;
+	_viewMatrix.m[0] = _xAxis.x;		_viewMatrix.m[1] = _yAxis.x;		_viewMatrix.m[2] = -_zAxis.x;	_viewMatrix.m[3] = 0.0f;
+	_viewMatrix.m[4] = _xAxis.y;		_viewMatrix.m[5] = _yAxis.y;		_viewMatrix.m[6] = -_zAxis.y;	_viewMatrix.m[7] = 0.0f;
+	_viewMatrix.m[8] = _xAxis.z;		_viewMatrix.m[9] = _yAxis.z;		_viewMatrix.m[10] = -_zAxis.z;	_viewMatrix.m[11] = 0.0f;
+	_viewMatrix.m[12] = 0.0f;			_viewMatrix.m[13] = 0.0f;			_viewMatrix.m[14] = 0.0f;		_viewMatrix.m[15] = 1.0f;
 
 	_viewMatrix.Translate(-_position.x, -_position.y, -_position.z);
 

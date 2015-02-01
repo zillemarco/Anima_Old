@@ -48,8 +48,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	//, _worldYAxis(engine)
 	//, _worldZAxis(engine)
 	: _active(false)
-	, _viewMatrix(engine)
-	, _projectionMatrix(engine)
+	//, _viewMatrix(engine)
+	//, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {
@@ -73,8 +73,8 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	//, _worldYAxis(engine)
 	//, _worldZAxis(engine)
 	, _active(false)
-	, _viewMatrix(engine)
-	, _projectionMatrix(engine)
+	//, _viewMatrix(engine)
+	//, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {

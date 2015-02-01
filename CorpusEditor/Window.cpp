@@ -46,9 +46,9 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
-	Anima::AnimaMatrix rm0(GetEngine());
-	Anima::AnimaMatrix rm1(GetEngine());
-	rm0.RotateY(rotY);
+	Anima::AnimaMatrix rm0;
+	Anima::AnimaMatrix rm1;
+	rm0.RotateYDeg(rotY);
 	rotY += 0.00001f;
 
 	//GetEngine()->GetModelsManager()->GetPModel(1)->GetTransformation()->RotateX(rotX);

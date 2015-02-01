@@ -374,7 +374,7 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b,
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value)
 {
-	glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, GL_FALSE, value.GetConstData());
+	glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, GL_FALSE, value.m);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value)

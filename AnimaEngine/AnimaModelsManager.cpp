@@ -92,13 +92,14 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 	if (sceneNode->mName.length > 0)
 		currentModel->SetModelName(sceneNode->mName.C_Str());
 
-	AnimaMatrix modelMatrix(_engine);
-	modelMatrix.SetData(sceneNode->mTransformation.a1, 0);	modelMatrix.SetData(sceneNode->mTransformation.a2, 1);	modelMatrix.SetData(sceneNode->mTransformation.a3, 2);	modelMatrix.SetData(sceneNode->mTransformation.a4, 3);
-	modelMatrix.SetData(sceneNode->mTransformation.b1, 4);	modelMatrix.SetData(sceneNode->mTransformation.b2, 5);	modelMatrix.SetData(sceneNode->mTransformation.b3, 6);	modelMatrix.SetData(sceneNode->mTransformation.b4, 7);
-	modelMatrix.SetData(sceneNode->mTransformation.c1, 8);	modelMatrix.SetData(sceneNode->mTransformation.c2, 9);	modelMatrix.SetData(sceneNode->mTransformation.c3, 10); modelMatrix.SetData(sceneNode->mTransformation.c4, 11);
-	modelMatrix.SetData(sceneNode->mTransformation.d1, 12); modelMatrix.SetData(sceneNode->mTransformation.d2, 13); modelMatrix.SetData(sceneNode->mTransformation.d3, 14); modelMatrix.SetData(sceneNode->mTransformation.d4, 15);
+	AnimaMatrix modelMatrix;
+	modelMatrix.m[0] = sceneNode->mTransformation.a1;	modelMatrix.m[1] = sceneNode->mTransformation.a2;	modelMatrix.m[2] = sceneNode->mTransformation.a3;	modelMatrix.m[3] = sceneNode->mTransformation.a4;
+	modelMatrix.m[4] = sceneNode->mTransformation.b1;	modelMatrix.m[5] = sceneNode->mTransformation.b2;	modelMatrix.m[6] = sceneNode->mTransformation.b3;	modelMatrix.m[7] = sceneNode->mTransformation.b4;
+	modelMatrix.m[8] = sceneNode->mTransformation.c1;	modelMatrix.m[9] = sceneNode->mTransformation.c2;	modelMatrix.m[10] = sceneNode->mTransformation.c3;	modelMatrix.m[11] = sceneNode->mTransformation.c4;
+	modelMatrix.m[12] = sceneNode->mTransformation.d1;	modelMatrix.m[13] = sceneNode->mTransformation.d2;	modelMatrix.m[14] = sceneNode->mTransformation.d3;	modelMatrix.m[15] = sceneNode->mTransformation.d4;
 
-	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transpose());
+	//currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transposed());
+	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix);
 
 	int numeroMesh = sceneNode->mNumMeshes;
 	

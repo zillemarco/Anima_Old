@@ -11,6 +11,7 @@
 #include "Window.h"
 #include <AnimaMath.h>
 #include <AnimaCamerasManager.h>
+#include <AnimaBenchmarkTimer.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -85,6 +86,84 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
+
+	//float data[16] = {	2.0, 1.0, 5.0, 4.0,
+	//					16.0, 5.0, 8.0, -1.0,
+	//					-5.0, 4.0, -1.0, 0.0, 
+	//					10.0, -5.0, 0.0, 4.0 };
+
+	//Anima::AnimaMatrix trasp(data), traspSSE(data);
+	//Anima::AnimaMatrix mul0(data), mul1(data), mulSSE0(data), mulSSE1(data);
+	//Anima::AnimaMatrix inv(data), invSSE(data);
+
+	//Anima::AnimaBenchmarkTimer timer;
+	//double t;
+
+	//char szBuff[1024];
+
+	//OutputDebugStringA("TEST TRASPOSTA\n");
+	//OutputDebugStringA("trasp:\n");
+	//trasp.DumpMemory();
+	//OutputDebugStringA("traspSSE:\n");
+	//traspSSE.DumpMemory();
+
+	//timer.Reset();
+	//trasp.Transpose();
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "trasp trasposta in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//trasp.DumpMemory();
+
+	//timer.Reset();
+	//traspSSE.TransposeSSE();
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "traspSSE trasposta in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//traspSSE.DumpMemory();
+
+	//OutputDebugStringA("TEST MOLTIPLICAZIONE\n");
+	//OutputDebugStringA("mul0:\n");
+	//mul0.DumpMemory();
+	//OutputDebugStringA("mul1:\n");
+	//mul1.DumpMemory();
+	//OutputDebugStringA("mulSSE0:\n");
+	//mulSSE0.DumpMemory();
+	//OutputDebugStringA("mulSSE1:\n");
+	//mulSSE1.DumpMemory();
+
+	//timer.Reset();
+	//mul0.MultiplyMatrix(mul1);
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "mul0 moltiplicata in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//mul0.DumpMemory();
+
+	//timer.Reset();
+	//mulSSE0.MultiplyMatrixSSE(mulSSE1);
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "mul0SSE moltiplicata in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//mulSSE0.DumpMemory();
+
+	//OutputDebugStringA("TEST INVERSA\n");
+	//OutputDebugStringA("inv:\n");
+	//inv.DumpMemory();
+	//OutputDebugStringA("invSSE:\n");
+	//invSSE.DumpMemory();
+
+	//timer.Reset();
+	//inv.Inverse();
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "inv inversa in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//inv.DumpMemory();
+
+	//timer.Reset();
+	//invSSE.InverseSSE();
+	//t = timer.Elapsed();
+	//sprintf(szBuff, "invSSE inversa in: %.20f\n", t);
+	//OutputDebugStringA(szBuff);
+	//invSSE.DumpMemory();
 			
 #if defined _MSC_VER
 	Anima::AnimaString path1("D:/Git/AnimaEngine/AnimaEngine/data/models/piano.3ds", &engine);
