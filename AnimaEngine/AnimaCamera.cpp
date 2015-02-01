@@ -40,16 +40,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #define INIT_WORLD_AXIS		INIT_WORLD_X_AXIS	INIT_WORLD_Y_AXIS	INIT_WORLD_Z_AXIS
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
-	//: _position(engine)
-	//, _xAxis(engine)
-	//, _yAxis(engine)
-	//, _zAxis(engine)
-	//, _worldXAxis(engine)
-	//, _worldYAxis(engine)
-	//, _worldZAxis(engine)
 	: _active(false)
-	//, _viewMatrix(engine)
-	//, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {
@@ -66,15 +57,7 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 
 AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
 	: _position(position)
-	//, _xAxis(engine)
-	//, _yAxis(engine)
-	//, _zAxis(engine)
-	//, _worldXAxis(engine)
-	//, _worldYAxis(engine)
-	//, _worldZAxis(engine)
 	, _active(false)
-	//, _viewMatrix(engine)
-	//, _projectionMatrix(engine)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {

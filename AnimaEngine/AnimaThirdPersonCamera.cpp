@@ -17,21 +17,18 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
 	: AnimaCamera(engine, camerasManager)
-	//, _target(engine)
 {
 	LookAt(0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine)
 	: AnimaCamera(engine, nullptr)
-	//, _target(engine)
 {
 	LookAt(0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& target)
 	: AnimaCamera(engine, camerasManager)
-	//, _target(engine)
 {
 	LookAt(position, target);
 }
@@ -129,8 +126,8 @@ void AnimaThirdPersonCamera::RotateX(AFloat angle)
 {
 	_position -= _target;
 
-	//AnimaMath::RotateVector(_yAxis, angle, _xAxis);
-	//AnimaMath::RotateVector(_zAxis, angle, _xAxis);
+	AnimaMath::RotateVector(_yAxis, angle, _xAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _xAxis);
 
 	if (_yAxis.y < 0.0f)
 	{
@@ -159,9 +156,9 @@ void AnimaThirdPersonCamera::RotateY(AFloat angle)
 {
 	_position -= _target;
 
-	//AnimaMath::RotateVector(_xAxis, angle, _worldYAxis);
-	//AnimaMath::RotateVector(_yAxis, angle, _worldYAxis);
-	//AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_xAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_yAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
 
 	float dist = _position.Length();
 	_position = _target + _zAxis * dist;
@@ -186,7 +183,6 @@ void AnimaThirdPersonCamera::SetDistance(AFloat dist)
 		return;
 
 	AnimaVertex3f dir = -GetForward();
-	//dir.Inverse();
 	dir.Normalize();
 	dir *= dist;
 
@@ -200,18 +196,14 @@ void AnimaThirdPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVe
 	_position = position;
 	_target = target;
 
-	_zAxis = _target - _position;
+	_zAxis = _position - _target;
 	_zAxis.Normalize();
 
 	_xAxis = _zAxis ^ _worldYAxis;
 	_xAxis.Normalize();
 
-	_yAxis = _worldYAxis;// _zAxis ^ _xAxis;
+	_yAxis = _worldYAxis;
 	_yAxis.Normalize();
-
-	//_xAxis.DumpMemory(false);
-	//_yAxis.DumpMemory(false);
-	//_zAxis.DumpMemory(false);
 
 	CalculateViewMatrix();
 }
@@ -224,30 +216,8 @@ void AnimaThirdPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat z
 }
 
 void AnimaThirdPersonCamera::CalculateViewMatrix()
-{
-	//_xAxis[0] = 1.0f;
-	//_xAxis[1] = 0.0f;
-	//_xAxis[2] = 0.0f;
-
-	//_yAxis[0] = 0.0f;
-	//_yAxis[1] = 1.0f;
-	//_yAxis[2] = 0.0f;
-
-	//_zAxis[0] = 0.0f;
-	//_zAxis[1] = 0.0f;
-	//_zAxis[2] = -1.0f;
-	
-	_viewMatrix.m[0] = _xAxis.x;		_viewMatrix.m[1] = _yAxis.x;		_viewMatrix.m[2] = -_zAxis.x;	_viewMatrix.m[3] = 0.0f;
-	_viewMatrix.m[4] = _xAxis.y;		_viewMatrix.m[5] = _yAxis.y;		_viewMatrix.m[6] = -_zAxis.y;	_viewMatrix.m[7] = 0.0f;
-	_viewMatrix.m[8] = _xAxis.z;		_viewMatrix.m[9] = _yAxis.z;		_viewMatrix.m[10] = -_zAxis.z;	_viewMatrix.m[11] = 0.0f;
-	_viewMatrix.m[12] = 0.0f;			_viewMatrix.m[13] = 0.0f;			_viewMatrix.m[14] = 0.0f;		_viewMatrix.m[15] = 1.0f;
-
-	_viewMatrix.Translate(-_position.x, -_position.y, -_position.z);
-
-	//_viewMatrix[0] = _xAxis[0];								_viewMatrix[1] = _yAxis[0];								_viewMatrix[2] = _zAxis[0];								_viewMatrix[3] = 0.0f;
-	//_viewMatrix[4] = _xAxis[1];								_viewMatrix[5] = _yAxis[1];								_viewMatrix[6] = _zAxis[1];								_viewMatrix[7] = 0.0f;
-	//_viewMatrix[8] = _xAxis[2];								_viewMatrix[9] = _yAxis[2];								_viewMatrix[10] = _zAxis[2];							_viewMatrix[11] = 0.0f;
-	//_viewMatrix[12] = -AnimaMath::Dot(_xAxis, _position);	_viewMatrix[13] = -AnimaMath::Dot(_yAxis, _position);	_viewMatrix[14] = -AnimaMath::Dot(_zAxis, _position);	_viewMatrix[15] = 1.0f;
+{	
+	_viewMatrix.LookAt(_position, (_target - _position), _worldYAxis);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

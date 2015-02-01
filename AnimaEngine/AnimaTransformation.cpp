@@ -449,18 +449,10 @@ AFloat AnimaTransformation::GetScaleZ()
 void AnimaTransformation::UpdateMatrix()
 {
 	AnimaMatrix translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
-	AnimaMatrix rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x);
+	AnimaMatrix rotationMatrix = (AnimaQuaternion(AnimaVertex3f(1.0, 0.0, 0.0), _rotation.x) * AnimaQuaternion(AnimaVertex3f(0.0, 1.0, 0.0), _rotation.y) * AnimaQuaternion(AnimaVertex3f(0.0, 0.0, 1.0), _rotation.z)).GetMatrix();
 	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
 
-	//_transformationMatrix = _initialTransformationMatrix * scaleMatrix * rotationMatrix * translationMatrix;
-	_transformationMatrix =  translationMatrix * rotationMatrix * scaleMatrix * _initialTransformationMatrix;
-
-	//_transformationMatrix = _initialTransformationMatrix;
-	//_transformationMatrix.Scale(_scale[0], _scale[1], _scale[2]);
-	//_transformationMatrix.RotateX(_rotation[0]);
-	//_transformationMatrix.RotateY(_rotation[1]);
-	//_transformationMatrix.RotateZ(_rotation[2]);
-	//_transformationMatrix.Translate(_translation[0], _translation[1], _translation[2]);
+	_transformationMatrix = scaleMatrix * rotationMatrix * translationMatrix *_initialTransformationMatrix;
 }
 
 void AnimaTransformation::SetTransformationMatrix(const AnimaMatrix& m)

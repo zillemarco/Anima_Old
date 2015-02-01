@@ -70,8 +70,8 @@ public:
 	void MultiplyMatrix(const AnimaMatrix& p);
 	void MultiplyMatrixSSE(const AnimaMatrix& p);
 
-	void LookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up);
-	void LookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp);
+	void LookAt(const AnimaVertex3f &position, const AnimaVertex3f &forward, const AnimaVertex3f &up);
+	void LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xForward, AFloat yForward, AFloat zForward, AFloat xUp, AFloat yUp, AFloat zUp);
 	static AnimaMatrix MakeLookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up);
 	static AnimaMatrix MakeLookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp);
 

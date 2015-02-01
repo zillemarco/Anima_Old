@@ -62,6 +62,10 @@ void Window::DrawScene()
 	//Anima::AnimaVertex3f p1 = pointL1->GetPosition();
 	//p1 = Anima::AnimaMath::MatrixMulVector(rm1, p1);
 	//pointL1->SetPosition(p1);
+	//GetEngine()->GetModelsManager()->GetPModelFromName("origine")->GetTransformation()->RotateXDeg(0.01f);
+	//GetEngine()->GetModelsManager()->GetPModelFromName("x-cubo")->GetTransformation()->RotateXDeg(0.01f);
+	//GetEngine()->GetModelsManager()->GetPModelFromName("y-sfera")->GetTransformation()->RotateZDeg(0.01f);
+	//GetEngine()->GetModelsManager()->GetPModelFromName("z-toro")->GetTransformation()->RotateXDeg(0.01f);
 
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
@@ -106,7 +110,7 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 		double dx = wnd->_lastPTX - x;
 
 		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * 0.1);
+		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * -0.1);
 	}
 
 	wnd->_lastPTX = x;

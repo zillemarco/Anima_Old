@@ -564,14 +564,34 @@ void AnimaMatrix::MultiplyMatrixSSE(const AnimaMatrix& p)
 	_mm_storeu_ps(&m[12], r4);
 }
 
-void AnimaMatrix::LookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up)
+void AnimaMatrix::LookAt(const AnimaVertex3f &position, const AnimaVertex3f &forward, const AnimaVertex3f &up)
 {
-	// TODO
+	SetIdentity();
+	
+	AnimaVertex3f f, s, u;
+	//f = (target - position).Normalized();
+	f = forward.Normalized();
+	s = Cross(f, up).Normalized();
+	u = Cross(s, f);
+
+	m[0] = s.vec[0];
+	m[4] = s.vec[1];
+	m[8] = s.vec[2];
+
+	m[1] = u.vec[0];
+	m[5] = u.vec[1];
+	m[9] = u.vec[2];
+
+	m[2] = -f.vec[0];
+	m[6] = -f.vec[1];
+	m[10] = -f.vec[2];
+
+	Translate(-position);
 }
 
-void AnimaMatrix::LookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp)
+void AnimaMatrix::LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xForward, AFloat yForward, AFloat zForward, AFloat xUp, AFloat yUp, AFloat zUp)
 {
-	// TODO
+	LookAt(AnimaVertex3f(xPosition, yPosition, zPosition), AnimaVertex3f(xForward, yForward, zForward), AnimaVertex3f(xUp, yUp, zUp));
 }
 
 AnimaMatrix AnimaMatrix::MakeLookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up)
@@ -605,8 +625,6 @@ void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zF
 	m[4] = 0.0f;			m[5] = cotan;	m[6] = 0.0f;							m[7] = 0.0f;
 	m[8] = 0.0f;			m[9] = 0.0f;	m[10] = -(zNear + zFar) / clip;			m[11] = -1.0f;
 	m[12] = 0.0f;			m[13] = 0.0f;	m[14] = -(2.0f * zNear * zFar) / clip;	m[15] = 0.0f;
-
-	//m = m.Transpose();
 }
 
 AnimaMatrix AnimaMatrix::MakePerspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar)
@@ -1032,237 +1050,3 @@ void AnimaMatrix::DumpMemory() const
 #undef _mm_shufd
 
 END_ANIMA_ENGINE_NAMESPACE
-
-
-//AnimaMatrix& AnimaMatrix::operator*=(const AnimaMatrix& src)
-//{
-//	AFloat* srcV = src._matrixData;
-//
-//	__m128 src1 = _mm_loadu_ps(&srcV[0]);
-//	__m128 src2 = _mm_loadu_ps(&srcV[4]);
-//	__m128 src3 = _mm_loadu_ps(&srcV[8]);
-//	__m128 src4 = _mm_loadu_ps(&srcV[12]);
-//
-//	__m128 r1 = _mm_loadu_ps(&_matrixData[0]);
-//	__m128 r2 = _mm_loadu_ps(&_matrixData[4]);
-//	__m128 r3 = _mm_loadu_ps(&_matrixData[8]);
-//	__m128 r4 = _mm_loadu_ps(&_matrixData[12]);
-//
-//	r1 = _mm_add_ps(_mm_add_ps(
-//		_mm_add_ps(_mm_mul_ps(_mm_shufd(r1, 0x00), src1),
-//		_mm_mul_ps(_mm_shufd(r1, 0x55), src2)),
-//		_mm_mul_ps(_mm_shufd(r1, 0xAA), src3)),
-//		_mm_mul_ps(_mm_shufd(r1, 0xFF), src4));
-//	r2 = _mm_add_ps(_mm_add_ps(
-//		_mm_add_ps(_mm_mul_ps(_mm_shufd(r2, 0x00), src1),
-//		_mm_mul_ps(_mm_shufd(r2, 0x55), src2)),
-//		_mm_mul_ps(_mm_shufd(r2, 0xAA), src3)),
-//		_mm_mul_ps(_mm_shufd(r2, 0xFF), src4));
-//	r3 = _mm_add_ps(_mm_add_ps(
-//		_mm_add_ps(_mm_mul_ps(_mm_shufd(r3, 0x00), src1),
-//		_mm_mul_ps(_mm_shufd(r3, 0x55), src2)),
-//		_mm_mul_ps(_mm_shufd(r3, 0xAA), src3)),
-//		_mm_mul_ps(_mm_shufd(r3, 0xFF), src4));
-//	r4 = _mm_add_ps(_mm_add_ps(
-//		_mm_add_ps(_mm_mul_ps(_mm_shufd(r4, 0x00), src1),
-//		_mm_mul_ps(_mm_shufd(r4, 0x55), src2)),
-//		_mm_mul_ps(_mm_shufd(r4, 0xAA), src3)),
-//		_mm_mul_ps(_mm_shufd(r4, 0xFF), src4));
-//
-//	_mm_storeu_ps(&_matrixData[0], r1);
-//	_mm_storeu_ps(&_matrixData[4], r2);
-//	_mm_storeu_ps(&_matrixData[8], r3);
-//	_mm_storeu_ps(&_matrixData[12], r4);
-//
-//	return *this;
-//}
-//
-//AnimaMatrix AnimaMatrix::Inverse() const
-//{
-//	AnimaMatrix resultMatrix(_engine, _matrixData);
-//	AFloat* src = resultMatrix._matrixData;
-//
-//	__m128 m1 = _mm_loadu_ps(&src[0]);
-//	__m128 m2 = _mm_loadu_ps(&src[4]);
-//	__m128 m3 = _mm_loadu_ps(&src[8]);
-//	__m128 m4 = _mm_loadu_ps(&src[12]);
-//
-//	__m128 f1 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0xAA), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
-//	__m128 f2 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x55), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
-//	__m128 f3 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x55), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80), _mm_shuffle_ps(m3, m2, 0xAA)));
-//	__m128 f4 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xFF), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0xFF)));
-//	__m128 f5 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0xAA), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0xAA)));
-//	__m128 f6 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(m3, m2, 0x00), _mm_shufd(_mm_shuffle_ps(m4, m3, 0x55), 0x80)),
-//		_mm_mul_ps(_mm_shufd(_mm_shuffle_ps(m4, m3, 0x00), 0x80), _mm_shuffle_ps(m3, m2, 0x55)));
-//
-//	__m128 v1 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0x00), 0xA8);
-//	__m128 v2 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0x55), 0xA8);
-//	__m128 v3 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0xAA), 0xA8);
-//	__m128 v4 = _mm_shufd(_mm_shuffle_ps(m2, m1, 0xFF), 0xA8);
-//	__m128 s1 = _mm_set_ps(-0.0f, 0.0f, -0.0f, 0.0f);
-//	__m128 s2 = _mm_set_ps(0.0f, -0.0f, 0.0f, -0.0f);
-//	__m128 i1 = _mm_xor_ps(s1, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v2, f1), _mm_mul_ps(v3, f2)), _mm_mul_ps(v4, f3)));
-//	__m128 i2 = _mm_xor_ps(s2, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f1), _mm_mul_ps(v3, f4)), _mm_mul_ps(v4, f5)));
-//	__m128 i3 = _mm_xor_ps(s1, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f2), _mm_mul_ps(v2, f4)), _mm_mul_ps(v4, f6)));
-//	__m128 i4 = _mm_xor_ps(s2, _mm_add_ps(_mm_sub_ps(_mm_mul_ps(v1, f3), _mm_mul_ps(v2, f5)), _mm_mul_ps(v3, f6)));
-//
-//	__m128 d = _mm_mul_ps(m1, _mm_movelh_ps(_mm_unpacklo_ps(i1, i2), _mm_unpacklo_ps(i3, i4)));
-//	d = _mm_add_ps(d, _mm_shufd(d, 0x4E));
-//	d = _mm_add_ps(d, _mm_shufd(d, 0x11));
-//	d = _mm_div_ps(_mm_set1_ps(1.0f), d);
-//
-//	__m128 r1 = _mm_mul_ps(i1, d);
-//	__m128 r2 = _mm_mul_ps(i2, d);
-//	__m128 r3 = _mm_mul_ps(i3, d);
-//	__m128 r4 = _mm_mul_ps(i4, d);
-//
-//	_mm_storeu_ps(&src[0], r1);
-//	_mm_storeu_ps(&src[4], r2);
-//	_mm_storeu_ps(&src[8], r3);
-//	_mm_storeu_ps(&src[12], r4);
-//
-//	return resultMatrix;
-//}
-//
-//float AnimaMatrix::Determinant() const
-//{
-//	AFloat* src = _matrixData;
-//
-//	__m128 m1 = _mm_loadu_ps(&src[0]);
-//	__m128 m2 = _mm_loadu_ps(&src[4]);
-//	__m128 m3 = _mm_loadu_ps(&src[8]);
-//	__m128 m4 = _mm_loadu_ps(&src[12]);
-//
-//	__m128 r = _mm_shufd(m3, 0x39);
-//	__m128 v1 = _mm_mul_ps(r, m4);
-//	__m128 v2 = _mm_mul_ps(r, _mm_shufd(m4, 0x4E));
-//	__m128 v3 = _mm_mul_ps(r, _mm_shufd(m4, 0x93));
-//
-//	__m128 r1 = _mm_sub_ps(_mm_shufd(v2, 0x39), _mm_shufd(v1, 0x4E));
-//	__m128 r2 = _mm_sub_ps(_mm_shufd(v3, 0x4E), v3);
-//	__m128 r3 = _mm_sub_ps(v2, _mm_shufd(v1, 0x39));
-//
-//
-//	v1 = _mm_shufd(m2, 0x93);
-//	v2 = _mm_shufd(m2, 0x39);
-//	v3 = _mm_shufd(m2, 0x4E);
-//
-//	__m128 d = _mm_mul_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(v2, r1), _mm_mul_ps(v3, r2)), _mm_mul_ps(v1, r3)), m1);
-//	d = _mm_add_ps(d, _mm_shufd(d, 0x4E));
-//	d = _mm_sub_ss(d, _mm_shufd(d, 0x11));
-//	return _mm_cvtss_f32(d);
-//}
-//
-//AnimaMatrix AnimaMatrix::Transpose() const
-//{
-//	AnimaMatrix resultMatrix(_engine, _matrixData);
-//	AFloat* src = resultMatrix._matrixData;
-//
-//	__m128 m1 = _mm_loadu_ps(&src[0]);
-//	__m128 m2 = _mm_loadu_ps(&src[4]);
-//	__m128 m3 = _mm_loadu_ps(&src[8]);
-//	__m128 m4 = _mm_loadu_ps(&src[12]);
-//
-//	__m128 t1 = _mm_unpacklo_ps(m1, m2);
-//	__m128 t2 = _mm_unpacklo_ps(m3, m4);
-//	__m128 t3 = _mm_unpackhi_ps(m1, m2);
-//	__m128 t4 = _mm_unpackhi_ps(m3, m4);
-//
-//	__m128 r1 = _mm_movelh_ps(t1, t2);
-//	__m128 r2 = _mm_movehl_ps(t2, t1);
-//	__m128 r3 = _mm_movelh_ps(t3, t4);
-//	__m128 r4 = _mm_movehl_ps(t4, t3);
-//
-//	_mm_storeu_ps(&src[0], r1);
-//	_mm_storeu_ps(&src[4], r2);
-//	_mm_storeu_ps(&src[8], r3);
-//	_mm_storeu_ps(&src[12], r4);
-//
-//	return resultMatrix;
-//}
-//void AnimaMatrix::Translate(float tx, float ty, float tz)
-//{
-//	AnimaVertex4f m0(_matrixData);
-//	AnimaVertex4f m1(_matrixData + 4);
-//	AnimaVertex4f m2(_matrixData + 8);
-//	AnimaVertex4f m3(_matrixData + 12);
-//
-//	AnimaVertex4f res = m0 * tx + m1 * ty + m2 * tz + m3;
-//
-//	_matrixData[12] = res.x;
-//	_matrixData[13] = res.y;
-//	_matrixData[14] = res.z;
-//	_matrixData[15] = res.w;
-//}
-//
-//void AnimaMatrix::Translate(const AnimaVertex3f& translation)
-//{
-//	Translate(translation.x, translation.y, translation.z);
-//}
-//
-//void AnimaMatrix::Scale(float sx, float sy, float sz)
-//{
-//	AnimaVertex4f m0(_matrixData);
-//	AnimaVertex4f m1(_matrixData + 4);
-//	AnimaVertex4f m2(_matrixData + 8);
-//	AnimaVertex4f m3(_matrixData + 12);
-//
-//	AnimaVertex4f r0 = m0 * sx;
-//	AnimaVertex4f r1 = m1 * sy;
-//	AnimaVertex4f r2 = m2 * sz;
-//	AnimaVertex4f r3 = m3;
-//
-//	_matrixData[0] = r0.x;	_matrixData[1] = r0.y;	_matrixData[2] = r0.z;	_matrixData[3] = r0.w;
-//	_matrixData[4] = r1.x;	_matrixData[5] = r1.y;	_matrixData[6] = r1.z;	_matrixData[7] = r1.w;
-//	_matrixData[8] = r2.x;	_matrixData[9] = r2.y;	_matrixData[10] = r2.z;	_matrixData[11] = r2.w;
-//	_matrixData[12] = r3.x;	_matrixData[13] = r3.y;	_matrixData[14] = r3.z;	_matrixData[15] = r3.w;
-//}
-//
-//void AnimaMatrix::Scale(const AnimaVertex3f& scale)
-//{
-//	Scale(scale.x, scale.y, scale.z);
-//}
-//
-//void AnimaMatrix::Rotate(float angle, AnimaVertex3f axis)
-//{
-//	float a = angle;
-//	float c = cosf(a);
-//	float s = sinf(a);
-//
-//	AnimaVertex3f ax = axis;
-//	ax.Normalize();
-//	AnimaVertex3f temp = ((float(1) - c) * axis);
-//
-//	AnimaMatrix rotMatrix(_engine);
-//	rotMatrix[0] = c + temp.x * axis.x;
-//	rotMatrix[1] = 0 + temp.x * axis.y + s * axis.z;
-//	rotMatrix[2] = 0 + temp.x * axis.z - s * axis.y;
-//
-//	rotMatrix[4] = 0 + temp.y * axis.x - s * axis.z;
-//	rotMatrix[5] = c + temp.y * axis.y;
-//	rotMatrix[6] = 0 + temp.y * axis.z + s * axis.x;
-//
-//	rotMatrix[8] = 0 + temp.z * axis.x + s * axis.y;
-//	rotMatrix[9] = 0 + temp.z * axis.y - s * axis.x;
-//	rotMatrix[10] = c + temp.z * axis.z;
-//
-//	AnimaVertex4f m0(_matrixData);
-//	AnimaVertex4f m1(_matrixData + 4);
-//	AnimaVertex4f m2(_matrixData + 8);
-//	AnimaVertex4f m3(_matrixData + 12);
-//
-//	AnimaVertex4f r0 = m0 * rotMatrix[0] + m1 * rotMatrix[1] + m2 * rotMatrix[2];
-//	AnimaVertex4f r1 = m0 * rotMatrix[4] + m1 * rotMatrix[5] + m2 * rotMatrix[6];
-//	AnimaVertex4f r2 = m0 * rotMatrix[8] + m1 * rotMatrix[9] + m2 * rotMatrix[10];
-//	AnimaVertex4f r3 = m3;
-//
-//	_matrixData[0] = r0.x;	_matrixData[1] = r0.y;	_matrixData[2] = r0.z;	_matrixData[3] = r0.w;
-//	_matrixData[4] = r1.x;	_matrixData[5] = r1.y;	_matrixData[6] = r1.z;	_matrixData[7] = r1.w;
-//	_matrixData[8] = r2.x;	_matrixData[9] = r2.y;	_matrixData[10] = r2.z;	_matrixData[11] = r2.w;
-//	_matrixData[12] = r3.x;	_matrixData[13] = r3.y;	_matrixData[14] = r3.z;	_matrixData[15] = r3.w;
-//}

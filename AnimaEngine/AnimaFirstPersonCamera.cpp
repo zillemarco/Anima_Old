@@ -93,7 +93,7 @@ void AnimaFirstPersonCamera::RotateX(AFloat angle)
 	AnimaVertex3f hAxis = _worldYAxis ^ _zAxis;
 	hAxis.Normalize();
 	
-	//AnimaMath::RotateVector(_zAxis, angle, hAxis);
+	AnimaMath::RotateVector(_zAxis, angle, hAxis);
 	_zAxis.Normalize();
 
 	AnimaVertex3f newUp = _zAxis ^ hAxis;
@@ -113,7 +113,7 @@ void AnimaFirstPersonCamera::RotateY(AFloat angle)
 	AnimaVertex3f hAxis = _worldYAxis ^ _zAxis;
 	hAxis.Normalize();
 	
-	//AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
 	_zAxis.Normalize();
 
 	AnimaVertex3f newUp = _zAxis ^ hAxis;
@@ -153,12 +153,7 @@ void AnimaFirstPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat z
 
 void AnimaFirstPersonCamera::CalculateViewMatrix()
 {
-	_viewMatrix.m[0] = _xAxis.x;		_viewMatrix.m[1] = _xAxis.y;		_viewMatrix.m[2] = _xAxis.z;		_viewMatrix.m[3] = 0.0f;
-	_viewMatrix.m[4] = _yAxis.x;		_viewMatrix.m[5] = _yAxis.y;		_viewMatrix.m[6] = _yAxis.z;		_viewMatrix.m[7] = 0.0f;
-	_viewMatrix.m[8] = _zAxis.x;		_viewMatrix.m[9] = _zAxis.y;		_viewMatrix.m[10] = _zAxis.z;		_viewMatrix.m[11] = 0.0f;
-	_viewMatrix.m[12] = 0.0f;			_viewMatrix.m[13] = 0.0f;			_viewMatrix.m[14] = 0.0f;			_viewMatrix.m[15] = 1.0f;
-
-	_viewMatrix.Translate(-_position.x, -_position.y, -_position.z);
+	_viewMatrix.LookAt(_position, _zAxis, _yAxis);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

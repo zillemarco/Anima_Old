@@ -20,7 +20,6 @@ void AnimaRenderingManager::DrawModel(AnimaEngine* engine, AnimaModel* model, An
 	if (engine == nullptr || model == nullptr || program == nullptr)
 		return;
 	
-	model->GetTransformation()->RotateYDeg(0.01f);
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
 
 	ASizeT meshNumber = model->GetMeshesNumber();
