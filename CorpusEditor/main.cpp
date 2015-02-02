@@ -168,6 +168,7 @@ int main(int argc, char** argv)
 #if defined _MSC_VER
 	Anima::AnimaString path1("D:/Git/AnimaEngine/AnimaEngine/data/models/piano.3ds", &engine);
 	Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
+	//Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/LeePerrySmith.obj", &engine);
 	Anima::AnimaString path3("D:/Git/AnimaEngine/AnimaEngine/data/models/x.3ds", &engine);
 	Anima::AnimaString path4("D:/Git/AnimaEngine/AnimaEngine/data/models/y.3ds", &engine);
 	Anima::AnimaString path5("D:/Git/AnimaEngine/AnimaEngine/data/models/z.3ds", &engine);

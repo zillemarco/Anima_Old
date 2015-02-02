@@ -124,25 +124,14 @@ void AnimaThirdPersonCamera::Move(const AFloat& xDirection, const AFloat& yDirec
 
 void AnimaThirdPersonCamera::RotateX(AFloat angle)
 {
+	if ((_zAxis.y >= 0.9999f && angle > 0.0f) || (_zAxis.y <= -0.9999f && angle < 0.0f))
+		return;
+
 	_position -= _target;
-
-	AnimaMath::RotateVector(_yAxis, angle, _xAxis);
+	
 	AnimaMath::RotateVector(_zAxis, angle, _xAxis);
-
-	if (_yAxis.y < 0.0f)
-	{
-		_zAxis.x = 0.0f;
-		_zAxis.y = _zAxis.y > 0.0f ? 1.0f : 0.0f;
-		_zAxis.z = 0.0f;
-
-		_yAxis = _zAxis ^ _xAxis;
-	}
-
-	if (_zAxis.Length() != 0.0f)
-	{
-		float dist = _position.Length();
-		_position = _target + _zAxis * dist;
-	}
+	
+	_position = _target + _zAxis * _position.Length();
 
 	CalculateViewMatrix();
 }
