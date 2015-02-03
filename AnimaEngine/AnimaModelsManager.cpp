@@ -50,7 +50,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 		return nullptr;
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Fast);
 	
 	if(scene == nullptr)
 		return nullptr;
@@ -98,8 +98,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 	modelMatrix.m[8] = sceneNode->mTransformation.c1;	modelMatrix.m[9] = sceneNode->mTransformation.c2;	modelMatrix.m[10] = sceneNode->mTransformation.c3;	modelMatrix.m[11] = sceneNode->mTransformation.c4;
 	modelMatrix.m[12] = sceneNode->mTransformation.d1;	modelMatrix.m[13] = sceneNode->mTransformation.d2;	modelMatrix.m[14] = sceneNode->mTransformation.d3;	modelMatrix.m[15] = sceneNode->mTransformation.d4;
 
-	//currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transposed());
-	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix);
+	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transposed());
 
 	int numeroMesh = sceneNode->mNumMeshes;
 	
@@ -119,7 +118,6 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			int numeroVertici = mesh->mNumVertices;
 
 			AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
-			//AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
 			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_engine->GetGenericAllocator()), numeroFacce, _engine);
 		
 			int offsetFacce = 0;
@@ -132,9 +130,6 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				vertici[offsetVertici].x = vert->x;
 				vertici[offsetVertici].y = vert->y;
 				vertici[offsetVertici].z = vert->z;
-				//vertici[offsetVertici][0] = vert->x;
-				//vertici[offsetVertici][1] = vert->y;
-				//vertici[offsetVertici][2] = vert->z;
 			
 				offsetVertici++;
 			}
@@ -158,7 +153,6 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			if (mesh->HasNormals())
 			{
 				AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
-				//AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
 				int offsetNormali = 0;
 				for (int t = 0; t < numeroVertici; t++)
 				{
@@ -167,9 +161,6 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 					normali[offsetNormali].x = norm->x;
 					normali[offsetNormali].y = norm->y;
 					normali[offsetNormali].z = norm->z;
-					//normali[offsetNormali][0] = norm->x;
-					//normali[offsetNormali][1] = norm->y;
-					//normali[offsetNormali][2] = norm->z;
 
 					offsetNormali++;
 				}
@@ -181,14 +172,11 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 			if (mesh->HasTextureCoords(0))
 			{
 				AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetGenericAllocator()), numeroVertici);
-				//AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetGenericAllocator()), numeroVertici, _engine);
 				int offsetTextCoords = 0;
 				for (int t = 0; t < numeroVertici; t++)
 				{
 					textCoords[offsetTextCoords].u = mesh->mTextureCoords[0][t].x;
 					textCoords[offsetTextCoords].v = mesh->mTextureCoords[0][t].y;
-					//textCoords[offsetTextCoords][0] = mesh->mTextureCoords[0][t].x;
-					//textCoords[offsetTextCoords][1] = mesh->mTextureCoords[0][t].y;
 
 					offsetTextCoords++;
 				}

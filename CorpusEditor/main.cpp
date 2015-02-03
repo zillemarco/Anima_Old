@@ -12,7 +12,7 @@
 #include <AnimaMath.h>
 #include <AnimaCamerasManager.h>
 #include <AnimaBenchmarkTimer.h>
-
+#include <AnimaModel.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -167,11 +167,11 @@ int main(int argc, char** argv)
 			
 #if defined _MSC_VER
 	Anima::AnimaString path1("D:/Git/AnimaEngine/AnimaEngine/data/models/piano.3ds", &engine);
-	Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
-	//Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/LeePerrySmith.obj", &engine);
-	Anima::AnimaString path3("D:/Git/AnimaEngine/AnimaEngine/data/models/x.3ds", &engine);
-	Anima::AnimaString path4("D:/Git/AnimaEngine/AnimaEngine/data/models/y.3ds", &engine);
-	Anima::AnimaString path5("D:/Git/AnimaEngine/AnimaEngine/data/models/z.3ds", &engine);
+	//Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
+	Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/LeePerrySmith.obj", &engine);
+	//Anima::AnimaString path3("D:/Git/AnimaEngine/AnimaEngine/data/models/x.3ds", &engine);
+	//Anima::AnimaString path4("D:/Git/AnimaEngine/AnimaEngine/data/models/y.3ds", &engine);
+	//Anima::AnimaString path5("D:/Git/AnimaEngine/AnimaEngine/data/models/z.3ds", &engine);
 	//Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/nurse.obj", &engine);
 	Anima::AChar tmpFileName[PATH_MAX];
 	sprintf(tmpFileName, "log.log");
@@ -181,17 +181,13 @@ int main(int argc, char** argv)
 #endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	//if(!manager->LoadModel(path1))
-	//	return 0;
-	if (!manager->LoadModel(path2, "origine"))
+	if (!manager->LoadModel(path1, "piano"))
 		return 0;
-	if (!manager->LoadModel(path3, "x-cubo"))
+	if (!manager->LoadModel(path2, "scimmia"))
 		return 0;
-	if (!manager->LoadModel(path4, "y-sfera"))
-		return 0;
-	if (!manager->LoadModel(path5, "z-toro"))
-		return 0;
-				
+
+	manager->GetPModelFromName("scimmia")->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
@@ -205,7 +201,7 @@ int main(int argc, char** argv)
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera();
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera();
 	
-	Anima::AnimaVertex3f pos(0, 0, 10);	
+	Anima::AnimaVertex3f pos(0, 0.5, 10);	
 	Anima::AnimaVertex3f tar(0, 0, 0);
 	Anima::AnimaVertex3f forw(0, 0, -1);
 

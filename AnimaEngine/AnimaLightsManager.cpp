@@ -152,6 +152,49 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const char* name)
 	return CreatePointLight(str);
 }
 
+AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
+{
+	if (_lightsMap.find(name) != _lightsMap.end())
+		return nullptr;
+
+	ANIMA_ASSERT(_engine != nullptr);
+	if (_lightsNumber > 0)
+	{
+		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+
+		for (int i = 0; i < _lightsNumber; i++)
+			tmpOldLights[i] = _lights[i];
+
+		ClearLights(false, false);
+
+		_lightsNumber++;
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+
+		for (int i = 0; i < _lightsNumber - 1; i++)
+			_lights[i] = tmpOldLights[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldLights);
+		tmpOldLights = nullptr;
+	}
+	else
+	{
+		_lightsNumber++;
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+	}
+
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_engine->GetGenericAllocator()), _engine);
+
+	_lightsMap[name] = (AUint)(_lightsNumber - 1);
+
+	return (AnimaSpotLight*)_lights[_lightsNumber - 1];
+}
+
+AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
+{
+	AnimaString str(name, _engine);
+	return CreateSpotLight(str);
+}
+
 void AnimaLightsManager::ClearLights(bool bDeleteObjects, bool bResetNumber)
 {
 	if (_lights != nullptr)
@@ -179,17 +222,17 @@ AnimaLight* AnimaLightsManager::GetLight(AUint index)
 	return _lights[index];
 }
 
-AnimaLight* AnimaLightsManager::GetLight(const AnimaString& name)
+AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 {
 	if (_lightsMap.find(name) == _lightsMap.end())
 		return nullptr;
 	return GetLight(_lightsMap[name]);
 }
 
-AnimaLight* AnimaLightsManager::GetLight(const char* name)
+AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 {
 	AnimaString str(name, _engine);
-	return GetLight(str);
+	return GetLightFromName(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -33,9 +33,12 @@ public:
 	AnimaPointLight* CreatePointLight(const AnimaString& name);
 	AnimaPointLight* CreatePointLight(const char* name);
 
+	AnimaSpotLight* CreateSpotLight(const AnimaString& name);
+	AnimaSpotLight* CreateSpotLight(const char* name);
+
 	AnimaLight* GetLight(AUint index);
-	AnimaLight* GetLight(const AnimaString& name);
-	AnimaLight* GetLight(const char* name);
+	AnimaLight* GetLightFromName(const AnimaString& name);
+	AnimaLight* GetLightFromName(const char* name);
 
 private:
 	void ClearLights(bool bDeleteObjects = true, bool bResetNumber = true);

@@ -148,6 +148,17 @@ AFloat AnimaLight::GetRange()
 	return 0.0f;
 }
 
+void AnimaLight::SetCutoff(AFloat c)
+{
+	ANIMA_ASSERT(false);
+}
+
+AFloat AnimaLight::GetCutoff()
+{
+	ANIMA_ASSERT(false);
+	return 0.0f;
+}
+
 //----------------------------------------------------------------
 //						ANIMA AMBIENT LIGHT
 //----------------------------------------------------------------
@@ -183,7 +194,7 @@ AnimaColor3f AnimaAmbientLight::GetColor()
 AnimaDirectionalLight::AnimaDirectionalLight(AnimaEngine* engine)
 	: AnimaAmbientLight(engine)
 {
-	AnimaMappedValues::SetVector("direction", -1.0f, -1.0f, -1.0f);
+	AnimaMappedValues::SetVector("direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	AnimaMappedValues::SetFloat("intensity", 0.0f);
 }
 
@@ -193,12 +204,12 @@ AnimaDirectionalLight::~AnimaDirectionalLight()
 
 void AnimaDirectionalLight::SetDirection(const AnimaVertex3f& direction)
 {
-	AnimaMappedValues::SetVector("direction", direction);
+	AnimaMappedValues::SetVector("direction", direction.Normalized());
 }
 
 void AnimaDirectionalLight::SetDirection(AFloat x, AFloat y, AFloat z)
 {
-	AnimaMappedValues::SetVector("direction", x, y, z);
+	AnimaMappedValues::SetVector("direction", AnimaVertex3f(x, y, z).Normalized());
 }
 
 void AnimaDirectionalLight::SetIntensity(AFloat intensity)
@@ -297,6 +308,45 @@ AFloat AnimaPointLight::GetExponentAttenuation()
 AFloat AnimaPointLight::GetRange()
 {
 	return AnimaMappedValues::GetFloat("range");
+}
+
+//----------------------------------------------------------------
+//						ANIMA SPOT LIGHT
+//----------------------------------------------------------------
+AnimaSpotLight::AnimaSpotLight(AnimaEngine* engine)
+	: AnimaPointLight(engine)
+{
+	AnimaMappedValues::SetVector("direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
+	AnimaMappedValues::SetFloat("cutoff", 0.7f);
+}
+
+AnimaSpotLight::~AnimaSpotLight()
+{
+}
+
+void AnimaSpotLight::SetDirection(const AnimaVertex3f& direction)
+{
+	AnimaMappedValues::SetVector("direction", direction.Normalized());
+}
+
+void AnimaSpotLight::SetDirection(AFloat x, AFloat y, AFloat z)
+{
+	AnimaMappedValues::SetVector("direction", AnimaVertex3f(x, y, z).Normalized());
+}
+
+void AnimaSpotLight::SetCutoff(AFloat c)
+{
+	AnimaMappedValues::SetFloat("cutoff", c);
+}
+
+AnimaVertex3f AnimaSpotLight::GetDirection()
+{
+	return AnimaMappedValues::GetVector3f("direction");
+}
+
+AFloat AnimaSpotLight::GetCutoff()
+{
+	return AnimaMappedValues::GetFloat("cutoff");
 }
 
 END_ANIMA_ENGINE_NAMESPACE

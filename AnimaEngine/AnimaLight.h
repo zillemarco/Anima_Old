@@ -57,6 +57,9 @@ public:
 
 	virtual void SetRange(AFloat range);
 	virtual AFloat GetRange();
+
+	virtual void SetCutoff(AFloat c);
+	virtual AFloat GetCutoff();
 };
 
 //----------------------------------------------------------------
@@ -114,6 +117,23 @@ public:
 	AFloat GetLinearAttenuation() override;
 	AFloat GetExponentAttenuation() override;
 	AFloat GetRange() override;
+};
+
+//----------------------------------------------------------------
+//						ANIMA SPOT LIGHT
+//----------------------------------------------------------------
+class ANIMA_ENGINE_EXPORT AnimaSpotLight : public AnimaPointLight
+{
+public:
+	AnimaSpotLight(AnimaEngine* engine);
+	virtual ~AnimaSpotLight();
+
+	void SetDirection(const AnimaVertex3f& position) override;
+	void SetDirection(AFloat x, AFloat y, AFloat z) override;
+	void SetCutoff(AFloat c) override;
+
+	AnimaVertex3f GetDirection() override;
+	AFloat GetCutoff() override;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

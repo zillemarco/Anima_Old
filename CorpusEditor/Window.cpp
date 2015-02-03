@@ -14,6 +14,9 @@
 #include <AnimaLightsManager.h>
 #include <AnimaMath.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
@@ -46,36 +49,18 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
-	Anima::AnimaMatrix rm0;
-	Anima::AnimaMatrix rm1;
-	rm0.RotateYDeg(rotY);
-	rotY += 0.00001f;
-
-	//GetEngine()->GetModelsManager()->GetPModel(1)->GetTransformation()->RotateX(rotX);
-	//rm1.RotateX(rotX);
-	//rotX += 0.00001;
-
-	//Anima::AnimaVertex3f p0 = pointL0->GetPosition();
-	//p0 = Anima::AnimaMath::MatrixMulVector(rm0, p0);
-	//pointL0->SetPosition(p0);
-
-	//Anima::AnimaVertex3f p1 = pointL1->GetPosition();
-	//p1 = Anima::AnimaMath::MatrixMulVector(rm1, p1);
-	//pointL1->SetPosition(p1);
-	//GetEngine()->GetModelsManager()->GetPModelFromName("origine")->GetTransformation()->RotateXDeg(0.01f);
-	//GetEngine()->GetModelsManager()->GetPModelFromName("x-cubo")->GetTransformation()->RotateXDeg(0.01f);
-	//GetEngine()->GetModelsManager()->GetPModelFromName("y-sfera")->GetTransformation()->RotateZDeg(0.01f);
-	//GetEngine()->GetModelsManager()->GetPModelFromName("z-toro")->GetTransformation()->RotateXDeg(0.01f);
-
+	//spotL0->SetPosition(GetEngine()->GetCamerasManager()->GetActiveCamera()->GetPosition());
+	//spotL0->SetDirection(-GetEngine()->GetCamerasManager()->GetActiveCamera()->GetForward());
+	
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
 	Anima::AnimaRenderingManager::Start(GetEngine());
 
-	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(0), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
-	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(1), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
-	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(2), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
-	Anima::AnimaRenderingManager::DrawModel(GetEngine(), GetEngine()->GetModelsManager()->GetPModel(3), GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
-
+	for (int i = 0; i < GetEngine()->GetModelsManager()->GetModelsNumber(); i++)
+	{
+		Anima::AnimaModel* pModel = GetEngine()->GetModelsManager()->GetPModel(i);
+		Anima::AnimaRenderingManager::DrawModel(GetEngine(), pModel, GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
+	}
 	Anima::AnimaRenderingManager::Finish(GetEngine());
 
 	SwapBuffers();
@@ -205,12 +190,12 @@ void Window::Load()
 	texture->Load();
 	
 	Anima::AnimaAmbientLight* ambL = GetEngine()->GetLightsManager()->CreateAmbientLight("ambient");
-	ambL->SetColor(1.0, 1.0, 1.0);
+	ambL->SetColor(0.2, 0.2, 0.2);
 
-	//Anima::AnimaDirectionalLight* dirL = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
-	//dirL->SetColor(1.0f, 1.0f, 1.0f);
-	//dirL->SetIntensity(1.0f);
-	//dirL->SetDirection(-1.0f, -1.0f, -1.0f);
+	Anima::AnimaDirectionalLight* dirL = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
+	dirL->SetColor(0.2f, 0.0f, 0.0f);
+	dirL->SetIntensity(1.0f);
+	dirL->SetDirection(1.0f, 1.0f, 1.0f);
 	
 	//pointL0 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight0");
 	//pointL0->SetColor(0.0f, 0.0f, 1.0f);
@@ -228,7 +213,14 @@ void Window::Load()
 	//pointL1->SetIntensity(1.0f);
 	//pointL1->SetPosition(0.0f, 0.0f, -10.0f);
 
-	GetEngine()->GetModelsManager()->GetPModelFromName("x-cubo")->GetTransformation()->TranslateX(10.0f);
-	GetEngine()->GetModelsManager()->GetPModelFromName("y-sfera")->GetTransformation()->TranslateY(10.0f);
-	GetEngine()->GetModelsManager()->GetPModelFromName("z-toro")->GetTransformation()->TranslateZ(10.0f);
+	spotL0 = GetEngine()->GetLightsManager()->CreateSpotLight("spotLight0");
+	spotL0->SetColor(0.0f, 1.0f, 0.0f);
+	spotL0->SetConstantAttenuation(0.1);
+	spotL0->SetLinearAttenuation(0.1f);
+	spotL0->SetExponentAttenuation(0.01f);
+	spotL0->SetIntensity(0.5f);
+	spotL0->SetPosition(0.0f, 3.0f, -5.0f);
+	spotL0->SetDirection(0.0f, -1.0f, 0.0f);
+
+	GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetTransformation()->TranslateY(1.2f);
 }

@@ -36,6 +36,7 @@ private:
 	Anima::AnimaTexture* texture;
 	Anima::AnimaPointLight* pointL0;
 	Anima::AnimaPointLight* pointL1;
+	Anima::AnimaSpotLight* spotL0;
 
 	int _matrixUniform;
 	int _posAttr;
