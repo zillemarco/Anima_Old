@@ -28,12 +28,11 @@ END_MESSAGE_MAP()
 
 Window::Window()
 {
-	rotX = rotY = 0.0;
-	tx = ty = tz = 0.0;
 	projection = true;
 
 	_lastPTX = 0.0;
 	_lastPTY = 0.0;
+	type = true;
 }
 
 Window::~Window()
@@ -49,19 +48,11 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
-	//spotL0->SetPosition(GetEngine()->GetCamerasManager()->GetActiveCamera()->GetPosition());
-	//spotL0->SetDirection(-GetEngine()->GetCamerasManager()->GetActiveCamera()->GetForward());
-	
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
-	Anima::AnimaRenderingManager::Start(GetEngine());
-
-	for (int i = 0; i < GetEngine()->GetModelsManager()->GetModelsNumber(); i++)
-	{
-		Anima::AnimaModel* pModel = GetEngine()->GetModelsManager()->GetPModel(i);
-		Anima::AnimaRenderingManager::DrawModel(GetEngine(), pModel, GetEngine()->GetShadersManager()->GetProgramFromName("basic"));
-	}
-	Anima::AnimaRenderingManager::Finish(GetEngine());
+	renderingManager.Start(GetEngine());
+	renderingManager.ForwardDrawAllModels(GetEngine());
+	renderingManager.Finish(GetEngine());
 
 	SwapBuffers();
 }
@@ -149,6 +140,9 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 			wnd->_tpcamera->Activate();
 
 		break;
+	case ANIMA_ENGINE_KEY_T:
+			wnd->type = !wnd->type;
+		break;
 	}
 }
 
@@ -170,57 +164,81 @@ void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 
 void Window::Load()
 {
-#if defined _MSC_VER
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("basic-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("basic-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
-#else
-	Anima::AnimaShader* vs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = GetEngine()->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
-#endif
+	Anima::AnimaShadersManager* mgr = GetEngine()->GetShadersManager();
 
-	GLenum error = glGetError();
-	
-	program = GetEngine()->GetShadersManager()->CreateProgram("basic");
-	program->Create();
-	program->AddShader(vs);
-	program->AddShader(fs);
-	program->Link();
+	mgr->CreateProgram("phong");
+	mgr->GetProgramFromName("phong")->Create();
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("phong")->Link();
+
+	mgr->CreateProgram("forward-ambient");
+	mgr->GetProgramFromName("forward-ambient")->Create();
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-ambient")->Link();
+
+	mgr->CreateProgram("forward-directional");
+	mgr->GetProgramFromName("forward-directional")->Create();
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-directional")->Link();
+
+	mgr->CreateProgram("forward-point");
+	mgr->GetProgramFromName("forward-point")->Create();
+	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-point")->Link();
+
+	mgr->CreateProgram("forward-spot");
+	mgr->GetProgramFromName("forward-spot")->Create();
+	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-spot")->Link();
 
 	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
 	texture->Load();
 	
-	Anima::AnimaAmbientLight* ambL = GetEngine()->GetLightsManager()->CreateAmbientLight("ambient");
-	ambL->SetColor(0.2, 0.2, 0.2);
+	Anima::AnimaLight* l = GetEngine()->GetLightsManager()->CreateAmbientLight("ambient");
+	l->SetColor(0.2f, 0.2f, 0.2f);
 
-	Anima::AnimaDirectionalLight* dirL = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
-	dirL->SetColor(0.2f, 0.0f, 0.0f);
-	dirL->SetIntensity(1.0f);
-	dirL->SetDirection(1.0f, 1.0f, 1.0f);
+	l = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
+	l->SetColor(1.0f, 1.0f, 1.0f);
+	l->SetIntensity(0.8f);
+	l->SetDirection(-1.0f, -1.0f, -1.0f);
 	
-	//pointL0 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight0");
-	//pointL0->SetColor(0.0f, 0.0f, 1.0f);
-	//pointL0->SetConstantAttenuation(0.0f);
-	//pointL0->SetLinearAttenuation(0.0f);
-	//pointL0->SetExponentAttenuation(0.01f);
-	//pointL0->SetIntensity(1.0f);
-	//pointL0->SetPosition(-10.0f, 0.0f, 0.0f);
+	l = GetEngine()->GetLightsManager()->CreatePointLight("pointLight0");
+	l->SetColor(0.0f, 0.0f, 1.0f);
+	l->SetConstantAttenuation(0.0f);
+	l->SetLinearAttenuation(0.0f);
+	l->SetExponentAttenuation(0.01f);
+	l->SetIntensity(1.0f);
+	l->SetPosition(-10.0f, 0.0f, 0.0f);
 
-	//pointL1 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight1");
-	//pointL1->SetColor(1.0f, 0.0f, 0.0f);
-	//pointL1->SetConstantAttenuation(0.0f);
-	//pointL1->SetLinearAttenuation(0.0f);
-	//pointL1->SetExponentAttenuation(0.01f);
-	//pointL1->SetIntensity(1.0f);
-	//pointL1->SetPosition(0.0f, 0.0f, -10.0f);
+	l = GetEngine()->GetLightsManager()->CreatePointLight("pointLight1");
+	l->SetColor(1.0f, 0.0f, 0.0f);
+	l->SetConstantAttenuation(0.0f);
+	l->SetLinearAttenuation(0.0f);
+	l->SetExponentAttenuation(0.01f);
+	l->SetIntensity(1.0f);
+	l->SetPosition(0.0f, 0.0f, -10.0f);
 
-	spotL0 = GetEngine()->GetLightsManager()->CreateSpotLight("spotLight0");
-	spotL0->SetColor(0.0f, 1.0f, 0.0f);
-	spotL0->SetConstantAttenuation(0.1);
-	spotL0->SetLinearAttenuation(0.1f);
-	spotL0->SetExponentAttenuation(0.01f);
-	spotL0->SetIntensity(0.5f);
-	spotL0->SetPosition(0.0f, 3.0f, -5.0f);
-	spotL0->SetDirection(0.0f, -1.0f, 0.0f);
+	l = GetEngine()->GetLightsManager()->CreateSpotLight("spotLight0");
+	l->SetColor(0.0f, 1.0f, 0.0f);
+	l->SetConstantAttenuation(0.1);
+	l->SetLinearAttenuation(0.1f);
+	l->SetExponentAttenuation(0.01f);
+	l->SetIntensity(0.5f);
+	l->SetPosition(0.0f, 3.0f, -5.0f);
+	l->SetDirection(0.0f, -1.0f, 0.0f);
 
-	GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetTransformation()->TranslateY(1.2f);
+	GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->ComputeBoundingBox(true);
+	Anima::AnimaVertex3f min = GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMin();
+	Anima::AnimaVertex3f max = GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMax();
+
+	Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
+	Anima::AnimaVertex3f pos = center;
+	pos.z += 5.0f;
+
+	_tpcamera->LookAt(pos, center);
 }

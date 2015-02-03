@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <AnimaModelsManager.h>
 #include <QMenu>
+#include <QItemSelection>
 #include <AnimaModel.h>
 
 Q_DECLARE_METATYPE(Anima::AnimaModel*)
@@ -129,6 +130,9 @@ ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
 	_resourcesTreeModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Resource name")));
 	_resourcesTreeModel->setHorizontalHeaderItem(1, new QStandardItem(tr("File name")));
 	connect(_resourcesTreeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(resourceTreeItemDataChanged(QStandardItem*)));
+
+	QItemSelectionModel* selectionModel = _resourcesTree->selectionModel();
+	connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(resourceTreeItemSelectionChanged(const QItemSelection&, const QItemSelection&)));
 	
 	_resourcesTree->setColumnWidth(0, 150);
 	_resourcesTree->setColumnWidth(1, 100);
@@ -166,10 +170,10 @@ void ResourceManagerTab::LoadModelsTree()
 		QList<QStandardItem*> newItem;
 		
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelName()));
-		resourceNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ResourceManagerTabRole);
+		resourceNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ModelRole);
 		resourceNameItem->setEditable(true);
 		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelFileName()));
-		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ResourceManagerTabRole);
+		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ModelRole);
 		resourceFileNameItem->setEditable(true);
 		
 		newItem.append(resourceNameItem);
@@ -248,4 +252,16 @@ void ResourceManagerTab::createMenus()
 
 void ResourceManagerTab::resourceTreeItemDataChanged(QStandardItem* item)
 {
+}
+
+void ResourceManagerTab::resourceTreeItemSelectionChanged(const QItemSelection& current, const QItemSelection& previous)
+{
+	const QModelIndex index = _resourcesTree->selectionModel()->currentIndex();
+	QVariant var = index.data(ModelRole);
+
+	if (var.isValid())
+	{
+		Anima::AnimaModel* model = var.value<Anima::AnimaModel*>();
+		_modelViewer->setSelectedModel(model);
+	}
 }

@@ -8,6 +8,7 @@
 #include <AnimaTexture.h>
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
+#include <AnimaRenderingManager.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -21,7 +22,6 @@ public:
 	void DrawScene();
 	void Load();
 
-
 	Anima::AnimaThirdPersonCamera* _tpcamera;
 	Anima::AnimaFirstPersonCamera* _fpcamera;
 
@@ -32,21 +32,11 @@ private:
 	ANIMA_WINDOW_EVENT void KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods);
 	ANIMA_WINDOW_EVENT void ScrollCallback(Anima::AnimaWindow* window, double x, double y);
 
-	Anima::AnimaShaderProgram* program;
 	Anima::AnimaTexture* texture;
-	Anima::AnimaPointLight* pointL0;
-	Anima::AnimaPointLight* pointL1;
-	Anima::AnimaSpotLight* spotL0;
-
-	int _matrixUniform;
-	int _posAttr;
-
-	Anima::AnimaMaterial* material;
+	Anima::AnimaRenderingManager renderingManager;
 	
-	float rotX, rotY;
-	float tx, ty, tz;
-
 	bool projection;
+	bool type;
 
 	double _lastPTX, _lastPTY;
 

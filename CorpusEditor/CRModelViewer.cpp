@@ -3,6 +3,7 @@
 #include <AnimaShaderProgram.h>
 #include <AnimaModelsManager.h>
 #include <AnimaCamerasManager.h>
+#include <AnimaDataGeneratorsManager.h>
 #include <AnimaModel.h>
 #include <AnimaShader.h>
 #include <AnimaEngine.h>
@@ -14,48 +15,57 @@
 #include <qmessagebox>
 #include <QCoreApplication>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #define UPDATE_VIEW QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
 
 CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
 	: CorpusOGLWindowBase(engine, parent)
-	, _program(nullptr)
 	, _frame(0)
 {
-//	_animating = false;
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
+	_selectedModel = nullptr;
 }
 
 CRModelViewer::~CRModelViewer()
 {
 }
 
-GLuint CRModelViewer::loadShader(GLenum type, const char *source)
-{
-	return 0;
-}
-
 void CRModelViewer::Initialize()
 {
-#if defined _MSC_VER
-	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("basic-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("basic-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
-#else
-	Anima::AnimaShader* vs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.vs", Anima::AnimaShader::VERTEX);
-	Anima::AnimaShader* fs = _engine->GetShadersManager()->LoadShaderFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/test/shader.fs", Anima::AnimaShader::FRAGMENT);
-#endif
-	
-	_program = _engine->GetShadersManager()->CreateProgram("basic");
-	_program->Create();
-	_program->AddShader(vs);
-	_program->AddShader(fs);
-	_program->Link();
+	Anima::AnimaShadersManager* mgr = _engine->GetShadersManager();
 
-	//_program->AddUniform("gWorld");
-	//_program->AddUniform("uniformColor");
+	mgr->CreateProgram("phong");
+	mgr->GetProgramFromName("phong")->Create();
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("phong")->Link();
 
-	//_matrixUniform = glGetUniformLocation(_program->GetID(), "gWorld");
-	//_posAttr = glGetUniformLocation(_program->GetID(), "posAttr");
+	mgr->CreateProgram("forward-ambient");
+	mgr->GetProgramFromName("forward-ambient")->Create();
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-ambient")->Link();
+
+	mgr->CreateProgram("forward-directional");
+	mgr->GetProgramFromName("forward-directional")->Create();
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-directional")->Link();
+
+	mgr->CreateProgram("forward-point");
+	mgr->GetProgramFromName("forward-point")->Create();
+	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-point")->Link();
+
+	mgr->CreateProgram("forward-spot");
+	mgr->GetProgramFromName("forward-spot")->Create();
+	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-spot")->Link();
 }
 
 void CRModelViewer::Render()
@@ -66,30 +76,15 @@ void CRModelViewer::Render()
 	
 	glViewport(0, 0, w, h);
 
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	_engine->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
+	_engine->GetDataGeneratorsManager()->UpdateValues();
 
-	//glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
-	//glFrontFace(GL_CW);
-	////glCullFace(GL_BACK);
-	////glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
+	_renderingManager.Start(_engine);
 
-	//_program->Use();
+	if (_selectedModel != nullptr)
+		_renderingManager.ForwardDrawSingleModel(_engine, _selectedModel);
 
-	//Anima::AnimaMatrix projection(_engine);
-	//projection.Perspective(60.0f, w / h, 0.01f, 1000.0f);
-
-	//Anima::AnimaMatrix camera = _engine->GetCamerasManager()->GetActiveCamera()->GetViewMatrix();
-	//Anima::AnimaMatrix model(_engine);
-	//_program->SetUniform("gWorld", model * camera * projection);
-	//_program->SetUniform("uniformColor", 0.0, 1.0, 1.0);
-	//
-	//Anima::AnimaModelsManager* mgr = _engine->GetModelsManager();
-	//Anima::AnimaMatrix m(_engine);
-	//if (mgr->GetModelsNumber() > 0)
-	//{
-	//	mgr->GetPModel(0)->Draw(m);
-	//}
+	_renderingManager.Finish(_engine);
 
 	++_frame;
 }
@@ -166,4 +161,26 @@ void CRModelViewer::wheelEvent(QWheelEvent* wEvent)
 	}
 
 	_engine->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
+}
+
+void CRModelViewer::setSelectedModel(Anima::AnimaModel* model)
+{
+	_selectedModel = model;
+
+	if (_selectedModel != nullptr)
+	{
+		_selectedModel->ComputeBoundingBox(true);
+		Anima::AnimaVertex3f min = _selectedModel->GetBoundingBoxMin();
+		Anima::AnimaVertex3f max = _selectedModel->GetBoundingBoxMax();
+
+		float boxL = fabs(max.x - min.x);
+		float boxH = fabs(max.y - min.y);
+		float boxP = fabs(max.z - min.z);
+
+		Anima::AnimaVertex3f center(max.x - (boxL / 2.0f), max.y - (boxH / 2.0f), max.z - (boxP / 2.0f));
+		Anima::AnimaVertex3f pos = center;
+		pos.z += (boxH / 2.0f) / sinf(60.0f * (float)M_PI / 180.0f);
+
+		_engine->GetCamerasManager()->GetActiveCamera()->LookAt(pos, center);
+	}
 }

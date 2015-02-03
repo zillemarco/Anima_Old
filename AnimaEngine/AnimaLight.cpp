@@ -22,11 +22,13 @@ AnimaLight::AnimaLight(AnimaEngine* engine)
 AnimaLight::AnimaLight(const AnimaLight& src)
 	: AnimaMappedValues(src)
 {
+	_type = src._type;
 }
 
 AnimaLight::AnimaLight(AnimaLight&& src)
 	: AnimaMappedValues(src)
 {
+	_type = src._type;
 }
 
 AnimaLight::~AnimaLight()
@@ -36,12 +38,14 @@ AnimaLight::~AnimaLight()
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 {
 	AnimaMappedValues::operator=(src);
+	_type = src._type;
 	return *this;
 }
 
 AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 {
 	AnimaMappedValues::operator=(src);
+	_type = src._type;
 	return *this;
 }
 
@@ -159,6 +163,26 @@ AFloat AnimaLight::GetCutoff()
 	return 0.0f;
 }
 
+bool AnimaLight::IsAmbientLight()
+{
+	return _type == AMBIENT;
+}
+
+bool AnimaLight::IsDirectionalLight()
+{
+	return _type == DIRECTIONAL;
+}
+
+bool AnimaLight::IsPointLight()
+{
+	return _type == POINT;
+}
+
+bool AnimaLight::IsSpotLight()
+{
+	return _type == SPOT;
+}
+
 //----------------------------------------------------------------
 //						ANIMA AMBIENT LIGHT
 //----------------------------------------------------------------
@@ -167,6 +191,8 @@ AnimaAmbientLight::AnimaAmbientLight(AnimaEngine* engine)
 {
 	AnimaMappedValues::SetColor("color", 1.0f, 1.0f, 1.0f);
 	AnimaMappedValues::SetFloat("intensity", 1.0f);
+	
+	_type = AMBIENT;
 }
 
 AnimaAmbientLight::~AnimaAmbientLight()
@@ -196,6 +222,8 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaEngine* engine)
 {
 	AnimaMappedValues::SetVector("direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	AnimaMappedValues::SetFloat("intensity", 0.0f);
+
+	_type = DIRECTIONAL;
 }
 
 AnimaDirectionalLight::~AnimaDirectionalLight()
@@ -239,6 +267,8 @@ AnimaPointLight::AnimaPointLight(AnimaEngine* engine)
 	AnimaMappedValues::SetFloat("linearAttenuation", 0.0f);
 	AnimaMappedValues::SetFloat("exponentAttenuation", 1.0f);
 	AnimaMappedValues::SetFloat("range", 20.0f);
+
+	_type = POINT;
 }
 
 AnimaPointLight::~AnimaPointLight()
@@ -318,6 +348,8 @@ AnimaSpotLight::AnimaSpotLight(AnimaEngine* engine)
 {
 	AnimaMappedValues::SetVector("direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
 	AnimaMappedValues::SetFloat("cutoff", 0.7f);
+
+	_type = SPOT;
 }
 
 AnimaSpotLight::~AnimaSpotLight()

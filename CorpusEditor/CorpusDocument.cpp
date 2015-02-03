@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <AnimaCamerasManager.h>
+#include <AnimaLightsManager.h>
 #include <AnimaCamera.h>
 
 CorpusDocument::CorpusDocument()
@@ -84,9 +85,11 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 		return false;
 
 	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera();
-	cam->LookAt(0.0, 0.0, -20.0, 0.0, 0.0, 0.0);
+	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
+	_engine->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
+
 	_hasModifications = true;
 	_newDocument = true;
 	
@@ -109,8 +112,10 @@ bool CorpusDocument::OpenDocument(QString path)
 		return false;
 
 	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera();
-	cam->LookAt(0.0, 0.0, -20.0, 0.0, 0.0, 0.0);
+	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
+
+	_engine->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
 	
 	_hasModifications = false;
 	_newDocument = false;
@@ -673,16 +678,16 @@ bool CorpusDocument::ImportModel()
 		return false;
 	}
 	
-	//if(!_engine->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData()))
-	//{
-	//	QMessageBox msg;
-	//	msg.setWindowTitle(QString("CorpusEditor"));
-	//	msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
-	//	msg.exec();
-	//	
-	//	QFile::remove(copiedFilePath);
-	//	return false;
-	//}
+	if(!_engine->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
+	{
+		QMessageBox msg;
+		msg.setWindowTitle(QString("CorpusEditor"));
+		msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
+		msg.exec();
+		
+		QFile::remove(copiedFilePath);
+		return false;
+	}
 	
 	_hasModifications = true;
 	
@@ -793,15 +798,15 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 
 bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileName)
 {
-	//QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
-	//
-	//Anima::AnimaModel* model = _engine->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData());
-	//
-	//if(!model)
-	//	return false;
-	//
-	//model->SetModelName(modelName.toLocal8Bit().constData());
-	//model->SetModelFileName(modelFileName.toLocal8Bit().constData());
+	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
+	
+	Anima::AnimaModel* model = _engine->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
+	
+	if(!model)
+		return false;
+	
+	model->SetModelName(modelName.toLocal8Bit().constData());
+	model->SetModelFileName(modelFileName.toLocal8Bit().constData());
 	
 	return true;
 }

@@ -235,4 +235,53 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 	return GetLightFromName(str);
 }
 
+AInt AnimaLightsManager::GetTotalLightsCount()
+{
+	return _lightsNumber;
+}
+
+AInt AnimaLightsManager::GetAmbientLightsCount()
+{
+	AInt c = 0;
+	for (ASizeT i = 0; i < _lightsNumber; i++)
+	{
+		if (_lights[i]->IsAmbientLight())
+			c++;
+	}
+	return c;
+}
+
+AInt AnimaLightsManager::GetDirectionalLightsCount()
+{
+	AInt c = 0;
+	for (ASizeT i = 0; i < _lightsNumber; i++)
+	{
+		if (_lights[i]->IsDirectionalLight())
+			c++;
+	}
+	return c;
+}
+
+AInt AnimaLightsManager::GetPointLightsCount()
+{
+	AInt c = 0;
+	for (ASizeT i = 0; i < _lightsNumber; i++)
+	{
+		if (_lights[i]->IsPointLight())
+			c++;
+	}
+	return c;
+}
+
+AInt AnimaLightsManager::GetSpotLightsCount()
+{
+	AInt c = 0;
+	for (ASizeT i = 0; i < _lightsNumber; i++)
+	{
+		if (_lights[i]->IsSpotLight())
+			c++;
+	}
+	return c;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

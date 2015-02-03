@@ -52,7 +52,8 @@ public:
 	
 protected:
 	enum ResourceManagerTabRoles {
-		ResourceManagerTabRole = Qt::UserRole + 1
+		ResourceManagerTabRole = Qt::UserRole + 1,
+		ModelRole = Qt::UserRole + 2,
 	};
 
 public:
@@ -73,6 +74,7 @@ private slots:
 	void importTexture();
 	void addNewMaterial();
 	void resourceTreeItemDataChanged(QStandardItem* item);
+	void resourceTreeItemSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
 	
 private:
 	CorpusDocument* _document;

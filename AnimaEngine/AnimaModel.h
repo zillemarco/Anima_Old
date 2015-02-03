@@ -71,9 +71,20 @@ public:
 	AnimaTransformation* GetTransformation();
 	AnimaTransformation GetTransformationCopy();
 
+	void SetParent(AnimaModel* parent);
+	AnimaModel* GetParent() const;
+
+	void ComputeBoundingBox(bool updateRecursively = false);
+	AnimaVertex3f GetBoundingBoxMin() const;
+	AnimaVertex3f GetBoundingBoxMax() const;
+
 protected:
 	AnimaModel*		_modelChildren;
 	ASizeT			_modelChildrenNumber;
+
+	AnimaModel*		_parentModel;
+	AnimaVertex3f	_boundingBoxMin;
+	AnimaVertex3f	_boundingBoxMax;
 	
 	AnimaMesh*		_modelMeshes;
 	ASizeT			_modelMeshesNumber;

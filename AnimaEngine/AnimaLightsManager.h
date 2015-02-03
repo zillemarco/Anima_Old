@@ -40,6 +40,12 @@ public:
 	AnimaLight* GetLightFromName(const AnimaString& name);
 	AnimaLight* GetLightFromName(const char* name);
 
+	AInt GetTotalLightsCount();
+	AInt GetAmbientLightsCount();
+	AInt GetDirectionalLightsCount();
+	AInt GetPointLightsCount();
+	AInt GetSpotLightsCount();
+
 private:
 	void ClearLights(bool bDeleteObjects = true, bool bResetNumber = true);
 	

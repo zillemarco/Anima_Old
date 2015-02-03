@@ -1,14 +1,10 @@
 #pragma once
 
 #include "CorpusOGLWindowBase.h"
+#include <AnimaRenderingManager.h>
 
 class QMouseEvent;
 class QWheelEvent;
-
-namespace Anima
-{
-	class AnimaShaderProgram;
-};
 
 class CRModelViewer : public CorpusOGLWindowBase
 {
@@ -22,14 +18,12 @@ public:
 	void mouseMoveEvent(QMouseEvent* mEvent);
 	void wheelEvent(QWheelEvent* wEvent);
 
+	void setSelectedModel(Anima::AnimaModel* model);
+
 private:
-	GLuint loadShader(GLenum type, const char *source);
+	Anima::AnimaRenderingManager _renderingManager;
+	Anima::AnimaModel* _selectedModel;
 
-	GLuint _posAttr;
-	GLuint _colAttr;
-	GLuint _matrixUniform;
-
-	Anima::AnimaShaderProgram* _program;
 	int _frame;
 
 	int _lastMouseXPos;

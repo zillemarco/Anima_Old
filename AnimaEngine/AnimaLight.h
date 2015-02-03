@@ -21,6 +21,14 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaLight : protected AnimaMappedValues
 {
+public:
+	enum AnimaLightType {
+		AMBIENT,
+		DIRECTIONAL,
+		POINT,
+		SPOT
+	};
+
 protected:
 	AnimaLight(AnimaEngine* engine);
 	AnimaLight(const AnimaLight& src);
@@ -60,6 +68,14 @@ public:
 
 	virtual void SetCutoff(AFloat c);
 	virtual AFloat GetCutoff();
+
+	bool IsAmbientLight();
+	bool IsDirectionalLight();
+	bool IsPointLight();
+	bool IsSpotLight();
+
+protected:
+	AnimaLightType _type;
 };
 
 //----------------------------------------------------------------

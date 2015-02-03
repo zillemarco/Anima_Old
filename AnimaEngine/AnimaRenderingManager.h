@@ -8,6 +8,7 @@
 #include "AnimaTypes.h"
 #include "AnimaModel.h"
 #include "AnimaMaterial.h"
+#include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -17,15 +18,28 @@ class AnimaEngine;
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
 {
 public:
-	static void Start(AnimaEngine* engine);
-	static void Finish(AnimaEngine* engine);
+	void Start(AnimaEngine* engine);
+	void Finish(AnimaEngine* engine);
 
-	static void DrawAllModels(AnimaEngine* engine);
-	static void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program);
-	static void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawAllModels(AnimaEngine* engine);
+	void DrawSingleModel(AnimaEngine* engine, AnimaModel* model);
+
+	void ForwardDrawAllModels(AnimaEngine* engine);
+	void ForwardDrawSingleModel(AnimaEngine* engine, AnimaModel* model);
 
 private:
-	static void DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program);
+	void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	
+	void AmbientPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void DirectionalPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void PointPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void SpotPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+
+	void ForwardDrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program);
+	void ForwardDrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 };
 
 END_ANIMA_ENGINE_NAMESPACE

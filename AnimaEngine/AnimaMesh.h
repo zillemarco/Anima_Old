@@ -21,6 +21,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaModel;
+
 class ANIMA_ENGINE_EXPORT AnimaMesh
 {
 public:
@@ -70,6 +72,9 @@ public:
 	AnimaString GetAnimaMeshName();
 	const char* GetMeshName();
 
+	void SetParent(AnimaModel* parent);
+	AnimaModel* GetParent() const;
+
 	bool CreateBuffers();
 	void UpdateBuffers();
 
@@ -78,6 +83,12 @@ public:
 
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();
+
+	AnimaMatrix GetFinalMatrix() const;
+
+	void ComputeBoundingBox();
+	AnimaVertex3f GetBoundingBoxMin() const;
+	AnimaVertex3f GetBoundingBoxMax() const;
 	
 public:
 	bool AreBuffersCreated();
@@ -134,6 +145,10 @@ protected:
 	AnimaMaterial*	_material;
 
 	AnimaString		_meshName;
+
+	AnimaModel*		_parentModel;
+	AnimaVertex3f	_boundingBoxMin;
+	AnimaVertex3f	_boundingBoxMax;
 
 	AUint			_vertexArrayObject;
 	AUint			_indexesBufferObject;

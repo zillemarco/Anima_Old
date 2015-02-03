@@ -9,8 +9,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "AnimaMesh.h"
+#include "AnimaModel.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+#ifndef min
+#	define min(a,b) (a < b ? a : b)
+#endif
+
+#ifndef max
+#	define max(a,b) (a > b ? a : b)
+#endif
 
 AnimaMesh::AnimaMesh(AnimaEngine* engine)
 : _meshName(engine)
@@ -36,6 +45,7 @@ AnimaMesh::AnimaMesh(AnimaEngine* engine)
 	_textureCoordsNumber = 0;
 	_facesNumber = 0;
 	_meshName = "_mesh_";
+	_parentModel = nullptr;
 
 	_material = nullptr;
 }
@@ -63,6 +73,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_normalsNumber = 0;
 	_textureCoordsNumber = 0;
 	_facesNumber = 0;
+
+	_parentModel = src._parentModel;
 	
 	SetVertices(src._vertices, src._verticesNumber);
 	SetNormals(src._normals, src._normalsNumber);
@@ -89,6 +101,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _engine(src._engine)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
 	, _material(src._material)
+	, _parentModel(src._parentModel)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -124,6 +137,7 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_material = src._material;
+		_parentModel = src._parentModel;
 		
 		SetMeshName(src._meshName);
 		SetVertices(src._vertices, src._verticesNumber);
@@ -152,6 +166,7 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_facesNumber = src._facesNumber;
 
 		_material = src._material;
+		_parentModel = src._parentModel;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -889,6 +904,65 @@ AUint AnimaMesh::GetNormalsBufferObject()
 AUint AnimaMesh::GetTextureCoordsBufferObject()
 {
 	return _textureCoordsBufferObject;
+}
+
+void AnimaMesh::SetParent(AnimaModel* parent)
+{
+	_parentModel = parent;
+}
+
+AnimaModel* AnimaMesh::GetParent() const
+{
+	return _parentModel;
+}
+
+void AnimaMesh::ComputeBoundingBox()
+{
+	if (_verticesNumber <= 0)
+	{
+		_boundingBoxMin.x = _boundingBoxMax.x = 0.0f;
+		_boundingBoxMin.y = _boundingBoxMax.y = 0.0f;
+		_boundingBoxMin.z = _boundingBoxMax.z = 0.0f;
+		return;
+	}
+
+	_boundingBoxMin = _vertices[0];
+	_boundingBoxMax = _vertices[0];
+
+	for (int i = 1; i < _verticesNumber; i++)
+	{
+		_boundingBoxMin.x = min(_boundingBoxMin.x, _vertices[i].x);
+		_boundingBoxMin.y = min(_boundingBoxMin.y, _vertices[i].y);
+		_boundingBoxMin.z = min(_boundingBoxMin.z, _vertices[i].z);
+
+		_boundingBoxMax.x = max(_boundingBoxMax.x, _vertices[i].x);
+		_boundingBoxMax.y = max(_boundingBoxMax.y, _vertices[i].y);
+		_boundingBoxMax.z = max(_boundingBoxMax.z, _vertices[i].z);
+	}
+}
+
+AnimaVertex3f AnimaMesh::GetBoundingBoxMin() const
+{
+	return _boundingBoxMin;
+}
+
+AnimaVertex3f AnimaMesh::GetBoundingBoxMax() const
+{
+	return _boundingBoxMax;
+}
+
+AnimaMatrix AnimaMesh::GetFinalMatrix() const
+{
+	AnimaModel* p = _parentModel;
+	AnimaMatrix m;
+
+	while (p != nullptr)
+	{
+		m = m * p->GetTransformation()->GetTransformationMatrix();
+		p = p->GetParent();
+	}
+
+	return m;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
