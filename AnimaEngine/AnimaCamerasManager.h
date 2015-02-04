@@ -30,12 +30,17 @@ public:
 	AnimaCamerasManager(AnimaEngine* engine);
 	~AnimaCamerasManager();
 	
-	AnimaFirstPersonCamera* CreateNewFirstPersonCamera();
-	AnimaThirdPersonCamera* CreateNewThirdPersonCamera();
+	AnimaFirstPersonCamera* CreateNewFirstPersonCamera(const AnimaString& name);
+	AnimaFirstPersonCamera* CreateNewFirstPersonCamera(const char* name);
+	AnimaThirdPersonCamera* CreateNewThirdPersonCamera(const AnimaString& name);
+	AnimaThirdPersonCamera* CreateNewThirdPersonCamera(const char* name);
 	
 	AnimaCamera* GetActiveCamera();
+	AnimaCamera* GetCamera(ASizeT index);
+	AnimaCamera* GetCameraFromName(const AnimaString& name);
+	AnimaCamera* GetCameraFromName(const char* name);
 
-	void UpdatePerspectiveCameras(float fov, float ratio, float zNear, float zFar);
+	void UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar);
 	void UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar);
 	
 private:
@@ -51,6 +56,10 @@ private:
 	ASizeT			_camerasNumber;
 	
 	AnimaCamera*	_activeCamera;
+
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _camerasMap;
+#pragma warning (default: 4251) 
 };
 
 END_ANIMA_ENGINE_NAMESPACE

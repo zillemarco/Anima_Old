@@ -231,13 +231,13 @@ bool AnimaShaderProgram::Link()
 	
 	if (IsLinked())
 		return true;
-	
-	for (int i = 0; i < _shadersNumber; i++)
-		glAttachShader(_id, _shaders[i]->GetID());
 
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
+	for (int i = 0; i < _shadersNumber; i++)
+		glAttachShader(_id, _shaders[i]->GetID());
+	
 	glLinkProgram(_id);
 
 	GLint isLinked = 0;
@@ -330,6 +330,18 @@ void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 	SetUniformf(str, value);
 }
 
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value)
+{
+	if (_uniforms.find(uniformName) != _uniforms.end())
+		glUniform2f(_uniforms.at(uniformName)._location, value.x, value.y);
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
+{
+	AnimaString str(uniformName, _engine);
+	SetUniform(str, value);
+}
+
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
 {
 	if (_uniforms.find(uniformName) != _uniforms.end())
@@ -378,28 +390,30 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b,
 	SetUniform(str, a, b, c, d);
 }
 
-void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value)
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose)
 {
 	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, GL_FALSE, value.m);
+		glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, transpose ? GL_TRUE : GL_FALSE, value.m);
 }
 
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value)
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
 {
 	AnimaString str(uniformName, _engine);
-	SetUniform(str, value);
+	SetUniform(str, value, transpose);
 }
 
 void AnimaShaderProgram::ScanVariables()
 {
 	_uniforms.clear();
+	_inputs.clear(); 
+	_outputs.clear();
 
 	GLint numActiveUniforms = 0;
 	glGetProgramInterfaceiv(_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
 	const int propertiesSize = 3;
 
-	AnimaString uniformName(_engine);
+	AnimaString name(_engine);
 	GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
 	GLint values[propertiesSize];
 
@@ -407,14 +421,95 @@ void AnimaShaderProgram::ScanVariables()
 	{
 		glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-		uniformName.Reserve(values[0] - 1);
-		glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, uniformName.GetBuffer());
+		name.Reserve(values[0] - 1);
+		glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
 
 		AnimaUniformInfo info;
 		info._location = values[2];
 		info._type = values[1];
+		info._name = name;
 
-		_uniforms[uniformName] = info;
+		_uniforms[name] = info;
+	}
+
+	GLint numActiveInputs = 0;
+	glGetProgramInterfaceiv(_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveInputs);
+
+	for (int i = 0; i < numActiveInputs; i++)
+	{
+		glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+		name.Reserve(values[0] - 1);
+		glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0], NULL, name.GetBuffer());
+
+		AnimaInputInfo info;
+		info._location = values[2];
+		info._type = values[1];
+		info._name = name;
+
+		_inputs[name] = info;
+	}
+
+	GLint numActiveOutputs = 0;
+	glGetProgramInterfaceiv(_id, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &numActiveOutputs);
+
+	for (int i = 0; i < numActiveOutputs; i++)
+	{
+		glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+		name.Reserve(values[0] - 1);
+		glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0], NULL, name.GetBuffer());
+
+		AnimaOutputInfo info;
+		info._location = values[2];
+		info._type = values[1];
+		info._name = name;
+
+		_outputs[name] = info;
+	}
+}
+
+void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
+{
+	glBindVertexArray(mesh->GetVertexArrayObject());
+
+	for (auto key : _inputs)
+	{
+		AnimaInputInfo info = key.second;
+
+		if (info._name == "_position")
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, mesh->GetVerticesBufferObject());
+			glEnableVertexAttribArray(info._location);
+			glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+		else if (info._name == "_normal")
+		{
+			if (mesh->GetFloatVerticesNormalCount() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetNormalsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+		else if (info._name == "_textureCoord")
+		{
+			if (mesh->GetFloatVerticesTextureCoordCount() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTextureCoordsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+	}
+}
+
+void AnimaShaderProgram::DisableInputs()
+{
+	for (auto key : _inputs)
+	{
+		AnimaInputInfo info = key.second;
+		glDisableVertexAttribArray(info._location);
 	}
 }
 

@@ -71,7 +71,7 @@ public:
 	};
 
 public:
-	AnimaString(AnimaEngine* engine);
+	AnimaString(AnimaEngine* engine = nullptr);
 	AnimaString(const char* src, AnimaEngine* engine);
 	AnimaString(const AnimaString& src);
 	AnimaString(AnimaString&& src);

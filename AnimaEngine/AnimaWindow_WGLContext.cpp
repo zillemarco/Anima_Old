@@ -90,8 +90,15 @@ static bool initGlewExtensions()
 	if (AnimaEngine::IsGlewExtensionsInitialized())
 		return true;
 
+	if (glGetError() != GL_NO_ERROR)
+		return false;
+
 	glewExperimental = GL_TRUE;
 	GLenum error = glewInit();
+
+	if (glGetError() != GL_NO_ERROR)
+		return false;
+
 	if (error != GLEW_OK)
 	{
 		char str[4096];

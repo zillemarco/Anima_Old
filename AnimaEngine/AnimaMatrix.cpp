@@ -610,6 +610,15 @@ AnimaMatrix AnimaMatrix::MakeLookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AF
 
 void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar)
 {
+	char szBuff[1024];
+	sprintf(szBuff, "%f\n", aspect);
+
+#if defined _MSC_VER
+	OutputDebugStringA(szBuff);
+#else
+	puts(szBuff);
+#endif
+
 	SetIdentity();
 
 	float radians = (fov / 2.0f) *(float)M_PI / 180.0f;

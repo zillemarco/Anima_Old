@@ -115,10 +115,15 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 			return;
 
 		program->Use();
-
+		
 		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
 		program->SetUniform("eyePosition", camera->GetPosition());
+		program->SetUniform("windowSize", camera->GetWindowSize());
+		program->SetUniformi("wireframe", 1);
+		program->SetUniform("edgesColor", AnimaVertex4f(0.0, 0.0, 0.0, 0.0));
+		program->SetUniformf("tessellationLevel", 5.0);
+		program->SetUniformf("tessAlpha", 1);
 		
 		AnimaLight* ambL = engine->GetLightsManager()->GetLightFromName("ambient");
 		if (ambL != nullptr)
@@ -200,6 +205,7 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 		glEnable(GL_CULL_FACE);
 
 	program->SetUniform("modelMatrix", parentTransformation);
+	program->SetUniform("ctrl_modelMatrix", parentTransformation);
 
 	AnimaTexture* texture = material->GetTexture("diffuse");
 	if (texture != nullptr)
@@ -215,51 +221,14 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
-	
-	bool bEnabled_0 = true;
-	bool bEnabled_1 = false;
-	bool bEnabled_2 = false;
-	bool bEnabled_3 = false;
 
-	glBindVertexArray(mesh->GetVertexArrayObject());
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->GetVerticesBufferObject());
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	if (mesh->GetFloatVerticesNormalCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->GetNormalsBufferObject());
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_1 = true;
-	}
-
-	if (mesh->GetFloatVerticesTextureCoordCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTextureCoordsBufferObject());
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_2 = true;
-	}
+	program->EnableInputs(mesh);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glDrawElements(GL_PATCHES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
-	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-
-	if (bEnabled_3)
-		glDisableVertexAttribArray(3);
-
-	if (bEnabled_2)
-		glDisableVertexAttribArray(2);
-
-	if (bEnabled_1)
-		glDisableVertexAttribArray(1);
-
-	if (bEnabled_0)
-		glDisableVertexAttribArray(0);
+	program->DisableInputs();
 }
 
 void AnimaRenderingManager::ForwardDrawAllModels(AnimaEngine* engine)
@@ -359,46 +328,13 @@ void AnimaRenderingManager::ForwardDrawModelMesh(AnimaEngine* engine, AnimaMesh*
 	bool bEnabled_1 = false;
 	bool bEnabled_2 = false;
 	bool bEnabled_3 = false;
-
-	glBindVertexArray(mesh->GetVertexArrayObject());
-
-	glBindBuffer(GL_ARRAY_BUFFER, mesh->GetVerticesBufferObject());
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	if (mesh->GetFloatVerticesNormalCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->GetNormalsBufferObject());
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_1 = true;
-	}
-
-	if (mesh->GetFloatVerticesTextureCoordCount() > 0)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTextureCoordsBufferObject());
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		bEnabled_2 = true;
-	}
-
+	
+	program->EnableInputs(mesh);
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
-
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
-	if (bEnabled_3)
-		glDisableVertexAttribArray(3);
-
-	if (bEnabled_2)
-		glDisableVertexAttribArray(2);
-
-	if (bEnabled_1)
-		glDisableVertexAttribArray(1);
-
-	if (bEnabled_0)
-		glDisableVertexAttribArray(0);
+	program->DisableInputs();
 }
 
 void AnimaRenderingManager::AmbientPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model)

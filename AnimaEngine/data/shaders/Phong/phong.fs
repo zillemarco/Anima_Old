@@ -6,6 +6,7 @@ const int MAX_SPOT_LIGHTS = 2;
 in vec2 frag_textureCoord;
 in vec3 frag_normal;
 in vec3 frag_worldPosition;
+noperspective in vec3 frag_dist;
 
 out vec4 fragColor;
 
@@ -45,6 +46,9 @@ struct SpotLight
 
 uniform sampler2D materialDiffuseTexture;
 uniform vec4 materialColor;
+
+uniform int wireframe;
+uniform vec4 edgesColor;
 
 uniform vec3 ambientLight;
 uniform DirectionalLight directionalLight;
@@ -142,5 +146,11 @@ void main()
 		if(spotLights[i].pointLight.base.intensity > 0.0)
 			totalLight += calcSpotLight(spotLights[i], normal);
 		
-	fragColor = color * totalLight;
+	float nearD = min(min(frag_dist[0], frag_dist[1]), frag_dist[2]);	
+	float edgeIntensity = exp2(-1.0 * nearD * nearD);
+	
+	if(wireframe == 1)	
+		fragColor = (edgeIntensity * edgesColor) + ((1.0 - edgeIntensity) * vec4(color * totalLight));
+	else
+		fragColor = vec4(color * totalLight);
 }

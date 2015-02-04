@@ -84,7 +84,7 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	if(!_engine->Initialize())
 		return false;
 
-	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera();
+	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
@@ -111,7 +111,7 @@ bool CorpusDocument::OpenDocument(QString path)
 	if(!_engine->Initialize())
 		return false;
 
-	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera();
+	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 

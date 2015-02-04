@@ -66,7 +66,7 @@ public:
 	virtual void CalculateViewMatrix() = 0;
 	virtual AnimaMatrix GetViewMatrix();
 
-	virtual void CalculateProjectionMatrix(float fov, float ratio, float zNear, float zFar);
+	virtual void CalculateProjectionMatrix(float fov, const AnimaVertex2f& size, float zNear, float zFar);
 	virtual void CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar);
 	virtual AnimaMatrix GetProjectionMatrix();
 	
@@ -75,6 +75,8 @@ public:
 
 	bool IsPerspectiveProjectionType();
 	bool IsOrthoProjectionType();
+
+	AnimaVertex2f GetWindowSize();
 
 protected:
 	AnimaVertex3f _position;
@@ -86,6 +88,8 @@ protected:
 	AnimaVertex3f _worldXAxis;
 	AnimaVertex3f _worldYAxis;
 	AnimaVertex3f _worldZAxis;
+
+	AnimaVertex2f _windowSize;
 	
 	bool _active;
 	AnimaCameraProjectionType _projectionType;

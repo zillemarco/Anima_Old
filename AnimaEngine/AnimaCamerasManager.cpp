@@ -25,8 +25,11 @@ AnimaCamerasManager::~AnimaCamerasManager()
 	ClearCameras();
 }
 
-AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera()
+AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const AnimaString& name)
 {
+	if (_camerasMap.find(name) != _camerasMap.end())
+		return nullptr;
+
 	ANIMA_ASSERT(_engine != nullptr);
 	if (_camerasNumber > 0)
 	{
@@ -53,11 +56,23 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera()
 	}
 	
 	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+
+	_camerasMap[name] = (AUint)(_camerasNumber - 1);
+
 	return (AnimaFirstPersonCamera*)_cameras[_camerasNumber - 1];
 }
 
-AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera()
+AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const char* name)
 {
+	AnimaString str(name, _engine);
+	return CreateNewFirstPersonCamera(str);
+}
+
+AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const AnimaString& name)
+{
+	if (_camerasMap.find(name) != _camerasMap.end())
+		return nullptr;
+
 	ANIMA_ASSERT(_engine != nullptr);
 	if (_camerasNumber > 0)
 	{
@@ -84,7 +99,16 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera()
 	}
 
 	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+
+	_camerasMap[name] = (AUint)(_camerasNumber - 1);
+
 	return (AnimaThirdPersonCamera*)_cameras[_camerasNumber - 1];
+}
+
+AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const char* name)
+{
+	AnimaString str(name, _engine);
+	return CreateNewThirdPersonCamera(str);
 }
 
 void AnimaCamerasManager::ClearCameras(bool bDeleteObjects, bool bResetNumber)
@@ -148,12 +172,12 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 	return nullptr;
 }
 
-void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, float ratio, float zNear, float zFar)
+void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar)
 {
 	for (ASizeT i = 0; i < _camerasNumber; i++)
 	{
 		if (_cameras[i]->IsPerspectiveProjectionType())
-			_cameras[i]->CalculateProjectionMatrix(fov, ratio, zNear, zFar);
+			_cameras[i]->CalculateProjectionMatrix(fov, size, zNear, zFar);
 	}
 }
 
@@ -164,6 +188,25 @@ void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bott
 		if (_cameras[i]->IsOrthoProjectionType())
 			_cameras[i]->CalculateProjectionMatrix(left, right, bottom, top, zNear, zFar);
 	}
+}
+
+AnimaCamera* AnimaCamerasManager::GetCamera(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _camerasNumber);
+	return _cameras[index];
+}
+
+AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)
+{
+	if (_camerasMap.find(name) == _camerasMap.end())
+		return nullptr;
+	return GetCamera(_camerasMap[name]);
+}
+
+AnimaCamera* AnimaCamerasManager::GetCameraFromName(const char* name)
+{
+	AnimaString str(name, _engine);
+	return GetCameraFromName(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

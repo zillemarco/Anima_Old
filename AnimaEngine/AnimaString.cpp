@@ -14,7 +14,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaString::AnimaString(AnimaEngine* engine)
 {
-	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
 	
 	_string = nullptr;
@@ -23,7 +22,6 @@ AnimaString::AnimaString(AnimaEngine* engine)
 
 AnimaString::AnimaString(const char* src, AnimaEngine* engine)
 {
-	ANIMA_ASSERT(engine != nullptr);
 	_engine = engine;
 	
 	_string = nullptr;
@@ -132,7 +130,7 @@ void AnimaString::SetString(const char* str)
 
 void AnimaString::ClearString()
 {
-	if(_string != nullptr && _stringLength > 0)
+	if(_engine != nullptr && _string != nullptr && _stringLength > 0)
 	{
 		AnimaAllocatorNamespace::DeallocateArray<AChar>(*(_engine->GetStringAllocator()), _string);
 		_string = nullptr;
@@ -190,6 +188,7 @@ ASizeT AnimaString::GetBufferLength() const
 
 AnimaString& AnimaString::operator+=(const AnimaString& src)
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	ASizeT newStringLength = (this->_stringLength - 1) + (src._stringLength - 1) + 1;
 	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), newStringLength);
 	AChar* tmp = newString;
@@ -212,6 +211,7 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 
 AnimaString& AnimaString::operator+=(const char* src)
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	ASizeT newStringLength = (this->_stringLength - 1) + strlen(src) + 1;
 	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), newStringLength);
 	AChar* tmp = newString;
@@ -367,6 +367,7 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 
 AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	if(startPos < 0)
 		startPos = 0;
 	
@@ -456,6 +457,7 @@ void AnimaString::Replace(AChar find, AChar replacement, AInt startPos, AInt cou
 
 void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AInt count)
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = strlen(replacement);
@@ -495,6 +497,7 @@ void AnimaString::Replace(AChar find, const AnimaString& replacement, AInt start
 
 void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AInt count)
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = 1;
@@ -529,6 +532,7 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 
 void AnimaString::Replace(const char* find, const char* replacement, AInt startPos, AInt count)
 {
+	ANIMA_ASSERT(_engine != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = strlen(replacement);

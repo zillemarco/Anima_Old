@@ -7,6 +7,7 @@
 #include "AnimaShader.h"
 #include "AnimaVertex.h"
 #include "AnimaMatrix.h"
+#include "AnimaMesh.h"
 #include <boost\unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -36,6 +37,19 @@ public:
 	struct AnimaUniformInfo {
 		AInt _location;
 		AUint _type;
+		AnimaString _name;
+	};
+
+	struct AnimaInputInfo {
+		AInt _location;
+		AUint _type;
+		AnimaString _name;
+	};
+
+	struct AnimaOutputInfo {
+		AInt _location;
+		AUint _type;
+		AnimaString _name;
 	};
 
 public:
@@ -70,10 +84,15 @@ public:
 public:
 	void ScanVariables();
 
+	void EnableInputs(AnimaMesh* mesh);
+	void DisableInputs();
+
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
 	void SetUniformf(const AnimaString& uniformName, AFloat value);
 	void SetUniformf(const char* uniformName, AFloat value);
+	void SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value);
+	void SetUniform(const char* uniformName, const AnimaVertex2f& value);
 	void SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value);
 	void SetUniform(const char* uniformName, const AnimaVertex3f& value);
 	void SetUniform(const AnimaString& uniformName, const AnimaColor4f& value);
@@ -82,8 +101,8 @@ public:
 	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c);
 	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
-	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value);
-	void SetUniform(const char* uniformName, const AnimaMatrix& value);
+	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose = false);
+	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
 	
 private:
 	AnimaEngine*	_engine;
@@ -95,6 +114,8 @@ private:
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaString::Hasher> _uniforms;
+	boost::unordered_map<AnimaString, AnimaInputInfo, AnimaString::Hasher> _inputs;
+	boost::unordered_map<AnimaString, AnimaOutputInfo, AnimaString::Hasher> _outputs;
 #pragma warning (default: 4251) 
 
 	AInt			_id;

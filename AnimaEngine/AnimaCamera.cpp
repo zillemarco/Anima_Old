@@ -223,10 +223,11 @@ AnimaMatrix AnimaCamera::GetProjectionMatrix()
 	return _projectionMatrix;
 }
 
-void AnimaCamera::CalculateProjectionMatrix(float fov, float ratio, float zNear, float zFar)
+void AnimaCamera::CalculateProjectionMatrix(float fov, const AnimaVertex2f& size, float zNear, float zFar)
 {
+	_windowSize = size;
 	_projectionMatrix.SetIdentity();
-	_projectionMatrix.Perspective(fov, ratio, zNear, zFar);
+	_projectionMatrix.Perspective(fov, size.x / size.y, zNear, zFar);
 	_projectionType = PERSPECTIVE;
 }
 
@@ -245,6 +246,11 @@ bool AnimaCamera::IsPerspectiveProjectionType()
 bool AnimaCamera::IsOrthoProjectionType()
 {
 	return _projectionType == ORTHO;
+}
+
+AnimaVertex2f AnimaCamera::GetWindowSize()
+{
+	return _windowSize;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

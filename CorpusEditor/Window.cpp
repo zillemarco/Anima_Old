@@ -51,7 +51,7 @@ void Window::DrawScene()
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
 	renderingManager.Start(GetEngine());
-	renderingManager.ForwardDrawAllModels(GetEngine());
+	renderingManager.DrawAllModels(GetEngine());
 	renderingManager.Finish(GetEngine());
 
 	SwapBuffers();
@@ -64,7 +64,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
-		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
+		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
 	}
 	else
 	{
@@ -154,6 +154,8 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 		window->SetWindowTitle("press");
 	else if (action == ANIMA_ENGINE_RELEASE)
 		window->SetWindowTitle("release");
+
+	((Window*)window)->DrawScene();
 }
 
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
@@ -169,32 +171,35 @@ void Window::Load()
 	mgr->CreateProgram("phong");
 	mgr->GetProgramFromName("phong")->Create();
 	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-cs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.cs", Anima::AnimaShader::TESSELLATION_CONTROL));
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-es", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.es", Anima::AnimaShader::TESSELLATION_EVALUATION));
+	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-gs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.gs", Anima::AnimaShader::GEOMETRY));
 	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("phong")->Link();
 
-	mgr->CreateProgram("forward-ambient");
-	mgr->GetProgramFromName("forward-ambient")->Create();
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-ambient")->Link();
+	//mgr->CreateProgram("forward-ambient");
+	//mgr->GetProgramFromName("forward-ambient")->Create();
+	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.fs", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-ambient")->Link();
 
-	mgr->CreateProgram("forward-directional");
-	mgr->GetProgramFromName("forward-directional")->Create();
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-directional")->Link();
+	//mgr->CreateProgram("forward-directional");
+	//mgr->GetProgramFromName("forward-directional")->Create();
+	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.vs", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.fs", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-directional")->Link();
 
-	mgr->CreateProgram("forward-point");
-	mgr->GetProgramFromName("forward-point")->Create();
-	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-point")->Link();
+	//mgr->CreateProgram("forward-point");
+	//mgr->GetProgramFromName("forward-point")->Create();
+	//mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.vs", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.fs", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-point")->Link();
 
-	mgr->CreateProgram("forward-spot");
-	mgr->GetProgramFromName("forward-spot")->Create();
-	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-spot")->Link();
+	//mgr->CreateProgram("forward-spot");
+	//mgr->GetProgramFromName("forward-spot")->Create();
+	//mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.vs", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-spot")->Link();
 
 	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
 	texture->Load();
