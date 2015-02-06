@@ -122,7 +122,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	return *this;
 }
 
-bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
+inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
@@ -141,7 +141,7 @@ bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	return true;
 }
 
-bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
+inline bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
@@ -430,66 +430,114 @@ void AnimaShaderProgram::ScanVariables()
 	_outputs.clear();
 
 	GLint numActiveUniforms = 0;
-	glGetProgramInterfaceiv(_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
-
-	const int propertiesSize = 4;
-
-	AnimaString name(_engine);
-	GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
-	GLint values[propertiesSize];
-
-	for (int i = 0; i < numActiveUniforms; i++)
-	{
-		glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
-
-		name.Reserve(values[0] - 1);
-		glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
-
-		AnimaUniformInfo info;
-		info._arraySize = values[3];
-		info._location = values[2];
-		info._type = values[1];
-		info._name = name;
-
-		_uniforms[name] = info;
-	}
-
-	GLint numActiveInputs = 0;
-	glGetProgramInterfaceiv(_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveInputs);
-
-	for (int i = 0; i < numActiveInputs; i++)
-	{
-		glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
-
-		name.Reserve(values[0] - 1);
-		glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0], NULL, name.GetBuffer());
-
-		AnimaInputInfo info;
-		info._location = values[2];
-		info._type = values[1];
-		info._name = name;
-
-		_inputs[name] = info;
-	}
-
 	GLint numActiveOutputs = 0;
-	glGetProgramInterfaceiv(_id, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &numActiveOutputs);
+	GLint numActiveInputs = 0;
 
-	for (int i = 0; i < numActiveOutputs; i++)
+	if (GLEW_ARB_program_interface_query)
 	{
-		glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+		glGetProgramInterfaceiv(_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+		glGetProgramInterfaceiv(_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveInputs);
+		glGetProgramInterfaceiv(_id, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &numActiveOutputs);
 
-		name.Reserve(values[0] - 1);
-		glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0], NULL, name.GetBuffer());
+		const int propertiesSize = 4;
 
-		AnimaOutputInfo info;
-		info._location = values[2];
-		info._type = values[1];
-		info._name = name;
+		AnimaString name(_engine);
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
+		GLint values[propertiesSize];
 
-		_outputs[name] = info;
+		for (int i = 0; i < numActiveUniforms; i++)
+		{
+			glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
+
+			AnimaUniformInfo info;
+			info._arraySize = values[3];
+			info._location = values[2];
+			info._type = values[1];
+			info._name = name;
+
+			_uniforms[name] = info;
+		}
+
+		for (int i = 0; i < numActiveInputs; i++)
+		{
+			glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0], NULL, name.GetBuffer());
+
+			AnimaInputInfo info;
+			info._location = values[2];
+			info._type = values[1];
+			info._name = name;
+
+			_inputs[name] = info;
+		}
+
+		for (int i = 0; i < numActiveOutputs; i++)
+		{
+			glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
+
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0], NULL, name.GetBuffer());
+
+			AnimaOutputInfo info;
+			info._location = values[2];
+			info._type = values[1];
+			info._name = name;
+
+			_outputs[name] = info;
+		}
 	}
-	
+	else
+	{
+		glGetProgramiv(_id, GL_ACTIVE_UNIFORMS, &numActiveUniforms);
+		glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveInputs);
+		//glGetProgramiv(_id, GL_ACTIVE_RESOURCES, &numActiveOutputs);
+
+		AnimaString name(_engine);
+		AnimaString tmp(_engine);
+		GLenum type;
+		GLsizei bufLen;
+		GLsizei elements;
+		GLint location;
+
+		tmp.Reserve(200);
+
+		for (int i = 0; i < numActiveUniforms; i++)
+		{
+			glGetActiveUniform(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
+			name.Reserve(bufLen);
+			name.SetString(tmp.GetBuffer());
+
+			AnimaUniformInfo info;
+			info._arraySize = elements;
+			info._location = i;
+			info._type = type;
+			info._name = name;
+
+			_uniforms[name] = info;
+		}
+
+		for (int i = 0; i < numActiveInputs; i++)
+		{
+			glGetActiveAttrib(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
+			name.Reserve(bufLen);
+			name.SetString(tmp.GetBuffer());
+			
+			location = glGetAttribLocation(_id, name.GetConstBuffer());
+
+			AnimaInputInfo info;
+			info._location = location;
+			info._type = type;
+			info._name = name;
+
+			_inputs[name] = info;
+		}
+	}
+		
 	_maxPointLights = 0;
 	_maxSpotLights = 0;
 
@@ -842,6 +890,11 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
 	if (lightsCount <= 0)
 		return;
 
+	bool hasAmbientLight = lightsManager->GetAmbientLightsCount() > 0;
+	bool hasDirectionalLights = lightsManager->GetDirectionalLightsCount() > 0;
+	bool hasPointLights = lightsManager->GetPointLightsCount() > 0;
+	bool hasSpotLights = lightsManager->GetSpotLightsCount() > 0;
+	
 	int nextPointLight = 0;
 	int nextSpotLight = 0;
 
