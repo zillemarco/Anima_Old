@@ -88,16 +88,13 @@ int main(int argc, char** argv)
 	engine.Initialize();
 			
 #if defined _MSC_VER
-	Anima::AnimaString path2("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
-	Anima::AChar tmpFileName[PATH_MAX];
-	sprintf(tmpFileName, "log.log");
-	Anima::AnimaEngine::SetLogFilePath(tmpFileName);
+	Anima::AnimaString path("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
 #else
-	Anima::AnimaString path("/Users/marco/Documents/Modelli/Big_Dragon/Big_Dragon.fbx", &engine);
+	Anima::AnimaString path("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
 #endif
 	
 	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	if (!manager->LoadModel(path2, "scimmia"))
+	if (!manager->LoadModel(path, "scimmia"))
 		return 0;
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);

@@ -205,51 +205,51 @@ public:
 	AFloat Length2() const;
 };
 
-inline AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex2f &a, const AnimaVertex2f &b);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex2f &v);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex2f &v, const float param);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex2f &a, const AnimaVertex2f &b);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex2f &v);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex2f &v, const float param);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex2f &a, const AnimaVertex2f &b);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex2f &v);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex2f &v, const float param);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex2f &a, const AnimaVertex2f &b);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex2f &v);
-inline AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex2f &v, const float param);
+AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex2f &a, const AnimaVertex2f &b);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex2f &v);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex2f &v, const float param);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex2f &a, const AnimaVertex2f &b);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex2f &v);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex2f &v, const float param);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex2f &a, const AnimaVertex2f &b);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex2f &v);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex2f &v, const float param);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex2f &a, const AnimaVertex2f &b);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex2f &v);
+AnimaVertex2f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex2f &v, const float param);
 
-inline AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex3f &a, const AnimaVertex3f &b);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex3f &v);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex3f &v, const float param);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex3f &a, const AnimaVertex3f &b);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex3f &v);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex3f &v, const float param);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex3f &a, const AnimaVertex3f &b);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex3f &v);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex3f &v, const float param);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex3f &a, const AnimaVertex3f &b);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex3f &v);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex3f &v, const float param);
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT operator ^ (const AnimaVertex3f &a, const AnimaVertex3f &b);
+AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex3f &a, const AnimaVertex3f &b);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex3f &v);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex3f &v, const float param);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex3f &a, const AnimaVertex3f &b);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex3f &v);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex3f &v, const float param);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex3f &a, const AnimaVertex3f &b);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex3f &v);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex3f &v, const float param);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex3f &a, const AnimaVertex3f &b);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex3f &v);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex3f &v, const float param);
+AnimaVertex3f ANIMA_ENGINE_EXPORT operator ^ (const AnimaVertex3f &a, const AnimaVertex3f &b);
 
-inline AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex4f &a, const AnimaVertex4f &b);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex4f &v);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex4f &v, const float param);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex4f &a, const AnimaVertex4f &b);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex4f &v);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex4f &v, const float param);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex4f &a, const AnimaVertex4f &b);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex4f &v);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex4f &v, const float param);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex4f &a, const AnimaVertex4f &b);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex4f &v);
-inline AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex4f &v, const float param);
+AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex4f &a, const AnimaVertex4f &b);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator * (const float param, const AnimaVertex4f &v);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator * (const AnimaVertex4f &v, const float param);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex4f &a, const AnimaVertex4f &b);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const float param, const AnimaVertex4f &v);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator / (const AnimaVertex4f &v, const float param);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex4f &a, const AnimaVertex4f &b);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const float param, const AnimaVertex4f &v);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator - (const AnimaVertex4f &v, const float param);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex4f &a, const AnimaVertex4f &b);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const float param, const AnimaVertex4f &v);
+AnimaVertex4f ANIMA_ENGINE_EXPORT operator + (const AnimaVertex4f &v, const float param);
 
-inline float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex2f &a, const AnimaVertex2f &b);
-inline float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex3f &a, const AnimaVertex3f &b);
-inline float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex4f &a, const AnimaVertex4f &b);
+float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex2f &a, const AnimaVertex2f &b);
+float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex3f &a, const AnimaVertex3f &b);
+float ANIMA_ENGINE_EXPORT Dot(const AnimaVertex4f &a, const AnimaVertex4f &b);
 
-inline AnimaVertex3f ANIMA_ENGINE_EXPORT Cross(const AnimaVertex3f &a, const AnimaVertex3f &b);
+AnimaVertex3f ANIMA_ENGINE_EXPORT Cross(const AnimaVertex3f &a, const AnimaVertex3f &b);
 
 END_ANIMA_ENGINE_NAMESPACE
 

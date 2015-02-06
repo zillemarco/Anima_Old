@@ -16,8 +16,8 @@
 
 CorpusOGLWindowBase::CorpusOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
 : QWindow(parent)
-, _updatePending(false)
 , _animating(true)
+, _updatePending(false)
 , _context(nullptr)
 , _device(nullptr)
 , _engine(engine)

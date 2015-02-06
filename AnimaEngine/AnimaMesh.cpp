@@ -91,7 +91,9 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _textureCoordsNumber(src._textureCoordsNumber)
 	, _faces(src._faces)
 	, _facesNumber(src._facesNumber)
+	, _material(src._material)
 	, _meshName(src._meshName)
+	, _parentModel(src._parentModel)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
@@ -100,8 +102,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
 	, _engine(src._engine)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
-	, _material(src._material)
-	, _parentModel(src._parentModel)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;

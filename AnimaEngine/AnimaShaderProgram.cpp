@@ -122,7 +122,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	return *this;
 }
 
-inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
+bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
@@ -141,7 +141,7 @@ inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	return true;
 }
 
-inline bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
+bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
@@ -842,11 +842,6 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
 	if (lightsCount <= 0)
 		return;
 
-	bool hasAmbientLight = lightsManager->GetAmbientLightsCount() > 0;
-	bool hasDirectionalLights = lightsManager->GetDirectionalLightsCount() > 0;
-	bool hasPointLights = lightsManager->GetPointLightsCount() > 0;
-	bool hasSpotLights = lightsManager->GetSpotLightsCount() > 0;
-	
 	int nextPointLight = 0;
 	int nextSpotLight = 0;
 

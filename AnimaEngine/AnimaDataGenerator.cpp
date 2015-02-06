@@ -78,13 +78,13 @@ void AnimaDataGenerator::SetColor(AFloat r, AFloat g, AFloat b)
 AnimaColor3f AnimaDataGenerator::GetColor3f()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaColor3f();
 }
 
 AnimaColor4f AnimaDataGenerator::GetColor4f()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaColor4f();
 }
 
 void AnimaDataGenerator::SetVector(const AnimaVertex2f& color)
@@ -120,19 +120,19 @@ void AnimaDataGenerator::SetVector(AFloat x, AFloat y, AFloat z, AFloat w)
 AnimaVertex2f AnimaDataGenerator::GetVector2f()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaVertex2f();
 }
 
 AnimaVertex3f AnimaDataGenerator::GetVector3f()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaVertex3f();
 }
 
 AnimaVertex4f AnimaDataGenerator::GetVector4f()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaVertex4f();
 }
 
 void AnimaDataGenerator::StopValueUpdate()

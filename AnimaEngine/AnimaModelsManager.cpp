@@ -252,11 +252,11 @@ ASizeT AnimaModelsManager::GetModelsNumber()
 	return _modelsNumber;
 }
 
-AnimaModel AnimaModelsManager::GetModel(ASizeT index)
-{
-	ANIMA_ASSERT(index >= 0 && index < _modelsNumber);
-	return _models[index];
-}
+//AnimaModel AnimaModelsManager::GetModel(ASizeT index)
+//{
+//	ANIMA_ASSERT(index >= 0 && index < _modelsNumber);
+//	return _models[index];
+//}
 
 AnimaModel* AnimaModelsManager::GetPModel(ASizeT index)
 {
@@ -284,18 +284,18 @@ ASizeT AnimaModelsManager::GetNextModelID()
 	return _nextModelID++;
 }
 
-AnimaModel AnimaModelsManager::GetModelFromName(const AnimaString& name)
-{
-	if (_modelsMap.find(name) == _modelsMap.end())
-		return nullptr;
-	return GetModel((ASizeT)_modelsMap[name]);
-}
-
-AnimaModel AnimaModelsManager::GetModelFromName(const char* name)
-{
-	AnimaString str(name, _engine);
-	return GetModelFromName(str);
-}
+//AnimaModel AnimaModelsManager::GetModelFromName(const AnimaString& name)
+//{
+//	if (_modelsMap.find(name) == _modelsMap.end())
+//		return nullptr;
+//	return GetModel((ASizeT)_modelsMap[name]);
+//}
+//
+//AnimaModel AnimaModelsManager::GetModelFromName(const char* name)
+//{
+//	AnimaString str(name, _engine);
+//	return GetModelFromName(str);
+//}
 
 AnimaModel* AnimaModelsManager::GetPModelFromName(const AnimaString& name)
 {

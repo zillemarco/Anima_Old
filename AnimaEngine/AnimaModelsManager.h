@@ -40,10 +40,10 @@ public:
 
 	ASizeT GetModelsNumber();
 
-	AnimaModel GetModel(ASizeT index);
+//	AnimaModel GetModel(ASizeT index);
 	AnimaModel* GetPModel(ASizeT index);
-	AnimaModel GetModelFromName(const AnimaString& name);
-	AnimaModel GetModelFromName(const char* name);
+//	AnimaModel GetModelFromName(const AnimaString& name);
+//	AnimaModel GetModelFromName(const char* name);
 	AnimaModel* GetPModelFromName(const AnimaString& name);
 	AnimaModel* GetPModelFromName(const char* name);
 	

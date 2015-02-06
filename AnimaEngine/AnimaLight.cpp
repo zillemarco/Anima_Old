@@ -77,7 +77,7 @@ void AnimaLight::SetDirection(AFloat x, AFloat y, AFloat z)
 AnimaColor3f AnimaLight::GetColor()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaColor3f();
 }
 
 AFloat AnimaLight::GetIntensity()
@@ -89,7 +89,7 @@ AFloat AnimaLight::GetIntensity()
 AnimaVertex3f AnimaLight::GetDirection()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaVertex3f();
 }
 
 void AnimaLight::SetPosition(const AnimaVertex3f& position)
@@ -105,7 +105,7 @@ void AnimaLight::SetPosition(AFloat x, AFloat y, AFloat z)
 AnimaVertex3f AnimaLight::GetPosition()
 {
 	ANIMA_ASSERT(false);
-	return nullptr;
+	return AnimaVertex3f();
 }
 
 void AnimaLight::SetConstantAttenuation(AFloat attenuation)

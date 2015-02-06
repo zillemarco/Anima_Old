@@ -11,7 +11,7 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
-#include <boost\unordered_map.hpp>
+#include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -65,8 +65,8 @@ public:
 	AnimaShaderProgram& operator=(const AnimaShaderProgram& src);
 	AnimaShaderProgram& operator=(AnimaShaderProgram&& src);
 
-	inline bool operator==(const AnimaShaderProgram& left);
-	inline bool operator!=(const AnimaShaderProgram& left);
+	bool operator==(const AnimaShaderProgram& left);
+	bool operator!=(const AnimaShaderProgram& left);
 
 public:
 	void AddShader(AnimaShader* shader);

@@ -704,207 +704,207 @@ AFloat AnimaVertex4f::Length2() const
 	return vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3];
 }
 
-inline AFloat operator * (const AnimaVertex2f &a, const AnimaVertex2f &b)
+AFloat operator * (const AnimaVertex2f &a, const AnimaVertex2f &b)
 {
 	return Dot(a, b);
 }
 
-inline AnimaVertex2f operator * (const float param, const AnimaVertex2f &v)
+AnimaVertex2f operator * (const float param, const AnimaVertex2f &v)
 {
 	return AnimaVertex2f(v.vec[0] * param, v.vec[1] * param);
 }
 
-inline AnimaVertex2f operator * (const AnimaVertex2f &v, const float param)
+AnimaVertex2f operator * (const AnimaVertex2f &v, const float param)
 {
 	return AnimaVertex2f(v.vec[0] * param, v.vec[1] * param);
 }
 
-inline AnimaVertex2f operator / (const AnimaVertex2f &a, const AnimaVertex2f &b)
+AnimaVertex2f operator / (const AnimaVertex2f &a, const AnimaVertex2f &b)
 {
 	return AnimaVertex2f(a.vec[0] / b.vec[0], a.vec[1] / b.vec[1]);
 }
 
-inline AnimaVertex2f operator / (const float param, const AnimaVertex2f &v)
+AnimaVertex2f operator / (const float param, const AnimaVertex2f &v)
 {
 	return AnimaVertex2f(param / v.vec[0], param / v.vec[1]);
 }
 
-inline AnimaVertex2f operator / (const AnimaVertex2f &v, const float param)
+AnimaVertex2f operator / (const AnimaVertex2f &v, const float param)
 {
 	return AnimaVertex2f(v.vec[0] / param, v.vec[1] / param);
 }
 
-inline AnimaVertex2f operator - (const AnimaVertex2f &a, const AnimaVertex2f &b)
+AnimaVertex2f operator - (const AnimaVertex2f &a, const AnimaVertex2f &b)
 {
 	return AnimaVertex2f(a.vec[0] - b.vec[0], a.vec[1] - b.vec[1]);
 }
 
-inline AnimaVertex2f operator - (const float param, const AnimaVertex2f &v)
+AnimaVertex2f operator - (const float param, const AnimaVertex2f &v)
 {
 	return AnimaVertex2f(param - v.vec[0], param - v.vec[1]);
 }
 
-inline AnimaVertex2f operator - (const AnimaVertex2f &v, const float param)
+AnimaVertex2f operator - (const AnimaVertex2f &v, const float param)
 {
 	return AnimaVertex2f(v.vec[0] - param, v.vec[1] - param);
 }
 
-inline AnimaVertex2f operator + (const AnimaVertex2f &a, const AnimaVertex2f &b)
+AnimaVertex2f operator + (const AnimaVertex2f &a, const AnimaVertex2f &b)
 {
 	return AnimaVertex2f(a.vec[0] + b.vec[0], a.vec[1] + b.vec[1]);
 }
 
-inline AnimaVertex2f operator + (const float param, const AnimaVertex2f &v)
+AnimaVertex2f operator + (const float param, const AnimaVertex2f &v)
 {
 	return AnimaVertex2f(param + v.vec[0], param + v.vec[1]);
 }
 
-inline AnimaVertex2f operator + (const AnimaVertex2f &v, const float param)
+AnimaVertex2f operator + (const AnimaVertex2f &v, const float param)
 {
 	return AnimaVertex2f(v.vec[0] + param, v.vec[1] + param);
 }
 
-inline AFloat operator * (const AnimaVertex3f &a, const AnimaVertex3f &b)
+AFloat operator * (const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return Dot(a, b);
 }
 
-inline AnimaVertex3f operator * (const float param, const AnimaVertex3f &v)
+AnimaVertex3f operator * (const float param, const AnimaVertex3f &v)
 {
 	return AnimaVertex3f(v.vec[0] * param, v.vec[1] * param, v.vec[2] * param);
 }
 
-inline AnimaVertex3f operator * (const AnimaVertex3f &v, const float param)
+AnimaVertex3f operator * (const AnimaVertex3f &v, const float param)
 {
 	return AnimaVertex3f(v.vec[0] * param, v.vec[1] * param, v.vec[2] * param);
 }
 
-inline AnimaVertex3f operator / (const AnimaVertex3f &a, const AnimaVertex3f &b)
+AnimaVertex3f operator / (const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return AnimaVertex3f(a.vec[0] / b.vec[0], a.vec[1] / b.vec[1], a.vec[2] / b.vec[2]);
 }
 
-inline AnimaVertex3f operator / (const float param, const AnimaVertex3f &v)
+AnimaVertex3f operator / (const float param, const AnimaVertex3f &v)
 {
 	return AnimaVertex3f(param / v.vec[0], param / v.vec[1], param / v.vec[2]);
 }
 
-inline AnimaVertex3f operator / (const AnimaVertex3f &v, const float param)
+AnimaVertex3f operator / (const AnimaVertex3f &v, const float param)
 {
 	return AnimaVertex3f(v.vec[0] / param, v.vec[1] / param, v.vec[2] / param);
 }
 
-inline AnimaVertex3f operator - (const AnimaVertex3f &a, const AnimaVertex3f &b)
+AnimaVertex3f operator - (const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return AnimaVertex3f(a.vec[0] - b.vec[0], a.vec[1] - b.vec[1], a.vec[2] - b.vec[2]);
 }
 
-inline AnimaVertex3f operator - (const float param, const AnimaVertex3f &v)
+AnimaVertex3f operator - (const float param, const AnimaVertex3f &v)
 {
 	return AnimaVertex3f(param - v.vec[0], param - v.vec[1], param - v.vec[2]);
 }
 
-inline AnimaVertex3f operator - (const AnimaVertex3f &v, const float param)
+AnimaVertex3f operator - (const AnimaVertex3f &v, const float param)
 {
 	return AnimaVertex3f(v.vec[0] - param, v.vec[1] - param, v.vec[2] - param);
 }
 
-inline AnimaVertex3f operator + (const AnimaVertex3f &a, const AnimaVertex3f &b)
+AnimaVertex3f operator + (const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return AnimaVertex3f(a.vec[0] + b.vec[0], a.vec[1] + b.vec[1], a.vec[2] + b.vec[2]);
 }
 
-inline AnimaVertex3f operator + (const float param, const AnimaVertex3f &v)
+AnimaVertex3f operator + (const float param, const AnimaVertex3f &v)
 {
 	return AnimaVertex3f(param + v.vec[0], param + v.vec[1], param + v.vec[2]);
 }
 
-inline AnimaVertex3f operator + (const AnimaVertex3f &v, const float param)
+AnimaVertex3f operator + (const AnimaVertex3f &v, const float param)
 {
 	return AnimaVertex3f(v.vec[0] + param, v.vec[1] + param, v.vec[2] + param);
 }
 
-inline AnimaVertex3f operator ^ (const AnimaVertex3f &a, const AnimaVertex3f &b)
+AnimaVertex3f operator ^ (const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return Cross(a, b);
 }
 
-inline AFloat operator * (const AnimaVertex4f &a, const AnimaVertex4f &b)
+AFloat operator * (const AnimaVertex4f &a, const AnimaVertex4f &b)
 {
 	return Dot(a, b);
 }
 
-inline AnimaVertex4f operator * (const float param, const AnimaVertex4f &v)
+AnimaVertex4f operator * (const float param, const AnimaVertex4f &v)
 {
 	return AnimaVertex4f(v.vec[0] * param, v.vec[1] * param, v.vec[2] * param, v.vec[3] * param);
 }
 
-inline AnimaVertex4f operator * (const AnimaVertex4f &v, const float param)
+AnimaVertex4f operator * (const AnimaVertex4f &v, const float param)
 {
 	return AnimaVertex4f(v.vec[0] * param, v.vec[1] * param, v.vec[2] * param, v.vec[3] * param);
 }
 
-inline AnimaVertex4f operator / (const AnimaVertex4f &a, const AnimaVertex4f &b)
+AnimaVertex4f operator / (const AnimaVertex4f &a, const AnimaVertex4f &b)
 {
 	return AnimaVertex4f(a.vec[0] / b.vec[0], a.vec[1] / b.vec[1], a.vec[2] / b.vec[2], a.vec[3] / b.vec[3]);
 }
 
-inline AnimaVertex4f operator / (const float param, const AnimaVertex4f &v)
+AnimaVertex4f operator / (const float param, const AnimaVertex4f &v)
 {
 	return AnimaVertex4f(param / v.vec[0], param / v.vec[1], param / v.vec[2], param / v.vec[3]);
 }
 
-inline AnimaVertex4f operator / (const AnimaVertex4f &v, const float param)
+AnimaVertex4f operator / (const AnimaVertex4f &v, const float param)
 {
 	return AnimaVertex4f(v.vec[0] / param, v.vec[1] / param, v.vec[2] / param, v.vec[3] / param);
 }
 
-inline AnimaVertex4f operator - (const AnimaVertex4f &a, const AnimaVertex4f &b)
+AnimaVertex4f operator - (const AnimaVertex4f &a, const AnimaVertex4f &b)
 {
 	return AnimaVertex4f(a.vec[0] - b.vec[0], a.vec[1] - b.vec[1], a.vec[2] - b.vec[2], a.vec[3] - b.vec[3]);
 }
 
-inline AnimaVertex4f operator - (const float param, const AnimaVertex4f &v)
+AnimaVertex4f operator - (const float param, const AnimaVertex4f &v)
 {
 	return AnimaVertex4f(param - v.vec[0], param - v.vec[1], param - v.vec[2], param - v.vec[3]);
 }
 
-inline AnimaVertex4f operator - (const AnimaVertex4f &v, const float param)
+AnimaVertex4f operator - (const AnimaVertex4f &v, const float param)
 {
 	return AnimaVertex4f(v.vec[0] - param, v.vec[1] - param, v.vec[2] - param, v.vec[3] - param);
 }
 
-inline AnimaVertex4f operator + (const AnimaVertex4f &a, const AnimaVertex4f &b)
+AnimaVertex4f operator + (const AnimaVertex4f &a, const AnimaVertex4f &b)
 {
 	return AnimaVertex4f(a.vec[0] + b.vec[0], a.vec[1] + b.vec[1], a.vec[2] + b.vec[2], a.vec[3] + b.vec[3]);
 }
 
-inline AnimaVertex4f operator + (const float param, const AnimaVertex4f &v)
+AnimaVertex4f operator + (const float param, const AnimaVertex4f &v)
 {
 	return AnimaVertex4f(param + v.vec[0], param + v.vec[1], param + v.vec[2], param + v.vec[3]);
 }
 
-inline AnimaVertex4f operator + (const AnimaVertex4f &v, const float param)
+AnimaVertex4f operator + (const AnimaVertex4f &v, const float param)
 {
 	return AnimaVertex4f(v.vec[0] + param, v.vec[1] + param, v.vec[2] + param, v.vec[3] + param);
 }
 
-inline float Dot(const AnimaVertex2f &a, const AnimaVertex2f &b)
+float Dot(const AnimaVertex2f &a, const AnimaVertex2f &b)
 {
 	return a.vec[0] * b.vec[0] + a.vec[1] * b.vec[1];
 }
 
-inline float Dot(const AnimaVertex3f &a, const AnimaVertex3f &b)
+float Dot(const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return a.vec[0] * b.vec[0] + a.vec[1] * b.vec[1] + a.vec[2] * b.vec[2];
 }
 
-inline float Dot(const AnimaVertex4f &a, const AnimaVertex4f &b)
+float Dot(const AnimaVertex4f &a, const AnimaVertex4f &b)
 {
 	return a.vec[0] * b.vec[0] + a.vec[1] * b.vec[1] + a.vec[2] * b.vec[2] + a.vec[3] * b.vec[3];
 }
 
-inline AnimaVertex3f Cross(const AnimaVertex3f &a, const AnimaVertex3f &b)
+AnimaVertex3f Cross(const AnimaVertex3f &a, const AnimaVertex3f &b)
 {
 	return AnimaVertex3f(	a.vec[1] * b.vec[2] - a.vec[2] * b.vec[1],
 							a.vec[2] * b.vec[0] - a.vec[0] * b.vec[2],
