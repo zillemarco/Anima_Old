@@ -122,7 +122,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	return *this;
 }
 
-inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
+bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
@@ -141,7 +141,7 @@ inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	return true;
 }
 
-inline bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
+bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
@@ -511,10 +511,12 @@ void AnimaShaderProgram::ScanVariables()
 			glGetActiveUniform(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
 			name.Reserve(bufLen);
 			name.SetString(tmp.GetBuffer());
+			
+			location = glGetUniformLocation(_id, name.GetConstBuffer());
 
 			AnimaUniformInfo info;
 			info._arraySize = elements;
-			info._location = i;
+			info._location = location;
 			info._type = type;
 			info._name = name;
 
@@ -690,7 +692,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaEngine* engine, AnimaCamera*
 	if (_uniforms.find(str) != end)
 	{
 		info = _uniforms[str];
-
+		
 		if (info._type == GL_FLOAT_MAT4)
 			SetUniform(info._name, camera->GetProjectionMatrix() * camera->GetViewMatrix());
 		else
@@ -890,11 +892,6 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
 	if (lightsCount <= 0)
 		return;
 
-	bool hasAmbientLight = lightsManager->GetAmbientLightsCount() > 0;
-	bool hasDirectionalLights = lightsManager->GetDirectionalLightsCount() > 0;
-	bool hasPointLights = lightsManager->GetPointLightsCount() > 0;
-	bool hasSpotLights = lightsManager->GetSpotLightsCount() > 0;
-	
 	int nextPointLight = 0;
 	int nextSpotLight = 0;
 

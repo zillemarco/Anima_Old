@@ -51,7 +51,7 @@ void Window::DrawScene()
 	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
 
 	renderingManager.Start(GetEngine());
-	renderingManager.DrawAllModels(GetEngine());
+	renderingManager.ForwardDrawAllModels(GetEngine());
 	renderingManager.Finish(GetEngine());
 
 	SwapBuffers();
@@ -63,7 +63,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 
 	if (ctx)
 	{
-		glViewport(0, 0, w * window->GetResolutionMutiplier(), h * window->GetResolutionMutiplier());
+		glViewport(0, 0, w, h);
 		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
 	}
 	else
