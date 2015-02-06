@@ -1,7 +1,12 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaShadersManager.h"
+#include "AnimaLightsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+#if !defined UPD_ERROR
+#	define UPD_ERROR ANIMA_ASSERT(false)
+#endif
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager)
 {
@@ -10,6 +15,9 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager*
 	_shadersNumber = 0;
 	_id = 0;
 	_linked = false;
+
+	_maxPointLights = 0;
+	_maxSpotLights = 0;
 
 	_shadersManager = shadersManager;
 }
@@ -28,6 +36,9 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 
 	_shadersManager = src._shadersManager;
 
+	_maxPointLights = src._maxPointLights;
+	_maxSpotLights = src._maxSpotLights;
+
 	SetShaders(src._shaders, src._shadersNumber);
 }
 
@@ -42,6 +53,8 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	_uniforms = src._uniforms;
 
 	_shadersManager = src._shadersManager;
+	_maxPointLights = src._maxPointLights;
+	_maxSpotLights = src._maxSpotLights;
 
 	src._shaders = nullptr;
 	src._shadersNumber = 0;
@@ -72,6 +85,8 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 		_uniforms = src._uniforms;
 
 		_shadersManager = src._shadersManager;
+		_maxPointLights = src._maxPointLights;
+		_maxSpotLights = src._maxSpotLights;
 
 		_engine = src._engine;
 		_id = src._id;
@@ -91,6 +106,8 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_uniforms = src._uniforms;
 
 		_shadersManager = src._shadersManager;
+		_maxPointLights = src._maxPointLights;
+		_maxSpotLights = src._maxSpotLights;
 
 		_engine = src._engine;
 		_id = src._id;
@@ -112,6 +129,8 @@ inline bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	if (_engine != left._engine) return false;
 	if (_shadersNumber != left._shadersNumber) return false; 
 	if (_linked != left._linked) return false;
+	if(_maxPointLights != left._maxPointLights) return false;
+	if(_maxSpotLights != left._maxSpotLights) return false;
 
 	for (int i = 0; i < _shadersNumber; i++)
 	{
@@ -129,6 +148,8 @@ inline bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 	if (_engine != left._engine) return true;
 	if (_shadersNumber != left._shadersNumber) return true;
 	if (_linked != left._linked) return true;
+	if (_maxPointLights != left._maxPointLights) return true;
+	if (_maxSpotLights != left._maxSpotLights) return true;
 
 	for (int i = 0; i < _shadersNumber; i++)
 	{
@@ -411,10 +432,10 @@ void AnimaShaderProgram::ScanVariables()
 	GLint numActiveUniforms = 0;
 	glGetProgramInterfaceiv(_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
-	const int propertiesSize = 3;
+	const int propertiesSize = 4;
 
 	AnimaString name(_engine);
-	GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION };
+	GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
 	GLint values[propertiesSize];
 
 	for (int i = 0; i < numActiveUniforms; i++)
@@ -425,6 +446,7 @@ void AnimaShaderProgram::ScanVariables()
 		glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
 
 		AnimaUniformInfo info;
+		info._arraySize = values[3];
 		info._location = values[2];
 		info._type = values[1];
 		info._name = name;
@@ -467,9 +489,34 @@ void AnimaShaderProgram::ScanVariables()
 
 		_outputs[name] = info;
 	}
+	
+	_maxPointLights = 0;
+	_maxSpotLights = 0;
+
+	AnimaString str(_engine);
+	bool stop = false;
+
+	while (!stop)
+	{
+		str.Format("_pointLight[%d].position", _maxPointLights);
+		if (_uniforms.find(str) != _uniforms.end())
+			_maxPointLights++;
+		else
+			stop = true;
+	}
+
+	stop = false;
+	while (!stop)
+	{
+		str.Format("_spotLight[%d].direction", _maxSpotLights);
+		if (_uniforms.find(str) != _uniforms.end())
+			_maxSpotLights++;
+		else
+			stop = true;
+	}
 }
 
-void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
+void AnimaShaderProgram::EnableInputs(AnimaEngine* engine, AnimaMesh* mesh)
 {
 	glBindVertexArray(mesh->GetVertexArrayObject());
 
@@ -504,12 +551,406 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 	}
 }
 
-void AnimaShaderProgram::DisableInputs()
+void AnimaShaderProgram::DisableInputs(AnimaEngine* engine)
 {
 	for (auto key : _inputs)
 	{
 		AnimaInputInfo info = key.second;
 		glDisableVertexAttribArray(info._location);
+	}
+}
+
+void AnimaShaderProgram::UpdateMeshProperies(AnimaEngine* engine, AnimaMesh* mesh, const AnimaMatrix& transformation)
+{
+	AnimaString str(engine);
+	AnimaUniformInfo info;
+	auto end = _uniforms.end();
+
+	str = "_modelMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._name, transformation);
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+}
+
+void AnimaShaderProgram::UpdateCameraProperies(AnimaEngine* engine, AnimaCamera* camera)
+{
+	AnimaString str(engine);
+	AnimaUniformInfo info;
+	auto end = _uniforms.end();
+
+	str = "_cameraPosition";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, camera->GetPosition());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_windowSize";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC2)
+			SetUniform(info._name, camera->GetWindowSize());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_viewMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._name, camera->GetViewMatrix());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_projectionMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._name, camera->GetProjectionMatrix());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_projectionViewMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._name, camera->GetProjectionMatrix() * camera->GetViewMatrix());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+}
+
+void AnimaShaderProgram::UpdateMaterialProperies(AnimaEngine* engine, AnimaMaterial* material)
+{
+	if (material == nullptr)
+		return;
+
+	AnimaString str(engine);
+	AnimaUniformInfo info;
+	auto end = _uniforms.end();
+
+	str = "_materialDiffuseColor";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, material->GetColor3f("diffuseColor"));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, material->GetColor4f("diffuseColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialSpecularColor";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, material->GetColor3f("specularColor"));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, material->GetColor4f("specularColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialAmbientColor";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, material->GetColor3f("ambientColor"));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, material->GetColor4f("ambientColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialEmissionColor";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, material->GetColor3f("emissionColor"));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, material->GetColor4f("emissionColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialShininess";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT)
+			SetUniformf(info._name, material->GetFloat("shininess"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialWireframe";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_BOOL || info._type == GL_INT)
+			SetUniformi(info._name, material->GetBoolean("wireframe") ? 1 : 0);
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialWireframeColor";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, material->GetColor3f("wireframeColor"));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, material->GetColor4f("wireframeColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialMaxTessellationLevel";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT)
+			SetUniformf(info._name, material->GetFloat("maxTessellationLevel"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialTessellationAlpha";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT)
+			SetUniformf(info._name, material->GetFloat("tessellationAlpha"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	if (material->GetBoolean("twoSided"))
+		glDisable(GL_CULL_FACE);
+	else
+		glEnable(GL_CULL_FACE);
+
+	glFrontFace(material->GetInteger("frontFace"));
+	glCullFace(material->GetInteger("cullFace"));
+}
+
+void AnimaShaderProgram::UpdateLightProperies(AnimaEngine* engine, AnimaLight* light)
+{
+	if (light->IsAmbientLight())
+	{
+		SetUniform("_ambientLight", light->GetColor());
+	}
+	else if (light->IsDirectionalLight())
+	{
+		SetUniform("_directionalLight.direction", light->GetDirection());
+		SetUniform("_directionalLight.base.color", light->GetColor());
+		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
+	}
+	else if (light->IsPointLight())
+	{
+		SetUniform("_pointLight.position", light->GetPosition());
+		SetUniformf("_pointLight.range", light->GetRange());
+		SetUniform("_pointLight.base.color", light->GetColor());
+		SetUniformf("_pointLight.base.intensity", light->GetIntensity());
+		SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
+		SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
+		SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
+	}
+	else if (light->IsSpotLight())
+	{
+		SetUniform("_spotLight.direction", light->GetDirection());
+		SetUniformf("_spotLight.cutoff", light->GetCutoff());
+		SetUniform("_spotLight.pointLight.position", light->GetPosition());
+		SetUniformf("_spotLight.pointLight.range", light->GetRange());
+		SetUniform("_spotLight.pointLight.base.color", light->GetColor());
+		SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
+		SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
+		SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
+		SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
+	}
+}
+
+void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
+{
+	AnimaLightsManager* lightsManager = engine->GetLightsManager();
+
+	AInt lightsCount = lightsManager->GetTotalLightsCount();
+
+	if (lightsCount <= 0)
+		return;
+
+	bool hasAmbientLight = lightsManager->GetAmbientLightsCount() > 0;
+	bool hasDirectionalLights = lightsManager->GetDirectionalLightsCount() > 0;
+	bool hasPointLights = lightsManager->GetPointLightsCount() > 0;
+	bool hasSpotLights = lightsManager->GetSpotLightsCount() > 0;
+	
+	int nextPointLight = 0;
+	int nextSpotLight = 0;
+
+	AnimaString str(_engine);
+	AnimaLight* light = nullptr;
+	
+	for (int i = 0; i < lightsCount; i++)
+	{
+		light = lightsManager->GetLight(i);
+
+		if (light->IsAmbientLight())
+		{
+			SetUniform("_ambientLight", light->GetColor());
+		}
+		else if (light->IsDirectionalLight())
+		{
+			SetUniform("_directionalLight.direction", light->GetDirection());
+			SetUniform("_directionalLight.base.color", light->GetColor());
+			SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
+		}
+		else if (light->IsPointLight())
+		{
+			if (_maxPointLights == 0)
+			{
+				SetUniform("_pointLight.position", light->GetPosition());
+				SetUniformf("_pointLight.range", light->GetRange());
+				SetUniform("_pointLight.base.color", light->GetColor());
+				SetUniformf("_pointLight.base.intensity", light->GetIntensity());
+				SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
+				SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
+				SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
+			}
+			else
+			{
+				str.Format("_pointLight[%d].position", nextPointLight);
+				SetUniform(str, light->GetPosition());
+
+				str.Format("_pointLight[%d].range", nextPointLight);
+				SetUniformf(str, light->GetRange());
+
+				str.Format("_pointLight[%d].base.color", nextPointLight);
+				SetUniform(str, light->GetColor());
+
+				str.Format("_pointLight[%d].base.intensity", nextPointLight);
+				SetUniformf(str, light->GetIntensity());
+
+				str.Format("_pointLight[%d].attenuation.constant", nextPointLight);
+				SetUniformf(str, light->GetConstantAttenuation());
+
+				str.Format("_pointLight[%d].attenuation.linear", nextPointLight);
+				SetUniformf(str, light->GetLinearAttenuation());
+
+				str.Format("_pointLight[%d].attenuation.exponent", nextPointLight);
+				SetUniformf(str, light->GetExponentAttenuation());
+
+				nextPointLight++;
+			}
+		}
+		else if (light->IsSpotLight())
+		{
+			if (_maxPointLights == 0)
+			{
+				SetUniform("_spotLight.direction", light->GetDirection());
+				SetUniformf("_spotLight.cutoff", light->GetCutoff());
+				SetUniform("_spotLight.pointLight.position", light->GetPosition());
+				SetUniformf("_spotLight.pointLight.range", light->GetRange());
+				SetUniform("_spotLight.pointLight.base.color", light->GetColor());
+				SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
+				SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
+				SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
+				SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
+			}
+			else
+			{
+				str.Format("_spotLight[%d].direction", nextSpotLight);
+				SetUniform(str, light->GetDirection());
+
+				str.Format("_spotLight[%d].cutoff", nextSpotLight);
+				SetUniformf(str, light->GetCutoff());
+
+				str.Format("_spotLight[%d].pointLight.position", nextSpotLight);
+				SetUniform(str, light->GetPosition());
+
+				str.Format("_spotLight[%d].pointLight.range", nextSpotLight);
+				SetUniformf(str, light->GetRange());
+
+				str.Format("_spotLight[%d].pointLight.base.color", nextSpotLight);
+				SetUniform(str, light->GetColor());
+
+				str.Format("_spotLight[%d].pointLight.base.intensity", nextSpotLight);
+				SetUniformf(str, light->GetIntensity());
+
+				str.Format("_spotLight[%d].pointLight.attenuation.constant", nextSpotLight);
+				SetUniformf(str, light->GetConstantAttenuation());
+
+				str.Format("_spotLight[%d].pointLight.attenuation.linear", nextSpotLight);
+				SetUniformf(str, light->GetLinearAttenuation());
+
+				str.Format("_spotLight[%d].pointLight.attenuation.exponent", nextSpotLight);
+				SetUniformf(str, light->GetExponentAttenuation());
+
+				nextSpotLight++;
+			}
+		}
 	}
 }
 

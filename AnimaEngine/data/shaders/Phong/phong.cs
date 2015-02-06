@@ -14,9 +14,9 @@ struct PnPatch
     float n101;
 };
 
-uniform float tessellationLevel;
-uniform vec3 ctrl_eyePosition;
-uniform mat4 ctrl_modelMatrix;			// mvp uniform 
+uniform float _materialMaxTessellationLevel;
+uniform vec3 _cameraPosition;
+uniform mat4 _modelMatrix;			// mvp uniform 
 
 layout(vertices=3) out;
 in vec3 ctrl_normal[];
@@ -43,13 +43,13 @@ float GetTessLevel(float Distance0, float Distance1)
     float AvgDistance = (Distance0 + Distance1) / 2.0;                                          
                                                                                                 
     if (AvgDistance <= 10.0) {                                                                   
-        return 10.0;                                                                            
+        return _materialMaxTessellationLevel;                                                                            
     }                                                                                           
     else if (AvgDistance <= 20.0) {                                                              
-        return 7.0;                                                                             
+        return _materialMaxTessellationLevel / 2;                                                                             
     }                                                                                           
     else {                                                                                      
-        return 3.0;                                                                             
+        return _materialMaxTessellationLevel / 4;                                                                             
     }                                                                                           
 }  
 
@@ -90,9 +90,9 @@ void main()
     eval_pnPatch[gl_InvocationID].n011 = N1+N2-vij(1,2)*(P2-P1);  
     eval_pnPatch[gl_InvocationID].n101 = N2+N0-vij(2,0)*(P0-P2); 
 
-    float EyeToVertexDistance0 = distance(ctrl_eyePosition, (ctrl_modelMatrix * gl_in[0].gl_Position).xyz);
-    float EyeToVertexDistance1 = distance(ctrl_eyePosition, (ctrl_modelMatrix * gl_in[1].gl_Position).xyz);
-    float EyeToVertexDistance2 = distance(ctrl_eyePosition, (ctrl_modelMatrix * gl_in[2].gl_Position).xyz);
+    float EyeToVertexDistance0 = distance(_cameraPosition, (_modelMatrix * gl_in[0].gl_Position).xyz);
+    float EyeToVertexDistance1 = distance(_cameraPosition, (_modelMatrix * gl_in[1].gl_Position).xyz);
+    float EyeToVertexDistance2 = distance(_cameraPosition, (_modelMatrix * gl_in[2].gl_Position).xyz);
     
     // set tess levels  
     gl_TessLevelOuter[0] = GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);

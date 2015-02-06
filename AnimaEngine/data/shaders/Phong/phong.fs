@@ -44,20 +44,20 @@ struct SpotLight
 	float cutoff;
 };
 
-uniform sampler2D materialDiffuseTexture;
-uniform vec4 materialColor;
+uniform sampler2D _materialDiffuseTexture;
+uniform vec4 _materialDiffuseColor;
+uniform vec3 _materialSpecularColor;
+uniform float _materialShininess;
 
-uniform int wireframe;
-uniform vec4 edgesColor;
+uniform int _materialWireframe;
+uniform vec4 _materialWireframeColor;
 
-uniform vec3 ambientLight;
-uniform DirectionalLight directionalLight;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+uniform vec3 _ambientLight;
+uniform DirectionalLight _directionalLight;
+uniform PointLight _pointLight[MAX_POINT_LIGHTS];
+uniform SpotLight _spotLight[MAX_SPOT_LIGHTS];
 
-uniform float specularIntensity;
-uniform float specularPower;
-uniform vec3 eyePosition;
+uniform vec3 _cameraPosition;
 
 vec4 calcLight(BaseLight base, vec3 direction, vec3 normal)
 {
@@ -69,15 +69,15 @@ vec4 calcLight(BaseLight base, vec3 direction, vec3 normal)
 	{
 		diffuseColor = vec4(base.color, 1.0f) * base.intensity * diffuseFactor;
 		
-		vec3 directionToEye = normalize(eyePosition - frag_worldPosition);
+		vec3 directionToEye = normalize(_cameraPosition - frag_worldPosition);
 		vec3 reflectDirection = normalize(reflect(direction, normal));
 		
 		float specularFactor = dot(directionToEye, reflectDirection);
-		specularFactor = pow(specularFactor, specularPower);
+		specularFactor = pow(specularFactor, _materialShininess);
 		
 		if(specularFactor > 0.0)
 		{
-			specularColor = vec4(base.color, 1.0f) * specularIntensity * specularFactor;
+			specularColor = vec4(base.color, 1.0f) * vec4(_materialSpecularColor, 1.0) * specularFactor;
 		}
 	}
 
@@ -127,30 +127,30 @@ vec4 calcSpotLight(SpotLight sLight, vec3 normal)
 
 void main()
 {
-	vec4 totalLight = vec4(ambientLight, 1.0);
-	vec4 color = materialColor;
-    vec4 textureColor = texture(materialDiffuseTexture, frag_textureCoord.xy);
+	vec4 totalLight = vec4(_ambientLight, 1.0);
+	vec4 color = _materialDiffuseColor;
+    vec4 textureColor = texture(_materialDiffuseTexture, frag_textureCoord.xy);
 	
 	if(textureColor != vec4(0.0, 0.0, 0.0, 1.0))
 		color *= textureColor;
 		
 	vec3 normal = normalize(frag_normal);
 	
-	totalLight += calcDirectionalLight(directionalLight, normal);
+	totalLight += calcDirectionalLight(_directionalLight, normal);
 	
 	for(int i = 0; i < MAX_POINT_LIGHTS; i++)
-		if(pointLights[i].base.intensity > 0.0)
-			totalLight += calcPointLight(pointLights[i], normal);
+		if(_pointLight[i].base.intensity > 0.0)
+			totalLight += calcPointLight(_pointLight[i], normal);
 			
 	for(int i = 0; i < MAX_SPOT_LIGHTS; i++)
-		if(spotLights[i].pointLight.base.intensity > 0.0)
-			totalLight += calcSpotLight(spotLights[i], normal);
+		if(_spotLight[i].pointLight.base.intensity > 0.0)
+			totalLight += calcSpotLight(_spotLight[i], normal);
 		
-	float nearD = min(min(frag_dist[0], frag_dist[1]), frag_dist[2]);	
-	float edgeIntensity = exp2(-1.0 * nearD * nearD);
+	//float nearD = min(min(frag_dist[0], frag_dist[1]), frag_dist[2]);	
+	//float edgeIntensity = exp2(-1.0 * nearD * nearD);
 	
-	if(wireframe == 1)	
-		fragColor = (edgeIntensity * edgesColor) + ((1.0 - edgeIntensity) * vec4(color * totalLight));
-	else
+	//if(_materialWireframe == 1)	
+	//	fragColor = (edgeIntensity * _materialWireframeColor) + ((1.0 - edgeIntensity) * vec4(color * totalLight));
+	//else
 		fragColor = vec4(color * totalLight);
 }

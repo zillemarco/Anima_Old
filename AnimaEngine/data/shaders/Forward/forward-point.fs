@@ -26,14 +26,14 @@ struct PointLight
 	vec3 position;
 };
 
-uniform sampler2D materialDiffuseTexture;
-uniform vec4 materialColor;
+uniform sampler2D _materialDiffuseTexture;
+uniform vec4 _materialDiffuseColor;
 
-uniform PointLight pointLight;
+uniform PointLight _pointLight;
 
-uniform float specularIntensity;
-uniform float specularPower;
-uniform vec3 eyePosition;
+uniform vec3 _materialSpecularColor;
+uniform float _materialShininess;
+uniform vec3 _cameraPosition;
 
 vec4 calcLight(BaseLight base, vec3 direction, vec3 normal)
 {
@@ -45,15 +45,15 @@ vec4 calcLight(BaseLight base, vec3 direction, vec3 normal)
 	{
 		diffuseColor = vec4(base.color, 1.0f) * base.intensity * diffuseFactor;
 		
-		vec3 directionToEye = normalize(eyePosition - frag_worldPosition);
+		vec3 directionToEye = normalize(_cameraPosition - frag_worldPosition);
 		vec3 reflectDirection = normalize(reflect(direction, normal));
 		
 		float specularFactor = dot(directionToEye, reflectDirection);
-		specularFactor = pow(specularFactor, specularPower);
+		specularFactor = pow(specularFactor, _materialShininess);
 		
 		if(specularFactor > 0.0)
 		{
-			specularColor = vec4(base.color, 1.0f) * specularIntensity * specularFactor;
+			specularColor = vec4(base.color, 1.0f) * vec4(_materialSpecularColor, 1.0) * specularFactor;
 		}
 	}
 
@@ -79,13 +79,13 @@ vec4 calcPointLight(PointLight pLight, vec3 normal)
 
 void main()
 {
-	vec4 color = materialColor;
-    vec4 textureColor = texture(materialDiffuseTexture, frag_textureCoord.xy);
+	vec4 color = _materialDiffuseColor;
+    vec4 textureColor = texture(_materialDiffuseTexture, frag_textureCoord.xy);
 	
 	if(textureColor != vec4(0.0, 0.0, 0.0, 1.0))
 		color *= textureColor;
 		
 	vec3 normal = normalize(frag_normal);
 	
-	fragColor = color * calcPointLight(pointLight, normal);
+	fragColor = color * calcPointLight(_pointLight, normal);
 }

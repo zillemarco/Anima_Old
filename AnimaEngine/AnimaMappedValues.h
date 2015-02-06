@@ -23,10 +23,12 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMappedValues
 {
-public:
-	AnimaMappedValues(AnimaEngine* engine);
+protected:
+	AnimaMappedValues(AnimaEngine* engine, const AnimaString& name);
 	AnimaMappedValues(const AnimaMappedValues& src);
 	AnimaMappedValues(AnimaMappedValues&& src);
+
+public:
 	~AnimaMappedValues();
 	
 	AnimaMappedValues& operator=(const AnimaMappedValues& src);
@@ -68,6 +70,9 @@ public:
 	void AddBoolean(AnimaString propertyName, bool value);
 	void AddBoolean(const char* propertyName, bool value);
 
+	void AddInteger(AnimaString propertyName, AInt value);
+	void AddInteger(const char* propertyName, AInt value);
+
 	void SetTexture(AnimaString propertyName, AnimaTexture* value);
 	void SetTexture(const char* propertyName, AnimaTexture* value);
 
@@ -103,6 +108,9 @@ public:
 	void SetBoolean(AnimaString propertyName, bool value);
 	void SetBoolean(const char* propertyName, bool value);
 
+	void SetInteger(AnimaString propertyName, AInt value);
+	void SetInteger(const char* propertyName, AInt value);
+
 	AnimaTexture* GetTexture(AnimaString propertyName);
 	AnimaTexture* GetTexture(const char* propertyName);
 
@@ -121,17 +129,22 @@ public:
 	AFloat GetFloat(AnimaString propertyName);
 	AFloat GetFloat(const char* propertyName);
 
+	AInt GetInteger(AnimaString propertyName);
+	AInt GetInteger(const char* propertyName);
+
 	bool GetBoolean(AnimaString propertyName);
 	bool GetBoolean(const char* propertyName);
 	
 protected:
 	AnimaEngine* _engine;
+	AnimaString _name;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher> _texturesMap;
 	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaString::Hasher> _colorsMap;
 	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaString::Hasher> _vectorsMap;
 	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher> _floatsMap;
+	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaString::Hasher> _booleansMap;
 #pragma warning (default: 4251) 
 };

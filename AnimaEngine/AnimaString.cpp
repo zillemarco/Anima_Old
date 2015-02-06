@@ -605,6 +605,36 @@ bool AnimaString::CompareNoCase(const char* left) const
 	return boost::iequals(this->_string, left);
 }
 
+bool AnimaString::StartsWith(AChar c) const
+{
+	if (GetBufferLength() > 0 && _string[0] == c)
+		return true;
+	return false;
+}
+
+bool AnimaString::StartsWith(const AnimaString& str) const
+{
+	return StartsWith(str._string);
+}
+
+bool AnimaString::StartsWith(const char* str) const
+{
+	ASizeT lenThis = strlen(this->_string);
+	ASizeT lenStr = strlen(str);
+
+	if (lenThis < lenStr)
+		return false;
+	if (lenThis == lenStr)
+		return Compare(str);
+
+	for (ASizeT i = 0; i < lenStr; i++)
+	{
+		if (str[i] != _string[i])
+			return false;
+	}
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE
 
 

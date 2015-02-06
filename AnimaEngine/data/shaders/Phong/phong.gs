@@ -13,13 +13,13 @@ out vec3 frag_normal;
 out vec3 frag_worldPosition;
 noperspective out vec3 frag_dist;
 
-uniform vec2 windowSize;
+uniform vec2 _windowSize;
 
 void main(void)
 {
-	vec2 p0 = windowSize * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
-	vec2 p1 = windowSize * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
-	vec2 p2 = windowSize * gl_in[2].gl_Position.xy / gl_in[2].gl_Position.w;
+	vec2 p0 = _windowSize * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
+	vec2 p1 = _windowSize * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
+	vec2 p2 = _windowSize * gl_in[2].gl_Position.xy / gl_in[2].gl_Position.w;
 	vec2 v0 = p2 - p1;
 	vec2 v1 = p2 - p0;
 	vec2 v2 = p1 - p0;

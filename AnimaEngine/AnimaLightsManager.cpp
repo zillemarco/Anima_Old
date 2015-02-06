@@ -53,7 +53,7 @@ AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& nam
 		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_engine->GetGenericAllocator()), _engine);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_engine->GetGenericAllocator()), _engine, name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -96,7 +96,7 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_engine->GetGenericAllocator()), _engine);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_engine->GetGenericAllocator()), _engine, name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -139,7 +139,7 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_engine->GetGenericAllocator()), _engine);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_engine->GetGenericAllocator()), _engine, name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -182,7 +182,7 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_engine->GetGenericAllocator()), _engine);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_engine->GetGenericAllocator()), _engine, name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -237,7 +237,7 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 
 AInt AnimaLightsManager::GetTotalLightsCount()
 {
-	return _lightsNumber;
+	return (AInt)_lightsNumber;
 }
 
 AInt AnimaLightsManager::GetAmbientLightsCount()

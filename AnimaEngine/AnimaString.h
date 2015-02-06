@@ -177,6 +177,10 @@ public:
 	bool Compare(const char* left) const;
 	bool CompareNoCase(const char* left) const;
 	
+	bool StartsWith(AChar c) const;
+	bool StartsWith(const AnimaString& str) const;
+	bool StartsWith(const char* str) const;
+
 private:
 	ASizeT GetFormatStringLength(const char* format, va_list args);
 	

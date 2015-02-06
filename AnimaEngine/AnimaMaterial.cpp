@@ -11,9 +11,15 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMaterial::AnimaMaterial(AnimaEngine* engine)
-	: AnimaMappedValues(engine)
+AnimaMaterial::AnimaMaterial(AnimaEngine* engine, const AnimaString& name)
+	: AnimaMappedValues(engine, name)
 {
+	SetInteger("frontFace", GL_CCW);
+	SetInteger("cullFace", GL_BACK);
+	SetBoolean("wireframe", false);
+	SetColor("wireframeColor", 0.0f, 0.0f, 0.0f);
+	SetFloat("maxTessellationLevel", 1.0f);
+	SetFloat("tessellationAlpha", 0.0f);
 }
 
 AnimaMaterial::AnimaMaterial(const AnimaMaterial& src)

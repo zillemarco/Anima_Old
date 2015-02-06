@@ -53,7 +53,7 @@ AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 		_materials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_engine->GetGenericAllocator()), _materialsNumber);
 	}
 
-	_materials[_materialsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_engine->GetGenericAllocator()), _engine);
+	_materials[_materialsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_engine->GetGenericAllocator()), _engine, name);
 
 	_materialsMap[name] = (AUint)(_materialsNumber - 1);
 

@@ -370,14 +370,14 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
 
 		if (ret2 == AI_SUCCESS)
-			material->AddFloat("shiness", shininess * strength);
+			material->AddFloat("shininess", shininess * strength);
 		else
-			material->AddFloat("shiness", shininess);
+			material->AddFloat("shininess", shininess);
 	}
 	else 
 	{
-		material->AddFloat("shiness", 0.0f);
-		material->SetColor("specularColor", 0.0, 0.0, 0.0, 1.0f);
+		material->AddFloat("shininess", 0.0f);
+		material->SetColor("specularColor", 0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	max = 1;

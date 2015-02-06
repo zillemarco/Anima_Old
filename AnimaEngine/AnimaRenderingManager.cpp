@@ -105,7 +105,7 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 {
 	if (engine == nullptr || mesh == nullptr || program == nullptr)
 		return;
-
+	
 	AnimaShaderProgram* activeProgram = engine->GetShadersManager()->GetActiveProgram();
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
@@ -115,120 +115,35 @@ void AnimaRenderingManager::DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, 
 			return;
 
 		program->Use();
-		
-		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
-		program->SetUniform("eyePosition", camera->GetPosition());
-		program->SetUniform("windowSize", camera->GetWindowSize());
-		program->SetUniformi("wireframe", 1);
-		program->SetUniform("edgesColor", AnimaVertex4f(0.0, 0.0, 0.0, 0.0));
-		program->SetUniformf("tessellationLevel", 5.0);
-		program->SetUniformf("tessAlpha", 1);
-		
-		AnimaLight* ambL = engine->GetLightsManager()->GetLightFromName("ambient");
-		if (ambL != nullptr)
-		{
-			program->SetUniform("ambientLight", ambL->GetColor());
-		}
 
-		AnimaLight* dirL = engine->GetLightsManager()->GetLightFromName("directional");
-		if (dirL != nullptr)
-		{
-			program->SetUniform("directionalLight.base.color", dirL->GetColor());
-			program->SetUniformf("directionalLight.base.intensity", dirL->GetIntensity());
-			program->SetUniform("directionalLight.direction", dirL->GetDirection().Normalized());
-		}
-
-		AnimaLight* pointL = engine->GetLightsManager()->GetLightFromName("pointLight0");
-		if (pointL != nullptr)
-		{
-			program->SetUniform("pointLights[0].base.color", pointL->GetColor());
-			program->SetUniformf("pointLights[0].base.intensity", pointL->GetIntensity());
-			program->SetUniformf("pointLights[0].attenuation.constant", pointL->GetConstantAttenuation());
-			program->SetUniformf("pointLights[0].attenuation.linear", pointL->GetLinearAttenuation());
-			program->SetUniformf("pointLights[0].attenuation.exponent", pointL->GetExponentAttenuation());
-			program->SetUniform("pointLights[0].position", pointL->GetPosition());
-			program->SetUniformf("pointLights[0].range", pointL->GetRange());
-		}
-
-		pointL = engine->GetLightsManager()->GetLightFromName("pointLight1");
-		if (pointL != nullptr)
-		{
-			program->SetUniform("pointLights[1].base.color", pointL->GetColor());
-			program->SetUniformf("pointLights[1].base.intensity", pointL->GetIntensity());
-			program->SetUniformf("pointLights[1].attenuation.constant", pointL->GetConstantAttenuation());
-			program->SetUniformf("pointLights[1].attenuation.linear", pointL->GetLinearAttenuation());
-			program->SetUniformf("pointLights[1].attenuation.exponent", pointL->GetExponentAttenuation());
-			program->SetUniform("pointLights[1].position", pointL->GetPosition());
-			program->SetUniformf("pointLights[1].range", pointL->GetRange());
-		}
-
-		AnimaLight* spotL = engine->GetLightsManager()->GetLightFromName("spotLight0");
-		if (spotL != nullptr)
-		{
-			program->SetUniform("spotLights[0].pointLight.base.color", spotL->GetColor());
-			program->SetUniformf("spotLights[0].pointLight.base.intensity", spotL->GetIntensity());
-			program->SetUniformf("spotLights[0].pointLight.attenuation.constant", spotL->GetConstantAttenuation());
-			program->SetUniformf("spotLights[0].pointLight.attenuation.linear", spotL->GetLinearAttenuation());
-			program->SetUniformf("spotLights[0].pointLight.attenuation.exponent", spotL->GetExponentAttenuation());
-			program->SetUniform("spotLights[0].pointLight.position", spotL->GetPosition());
-			program->SetUniformf("spotLights[0].pointLight.range", spotL->GetRange());
-			program->SetUniform("spotLights[0].direction", spotL->GetDirection());
-			program->SetUniformf("spotLights[0].cutoff", spotL->GetCutoff());
-		}
-
-		spotL = engine->GetLightsManager()->GetLightFromName("spotLight1");
-		if (spotL != nullptr)
-		{
-			program->SetUniform("spotLights[1].pointLight.base.color", spotL->GetColor());
-			program->SetUniformf("spotLights[1].pointLight.base.intensity", spotL->GetIntensity());
-			program->SetUniformf("spotLights[1].pointLight.attenuation.constant", spotL->GetConstantAttenuation());
-			program->SetUniformf("spotLights[1].pointLight.attenuation.linear", spotL->GetLinearAttenuation());
-			program->SetUniformf("spotLights[1].pointLight.attenuation.exponent", spotL->GetExponentAttenuation());
-			program->SetUniform("spotLights[1].pointLight.position", spotL->GetPosition());
-			program->SetUniformf("spotLights[1].pointLight.range", spotL->GetRange());
-			program->SetUniform("spotLights[1].direction", spotL->GetDirection());
-			program->SetUniformf("spotLights[1].cutoff", spotL->GetCutoff());
-		}
+		program->UpdateCameraProperies(engine, camera);
+		program->UpdateLightsProperies(engine);
 	}
 
 	AnimaMaterial* material = mesh->GetMaterial();
 	if (material == nullptr)
 		return;
-	
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
 
-	if (material->GetBoolean("twoSided"))
-		glDisable(GL_CULL_FACE);
-	else
-		glEnable(GL_CULL_FACE);
+	program->UpdateMeshProperies(engine, mesh, parentTransformation);
+	program->UpdateMaterialProperies(engine, material);
 
-	program->SetUniform("modelMatrix", parentTransformation);
-	program->SetUniform("ctrl_modelMatrix", parentTransformation);
-
-	AnimaTexture* texture = material->GetTexture("diffuse");
-	if (texture != nullptr)
-	{
-		program->SetUniformi("materialDiffuseTexture", 0);
-		texture->Bind(0);
-	}
-
-	program->SetUniform("materialColor", material->GetColor4f("diffuseColor"));
-
-	program->SetUniformf("specularIntensity", 2.0f);
-	program->SetUniformf("specularPower", 32.0f);
+	//AnimaTexture* texture = material->GetTexture("diffuse");
+	//if (texture != nullptr)
+	//{
+	//	program->SetUniformi("materialDiffuseTexture", 0);
+	//	texture->Bind(0);
+	//}
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
 
-	program->EnableInputs(mesh);
+	program->EnableInputs(engine, mesh);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
 	glPatchParameteri(GL_PATCH_VERTICES, 3);
 	glDrawElements(GL_PATCHES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
-	program->DisableInputs();
+	program->DisableInputs(engine);
 }
 
 void AnimaRenderingManager::ForwardDrawAllModels(AnimaEngine* engine)
@@ -299,42 +214,25 @@ void AnimaRenderingManager::ForwardDrawModelMesh(AnimaEngine* engine, AnimaMesh*
 	if (material == nullptr)
 		return;
 
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
+	program->UpdateMeshProperies(engine, mesh, parentTransformation);
+	program->UpdateMaterialProperies(engine, material);
 
-	if (material->GetBoolean("twoSided"))
-		glDisable(GL_CULL_FACE);
-	else
-		glEnable(GL_CULL_FACE);
-
-	program->SetUniform("modelMatrix", parentTransformation);
-
-	AnimaTexture* texture = material->GetTexture("diffuse");
-	if (texture != nullptr)
-	{
-		program->SetUniformi("materialDiffuseTexture", 0);
-		texture->Bind(0);
-	}
-
-	program->SetUniform("materialColor", material->GetColor4f("diffuseColor"));
-
-	program->SetUniformf("specularIntensity", 2.0f);
-	program->SetUniformf("specularPower", 32.0f);
-
+	//AnimaTexture* texture = material->GetTexture("diffuse");
+	//if (texture != nullptr)
+	//{
+	//	program->SetUniformi("materialDiffuseTexture", 0);
+	//	texture->Bind(0);
+	//}
+	
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
 
-	bool bEnabled_0 = true;
-	bool bEnabled_1 = false;
-	bool bEnabled_2 = false;
-	bool bEnabled_3 = false;
-	
-	program->EnableInputs(mesh);
+	program->EnableInputs(engine, mesh);
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
-	program->DisableInputs();
+	program->DisableInputs(engine);
 }
 
 void AnimaRenderingManager::AmbientPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model)
@@ -359,8 +257,7 @@ void AnimaRenderingManager::AmbientPass(AnimaEngine* engine, AnimaShaderProgram*
 
 		program->Use();
 
-		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
+		program->UpdateCameraProperies(engine, camera);
 	}
 
 	for (ASizeT i = 0; i < nLights; i++)
@@ -369,7 +266,7 @@ void AnimaRenderingManager::AmbientPass(AnimaEngine* engine, AnimaShaderProgram*
 		if (!light->IsAmbientLight())
 			continue;
 
-		program->SetUniform("ambientLight", light->GetColor());
+		program->UpdateLightProperies(engine, light);
 
 		if (model == nullptr)
 		{
@@ -424,10 +321,7 @@ void AnimaRenderingManager::DirectionalPass(AnimaEngine* engine, AnimaShaderProg
 
 		program->Use();
 
-		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-
-		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
-		program->SetUniform("eyePosition", camera->GetPosition());
+		program->UpdateCameraProperies(engine, camera);
 	}
 
 	for (ASizeT i = 0; i < nLights; i++)
@@ -436,9 +330,7 @@ void AnimaRenderingManager::DirectionalPass(AnimaEngine* engine, AnimaShaderProg
 		if (!light->IsDirectionalLight())
 			continue;
 
-		program->SetUniform("directionalLight.base.color", light->GetColor());
-		program->SetUniformf("directionalLight.base.intensity", light->GetIntensity());
-		program->SetUniform("directionalLight.direction", light->GetDirection().Normalized());
+		program->UpdateLightProperies(engine, light);
 
 		if (model == nullptr)
 		{
@@ -493,10 +385,7 @@ void AnimaRenderingManager::PointPass(AnimaEngine* engine, AnimaShaderProgram* p
 
 		program->Use();
 
-		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-
-		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
-		program->SetUniform("eyePosition", camera->GetPosition());
+		program->UpdateCameraProperies(engine, camera);
 	}
 
 	for (ASizeT i = 0; i < nLights; i++)
@@ -505,13 +394,7 @@ void AnimaRenderingManager::PointPass(AnimaEngine* engine, AnimaShaderProgram* p
 		if (!light->IsPointLight())
 			continue;
 
-		program->SetUniform("pointLight.base.color", light->GetColor());
-		program->SetUniformf("pointLight.base.intensity", light->GetIntensity());
-		program->SetUniformf("pointLight.attenuation.constant", light->GetConstantAttenuation());
-		program->SetUniformf("pointLight.attenuation.linear", light->GetLinearAttenuation());
-		program->SetUniformf("pointLight.attenuation.exponent", light->GetExponentAttenuation());
-		program->SetUniform("pointLight.position", light->GetPosition());
-		program->SetUniformf("pointLight.range", light->GetRange());
+		program->UpdateLightProperies(engine, light);
 
 		if (model == nullptr)
 		{
@@ -566,10 +449,7 @@ void AnimaRenderingManager::SpotPass(AnimaEngine* engine, AnimaShaderProgram* pr
 
 		program->Use();
 
-		AnimaMatrix viewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-
-		program->SetUniform("viewProjectionMatrix", viewProjectionMatrix);
-		program->SetUniform("eyePosition", camera->GetPosition());
+		program->UpdateCameraProperies(engine, camera);
 	}
 
 	for (ASizeT i = 0; i < nLights; i++)
@@ -578,15 +458,7 @@ void AnimaRenderingManager::SpotPass(AnimaEngine* engine, AnimaShaderProgram* pr
 		if (!light->IsSpotLight())
 			continue;
 
-		program->SetUniform("spotLight.pointLight.base.color", light->GetColor());
-		program->SetUniformf("spotLight.pointLight.base.intensity", light->GetIntensity());
-		program->SetUniformf("spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
-		program->SetUniformf("spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
-		program->SetUniformf("spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
-		program->SetUniform("spotLight.pointLight.position", light->GetPosition());
-		program->SetUniformf("spotLight.pointLight.range", light->GetRange());
-		program->SetUniform("spotLight.direction", light->GetDirection());
-		program->SetUniformf("spotLight.cutoff", light->GetCutoff());
+		program->UpdateLightProperies(engine, light);
 
 		if (model == nullptr)
 		{

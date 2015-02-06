@@ -8,6 +8,9 @@
 #include "AnimaVertex.h"
 #include "AnimaMatrix.h"
 #include "AnimaMesh.h"
+#include "AnimaMaterial.h"
+#include "AnimaLight.h"
+#include "AnimaCamera.h"
 #include <boost\unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -37,6 +40,7 @@ public:
 	struct AnimaUniformInfo {
 		AInt _location;
 		AUint _type;
+		AUint _arraySize;
 		AnimaString _name;
 	};
 
@@ -84,8 +88,14 @@ public:
 public:
 	void ScanVariables();
 
-	void EnableInputs(AnimaMesh* mesh);
-	void DisableInputs();
+	void EnableInputs(AnimaEngine* engine, AnimaMesh* mesh);
+	void DisableInputs(AnimaEngine* engine);
+
+	void UpdateMeshProperies(AnimaEngine* engine, AnimaMesh* mesh, const AnimaMatrix& transformation);
+	void UpdateCameraProperies(AnimaEngine* engine, AnimaCamera* camera);
+	void UpdateMaterialProperies(AnimaEngine* engine, AnimaMaterial* material);
+	void UpdateLightProperies(AnimaEngine* engine, AnimaLight* light);
+	void UpdateLightsProperies(AnimaEngine* engine);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
@@ -111,6 +121,9 @@ private:
 	ASizeT			_shadersNumber;
 
 	AnimaShadersManager* _shadersManager;
+
+	AUint _maxPointLights;
+	AUint _maxSpotLights;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaString::Hasher> _uniforms;

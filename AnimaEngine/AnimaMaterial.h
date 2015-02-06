@@ -19,7 +19,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMaterial : public AnimaMappedValues
 {
 public:
-	AnimaMaterial(AnimaEngine* engine);
+	AnimaMaterial(AnimaEngine* engine, const AnimaString& name);
 	AnimaMaterial(const AnimaMaterial& src);
 	AnimaMaterial(AnimaMaterial&& src);
 	~AnimaMaterial();
