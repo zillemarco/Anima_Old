@@ -13,6 +13,8 @@
 #include <AnimaCamerasManager.h>
 #include <AnimaBenchmarkTimer.h>
 #include <AnimaModel.h>
+#include <AnimaStage.h>
+#include <AnimaStagesManager.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -86,14 +88,17 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaEngine engine;
 	engine.Initialize();
-			
+
+	Anima::AnimaStage* stage = engine.GetStagesManager()->CreateStage("test-stage");
+	stage->Initialize();
+
 #if defined _MSC_VER
-	Anima::AnimaString path("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
+	Anima::AnimaString path("D:/Git/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", stage->GetStringAllocator());
 #else
-	Anima::AnimaString path("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", &engine);
+	Anima::AnimaString path("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/models/scimmiaO.3ds", stage->GetStringAllocator());
 #endif
 	
-	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
+	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
 	if (!manager->LoadModel(path, "scimmia"))
 		return 0;
 	
@@ -106,7 +111,7 @@ int main(int argc, char** argv)
 
 	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
 	
-	Anima::AnimaCamerasManager* camMan = engine.GetCamerasManager();
+	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 	

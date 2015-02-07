@@ -19,7 +19,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaDataGenerator
 {
 public:
-	AnimaDataGenerator(AnimaEngine* engine);
+	AnimaDataGenerator(AnimaAllocator* allocator);
 	AnimaDataGenerator(const AnimaDataGenerator& src);
 	AnimaDataGenerator(AnimaDataGenerator&& src);
 	virtual ~AnimaDataGenerator();
@@ -53,7 +53,7 @@ public:
 	bool CanUpdateValue();
 
 protected:
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 
 	bool _canUpdateValue;
 };

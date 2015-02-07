@@ -10,10 +10,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaFace::AnimaFace(AnimaEngine* engine)
+AnimaFace::AnimaFace(AnimaAllocator* allocator)
 {
-	ANIMA_ASSERT(engine != nullptr);
-	_engine = engine;
+	ANIMA_ASSERT(allocator != nullptr);
+	_allocator = allocator;
 	
 	_indexes = nullptr;
 	_indexesNumber = 0;
@@ -21,7 +21,7 @@ AnimaFace::AnimaFace(AnimaEngine* engine)
 
 AnimaFace::AnimaFace(const AnimaFace& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_indexes = nullptr;
 	_indexesNumber = 0;
 	
@@ -31,7 +31,7 @@ AnimaFace::AnimaFace(const AnimaFace& src)
 AnimaFace::AnimaFace(AnimaFace&& src)
 : _indexes(src._indexes)
 , _indexesNumber(src._indexesNumber)
-, _engine(src._engine)
+, _allocator(src._allocator)
 {
 	src._indexes = nullptr;
 	src._indexesNumber = 0;
@@ -46,7 +46,7 @@ AnimaFace& AnimaFace::operator=(const AnimaFace& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		SetIndexes(src._indexes, src._indexesNumber);
 	}
 	
@@ -57,7 +57,7 @@ AnimaFace& AnimaFace::operator=(AnimaFace&& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		
 		_indexes = src._indexes;
 		_indexesNumber = src._indexesNumber;
@@ -71,13 +71,13 @@ AnimaFace& AnimaFace::operator=(AnimaFace&& src)
 
 void AnimaFace::SetIndexes(AUint* indexes, ASizeT n)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	ClearIndexes();
 	
 	if(indexes != nullptr && n > 0)
 	{
 		_indexesNumber = n;
-		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
 		
 		for (int i = 0; i < _indexesNumber; i++)
 			_indexes[i] = indexes[i];
@@ -86,30 +86,30 @@ void AnimaFace::SetIndexes(AUint* indexes, ASizeT n)
 
 void AnimaFace::AddIndex(const AUint& index)
 {
-	ANIMA_ASSERT(_engine != nullptr);
-	AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+	ANIMA_ASSERT(_allocator != nullptr);
+	AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
 	
 	for (int i = 0; i < _indexesNumber; i++)
 		tmpOldIndexes[i] = _indexes[i];
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _indexes);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _indexes);
 	
 	_indexesNumber++;
-	_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetModelDataAllocator()), _indexesNumber);
+	_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
 	
 	for (int i = 0; i < _indexesNumber - 1; i++)
 		_indexes[i] = tmpOldIndexes[i];
 	
 	_indexes[_indexesNumber - 1] = index;
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), tmpOldIndexes);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldIndexes);
 }
 
 void AnimaFace::ClearIndexes()
 {
 	if(_indexes != nullptr && _indexesNumber > 0)
 	{
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelDataAllocator()), _indexes);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _indexes);
 		_indexes = nullptr;
 		_indexesNumber = 0;
 	}

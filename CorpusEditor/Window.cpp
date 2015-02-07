@@ -13,6 +13,8 @@
 #include <AnimaLight.h>
 #include <AnimaLightsManager.h>
 #include <AnimaMath.h>
+#include <AnimaStage.h>
+#include <AnimaStagesManager.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -48,11 +50,11 @@ void Window::DrawScene()
 {
 	MakeCurrentContext();
 
-	GetEngine()->GetDataGeneratorsManager()->UpdateValues();
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 
-	renderingManager.Start(GetEngine());
-	renderingManager.ForwardDrawAllModels(GetEngine());
-	renderingManager.Finish(GetEngine());
+	renderingManager.Start(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	renderingManager.ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	renderingManager.Finish(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 
 	SwapBuffers();
 }
@@ -64,7 +66,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		glViewport(0, 0, w, h);
-		window->GetEngine()->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+		window->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
 	}
 	else
 	{
@@ -85,8 +87,8 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 		double dy = wnd->_lastPTY - y;
 		double dx = wnd->_lastPTX - x;
 
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * -0.1);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * -0.1);
 	}
 
 	wnd->_lastPTX = x;
@@ -103,34 +105,34 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(-0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateYDeg(0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_UP:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(-0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(-0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->RotateXDeg(0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(0.5f);
 		break;
 	case ANIMA_ENGINE_KEY_W:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_S:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(0.0f, -1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, -1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_D:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(-1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(-1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_A:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_L:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(-1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(-1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_O:
-		wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_C:
 
@@ -161,12 +163,12 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
 	Window* wnd = (Window*)window;
-	wnd->GetEngine()->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
+	wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
 }
 
 void Window::Load()
 {
-	Anima::AnimaShadersManager* mgr = GetEngine()->GetShadersManager();
+	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
 
 #if defined _MSC_VER
 	mgr->CreateProgram("phong");
@@ -202,7 +204,7 @@ void Window::Load()
 	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("forward-spot")->Link();
 
-	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
+	texture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
 	texture->Load();
 #else
 	mgr->CreateProgram("phong");
@@ -238,19 +240,19 @@ void Window::Load()
 	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("forward-spot")->Link();
 	
-	texture = GetEngine()->GetTexturesManager()->LoadTextureFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
+	texture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile("/Users/marco/Documents/Progetti/Repository/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
 	texture->Load();
 #endif
 	
-	Anima::AnimaLight* l0 = GetEngine()->GetLightsManager()->CreateAmbientLight("ambient");
+	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.2f, 0.2f, 0.2f);
 
-	Anima::AnimaLight* l1 = GetEngine()->GetLightsManager()->CreateDirectionalLight("directional");
+	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);
 	l1->SetIntensity(0.8f);
 	l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
-	Anima::AnimaLight* l2 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight0");
+	Anima::AnimaLight* l2 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight0");
 	l2->SetColor(0.0f, 0.0f, 1.0f);
 	l2->SetConstantAttenuation(0.0f);
 	l2->SetLinearAttenuation(0.0f);
@@ -258,7 +260,7 @@ void Window::Load()
 	l2->SetIntensity(1.0f);
 	l2->SetPosition(-10.0f, 0.0f, 0.0f);
 
-	Anima::AnimaLight* l3 = GetEngine()->GetLightsManager()->CreatePointLight("pointLight1");
+	Anima::AnimaLight* l3 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight1");
 	l3->SetColor(1.0f, 0.0f, 0.0f);
 	l3->SetConstantAttenuation(0.0f);
 	l3->SetLinearAttenuation(0.0f);
@@ -266,7 +268,7 @@ void Window::Load()
 	l3->SetIntensity(1.0f);
 	l3->SetPosition(0.0f, 0.0f, -10.0f);
 
-	Anima::AnimaLight* l4 = GetEngine()->GetLightsManager()->CreateSpotLight("spotLight0");
+	Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
 	l4->SetColor(0.0f, 1.0f, 0.0f);
 	l4->SetConstantAttenuation(0.1);
 	l4->SetLinearAttenuation(0.1f);
@@ -275,9 +277,9 @@ void Window::Load()
 	l4->SetPosition(0.0f, 0.5f, 5.0f);
 	l4->SetDirection(0.0f, 0.0f, -1.0f);
 
-	GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->ComputeBoundingBox(true);
-	Anima::AnimaVertex3f min = GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMin();
-	Anima::AnimaVertex3f max = GetEngine()->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMax();
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("scimmia")->ComputeBoundingBox(true);
+	Anima::AnimaVertex3f min = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMin();
+	Anima::AnimaVertex3f max = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("scimmia")->GetBoundingBoxMax();
 
 	Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
 	Anima::AnimaVertex3f pos = center;

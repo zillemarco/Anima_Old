@@ -39,13 +39,13 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #define INIT_AXIS			INIT_X_AXIS			INIT_Y_AXIS			INIT_Z_AXIS
 #define INIT_WORLD_AXIS		INIT_WORLD_X_AXIS	INIT_WORLD_Y_AXIS	INIT_WORLD_Z_AXIS
 
-AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager)
+AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager)
 	: _active(false)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {
-	ANIMA_ASSERT(engine != nullptr);
-	_engine = engine;
+	ANIMA_ASSERT(allocator != nullptr);
+	_allocator = allocator;
 
 	_position.x = 0.0f;
 	_position.y = 0.0f;
@@ -55,14 +55,14 @@ AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManage
 	INIT_WORLD_AXIS;
 }
 
-AnimaCamera::AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
+AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
 	: _position(position)
 	, _active(false)
 	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
 {
-	ANIMA_ASSERT(engine != nullptr);
-	_engine = engine;
+	ANIMA_ASSERT(allocator != nullptr);
+	_allocator = allocator;
 	
 	INIT_AXIS;
 	INIT_WORLD_AXIS;
@@ -82,7 +82,7 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _camerasManager(src._camerasManager)
 	, _projectionType(src._projectionType)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 
 	INIT_WORLD_AXIS;
 }
@@ -98,7 +98,7 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _active(src._active)
 	, _viewMatrix(src._viewMatrix)
 	, _projectionMatrix(src._projectionMatrix)
-	, _engine(src._engine)
+	, _allocator(src._allocator)
 	, _camerasManager(src._camerasManager)
 	, _projectionType(src._projectionType)
 {
@@ -114,7 +114,7 @@ AnimaCamera& AnimaCamera::operator=(const AnimaCamera& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;
@@ -137,7 +137,7 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;

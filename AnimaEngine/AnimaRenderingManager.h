@@ -10,36 +10,35 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
+#include "AnimaStage.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
-
-class AnimaEngine;
 
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
 {
 public:
-	void Start(AnimaEngine* engine);
-	void Finish(AnimaEngine* engine);
+	void Start(AnimaStage* stage);
+	void Finish(AnimaStage* stage);
 
-	void DrawAllModels(AnimaEngine* engine);
-	void DrawSingleModel(AnimaEngine* engine, AnimaModel* model);
+	void DrawAllModels(AnimaStage* stage);
+	void DrawSingleModel(AnimaStage* stage, AnimaModel* model);
 
-	void ForwardDrawAllModels(AnimaEngine* engine);
-	void ForwardDrawSingleModel(AnimaEngine* engine, AnimaModel* model);
+	void ForwardDrawAllModels(AnimaStage* stage);
+	void ForwardDrawSingleModel(AnimaStage* stage, AnimaModel* model);
 
 private:
-	void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program);
-	void DrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void DrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
+	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	
-	void AmbientPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void DirectionalPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void PointPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void SpotPass(AnimaEngine* engine, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void AmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void DirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void PointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void SpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
 
-	void ForwardDrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program);
-	void ForwardDrawModel(AnimaEngine* engine, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void ForwardDrawModelMesh(AnimaEngine* engine, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
+	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 };
 
 END_ANIMA_ENGINE_NAMESPACE

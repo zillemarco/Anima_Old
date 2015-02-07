@@ -11,8 +11,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMaterial::AnimaMaterial(AnimaEngine* engine, const AnimaString& name)
-	: AnimaMappedValues(engine, name)
+AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
 	SetInteger("frontFace", GL_CCW);
 	SetInteger("cullFace", GL_BACK);

@@ -2,9 +2,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaTexture::AnimaTexture(AnimaEngine* engine)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_textureId = 0;
 	_samplerId = 0;
 	_width = 0;
@@ -17,9 +17,9 @@ AnimaTexture::AnimaTexture(AnimaEngine* engine)
 	_dataSize = 0;
 }
 
-AnimaTexture::AnimaTexture(AnimaEngine* engine, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_textureId = 0;
 	_samplerId = 0;
 	_width = width;
@@ -29,14 +29,14 @@ AnimaTexture::AnimaTexture(AnimaEngine* engine, AUchar* data, ASizeT dataSize, A
 	_isLoaded = false;
 
 	_dataSize = dataSize;
-	_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+	_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 
 	SetData(data, dataSize);
 }
 
 AnimaTexture::AnimaTexture(const AnimaTexture& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_textureId = src._textureId;
 	_samplerId = src._samplerId;
 	_width = src._width;
@@ -46,14 +46,14 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	_isLoaded = src._isLoaded;
 
 	_dataSize = src._dataSize;
-	_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+	_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 
 	SetData(src._data, src._dataSize);
 }
 
 AnimaTexture::AnimaTexture(AnimaTexture&& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_textureId = src._textureId;
 	_samplerId = src._samplerId;
 	_width = src._width;
@@ -63,7 +63,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	_isLoaded = src._isLoaded;
 
 	_dataSize = src._dataSize;
-	_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+	_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 
 	SetData(src._data, src._dataSize);
 }
@@ -74,7 +74,7 @@ AnimaTexture::~AnimaTexture()
 
 	if (_data != nullptr)
 	{
-		(_engine->GetGenericAllocator())->Deallocate(_data);
+		(_allocator)->Deallocate(_data);
 		_data = nullptr;
 
 		_dataSize = 0;
@@ -91,7 +91,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_textureId = src._textureId;
 		_samplerId = src._samplerId;
 		_width = src._width;
@@ -101,7 +101,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_isLoaded = src._isLoaded;
 
 		_dataSize = src._dataSize;
-		_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+		_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 
 		SetData(src._data, src._dataSize);
 	}
@@ -113,7 +113,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_textureId = src._textureId;
 		_samplerId = src._samplerId;
 		_width = src._width;
@@ -123,7 +123,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_isLoaded = src._isLoaded;
 
 		_dataSize = src._dataSize;
-		_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+		_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 
 		SetData(src._data, src._dataSize);
 	}
@@ -182,10 +182,10 @@ void AnimaTexture::SetData(AUchar* data, ASizeT dataSize)
 	{
 		_dataSize = dataSize;
 
-		(_engine->GetGenericAllocator())->Deallocate(_data);
+		(_allocator)->Deallocate(_data);
 		_data = nullptr;
 
-		_data = (AUchar*)(_engine->GetGenericAllocator())->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
+		_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * _dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
 	}
 
 	memcpy(_data, data, sizeof(AUchar) * dataSize);

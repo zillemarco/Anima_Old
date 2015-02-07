@@ -2,20 +2,20 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaShader::AnimaShader(AnimaEngine* engine)
-	: _text(engine)
+AnimaShader::AnimaShader(AnimaAllocator* allocator)
+	: _text(allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
 	_type = INVALID;
 }
 
-AnimaShader::AnimaShader(AnimaEngine* engine, AnimaString shaderText, AnimaShaderType type)
-	: _text(engine)
+AnimaShader::AnimaShader(AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type)
+	: _text(allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
@@ -23,10 +23,10 @@ AnimaShader::AnimaShader(AnimaEngine* engine, AnimaString shaderText, AnimaShade
 	_text = shaderText;
 }
 
-AnimaShader::AnimaShader(AnimaEngine* engine, const char* shaderText, AnimaShaderType type)
-	: _text(engine)
+AnimaShader::AnimaShader(AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type)
+	: _text(allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
@@ -37,7 +37,7 @@ AnimaShader::AnimaShader(AnimaEngine* engine, const char* shaderText, AnimaShade
 AnimaShader::AnimaShader(const AnimaShader& src)
 	: _text(src._text)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_id = src._id;
 	_type = src._type;
 	_compiled = src._compiled;
@@ -48,7 +48,7 @@ AnimaShader::AnimaShader(AnimaShader&& src)
 	, _id(src._id)
 	, _type(src._type)
 	, _compiled(src._compiled)
-	, _engine(src._engine)
+	, _allocator(src._allocator)
 {
 	src._id = 0;
 	src._compiled = false;
@@ -92,7 +92,7 @@ inline bool AnimaShader::operator==(const AnimaShader& left)
 	if (_id != left._id) return false;
 	if (_type != left._type) return false;
 	if (_text != left._text) return false;
-	if (_engine != left._engine) return false;
+	if (_allocator != left._allocator) return false;
 	if (_compiled != left._compiled) return false;
 
 	return true;
@@ -103,7 +103,7 @@ inline bool AnimaShader::operator!=(const AnimaShader& left)
 	if (_id != left._id) return true;
 	if (_type != left._type) return true;
 	if (_text != left._text) return true;
-	if (_engine != left._engine) return true;
+	if (_allocator != left._allocator) return true;
 	if (_compiled != left._compiled) return true;
 
 	return false;

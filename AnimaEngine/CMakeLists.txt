@@ -46,7 +46,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMappedValues.h
 					AnimaLight.h
 					AnimaLightsManager.h
-					AnimaVectorGenerator.h)
+					AnimaVectorGenerator.h
+					AnimaStage.h
+					AnimaStagesManager.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -86,7 +88,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMappedValues.cpp
 					AnimaLight.cpp
 					AnimaLightsManager.cpp
-					AnimaVectorGenerator.cpp)
+					AnimaVectorGenerator.cpp
+					AnimaStage.cpp
+					AnimaStagesManager.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

@@ -20,10 +20,10 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaTransformation
 {
 public:
-	AnimaTransformation(AnimaEngine* engine);
-	AnimaTransformation(AnimaEngine* engine, const AnimaMatrix& initialTransformationMatrix);
-	AnimaTransformation(AnimaEngine* engine, const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s);
-	AnimaTransformation(AnimaEngine* engine, AFloat tx, AFloat ty, AFloat tz, AFloat rx, AFloat ry, AFloat rz, AFloat sx, AFloat sy, AFloat sz);
+	AnimaTransformation();
+	AnimaTransformation(const AnimaMatrix& initialTransformationMatrix);
+	AnimaTransformation(const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s);
+	AnimaTransformation(AFloat tx, AFloat ty, AFloat tz, AFloat rx, AFloat ry, AFloat rz, AFloat sx, AFloat sy, AFloat sz);
 	AnimaTransformation(const AnimaTransformation& src);
 	AnimaTransformation(AnimaTransformation&& src);
 	~AnimaTransformation();
@@ -100,8 +100,6 @@ protected:
 
 	AnimaMatrix _transformationMatrix;
 	AnimaMatrix _initialTransformationMatrix;
-
-	AnimaEngine* _engine;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

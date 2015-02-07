@@ -12,6 +12,7 @@
 #include "AnimaEngineCore.h"
 #include "AnimaAllocators.h"
 #include "AnimaWindow.h"
+#include "AnimaString.h"
 
 //#ifndef _MSC_VER
 //#include <sys/syslimits.h>
@@ -49,13 +50,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 typedef AnimaEngineWindow_Base AnimaWindow;
 
-class AnimaModelsManager;
-class AnimaShadersManager;
-class AnimaCamerasManager;
-class AnimaTexturesManager;
-class AnimaDataGeneratorsManager;
-class AnimaMaterialsManager;
-class AnimaLightsManager;
+class AnimaStagesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -141,84 +136,6 @@ public:
 	static _GETD_ANIMA_ENGINE_PLATFORM_LIBRARY_TLS_STATE;
 
 public:
-	inline AnimaAllocator* GetModelsAllocator()
-	{
-		ANIMA_ASSERT(_modelsAllocator != nullptr);
-		return _modelsAllocator;
-	}
-
-	inline AnimaAllocator* GetGenericAllocator()
-	{
-		ANIMA_ASSERT(_genericAllocator != nullptr);
-		return _genericAllocator;
-	}
-
-	inline AnimaAllocator* GetModelDataAllocator()
-	{
-		ANIMA_ASSERT(_modelDataAllocator != nullptr);
-		return _modelDataAllocator;
-	}
-
-	inline AnimaAllocator* GetStringAllocator()
-	{
-		ANIMA_ASSERT(_stringAllocator != nullptr);
-		return _stringAllocator;
-	}
-
-	inline AnimaAllocator* GetShadersAllocator()
-	{
-		ANIMA_ASSERT(_shadersAllocator != nullptr);
-		return _shadersAllocator;
-	}
-
-	inline AnimaAllocator* GetCamerasAllocator()
-	{
-		ANIMA_ASSERT(_camerasAllocator != nullptr);
-		return _camerasAllocator;
-	}
-
-	inline AnimaModelsManager* GetModelsManager()
-	{
-		ANIMA_ASSERT(_modelsManager != nullptr);
-		return _modelsManager;
-	}
-
-	inline AnimaShadersManager* GetShadersManager()
-	{
-		ANIMA_ASSERT(_shadersManager != nullptr);
-		return _shadersManager;
-	}
-
-	inline AnimaCamerasManager* GetCamerasManager()
-	{
-		ANIMA_ASSERT(_camerasManager != nullptr);
-		return _camerasManager;
-	}
-
-	inline AnimaTexturesManager* GetTexturesManager()
-	{
-		ANIMA_ASSERT(_texturesManager != nullptr);
-		return _texturesManager;
-	}
-
-	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()
-	{
-		ANIMA_ASSERT(_dataGeneratorsManager != nullptr);
-		return _dataGeneratorsManager;
-	}
-
-	inline AnimaMaterialsManager* GetMaterialsManager()
-	{
-		ANIMA_ASSERT(_materialsManager != nullptr);
-		return _materialsManager;
-	}
-
-	inline AnimaLightsManager* GetLightsManager()
-	{
-		ANIMA_ASSERT(_lightsManager != nullptr);
-		return _lightsManager;
-	}
-
 	void DumpMemory(const char* fileName, bool bLogToFile = true);
 
 private:
@@ -240,26 +157,18 @@ private:
 	AnimaWindow*	_windowListHead;					/*!< Primo elemento della lista delle finestre istanziate da un'istanza di AnimaEngine */
 	AnimaWindow*	_focusedWindow;						/*!< Puntatore alla finestra attualmente attiva tra la lista di quelle istanziate da un'istanza di AnimaEngine */
 
-	static _AnimaEngineWindowHints _windowHints;				/*!< Contenitore di dati per inizializzare un contesto di rendering su una finestra */
-	static _ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE;	/*!< Contenitore con i puntatore alle funzioni e instanze delle librerie per la gestione delle finestre */
+	static _AnimaEngineWindowHints _windowHints;			/*!< Contenitore di dati per inizializzare un contesto di rendering su una finestra */
+	static _ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE;		/*!< Contenitore con i puntatore alle funzioni e instanze delle librerie per la gestione delle finestre */
 	static _ANIMA_ENGINE_PLATFORM_LIBRARY_CONTEXT_STATE;	/*!< Contenitore con i puntatore alle funzioni e instanze delle librerie per la gestione di OpenGL */
 	static _ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE;		/*!< Contenitore con dati per la gestione del timer */
 	static _ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE;	/*!< Contenitore con dati per la gestione del joystick */
 	static _ANIMA_ENGINE_PLATFORM_LIBRARY_TLS_STATE;		/*!< Contenitore con dati per la gestione dei thread */
-	static bool _animaEngineInitialized;						/*!< Flag per indicare se AnimaEngine è stato inizializzato con successo */
-	static int	_animaEngineCount;								/*!< Contatore di istanze di AnimaEngine */
+	static bool _animaEngineInitialized;					/*!< Flag per indicare se AnimaEngine è stato inizializzato con successo */
+	static int	_animaEngineCount;							/*!< Contatore di istanze di AnimaEngine */
 
-	void*	_mainMemory;		/*!< Buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
-	ASizeT	_mainMemorySize;	/*!< Dimensione del buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
-
-	AnimaFreeListAllocator*	_mainAllocator;			/*!< Allocator usato per creare tutti gli altri allocator */
-	AnimaFreeListAllocator* _modelDataAllocator;	/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
-	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
-	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
-	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */
-	AnimaFreeListAllocator* _stringAllocator;		/*!< Allocator usato dalla classe AnimaString */
-	AnimaFreeListAllocator* _shadersAllocator;		/*!< Allocator usato dalla classe AnimaShaderProgram e AnimaShadersManager */
-	AnimaFreeListAllocator* _camerasAllocator;		/*!< Allocator usato dalla classe AnimaCamerasManager */
+	void*	_sharedMemory;								/*!< Buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
+	ASizeT	_sharedMemorySize;							/*!< Dimensione del buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
+	AnimaFreeListAllocator*	_sharedMemoryAllocator;	/*!< Allocator usato per creare tutti gli altri allocator */
 	
 	static bool _platformLibraryWindowStateInitialized;
 	static bool _platformLibraryContextStateInitialized;
@@ -271,15 +180,17 @@ private:
 	static bool _usedExternal;						/*!< Flag that has to be set to true if AnimaEngine is being used inside an external app. This flag is false ONLY IF AnimaEngine is the one who controls the windowing system */
 
 private:
-	AnimaModelsManager* _modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
-	AnimaShadersManager* _shadersManager;				/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
-	AnimaCamerasManager* _camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
-	AnimaTexturesManager* _texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
-	AnimaDataGeneratorsManager* _dataGeneratorsManager;
-	AnimaMaterialsManager* _materialsManager;
-	AnimaLightsManager* _lightsManager;
 	
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
+
+public:
+	inline AnimaStagesManager* GetStagesManager() {
+		ANIMA_ASSERT(_stagesManager != nullptr);
+		return _stagesManager;
+	}
+
+private:
+	AnimaStagesManager* _stagesManager;
 };
 
 template<class T>

@@ -30,7 +30,7 @@ public:
 	};
 
 protected:
-	AnimaLight(AnimaEngine* engine, const AnimaString& name);
+	AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaLight(const AnimaLight& src);
 	AnimaLight(AnimaLight&& src);
 
@@ -84,7 +84,7 @@ protected:
 class ANIMA_ENGINE_EXPORT AnimaAmbientLight : public AnimaLight
 {
 public:
-	AnimaAmbientLight(AnimaEngine* engine, const AnimaString& name);
+	AnimaAmbientLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaAmbientLight();
 
 	void SetColor(const AnimaColor3f& color) override;
@@ -99,7 +99,7 @@ public:
 class ANIMA_ENGINE_EXPORT AnimaDirectionalLight : public AnimaAmbientLight
 {
 public:
-	AnimaDirectionalLight(AnimaEngine* engine, const AnimaString& name);
+	AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaDirectionalLight();
 	
 	void SetDirection(const AnimaVertex3f& direction) override;
@@ -116,7 +116,7 @@ public:
 class ANIMA_ENGINE_EXPORT AnimaPointLight : public AnimaAmbientLight
 {
 public:
-	AnimaPointLight(AnimaEngine* engine, const AnimaString& name);
+	AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaPointLight();
 
 	void SetPosition(const AnimaVertex3f& position) override;
@@ -141,7 +141,7 @@ public:
 class ANIMA_ENGINE_EXPORT AnimaSpotLight : public AnimaPointLight
 {
 public:
-	AnimaSpotLight(AnimaEngine* engine, const AnimaString& name);
+	AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaSpotLight();
 
 	void SetDirection(const AnimaVertex3f& position) override;

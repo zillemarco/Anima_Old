@@ -10,56 +10,56 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator)
+	: AnimaDataGenerator(allocator)
 	, _vector(0.0f, 0.0f, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex2f& vector)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex2f& vector)
+	: AnimaDataGenerator(allocator)
 	, _vector(vector, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y)
+	: AnimaDataGenerator(allocator)
 	, _vector(x, y, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex3f& vector)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex3f& vector)
+	: AnimaDataGenerator(allocator)
 	, _vector(vector, 1.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y, AFloat z)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z)
+	: AnimaDataGenerator(allocator)
 	, _vector(x, y, z, 1.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, const AnimaVertex4f& vector)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex4f& vector)
+	: AnimaDataGenerator(allocator)
 	, _vector(vector)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaEngine* engine, AFloat x, AFloat y, AFloat z, AFloat w)
-	: AnimaDataGenerator(engine)
+AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w)
+	: AnimaDataGenerator(allocator)
 	, _vector(x, y, z, w)
 {
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaVectorGenerator& src)
-	: AnimaDataGenerator(src._engine)
+	: AnimaDataGenerator(src._allocator)
 	, _vector(src._vector)
 {
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaVectorGenerator&& src)
-	: AnimaDataGenerator(src._engine)
+	: AnimaDataGenerator(src._allocator)
 	, _vector(src._vector)
 {
 }

@@ -11,10 +11,11 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMappedValues::AnimaMappedValues(AnimaEngine* engine, const AnimaString& name)
+AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 {
-	ANIMA_ASSERT(engine != nullptr);
-	_engine = engine;
+	ANIMA_ASSERT(allocator != nullptr);
+	_allocator = allocator;
+	_dataGeneratorManager = dataGeneratorManager;
 	_name = name;
 
 	if (_name.ReverseFind('.') != _name.GetBufferLength())
@@ -23,8 +24,9 @@ AnimaMappedValues::AnimaMappedValues(AnimaEngine* engine, const AnimaString& nam
 
 AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_name = src._name;
+	_dataGeneratorManager = src._dataGeneratorManager;
 
 	_texturesMap = src._texturesMap;
 	_colorsMap = src._colorsMap;
@@ -36,8 +38,9 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_name = src._name;
+	_dataGeneratorManager = src._dataGeneratorManager;
 
 	_texturesMap = src._texturesMap;
 	_colorsMap = src._colorsMap;
@@ -61,8 +64,9 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_name = src._name;
+		_dataGeneratorManager = src._dataGeneratorManager;
 
 		_texturesMap = src._texturesMap;
 		_colorsMap = src._colorsMap;
@@ -79,8 +83,9 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 {
 	if (this != &src)
 	{
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_name = src._name;
+		_dataGeneratorManager = src._dataGeneratorManager;
 
 		_texturesMap = src._texturesMap;
 		_colorsMap = src._colorsMap;
@@ -103,7 +108,7 @@ void AnimaMappedValues::AddTexture(AnimaString propertyName, AnimaTexture* value
 
 void AnimaMappedValues::AddTexture(const char* propertyName, AnimaTexture* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddTexture(str, value);
 }
 
@@ -117,7 +122,7 @@ void AnimaMappedValues::AddColor(AnimaString propertyName, AnimaColorGenerator* 
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColorGenerator* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddColor(str, value);
 }
 
@@ -129,7 +134,7 @@ void AnimaMappedValues::AddColor(AnimaString propertyName, AnimaColor3f value)
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor3f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddColor(str, value);
 }
 
@@ -148,18 +153,18 @@ void AnimaMappedValues::AddColor(const char* propertyName, AFloat r, AFloat g, A
 void AnimaMappedValues::AddColor(AnimaString propertyName, AnimaColor4f value)
 {
 	AnimaString name = _name + propertyName;
-	AnimaColorGenerator* generator = _engine->GetDataGeneratorsManager()->CreateColorGenerator(name);
+	AnimaColorGenerator* generator = _dataGeneratorManager->CreateColorGenerator(name);
 
 	if (generator == nullptr)
 	{
 		int i = 1;
 
-		AnimaString suffix(_engine);
+		AnimaString suffix(_allocator);
 		suffix.Format(".valueGenerator.%d", i);
 
 		while (generator == nullptr)
 		{
-			generator = _engine->GetDataGeneratorsManager()->CreateColorGenerator(name + suffix);
+			generator = _dataGeneratorManager->CreateColorGenerator(name + suffix);
 
 			i++;
 			suffix.Format(".valueGenerator.%d", i);
@@ -173,7 +178,7 @@ void AnimaMappedValues::AddColor(AnimaString propertyName, AnimaColor4f value)
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor4f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddColor(str, value);
 }
 
@@ -199,7 +204,7 @@ void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVectorGenerator
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddVector(str, value);
 }
 
@@ -211,7 +216,7 @@ void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex2f value)
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex2f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddVector(str, value);
 }
 
@@ -235,7 +240,7 @@ void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex3f value)
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex3f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddVector(str, value);
 }
 
@@ -254,18 +259,18 @@ void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, 
 void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex4f value)
 {
 	AnimaString name = _name + propertyName;
-	AnimaVectorGenerator* generator = _engine->GetDataGeneratorsManager()->CreateVectorGenerator(name);
+	AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(name);
 
 	if (generator == nullptr)
 	{
 		int i = 1;
 
-		AnimaString suffix(_engine);
+		AnimaString suffix(_allocator);
 		suffix.Format(".valueGenerator.%d", i);
 
 		while (generator == nullptr)
 		{
-			generator = _engine->GetDataGeneratorsManager()->CreateVectorGenerator(name + suffix);
+			generator = _dataGeneratorManager->CreateVectorGenerator(name + suffix);
 
 			i++;
 			suffix.Format(".valueGenerator.%d", i);
@@ -279,7 +284,7 @@ void AnimaMappedValues::AddVector(AnimaString propertyName, AnimaVertex4f value)
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex4f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddVector(str, value);
 }
 
@@ -305,7 +310,7 @@ void AnimaMappedValues::AddFloat(AnimaString propertyName, AFloat value)
 
 void AnimaMappedValues::AddFloat(const char* propertyName, AFloat value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddFloat(str, value);
 }
 
@@ -319,7 +324,7 @@ void AnimaMappedValues::AddBoolean(AnimaString propertyName, bool value)
 
 void AnimaMappedValues::AddBoolean(const char* propertyName, bool value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddBoolean(str, value);
 }
 
@@ -333,7 +338,7 @@ void AnimaMappedValues::AddInteger(AnimaString propertyName, AInt value)
 
 void AnimaMappedValues::AddInteger(const char* propertyName, AInt value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	AddInteger(str, value);
 }
 
@@ -348,7 +353,7 @@ void AnimaMappedValues::SetTexture(AnimaString propertyName, AnimaTexture* value
 
 void AnimaMappedValues::SetTexture(const char* propertyName, AnimaTexture* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetTexture(str, value);
 }
 
@@ -363,7 +368,7 @@ void AnimaMappedValues::SetColor(AnimaString propertyName, AnimaColorGenerator* 
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColorGenerator* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetColor(str, value);
 }
 
@@ -375,7 +380,7 @@ void AnimaMappedValues::SetColor(AnimaString propertyName, AnimaColor3f value)
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor3f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetColor(str, value);
 }
 
@@ -387,14 +392,14 @@ void AnimaMappedValues::SetColor(AnimaString propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetColor(str, r, g, b);
 }
 
 void AnimaMappedValues::SetColor(AnimaString propertyName, AnimaColor4f value)
 {
 	AnimaString name = _name + propertyName;
-	AnimaColorGenerator* generator = (AnimaColorGenerator*)_engine->GetDataGeneratorsManager()->GetGenerator(name);
+	AnimaColorGenerator* generator = (AnimaColorGenerator*)_dataGeneratorManager->GetGenerator(name);
 	if (generator == nullptr)
 		AddColor(propertyName, value);
 	else
@@ -406,7 +411,7 @@ void AnimaMappedValues::SetColor(AnimaString propertyName, AnimaColor4f value)
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor4f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetColor(str, value);
 }
 
@@ -418,7 +423,7 @@ void AnimaMappedValues::SetColor(AnimaString propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetColor(str, r, g, b, a);
 }
 
@@ -433,7 +438,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVectorGenerator
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, value);
 }
 
@@ -445,7 +450,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex2f value)
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex2f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, value);
 }
 
@@ -457,7 +462,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y)
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, x, y);
 }
 
@@ -469,7 +474,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex3f value)
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex3f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, value);
 }
 
@@ -481,14 +486,14 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, x, y, z);
 }
 
 void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex4f value)
 {
 	AnimaString name = _name + propertyName;
-	AnimaVectorGenerator* generator = (AnimaVectorGenerator*)_engine->GetDataGeneratorsManager()->GetGenerator(name);
+	AnimaVectorGenerator* generator = (AnimaVectorGenerator*)_dataGeneratorManager->GetGenerator(name);
 	if (generator == nullptr)
 		AddVector(propertyName, value);
 	else
@@ -500,7 +505,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AnimaVertex4f value)
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex4f value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, value);
 }
 
@@ -512,7 +517,7 @@ void AnimaMappedValues::SetVector(AnimaString propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetVector(str, x, y, z, w);
 }
 
@@ -527,7 +532,7 @@ void AnimaMappedValues::SetFloat(AnimaString propertyName, AFloat value)
 
 void AnimaMappedValues::SetFloat(const char* propertyName, AFloat value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetFloat(str, value);
 }
 
@@ -542,7 +547,7 @@ void AnimaMappedValues::SetBoolean(AnimaString propertyName, bool value)
 
 void AnimaMappedValues::SetBoolean(const char* propertyName, bool value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetBoolean(str, value);
 }
 
@@ -557,7 +562,7 @@ void AnimaMappedValues::SetInteger(AnimaString propertyName, AInt value)
 
 void AnimaMappedValues::SetInteger(const char* propertyName, AInt value)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	SetInteger(str, value);
 }
 
@@ -571,7 +576,7 @@ AnimaTexture* AnimaMappedValues::GetTexture(AnimaString propertyName)
 
 AnimaTexture* AnimaMappedValues::GetTexture(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetTexture(str);
 }
 
@@ -587,7 +592,7 @@ AnimaColor3f AnimaMappedValues::GetColor3f(AnimaString propertyName)
 
 AnimaColor3f AnimaMappedValues::GetColor3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetColor3f(str);
 }
 
@@ -603,7 +608,7 @@ AnimaColor4f AnimaMappedValues::GetColor4f(AnimaString propertyName)
 
 AnimaColor4f AnimaMappedValues::GetColor4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetColor4f(str);
 }
 
@@ -619,7 +624,7 @@ AnimaVertex2f AnimaMappedValues::GetVector2f(AnimaString propertyName)
 
 AnimaVertex2f AnimaMappedValues::GetVector2f(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetVector2f(str);
 }
 
@@ -635,7 +640,7 @@ AnimaVertex3f AnimaMappedValues::GetVector3f(AnimaString propertyName)
 
 AnimaVertex3f AnimaMappedValues::GetVector3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetVector3f(str);
 }
 
@@ -651,7 +656,7 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(AnimaString propertyName)
 
 AnimaVertex4f AnimaMappedValues::GetVector4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetVector4f(str);
 }
 
@@ -665,7 +670,7 @@ AFloat AnimaMappedValues::GetFloat(AnimaString propertyName)
 
 AFloat AnimaMappedValues::GetFloat(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetFloat(str);
 }
 
@@ -679,7 +684,7 @@ bool AnimaMappedValues::GetBoolean(AnimaString propertyName)
 
 bool AnimaMappedValues::GetBoolean(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetBoolean(str);
 }
 
@@ -693,7 +698,7 @@ AInt AnimaMappedValues::GetInteger(AnimaString propertyName)
 
 AInt AnimaMappedValues::GetInteger(const char* propertyName)
 {
-	AnimaString str(propertyName, _engine);
+	AnimaString str(propertyName, _allocator);
 	return GetInteger(str);
 }
 

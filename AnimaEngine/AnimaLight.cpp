@@ -14,8 +14,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 //----------------------------------------------------------------
 //						ANIMA LIGHT
 //----------------------------------------------------------------
-AnimaLight::AnimaLight(AnimaEngine* engine, const AnimaString& name)
-	: AnimaMappedValues(engine, name)
+AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
 }
 
@@ -186,8 +186,8 @@ bool AnimaLight::IsSpotLight()
 //----------------------------------------------------------------
 //						ANIMA AMBIENT LIGHT
 //----------------------------------------------------------------
-AnimaAmbientLight::AnimaAmbientLight(AnimaEngine* engine, const AnimaString& name)
-	: AnimaLight(engine, name)
+AnimaAmbientLight::AnimaAmbientLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaLight(allocator, dataGeneratorManager, name)
 {
 	AnimaMappedValues::SetColor("color", 1.0f, 1.0f, 1.0f);
 	AnimaMappedValues::SetFloat("intensity", 1.0f);
@@ -217,8 +217,8 @@ AnimaColor3f AnimaAmbientLight::GetColor()
 //----------------------------------------------------------------
 //						ANIMA DIRECTIONAL LIGHT
 //----------------------------------------------------------------
-AnimaDirectionalLight::AnimaDirectionalLight(AnimaEngine* engine, const AnimaString& name)
-	: AnimaAmbientLight(engine, name)
+AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaAmbientLight(allocator, dataGeneratorManager, name)
 {
 	AnimaMappedValues::SetVector("direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	AnimaMappedValues::SetFloat("intensity", 0.0f);
@@ -258,8 +258,8 @@ AFloat AnimaDirectionalLight::GetIntensity()
 //----------------------------------------------------------------
 //						ANIMA POINT LIGHT
 //----------------------------------------------------------------
-AnimaPointLight::AnimaPointLight(AnimaEngine* engine, const AnimaString& name)
-	: AnimaAmbientLight(engine, name)
+AnimaPointLight::AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaAmbientLight(allocator, dataGeneratorManager, name)
 {
 	AnimaMappedValues::SetVector("position", 0.0f, 0.0f, 0.0f);
 	AnimaMappedValues::SetFloat("intensity", 0.0f);
@@ -343,8 +343,8 @@ AFloat AnimaPointLight::GetRange()
 //----------------------------------------------------------------
 //						ANIMA SPOT LIGHT
 //----------------------------------------------------------------
-AnimaSpotLight::AnimaSpotLight(AnimaEngine* engine, const AnimaString& name)
-	: AnimaPointLight(engine, name)
+AnimaSpotLight::AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager,  const AnimaString& name)
+	: AnimaPointLight(allocator, dataGeneratorManager, name)
 {
 	AnimaMappedValues::SetVector("direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
 	AnimaMappedValues::SetFloat("cutoff", 0.7f);

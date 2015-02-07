@@ -15,6 +15,7 @@
 #include "AnimaString.h"
 #include "AnimaColorGenerator.h"
 #include "AnimaVectorGenerator.h"
+#include "AnimaDataGeneratorsManager.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include <boost/unordered_map.hpp>
@@ -24,7 +25,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMappedValues
 {
 protected:
-	AnimaMappedValues(AnimaEngine* engine, const AnimaString& name);
+	AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaMappedValues(const AnimaMappedValues& src);
 	AnimaMappedValues(AnimaMappedValues&& src);
 
@@ -136,7 +137,8 @@ public:
 	bool GetBoolean(const char* propertyName);
 	
 protected:
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
+	AnimaDataGeneratorsManager* _dataGeneratorManager;
 	AnimaString _name;
 
 #pragma warning (disable: 4251)

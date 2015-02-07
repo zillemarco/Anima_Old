@@ -19,7 +19,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaFace
 {
 public:
-	AnimaFace(AnimaEngine* engine);
+	AnimaFace(AnimaAllocator* allocator);
 	AnimaFace(const AnimaFace& src);
 	AnimaFace(AnimaFace&& src);
 	~AnimaFace();
@@ -44,7 +44,7 @@ protected:
 	AUint*	_indexes;
 	ASizeT	_indexesNumber;
 	
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

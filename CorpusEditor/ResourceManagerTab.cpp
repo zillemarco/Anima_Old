@@ -16,6 +16,8 @@
 #include <QMenu>
 #include <QItemSelection>
 #include <AnimaModel.h>
+#include <AnimaStage.h>
+#include <AnimaStagesManager.h>
 
 Q_DECLARE_METATYPE(Anima::AnimaModel*)
 
@@ -39,7 +41,7 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 {
 	if (role == Qt::EditRole)
 	{
-		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine());
+		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetStringAllocator());
 		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
 		
 		if(index.column() == 0)
@@ -48,9 +50,9 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			
 			bool bFound = false;
-			for (int i = 0; i < _document->GetEngine()->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			for (int i = 0; i < _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if(_document->GetEngine()->GetModelsManager()->GetPModel(i)->GetAnimaModelName() == newString)
+				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModel(i)->GetAnimaModelName() == newString)
 					bFound = true;
 			}
 		
@@ -73,9 +75,9 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			
 			bool bFound = false;
-			for (int i = 0; i < _document->GetEngine()->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			for (int i = 0; i < _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if(_document->GetEngine()->GetModelsManager()->GetPModel(i)->GetAnimaModelFileName() == newString)
+				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModel(i)->GetAnimaModelFileName() == newString)
 					bFound = true;
 			}
 			
@@ -164,7 +166,7 @@ void ResourceManagerTab::LoadModelsTree()
 {
 	_modelResourcesTreeItem->removeRows(0, _modelResourcesTreeItem->rowCount());
 	
-	Anima::AnimaModelsManager* mgr = _document->GetEngine()->GetModelsManager();
+	Anima::AnimaModelsManager* mgr = _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager();
 	for(int i = 0; i < mgr->GetModelsNumber(); i++)
 	{
 		QList<QStandardItem*> newItem;

@@ -12,17 +12,17 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaString::AnimaString(AnimaEngine* engine)
+AnimaString::AnimaString(AnimaAllocator* allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	
 	_string = nullptr;
 	_stringLength = 0;
 }
 
-AnimaString::AnimaString(const char* src, AnimaEngine* engine)
+AnimaString::AnimaString(const char* src, AnimaAllocator* allocator)
 {
-	_engine = engine;
+	_allocator = allocator;
 	
 	_string = nullptr;
 	_stringLength = 0;
@@ -32,7 +32,7 @@ AnimaString::AnimaString(const char* src, AnimaEngine* engine)
 
 AnimaString::AnimaString(const AnimaString& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	
 	_string = nullptr;
 	_stringLength = 0;
@@ -43,7 +43,7 @@ AnimaString::AnimaString(const AnimaString& src)
 AnimaString::AnimaString(AnimaString&& src)
 : _string(src._string)
 , _stringLength(src._stringLength)
-, _engine(src._engine)
+, _allocator(src._allocator)
 {
 	src._string = nullptr;
 	src._stringLength = 0;
@@ -60,7 +60,7 @@ AnimaString& AnimaString::operator=(const AnimaString& src)
 	{
 		ClearString();
 	
-		_engine = src._engine;
+		_allocator = src._allocator;
 		SetString(src._string);
 	}
 	return *this;
@@ -72,7 +72,7 @@ AnimaString& AnimaString::operator=(AnimaString&& src)
 	{
 		ClearString();
 		
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_string = src._string;
 		_stringLength = src._stringLength;
 		
@@ -84,7 +84,7 @@ AnimaString& AnimaString::operator=(AnimaString&& src)
 
 AnimaString& AnimaString::operator=(const char* src)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	SetString(src);
@@ -114,14 +114,14 @@ bool AnimaString::operator!=(const char* left)
 
 void AnimaString::SetString(const char* str)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	
 	if(str != nullptr)
 	{
 		_stringLength = strlen(str) + 1;
-		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), _stringLength);
+		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
 		memset(_string, 0, _stringLength);
 	
 		strcpy(_string, str);
@@ -130,9 +130,9 @@ void AnimaString::SetString(const char* str)
 
 void AnimaString::ClearString()
 {
-	if(_engine != nullptr && _string != nullptr && _stringLength > 0)
+	if(_allocator != nullptr && _string != nullptr && _stringLength > 0)
 	{
-		AnimaAllocatorNamespace::DeallocateArray<AChar>(*(_engine->GetStringAllocator()), _string);
+		AnimaAllocatorNamespace::DeallocateArray<AChar>(*_allocator, _string);
 		_string = nullptr;
 		_stringLength = 0;
 	}
@@ -150,7 +150,7 @@ AChar* AnimaString::GetBuffer() const
 
 void AnimaString::Format(const char* format, ...)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	ClearString();
 	
 	va_list args;
@@ -159,7 +159,7 @@ void AnimaString::Format(const char* format, ...)
 	ASizeT length = GetFormatStringLength(format, args);
 	
 	_stringLength = length + 1;
-	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), _stringLength);
+	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
 	memset(_string, 0, _stringLength);
 	
 	vsnprintf(_string, _stringLength, format, args);
@@ -188,9 +188,9 @@ ASizeT AnimaString::GetBufferLength() const
 
 AnimaString& AnimaString::operator+=(const AnimaString& src)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	ASizeT newStringLength = (this->_stringLength - 1) + (src._stringLength - 1) + 1;
-	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), newStringLength);
+	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
 	AChar* tmp = newString;
 	
 	strcpy(newString, _string);
@@ -201,7 +201,7 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 	
 	SetString(newString);
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetStringAllocator()), newString);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
 	
 	newString = nullptr;
 	tmp = nullptr;
@@ -211,9 +211,9 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 
 AnimaString& AnimaString::operator+=(const char* src)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	ASizeT newStringLength = (this->_stringLength - 1) + strlen(src) + 1;
-	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), newStringLength);
+	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
 	AChar* tmp = newString;
 	
 	strcpy(newString, _string);
@@ -224,7 +224,7 @@ AnimaString& AnimaString::operator+=(const char* src)
 	
 	SetString(newString);
 	
-	AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetStringAllocator()), newString);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
 	
 	newString = nullptr;
 	tmp = nullptr;
@@ -246,12 +246,12 @@ const AChar& AnimaString::operator[](ASizeT index) const
 
 void AnimaString::Reserve(ASizeT size)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	
 	_stringLength = size + 1;
-	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*(_engine->GetStringAllocator()), _stringLength);
+	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
 	memset(_string, 0, _stringLength);
 }
 
@@ -367,11 +367,11 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 
 AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	if(startPos < 0)
 		startPos = 0;
 	
-	AnimaString resultString(_engine);
+	AnimaString resultString(_allocator);
 	
 	if(len <= 0)
 		resultString = "";
@@ -457,7 +457,7 @@ void AnimaString::Replace(AChar find, AChar replacement, AInt startPos, AInt cou
 
 void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = strlen(replacement);
@@ -468,7 +468,7 @@ void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AI
 		if(count > 0 && replacements >= count)
 			break;
 		
-		AnimaString tmpString(_engine);
+		AnimaString tmpString(_allocator);
 		tmpString.Reserve(_stringLength - 1 + replacementLength);
 		
 		int offsetString = 0;
@@ -497,7 +497,7 @@ void AnimaString::Replace(AChar find, const AnimaString& replacement, AInt start
 
 void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = 1;
@@ -508,7 +508,7 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 		if(count > 0 && replacements >= count)
 			break;
 		
-		AnimaString tmpString(_engine);
+		AnimaString tmpString(_allocator);
 		tmpString.Reserve(_stringLength - 1 - findLength + replacementLength);
 		
 		int offsetString = 0;
@@ -532,7 +532,7 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 
 void AnimaString::Replace(const char* find, const char* replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	ASizeT replacementLength = strlen(replacement);
@@ -543,7 +543,7 @@ void AnimaString::Replace(const char* find, const char* replacement, AInt startP
 		if(count > 0 && replacements >= count)
 			break;
 		
-		AnimaString tmpString(_engine);
+		AnimaString tmpString(_allocator);
 		tmpString.Reserve(_stringLength - 1 - findLength + replacementLength);
 		
 		int offsetString = 0;

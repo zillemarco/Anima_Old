@@ -11,6 +11,7 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
+#include "AnimaStage.h"
 #include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -57,7 +58,7 @@ public:
 	};
 
 public:
-	AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager);
+	AnimaShaderProgram(AnimaAllocator* allocator, AnimaShadersManager* shadersManager);
 	AnimaShaderProgram(const AnimaShaderProgram& src);
 	AnimaShaderProgram(AnimaShaderProgram&& src);
 	~AnimaShaderProgram();
@@ -88,14 +89,14 @@ public:
 public:
 	void ScanVariables();
 
-	void EnableInputs(AnimaEngine* engine, AnimaMesh* mesh);
-	void DisableInputs(AnimaEngine* engine);
+	void EnableInputs(AnimaStage* stage, AnimaMesh* mesh);
+	void DisableInputs(AnimaStage* stage);
 
-	void UpdateMeshProperies(AnimaEngine* engine, AnimaMesh* mesh, const AnimaMatrix& transformation);
-	void UpdateCameraProperies(AnimaEngine* engine, AnimaCamera* camera);
-	void UpdateMaterialProperies(AnimaEngine* engine, AnimaMaterial* material);
-	void UpdateLightProperies(AnimaEngine* engine, AnimaLight* light);
-	void UpdateLightsProperies(AnimaEngine* engine);
+	void UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh, const AnimaMatrix& transformation);
+	void UpdateCameraProperies(AnimaStage* stage, AnimaCamera* camera);
+	void UpdateMaterialProperies(AnimaStage* stage, AnimaMaterial* material);
+	void UpdateLightProperies(AnimaStage* stage, AnimaLight* light);
+	void UpdateLightsProperies(AnimaStage* stage);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
@@ -115,7 +116,7 @@ public:
 	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
 	
 private:
-	AnimaEngine*	_engine;
+	AnimaAllocator*	_allocator;
 	
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;

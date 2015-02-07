@@ -20,11 +20,11 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaColorGenerator : public AnimaDataGenerator
 {
 public:
-	AnimaColorGenerator(AnimaEngine* engine);
-	AnimaColorGenerator(AnimaEngine* engine, const AnimaColor3f& color);
-	AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b);
-	AnimaColorGenerator(AnimaEngine* engine, const AnimaColor4f& color);
-	AnimaColorGenerator(AnimaEngine* engine, AFloat r, AFloat g, AFloat b, AFloat a);
+	AnimaColorGenerator(AnimaAllocator* allocator);
+	AnimaColorGenerator(AnimaAllocator* allocator, const AnimaColor3f& color);
+	AnimaColorGenerator(AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b);
+	AnimaColorGenerator(AnimaAllocator* allocator, const AnimaColor4f& color);
+	AnimaColorGenerator(AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b, AFloat a);
 	AnimaColorGenerator(const AnimaColorGenerator& src);
 	AnimaColorGenerator(AnimaColorGenerator&& src);
 	~AnimaColorGenerator();

@@ -17,6 +17,7 @@
 #include "AnimaCamera.h"
 #include "AnimaFirstPersonCamera.h"
 #include "AnimaThirdPersonCamera.h"
+#include "AnimaStage.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -27,7 +28,7 @@ class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 	friend AnimaThirdPersonCamera;
 	
 public:
-	AnimaCamerasManager(AnimaEngine* engine);
+	AnimaCamerasManager(AnimaStage* stage);
 	~AnimaCamerasManager();
 	
 	AnimaFirstPersonCamera* CreateNewFirstPersonCamera(const AnimaString& name);
@@ -50,7 +51,7 @@ private:
 	void NotifyCameraDeactivation(AnimaCamera* camera);
 	
 private:
-	AnimaEngine* _engine;
+	AnimaStage* _stage;
 	
 	AnimaCamera**	_cameras;
 	ASizeT			_camerasNumber;

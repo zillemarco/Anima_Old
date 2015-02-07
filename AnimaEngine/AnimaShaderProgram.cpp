@@ -8,9 +8,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
-AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager* shadersManager)
+AnimaShaderProgram::AnimaShaderProgram(AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
 {
-	_engine = engine;
+	_allocator = allocator;
 	_shaders = nullptr;
 	_shadersNumber = 0;
 	_id = 0;
@@ -24,7 +24,7 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaEngine* engine, AnimaShadersManager*
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 {
-	_engine = src._engine;
+	_allocator = src._allocator;
 	_id = src._id;
 	_linked = src._linked;
 
@@ -43,7 +43,7 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
-	: _engine(src._engine)
+	: _allocator(src._allocator)
 	, _shaders(src._shaders)
 	, _shadersNumber(src._shadersNumber)
 	, _id(src._id)
@@ -63,11 +63,11 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 
 AnimaShaderProgram::~AnimaShaderProgram()
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 
 	if (_shadersNumber > 0 && _shaders != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shaders);
+		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*_allocator, _shaders);
 		_shaders = nullptr;
 		_shadersNumber = 0;
 	}
@@ -88,7 +88,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 		_maxPointLights = src._maxPointLights;
 		_maxSpotLights = src._maxSpotLights;
 
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_id = src._id;
 		_linked = src._linked;
 	}
@@ -109,7 +109,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_maxPointLights = src._maxPointLights;
 		_maxSpotLights = src._maxSpotLights;
 
-		_engine = src._engine;
+		_allocator = src._allocator;
 		_id = src._id;
 		_linked = src._linked;
 
@@ -126,7 +126,7 @@ bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
-	if (_engine != left._engine) return false;
+	if (_allocator != left._allocator) return false;
 	if (_shadersNumber != left._shadersNumber) return false; 
 	if (_linked != left._linked) return false;
 	if(_maxPointLights != left._maxPointLights) return false;
@@ -145,7 +145,7 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 {
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
-	if (_engine != left._engine) return true;
+	if (_allocator != left._allocator) return true;
 	if (_shadersNumber != left._shadersNumber) return true;
 	if (_linked != left._linked) return true;
 	if (_maxPointLights != left._maxPointLights) return true;
@@ -162,30 +162,30 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 
 void AnimaShaderProgram::AddShader(AnimaShader* shader)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_allocator != nullptr);
 	if (_shadersNumber > 0)
 	{
-		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
+		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
 
 		for (int i = 0; i < _shadersNumber; i++)
 			tmpOldShaders[i] = _shaders[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), _shaders);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
 
 		_shadersNumber++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
+		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
 
 		for (int i = 0; i < _shadersNumber - 1; i++)
 			_shaders[i] = tmpOldShaders[i];
 
 		_shaders[_shadersNumber - 1] = shader;
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), tmpOldShaders);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldShaders);
 	}
 	else
 	{
 		_shadersNumber++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
+		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
 
 		_shaders[_shadersNumber - 1] = shader;
 	}
@@ -193,13 +193,13 @@ void AnimaShaderProgram::AddShader(AnimaShader* shader)
 
 void AnimaShaderProgram::SetShaders(AnimaShader** shaders, ASizeT count)
 {
-	ANIMA_ASSERT(_engine != nullptr)
+	ANIMA_ASSERT(_allocator != nullptr)
 	ClearShaders();
 
 	if (shaders != nullptr && count > 0)
 	{
 		_shadersNumber = count;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), count);
+		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, count);
 
 		for (int i = 0; i < _shadersNumber; i++)
 			_shaders[i] = shaders[i];
@@ -210,7 +210,7 @@ void AnimaShaderProgram::ClearShaders()
 {
 	if (_shaders != nullptr && _shadersNumber > 0)
 	{
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), _shaders);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
 		_shaders = nullptr;
 		_shadersNumber = 0;
 	}
@@ -335,7 +335,7 @@ void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 
 void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniformi(str, value);
 }
 
@@ -347,7 +347,7 @@ void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat valu
 
 void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniformf(str, value);
 }
 
@@ -359,7 +359,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value);
 }
 
@@ -371,7 +371,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value);
 }
 
@@ -383,7 +383,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaC
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value);
 }
 
@@ -395,7 +395,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, a, b, c);
 }
 
@@ -407,7 +407,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, a, b, c, d);
 }
 
@@ -419,7 +419,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaM
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
 {
-	AnimaString str(uniformName, _engine);
+	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value, transpose);
 }
 
@@ -441,7 +441,7 @@ void AnimaShaderProgram::ScanVariables()
 
 		const int propertiesSize = 4;
 
-		AnimaString name(_engine);
+		AnimaString name(_allocator);
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
 		GLint values[propertiesSize];
 
@@ -497,8 +497,8 @@ void AnimaShaderProgram::ScanVariables()
 		glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveInputs);
 		//glGetProgramiv(_id, GL_ACTIVE_RESOURCES, &numActiveOutputs);
 
-		AnimaString name(_engine);
-		AnimaString tmp(_engine);
+		AnimaString name(_allocator);
+		AnimaString tmp(_allocator);
 		GLenum type;
 		GLsizei bufLen;
 		GLsizei elements;
@@ -543,7 +543,7 @@ void AnimaShaderProgram::ScanVariables()
 	_maxPointLights = 0;
 	_maxSpotLights = 0;
 
-	AnimaString str(_engine);
+	AnimaString str(_allocator);
 	bool stop = false;
 
 	while (!stop)
@@ -566,7 +566,7 @@ void AnimaShaderProgram::ScanVariables()
 	}
 }
 
-void AnimaShaderProgram::EnableInputs(AnimaEngine* engine, AnimaMesh* mesh)
+void AnimaShaderProgram::EnableInputs(AnimaStage* stage, AnimaMesh* mesh)
 {
 	glBindVertexArray(mesh->GetVertexArrayObject());
 
@@ -601,7 +601,7 @@ void AnimaShaderProgram::EnableInputs(AnimaEngine* engine, AnimaMesh* mesh)
 	}
 }
 
-void AnimaShaderProgram::DisableInputs(AnimaEngine* engine)
+void AnimaShaderProgram::DisableInputs(AnimaStage* stage)
 {
 	for (auto key : _inputs)
 	{
@@ -610,9 +610,9 @@ void AnimaShaderProgram::DisableInputs(AnimaEngine* engine)
 	}
 }
 
-void AnimaShaderProgram::UpdateMeshProperies(AnimaEngine* engine, AnimaMesh* mesh, const AnimaMatrix& transformation)
+void AnimaShaderProgram::UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh, const AnimaMatrix& transformation)
 {
-	AnimaString str(engine);
+	AnimaString str(_allocator);
 	AnimaUniformInfo info;
 	auto end = _uniforms.end();
 
@@ -630,9 +630,9 @@ void AnimaShaderProgram::UpdateMeshProperies(AnimaEngine* engine, AnimaMesh* mes
 	}
 }
 
-void AnimaShaderProgram::UpdateCameraProperies(AnimaEngine* engine, AnimaCamera* camera)
+void AnimaShaderProgram::UpdateCameraProperies(AnimaStage* stage, AnimaCamera* camera)
 {
-	AnimaString str(engine);
+	AnimaString str(_allocator);
 	AnimaUniformInfo info;
 	auto end = _uniforms.end();
 
@@ -702,12 +702,12 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaEngine* engine, AnimaCamera*
 	}
 }
 
-void AnimaShaderProgram::UpdateMaterialProperies(AnimaEngine* engine, AnimaMaterial* material)
+void AnimaShaderProgram::UpdateMaterialProperies(AnimaStage* stage, AnimaMaterial* material)
 {
 	if (material == nullptr)
 		return;
 
-	AnimaString str(engine);
+	AnimaString str(_allocator);
 	AnimaUniformInfo info;
 	auto end = _uniforms.end();
 
@@ -847,7 +847,7 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaEngine* engine, AnimaMater
 	glCullFace(material->GetInteger("cullFace"));
 }
 
-void AnimaShaderProgram::UpdateLightProperies(AnimaEngine* engine, AnimaLight* light)
+void AnimaShaderProgram::UpdateLightProperies(AnimaStage* stage, AnimaLight* light)
 {
 	if (light->IsAmbientLight())
 	{
@@ -883,9 +883,9 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaEngine* engine, AnimaLight* l
 	}
 }
 
-void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
+void AnimaShaderProgram::UpdateLightsProperies(AnimaStage* stage)
 {
-	AnimaLightsManager* lightsManager = engine->GetLightsManager();
+	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 
 	AInt lightsCount = lightsManager->GetTotalLightsCount();
 
@@ -895,7 +895,7 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaEngine* engine)
 	int nextPointLight = 0;
 	int nextSpotLight = 0;
 
-	AnimaString str(_engine);
+	AnimaString str(_allocator);
 	AnimaLight* light = nullptr;
 	
 	for (int i = 0; i < lightsCount; i++)

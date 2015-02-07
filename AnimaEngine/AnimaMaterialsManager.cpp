@@ -10,9 +10,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMaterialsManager::AnimaMaterialsManager(AnimaEngine* engine)
+AnimaMaterialsManager::AnimaMaterialsManager(AnimaStage* stage)
 {
-	_engine = engine;
+	_stage = stage;
 	
 	_materials = nullptr;
 	_materialsNumber = 0;
@@ -28,10 +28,10 @@ AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 	if (_materialsMap.find(name) != _materialsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_materialsNumber > 0)
 	{
-		AnimaMaterial** tmpOldMaterials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_engine->GetGenericAllocator()), _materialsNumber);
+		AnimaMaterial** tmpOldMaterials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_stage->GetMaterialsAllocator()), _materialsNumber);
 
 		for (int i = 0; i < _materialsNumber; i++)
 			tmpOldMaterials[i] = _materials[i];
@@ -39,21 +39,21 @@ AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 		ClearMaterials(false, false);
 
 		_materialsNumber++;
-		_materials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_engine->GetGenericAllocator()), _materialsNumber);
+		_materials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_stage->GetMaterialsAllocator()), _materialsNumber);
 
 		for (int i = 0; i < _materialsNumber - 1; i++)
 			_materials[i] = tmpOldMaterials[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldMaterials);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetMaterialsAllocator()), tmpOldMaterials);
 		tmpOldMaterials = nullptr;
 	}
 	else
 	{
 		_materialsNumber++;
-		_materials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_engine->GetGenericAllocator()), _materialsNumber);
+		_materials = AnimaAllocatorNamespace::AllocateArray<AnimaMaterial*>(*(_stage->GetMaterialsAllocator()), _materialsNumber);
 	}
 
-	_materials[_materialsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_engine->GetGenericAllocator()), _engine, name);
+	_materials[_materialsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_stage->GetMaterialsAllocator()), _stage->GetMaterialsAllocator(), _stage->GetDataGeneratorsManager(), name);
 
 	_materialsMap[name] = (AUint)(_materialsNumber - 1);
 
@@ -62,7 +62,7 @@ AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 
 AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateMaterial(str);
 }
 
@@ -74,12 +74,12 @@ void AnimaMaterialsManager::ClearMaterials(bool bDeleteObjects, bool bResetNumbe
 		{
 			for (int i = 0; i < (int)_materialsNumber; i++)
 			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetGenericAllocator()), _materials[i]);
+				AnimaAllocatorNamespace::DeallocateObject(*(_stage->GetMaterialsAllocator()), _materials[i]);
 				_materials[i] = nullptr;
 			}
 		}
 		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaMaterial*>(*(_engine->GetGenericAllocator()), _materials);
+		AnimaAllocatorNamespace::DeallocateArray<AnimaMaterial*>(*(_stage->GetMaterialsAllocator()), _materials);
 		_materials = nullptr;
 	}
 	
@@ -102,7 +102,7 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterial(const AnimaString& name)
 
 AnimaMaterial* AnimaMaterialsManager::GetMaterial(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return GetMaterial(str);
 }
 

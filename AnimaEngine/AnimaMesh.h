@@ -26,7 +26,7 @@ class AnimaModel;
 class ANIMA_ENGINE_EXPORT AnimaMesh
 {
 public:
-	AnimaMesh(AnimaEngine* engine);
+	AnimaMesh(AnimaAllocator* allocator);
 	AnimaMesh(const AnimaMesh& src);
 	AnimaMesh(AnimaMesh&& src);
 	~AnimaMesh();
@@ -157,7 +157,7 @@ protected:
 	//AUint			_colorsBufferObject;
 	AUint			_textureCoordsBufferObject;
 	
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 
 	bool _needsBuffersUpdate;
 };

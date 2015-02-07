@@ -11,8 +11,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaTexture
 {
 public:
-	AnimaTexture(AnimaEngine* engine);
-	AnimaTexture(AnimaEngine* engine, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format);
+	AnimaTexture(AnimaAllocator* allocator);
+	AnimaTexture(AnimaAllocator* allocator, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -47,7 +47,7 @@ public:
 	void Bind(AUint unit);
 
 private:
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 	
 	AUchar* _data;
 	ASizeT _dataSize;

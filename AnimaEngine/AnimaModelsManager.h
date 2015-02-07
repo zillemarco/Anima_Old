@@ -15,6 +15,7 @@
 #include "AnimaModel.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
+#include "AnimaStage.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -27,7 +28,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModelsManager
 {
 public:
-	AnimaModelsManager(AnimaEngine* engine);
+	AnimaModelsManager(AnimaStage* stage);
 	~AnimaModelsManager();
 	
 public:
@@ -40,10 +41,7 @@ public:
 
 	ASizeT GetModelsNumber();
 
-//	AnimaModel GetModel(ASizeT index);
 	AnimaModel* GetPModel(ASizeT index);
-//	AnimaModel GetModelFromName(const AnimaString& name);
-//	AnimaModel GetModelFromName(const char* name);
 	AnimaModel* GetPModelFromName(const AnimaString& name);
 	AnimaModel* GetPModelFromName(const char* name);
 	
@@ -58,7 +56,7 @@ private:
 	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
 	
 private:
-	AnimaEngine* _engine;
+	AnimaStage* _stage;
 	
 	AnimaModel* _models;
 	ASizeT		_modelsNumber;

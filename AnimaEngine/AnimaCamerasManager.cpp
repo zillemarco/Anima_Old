@@ -10,9 +10,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaCamerasManager::AnimaCamerasManager(AnimaEngine* engine)
+AnimaCamerasManager::AnimaCamerasManager(AnimaStage* stage)
 {
-	_engine = engine;
+	_stage = stage;
 	
 	_cameras = nullptr;
 	_camerasNumber = 0;
@@ -30,10 +30,10 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const An
 	if (_camerasMap.find(name) != _camerasMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_camerasNumber > 0)
 	{
-		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 		
 		for (int i = 0; i < _camerasNumber; i++)
 			tmpOldCameras[i] = _cameras[i];
@@ -41,21 +41,21 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const An
 		ClearCameras(false, false);
 		
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 		
 		for (int i = 0; i < _camerasNumber - 1; i++)
 			_cameras[i] = tmpOldCameras[i];
 		
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetCamerasAllocator()), tmpOldCameras);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetCamerasAllocator()), tmpOldCameras);
 		tmpOldCameras = nullptr;
 	}
 	else
 	{
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 	}
 	
-	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_stage->GetCamerasAllocator()), _stage->GetCamerasAllocator(), this);
 
 	_camerasMap[name] = (AUint)(_camerasNumber - 1);
 
@@ -64,7 +64,7 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const An
 
 AnimaFirstPersonCamera* AnimaCamerasManager::CreateNewFirstPersonCamera(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateNewFirstPersonCamera(str);
 }
 
@@ -73,10 +73,10 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const An
 	if (_camerasMap.find(name) != _camerasMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_camerasNumber > 0)
 	{
-		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		AnimaCamera** tmpOldCameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 
 		for (int i = 0; i < _camerasNumber; i++)
 			tmpOldCameras[i] = _cameras[i];
@@ -84,21 +84,21 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const An
 		ClearCameras(false, false);
 
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 
 		for (int i = 0; i < _camerasNumber - 1; i++)
 			_cameras[i] = tmpOldCameras[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetCamerasAllocator()), tmpOldCameras);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetCamerasAllocator()), tmpOldCameras);
 		tmpOldCameras = nullptr;
 	}
 	else
 	{
 		_camerasNumber++;
-		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _camerasNumber);
+		_cameras = AnimaAllocatorNamespace::AllocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _camerasNumber);
 	}
 
-	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_engine->GetCamerasAllocator()), _engine, this);
+	_cameras[_camerasNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_stage->GetCamerasAllocator()), _stage->GetCamerasAllocator(), this);
 
 	_camerasMap[name] = (AUint)(_camerasNumber - 1);
 
@@ -107,7 +107,7 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const An
 
 AnimaThirdPersonCamera* AnimaCamerasManager::CreateNewThirdPersonCamera(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateNewThirdPersonCamera(str);
 }
 
@@ -119,12 +119,12 @@ void AnimaCamerasManager::ClearCameras(bool bDeleteObjects, bool bResetNumber)
 		{
 			for (int i = 0; i < (int)_camerasNumber; i++)
 			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetCamerasAllocator()), _cameras[i]);
+				AnimaAllocatorNamespace::DeallocateObject(*(_stage->GetCamerasAllocator()), _cameras[i]);
 				_cameras[i] = nullptr;
 			}
 		}
 		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaCamera*>(*(_engine->GetCamerasAllocator()), _cameras);
+		AnimaAllocatorNamespace::DeallocateArray<AnimaCamera*>(*(_stage->GetCamerasAllocator()), _cameras);
 		_cameras = nullptr;
 	}
 	
@@ -205,7 +205,7 @@ AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)
 
 AnimaCamera* AnimaCamerasManager::GetCameraFromName(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return GetCameraFromName(str);
 }
 

@@ -10,9 +10,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaLightsManager::AnimaLightsManager(AnimaEngine* engine)
+AnimaLightsManager::AnimaLightsManager(AnimaStage* stage)
 {
-	_engine = engine;
+	_stage = stage;
 	
 	_lights = nullptr;
 	_lightsNumber = 0;
@@ -28,10 +28,10 @@ AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& nam
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_lightsNumber > 0)
 	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber; i++)
 			tmpOldLights[i] = _lights[i];
@@ -39,21 +39,21 @@ AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& nam
 		ClearLights(false, false);
 
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber - 1; i++)
 			_lights[i] = tmpOldLights[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldLights);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetLightsAllocator()), tmpOldLights);
 		tmpOldLights = nullptr;
 	}
 	else
 	{
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_engine->GetGenericAllocator()), _engine, name);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_stage->GetLightsAllocator()), _stage->GetLightsAllocator(), _stage->GetDataGeneratorsManager(), name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -62,7 +62,7 @@ AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& nam
 
 AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateAmbientLight(str);
 }
 
@@ -71,10 +71,10 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_lightsNumber > 0)
 	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber; i++)
 			tmpOldLights[i] = _lights[i];
@@ -82,21 +82,21 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 		ClearLights(false, false);
 
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber - 1; i++)
 			_lights[i] = tmpOldLights[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldLights);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetLightsAllocator()), tmpOldLights);
 		tmpOldLights = nullptr;
 	}
 	else
 	{
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_engine->GetGenericAllocator()), _engine, name);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_stage->GetLightsAllocator()), _stage->GetLightsAllocator(), _stage->GetDataGeneratorsManager(), name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -105,7 +105,7 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateDirectionalLight(str);
 }
 
@@ -114,10 +114,10 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_lightsNumber > 0)
 	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber; i++)
 			tmpOldLights[i] = _lights[i];
@@ -125,21 +125,21 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 		ClearLights(false, false);
 
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber - 1; i++)
 			_lights[i] = tmpOldLights[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldLights);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetLightsAllocator()), tmpOldLights);
 		tmpOldLights = nullptr;
 	}
 	else
 	{
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_engine->GetGenericAllocator()), _engine, name);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_stage->GetLightsAllocator()), _stage->GetLightsAllocator(), _stage->GetDataGeneratorsManager(), name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -148,7 +148,7 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreatePointLight(str);
 }
 
@@ -157,10 +157,10 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_stage != nullptr);
 	if (_lightsNumber > 0)
 	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber; i++)
 			tmpOldLights[i] = _lights[i];
@@ -168,21 +168,21 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 		ClearLights(false, false);
 
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 
 		for (int i = 0; i < _lightsNumber - 1; i++)
 			_lights[i] = tmpOldLights[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tmpOldLights);
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetLightsAllocator()), tmpOldLights);
 		tmpOldLights = nullptr;
 	}
 	else
 	{
 		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lightsNumber);
+		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lightsNumber);
 	}
 
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_engine->GetGenericAllocator()), _engine, name);
+	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_stage->GetLightsAllocator()), _stage->GetLightsAllocator(), _stage->GetDataGeneratorsManager(), name);
 
 	_lightsMap[name] = (AUint)(_lightsNumber - 1);
 
@@ -191,7 +191,7 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return CreateSpotLight(str);
 }
 
@@ -203,12 +203,12 @@ void AnimaLightsManager::ClearLights(bool bDeleteObjects, bool bResetNumber)
 		{
 			for (int i = 0; i < (int)_lightsNumber; i++)
 			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetGenericAllocator()), _lights[i]);
+				AnimaAllocatorNamespace::DeallocateObject(*(_stage->GetLightsAllocator()), _lights[i]);
 				_lights[i] = nullptr;
 			}
 		}
 		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaLight*>(*(_engine->GetGenericAllocator()), _lights);
+		AnimaAllocatorNamespace::DeallocateArray<AnimaLight*>(*(_stage->GetLightsAllocator()), _lights);
 		_lights = nullptr;
 	}
 	
@@ -231,7 +231,7 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 {
-	AnimaString str(name, _engine);
+	AnimaString str(name, _stage->GetStringAllocator());
 	return GetLightFromName(str);
 }
 

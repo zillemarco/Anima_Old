@@ -19,6 +19,8 @@
 #include <AnimaCamerasManager.h>
 #include <AnimaLightsManager.h>
 #include <AnimaCamera.h>
+#include <AnimaStage.h>
+#include <AnimaStagesManager.h>
 
 CorpusDocument::CorpusDocument()
 {
@@ -83,12 +85,13 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	_engine = new Anima::AnimaEngine();
 	if(!_engine->Initialize())
 		return false;
+	_engine->GetStagesManager()->CreateStage("corpus");
 
-	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
-	_engine->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
+	_engine->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
 
 	_hasModifications = true;
 	_newDocument = true;
@@ -111,11 +114,11 @@ bool CorpusDocument::OpenDocument(QString path)
 	if(!_engine->Initialize())
 		return false;
 
-	Anima::AnimaCamera* cam = _engine->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 
-	_engine->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
+	_engine->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
 	
 	_hasModifications = false;
 	_newDocument = false;
@@ -678,7 +681,7 @@ bool CorpusDocument::ImportModel()
 		return false;
 	}
 	
-	if(!_engine->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
+	if (!_engine->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
 	{
 		QMessageBox msg;
 		msg.setWindowTitle(QString("CorpusEditor"));
@@ -706,7 +709,7 @@ bool CorpusDocument::AddMaterial()
 
 void CorpusDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 {
-	Anima::AnimaModelsManager* mgr = _engine->GetModelsManager();
+	Anima::AnimaModelsManager* mgr = _engine->GetStagesManager()->GetStage("test-stage")->GetModelsManager();
 	Anima::ASizeT numeroModelli = mgr->GetModelsNumber();
 	
 	xmlWriter->writeStartElement("Models");
@@ -800,7 +803,7 @@ bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileNam
 {
 	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
 	
-	Anima::AnimaModel* model = _engine->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
+	Anima::AnimaModel* model = _engine->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
 	
 	if(!model)
 		return false;

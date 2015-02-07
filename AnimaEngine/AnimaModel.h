@@ -23,7 +23,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModel
 {
 public:
-	AnimaModel(AnimaEngine* engine);
+	AnimaModel(AnimaAllocator* allocator);
 	AnimaModel(const AnimaModel& src);
 	AnimaModel(AnimaModel&& src);
 	~AnimaModel();
@@ -95,7 +95,7 @@ protected:
 	//AnimaMatrix		_transformationMatrix;
 	AnimaTransformation _transformation;
 	
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

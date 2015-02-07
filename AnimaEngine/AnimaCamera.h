@@ -12,7 +12,6 @@
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
 #include "AnimaTypes.h"
-#include "AnimaEngine.h"
 #include "AnimaMatrix.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -28,8 +27,8 @@ public:
 	};
 
 protected:
-	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
-	AnimaCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position);
+	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager);
+	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position);
 	
 public:
 	AnimaCamera(const AnimaCamera& src);
@@ -97,7 +96,7 @@ protected:
 	AnimaMatrix _viewMatrix;
 	AnimaMatrix _projectionMatrix;
 
-	AnimaEngine* _engine;	
+	AnimaAllocator* _allocator;	
 	AnimaCamerasManager* _camerasManager;
 };
 

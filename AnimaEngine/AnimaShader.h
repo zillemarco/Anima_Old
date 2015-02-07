@@ -21,9 +21,9 @@ public:
 	};
 
 public:
-	AnimaShader(AnimaEngine* engine);
-	AnimaShader(AnimaEngine* engine, AnimaString shaderText, AnimaShaderType type);
-	AnimaShader(AnimaEngine* engine, const char* shaderText, AnimaShaderType type);
+	AnimaShader(AnimaAllocator* allocator);
+	AnimaShader(AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type);
+	AnimaShader(AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type);
 	AnimaShader(const AnimaShader& src);
 	AnimaShader(AnimaShader&& src);
 	~AnimaShader();
@@ -53,7 +53,7 @@ public:
 	AInt GetID();
 
 private:
-	AnimaEngine*	_engine;
+	AnimaAllocator*	_allocator;
 	AnimaShaderType _type;
 	AnimaString		_text;
 

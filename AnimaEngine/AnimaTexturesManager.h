@@ -15,6 +15,7 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaTexture.h"
+#include "AnimaStage.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -36,7 +37,7 @@ struct AnimaTGA {
 class ANIMA_ENGINE_EXPORT AnimaTexturesManager
 {
 public:
-	AnimaTexturesManager(AnimaEngine* engine);
+	AnimaTexturesManager(AnimaStage* stage);
 	~AnimaTexturesManager();
 	
 	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName);
@@ -81,7 +82,7 @@ private:
 	AnimaTexture* LoadCompressedTGA(FILE* file, const char* textureName);
 		
 private:
-	AnimaEngine* _engine;
+	AnimaStage* _stage;
 
 	AnimaTexture**	_textures;
 	ASizeT			_texturesNumber;

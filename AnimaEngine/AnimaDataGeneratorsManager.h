@@ -17,13 +17,14 @@
 #include "AnimaColorGenerator.h"
 #include "AnimaVectorGenerator.h"
 #include "AnimaDataGenerator.h"
+#include "AnimaStage.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaDataGeneratorsManager
 {
 public:
-	AnimaDataGeneratorsManager(AnimaEngine* engine);
+	AnimaDataGeneratorsManager(AnimaStage* stage);
 	~AnimaDataGeneratorsManager();
 	
 	AnimaColorGenerator* CreateColorGenerator(const AnimaString& name);
@@ -42,7 +43,7 @@ private:
 	void ClearGenerators(bool bDeleteObjects = true, bool bResetNumber = true);
 	
 private:
-	AnimaEngine* _engine;
+	AnimaStage* _stage;
 	
 	AnimaDataGenerator** _generators;
 	ASizeT _generatorsNumber;

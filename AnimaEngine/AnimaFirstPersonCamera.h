@@ -12,7 +12,6 @@
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
 #include "AnimaTypes.h"
-#include "AnimaEngine.h"
 #include "AnimaCamera.h"
 #include "AnimaAllocators.h"
 
@@ -21,9 +20,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaFirstPersonCamera : public AnimaCamera
 {
 public:
-	AnimaFirstPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager);
-	AnimaFirstPersonCamera(AnimaEngine* engine);
-	AnimaFirstPersonCamera(AnimaEngine* engine, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
 	AnimaFirstPersonCamera(const AnimaFirstPersonCamera& src);
 	AnimaFirstPersonCamera(AnimaFirstPersonCamera&& src);
 	~AnimaFirstPersonCamera();

@@ -15,7 +15,7 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class AnimaEngine;
+class AnimaAllocator;
 
 class ANIMA_ENGINE_EXPORT AnimaString
 {
@@ -71,8 +71,8 @@ public:
 	};
 
 public:
-	AnimaString(AnimaEngine* engine = nullptr);
-	AnimaString(const char* src, AnimaEngine* engine);
+	AnimaString(AnimaAllocator* allocator = nullptr);
+	AnimaString(const char* src, AnimaAllocator* allocator);
 	AnimaString(const AnimaString& src);
 	AnimaString(AnimaString&& src);
 	~AnimaString();
@@ -95,7 +95,7 @@ public:
 	
 	friend AnimaString operator+(const char* srca, const AnimaString& srcb)
 	{
-		AnimaString result(srca, srcb._engine);
+		AnimaString result(srca, srcb._allocator);
 		return result += srcb;
 	}
 	
@@ -188,7 +188,7 @@ private:
 	AChar* _string;
 	ASizeT _stringLength;
 	
-	AnimaEngine* _engine;
+	AnimaAllocator* _allocator;
 };
 
 END_ANIMA_ENGINE_NAMESPACE
