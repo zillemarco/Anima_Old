@@ -12,6 +12,18 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+AnimaRenderingManager::AnimaRenderingManager(AnimaStage* stage)
+{
+	// TODO
+	//AnimaString str("diffuse", stage->GetStringAllocator());
+	//_textureSlots[str] = 0;
+}
+
+AnimaRenderingManager::~AnimaRenderingManager()
+{
+	_textureSlots.clear();
+}
+
 void AnimaRenderingManager::Start(AnimaStage* stage)
 {
 	stage->GetShadersManager()->SetActiveProgram(nullptr);
@@ -43,6 +55,10 @@ void AnimaRenderingManager::DrawAllModels(AnimaStage* stage)
 	for (ASizeT j = 0; j < nModels; j++)
 	{
 		AnimaModel* model = modelsManager->GetPModel(j);
+
+		if (!model->DrawingEnabled())
+			continue;
+
 		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
 
 		ASizeT meshNumber = model->GetMeshesNumber();
@@ -57,6 +73,9 @@ void AnimaRenderingManager::DrawAllModels(AnimaStage* stage)
 
 void AnimaRenderingManager::DrawSingleModel(AnimaStage* stage, AnimaModel* model)
 {
+	if (!model->DrawingEnabled())
+		return;
+
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
@@ -87,6 +106,9 @@ void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaModel* model, Anim
 
 void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
+	if (!model->DrawingEnabled())
+		return;
+
 	if (stage == nullptr || model == nullptr || program == nullptr)
 		return;
 	
@@ -125,15 +147,8 @@ void AnimaRenderingManager::DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, An
 		return;
 
 	program->UpdateMeshProperies(stage, mesh, parentTransformation);
-	program->UpdateMaterialProperies(stage, material);
-
-	//AnimaTexture* texture = material->GetTexture("diffuse");
-	//if (texture != nullptr)
-	//{
-	//	program->SetUniformi("materialDiffuseTexture", 0);
-	//	texture->Bind(0);
-	//}
-
+	program->UpdateMaterialProperies(stage, this, material);
+	
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
 
@@ -194,6 +209,9 @@ void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaModel* mode
 
 void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
+	if (!model->DrawingEnabled())
+		return;
+
 	if (stage == nullptr || model == nullptr || program == nullptr)
 		return;
 
@@ -215,15 +233,8 @@ void AnimaRenderingManager::ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* m
 		return;
 
 	program->UpdateMeshProperies(stage, mesh, parentTransformation);
-	program->UpdateMaterialProperies(stage, material);
-
-	//AnimaTexture* texture = material->GetTexture("diffuse");
-	//if (texture != nullptr)
-	//{
-	//	program->SetUniformi("materialDiffuseTexture", 0);
-	//	texture->Bind(0);
-	//}
-	
+	program->UpdateMaterialProperies(stage, this, material);
+		
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
 
@@ -237,6 +248,9 @@ void AnimaRenderingManager::ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* m
 
 void AnimaRenderingManager::AmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
 {
+	if (model != nullptr && !model->DrawingEnabled())
+		return;
+
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 
@@ -273,6 +287,10 @@ void AnimaRenderingManager::AmbientPass(AnimaStage* stage, AnimaShaderProgram* p
 			for (ASizeT j = 0; j < nModels; j++)
 			{
 				AnimaModel* innerModel = modelsManager->GetPModel(j);
+
+				if (!innerModel->DrawingEnabled())
+					continue;
+
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
@@ -301,6 +319,9 @@ void AnimaRenderingManager::AmbientPass(AnimaStage* stage, AnimaShaderProgram* p
 
 void AnimaRenderingManager::DirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
 {
+	if (model != nullptr && !model->DrawingEnabled())
+		return;
+
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 
@@ -337,6 +358,10 @@ void AnimaRenderingManager::DirectionalPass(AnimaStage* stage, AnimaShaderProgra
 			for (ASizeT j = 0; j < nModels; j++)
 			{
 				AnimaModel* innerModel = modelsManager->GetPModel(j);
+
+				if (!innerModel->DrawingEnabled())
+					continue;
+
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
@@ -365,6 +390,9 @@ void AnimaRenderingManager::DirectionalPass(AnimaStage* stage, AnimaShaderProgra
 
 void AnimaRenderingManager::PointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
 {
+	if (model != nullptr && !model->DrawingEnabled())
+		return;
+
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 
@@ -401,6 +429,10 @@ void AnimaRenderingManager::PointPass(AnimaStage* stage, AnimaShaderProgram* pro
 			for (ASizeT j = 0; j < nModels; j++)
 			{
 				AnimaModel* innerModel = modelsManager->GetPModel(j);
+
+				if (!innerModel->DrawingEnabled())
+					continue;
+
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
@@ -429,6 +461,9 @@ void AnimaRenderingManager::PointPass(AnimaStage* stage, AnimaShaderProgram* pro
 
 void AnimaRenderingManager::SpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
 {
+	if (model != nullptr && !model->DrawingEnabled())
+		return;
+
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 
@@ -465,6 +500,10 @@ void AnimaRenderingManager::SpotPass(AnimaStage* stage, AnimaShaderProgram* prog
 			for (ASizeT j = 0; j < nModels; j++)
 			{
 				AnimaModel* innerModel = modelsManager->GetPModel(j);
+
+				if (!innerModel->DrawingEnabled())
+					continue;
+
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
@@ -489,6 +528,19 @@ void AnimaRenderingManager::SpotPass(AnimaStage* stage, AnimaShaderProgram* prog
 				ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
 		}
 	}
+}
+
+AUint AnimaRenderingManager::GetTextureSlot(const AnimaString& slotName)
+{
+	if (_textureSlots.find(slotName) != _textureSlots.end())
+		return _textureSlots[slotName];
+	return 0;
+}
+
+AUint AnimaRenderingManager::GetTextureSlot(AnimaStage* stage, const char* slotName)
+{
+	AnimaString str(slotName, stage->GetStringAllocator());
+	return GetTextureSlot(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

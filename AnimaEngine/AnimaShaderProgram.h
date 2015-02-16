@@ -17,6 +17,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShadersManager;
+class AnimaRenderingManager;
 
 class ANIMA_ENGINE_EXPORT AnimaShaderProgram
 {
@@ -94,7 +95,7 @@ public:
 
 	void UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh, const AnimaMatrix& transformation);
 	void UpdateCameraProperies(AnimaStage* stage, AnimaCamera* camera);
-	void UpdateMaterialProperies(AnimaStage* stage, AnimaMaterial* material);
+	void UpdateMaterialProperies(AnimaStage* stage, AnimaRenderingManager* renderingManager, AnimaMaterial* material);
 	void UpdateLightProperies(AnimaStage* stage, AnimaLight* light);
 	void UpdateLightsProperies(AnimaStage* stage);
 

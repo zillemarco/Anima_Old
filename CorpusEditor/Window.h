@@ -9,6 +9,7 @@
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaRenderingManager.h>
+#include <AnimaModel.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -32,8 +33,12 @@ private:
 	ANIMA_WINDOW_EVENT void KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods);
 	ANIMA_WINDOW_EVENT void ScrollCallback(Anima::AnimaWindow* window, double x, double y);
 
+	void BindAsRenderTarget();
+
+	Anima::AnimaModel* pianoDisegno;
 	Anima::AnimaTexture* texture;
-	Anima::AnimaRenderingManager renderingManager;
+	Anima::AnimaTexture* renderTexture;
+	Anima::AnimaRenderingManager* renderingManager;
 	
 	bool projection;
 	bool type;

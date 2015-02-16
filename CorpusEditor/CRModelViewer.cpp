@@ -26,6 +26,7 @@ CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
 	: CorpusOGLWindowBase(engine, parent)
 	, _frame(0)
 {
+	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetStagesManager()->GetStage("test-stage"));
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
 	_selectedModel = nullptr;
@@ -81,12 +82,12 @@ void CRModelViewer::Render()
 	_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
 	_engine->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 
-	_renderingManager.Start(_engine->GetStagesManager()->GetStage("test-stage"));
+	_renderingManager->Start(_engine->GetStagesManager()->GetStage("test-stage"));
 
 	if (_selectedModel != nullptr)
-		_renderingManager.ForwardDrawSingleModel(_engine->GetStagesManager()->GetStage("test-stage"), _selectedModel);
+		_renderingManager->ForwardDrawSingleModel(_engine->GetStagesManager()->GetStage("test-stage"), _selectedModel);
 
-	_renderingManager.Finish(_engine->GetStagesManager()->GetStage("test-stage"));
+	_renderingManager->Finish(_engine->GetStagesManager()->GetStage("test-stage"));
 
 	++_frame;
 }

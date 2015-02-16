@@ -247,6 +247,116 @@ void AnimaModelsManager::AddModel(const AnimaModel& model, const AnimaString& na
 	}
 }
 
+AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
+{
+	if (_modelsMap.find(name) != _modelsMap.end())
+		return nullptr;
+
+	ANIMA_ASSERT(_stage != nullptr);
+	if (_modelsNumber > 0)
+	{
+		AnimaModel* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_stage->GetModelsAllocator()), _modelsNumber, _stage->GetModelDataAllocator());
+
+		for (int i = 0; i < _modelsNumber; i++)
+			tmpOldModels[i] = _models[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetModelsAllocator()), _models);
+
+		_modelsNumber++;
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_stage->GetModelsAllocator()), _modelsNumber, _stage->GetModelDataAllocator());
+
+		for (int i = 0; i < _modelsNumber - 1; i++)
+			_models[i] = tmpOldModels[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetModelsAllocator()), tmpOldModels);
+	}
+	else
+	{
+		_modelsNumber++;
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaModel>(*(_stage->GetModelsAllocator()), _modelsNumber, _stage->GetModelDataAllocator());
+	}
+
+	_modelsMap[name] = (AUint)_modelsNumber - 1;
+	return &_models[_modelsNumber - 1];
+}
+
+AnimaModel* AnimaModelsManager::CreateModel(const char* name)
+{
+	AnimaString str(name, _stage->GetStringAllocator());
+	return CreateModel(str);
+}
+
+AnimaModel* AnimaModelsManager::CreatePlane(const AnimaString& name)
+{
+	if (_modelsMap.find(name) != _modelsMap.end())
+		return nullptr;
+
+	AnimaModel* newModel = CreateModel(name);
+	AnimaMesh* planeMesh = newModel->CreateMesh();
+	AnimaMaterial* material = planeMesh->GetMaterial();
+
+	int i = 1;
+	AnimaString prefix = name;
+	AnimaString suffix(_stage->GetStringAllocator());
+	suffix.Format(".material.%d", i);
+
+	while (material == nullptr)
+	{
+		material = _stage->GetMaterialsManager()->CreateMaterial(prefix + suffix);
+
+		i++;
+		suffix.Format(".material.%d", i);
+	}
+
+	material->AddColor("diffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
+
+	AInt numeroVertici = 4;
+	AInt numeroFacce = 2;
+	AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_stage->GetGenericAllocator()), numeroVertici);
+	AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_stage->GetGenericAllocator()), numeroVertici);
+	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_stage->GetGenericAllocator()), numeroVertici);
+	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_stage->GetGenericAllocator()), numeroFacce, _stage->GetModelDataAllocator());
+	
+	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
+	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
+	vertici[2] = AnimaVertex3f(1.0f, 0.0f, 1.0f);
+	vertici[3] = AnimaVertex3f(1.0f, 0.0f, -1.0f);
+
+	normali[0] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[1] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[2] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[3] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+
+	textCoords[0] = AnimaVertex2f(1.0f, 0.0f);
+	textCoords[1] = AnimaVertex2f(1.0f, 1.0f);
+	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
+	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
+
+	AUint indexes0[] = { 0, 1, 2 };
+	AUint indexes1[] = { 0, 2, 3 };
+	facce[0].SetIndexes(indexes0, 3);
+	facce[1].SetIndexes(indexes1, 3);
+	
+	planeMesh->SetVertices(vertici, numeroVertici);
+	planeMesh->SetNormals(normali, numeroVertici);
+	planeMesh->SetTextureCoords(textCoords, numeroVertici);
+	planeMesh->SetFaces(facce, numeroFacce);
+	planeMesh->SetMaterial(material);
+
+	AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), vertici);
+	AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), normali);
+	AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), textCoords);
+	AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), facce);
+
+	return newModel;
+}
+
+AnimaModel* AnimaModelsManager::CreatePlane(const char* name)
+{
+	AnimaString str(name, _stage->GetStringAllocator());
+	return CreatePlane(str);
+}
+
 ASizeT AnimaModelsManager::GetModelsNumber()
 {
 	return _modelsNumber;

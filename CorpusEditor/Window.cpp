@@ -30,6 +30,7 @@ END_MESSAGE_MAP()
 
 Window::Window()
 {
+	renderingManager = nullptr;
 	projection = true;
 
 	_lastPTX = 0.0;
@@ -39,6 +40,7 @@ Window::Window()
 
 Window::~Window()
 {
+	delete renderingManager;
 }
 
 void Window::PaintCallback(Anima::AnimaWindow* window)
@@ -48,13 +50,20 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 
 void Window::DrawScene()
 {
-	MakeCurrentContext();
+	if (renderingManager == nullptr)
+		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 
-	renderingManager.Start(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-	renderingManager.ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-	renderingManager.Finish(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	MakeCurrentContext();
+
+	renderTexture->BindAsRenderTarget();	
+	renderingManager->Start(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	renderingManager->ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	renderingManager->Finish(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+
+	BindAsRenderTarget();
+	
 
 	SwapBuffers();
 }
@@ -168,6 +177,9 @@ void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 
 void Window::Load()
 {
+	int w, h;
+	this->GetWindowSize(&w, &h);
+
 	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
 
 #if defined _MSC_VER
@@ -205,7 +217,7 @@ void Window::Load()
 	mgr->GetProgramFromName("forward-spot")->Link();
 
 	texture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile("D:/Git/AnimaEngine/AnimaEngine/data/textures/mattoni.bmp", "texture-cubo");
-	texture->Load();
+	texture->LoadTextures();
 #else
 	mgr->CreateProgram("phong");
 	mgr->GetProgramFromName("phong")->Create();
@@ -244,6 +256,14 @@ void Window::Load()
 	texture->Load();
 #endif
 	
+	renderTexture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->CreateTexture("render-texture", GL_TEXTURE_2D, w, h, nullptr, 0, 0, GL_NEAREST, GL_RGB, GL_RGB, false, GL_COLOR_ATTACHMENT0);
+	renderTexture->LoadRenderTargets();
+	
+	pianoDisegno = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->CreatePlane("piano-disegno");
+	pianoDisegno->GetTransformation()->RotateXDeg(90.0f);
+	pianoDisegno->EnableDrawing(false);
+
+	
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.2f, 0.2f, 0.2f);
 
@@ -270,7 +290,7 @@ void Window::Load()
 
 	Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
 	l4->SetColor(0.0f, 1.0f, 0.0f);
-	l4->SetConstantAttenuation(0.1);
+	l4->SetConstantAttenuation(0.1f);
 	l4->SetLinearAttenuation(0.1f);
 	l4->SetExponentAttenuation(0.01f);
 	l4->SetIntensity(0.5f);
@@ -286,4 +306,12 @@ void Window::Load()
 	pos.z += 5.0f;
 
 	_tpcamera->LookAt(pos, center);
+}
+
+void Window::BindAsRenderTarget()
+{
+	int w, h;
+	this->GetWindowSize(&w, &h);
+	glViewport(0, 0, w, h);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }

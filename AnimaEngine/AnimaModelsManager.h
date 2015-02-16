@@ -39,6 +39,12 @@ public:
 	void AddModel(const AnimaModel& model, const AnimaString& name);
 	void AddModel(const AnimaModel& model, const char* name);
 
+	AnimaModel* CreatePlane(const AnimaString& name);
+	AnimaModel* CreatePlane(const char* name);
+
+	AnimaModel* CreateModel(const AnimaString& name);
+	AnimaModel* CreateModel(const char* name);
+
 	ASizeT GetModelsNumber();
 
 	AnimaModel* GetPModel(ASizeT index);

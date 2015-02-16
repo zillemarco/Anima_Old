@@ -1,6 +1,7 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaShadersManager.h"
 #include "AnimaLightsManager.h"
+#include "AnimaRenderingManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -702,7 +703,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaStage* stage, AnimaCamera* c
 	}
 }
 
-void AnimaShaderProgram::UpdateMaterialProperies(AnimaStage* stage, AnimaMaterial* material)
+void AnimaShaderProgram::UpdateMaterialProperies(AnimaStage* stage, AnimaRenderingManager* renderingManager, AnimaMaterial* material)
 {
 	if (material == nullptr)
 		return;
@@ -720,6 +721,28 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaStage* stage, AnimaMateria
 			SetUniform(info._name, material->GetColor3f("diffuseColor"));
 		else if (info._type == GL_FLOAT_VEC4)
 			SetUniform(info._name, material->GetColor4f("diffuseColor"));
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_materialDiffuseTexture";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_SAMPLER_2D)
+		{
+			AnimaTexture* texture = material->GetTexture("diffuseTexture");
+
+			if (texture != nullptr)
+			{
+				AUint slot = renderingManager->GetTextureSlot(stage, "diffuse");
+				texture->Bind(slot);
+				SetUniformi(info._name, slot);
+			}
+		}
 		else
 		{
 			UPD_ERROR;

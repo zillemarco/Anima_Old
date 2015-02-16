@@ -30,7 +30,7 @@ AnimaTexturesManager::~AnimaTexturesManager()
 	ClearTextures();
 }
 
-AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::CreateTextures(const AnimaString& textureName, AUint textureTarget, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint texturesNumber, AUint* attachments)
 {
 	if (_texturesMap.find(textureName) != _texturesMap.end())
 		return nullptr;
@@ -60,14 +60,20 @@ AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName
 		_textures = AnimaAllocatorNamespace::AllocateArray<AnimaTexture*>(*(_stage->GetTexturesAllocator()), _texturesNumber);
 	}
 
-	_textures[_texturesNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_stage->GetTexturesAllocator()), _stage->GetTexturesAllocator());
+	_textures[_texturesNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_stage->GetTexturesAllocator()), _stage->GetTexturesAllocator(), texturesNumber);
+	_textures[_texturesNumber - 1]->EnableClamp(clamp);
+	_textures[_texturesNumber - 1]->SetFilters(filters);
+	_textures[_texturesNumber - 1]->SetInternalFormats(internalFormats);
+	_textures[_texturesNumber - 1]->SetFormats(formats);
+	_textures[_texturesNumber - 1]->SetAttachments(attachments);
+	_textures[_texturesNumber - 1]->SetTextureTarget(textureTarget);
 
 	_texturesMap[textureName] = (AUint)(_texturesNumber - 1);
 
 	return _textures[_texturesNumber - 1];
 }
 
-AnimaTexture* AnimaTexturesManager::CreateTexture(AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::CreateTextures(const AnimaString& textureName, AUint textureTarget, AUint width, AUint height, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint texturesNumber, AUint* attachments)
 {
 	if (_texturesMap.find(textureName) != _texturesMap.end())
 		return nullptr;
@@ -97,23 +103,43 @@ AnimaTexture* AnimaTexturesManager::CreateTexture(AUchar* data, ASizeT dataSize,
 		_textures = AnimaAllocatorNamespace::AllocateArray<AnimaTexture*>(*(_stage->GetTexturesAllocator()), _texturesNumber);
 	}
 
-	_textures[_texturesNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_stage->GetTexturesAllocator()), _stage->GetTexturesAllocator(), data, dataSize, width, height, mipMapLevels, format);
+	_textures[_texturesNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_stage->GetTexturesAllocator()), _stage->GetTexturesAllocator(), textureTarget, width, height, texturesNumber, data, dataSize, mipMapLevels, filters, internalFormats, formats, clamp, attachments);
 
 	_texturesMap[textureName] = (AUint)(_texturesNumber - 1);
 
 	return _textures[_texturesNumber - 1];
 }
 
-AnimaTexture* AnimaTexturesManager::CreateTexture(const char* textureName)
+AnimaTexture* AnimaTexturesManager::CreateTextures(const char* textureName, AUint textureTarget, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint texturesNumber, AUint* attachments)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return CreateTexture(str);
+	return CreateTextures(str, textureTarget, filters, internalFormats, formats, clamp, texturesNumber, attachments);
 }
 
-AnimaTexture* AnimaTexturesManager::CreateTexture(AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint mipMapLevels, AUint format, const char* textureName)
+AnimaTexture* AnimaTexturesManager::CreateTextures(const char* textureName, AUint textureTarget, AUint width, AUint height, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint texturesNumber, AUint* attachments)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return CreateTexture(data, dataSize, width, height, mipMapLevels, format, str);
+	return CreateTextures(str, textureTarget, width, height, data, dataSize, mipMapLevels, filters, internalFormats, formats, clamp, texturesNumber, attachments);
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+{
+	return CreateTextures(textureName, textureTarget, &filter, &internalFormat, &format, clamp, 1, &attachment);
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+{
+	return CreateTextures(textureName, textureTarget, &filter, &internalFormat, &format, clamp, 1, &attachment);
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+{
+	return CreateTextures(textureName, textureTarget, width, height, &data, &dataSize, mipMapLevels, &filter, &internalFormat, &format, clamp, 1, &attachment);
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const char* textureName, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+{
+	return CreateTextures(textureName, textureTarget, width, height, &data, &dataSize, mipMapLevels, &filter, &internalFormat, &format, clamp, 1, &attachment);
 }
 
 void AnimaTexturesManager::ClearTextures(bool bDeleteObjects, bool bResetNumber)
@@ -137,7 +163,7 @@ void AnimaTexturesManager::ClearTextures(bool bDeleteObjects, bool bResetNumber)
 		_texturesNumber = 0;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AInt pos = filePath.ReverseFind('.');
 
@@ -148,34 +174,34 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& fileP
 	AnimaString ext = filePath.Right(filePath.GetBufferLength() - pos);
 
 	if (ext.CompareNoCase("bmp"))
-		return LoadTextureFromBMPFile(filePath, textureName);
+		return LoadTextureFromBMPFile(filePath, textureName, textureTarget, filter, internalFormat, format, clamp);
 	else if (ext.CompareNoCase("tga"))
-		return LoadTextureFromTGAFile(filePath, textureName);
+		return LoadTextureFromTGAFile(filePath, textureName, textureTarget, filter, internalFormat, format, clamp);
 	else if (ext.CompareNoCase("dds"))
-		return LoadTextureFromDDSFile(filePath, textureName);
+		return LoadTextureFromDDSFile(filePath, textureName, textureTarget, filter, internalFormat, clamp);
 
 	return nullptr;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const char* filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const char* filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(filePath, _stage->GetStringAllocator());
-	return LoadTextureFromFile(str, textureName);
+	return LoadTextureFromFile(str, textureName, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromFile(filePath, str);
+	return LoadTextureFromFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const char* filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const char* filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromFile(filePath, str);
+	return LoadTextureFromFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	unsigned char header[54];
 	unsigned int dataPos;
@@ -211,32 +237,32 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& fi
 	
 	fclose(file);
 
-	AnimaTexture* texture = LoadTextureFromData(data, imageSize, width, height, textureName);
+	AnimaTexture* texture = LoadTextureFromData(textureName, data, imageSize, width, height, textureTarget, filter, internalFormat, format, clamp);
 
 	delete[] data;
 
 	return texture;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const char* filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const char* filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(filePath, _stage->GetStringAllocator());
-	return LoadTextureFromBMPFile(str, textureName);
+	return LoadTextureFromBMPFile(str, textureName, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromBMPFile(filePath, str);
+	return LoadTextureFromBMPFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const char* filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const char* filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromBMPFile(filePath, str);
+	return LoadTextureFromBMPFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	FILE* file;
 	file = fopen(filePath.GetConstBuffer(), "rb");
@@ -253,9 +279,9 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 	}
 
 	if (memcmp(animaUTGAcompare, &tgaHeader, sizeof(tgaHeader)) == 0)
-		return LoadUncompressedTGA(file, textureName);
+		return LoadUncompressedTGA(file, textureName, textureTarget, filter, internalFormat, format, clamp);
 	else if (memcmp(animaCTGAcompare, &tgaHeader, sizeof(tgaHeader)) == 0)
-		return LoadCompressedTGA(file, textureName);
+		return LoadCompressedTGA(file, textureName, textureTarget, filter, internalFormat, format, clamp);
 	else
 	{
 		fclose(file);
@@ -265,25 +291,25 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 	return nullptr;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const char* filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const char* filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(filePath, _stage->GetStringAllocator());
-	return LoadTextureFromTGAFile(str, textureName);
+	return LoadTextureFromTGAFile(str, textureName, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromBMPFile(filePath, str);
+	return LoadTextureFromBMPFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const char* filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const char* filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromTGAFile(filePath, str);
+	return LoadTextureFromTGAFile(filePath, str, textureTarget, filter, internalFormat, format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaTGA tga;
 	if (fread(tga.header, sizeof(tga.header), 1, file) == 0)
@@ -338,14 +364,14 @@ AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const Anima
 
 	fclose(file);
 
-	AnimaTexture* texture = LoadTextureFromData(imageData, tga.imageSize, width, height, textureName);
+	AnimaTexture* texture = LoadTextureFromData(textureName, imageData, tga.imageSize, width, height, textureTarget, filter, internalFormat, format, clamp);
 
 	free(imageData);
 
 	return texture;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadCompressedTGA(FILE * file, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadCompressedTGA(FILE * file, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaTGA tga;
 	if (fread(tga.header, sizeof(tga.header), 1, file) == 0)
@@ -498,13 +524,13 @@ AnimaTexture* AnimaTexturesManager::LoadCompressedTGA(FILE * file, const AnimaSt
 	while (currentpixel < pixelcount);
 	fclose(file);
 
-	AnimaTexture* texture = LoadTextureFromData(imageData, tga.imageSize, width, height, textureName);
+	AnimaTexture* texture = LoadTextureFromData(textureName, imageData, tga.imageSize, width, height, textureTarget, filter, internalFormat, format, clamp);
 	free(imageData);
 	
 	return texture;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, bool clamp)
 {
 	unsigned char Header[124];
 	FILE * file;
@@ -557,51 +583,51 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 		return nullptr;
 	}
 
-	AnimaTexture* texture = LoadTextureFromData(buffer, bufsize, width, height, mipMapCount, format, textureName);
+	AnimaTexture* texture = LoadTextureFromData(textureName, buffer, bufsize, width, height, mipMapCount, textureTarget, filter, internalFormat, format, clamp);
 
 	free(buffer);
 
 	return texture;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const char* filePath, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const char* filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, bool clamp)
 {
 	AnimaString str(filePath, _stage->GetStringAllocator());
-	return LoadTextureFromDDSFile(str, textureName);
+	return LoadTextureFromDDSFile(str, textureName, textureTarget, filter, internalFormat, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromDDSFile(filePath, str);
+	return LoadTextureFromDDSFile(filePath, str, textureTarget, filter, internalFormat, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const char* filePath, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const char* filePath, const char* textureName, AUint textureTarget, AUint filter, AUint internalFormat, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromDDSFile(filePath, str);
+	return LoadTextureFromDDSFile(filePath, str, textureTarget, filter, internalFormat, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
-	return CreateTexture(data, dataSize, width, height, 0, 0, textureName);
+	return CreateTextures(textureName, textureTarget, width, height, &data, &dataSize, 0, &filter, &internalFormat, &format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint format, const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
-	return CreateTexture(data, dataSize, width, height, mipMapLevels, format, textureName);
+	return CreateTextures(textureName, textureTarget, width, height, &data, &dataSize, mipMapLevels, &filter, &internalFormat, &format, clamp);
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, const char* textureName)
-{
-	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromData(data, dataSize, width, height, str);
-}
-
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint format, const char* textureName)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const char* textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
 {
 	AnimaString str(textureName, _stage->GetStringAllocator());
-	return LoadTextureFromData(data, dataSize, width, height, mipMapLevels, format, str);
+	return LoadTextureFromData(str, data, dataSize, width, height, textureTarget, filter, internalFormat, format, clamp);
+}
+
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const char* textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, bool clamp)
+{
+	AnimaString str(textureName, _stage->GetStringAllocator());
+	return LoadTextureFromData(str, data, dataSize, width, height, mipMapLevels, textureTarget, filter, internalFormat, format, clamp);
 }
 
 AnimaTexture* AnimaTexturesManager::GetTexture(AUint index)

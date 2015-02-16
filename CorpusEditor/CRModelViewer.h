@@ -21,7 +21,7 @@ public:
 	void setSelectedModel(Anima::AnimaModel* model);
 
 private:
-	Anima::AnimaRenderingManager _renderingManager;
+	Anima::AnimaRenderingManager* _renderingManager;
 	Anima::AnimaModel* _selectedModel;
 
 	int _frame;

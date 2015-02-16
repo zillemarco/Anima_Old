@@ -11,12 +11,16 @@
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaStage.h"
+#include "AnimaString.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
 {
 public:
+	AnimaRenderingManager(AnimaStage* stage);
+	~AnimaRenderingManager();
+
 	void Start(AnimaStage* stage);
 	void Finish(AnimaStage* stage);
 
@@ -25,6 +29,10 @@ public:
 
 	void ForwardDrawAllModels(AnimaStage* stage);
 	void ForwardDrawSingleModel(AnimaStage* stage, AnimaModel* model);
+
+public:
+	AUint GetTextureSlot(const AnimaString& slotName);
+	AUint GetTextureSlot(AnimaStage* stage, const char* slotName);
 
 private:
 	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
@@ -39,6 +47,11 @@ private:
 	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
 	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+
+protected:
+#pragma warning (disable: 4251)
+	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _textureSlots;
+#pragma warning (default: 4251) 
 };
 
 END_ANIMA_ENGINE_NAMESPACE

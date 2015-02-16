@@ -46,6 +46,7 @@ public:
 	AnimaMesh GetMesh(ASizeT index);
 	AnimaMesh* GetPMesh(ASizeT index);
 	AnimaMesh* GetMeshes();
+	AnimaMesh* CreateMesh();
 	void ClearMeshes();
 	
 	void SetModelName(const AnimaString& name);
@@ -78,6 +79,9 @@ public:
 	AnimaVertex3f GetBoundingBoxMin() const;
 	AnimaVertex3f GetBoundingBoxMax() const;
 
+	void EnableDrawing(bool bEnable = true);
+	bool DrawingEnabled() const;
+
 protected:
 	AnimaModel*		_modelChildren;
 	ASizeT			_modelChildrenNumber;
@@ -91,6 +95,8 @@ protected:
 	
 	AnimaString		_modelName;
 	AnimaString		_modelFileName;
+
+	bool			_drawingEnabled;
 
 	//AnimaMatrix		_transformationMatrix;
 	AnimaTransformation _transformation;

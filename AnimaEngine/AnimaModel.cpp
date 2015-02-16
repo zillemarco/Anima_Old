@@ -32,6 +32,7 @@ AnimaModel::AnimaModel(AnimaAllocator* allocator)
 	_modelMeshes = nullptr;
 
 	_parentModel = nullptr;
+	_drawingEnabled = true;
 	
 	_modelChildrenNumber = 0;
 	_modelMeshesNumber = 0;
@@ -50,6 +51,7 @@ AnimaModel::AnimaModel(const AnimaModel& src)
 	
 	_modelChildrenNumber = 0;
 	_modelMeshesNumber = 0;
+	_drawingEnabled = src._drawingEnabled;
 
 	_parentModel = src._parentModel;
 	
@@ -68,6 +70,8 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 , _transformation(src._transformation)
 , _allocator(src._allocator)
 {
+	_drawingEnabled = src._drawingEnabled;
+
 	src._modelChildren = nullptr;
 	src._modelMeshes = nullptr;
 	
@@ -91,6 +95,8 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 		
 		_transformation = src._transformation;
 		_parentModel = src._parentModel;
+
+		_drawingEnabled = src._drawingEnabled;
 		
 		SetModelName(src._modelName);
 		SetModelFileName(src._modelFileName);
@@ -109,7 +115,9 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		
 		_modelChildren = src._modelChildren;
 		_modelMeshes = src._modelMeshes;
-		
+
+		_drawingEnabled = src._drawingEnabled;
+
 		_modelChildrenNumber = src._modelChildrenNumber;
 		_modelMeshesNumber = src._modelMeshesNumber;
 		
@@ -285,6 +293,35 @@ AnimaMesh* AnimaModel::GetMeshes()
 	return _modelMeshes;
 }
 
+AnimaMesh* AnimaModel::CreateMesh()
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_modelMeshesNumber > 0)
+	{
+		AnimaMesh* tmpOldMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _modelMeshesNumber, _allocator);
+
+		for (int i = 0; i < _modelMeshesNumber; i++)
+			tmpOldMeshes[i] = _modelMeshes[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _modelMeshes);
+
+		_modelMeshesNumber++;
+		_modelMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _modelMeshesNumber, _allocator);
+
+		for (int i = 0; i < _modelMeshesNumber - 1; i++)
+			_modelMeshes[i] = tmpOldMeshes[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldMeshes);
+	}
+	else
+	{
+		_modelMeshesNumber++;
+		_modelMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _modelMeshesNumber, _allocator);
+	}
+
+	return &_modelMeshes[_modelMeshesNumber - 1];
+}
+
 void AnimaModel::SetModelName(const AnimaString& name)
 {
 	_modelName = name;
@@ -436,6 +473,16 @@ AnimaVertex3f AnimaModel::GetBoundingBoxMin() const
 AnimaVertex3f AnimaModel::GetBoundingBoxMax() const
 {
 	return _boundingBoxMax;
+}
+
+void AnimaModel::EnableDrawing(bool bEnable)
+{
+	_drawingEnabled = bEnable;
+}
+
+bool AnimaModel::DrawingEnabled() const
+{
+	return _drawingEnabled;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
