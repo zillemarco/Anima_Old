@@ -450,8 +450,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0] - 1);
-			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
+			name.Reserve(values[0]);
+			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0] + 1, NULL, name.GetBuffer());
 
 			AnimaUniformInfo info;
 			info._arraySize = values[3];
@@ -466,8 +466,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0] - 1);
-			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0], NULL, name.GetBuffer());
+			name.Reserve(values[0]);
+			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0] + 1, NULL, name.GetBuffer());
 
 			AnimaInputInfo info;
 			info._location = values[2];
@@ -481,8 +481,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0] - 1);
-			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0], NULL, name.GetBuffer());
+			name.Reserve(values[0]);
+			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0] + 1, NULL, name.GetBuffer());
 
 			AnimaOutputInfo info;
 			info._location = values[2];

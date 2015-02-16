@@ -5,6 +5,12 @@ include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 add_definitions(-DANIMA_ENGINE_EXPORT_ENABLED)
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
+set(ANIMA_ENGINE_MODELS_PATH "${PROJECT_SOURCE_DIR}/data/models/")
+set(ANIMA_ENGINE_SHADERS_PATH "${PROJECT_SOURCE_DIR}/data/shaders/")
+set(ANIMA_ENGINE_TEXTURES_PATH "${PROJECT_SOURCE_DIR}/data/textures/")
+
+configure_file("${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h.in" "${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h")
+
 set(common_HEADERS	AnimaEngineCore.h
 					AnimaEngine.h
 					AnimaWindow_Data.h 

@@ -13,12 +13,7 @@
 #include "AnimaAllocators.h"
 #include "AnimaWindow.h"
 #include "AnimaString.h"
-
-//#ifndef _MSC_VER
-//#include <sys/syslimits.h>
-//#else
-//#include <windows.h>
-//#endif
+#include "AnimaEngineConfig.h"
 
 #if defined _MSC_VER
 #define PATH_MAX MAX_PATH
