@@ -35,9 +35,6 @@ private:
 
 	void BindAsRenderTarget();
 
-	Anima::AnimaModel* pianoDisegno;
-	Anima::AnimaTexture* texture;
-	Anima::AnimaTexture* renderTexture;
 	Anima::AnimaRenderingManager* renderingManager;
 	
 	bool projection;

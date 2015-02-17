@@ -30,6 +30,8 @@ AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 	_vertices = nullptr;
 	_normals = nullptr;
 	_textureCoords = nullptr;
+	_tangents = nullptr;
+	_bitangents = nullptr;
 	_faces = nullptr;
 
 	_indexesBufferObject = 0;
@@ -37,12 +39,16 @@ AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 	//_colorsBufferObject = 0;
 	_normalsBufferObject = 0;
 	_textureCoordsBufferObject = 0;
+	_tangentsBufferObject = 0;
+	_bitangentsBufferObject = 0;
 	_vertexArrayObject = 0;
 	_needsBuffersUpdate = true;
 
 	_verticesNumber = 0;
 	_normalsNumber = 0;
 	_textureCoordsNumber = 0;
+	_tangentsNumber = 0;
+	_bitangentsNumber = 0;
 	_facesNumber = 0;
 	_meshName = "_mesh_";
 	_parentModel = nullptr;
@@ -60,6 +66,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	//_colorsBufferObject = src._colorsBufferObject;
 	_normalsBufferObject = src._normalsBufferObject;
 	_textureCoordsBufferObject = src._textureCoordsBufferObject;
+	_tangentsBufferObject = src._tangentsBufferObject;
+	_bitangentsBufferObject = src._bitangentsBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	_material = src._material;
@@ -67,11 +75,15 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_vertices = nullptr;
 	_normals = nullptr;
 	_textureCoords = nullptr;
+	_tangents = nullptr;
+	_bitangents = nullptr;
 	_faces = nullptr;
 	
 	_verticesNumber = 0;
 	_normalsNumber = 0;
 	_textureCoordsNumber = 0;
+	_tangents = 0;
+	_bitangents = 0;
 	_facesNumber = 0;
 
 	_parentModel = src._parentModel;
@@ -79,6 +91,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	SetVertices(src._vertices, src._verticesNumber);
 	SetNormals(src._normals, src._normalsNumber);
 	SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
+	SetTangents(src._tangents, src._tangentsNumber);
+	SetBitangents(src._bitangents, src._bitangentsNumber);
 	SetFaces(src._faces, src._facesNumber);
 }
 
@@ -89,6 +103,10 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _normalsNumber(src._normalsNumber)
 	, _textureCoords(src._textureCoords)
 	, _textureCoordsNumber(src._textureCoordsNumber)
+	, _tangents(src._tangents)
+	, _tangentsNumber(src._tangentsNumber)
+	, _bitangents(src._bitangents)
+	, _bitangentsNumber(src._bitangentsNumber)
 	, _faces(src._faces)
 	, _facesNumber(src._facesNumber)
 	, _material(src._material)
@@ -100,6 +118,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	//, _colorsBufferObject(src._colorsBufferObject)
 	, _normalsBufferObject(src._normalsBufferObject)
 	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
+	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _allocator(src._allocator)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
 {
@@ -107,10 +126,14 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	src._normals = nullptr;
 	src._textureCoords = nullptr;
 	src._faces = nullptr;
+	src._tangents = nullptr;
+	src._bitangents = nullptr;
 	
 	src._verticesNumber = 0;
 	src._normalsNumber = 0;
 	src._textureCoordsNumber = 0;
+	src._tangentsNumber = 0;
+	src._bitangentsNumber = 0;
 	src._facesNumber = 0;
 }
 
@@ -121,6 +144,8 @@ AnimaMesh::~AnimaMesh()
 	ClearVertices();
 	ClearNormals();
 	ClearTextureCoords();
+	ClearTangents();
+	ClearBitangents();
 	ClearFaces();
 }
 
@@ -134,6 +159,8 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		//_colorsBufferObject = src._colorsBufferObject;
 		_normalsBufferObject = src._normalsBufferObject;
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
+		_tangentsBufferObject = src._tangentsBufferObject;
+		_bitangentsBufferObject = src._bitangentsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_material = src._material;
@@ -143,6 +170,8 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		SetVertices(src._vertices, src._verticesNumber);
 		SetNormals(src._normals, src._normalsNumber);
 		SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
+		SetTangents(src._tangents, src._tangentsNumber);
+		SetBitangents(src._bitangents, src._bitangentsNumber);
 		SetFaces(src._faces, src._facesNumber);
 	}
 	
@@ -158,11 +187,15 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_vertices = src._vertices;
 		_normals = src._normals;
 		_textureCoords = src._textureCoords;
+		_tangents = src._tangents;
+		_bitangents = src._bitangents;
 		_faces = src._faces;
 		
 		_verticesNumber = src._verticesNumber;
 		_normalsNumber = src._normalsNumber;
 		_textureCoordsNumber = src._textureCoordsNumber;
+		_tangentsNumber = src._tangentsNumber;
+		_bitangentsNumber = src._bitangentsNumber;
 		_facesNumber = src._facesNumber;
 
 		_material = src._material;
@@ -173,6 +206,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		//_colorsBufferObject = src._colorsBufferObject;
 		_normalsBufferObject = src._normalsBufferObject;
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
+		_tangentsBufferObject = src._tangentsBufferObject;
+		_bitangentsBufferObject = src._bitangentsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 
@@ -181,11 +216,15 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		src._vertices = nullptr;
 		src._normals = nullptr;
 		src._textureCoords = nullptr;
+		src._tangents = nullptr;
+		src._bitangents = nullptr;
 		src._faces = nullptr;
 		
 		src._verticesNumber = 0;
 		src._normalsNumber = 0;
 		src._textureCoordsNumber = 0;
+		src._tangentsNumber = 0;
+		src._bitangentsNumber = 0;
 		src._facesNumber = 0;
 	}
 	
@@ -222,6 +261,26 @@ void AnimaMesh::ClearTextureCoords()
 	}
 }
 
+void AnimaMesh::ClearTangents()
+{
+	if (_tangents != nullptr && _tangentsNumber > 0)
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _tangents);
+		_tangents = nullptr;
+		_tangentsNumber = 0;
+	}
+}
+
+void AnimaMesh::ClearBitangents()
+{
+	if (_bitangents != nullptr && _bitangentsNumber > 0)
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _bitangents);
+		_bitangents = nullptr;
+		_bitangentsNumber = 0;
+	}
+}
+
 void AnimaMesh::ClearFaces()
 {
 	if(_faces != nullptr && _facesNumber > 0)
@@ -243,12 +302,7 @@ void AnimaMesh::SetVertices(AnimaVertex3f* v, ASizeT n)
 		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, n);
 		
 		for(int i = 0; i < _verticesNumber; i++)
-		{
 			_vertices[i] = v[i];
-			//_vertices[i][0] = v[i][0];
-			//_vertices[i][1] = v[i][1];
-			//_vertices[i][2] = v[i][2];
-		}
 	}
 }
 
@@ -271,9 +325,6 @@ void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 			_vertices[i] = tmpOldVertices[i];
 
 		_vertices[_verticesNumber - 1] = v;
-		//_vertices[_verticesNumber - 1][0] = v[0];
-		//_vertices[_verticesNumber - 1][1] = v[1];
-		//_vertices[_verticesNumber - 1][2] = v[2];
 	
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldVertices);
 	}
@@ -283,9 +334,6 @@ void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 		_vertices = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _verticesNumber);
 		
 		_vertices[_verticesNumber - 1] = v;
-		//_vertices[_verticesNumber - 1][0] = v[0];
-		//_vertices[_verticesNumber - 1][1] = v[1];
-		//_vertices[_verticesNumber - 1][2] = v[2];
 	}
 }
 
@@ -300,12 +348,7 @@ void AnimaMesh::SetNormals(AnimaVertex3f* v, ASizeT n)
 		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _normalsNumber);
 	
 		for (int i = 0; i < _normalsNumber; i++)
-		{
 			_normals[i] = v[i];
-			//_normals[i][0] = v[i][0];
-			//_normals[i][1] = v[i][1];
-			//_normals[i][2] = v[i][2];
-		}
 	}
 }
 
@@ -328,9 +371,6 @@ void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 			_normals[i] = tmpOldNormals[i];
 	
 		_normals[_normalsNumber - 1] = v;
-		//_normals[_normalsNumber - 1][0] = v[0];
-		//_normals[_normalsNumber - 1][1] = v[1];
-		//_normals[_normalsNumber - 1][2] = v[2];
 	
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldNormals);
 	}
@@ -340,9 +380,6 @@ void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _normalsNumber);
 
 		_normals[_normalsNumber - 1] = v;
-		//_normals[_normalsNumber - 1][0] = v[0];
-		//_normals[_normalsNumber - 1][1] = v[1];
-		//_normals[_normalsNumber - 1][2] = v[2];
 	}
 }
 
@@ -389,6 +426,98 @@ void AnimaMesh::AddTextureCoord(const AnimaVertex2f& v)
 		_textureCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _textureCoordsNumber);
 		
 		_textureCoords[_textureCoordsNumber - 1] = v;
+	}
+}
+
+void AnimaMesh::SetTangents(AnimaVertex3f* v, ASizeT n)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	ClearTangents();
+
+	if (v != nullptr && n > 0)
+	{
+		_tangentsNumber = n;
+		_tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _tangentsNumber);
+
+		for (int i = 0; i < _tangentsNumber; i++)
+			_tangents[i] = v[i];
+	}
+}
+
+void AnimaMesh::AddTangent(const AnimaVertex3f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_tangentsNumber > 0)
+	{
+		AnimaVertex2f* tmpOldTangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _tangentsNumber);
+
+		for (int i = 0; i < _tangentsNumber; i++)
+			tmpOldTangents[i] = _tangents[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _tangents);
+
+		_tangentsNumber++;
+		_tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _tangentsNumber);
+
+		for (int i = 0; i < _tangentsNumber - 1; i++)
+			_textureCoords[i] = tmpOldTangents[i];
+
+		_tangents[_tangentsNumber - 1] = v;
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldTangents);
+	}
+	else
+	{
+		_tangentsNumber++;
+		_tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _tangentsNumber);
+
+		_tangents[_tangentsNumber - 1] = v;
+	}
+}
+
+void AnimaMesh::SetBitangents(AnimaVertex3f* v, ASizeT n)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	ClearBitangents();
+
+	if (v != nullptr && n > 0)
+	{
+		_bitangentsNumber = n;
+		_bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _bitangentsNumber);
+
+		for (int i = 0; i < _bitangentsNumber; i++)
+			_bitangents[i] = v[i];
+	}
+}
+
+void AnimaMesh::AddBitangent(const AnimaVertex3f& v)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_bitangentsNumber > 0)
+	{
+		AnimaVertex2f* tmpOldBitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, _bitangentsNumber);
+
+		for (int i = 0; i < _bitangentsNumber; i++)
+			tmpOldBitangents[i] = _bitangents[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _bitangents);
+
+		_bitangentsNumber++;
+		_bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _bitangentsNumber);
+
+		for (int i = 0; i < _bitangentsNumber - 1; i++)
+			_textureCoords[i] = tmpOldBitangents[i];
+
+		_bitangents[_bitangentsNumber - 1] = v;
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldBitangents);
+	}
+	else
+	{
+		_bitangentsNumber++;
+		_bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _bitangentsNumber);
+
+		_bitangents[_bitangentsNumber - 1] = v;
 	}
 }
 
@@ -504,6 +633,50 @@ AnimaVertex2f* AnimaMesh::GetTextureCoords()
 	return _textureCoords;
 }
 
+ASizeT AnimaMesh::GetTangentsNumber()
+{
+	return _tangentsNumber;
+}
+
+AnimaVertex3f AnimaMesh::GetTangent(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _tangentsNumber);
+	return _tangents[index];
+}
+
+AnimaVertex3f* AnimaMesh::GetPTangent(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _tangentsNumber);
+	return &_tangents[index];
+}
+
+AnimaVertex3f* AnimaMesh::GetTangents()
+{
+	return _tangents;
+}
+
+ASizeT AnimaMesh::GetBitangentsNumber()
+{
+	return _bitangentsNumber;
+}
+
+AnimaVertex3f AnimaMesh::GetBitangent(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _bitangentsNumber);
+	return _bitangents[index];
+}
+
+AnimaVertex3f* AnimaMesh::GetPBitangent(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _bitangentsNumber);
+	return &_bitangents[index];
+}
+
+AnimaVertex3f* AnimaMesh::GetBitangents()
+{
+	return _bitangents;
+}
+
 ASizeT AnimaMesh::GetFacesNumber()
 {
 	return _facesNumber;
@@ -560,6 +733,12 @@ bool AnimaMesh::CreateBuffers()
 	if (!CreateNormalsBuffer())
 		return false;
 
+	if (!CreateTangentsBuffer())
+		return false;
+
+	if (!CreateBitangentsBuffer())
+		return false;
+
 	//if (!CreateColorsBuffer())
 	//	return false;
 
@@ -579,6 +758,8 @@ void AnimaMesh::UpdateBuffers()
 		//glInvalidateBufferData(_colorsBufferObject);
 		glInvalidateBufferData(_normalsBufferObject);
 		glInvalidateBufferData(_textureCoordsBufferObject);
+		glInvalidateBufferData(_tangentsBufferObject);
+		glInvalidateBufferData(_bitangentsBufferObject);
 	}
 	
 	glBindVertexArray(_vertexArrayObject);
@@ -605,7 +786,7 @@ void AnimaMesh::UpdateBuffers()
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, normals);
 		normals = nullptr;
 	}
-
+	
 	//if (GetFloatVerticesColorCount() > 0)
 	//{
 	//	float* colors = GetFloatVerticesColor();
@@ -628,12 +809,30 @@ void AnimaMesh::UpdateBuffers()
 		textureCoords = nullptr;
 	}
 
+	if (GetFloatVerticesTangentsCount() > 0)
+	{
+		float* tangents = GetFloatVerticesTangents();
+		glBindBuffer(GL_ARRAY_BUFFER, _tangentsBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesTangentsCount(), tangents, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tangents);
+		tangents = nullptr;
+	}
+
+	if (GetFloatVerticesBitangentsCount() > 0)
+	{
+		float* bitangents = GetFloatVerticesBitangents();
+		glBindBuffer(GL_ARRAY_BUFFER, _bitangentsBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesBitangentsCount(), bitangents, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, bitangents);
+		bitangents = nullptr;
+	}
+
 	_needsBuffersUpdate = false;
 }
 
 bool AnimaMesh::AreBuffersCreated()
 {
-	return IsIndicesBufferCreated() && IsVerticesBufferCreated() && IsVertexArrayObjectCreated() && IsTextureCoordsBufferCreated() && IsNormalsBufferCreated();// && IsColorsBufferCreated();
+	return IsIndicesBufferCreated() && IsVerticesBufferCreated() && IsVertexArrayObjectCreated() && IsTextureCoordsBufferCreated() && IsNormalsBufferCreated() && IsTangentsBufferCreated() && IsBitangentsBufferCreated();// && IsColorsBufferCreated();
 }
 
 bool AnimaMesh::IsIndicesBufferCreated()
@@ -656,14 +855,24 @@ bool AnimaMesh::IsNormalsBufferCreated()
 	return _normalsBufferObject > 0;
 }
 
-bool AnimaMesh::IsVertexArrayObjectCreated()
-{
-	return _vertexArrayObject > 0;
-}
-
 bool AnimaMesh::IsTextureCoordsBufferCreated()
 {
 	return _textureCoordsBufferObject > 0;
+}
+
+bool AnimaMesh::IsTangentsBufferCreated()
+{
+	return _tangentsBufferObject > 0;
+}
+
+bool AnimaMesh::IsBitangentsBufferCreated()
+{
+	return _bitangentsBufferObject > 0;
+}
+
+bool AnimaMesh::IsVertexArrayObjectCreated()
+{
+	return _vertexArrayObject > 0;
 }
 
 bool AnimaMesh::CreateIndicesBuffer()
@@ -702,18 +911,6 @@ bool AnimaMesh::CreateNormalsBuffer()
 //	return true;
 //}
 
-bool AnimaMesh::CreateVertexArrayObject()
-{
-	if (IsVertexArrayObjectCreated())
-		return true;
-
-	glGenVertexArrays(1, &_vertexArrayObject);
-	if (_vertexArrayObject <= 0)
-		return false;
-
-	return true;
-}
-
 bool AnimaMesh::CreateTextureCoordsBuffer()
 {
 	if (IsTextureCoordsBufferCreated())
@@ -721,6 +918,30 @@ bool AnimaMesh::CreateTextureCoordsBuffer()
 
 	glGenBuffers(1, &_textureCoordsBufferObject);
 	if (_textureCoordsBufferObject <= 0)
+		return false;
+
+	return true;
+}
+
+bool AnimaMesh::CreateTangentsBuffer()
+{
+	if (IsTangentsBufferCreated())
+		return true;
+
+	glGenBuffers(1, &_tangentsBufferObject);
+	if (_tangentsBufferObject <= 0)
+		return false;
+
+	return true;
+}
+
+bool AnimaMesh::CreateBitangentsBuffer()
+{
+	if (IsBitangentsBufferCreated())
+		return true;
+
+	glGenBuffers(1, &_bitangentsBufferObject);
+	if (_bitangentsBufferObject <= 0)
 		return false;
 
 	return true;
@@ -735,6 +956,18 @@ bool AnimaMesh::CreateVerticesBuffer()
 	if (_verticesBufferObject <= 0)
 		return false;
 	
+	return true;
+}
+
+bool AnimaMesh::CreateVertexArrayObject()
+{
+	if (IsVertexArrayObjectCreated())
+		return true;
+
+	glGenVertexArrays(1, &_vertexArrayObject);
+	if (_vertexArrayObject <= 0)
+		return false;
+
 	return true;
 }
 
@@ -796,7 +1029,6 @@ float* AnimaMesh::GetFloatVertices()
 		for (int i = 0; i < _verticesNumber; i++)
 		{
 			memcpy(vertices + offset, _vertices[i].vec, sizeof(AFloat) * 3);
-			//_vertices[i].CopyData(vertices + offset);
 			offset += 3;
 		}
 	}
@@ -822,7 +1054,6 @@ float* AnimaMesh::GetFloatVerticesNormal()
 		for (int i = 0; i < _normalsNumber; i++)
 		{
 			memcpy(normals + offset, _normals[i].vec, sizeof(AFloat) * 3);
-			//_normals[i].CopyData(normals + offset);
 			offset += 3;
 		}
 	}
@@ -858,12 +1089,61 @@ float* AnimaMesh::GetFloatVerticesTextureCoord()
 		for (int i = 0; i < _verticesNumber; i++)
 		{
 			memcpy(textureCoords + offset, _textureCoords[i].vec, sizeof(AFloat) * 2);
-			//_textureCoords[i].CopyData(textureCoords + offset);			
 			offset += 2;
 		}
 	}
 
 	return textureCoords;
+}
+
+AUint AnimaMesh::GetFloatVerticesTangentsCount()
+{
+	return (AUint)_tangentsNumber * 3;
+}
+
+float* AnimaMesh::GetFloatVerticesTangents()
+{
+	float* tangents = nullptr;
+	ASizeT count = GetFloatVerticesTangentsCount();
+	ASizeT offset = 0;
+
+	if (count > 0)
+	{
+		tangents = AnimaAllocatorNamespace::AllocateArray<float>(*_allocator, count);
+
+		for (int i = 0; i < _verticesNumber; i++)
+		{
+			memcpy(tangents + offset, _tangents[i].vec, sizeof(AFloat) * 3);
+			offset += 3;
+		}
+	}
+
+	return tangents;
+}
+
+AUint AnimaMesh::GetFloatVerticesBitangentsCount()
+{
+	return (AUint)_bitangentsNumber * 3;
+}
+
+float* AnimaMesh::GetFloatVerticesBitangents()
+{
+	float* bitangents = nullptr;
+	ASizeT count = GetFloatVerticesBitangentsCount();
+	ASizeT offset = 0;
+
+	if (count > 0)
+	{
+		bitangents = AnimaAllocatorNamespace::AllocateArray<float>(*_allocator, count);
+
+		for (int i = 0; i < _verticesNumber; i++)
+		{
+			memcpy(bitangents + offset, _bitangents[i].vec, sizeof(AFloat) * 3);
+			offset += 3;
+		}
+	}
+
+	return bitangents;
 }
 
 void AnimaMesh::SetMaterial(AnimaMaterial* material)
@@ -904,6 +1184,16 @@ AUint AnimaMesh::GetNormalsBufferObject()
 AUint AnimaMesh::GetTextureCoordsBufferObject()
 {
 	return _textureCoordsBufferObject;
+}
+
+AUint AnimaMesh::GetTangentsBufferObject()
+{
+	return _tangentsBufferObject;
+}
+
+AUint AnimaMesh::GetBitangentsBufferObject()
+{
+	return _bitangentsBufferObject;
 }
 
 void AnimaMesh::SetParent(AnimaModel* parent)

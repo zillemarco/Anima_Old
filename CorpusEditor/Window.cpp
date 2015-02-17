@@ -19,6 +19,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+bool fxaa = true;
+
 BEGIN_MESSAGE_MAP(Window, Anima::AnimaEngineWindow_Base)
 	ANIMA_WINDOW_MOUSE_CLICK_EVENT(MouseClickCallback)
 	ANIMA_WINDOW_PAINT_EVENT(PaintCallback)
@@ -50,21 +52,32 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 
 void Window::DrawScene()
 {
+	int w, h;
+	this->GetWindowSize(&w, &h);
+
 	if (renderingManager == nullptr)
-		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	{
+		int mul = 1;
+
+		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
+		renderingManager->InitRenderingTargets(w * mul, h * mul);
+		renderingManager->InitRenderingUtilities(w * mul, h * mul);
+	}
 
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 
 	MakeCurrentContext();
 
-	//renderTexture->BindAsRenderTarget();	
+	renderingManager->GetTexture("DiffuseMap")->BindAsRenderTarget();
 	renderingManager->Start(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 	renderingManager->ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 	renderingManager->Finish(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 
-	BindAsRenderTarget();
+	if (fxaa)
+		renderingManager->ApplyFilter(GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager()->GetProgramFromName("fxaaFilter"), renderingManager->GetTexture("DiffuseMap"), nullptr);
+	else
+		renderingManager->ApplyFilter(GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager()->GetProgramFromName("nullFilter"), renderingManager->GetTexture("DiffuseMap"), nullptr);
 	
-
 	SwapBuffers();
 }
 
@@ -76,6 +89,12 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	{
 		glViewport(0, 0, w, h);
 		window->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+
+		if (((Window*)window)->renderingManager != nullptr)
+		{
+			int mul = 1;
+			((Window*)window)->renderingManager->InitRenderingTargets(w * mul, h * mul);
+		}
 	}
 	else
 	{
@@ -152,7 +171,10 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 
 		break;
 	case ANIMA_ENGINE_KEY_T:
-			wnd->type = !wnd->type;
+		wnd->type = !wnd->type;
+		break;
+	case ANIMA_ENGINE_KEY_F:
+		fxaa = !fxaa;
 		break;
 	}
 }
@@ -215,19 +237,27 @@ void Window::Load()
 	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("forward-spot")->Link();
 
-	texture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "mattoni.bmp", "texture-cubo");
-	texture->LoadTextures();
+	mgr->CreateProgram("nullFilter");
+	mgr->GetProgramFromName("nullFilter")->Create();
+	mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("nullFilter")->Link();
 
-	renderTexture = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->CreateTexture("render-texture", GL_TEXTURE_2D, w, h, nullptr, 0, 0, GL_NEAREST, GL_RGB, GL_RGB, false, GL_COLOR_ATTACHMENT0);
-	renderTexture->LoadRenderTargets();
-	
-	pianoDisegno = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->CreatePlane("piano-disegno");
-	pianoDisegno->GetTransformation()->RotateXDeg(90.0f);
-	pianoDisegno->EnableDrawing(false);
+	mgr->CreateProgram("fxaaFilter");
+	mgr->GetProgramFromName("fxaaFilter")->Create();
+	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("fxaaFilter")->Link();
 
-	
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal.bmp", "texture-mattoni-bump"));
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
+
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(0.2f, 0.2f, 0.2f);
+	l0->SetColor(0.1f, 0.1f, 0.1f);
 
 	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);

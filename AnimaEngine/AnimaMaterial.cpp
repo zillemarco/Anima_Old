@@ -14,12 +14,12 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
-	SetInteger("frontFace", GL_CCW);
-	SetInteger("cullFace", GL_BACK);
-	SetBoolean("wireframe", false);
-	SetColor("wireframeColor", 0.0f, 0.0f, 0.0f);
-	SetFloat("maxTessellationLevel", 1.0f);
-	SetFloat("tessellationAlpha", 0.0f);
+	SetInteger("FrontFace", GL_CCW);
+	SetInteger("CullFace", GL_BACK);
+	SetBoolean("Wireframe", false);
+	SetColor("WireframeColor", 0.0f, 0.0f, 0.0f);
+	SetFloat("MaxTessellationLevel", 1.0f);
+	SetFloat("TessellationAlpha", 0.0f);
 }
 
 AnimaMaterial::AnimaMaterial(const AnimaMaterial& src)

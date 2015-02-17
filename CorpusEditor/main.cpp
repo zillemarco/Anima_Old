@@ -93,9 +93,12 @@ int main(int argc, char** argv)
 	stage->Initialize();
 
 	Anima::AnimaString path(ANIMA_ENGINE_MODELS_PATH "scimmiaO.3ds", stage->GetStringAllocator());
+	Anima::AnimaString pathPlane(ANIMA_ENGINE_MODELS_PATH "piano.3ds", stage->GetStringAllocator());
 
 	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
 	if (!manager->LoadModel(path, "scimmia"))
+		return 0;
+	if (!manager->LoadModel(pathPlane, "piano"))
 		return 0;
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);

@@ -169,6 +169,38 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaModel* currentModel, const aiSce
 				AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), normali);
 			}
 
+			if (mesh->HasTangentsAndBitangents())
+			{
+				AnimaVertex3f* tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_stage->GetGenericAllocator()), numeroVertici);
+				AnimaVertex3f* bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_stage->GetGenericAllocator()), numeroVertici);
+				
+				int offsetTangents = 0;
+				int offsetBitangents = 0;
+
+				for (int t = 0; t < numeroVertici; t++)
+				{
+					const aiVector3D* tang = &mesh->mTangents[t];
+					const aiVector3D* bita = &mesh->mBitangents[t];
+
+					tangents[offsetTangents].x = tang->x;
+					tangents[offsetTangents].y = tang->y;
+					tangents[offsetTangents].z = tang->z;
+
+					bitangents[offsetBitangents].x = bita->x;
+					bitangents[offsetBitangents].y = bita->y;
+					bitangents[offsetBitangents].z = bita->z;
+
+					offsetTangents++;
+					offsetBitangents++;
+				}
+
+				currentMesh->SetTangents(tangents, offsetTangents);
+				currentMesh->SetBitangents(bitangents, offsetTangents);
+
+				AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), tangents);
+				AnimaAllocatorNamespace::DeallocateArray(*(_stage->GetGenericAllocator()), bitangents);
+			}
+
 			if (mesh->HasTextureCoords(0))
 			{
 				AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_stage->GetGenericAllocator()), numeroVertici);
@@ -434,24 +466,24 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 	int two_sided;
 	
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == AI_SUCCESS)
-		material->AddColor("diffuseColor", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+		material->AddColor("DiffuseColor", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
 	else
-		material->AddColor("diffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
+		material->AddColor("DiffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular) == AI_SUCCESS)
-		material->AddColor("specularColor", specular.r, specular.g, specular.b, specular.a);
+		material->AddColor("SpecularColor", specular.r, specular.g, specular.b, specular.a);
 	else
-		material->AddColor("specularColor", 0.0f, 0.0f, 0.0f, 1.0f);
+		material->AddColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient) == AI_SUCCESS)
-		material->AddColor("ambientColor", ambient.r, ambient.g, ambient.b, ambient.a);
+		material->AddColor("AmbientColor", ambient.r, ambient.g, ambient.b, ambient.a);
 	else
-		material->AddColor("ambientColor", 0.2f, 0.2f, 0.2f, 1.0f);
+		material->AddColor("AmbientColor", 0.2f, 0.2f, 0.2f, 1.0f);
 
 	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission) == AI_SUCCESS)
-		material->AddColor("emissionColor", emission.r, emission.g, emission.b, emission.a);
+		material->AddColor("EmissionColor", emission.r, emission.g, emission.b, emission.a);
 	else
-		material->AddColor("emissionColor", 0.0f, 0.0f, 0.0f, 1.0f);
+		material->AddColor("EmissionColor", 0.0f, 0.0f, 0.0f, 1.0f);
 	
 	max = 1;
 	ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
@@ -461,21 +493,21 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
 
 		if (ret2 == AI_SUCCESS)
-			material->AddFloat("shininess", shininess * strength);
+			material->AddFloat("Shininess", shininess * strength);
 		else
-			material->AddFloat("shininess", shininess);
+			material->AddFloat("Shininess", shininess);
 	}
 	else 
 	{
-		material->AddFloat("shininess", 0.0f);
-		material->SetColor("specularColor", 0.0f, 0.0f, 0.0f, 1.0f);
+		material->AddFloat("Shininess", 0.0f);
+		material->SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	max = 1;
 	if ((aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max) == AI_SUCCESS) && two_sided)
-		material->AddBoolean("twoSided", true);
+		material->AddBoolean("TwoSided", true);
 	else
-		material->AddBoolean("twoSided", false);
+		material->AddBoolean("TwoSided", false);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

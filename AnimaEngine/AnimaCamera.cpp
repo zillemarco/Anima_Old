@@ -175,17 +175,18 @@ void AnimaCamera::SetPosition(const AFloat& x, const AFloat& y, const AFloat& z)
 
 void AnimaCamera::Activate()
 {
-	ANIMA_ASSERT(_camerasManager != nullptr);
 	_active = true;
-	
-	_camerasManager->NotifyCameraActivation(this);
+
+	if (_camerasManager != nullptr)
+		_camerasManager->NotifyCameraActivation(this);
 }
 
 void AnimaCamera::Deactivate()
 {
-	ANIMA_ASSERT(_camerasManager != nullptr);
-	_active = false;
-	_camerasManager->NotifyCameraDeactivation(this);
+	_active = true;
+
+	if (_camerasManager != nullptr)
+		_camerasManager->NotifyCameraDeactivation(this);
 }
 
 bool AnimaCamera::IsActive()
@@ -213,9 +214,19 @@ AnimaVertex3f AnimaCamera::GetRight()
 	return _xAxis;
 }
 
+void AnimaCamera::SetViewMatrix(const AnimaMatrix& matrix)
+{
+	_viewMatrix = matrix;
+}
+
 AnimaMatrix AnimaCamera::GetViewMatrix()
 {
 	return _viewMatrix;
+}
+
+void AnimaCamera::SetProjectionMatrix(const AnimaMatrix& matrix)
+{
+	_projectionMatrix = matrix;
 }
 
 AnimaMatrix AnimaCamera::GetProjectionMatrix()

@@ -450,8 +450,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0] + 1, NULL, name.GetBuffer());
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0], NULL, name.GetBuffer());
 
 			AnimaUniformInfo info;
 			info._arraySize = values[3];
@@ -466,8 +466,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0] + 1, NULL, name.GetBuffer());
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0], NULL, name.GetBuffer());
 
 			AnimaInputInfo info;
 			info._location = values[2];
@@ -481,8 +481,8 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0] + 1, NULL, name.GetBuffer());
+			name.Reserve(values[0] - 1);
+			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0], NULL, name.GetBuffer());
 
 			AnimaOutputInfo info;
 			info._location = values[2];
@@ -567,7 +567,7 @@ void AnimaShaderProgram::ScanVariables()
 	}
 }
 
-void AnimaShaderProgram::EnableInputs(AnimaStage* stage, AnimaMesh* mesh)
+void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 {
 	glBindVertexArray(mesh->GetVertexArrayObject());
 
@@ -599,10 +599,28 @@ void AnimaShaderProgram::EnableInputs(AnimaStage* stage, AnimaMesh* mesh)
 				glVertexAttribPointer(info._location, 2, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
+		else if (info._name == "_tangent")
+		{
+			if (mesh->GetFloatVerticesTangentsCount() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTangentsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+		else if (info._name == "_bitangent")
+		{
+			if (mesh->GetFloatVerticesBitangentsCount() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBitangentsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
 	}
 }
 
-void AnimaShaderProgram::DisableInputs(AnimaStage* stage)
+void AnimaShaderProgram::DisableInputs()
 {
 	for (auto key : _inputs)
 	{
@@ -611,7 +629,7 @@ void AnimaShaderProgram::DisableInputs(AnimaStage* stage)
 	}
 }
 
-void AnimaShaderProgram::UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh, const AnimaMatrix& transformation)
+void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& transformation)
 {
 	AnimaString str(_allocator);
 	AnimaUniformInfo info;
@@ -631,7 +649,7 @@ void AnimaShaderProgram::UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh,
 	}
 }
 
-void AnimaShaderProgram::UpdateCameraProperies(AnimaStage* stage, AnimaCamera* camera)
+void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 {
 	AnimaString str(_allocator);
 	AnimaUniformInfo info;
@@ -657,6 +675,19 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaStage* stage, AnimaCamera* c
 
 		if (info._type == GL_FLOAT_VEC2)
 			SetUniform(info._name, camera->GetWindowSize());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "_inverseWindowSize";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_VEC2)
+			SetUniform(info._name, AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
 		else
 		{
 			UPD_ERROR;
@@ -703,174 +734,66 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaStage* stage, AnimaCamera* c
 	}
 }
 
-void AnimaShaderProgram::UpdateMaterialProperies(AnimaStage* stage, AnimaRenderingManager* renderingManager, AnimaMaterial* material)
+void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager)
 {
 	if (material == nullptr)
 		return;
 
 	AnimaString str(_allocator);
-	AnimaUniformInfo info;
-	auto end = _uniforms.end();
 
-	str = "_materialDiffuseColor";
-	if (_uniforms.find(str) != end)
+	for (auto& pair : _uniforms)
 	{
-		info = _uniforms[str];
+		AnimaUniformInfo info = pair.second;
+
+		if (!info._name.StartsWith("_material"))
+			continue;
+
+		str = info._name.Substring(9, info._name.GetBufferLength());
 
 		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, material->GetColor3f("diffuseColor"));
+			SetUniform(info._name, material->GetColor3f(str));
 		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, material->GetColor4f("diffuseColor"));
-		else
+			SetUniform(info._name, material->GetColor4f(str));
+		else if (info._type == GL_FLOAT)
+			SetUniformf(info._name, material->GetFloat(str));
+		else if (info._type == GL_BOOL)
+			SetUniformi(info._name, material->GetBoolean(str) ? 1 : 0);
+		else if (info._type == GL_INT)
+			SetUniformi(info._name, material->GetInteger(str));
+		else if (info._type == GL_SAMPLER_2D)
 		{
-			UPD_ERROR;
-		}
-	}
+			AnimaTexture* texture = material->GetTexture(str);
 
-	str = "_materialDiffuseTexture";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
+			AUint slot = renderingManager->GetTextureSlot(str);
+			SetUniformi(info._name, slot);
 
-		if (info._type == GL_SAMPLER_2D)
-		{
-			AnimaTexture* texture = material->GetTexture("diffuseTexture");
-
-			if (texture != nullptr)
+			if (texture == nullptr)
 			{
-				AUint slot = renderingManager->GetTextureSlot(stage, "diffuse");
+				glActiveTexture(GL_TEXTURE0 + slot);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				texture->LoadTextures();
 				texture->Bind(slot);
-				SetUniformi(info._name, slot);
 			}
 		}
 		else
 		{
-			UPD_ERROR;
+			ANIMA_ASSERT(false);
 		}
 	}
 
-	str = "_materialSpecularColor";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, material->GetColor3f("specularColor"));
-		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, material->GetColor4f("specularColor"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialAmbientColor";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, material->GetColor3f("ambientColor"));
-		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, material->GetColor4f("ambientColor"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialEmissionColor";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, material->GetColor3f("emissionColor"));
-		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, material->GetColor4f("emissionColor"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialShininess";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT)
-			SetUniformf(info._name, material->GetFloat("shininess"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialWireframe";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_BOOL || info._type == GL_INT)
-			SetUniformi(info._name, material->GetBoolean("wireframe") ? 1 : 0);
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialWireframeColor";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, material->GetColor3f("wireframeColor"));
-		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, material->GetColor4f("wireframeColor"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialMaxTessellationLevel";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT)
-			SetUniformf(info._name, material->GetFloat("maxTessellationLevel"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "_materialTessellationAlpha";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT)
-			SetUniformf(info._name, material->GetFloat("tessellationAlpha"));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	if (material->GetBoolean("twoSided"))
+	if (material->GetBoolean("TwoSided"))
 		glDisable(GL_CULL_FACE);
 	else
 		glEnable(GL_CULL_FACE);
 
-	glFrontFace(material->GetInteger("frontFace"));
-	glCullFace(material->GetInteger("cullFace"));
+	glFrontFace(material->GetInteger("FrontFace"));
+	glCullFace(material->GetInteger("CullFace"));
 }
 
-void AnimaShaderProgram::UpdateLightProperies(AnimaStage* stage, AnimaLight* light)
+void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 {
 	if (light->IsAmbientLight())
 	{
@@ -1018,6 +941,56 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaStage* stage)
 
 				nextSpotLight++;
 			}
+		}
+	}
+}
+
+void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)
+{
+	AnimaString str(_allocator);
+
+	for (auto& pair : _uniforms)
+	{
+		AnimaUniformInfo info = pair.second;
+
+		if (!info._name.StartsWith("_rendering"))
+			continue;
+
+		str = info._name.Substring(10, info._name.GetBufferLength());
+
+		if (info._type == GL_FLOAT_VEC2)
+			SetUniform(info._name, renderingManager->GetVector2f(str));
+		else if (info._type == GL_FLOAT_VEC3)
+			SetUniform(info._name, renderingManager->GetColor3f(str));
+		else if (info._type == GL_FLOAT_VEC4)
+			SetUniform(info._name, renderingManager->GetColor4f(str));
+		else if (info._type == GL_FLOAT)
+			SetUniformf(info._name, renderingManager->GetFloat(str));
+		else if (info._type == GL_BOOL)
+			SetUniformi(info._name, renderingManager->GetBoolean(str) ? 1 : 0);
+		else if (info._type == GL_INT)
+			SetUniformi(info._name, renderingManager->GetInteger(str));
+		else if (info._type == GL_SAMPLER_2D)
+		{
+			AnimaTexture* texture = renderingManager->GetTexture(str);
+
+			AUint slot = renderingManager->GetTextureSlot(str);
+			SetUniformi(info._name, slot);
+
+			if (texture == nullptr)
+			{
+				glActiveTexture(GL_TEXTURE0 + slot);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				texture->LoadTextures();
+				texture->Bind(slot);
+			}
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
 		}
 	}
 }

@@ -90,14 +90,15 @@ public:
 public:
 	void ScanVariables();
 
-	void EnableInputs(AnimaStage* stage, AnimaMesh* mesh);
-	void DisableInputs(AnimaStage* stage);
+	void EnableInputs(AnimaMesh* mesh);
+	void DisableInputs();
 
-	void UpdateMeshProperies(AnimaStage* stage, AnimaMesh* mesh, const AnimaMatrix& transformation);
-	void UpdateCameraProperies(AnimaStage* stage, AnimaCamera* camera);
-	void UpdateMaterialProperies(AnimaStage* stage, AnimaRenderingManager* renderingManager, AnimaMaterial* material);
-	void UpdateLightProperies(AnimaStage* stage, AnimaLight* light);
+	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& transformation);
+	void UpdateCameraProperies(AnimaCamera* camera);
+	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager);
+	void UpdateLightProperies(AnimaLight* light);
 	void UpdateLightsProperies(AnimaStage* stage);
+	void UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);

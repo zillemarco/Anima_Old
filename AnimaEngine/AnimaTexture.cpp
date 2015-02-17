@@ -36,6 +36,41 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint texturesNumber)
 	_renderTargetsReady = false;
 }
 
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+{
+	_allocator = allocator;
+
+	_texturesNumber = 1;
+
+	_textureIDs = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_datas = AnimaAllocatorNamespace::AllocateArray<AUchar*>(*_allocator, _texturesNumber);
+	_datasSize = AnimaAllocatorNamespace::AllocateArray<ASizeT>(*_allocator, _texturesNumber);
+	_filters = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+
+	for (AUint i = 0; i < _texturesNumber; i++)
+		_datas[i] = nullptr;
+
+	SetDatas(&data, &dataSize);
+	SetFilters(&filter);
+	SetFormats(&format);
+	SetInternalFormats(&internalFormat);
+	SetAttachments(&attachment);
+
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_mipMapLevels = mipMapLevels;
+	_enableClamp = clamp;
+	_width = width;
+	_height = height;
+	_textureTarget = textureTarget;
+	_texturesReady = false;
+	_renderTargetsReady = false;
+}
+
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint* attachments)
 {
 	_allocator = allocator;
@@ -682,7 +717,6 @@ bool AnimaTexture::LoadRenderTargets()
 	}
 
 	_renderTargetsReady = true;
-	_texturesReady = false;
 	return true;
 }
 

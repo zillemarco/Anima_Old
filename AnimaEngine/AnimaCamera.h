@@ -63,10 +63,12 @@ public:
 	virtual void LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xValue, AFloat yValue, AFloat zValue) = 0;
 
 	virtual void CalculateViewMatrix() = 0;
+	virtual void SetViewMatrix(const AnimaMatrix& matrix);
 	virtual AnimaMatrix GetViewMatrix();
 
 	virtual void CalculateProjectionMatrix(float fov, const AnimaVertex2f& size, float zNear, float zFar);
 	virtual void CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar);
+	virtual void SetProjectionMatrix(const AnimaMatrix& matrix);
 	virtual AnimaMatrix GetProjectionMatrix();
 	
 	virtual void Activate();

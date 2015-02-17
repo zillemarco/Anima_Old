@@ -84,42 +84,42 @@ public:
 	static const char* GetVersionString(void);
 
 	static void DefaultWindowHints(void);
-	static void SetWindowHint(int target, int hint);
-	static void SetWindowHint(int target, bool hint);
+static void SetWindowHint(int target, int hint);
+static void SetWindowHint(int target, bool hint);
 
-	static AnimaEngineWindowmonitor* GetPrimaryMonitor(void);
-	static void GetMonitorPos(AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos);
-	static void GetMonitorPhysicalSize(AnimaEngineWindowmonitor* monitor, int* width, int* height);
-	static const char* GetMonitorName(AnimaEngineWindowmonitor* monitor);
+static AnimaEngineWindowmonitor* GetPrimaryMonitor(void);
+static void GetMonitorPos(AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos);
+static void GetMonitorPhysicalSize(AnimaEngineWindowmonitor* monitor, int* width, int* height);
+static const char* GetMonitorName(AnimaEngineWindowmonitor* monitor);
 
-	static AnimaEngineWindowmonitorfun SetMonitorCallback(AnimaEngineWindowmonitorfun cbfun);
+static AnimaEngineWindowmonitorfun SetMonitorCallback(AnimaEngineWindowmonitorfun cbfun);
 
-	static const AnimaEngineWindowvidmode* GetVideoModes(AnimaEngineWindowmonitor* monitor, int* count);
-	static const AnimaEngineWindowvidmode* GetVideoMode(AnimaEngineWindowmonitor* monitor);
+static const AnimaEngineWindowvidmode* GetVideoModes(AnimaEngineWindowmonitor* monitor, int* count);
+static const AnimaEngineWindowvidmode* GetVideoMode(AnimaEngineWindowmonitor* monitor);
 
-	static void SetGamma(AnimaEngineWindowmonitor* monitor, float gamma);
-	static const AnimaEngineWindowgammaramp* GetGammaRamp(AnimaEngineWindowmonitor* monitor);
-	static void SetGammaRamp(AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp);
+static void SetGamma(AnimaEngineWindowmonitor* monitor, float gamma);
+static const AnimaEngineWindowgammaramp* GetGammaRamp(AnimaEngineWindowmonitor* monitor);
+static void SetGammaRamp(AnimaEngineWindowmonitor* monitor, const AnimaEngineWindowgammaramp* ramp);
 
-	static AnimaEngineWindowcursor* CreateCursor(const AnimaEngineWindowimage* image, int xhot, int yhot);
-	static void DestroyCursor(AnimaEngineWindowcursor* cursor);
+static AnimaEngineWindowcursor* CreateCursor(const AnimaEngineWindowimage* image, int xhot, int yhot);
+static void DestroyCursor(AnimaEngineWindowcursor* cursor);
 
-	static bool JoystickPresent(int joy);
+static bool JoystickPresent(int joy);
 
-	static const float* GetJoystickAxes(int joy, int* count);
-	static const unsigned char* GetJoystickButtons(int joy, int* count);
-	static const char* GetJoystickName(int joy);
-	static bool ExtensionSupported(const char* extension);
+static const float* GetJoystickAxes(int joy, int* count);
+static const unsigned char* GetJoystickButtons(int joy, int* count);
+static const char* GetJoystickName(int joy);
+static bool ExtensionSupported(const char* extension);
 
-	static void SetUsedExternal(bool bUsedExternal = true) { _usedExternal = bUsedExternal; }
-	static bool IsUsedExteral() { return _usedExternal; }
+static void SetUsedExternal(bool bUsedExternal = true) { _usedExternal = bUsedExternal; }
+static bool IsUsedExteral() { return _usedExternal; }
 
-	static bool InitializeGlewExtensions();
-	static bool IsGlewExtensionsInitialized()			{ return _glewExtensionsInitialized; }
-	static void SetGlewExtensionsInitialized(bool bSet) { _glewExtensionsInitialized = bSet; }
+static bool InitializeGlewExtensions();
+static bool IsGlewExtensionsInitialized()			{ return _glewExtensionsInitialized; }
+static void SetGlewExtensionsInitialized(bool bSet) { _glewExtensionsInitialized = bSet; }
 
-	static void SetLogFilePath(const AChar* path);
-	static AChar* GetLogFilePath();
+static void SetLogFilePath(const AChar* path);
+static AChar* GetLogFilePath();
 
 public:
 	static bool IsInitialized() { return _animaEngineInitialized; }
@@ -148,7 +148,7 @@ public:
 
 	static _AnimaEngineWindowMonitorCallbacks _callbacks;
 
-private:	
+private:
 	AnimaWindow*	_windowListHead;					/*!< Primo elemento della lista delle finestre istanziate da un'istanza di AnimaEngine */
 	AnimaWindow*	_focusedWindow;						/*!< Puntatore alla finestra attualmente attiva tra la lista di quelle istanziate da un'istanza di AnimaEngine */
 
@@ -163,25 +163,30 @@ private:
 
 	void*	_sharedMemory;								/*!< Buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
 	ASizeT	_sharedMemorySize;							/*!< Dimensione del buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
-	AnimaFreeListAllocator*	_sharedMemoryAllocator;	/*!< Allocator usato per creare tutti gli altri allocator */
-	
+	AnimaFreeListAllocator*	_sharedMemoryAllocator;		/*!< Allocator usato per creare tutti gli altri allocator */
+
 	static bool _platformLibraryWindowStateInitialized;
 	static bool _platformLibraryContextStateInitialized;
 	static bool _platformLibraryTimeStateInitialized;
 	static bool _platformLibraryJoystickStateInitialized;
 	static bool _platformLibraryTLSStateInitialized;
 	static bool _glewExtensionsInitialized;
-	
+
 	static bool _usedExternal;						/*!< Flag that has to be set to true if AnimaEngine is being used inside an external app. This flag is false ONLY IF AnimaEngine is the one who controls the windowing system */
 
 private:
-	
+
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 
 public:
 	inline AnimaStagesManager* GetStagesManager() {
 		ANIMA_ASSERT(_stagesManager != nullptr);
 		return _stagesManager;
+	}
+
+	inline AnimaAllocator* GetSharedMemoryAllocator() {
+		ANIMA_ASSERT(_sharedMemoryAllocator != nullptr);
+		return _sharedMemoryAllocator;
 	}
 
 private:

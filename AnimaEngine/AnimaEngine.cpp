@@ -105,9 +105,9 @@ void AnimaEngine::InitializeManagers()
 
 void AnimaEngine::Terminate()
 {
+	TerminateWindowSystem();
 	TerminateManagers();
 	TerminateMemorySystem();
-	TerminateWindowSystem();
 }
 
 void AnimaEngine::TerminateMemorySystem()

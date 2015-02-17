@@ -26,7 +26,7 @@ CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
 	: CorpusOGLWindowBase(engine, parent)
 	, _frame(0)
 {
-	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetStagesManager()->GetStage("test-stage"));
+	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetSharedMemoryAllocator());
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
 	_selectedModel = nullptr;

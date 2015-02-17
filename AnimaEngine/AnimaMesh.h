@@ -58,6 +58,22 @@ public:
 	AnimaVertex2f* GetPTextureCoord(ASizeT index);
 	AnimaVertex2f* GetTextureCoords();
 	void ClearTextureCoords();
+
+	void SetTangents(AnimaVertex3f* v, ASizeT n);
+	void AddTangent(const AnimaVertex3f& v);
+	ASizeT GetTangentsNumber();
+	AnimaVertex3f GetTangent(ASizeT index);
+	AnimaVertex3f* GetPTangent(ASizeT index);
+	AnimaVertex3f* GetTangents();
+	void ClearTangents();
+
+	void SetBitangents(AnimaVertex3f* v, ASizeT n);
+	void AddBitangent(const AnimaVertex3f& v);
+	ASizeT GetBitangentsNumber();
+	AnimaVertex3f GetBitangent(ASizeT index);
+	AnimaVertex3f* GetPBitangent(ASizeT index);
+	AnimaVertex3f* GetBitangents();
+	void ClearBitangents();
 	
 	void SetFaces(AnimaFace* faces, ASizeT n);
 	void AddFace(const AnimaFace& face);
@@ -98,6 +114,8 @@ public:
 	//bool IsColorsBufferCreated();
 	bool IsNormalsBufferCreated();
 	bool IsTextureCoordsBufferCreated();
+	bool IsTangentsBufferCreated();
+	bool IsBitangentsBufferCreated();
 	bool IsVertexArrayObjectCreated();
 
 	bool CreateIndicesBuffer();
@@ -105,6 +123,8 @@ public:
 	//bool CreateColorsBuffer();
 	bool CreateNormalsBuffer();
 	bool CreateTextureCoordsBuffer();
+	bool CreateTangentsBuffer();
+	bool CreateBitangentsBuffer();
 	bool CreateVertexArrayObject();
 
 	AUint GetVertexArrayObject();
@@ -113,6 +133,8 @@ public:
 	AUint GetNormalsBufferObject();
 	//AUint GetColorsBufferObject();
 	AUint GetTextureCoordsBufferObject();
+	AUint GetTangentsBufferObject();
+	AUint GetBitangentsBufferObject();
 
 	AUint GetFacesIndicesCount();
 	AUint* GetFacesIndices();
@@ -129,6 +151,12 @@ public:
 	AUint GetFloatVerticesTextureCoordCount();
 	float* GetFloatVerticesTextureCoord();
 
+	AUint GetFloatVerticesTangentsCount();
+	float* GetFloatVerticesTangents();
+
+	AUint GetFloatVerticesBitangentsCount();
+	float* GetFloatVerticesBitangents();
+
 protected:	
 	AnimaVertex3f*	_vertices;
 	ASizeT			_verticesNumber;
@@ -138,6 +166,12 @@ protected:
 	
 	AnimaVertex2f*	_textureCoords;
 	ASizeT			_textureCoordsNumber;
+
+	AnimaVertex3f*	_tangents;
+	ASizeT			_tangentsNumber;
+
+	AnimaVertex3f*	_bitangents;
+	ASizeT			_bitangentsNumber;
 	
 	AnimaFace*		_faces;
 	ASizeT			_facesNumber;
@@ -156,6 +190,8 @@ protected:
 	AUint			_normalsBufferObject;
 	//AUint			_colorsBufferObject;
 	AUint			_textureCoordsBufferObject;
+	AUint			_tangentsBufferObject;
+	AUint			_bitangentsBufferObject;
 	
 	AnimaAllocator* _allocator;
 
