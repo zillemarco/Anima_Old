@@ -26,7 +26,7 @@ public:
 		{
 			unsigned int seed = 5;
 			const void* key = stringKey.GetConstBuffer();
-			size_t len = stringKey.GetBufferLength() + 1;
+			size_t len = strlen((const char*)key);
 
 			const uint64_t m = 0xc6a4a7935bd1e995;
 			const int r = 47;

@@ -410,7 +410,7 @@ AnimaString AnimaString::TrimLeft() const
 	int startPos = 0;
 	for(startPos = 0; startPos < _stringLength - 1; startPos++)
 	{
-		if(_string[startPos] != ' ')
+		if (_string[startPos] != ' ' && _string[startPos] != '\t'&& _string[startPos] != '\n'&& _string[startPos] != '\0')
 			break;
 	}
 	
