@@ -68,16 +68,11 @@ void Window::DrawScene()
 
 	MakeCurrentContext();
 
-	renderingManager->GetTexture("DiffuseMap")->BindAsRenderTarget();
-	renderingManager->Start(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-	renderingManager->ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-	renderingManager->Finish(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-
 	if (fxaa)
-		renderingManager->ApplyFilter(GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager()->GetProgramFromName("fxaaFilter"), renderingManager->GetTexture("DiffuseMap"), nullptr);
+		renderingManager->DeferredDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
 	else
-		renderingManager->ApplyFilter(GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager()->GetProgramFromName("nullFilter"), renderingManager->GetTexture("DiffuseMap"), nullptr);
-	
+		renderingManager->ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+
 	SwapBuffers();
 }
 
@@ -204,15 +199,6 @@ void Window::Load()
 
 	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
 
-	mgr->CreateProgram("phong");
-	mgr->GetProgramFromName("phong")->Create();
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-vs", ANIMA_ENGINE_SHADERS_PATH "Phong/phong.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-cs", ANIMA_ENGINE_SHADERS_PATH "Phong/phong.cs", Anima::AnimaShader::TESSELLATION_CONTROL));
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-es", ANIMA_ENGINE_SHADERS_PATH "Phong/phong.es", Anima::AnimaShader::TESSELLATION_EVALUATION));
-	//mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-gs", ANIMA_ENGINE_SHADERS_PATH "Phong/phong.gs", Anima::AnimaShader::GEOMETRY));
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-fs", ANIMA_ENGINE_SHADERS_PATH "Phong/phong.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("phong")->Link();
-
 	mgr->CreateProgram("forward-ambient");
 	mgr->GetProgramFromName("forward-ambient")->Create();
 	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
@@ -237,6 +223,36 @@ void Window::Load()
 	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("forward-spot")->Link();
 
+	mgr->CreateProgram("deferred-prepare");
+	mgr->GetProgramFromName("deferred-prepare")->Create();
+	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-prepare")->Link();
+
+	mgr->CreateProgram("deferred-ambient");
+	mgr->GetProgramFromName("deferred-ambient")->Create();
+	mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-ambient")->Link();
+
+	mgr->CreateProgram("deferred-directional");
+	mgr->GetProgramFromName("deferred-directional")->Create();
+	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-directional")->Link();
+
+	mgr->CreateProgram("deferred-point");
+	mgr->GetProgramFromName("deferred-point")->Create();
+	mgr->GetProgramFromName("deferred-point")->AddShader(mgr->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-point")->AddShader(mgr->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-point")->Link();
+
+	mgr->CreateProgram("deferred-spot");
+	mgr->GetProgramFromName("deferred-spot")->Create();
+	mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot.vs", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot.fs", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-spot")->Link();
+
 	mgr->CreateProgram("nullFilter");
 	mgr->GetProgramFromName("nullFilter")->Create();
 	mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter.vs", Anima::AnimaShader::VERTEX));
@@ -249,15 +265,15 @@ void Window::Load()
 	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter.fs", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("fxaaFilter")->Link();
 
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal.bmp", "texture-mattoni-bump"));
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal.bmp", "texture-mattoni-bump"));
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModelFromName("piano")->GetPChild(0)->GetPMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(0.1f, 0.1f, 0.1f);
+	l0->SetColor(0.2f, 0.2f, 0.2f);
 
 	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);

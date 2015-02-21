@@ -20,6 +20,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint texturesNumber)
 	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 	for (AUint i = 0; i < _texturesNumber; i++)
 		_datas[i] = nullptr;
@@ -36,7 +37,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint texturesNumber)
 	_renderTargetsReady = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, bool clamp, AUint attachment)
 {
 	_allocator = allocator;
 
@@ -49,6 +50,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 	for (AUint i = 0; i < _texturesNumber; i++)
 		_datas[i] = nullptr;
@@ -58,6 +60,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	SetFormats(&format);
 	SetInternalFormats(&internalFormat);
 	SetAttachments(&attachment);
+	SetDataTypes(&dataType);
 
 	_frameBuffer = 0;
 	_renderBuffer = 0;
@@ -71,7 +74,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	_renderTargetsReady = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint* attachments)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, AUint* dataTypes, bool clamp, AUint* attachments)
 {
 	_allocator = allocator;
 
@@ -84,6 +87,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 	for (AUint i = 0; i < _texturesNumber; i++)
 		_datas[i] = nullptr;
@@ -93,6 +97,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	SetFormats(formats);
 	SetInternalFormats(internalFormats);
 	SetAttachments(attachments);
+	SetDataTypes(dataTypes);
 
 	_frameBuffer = 0;
 	_renderBuffer = 0;
@@ -119,6 +124,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 	for (AUint i = 0; i < _texturesNumber; i++)
 		_datas[i] = nullptr;
@@ -128,6 +134,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	SetFormats(src._formats);
 	SetInternalFormats(src._internalFormats);
 	SetAttachments(src._attachments);
+	SetDataTypes(src._dataTypes);
 
 	_frameBuffer = 0;
 	_renderBuffer = 0;
@@ -154,6 +161,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 	_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+	_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 	for (AUint i = 0; i < _texturesNumber; i++)
 		_datas[i] = nullptr;
@@ -163,6 +171,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	SetFormats(src._formats);
 	SetInternalFormats(src._internalFormats);
 	SetAttachments(src._attachments);
+	SetDataTypes(src._dataTypes);
 
 	_frameBuffer = 0;
 	_renderBuffer = 0;
@@ -203,6 +212,8 @@ AnimaTexture::~AnimaTexture()
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _internalFormats);
 	if (_attachments != nullptr)
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _attachments);
+	if (_dataTypes != nullptr)
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _dataTypes);
 
 	_datas = nullptr;
 	_datasSize = nullptr;
@@ -210,6 +221,7 @@ AnimaTexture::~AnimaTexture()
 	_formats = nullptr;
 	_internalFormats = nullptr;
 	_attachments = nullptr;
+	_dataTypes = nullptr;
 }
 
 AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
@@ -236,6 +248,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _internalFormats);
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _attachments);
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureIDs);
+			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _dataTypes);
 			
 			_texturesNumber = src._texturesNumber;
 
@@ -246,6 +259,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 			_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 			_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 			_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+			_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 			for (AUint i = 0; i < _texturesNumber; i++)
 				_datas[i] = nullptr;
@@ -256,6 +270,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		SetFormats(src._formats);
 		SetInternalFormats(src._internalFormats);
 		SetAttachments(src._attachments);
+		SetDataTypes(src._dataTypes);
 
 		_mipMapLevels = src._mipMapLevels;
 		_enableClamp = src._enableClamp;
@@ -292,6 +307,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _internalFormats);
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _attachments);
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureIDs);
+			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _dataTypes);
 
 			_texturesNumber = src._texturesNumber;
 
@@ -302,6 +318,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 			_internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 			_formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 			_attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+			_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
 
 			for (AUint i = 0; i < _texturesNumber; i++)
 				_datas[i] = nullptr;
@@ -312,6 +329,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		SetFormats(src._formats);
 		SetInternalFormats(src._internalFormats);
 		SetAttachments(src._attachments);
+		SetDataTypes(src._dataTypes);
 
 		_mipMapLevels = src._mipMapLevels;
 		_enableClamp = src._enableClamp;
@@ -487,9 +505,41 @@ AUint* AnimaTexture::GetInternalFormats() const
 	return _internalFormats;
 }
 
+void AnimaTexture::SetDataTypes(AUint* dataTypes)
+{
+	if (dataTypes != nullptr)
+	{
+		if (_dataTypes == nullptr)
+			_dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _texturesNumber);
+
+		for (AUint i = 0; i < _texturesNumber; i++)
+			_dataTypes[i] = dataTypes[i];
+	}
+	else
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _dataTypes);
+		_dataTypes = nullptr;
+	}
+}
+
+void AnimaTexture::SetDataType(AUint dataType, AUint index)
+{
+	_dataTypes[index] = dataType;
+}
+
+AUint AnimaTexture::GetDataType(AUint index) const
+{
+	return _dataTypes[index];
+}
+
+AUint* AnimaTexture::GetDataTypes() const
+{
+	return _dataTypes;
+}
+
 void AnimaTexture::SetDatas(AUchar** datas, ASizeT* datasSize)
 {
-	if (datas != nullptr)
+	if (datas != nullptr && datasSize != nullptr)
 	{
 		if (_datas == nullptr)
 			_datas = AnimaAllocatorNamespace::AllocateArray<AUchar*>(*_allocator, _texturesNumber);
@@ -508,14 +558,14 @@ void AnimaTexture::SetDatas(AUchar** datas, ASizeT* datasSize)
 			{
 				_allocator->Deallocate(_datas[i]);
 				_datas[i] = nullptr;
+				_datasSize[i] = 0;
 			}
 		}
 
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _datas);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _datasSize);
-
-		_datas = nullptr;
-		_datasSize = nullptr;
+		//AnimaAllocatorNamespace::DeallocateArray(*_allocator, _datas);
+		//AnimaAllocatorNamespace::DeallocateArray(*_allocator, _datasSize);
+		//_datas = nullptr;
+		//_datasSize = nullptr;
 	}
 }
 
@@ -611,7 +661,7 @@ bool AnimaTexture::LoadTextures()
 		}
 
 		if (_mipMapLevels == 0)
-			glTexImage2D(_textureTarget, 0, _internalFormats[i], _width, _height, 0, _formats[i], GL_UNSIGNED_BYTE, _datas[i]);
+			glTexImage2D(_textureTarget, 0, _internalFormats[i], _width, _height, 0, _formats[i], _dataTypes[i], _datas[i]);
 		else if (_mipMapLevels > 0)
 		{
 			unsigned int BlockSize = (_formats[i] == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;

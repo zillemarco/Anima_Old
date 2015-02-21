@@ -975,9 +975,18 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 			SetUniformi(info._name, renderingManager->GetInteger(str));
 		else if (info._type == GL_SAMPLER_2D)
 		{
-			AnimaTexture* texture = renderingManager->GetTexture(str);
+			AnimaTexture* texture = nullptr;
+
+			if (str.StartsWith("Deferred"))
+			{
+				texture = renderingManager->GetTexture("DeferredMap");
+				str = str.Substring(8, str.GetBufferLength());
+			}
+			else
+				texture = renderingManager->GetTexture(str);
 
 			AUint slot = renderingManager->GetTextureSlot(str);
+			AUint index = renderingManager->GetTextureIndex(str);
 			SetUniformi(info._name, slot);
 
 			if (texture == nullptr)
@@ -988,7 +997,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 			else
 			{
 				texture->LoadTextures();
-				texture->Bind(slot);
+				texture->Bind(slot, index);
 			}
 		}
 		else

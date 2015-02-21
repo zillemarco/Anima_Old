@@ -25,7 +25,47 @@ public:
 
 	AnimaRenderingManager& operator=(const AnimaRenderingManager& src);
 	AnimaRenderingManager& operator=(AnimaRenderingManager&& src);
+	
+protected:
+	class DeferredData
+	{
+	public:
+		DeferredData(AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
+			_index = index;
+			_attachment = attachment;
+			_internalFormat = internalFormat;
+			_format = format;
+			_dataType = dataType;
+			_filter = filter;
+		}
 
+		DeferredData(const DeferredData& src) {
+			_index = src._index;
+			_attachment = src._attachment;
+			_internalFormat = src._internalFormat;
+			_format = src._format;
+			_dataType = src._dataType;
+			_filter = src._filter;
+		}
+
+		DeferredData(const DeferredData&& src) {
+			_index = src._index;
+			_attachment = src._attachment;
+			_internalFormat = src._internalFormat;
+			_format = src._format;
+			_dataType = src._dataType;
+			_filter = src._filter;
+		}
+
+	public:
+		AUint _index;
+		AUint _attachment;
+		AUint _internalFormat;
+		AUint _format;
+		AUint _dataType;
+		AUint _filter;
+	};
+	
 public:
 	void Start(AnimaStage* stage);
 	void Finish(AnimaStage* stage);
@@ -35,26 +75,39 @@ public:
 
 	void ForwardDrawAllModels(AnimaStage* stage);
 	void ForwardDrawSingleModel(AnimaStage* stage, AnimaModel* model);
+
+	void DeferredDrawAllModels(AnimaStage* stage);
+	void DeferredDrawSingleModel(AnimaStage* stage, AnimaModel* model);
 	
 public:
 	void InitTextureSlots();
 	void InitRenderingTargets(AInt screenWidth, AInt screenHeight);
 	void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
 
-public:
+protected:
 	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
 	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	
-	void AmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void DirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void PointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void SpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
 
 	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
 	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 
+	void DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void DeferredAmbientPass(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
+
+	void DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
+	void DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	
 	void Clear();
 
 	void ApplyFilter(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
@@ -65,6 +118,9 @@ protected:
 
 	void SetTextureSlot(AnimaString slotName, AUint value);
 	void SetTextureSlot(const char* slotName, AUint value);
+
+	void SetDeferredData(AnimaString attachmentName, DeferredData* value);
+	void SetDeferredData(const char* attachmentName, DeferredData* value);
 
 	void SetColor(AnimaString propertyName, AnimaColor3f value);
 	void SetColor(const char* propertyName, AnimaColor3f value);
@@ -104,6 +160,12 @@ public:
 	AUint GetTextureSlot(const AnimaString& slotName);
 	AUint GetTextureSlot(const char* slotName);
 
+	AUint GetTextureIndex(const AnimaString& textureName);
+	AUint GetTextureIndex(const char* textureName);
+
+	DeferredData* GetDeferredData(const AnimaString& dataName);
+	DeferredData* GetDeferredData(const char* dataName);
+
 	AnimaColor3f GetColor3f(AnimaString propertyName);
 	AnimaColor3f GetColor3f(const char* propertyName);
 	AnimaColor4f GetColor4f(AnimaString propertyName);
@@ -125,7 +187,7 @@ public:
 	bool GetBoolean(AnimaString propertyName);
 	bool GetBoolean(const char* propertyName);
 
-public:
+protected:
 	AnimaAllocator* _allocator;
 
 	AnimaMesh* _filterMesh;
@@ -135,6 +197,7 @@ public:
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
+	boost::unordered_map<AnimaString, DeferredData*, AnimaString::Hasher>	_deferredDataMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
 
 	boost::unordered_map<AnimaString, AnimaColor3f, AnimaString::Hasher> _colors3fMap;

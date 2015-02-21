@@ -12,8 +12,8 @@ class ANIMA_ENGINE_EXPORT AnimaTexture
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator, AUint texturesNumber);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, bool clamp, AUint attachment);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, bool clamp, AUint* attachments);
+	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, bool clamp, AUint attachment);
+	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, AUint* dataTypes, bool clamp, AUint* attachments);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -52,6 +52,11 @@ public:
 	void SetInternalFormat(AUint internalFormat, AUint index);
 	AUint GetInternalFormat(AUint index) const;
 	AUint* GetInternalFormats() const;
+
+	void SetDataTypes(AUint* dataTypes);
+	void SetDataType(AUint dataType, AUint index);
+	AUint GetDataType(AUint index) const;
+	AUint* GetDataTypes() const;
 
 	void SetDatas(AUchar** datas, ASizeT* datasSize);
 	void SetData(AUchar* data, ASizeT dataSize, AUint index);
@@ -94,6 +99,7 @@ private:
 	AUint* _internalFormats;
 	AUint* _formats;
 	AUint* _attachments;
+	AUint* _dataTypes;
 
 	bool _enableClamp;
 
