@@ -125,23 +125,17 @@ void AnimaRenderingManager::InitTextureSlots()
 	// Slot usati dal deferred shading
 	SetTextureSlot("AlbedoMap", 0);
 	SetTextureSlot("NormalMap", 1);
-	//SetTextureSlot("WorldPosMap", 2);
-	//SetTextureSlot("SpecularMap", 3);
 
 	// Slot usati dai filtri
 	SetTextureSlot("FilterMap", 0);
 
 	// Dati usati dal deferred shading
-	DeferredData* albedoData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 0, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* normalData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 1, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	//DeferredData* worldPosData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 2, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	//DeferredData* specularData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 3, GL_COLOR_ATTACHMENT0 + 3, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* depthData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 2, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST);
+	DeferredData* albedoData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 1, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+	DeferredData* normalData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 2, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+	DeferredData* depthData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 0, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST);
 
 	SetDeferredData("AlbedoMap", albedoData);
 	SetDeferredData("NormalMap", normalData);
-	//SetDeferredData("WorldPosMap", worldPosData);
-	//SetDeferredData("SpecularMap", specularData);
 	SetDeferredData("DepthMap", depthData);
 }
 
@@ -182,7 +176,7 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			offset++;
 		}
 
-		AnimaTexture* diffuseMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGB, GL_RGB, GL_FLOAT, false, GL_COLOR_ATTACHMENT0);
+		AnimaTexture* diffuseMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA, GL_RGBA, GL_FLOAT, false, GL_COLOR_ATTACHMENT0);
 		diffuseMapTexture->LoadRenderTargets();
 		
 		AnimaTexture* deferredMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, (AUint)size, nullptr, nullptr, 0, filters, internalFormats, formats, dataTypes, false, attachments);
@@ -878,7 +872,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	Finish(stage);
 
-	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DeferredMap"), nullptr);
+	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaModel* model)
