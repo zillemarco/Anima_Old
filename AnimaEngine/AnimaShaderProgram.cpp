@@ -979,7 +979,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 
 			if (str.StartsWith("Deferred"))
 			{
-				texture = renderingManager->GetTexture("DeferredMap");
+				texture = renderingManager->GetTexture("DeferredInputMap");
 				str = str.Substring(8, str.GetBufferLength());
 			}
 			else

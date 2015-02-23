@@ -12,6 +12,14 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaStage.h"
 #include "AnimaString.h"
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+
+using boost::multi_index_container;
+using namespace boost::multi_index;
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -30,13 +38,14 @@ protected:
 	class DeferredData
 	{
 	public:
-		DeferredData(AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
+		DeferredData(const AnimaString& name, AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
 			_index = index;
 			_attachment = attachment;
 			_internalFormat = internalFormat;
 			_format = format;
 			_dataType = dataType;
 			_filter = filter;
+			_name = name;
 		}
 
 		DeferredData(const DeferredData& src) {
@@ -46,6 +55,7 @@ protected:
 			_format = src._format;
 			_dataType = src._dataType;
 			_filter = src._filter;
+			_name = src._name;
 		}
 
 		DeferredData(const DeferredData&& src) {
@@ -55,9 +65,11 @@ protected:
 			_format = src._format;
 			_dataType = src._dataType;
 			_filter = src._filter;
+			_name = src._name;
 		}
 
 	public:
+		AnimaString _name;
 		AUint _index;
 		AUint _attachment;
 		AUint _internalFormat;
@@ -65,6 +77,16 @@ protected:
 		AUint _dataType;
 		AUint _filter;
 	};
+
+	typedef multi_index_container<
+		DeferredData*,
+		indexed_by<
+		ordered_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AUint, _index)>,
+		hashed_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AnimaString, _name), AnimaString::Hasher> >
+	> DeferredDataSet;
+
+	typedef DeferredDataSet::nth_index<0>::type DeferredDataSetByIndex;
+	typedef DeferredDataSet::nth_index<1>::type DeferredDataSetByName;
 	
 public:
 	void Start(AnimaStage* stage);
@@ -119,8 +141,7 @@ protected:
 	void SetTextureSlot(AnimaString slotName, AUint value);
 	void SetTextureSlot(const char* slotName, AUint value);
 
-	void SetDeferredData(AnimaString attachmentName, DeferredData* value);
-	void SetDeferredData(const char* attachmentName, DeferredData* value);
+	void SetDeferredData(DeferredData* value);
 
 	void SetColor(AnimaString propertyName, AnimaColor3f value);
 	void SetColor(const char* propertyName, AnimaColor3f value);
@@ -197,8 +218,8 @@ protected:
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
-	boost::unordered_map<AnimaString, DeferredData*, AnimaString::Hasher>	_deferredDataMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
+	DeferredDataSet															_deferredDataMap;
 
 	boost::unordered_map<AnimaString, AnimaColor3f, AnimaString::Hasher> _colors3fMap;
 	boost::unordered_map<AnimaString, AnimaColor4f, AnimaString::Hasher> _colors4fMap;

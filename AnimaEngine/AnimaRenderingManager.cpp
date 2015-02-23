@@ -130,13 +130,16 @@ void AnimaRenderingManager::InitTextureSlots()
 	SetTextureSlot("FilterMap", 0);
 
 	// Dati usati dal deferred shading
-	DeferredData* albedoData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 1, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* normalData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 2, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* depthData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, 0, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST);
+	AnimaString strDepth("DepthMap", _allocator);
+	AnimaString strAlbedo("AlbedoMap", _allocator);
+	AnimaString strNormal("NormalMap", _allocator);
+	DeferredData* depthData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strDepth, 0, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST);
+	DeferredData* albedoData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strAlbedo, 1, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+	DeferredData* normalData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strNormal, 2, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
-	SetDeferredData("AlbedoMap", albedoData);
-	SetDeferredData("NormalMap", normalData);
-	SetDeferredData("DepthMap", depthData);
+	SetDeferredData(depthData);
+	SetDeferredData(albedoData);
+	SetDeferredData(normalData);
 }
 
 void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
@@ -163,10 +166,10 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		}
 
 		AInt offset = 0;
-		auto end = _deferredDataMap.end();
-		for (auto pair = _deferredDataMap.begin(); pair != end; pair++)
+		DeferredDataSetByIndex& indexIterator = get<0>(_deferredDataMap);
+		for (auto elem = indexIterator.begin(), end = indexIterator.end(); elem != end; elem++)
 		{
-			DeferredData* data = pair->second;
+			DeferredData* data = *elem;
 			attachments[offset] = data->_attachment;
 			formats[offset] = data->_format;
 			internalFormats[offset] = data->_internalFormat;
@@ -183,7 +186,7 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		deferredMapTexture->LoadRenderTargets();
 
 		SetTexture("DiffuseMap", diffuseMapTexture);
-		SetTexture("DeferredMap", deferredMapTexture);
+		SetTexture("DeferredInputMap", deferredMapTexture);
 		SetTexture("FilterMap", nullptr, false);
 
 		SetVector("ScreenSize", (AFloat)screenWidth, (AFloat)screenHeight);
@@ -842,7 +845,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	GetTexture("DeferredMap")->BindAsRenderTarget();
+	GetTexture("DeferredInputMap")->BindAsRenderTarget();
 
 	Start(stage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -879,7 +882,7 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMode
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	GetTexture("DeferredMap")->BindAsRenderTarget();
+	GetTexture("DeferredInputMap")->BindAsRenderTarget();
 	Start(stage);
 
 	glDepthMask(GL_TRUE);
@@ -1220,15 +1223,9 @@ void AnimaRenderingManager::SetTextureSlot(const char* propertyName, AUint value
 	SetTextureSlot(str, value);
 }
 
-void AnimaRenderingManager::SetDeferredData(AnimaString propertyName, AnimaRenderingManager::DeferredData* value)
+void AnimaRenderingManager::SetDeferredData(AnimaRenderingManager::DeferredData* value)
 {
-	_deferredDataMap[propertyName] = value;
-}
-
-void AnimaRenderingManager::SetDeferredData(const char* propertyName, AnimaRenderingManager::DeferredData* value)
-{
-	AnimaString str(propertyName, _allocator);
-	SetDeferredData(str, value);
+	_deferredDataMap.insert(value);
 }
 
 void AnimaRenderingManager::SetColor(AnimaString propertyName, AnimaColor3f value)
@@ -1407,8 +1404,10 @@ AUint AnimaRenderingManager::GetTextureSlot(const char* slotName)
 
 AUint AnimaRenderingManager::GetTextureIndex(const AnimaString& textureName)
 {
-	if (_deferredDataMap.find(textureName) != _deferredDataMap.end())
-		return _deferredDataMap[textureName]->_index;
+	DeferredDataSetByName& nameIterator = get<1>(_deferredDataMap);
+	auto res = nameIterator.find(textureName);
+	if (res != nameIterator.end())
+		return (*res)->_index;
 	return 0;
 }
 
@@ -1420,8 +1419,10 @@ AUint AnimaRenderingManager::GetTextureIndex(const char* textureName)
 
 AnimaRenderingManager::DeferredData* AnimaRenderingManager::GetDeferredData(const AnimaString& slotName)
 {
-	if (_deferredDataMap.find(slotName) != _deferredDataMap.end())
-		return _deferredDataMap[slotName];
+	DeferredDataSetByName& nameIterator = get<1>(_deferredDataMap);
+	auto res = nameIterator.find(slotName);
+	if (res != nameIterator.end())
+		return *res;
 	return nullptr;
 }
 
@@ -1571,13 +1572,10 @@ void AnimaRenderingManager::Clear()
 		}
 	}
 
-	for (auto& pair : _deferredDataMap)
+	for (auto& element : _deferredDataMap)
 	{
-		if (pair.second != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
-			pair.second = nullptr;
-		}
+		if(element != nullptr)
+			AnimaAllocatorNamespace::DeallocateObject(*_allocator, element);
 	}
 
 	_texturesMap.clear();
