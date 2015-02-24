@@ -12,7 +12,7 @@
 #include <AnimaMath.h>
 #include <AnimaCamerasManager.h>
 #include <AnimaBenchmarkTimer.h>
-#include <AnimaModel.h>
+#include <AnimaMesh.h>
 #include <AnimaStage.h>
 #include <AnimaStagesManager.h>
 

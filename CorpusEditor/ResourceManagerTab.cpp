@@ -15,11 +15,11 @@
 #include <AnimaModelsManager.h>
 #include <QMenu>
 #include <QItemSelection>
-#include <AnimaModel.h>
+#include <AnimaMesh.h>
 #include <AnimaStage.h>
 #include <AnimaStagesManager.h>
 
-Q_DECLARE_METATYPE(Anima::AnimaModel*)
+Q_DECLARE_METATYPE(Anima::AnimaMesh*)
 
 ResourceTreeItemModel::ResourceTreeItemModel(CorpusDocument* doc, QObject *parent)
 	: QStandardItemModel(parent)
@@ -42,17 +42,17 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 	if (role == Qt::EditRole)
 	{
 		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetStringAllocator());
-		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
+		Anima::AnimaMesh* model = itemFromIndex(index)->data().value<Anima::AnimaMesh*>();
 		
 		if(index.column() == 0)
 		{
-			if(model->GetAnimaModelName() == newString)
+			if(model->GetAnimaMeshName() == newString)
 				return false;
 			
 			bool bFound = false;
 			for (int i = 0; i < _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModel(i)->GetAnimaModelName() == newString)
+				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModel(i)->GetAnimaMeshName() == newString)
 					bFound = true;
 			}
 		
@@ -66,18 +66,18 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			}
 		
-			model->SetModelName(newString);
+			model->SetMeshName(newString);
 			_document->SetMofications();
 		}
 		else if(index.column() == 1)
 		{
-			if(model->GetAnimaModelFileName() == newString)
+			if(model->GetAnimaMeshFileName() == newString)
 				return false;
 			
 			bool bFound = false;
 			for (int i = 0; i < _document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetPModel(i)->GetAnimaModelFileName() == newString)
+				if (_document->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModel(i)->GetAnimaMeshFileName() == newString)
 					bFound = true;
 			}
 			
@@ -91,12 +91,12 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			}
 			
-			QString oldFileName = QString("%0/%1").arg(_document->projectDataModelsPath()).arg(model->GetModelFileName());
+			QString oldFileName = QString("%0/%1").arg(_document->projectDataModelsPath()).arg(model->GetMeshFileName());
 			QString newFileName = QString("%0/%1").arg(_document->projectDataModelsPath()).arg(value.toString());
 			
 			QFile::rename(oldFileName, newFileName);
 			
-			model->SetModelFileName(newString);
+			model->SetMeshFileName(newString);
 			_document->SetMofications();
 		}
 	}
@@ -171,11 +171,11 @@ void ResourceManagerTab::LoadModelsTree()
 	{
 		QList<QStandardItem*> newItem;
 		
-		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelName()));
-		resourceNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ModelRole);
+		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetMeshName()));
+		resourceNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
 		resourceNameItem->setEditable(true);
-		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetPModel(i)->GetModelFileName()));
-		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetPModel(i)), ModelRole);
+		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetMeshFileName()));
+		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
 		resourceFileNameItem->setEditable(true);
 		
 		newItem.append(resourceNameItem);
@@ -263,7 +263,7 @@ void ResourceManagerTab::resourceTreeItemSelectionChanged(const QItemSelection& 
 
 	if (var.isValid())
 	{
-		Anima::AnimaModel* model = var.value<Anima::AnimaModel*>();
+		Anima::AnimaMesh* model = var.value<Anima::AnimaMesh*>();
 		_modelViewer->setSelectedModel(model);
 	}
 }

@@ -719,8 +719,8 @@ void CorpusDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 	{
 		xmlWriter->writeStartElement("Model");
 		
-		xmlWriter->writeTextElement("Name", mgr->GetPModel(i)->GetModelName());
-		xmlWriter->writeTextElement("FileName", mgr->GetPModel(i)->GetModelFileName());
+		xmlWriter->writeTextElement("Name", mgr->GetModel(i)->GetMeshName());
+		xmlWriter->writeTextElement("FileName", mgr->GetModel(i)->GetMeshFileName());
 		
 		xmlWriter->writeEndElement();
 	}
@@ -803,13 +803,13 @@ bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileNam
 {
 	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
 	
-	Anima::AnimaModel* model = _engine->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
+	Anima::AnimaMesh* model = _engine->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
 	
 	if(!model)
 		return false;
 	
-	model->SetModelName(modelName.toLocal8Bit().constData());
-	model->SetModelFileName(modelFileName.toLocal8Bit().constData());
+	model->SetMeshName(modelName.toLocal8Bit().constData());
+	model->SetMeshFileName(modelFileName.toLocal8Bit().constData());
 	
 	return true;
 }

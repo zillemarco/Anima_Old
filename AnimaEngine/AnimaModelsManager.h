@@ -12,7 +12,7 @@
 #include "AnimaEngineCore.h"
 #include "AnimaAllocators.h"
 #include "AnimaTypes.h"
-#include "AnimaModel.h"
+#include "AnimaMesh.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaStage.h"
@@ -32,39 +32,39 @@ public:
 	~AnimaModelsManager();
 	
 public:
-	AnimaModel* LoadModel(const char* modelPath, const AnimaString& name);
-	AnimaModel* LoadModel(const char* modelPath, const char* name);
-	AnimaModel* LoadModel(const AnimaString& modelPath, const AnimaString& name);
-	AnimaModel* LoadModel(const AnimaString& modelPath, const char* name);
-	void AddModel(const AnimaModel& model, const AnimaString& name);
-	void AddModel(const AnimaModel& model, const char* name);
+	AnimaMesh* LoadModel(const char* modelPath, const AnimaString& name);
+	AnimaMesh* LoadModel(const char* modelPath, const char* name);
+	AnimaMesh* LoadModel(const AnimaString& modelPath, const AnimaString& name);
+	AnimaMesh* LoadModel(const AnimaString& modelPath, const char* name);
+	void AddModel(const AnimaMesh& model, const AnimaString& name);
+	void AddModel(const AnimaMesh& model, const char* name);
 
-	AnimaModel* CreatePlane(const AnimaString& name);
-	AnimaModel* CreatePlane(const char* name);
+	AnimaMesh* CreatePlane(const AnimaString& name);
+	AnimaMesh* CreatePlane(const char* name);
 
-	AnimaModel* CreateModel(const AnimaString& name);
-	AnimaModel* CreateModel(const char* name);
+	AnimaMesh* CreateModel(const AnimaString& name);
+	AnimaMesh* CreateModel(const char* name);
 
 	ASizeT GetModelsNumber();
 
-	AnimaModel* GetPModel(ASizeT index);
-	AnimaModel* GetPModelFromName(const AnimaString& name);
-	AnimaModel* GetPModelFromName(const char* name);
+	AnimaMesh* GetModel(ASizeT index);
+	AnimaMesh* GetModelFromName(const AnimaString& name);
+	AnimaMesh* GetModelFromName(const char* name);
 	
-	AnimaModel* GetModels();
+	AnimaMesh* GetModels();
 
 	void ClearModels();
 	
 	ASizeT GetNextModelID();
 	
 private:
-	void RecursiveLoadMesh(AnimaModel* currentModel, const aiScene *scene, const aiNode* sceneNode);
+	void RecursiveLoadMesh(AnimaMesh* currentModel, const aiScene *scene, const aiNode* sceneNode);
 	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
 	
 private:
 	AnimaStage* _stage;
 	
-	AnimaModel* _models;
+	AnimaMesh*	_models;
 	ASizeT		_modelsNumber;
 	
 	ASizeT		_nextModelID;

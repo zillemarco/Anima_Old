@@ -9,7 +9,7 @@
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaRenderingManager.h>
-#include <AnimaModel.h>
+#include <AnimaMesh.h>
 
 class Window : public Anima::AnimaWindow
 {

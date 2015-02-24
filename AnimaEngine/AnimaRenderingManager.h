@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
-#include "AnimaModel.h"
+#include "AnimaMesh.h"
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
@@ -93,13 +93,13 @@ public:
 	void Finish(AnimaStage* stage);
 
 	void DrawAllModels(AnimaStage* stage);
-	void DrawSingleModel(AnimaStage* stage, AnimaModel* model);
+	void DrawSingleModel(AnimaStage* stage, AnimaMesh* model);
 
 	void ForwardDrawAllModels(AnimaStage* stage);
-	void ForwardDrawSingleModel(AnimaStage* stage, AnimaModel* model);
+	void ForwardDrawSingleModel(AnimaStage* stage, AnimaMesh* model);
 
 	void DeferredDrawAllModels(AnimaStage* stage);
-	void DeferredDrawSingleModel(AnimaStage* stage, AnimaModel* model);
+	void DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model);
 	
 public:
 	void InitTextureSlots();
@@ -107,27 +107,27 @@ public:
 	void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
 
 protected:
-	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
-	void DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
+	void DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	
-	void ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
-	void ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
 
-	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
-	void ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
+	void ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 
-	void DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model = nullptr);
+	void DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
 	void DeferredAmbientPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
 
-	void DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program);
-	void DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
+	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	void DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	
 	void Clear();
@@ -211,10 +211,8 @@ public:
 protected:
 	AnimaAllocator* _allocator;
 
-	AnimaMesh* _filterMesh;
-	AnimaTransformation _filterMeshTransform;
-
-	AnimaCamera* _filterCamera;
+	AnimaMesh*		_filterMesh;
+	AnimaCamera*	_filterCamera;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;

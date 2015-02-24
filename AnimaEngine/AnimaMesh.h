@@ -18,10 +18,9 @@
 #include "AnimaString.h"
 #include "AnimaMatrix.h"
 #include "AnimaMaterial.h"
+#include "AnimaTransformation.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
-
-class AnimaModel;
 
 class ANIMA_ENGINE_EXPORT AnimaMesh
 {
@@ -35,6 +34,51 @@ public:
 	AnimaMesh& operator=(AnimaMesh&& src);
 	
 public:
+	// Gestione dati struttura
+	void SetChildren(AnimaMesh* children, ASizeT n);
+	void AddChild(const AnimaMesh& child);
+	ASizeT GetChildrenNumber();
+	AnimaMesh* GetChild(ASizeT index);
+	AnimaMesh* GetChildren();
+	void ClearChildren();
+
+	void SetMeshes(AnimaMesh* meshes, ASizeT n);
+	void AddMesh(const AnimaMesh& mesh);
+	ASizeT GetMeshesNumber();
+	AnimaMesh* GetMesh(ASizeT index);
+	AnimaMesh* GetMeshes();
+	void ClearMeshes();
+
+	AnimaMesh* CreateMesh();
+
+	void MakePlane();
+
+	void SetMeshName(const AnimaString& name);
+	void SetMeshName(const char* name);
+	AnimaString GetAnimaMeshName();
+	const char* GetMeshName();
+
+	void SetMeshFileName(const AnimaString& name);
+	void SetMeshFileName(const char* name);
+	AnimaString GetAnimaMeshFileName();
+	const char* GetMeshFileName();
+
+	void SetParent(AnimaMesh* parent);
+	AnimaMesh* GetParent() const;
+
+	void SetMaterial(AnimaMaterial* material);
+	AnimaMaterial* GetMaterial();
+
+	AnimaMatrix GetFinalMatrix() const;
+
+	void ComputeBoundingBox(bool updateRecursively);
+	AnimaVertex3f GetBoundingBoxMin() const;
+	AnimaVertex3f GetBoundingBoxMax() const;
+
+	AnimaTransformation* GetTransformation();
+	AnimaTransformation GetTransformationCopy();
+
+	// Gestione dati grafici
 	void SetVertices(AnimaVertex3f* v, ASizeT n);
 	void AddVertex(const AnimaVertex3f& v);
 	ASizeT GetVerticesNumber();
@@ -82,32 +126,16 @@ public:
 	AnimaFace* GetPFace(ASizeT index);
 	AnimaFace* GetFaces();
 	void ClearFaces();
-
-	void SetMeshName(const AnimaString& name);
-	void SetMeshName(const char* name);
-	AnimaString GetAnimaMeshName();
-	const char* GetMeshName();
-
-	void SetParent(AnimaModel* parent);
-	AnimaModel* GetParent() const;
-
+	
 	bool CreateBuffers();
 	void UpdateBuffers();
 
 	void SetUpdateBuffers(bool bUpdate = true);
 	bool NeedsBuffersUpdate();
-
-	void SetMaterial(AnimaMaterial* material);
-	AnimaMaterial* GetMaterial();
-
-	AnimaMatrix GetFinalMatrix() const;
-
-	void ComputeBoundingBox();
-	AnimaVertex3f GetBoundingBoxMin() const;
-	AnimaVertex3f GetBoundingBoxMax() const;
-	
+		
 public:
 	bool AreBuffersCreated();
+	bool CanCreateBuffers();
 	
 	bool IsIndicesBufferCreated();
 	bool IsVerticesBufferCreated();
@@ -157,7 +185,27 @@ public:
 	AUint GetFloatVerticesBitangentsCount();
 	float* GetFloatVerticesBitangents();
 
-protected:	
+protected:
+	AnimaAllocator* _allocator;
+
+	// Dati struttura
+	AnimaMaterial*	_material;
+	AnimaString		_meshName;
+	AnimaString		_meshFileName;
+	
+	AnimaMesh*		_parentMesh;
+	AnimaVertex3f	_boundingBoxMin;
+	AnimaVertex3f	_boundingBoxMax;
+
+	AnimaMesh*		_meshes;
+	ASizeT			_meshesNumber;
+
+	AnimaMesh*		_meshChildren;
+	ASizeT			_meshChildrenNumber;
+
+	AnimaTransformation _transformation;
+
+	// Dati grafica
 	AnimaVertex3f*	_vertices;
 	ASizeT			_verticesNumber;
 	
@@ -175,15 +223,7 @@ protected:
 	
 	AnimaFace*		_faces;
 	ASizeT			_facesNumber;
-
-	AnimaMaterial*	_material;
-
-	AnimaString		_meshName;
-
-	AnimaModel*		_parentModel;
-	AnimaVertex3f	_boundingBoxMin;
-	AnimaVertex3f	_boundingBoxMax;
-
+	
 	AUint			_vertexArrayObject;
 	AUint			_indexesBufferObject;
 	AUint			_verticesBufferObject;
@@ -193,8 +233,6 @@ protected:
 	AUint			_tangentsBufferObject;
 	AUint			_bitangentsBufferObject;
 	
-	AnimaAllocator* _allocator;
-
 	bool _needsBuffersUpdate;
 };
 

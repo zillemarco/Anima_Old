@@ -246,45 +246,9 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	// Inizializzazione del modello di supporto
 	//
 	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
-	_filterMeshTransform.RotateXDeg(90.0f);
-	
-	AInt numeroVertici = 4;
-	AInt numeroFacce = 2;
-	AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
-	AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
-	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, numeroVertici);
-	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, numeroFacce, _allocator);
-
-	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
-	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
-	vertici[2] = AnimaVertex3f(1.0f, 0.0f, 1.0f);
-	vertici[3] = AnimaVertex3f(1.0f, 0.0f, -1.0f);
-
-	normali[0] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[1] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[2] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[3] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-
-	textCoords[0] = AnimaVertex2f(1.0f, 0.0f);
-	textCoords[1] = AnimaVertex2f(1.0f, 1.0f);
-	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
-	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
-
-	AUint indexes0[] = { 0, 1, 2 };
-	AUint indexes1[] = { 0, 2, 3 };
-	facce[0].SetIndexes(indexes0, 3);
-	facce[1].SetIndexes(indexes1, 3);
-
-	_filterMesh->SetVertices(vertici, numeroVertici);
-	_filterMesh->SetNormals(normali, numeroVertici);
-	_filterMesh->SetTextureCoords(textCoords, numeroVertici);
-	_filterMesh->SetFaces(facce, numeroFacce);
-
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertici);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, normali);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, textCoords);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, facce);
-	
+	_filterMesh->MakePlane();
+	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
+		
 	//
 	// Inizializzazione della camera di supporto
 	//
@@ -315,7 +279,7 @@ void AnimaRenderingManager::ApplyFilter(AnimaShaderProgram* filterProgram, Anima
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMeshTransform.GetTransformationMatrix());
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 	filterProgram->EnableInputs(_filterMesh);
@@ -357,28 +321,22 @@ void AnimaRenderingManager::DrawAllModels(AnimaStage* stage)
 
 	for (ASizeT j = 0; j < nModels; j++)
 	{
-		AnimaModel* model = modelsManager->GetPModel(j);
-
-		if (!model->DrawingEnabled())
-			continue;
+		AnimaMesh* model = modelsManager->GetModel(j);
 
 		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
 
 		ASizeT meshNumber = model->GetMeshesNumber();
 		for (ASizeT i = 0; i < meshNumber; i++)
-			DrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+			DrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 		ASizeT childrenNumber = model->GetChildrenNumber();
 		for (ASizeT i = 0; i < childrenNumber; i++)
-			DrawModel(stage, model->GetPChild(i), program, modelMatrix);
+			DrawModel(stage, model->GetChild(i), program, modelMatrix);
 	}
 }
 
-void AnimaRenderingManager::DrawSingleModel(AnimaStage* stage, AnimaModel* model)
+void AnimaRenderingManager::DrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
-	if (!model->DrawingEnabled())
-		return;
-
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
@@ -394,24 +352,21 @@ void AnimaRenderingManager::DrawSingleModel(AnimaStage* stage, AnimaModel* model
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+		DrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DrawModel(stage, model->GetPChild(i), program, modelMatrix);
+		DrawModel(stage, model->GetChild(i), program, modelMatrix);
 }
 
-void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program)
+void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program)
 {
 	AnimaMatrix identityMatrix;
 	DrawModel(stage, model, program, identityMatrix);
 }
 
-void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
+void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
-	if (!model->DrawingEnabled())
-		return;
-
 	if (stage == nullptr || model == nullptr || program == nullptr)
 		return;
 	
@@ -419,11 +374,11 @@ void AnimaRenderingManager::DrawModel(AnimaStage* stage, AnimaModel* model, Anim
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+		DrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DrawModel(stage, model->GetPChild(i), program, modelMatrix);
+		DrawModel(stage, model->GetChild(i), program, modelMatrix);
 }
 
 void AnimaRenderingManager::DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
@@ -491,7 +446,7 @@ void AnimaRenderingManager::ForwardDrawAllModels(AnimaStage* stage)
 	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::ForwardDrawSingleModel(AnimaStage* stage, AnimaModel* model)
+void AnimaRenderingManager::ForwardDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
@@ -512,17 +467,14 @@ void AnimaRenderingManager::ForwardDrawSingleModel(AnimaStage* stage, AnimaModel
 	glDisable(GL_BLEND);
 }
 
-void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program)
+void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program)
 {
 	AnimaMatrix identityMatrix;
 	ForwardDrawModel(stage, model, program, identityMatrix);
 }
 
-void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
+void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
-	if (!model->DrawingEnabled())
-		return;
-
 	if (stage == nullptr || model == nullptr || program == nullptr)
 		return;
 
@@ -530,11 +482,11 @@ void AnimaRenderingManager::ForwardDrawModel(AnimaStage* stage, AnimaModel* mode
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		ForwardDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+		ForwardDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+		ForwardDrawModel(stage, model->GetChild(i), program, modelMatrix);
 }
 
 void AnimaRenderingManager::ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
@@ -557,9 +509,9 @@ void AnimaRenderingManager::ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* m
 	program->DisableInputs();
 }
 
-void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
+void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
 {
-	if (model != nullptr && !model->DrawingEnabled())
+	if (model != nullptr)
 		return;
 
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
@@ -597,20 +549,17 @@ void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderPro
 		{
 			for (ASizeT j = 0; j < nModels; j++)
 			{
-				AnimaModel* innerModel = modelsManager->GetPModel(j);
-
-				if (!innerModel->DrawingEnabled())
-					continue;
+				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
-					ForwardDrawModelMesh(stage, innerModel->GetPMesh(i), program, modelMatrix);
+					ForwardDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
 				ASizeT childrenNumber = innerModel->GetChildrenNumber();
 				for (ASizeT i = 0; i < childrenNumber; i++)
-					ForwardDrawModel(stage, innerModel->GetPChild(i), program, modelMatrix);
+					ForwardDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 			}
 		}
 		else
@@ -619,18 +568,18 @@ void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderPro
 
 			ASizeT meshNumber = model->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				ForwardDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+				ForwardDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 			ASizeT childrenNumber = model->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+				ForwardDrawModel(stage, model->GetChild(i), program, modelMatrix);
 		}
 	}
 }
 
-void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
+void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
 {
-	if (model != nullptr && !model->DrawingEnabled())
+	if (model != nullptr)
 		return;
 
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
@@ -668,20 +617,17 @@ void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShade
 		{
 			for (ASizeT j = 0; j < nModels; j++)
 			{
-				AnimaModel* innerModel = modelsManager->GetPModel(j);
-
-				if (!innerModel->DrawingEnabled())
-					continue;
+				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
-					ForwardDrawModelMesh(stage, innerModel->GetPMesh(i), program, modelMatrix);
+					ForwardDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
 				ASizeT childrenNumber = innerModel->GetChildrenNumber();
 				for (ASizeT i = 0; i < childrenNumber; i++)
-					ForwardDrawModel(stage, innerModel->GetPChild(i), program, modelMatrix);
+					ForwardDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 			}
 		}
 		else
@@ -690,18 +636,18 @@ void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShade
 
 			ASizeT meshNumber = model->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				ForwardDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+				ForwardDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 			ASizeT childrenNumber = model->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+				ForwardDrawModel(stage, model->GetChild(i), program, modelMatrix);
 		}
 	}
 }
 
-void AnimaRenderingManager::ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
+void AnimaRenderingManager::ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
 {
-	if (model != nullptr && !model->DrawingEnabled())
+	if (model != nullptr)
 		return;
 
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
@@ -739,20 +685,17 @@ void AnimaRenderingManager::ForwardPointPass(AnimaStage* stage, AnimaShaderProgr
 		{
 			for (ASizeT j = 0; j < nModels; j++)
 			{
-				AnimaModel* innerModel = modelsManager->GetPModel(j);
-
-				if (!innerModel->DrawingEnabled())
-					continue;
+				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
-					ForwardDrawModelMesh(stage, innerModel->GetPMesh(i), program, modelMatrix);
+					ForwardDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
 				ASizeT childrenNumber = innerModel->GetChildrenNumber();
 				for (ASizeT i = 0; i < childrenNumber; i++)
-					ForwardDrawModel(stage, innerModel->GetPChild(i), program, modelMatrix);
+					ForwardDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 			}
 		}
 		else
@@ -761,18 +704,18 @@ void AnimaRenderingManager::ForwardPointPass(AnimaStage* stage, AnimaShaderProgr
 
 			ASizeT meshNumber = model->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				ForwardDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+				ForwardDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 			ASizeT childrenNumber = model->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+				ForwardDrawModel(stage, model->GetChild(i), program, modelMatrix);
 		}
 	}
 }
 
-void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
+void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
 {
-	if (model != nullptr && !model->DrawingEnabled())
+	if (model != nullptr)
 		return;
 
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
@@ -810,20 +753,17 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 		{
 			for (ASizeT j = 0; j < nModels; j++)
 			{
-				AnimaModel* innerModel = modelsManager->GetPModel(j);
-
-				if (!innerModel->DrawingEnabled())
-					continue;
+				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
-					ForwardDrawModelMesh(stage, innerModel->GetPMesh(i), program, modelMatrix);
+					ForwardDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
 				ASizeT childrenNumber = innerModel->GetChildrenNumber();
 				for (ASizeT i = 0; i < childrenNumber; i++)
-					ForwardDrawModel(stage, innerModel->GetPChild(i), program, modelMatrix);
+					ForwardDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 			}
 		}
 		else
@@ -832,11 +772,11 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 
 			ASizeT meshNumber = model->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				ForwardDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+				ForwardDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 			ASizeT childrenNumber = model->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				ForwardDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+				ForwardDrawModel(stage, model->GetChild(i), program, modelMatrix);
 		}
 	}
 }
@@ -878,7 +818,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaModel* model)
+void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
@@ -920,17 +860,14 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMode
 	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program)
+void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program)
 {
 	AnimaMatrix identityMatrix;
 	DeferredDrawModel(stage, model, program, identityMatrix);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaModel* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
+void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
 {
-	if (!model->DrawingEnabled())
-		return;
-
 	if (stage == nullptr || model == nullptr || program == nullptr)
 		return;
 
@@ -938,11 +875,11 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaModel* mod
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DeferredDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+		DeferredDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DeferredDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+		DeferredDrawModel(stage, model->GetChild(i), program, modelMatrix);
 }
 
 void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation)
@@ -965,9 +902,9 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* 
 	program->DisableInputs();
 }
 
-void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaModel* model)
+void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
 {
-	if (model != nullptr && !model->DrawingEnabled())
+	if (model != nullptr)
 		return;
 
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
@@ -1005,20 +942,17 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 		{
 			for (ASizeT j = 0; j < nModels; j++)
 			{
-				AnimaModel* innerModel = modelsManager->GetPModel(j);
-
-				if (!innerModel->DrawingEnabled())
-					continue;
+				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
-					DeferredDrawModelMesh(stage, innerModel->GetPMesh(i), program, modelMatrix);
+					DeferredDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
 				ASizeT childrenNumber = innerModel->GetChildrenNumber();
 				for (ASizeT i = 0; i < childrenNumber; i++)
-					DeferredDrawModel(stage, innerModel->GetPChild(i), program, modelMatrix);
+					DeferredDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 			}
 		}
 		else
@@ -1027,11 +961,11 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 
 			ASizeT meshNumber = model->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				DeferredDrawModelMesh(stage, model->GetPMesh(i), program, modelMatrix);
+				DeferredDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
 
 			ASizeT childrenNumber = model->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(stage, model->GetPChild(i), program, modelMatrix);
+				DeferredDrawModel(stage, model->GetChild(i), program, modelMatrix);
 		}
 	}
 }
@@ -1064,7 +998,7 @@ void AnimaRenderingManager::DeferredAmbientPass(AnimaStage* stage, AnimaShaderPr
 			continue;
 
 		program->UpdateLightProperies(light);
-		program->UpdateMeshProperies(_filterMesh, _filterMeshTransform.GetTransformationMatrix());
+		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
 		program->EnableInputs(_filterMesh);
@@ -1102,7 +1036,7 @@ void AnimaRenderingManager::DeferredDirectionalPass(AnimaStage* stage, AnimaShad
 			continue;
 
 		program->UpdateLightProperies(light);
-		program->UpdateMeshProperies(_filterMesh, _filterMeshTransform.GetTransformationMatrix());
+		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
 		program->EnableInputs(_filterMesh);
@@ -1140,7 +1074,7 @@ void AnimaRenderingManager::DeferredPointPass(AnimaStage* stage, AnimaShaderProg
 			continue;
 
 		program->UpdateLightProperies(light);
-		program->UpdateMeshProperies(_filterMesh, _filterMeshTransform.GetTransformationMatrix());
+		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
 		program->EnableInputs(_filterMesh);
@@ -1178,7 +1112,7 @@ void AnimaRenderingManager::DeferredSpotPass(AnimaStage* stage, AnimaShaderProgr
 			continue;
 
 		program->UpdateLightProperies(light);
-		program->UpdateMeshProperies(_filterMesh, _filterMeshTransform.GetTransformationMatrix());
+		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
 		program->EnableInputs(_filterMesh);

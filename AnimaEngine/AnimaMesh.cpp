@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "AnimaMesh.h"
-#include "AnimaModel.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -23,9 +22,18 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 : _meshName(allocator)
+, _meshFileName(allocator)
 {
 	ANIMA_ASSERT(allocator != nullptr)
 	_allocator = allocator;
+
+	_meshChildren = nullptr;
+	_meshes = nullptr;
+	_parentMesh = nullptr;
+	_meshChildrenNumber = 0;
+	_meshesNumber = 0;
+	_meshName = "AnimaMesh";
+	_material = nullptr;
 	
 	_vertices = nullptr;
 	_normals = nullptr;
@@ -50,16 +58,25 @@ AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 	_tangentsNumber = 0;
 	_bitangentsNumber = 0;
 	_facesNumber = 0;
-	_meshName = "_mesh_";
-	_parentModel = nullptr;
-
-	_material = nullptr;
 }
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	: _meshName(src._meshName)
+	, _meshFileName(src._meshFileName)
+	, _transformation(src._transformation)
 {
 	_allocator = src._allocator;
+
+	_meshChildren = nullptr;
+	_meshes = nullptr;
+
+	_meshChildrenNumber = 0;
+	_meshesNumber = 0;
+
+	_parentMesh = src._parentMesh;
+
+	SetChildren(src._meshChildren, src._meshChildrenNumber);
+	SetMeshes(src._meshes, src._meshesNumber);
 
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
@@ -86,8 +103,6 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_bitangents = 0;
 	_facesNumber = 0;
 
-	_parentModel = src._parentModel;
-	
 	SetVertices(src._vertices, src._verticesNumber);
 	SetNormals(src._normals, src._normalsNumber);
 	SetTextureCoords(src._textureCoords, src._textureCoordsNumber);
@@ -110,8 +125,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _faces(src._faces)
 	, _facesNumber(src._facesNumber)
 	, _material(src._material)
-	, _meshName(src._meshName)
-	, _parentModel(src._parentModel)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
@@ -121,6 +134,14 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _allocator(src._allocator)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
+	, _meshChildren(src._meshChildren)
+	, _meshChildrenNumber(src._meshChildrenNumber)
+	, _parentMesh(src._parentMesh)
+	, _meshes(src._meshes)
+	, _meshesNumber(src._meshesNumber)
+	, _meshName(src._meshName)
+	, _meshFileName(src._meshFileName)
+	, _transformation(src._transformation)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -135,12 +156,20 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	src._tangentsNumber = 0;
 	src._bitangentsNumber = 0;
 	src._facesNumber = 0;
+
+	src._meshChildren = nullptr;
+	src._meshes = nullptr;
+
+	src._meshChildrenNumber = 0;
+	src._meshesNumber = 0;
 }
 
 AnimaMesh::~AnimaMesh()
 {
 	ANIMA_ASSERT(_allocator != nullptr);
-	
+
+	ClearChildren();
+	ClearMeshes();
 	ClearVertices();
 	ClearNormals();
 	ClearTextureCoords();
@@ -164,8 +193,13 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_material = src._material;
-		_parentModel = src._parentModel;
-		
+		_transformation = src._transformation;
+		_parentMesh = src._parentMesh;
+
+		SetMeshName(src._meshName);
+		SetMeshFileName(src._meshFileName);
+		SetChildren(src._meshChildren, src._meshChildrenNumber);
+		SetMeshes(src._meshes, src._meshesNumber);
 		SetMeshName(src._meshName);
 		SetVertices(src._vertices, src._verticesNumber);
 		SetNormals(src._normals, src._normalsNumber);
@@ -199,7 +233,18 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_facesNumber = src._facesNumber;
 
 		_material = src._material;
-		_parentModel = src._parentModel;
+		_parentMesh = src._parentMesh;
+
+		_meshChildren = src._meshChildren;
+		_meshes = src._meshes;
+
+		_meshChildrenNumber = src._meshChildrenNumber;
+		_meshesNumber = src._meshesNumber;
+
+		_meshName = src._meshName;
+		_meshFileName = src._meshFileName;
+
+		_transformation = src._transformation;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -211,8 +256,6 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 
-		_meshName = src._meshName;
-		
 		src._vertices = nullptr;
 		src._normals = nullptr;
 		src._textureCoords = nullptr;
@@ -229,6 +272,26 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 	}
 	
 	return *this;
+}
+
+void AnimaMesh::ClearChildren()
+{
+	if (_meshChildren != nullptr && _meshChildrenNumber > 0)
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _meshChildren);
+		_meshChildren = nullptr;
+		_meshChildrenNumber = 0;
+	}
+}
+
+void AnimaMesh::ClearMeshes()
+{
+	if (_meshes != nullptr && _meshesNumber > 0)
+	{
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _meshes);
+		_meshes = nullptr;
+		_meshesNumber = 0;
+	}
 }
 
 void AnimaMesh::ClearVertices()
@@ -289,6 +352,159 @@ void AnimaMesh::ClearFaces()
 		_faces = nullptr;
 		_facesNumber = 0;
 	}
+}
+
+void AnimaMesh::SetChildren(AnimaMesh* children, ASizeT n)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	ClearChildren();
+
+	if (children != nullptr && n > 0)
+	{
+		_meshChildrenNumber = n;
+		_meshChildren = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshChildrenNumber, _allocator);
+
+		for (int i = 0; i < _meshChildrenNumber; i++)
+			_meshChildren[i] = children[i];
+	}
+}
+
+void AnimaMesh::AddChild(const AnimaMesh& child)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_meshChildrenNumber > 0)
+	{
+		AnimaMesh* tmpOldChildren = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshChildrenNumber, _allocator);
+
+		for (int i = 0; i < _meshChildrenNumber; i++)
+			tmpOldChildren[i] = _meshChildren[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _meshChildren);
+
+		_meshChildrenNumber++;
+		_meshChildren = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshChildrenNumber, _allocator);
+
+		for (int i = 0; i < _meshChildrenNumber - 1; i++)
+			_meshChildren[i] = tmpOldChildren[i];
+
+		_meshChildren[_meshChildrenNumber - 1] = child;
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldChildren);
+	}
+	else
+	{
+		_meshChildrenNumber++;
+		_meshChildren = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshChildrenNumber, _allocator);
+
+		_meshChildren[_meshChildrenNumber - 1] = child;
+	}
+}
+
+void AnimaMesh::SetMeshes(AnimaMesh* meshes, ASizeT n)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	ClearMeshes();
+
+	if (meshes != nullptr && n > 0)
+	{
+		_meshesNumber = n;
+		_meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		for (int i = 0; i < _meshesNumber; i++)
+			_meshes[i] = meshes[i];
+	}
+}
+
+void AnimaMesh::AddMesh(const AnimaMesh& mesh)
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_meshesNumber > 0)
+	{
+		AnimaMesh* tmpOldMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		for (int i = 0; i < _meshesNumber; i++)
+			tmpOldMeshes[i] = _meshes[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _meshes);
+
+		_meshesNumber++;
+		_meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		for (int i = 0; i < _meshesNumber - 1; i++)
+			_meshes[i] = tmpOldMeshes[i];
+
+		_meshes[_meshesNumber - 1] = mesh;
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldMeshes);
+	}
+	else
+	{
+		_meshesNumber++;
+		_meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		_meshes[_meshesNumber - 1] = mesh;
+	}
+}
+
+AnimaMesh* AnimaMesh::CreateMesh()
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	if (_meshesNumber > 0)
+	{
+		AnimaMesh* tmpOldMeshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		for (int i = 0; i < _meshesNumber; i++)
+			tmpOldMeshes[i] = _meshes[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _meshes);
+
+		_meshesNumber++;
+		_meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+
+		for (int i = 0; i < _meshesNumber - 1; i++)
+			_meshes[i] = tmpOldMeshes[i];
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldMeshes);
+	}
+	else
+	{
+		_meshesNumber++;
+		_meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*_allocator, _meshesNumber, _allocator);
+	}
+
+	return &_meshes[_meshesNumber - 1];
+}
+
+ASizeT AnimaMesh::GetChildrenNumber()
+{
+	return _meshChildrenNumber;
+}
+
+AnimaMesh* AnimaMesh::GetChild(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _meshChildrenNumber);
+	return &_meshChildren[index];
+}
+
+AnimaMesh* AnimaMesh::GetChildren()
+{
+	return _meshChildren;
+}
+
+ASizeT AnimaMesh::GetMeshesNumber()
+{
+	return _meshesNumber;
+}
+
+AnimaMesh* AnimaMesh::GetMesh(ASizeT index)
+{
+	ANIMA_ASSERT(index >= 0 && index < _meshesNumber);
+	return &_meshes[index];
+}
+
+AnimaMesh* AnimaMesh::GetMeshes()
+{
+	return _meshes;
 }
 
 void AnimaMesh::SetVertices(AnimaVertex3f* v, ASizeT n)
@@ -699,28 +915,18 @@ AnimaFace* AnimaMesh::GetFaces()
 	return _faces;
 }
 
-void AnimaMesh::SetMeshName(const AnimaString& name)
+bool AnimaMesh::CanCreateBuffers()
 {
-	_meshName = name;
-}
-
-void AnimaMesh::SetMeshName(const char* name)
-{
-	_meshName = name;
-}
-
-AnimaString AnimaMesh::GetAnimaMeshName()
-{
-	return _meshName;
-}
-
-const char* AnimaMesh::GetMeshName()
-{
-	return _meshName.GetConstBuffer();
+	if (_verticesNumber <= 0 || _facesNumber <= 0)
+		return false;
+	return true;
 }
 
 bool AnimaMesh::CreateBuffers()
 {
+	if (!CanCreateBuffers())
+		return true;
+
 	if (!CreateVertexArrayObject())
 		return false;
 
@@ -747,6 +953,12 @@ bool AnimaMesh::CreateBuffers()
 
 void AnimaMesh::UpdateBuffers()
 {
+	if (!CanCreateBuffers())
+	{
+		_needsBuffersUpdate = false;
+		return;
+	}
+
 	if (!AreBuffersCreated())
 	{
 		ANIMA_ASSERT(CreateBuffers());
@@ -764,19 +976,23 @@ void AnimaMesh::UpdateBuffers()
 	
 	glBindVertexArray(_vertexArrayObject);
 	
-	AUint* indexes = GetFacesIndices();
-	ANIMA_ASSERT(indexes != nullptr);	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
-	indexes = nullptr;
-	
-	float* vertices = GetFloatVertices();
-	ANIMA_ASSERT(vertices != nullptr);
-	glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesCount(), vertices, GL_STATIC_DRAW);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertices);
-	vertices = nullptr;
+	if (GetFacesIndicesCount() > 0)
+	{
+		AUint* indexes = GetFacesIndices();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
+		indexes = nullptr;
+	}
+
+	if (GetFloatVerticesCount() > 0)
+	{
+		float* vertices = GetFloatVertices();
+		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesCount(), vertices, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertices);
+		vertices = nullptr;
+	}
 
 	if (GetFloatVerticesNormalCount() > 0)
 	{
@@ -1196,19 +1412,78 @@ AUint AnimaMesh::GetBitangentsBufferObject()
 	return _bitangentsBufferObject;
 }
 
-void AnimaMesh::SetParent(AnimaModel* parent)
+void AnimaMesh::SetMeshName(const AnimaString& name)
 {
-	_parentModel = parent;
+	_meshName = name;
 }
 
-AnimaModel* AnimaMesh::GetParent() const
+void AnimaMesh::SetMeshName(const char* name)
 {
-	return _parentModel;
+	_meshName = name;
 }
 
-void AnimaMesh::ComputeBoundingBox()
+AnimaString AnimaMesh::GetAnimaMeshName()
 {
-	if (_verticesNumber <= 0)
+	return _meshName;
+}
+
+const char* AnimaMesh::GetMeshName()
+{
+	return _meshName.GetConstBuffer();
+}
+
+void AnimaMesh::SetMeshFileName(const AnimaString& name)
+{
+	_meshFileName = name;
+}
+
+void AnimaMesh::SetMeshFileName(const char* name)
+{
+	_meshFileName = name;
+}
+
+AnimaString AnimaMesh::GetAnimaMeshFileName()
+{
+	return _meshFileName;
+}
+
+const char* AnimaMesh::GetMeshFileName()
+{
+	return _meshFileName.GetConstBuffer();
+}
+
+AnimaTransformation* AnimaMesh::GetTransformation()
+{
+	return &_transformation;
+}
+
+AnimaTransformation AnimaMesh::GetTransformationCopy()
+{
+	return _transformation;
+}
+
+void AnimaMesh::SetParent(AnimaMesh* parent)
+{
+	_parentMesh = parent;
+}
+
+AnimaMesh* AnimaMesh::GetParent() const
+{
+	return _parentMesh;
+}
+
+void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
+{
+	if (updateRecursively)
+	{
+		for (ASizeT i = 0; i < _meshChildrenNumber; i++)
+			_meshChildren[i].ComputeBoundingBox(updateRecursively);
+
+		for (ASizeT i = 0; i < _meshesNumber; i++)
+			_meshes[i].ComputeBoundingBox(true);
+	}
+
+	if (_meshChildrenNumber <= 0 && _meshesNumber <= 0)
 	{
 		_boundingBoxMin.x = _boundingBoxMax.x = 0.0f;
 		_boundingBoxMin.y = _boundingBoxMax.y = 0.0f;
@@ -1216,18 +1491,37 @@ void AnimaMesh::ComputeBoundingBox()
 		return;
 	}
 
-	_boundingBoxMin = _vertices[0];
-	_boundingBoxMax = _vertices[0];
-
-	for (int i = 1; i < _verticesNumber; i++)
+	if (_meshesNumber > 0)
 	{
-		_boundingBoxMin.x = min(_boundingBoxMin.x, _vertices[i].x);
-		_boundingBoxMin.y = min(_boundingBoxMin.y, _vertices[i].y);
-		_boundingBoxMin.z = min(_boundingBoxMin.z, _vertices[i].z);
+		_boundingBoxMin = _meshes[0].GetBoundingBoxMin();
+		_boundingBoxMax = _meshes[0].GetBoundingBoxMax();
 
-		_boundingBoxMax.x = max(_boundingBoxMax.x, _vertices[i].x);
-		_boundingBoxMax.y = max(_boundingBoxMax.y, _vertices[i].y);
-		_boundingBoxMax.z = max(_boundingBoxMax.z, _vertices[i].z);
+		for (ASizeT i = 1; i < _meshesNumber; i++)
+		{
+			_boundingBoxMin.x = min(_boundingBoxMin.x, _meshes[i].GetBoundingBoxMin().x);
+			_boundingBoxMin.y = min(_boundingBoxMin.y, _meshes[i].GetBoundingBoxMin().y);
+			_boundingBoxMin.z = min(_boundingBoxMin.z, _meshes[i].GetBoundingBoxMin().z);
+
+			_boundingBoxMax.x = max(_boundingBoxMax.x, _meshes[i].GetBoundingBoxMax().x);
+			_boundingBoxMax.y = max(_boundingBoxMax.y, _meshes[i].GetBoundingBoxMax().y);
+			_boundingBoxMax.z = max(_boundingBoxMax.z, _meshes[i].GetBoundingBoxMax().z);
+		}
+	}
+	else
+	{
+		_boundingBoxMin = _meshChildren[0].GetBoundingBoxMin();
+		_boundingBoxMax = _meshChildren[0].GetBoundingBoxMax();
+	}
+
+	for (ASizeT i = 1; i < _meshChildrenNumber; i++)
+	{
+		_boundingBoxMin.x = min(_boundingBoxMin.x, _meshChildren[i].GetBoundingBoxMin().x);
+		_boundingBoxMin.y = min(_boundingBoxMin.y, _meshChildren[i].GetBoundingBoxMin().y);
+		_boundingBoxMin.z = min(_boundingBoxMin.z, _meshChildren[i].GetBoundingBoxMin().z);
+
+		_boundingBoxMax.x = max(_boundingBoxMax.x, _meshChildren[i].GetBoundingBoxMax().x);
+		_boundingBoxMax.y = max(_boundingBoxMax.y, _meshChildren[i].GetBoundingBoxMax().y);
+		_boundingBoxMax.z = max(_boundingBoxMax.z, _meshChildren[i].GetBoundingBoxMax().z);
 	}
 }
 
@@ -1243,7 +1537,7 @@ AnimaVertex3f AnimaMesh::GetBoundingBoxMax() const
 
 AnimaMatrix AnimaMesh::GetFinalMatrix() const
 {
-	AnimaModel* p = _parentModel;
+	AnimaMesh* p = _parentMesh;
 	AnimaMatrix m;
 
 	while (p != nullptr)
@@ -1253,6 +1547,55 @@ AnimaMatrix AnimaMesh::GetFinalMatrix() const
 	}
 
 	return m;
+}
+
+void AnimaMesh::MakePlane()
+{
+	ClearChildren();
+	ClearMeshes();
+	ClearVertices();
+	ClearNormals();
+	ClearTextureCoords();
+	ClearTangents();
+	ClearBitangents();
+	ClearFaces();
+	
+	AInt numeroVertici = 4;
+	AInt numeroFacce = 2;
+	AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
+	AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
+	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, numeroVertici);
+	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, numeroFacce, _allocator);
+
+	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
+	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
+	vertici[2] = AnimaVertex3f(1.0f, 0.0f, 1.0f);
+	vertici[3] = AnimaVertex3f(1.0f, 0.0f, -1.0f);
+
+	normali[0] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[1] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[2] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	normali[3] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
+
+	textCoords[0] = AnimaVertex2f(1.0f, 0.0f);
+	textCoords[1] = AnimaVertex2f(1.0f, 1.0f);
+	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
+	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
+
+	AUint indexes0[] = { 0, 1, 2 };
+	AUint indexes1[] = { 0, 2, 3 };
+	facce[0].SetIndexes(indexes0, 3);
+	facce[1].SetIndexes(indexes1, 3);
+
+	SetVertices(vertici, numeroVertici);
+	SetNormals(normali, numeroVertici);
+	SetTextureCoords(textCoords, numeroVertici);
+	SetFaces(facce, numeroFacce);
+
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertici);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, normali);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, textCoords);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, facce);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -4,7 +4,7 @@
 #include <AnimaModelsManager.h>
 #include <AnimaCamerasManager.h>
 #include <AnimaDataGeneratorsManager.h>
-#include <AnimaModel.h>
+#include <AnimaMesh.h>
 #include <AnimaShader.h>
 #include <AnimaEngine.h>
 #include <AnimaStage.h>
@@ -166,7 +166,7 @@ void CRModelViewer::wheelEvent(QWheelEvent* wEvent)
 	_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
 }
 
-void CRModelViewer::setSelectedModel(Anima::AnimaModel* model)
+void CRModelViewer::setSelectedModel(Anima::AnimaMesh* model)
 {
 	_selectedModel = model;
 

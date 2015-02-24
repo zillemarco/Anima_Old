@@ -24,7 +24,6 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaPoolAllocator.h
                     AnimaProxyAllocator.h
                     AnimaVertex.h
-                    AnimaModel.h
                     AnimaModelsManager.h
                     AnimaMesh.h
                     AnimaFace.h
@@ -66,7 +65,6 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaPoolAllocator.cpp
                     AnimaProxyAllocator.cpp
 					AnimaVertex.cpp
-                    AnimaModel.cpp
                     AnimaModelsManager.cpp
                     AnimaMesh.cpp
                     AnimaFace.cpp
