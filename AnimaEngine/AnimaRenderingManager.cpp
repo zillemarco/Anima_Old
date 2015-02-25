@@ -27,7 +27,7 @@ AnimaRenderingManager::AnimaRenderingManager(const AnimaRenderingManager& src)
 
 	_texturesMap = src._texturesMap;
 	_textureSlotsMap = src._textureSlotsMap;
-	_deferredDataMap = src._deferredDataMap;
+	_gBuffersMap = src._gBuffersMap;
 
 	_colors3fMap = src._colors3fMap;
 	_colors4fMap = src._colors4fMap;
@@ -45,7 +45,7 @@ AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
 	_allocator = src._allocator;
 	_texturesMap = src._texturesMap;
 	_textureSlotsMap = src._textureSlotsMap;
-	_deferredDataMap = src._deferredDataMap;
+	_gBuffersMap = src._gBuffersMap;
 
 	_colors3fMap = src._colors3fMap;
 	_colors4fMap = src._colors4fMap;
@@ -73,7 +73,7 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(const AnimaRenderingMana
 		
 		_texturesMap = src._texturesMap;
 		_textureSlotsMap = src._textureSlotsMap;
-		_deferredDataMap = src._deferredDataMap;
+		_gBuffersMap = src._gBuffersMap;
 
 		_colors3fMap = src._colors3fMap;
 		_colors4fMap = src._colors4fMap;
@@ -99,7 +99,7 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(AnimaRenderingManager&& 
 
 		_texturesMap = src._texturesMap;
 		_textureSlotsMap = src._textureSlotsMap;
-		_deferredDataMap = src._deferredDataMap;
+		_gBuffersMap = src._gBuffersMap;
 
 		_colors3fMap = src._colors3fMap;
 		_colors4fMap = src._colors4fMap;
@@ -128,18 +128,6 @@ void AnimaRenderingManager::InitTextureSlots()
 
 	// Slot usati dai filtri
 	SetTextureSlot("FilterMap", 0);
-
-	// Dati usati dal deferred shading
-	AnimaString strDepth("DepthMap", _allocator);
-	AnimaString strAlbedo("AlbedoMap", _allocator);
-	AnimaString strNormal("NormalMap", _allocator);
-	DeferredData* depthData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strDepth, 0, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* albedoData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strAlbedo, 1, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-	DeferredData* normalData = AnimaAllocatorNamespace::AllocateNew<DeferredData>(*_allocator, strNormal, 2, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-
-	SetDeferredData(depthData);
-	SetDeferredData(albedoData);
-	SetDeferredData(normalData);
 }
 
 void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
@@ -149,78 +137,37 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 
 	if (oldSize != newSize)
 	{
-		AUint* attachments = nullptr;
-		AUint* formats = nullptr;
-		AUint* internalFormats = nullptr;
-		AUint* dataTypes = nullptr;
-		AUint* filters = nullptr;
-
-		ASizeT size = _deferredDataMap.size();
-		if (size > 0)
+		AnimaGBuffer* prepassBuffer = GetGBuffer("PrepassBuffer");
+		if (prepassBuffer != nullptr)
+			prepassBuffer->Resize(screenWidth, screenHeight);
+		else
 		{
-			attachments = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, size);
-			formats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, size);
-			internalFormats = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, size);
-			dataTypes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, size);
-			filters = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, size);
+			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->Create();
+
+			SetGBuffer("PrepassBuffer", prepassBuffer);
 		}
 
-		AInt offset = 0;
-		DeferredDataSetByIndex& indexIterator = get<0>(_deferredDataMap);
-		for (auto elem = indexIterator.begin(), end = indexIterator.end(); elem != end; elem++)
+		AnimaGBuffer* diffuseBuffer = GetGBuffer("DiffuseBuffer");
+		if (diffuseBuffer != nullptr)
+			diffuseBuffer->Resize(screenWidth, screenHeight);
+		else
 		{
-			DeferredData* data = *elem;
-			attachments[offset] = data->_attachment;
-			formats[offset] = data->_format;
-			internalFormats[offset] = data->_internalFormat;
-			dataTypes[offset] = data->_dataType;
-			filters[offset] = data->_filter;
+			diffuseBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			diffuseBuffer->AddTexture("DiffuseMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			diffuseBuffer->Create();
 
-			offset++;
+			SetGBuffer("DiffuseBuffer", diffuseBuffer);
 		}
 
-		AnimaTexture* diffuseMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA, GL_RGBA, GL_FLOAT, false, GL_COLOR_ATTACHMENT0);
-		diffuseMapTexture->LoadRenderTargets();
-		
-		AnimaTexture* deferredMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, (AUint)size, nullptr, nullptr, 0, filters, internalFormats, formats, dataTypes, false, attachments);
-		deferredMapTexture->LoadRenderTargets();
-
-		SetTexture("DiffuseMap", diffuseMapTexture);
-		SetTexture("DeferredInputMap", deferredMapTexture);
+		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
 
 		SetVector("ScreenSize", (AFloat)screenWidth, (AFloat)screenHeight);
 		SetVector("InverseScreenSize", 1.0f / (AFloat)screenWidth, 1.0f / (AFloat)screenHeight);
-
-		if (attachments != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateArray(*_allocator, attachments);
-			attachments = nullptr;
-		}
-
-		if (formats != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateArray(*_allocator, formats);
-			formats = nullptr;
-		}
-
-		if (internalFormats != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateArray(*_allocator, internalFormats);
-			internalFormats = nullptr;
-		}
-
-		if (dataTypes != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateArray(*_allocator, dataTypes);
-			dataTypes = nullptr;
-		}
-
-		if (filters != nullptr)
-		{
-			AnimaAllocatorNamespace::DeallocateArray(*_allocator, filters);
-			filters = nullptr;
-		}
 	}
 }
 
@@ -258,10 +205,8 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	_filterCamera->RotateYDeg(180.0f);
 }
 
-void AnimaRenderingManager::ApplyFilter(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst)
+void AnimaRenderingManager::ApplyEffect(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst)
 {
-	ANIMA_ASSERT(src != dst);
-
 	if (dst != nullptr)
 		dst->BindAsRenderTarget();
 	else
@@ -281,13 +226,45 @@ void AnimaRenderingManager::ApplyFilter(AnimaShaderProgram* filterProgram, Anima
 	filterProgram->UpdateCameraProperies(_filterCamera);
 	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
-	
+
 	filterProgram->EnableInputs(_filterMesh);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	filterProgram->DisableInputs();
 
 	SetTexture("FilterMap", nullptr, false);
+}
+
+void AnimaRenderingManager::ApplyEffect(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst)
+{
+	ANIMA_ASSERT(src != dst);
+
+	if (dst != nullptr)
+		dst->BindAsRenderTarget();
+	else
+	{
+		AnimaVertex2f size = GetVector2f("ScreenSize");
+		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+
+	if (_filterMesh->NeedsBuffersUpdate())
+		_filterMesh->UpdateBuffers();
+
+	SetGBuffer("FilterBuffer", src, false);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	filterProgram->Use();
+	filterProgram->UpdateCameraProperies(_filterCamera);
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	filterProgram->UpdateRenderingManagerProperies(this);
+	
+	filterProgram->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	filterProgram->DisableInputs();
+
+	SetGBuffer("FilterBuffer", nullptr, false);
 }
 
 void AnimaRenderingManager::Start(AnimaStage* stage)
@@ -423,7 +400,7 @@ void AnimaRenderingManager::ForwardDrawAllModels(AnimaStage* stage)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 	
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	//GetTexture("DiffuseMap")->BindAsRenderTarget();
 	Start(stage);
 
 	ForwardAmbientPass(stage, shadersManager->GetProgramFromName("forward-ambient"));
@@ -443,14 +420,14 @@ void AnimaRenderingManager::ForwardDrawAllModels(AnimaStage* stage)
 
 	Finish(stage);
 
-	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	//ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::ForwardDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	//GetTexture("DiffuseMap")->BindAsRenderTarget();
 	ForwardAmbientPass(stage, shadersManager->GetProgramFromName("forward-ambient"), model);
 
 	glEnable(GL_BLEND);
@@ -785,7 +762,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	GetTexture("DeferredInputMap")->BindAsRenderTarget();
+	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 
 	Start(stage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -799,30 +776,30 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	Finish(stage);
 
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
-	Start(stage);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	glDisable(GL_BLEND);
+	//GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
+	//Start(stage);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//
+	////glEnable(GL_BLEND);
+	////glBlendFunc(GL_ONE, GL_ONE);
+	//glDisable(GL_BLEND);
 
-	DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
-	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
-	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
-	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
+	////DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
+	////DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
+	////DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
+	////DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
 
-	Finish(stage);
+	//Finish(stage);
 
-	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	GetTexture("DeferredInputMap")->BindAsRenderTarget();
+	//GetTexture("DeferredInputMap")->BindAsRenderTarget();
 	Start(stage);
 
 	glDepthMask(GL_TRUE);
@@ -837,7 +814,7 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh
 	Finish(stage);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	//GetTexture("DiffuseMap")->BindAsRenderTarget();
 	Start(stage);
 
 	//glEnable(GL_BLEND);
@@ -857,7 +834,7 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh
 
 	Finish(stage);
 
-	ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	//ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program)
@@ -930,43 +907,34 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 		program->UpdateCameraProperies(camera);
 	}
 
-	for (ASizeT i = 0; i < nLights; i++)
+	if (model == nullptr)
 	{
-		AnimaLight* light = lightsManager->GetLight((AUint)i);
-		if (!light->IsAmbientLight())
-			continue;
-
-		program->UpdateLightProperies(light);
-
-		if (model == nullptr)
+		for (ASizeT j = 0; j < nModels; j++)
 		{
-			for (ASizeT j = 0; j < nModels; j++)
-			{
-				AnimaMesh* innerModel = modelsManager->GetModel(j);
+			AnimaMesh* innerModel = modelsManager->GetModel(j);
 
-				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
-				ASizeT meshNumber = innerModel->GetMeshesNumber();
-				for (ASizeT i = 0; i < meshNumber; i++)
-					DeferredDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
-
-				ASizeT childrenNumber = innerModel->GetChildrenNumber();
-				for (ASizeT i = 0; i < childrenNumber; i++)
-					DeferredDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
-			}
-		}
-		else
-		{
-			AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
-
-			ASizeT meshNumber = model->GetMeshesNumber();
+			ASizeT meshNumber = innerModel->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				DeferredDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
+				DeferredDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
 
-			ASizeT childrenNumber = model->GetChildrenNumber();
+			ASizeT childrenNumber = innerModel->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(stage, model->GetChild(i), program, modelMatrix);
+				DeferredDrawModel(stage, innerModel->GetChild(i), program, modelMatrix);
 		}
+	}
+	else
+	{
+		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
+
+		ASizeT meshNumber = model->GetMeshesNumber();
+		for (ASizeT i = 0; i < meshNumber; i++)
+			DeferredDrawModelMesh(stage, model->GetMesh(i), program, modelMatrix);
+
+		ASizeT childrenNumber = model->GetChildrenNumber();
+		for (ASizeT i = 0; i < childrenNumber; i++)
+			DeferredDrawModel(stage, model->GetChild(i), program, modelMatrix);
 	}
 }
 
@@ -1157,9 +1125,33 @@ void AnimaRenderingManager::SetTextureSlot(const char* propertyName, AUint value
 	SetTextureSlot(str, value);
 }
 
-void AnimaRenderingManager::SetDeferredData(AnimaRenderingManager::DeferredData* value)
+//void AnimaRenderingManager::SetDeferredData(AnimaRenderingManager::DeferredData* value)
+//{
+//	_gBuffersMap.insert(value);
+//}
+
+void AnimaRenderingManager::SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent)
 {
-	_deferredDataMap.insert(value);
+	auto element = _gBuffersMap.find(name);
+
+	if (element == _gBuffersMap.end())
+		_gBuffersMap[name] = value;
+	else
+	{
+		if (element->second != nullptr && deleteExistent)
+		{
+			AnimaAllocatorNamespace::DeallocateObject(*_allocator, element->second);
+			element->second = nullptr;
+		}
+
+		_gBuffersMap[name] = value;
+	}
+}
+
+void AnimaRenderingManager::SetGBuffer(const char* name, AnimaGBuffer* value, bool deleteExistent)
+{
+	AnimaString str(name, _allocator);
+	SetGBuffer(str, value, deleteExistent);
 }
 
 void AnimaRenderingManager::SetColor(AnimaString propertyName, AnimaColor3f value)
@@ -1336,34 +1328,47 @@ AUint AnimaRenderingManager::GetTextureSlot(const char* slotName)
 	return GetTextureSlot(str);
 }
 
-AUint AnimaRenderingManager::GetTextureIndex(const AnimaString& textureName)
-{
-	DeferredDataSetByName& nameIterator = get<1>(_deferredDataMap);
-	auto res = nameIterator.find(textureName);
-	if (res != nameIterator.end())
-		return (*res)->_index;
-	return 0;
-}
+//AUint AnimaRenderingManager::GetTextureIndex(const AnimaString& textureName)
+//{
+//	DeferredDataSetByName& nameIterator = get<1>(_gBuffersMap);
+//	auto res = nameIterator.find(textureName);
+//	if (res != nameIterator.end())
+//		return (*res)->_index;
+//	return 0;
+//}
+//
+//AUint AnimaRenderingManager::GetTextureIndex(const char* textureName)
+//{
+//	AnimaString str(textureName, _allocator);
+//	return GetTextureIndex(str);
+//}
 
-AUint AnimaRenderingManager::GetTextureIndex(const char* textureName)
-{
-	AnimaString str(textureName, _allocator);
-	return GetTextureIndex(str);
-}
+//AnimaRenderingManager::DeferredData* AnimaRenderingManager::GetDeferredData(const AnimaString& slotName)
+//{
+//	DeferredDataSetByName& nameIterator = get<1>(_gBuffersMap);
+//	auto res = nameIterator.find(slotName);
+//	if (res != nameIterator.end())
+//		return *res;
+//	return nullptr;
+//}
+//
+//AnimaRenderingManager::DeferredData* AnimaRenderingManager::GetDeferredData(const char* slotName)
+//{
+//	AnimaString str(slotName, _allocator);
+//	return GetDeferredData(str);
+//}
 
-AnimaRenderingManager::DeferredData* AnimaRenderingManager::GetDeferredData(const AnimaString& slotName)
+AnimaGBuffer* AnimaRenderingManager::GetGBuffer(const AnimaString& gBufferName)
 {
-	DeferredDataSetByName& nameIterator = get<1>(_deferredDataMap);
-	auto res = nameIterator.find(slotName);
-	if (res != nameIterator.end())
-		return *res;
+	if (_gBuffersMap.find(gBufferName) != _gBuffersMap.end())
+		return _gBuffersMap[gBufferName];
 	return nullptr;
 }
 
-AnimaRenderingManager::DeferredData* AnimaRenderingManager::GetDeferredData(const char* slotName)
+AnimaGBuffer* AnimaRenderingManager::GetGBuffer(const char* gBufferName)
 {
-	AnimaString str(slotName, _allocator);
-	return GetDeferredData(str);
+	AnimaString str(gBufferName, _allocator);
+	return GetGBuffer(str);
 }
 
 AnimaColor3f AnimaRenderingManager::GetColor3f(AnimaString propertyName)
@@ -1506,15 +1511,18 @@ void AnimaRenderingManager::Clear()
 		}
 	}
 
-	for (auto& element : _deferredDataMap)
+	for (auto& pair : _gBuffersMap)
 	{
-		if(element != nullptr)
-			AnimaAllocatorNamespace::DeallocateObject(*_allocator, element);
+		if (pair.second != nullptr)
+		{
+			AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
+			pair.second = nullptr;
+		}
 	}
 
 	_texturesMap.clear();
 	_textureSlotsMap.clear();
-	_deferredDataMap.clear();
+	_gBuffersMap.clear();
 
 	_colors3fMap.clear();
 	_colors4fMap.clear();

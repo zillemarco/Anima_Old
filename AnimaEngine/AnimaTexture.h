@@ -11,9 +11,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaTexture
 {
 public:
-	AnimaTexture(AnimaAllocator* allocator, AUint texturesNumber);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, bool clamp, AUint attachment);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUint texturesNumber, AUchar** data, ASizeT* dataSize, AUint mipMapLevels, AUint* filters, AUint* internalFormats, AUint* formats, AUint* dataTypes, bool clamp, AUint* attachments);
+	AnimaTexture(AnimaAllocator* allocator);
+	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp/*, AUint attachment*/);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -33,80 +32,68 @@ public:
 	void SetMipMapLevels(AUint levels);
 	AUint GetMipMapLevels() const;
 
-	void SetFormats(AUint* formats);
-	void SetFormat(AUint format, AUint index);
-	AUint GetFormat(AUint index) const;
-	AUint* GetFormats() const;
+	void SetFormat(AUint format);
+	AUint GetFormat() const;
 
-	void SetFilters(AUint* filters);
-	void SetFilter(AUint filter, AUint index);
-	AUint GetFilter(AUint index) const;
-	AUint* GetFilters() const;
+	void SetFilter(AUint filter);
+	AUint GetFilter() const;
 
-	void SetAttachments(AUint* attachments);
-	void SetAttachment(AUint attachment, AUint index);
-	AUint GetAttachment(AUint index) const;
-	AUint* GetAttachments() const;
+	////void SetAttachments(AUint* attachments);
+	//void SetAttachment(AUint attachment);
+	//AUint GetAttachment() const;
+	////AUint* GetAttachments() const;
 
-	void SetInternalFormats(AUint* internalFormats);
-	void SetInternalFormat(AUint internalFormat, AUint index);
-	AUint GetInternalFormat(AUint index) const;
-	AUint* GetInternalFormats() const;
+	void SetInternalFormat(AUint internalFormat);
+	AUint GetInternalFormat() const;
 
-	void SetDataTypes(AUint* dataTypes);
-	void SetDataType(AUint dataType, AUint index);
-	AUint GetDataType(AUint index) const;
-	AUint* GetDataTypes() const;
+	void SetDataType(AUint dataType);
+	AUint GetDataType() const;
 
-	void SetDatas(AUchar** datas, ASizeT* datasSize);
-	void SetData(AUchar* data, ASizeT dataSize, AUint index);
-	AUchar* GetData(AUint index) const;
-	const AUchar* GetConstData(AUint index) const;
-	AUchar** GetDatas() const;
-	const AUchar** GetConstDatas() const;
+	void SetData(AUchar* data, ASizeT dataSize);
+	AUchar* GetData() const;
+	const AUchar* GetConstData() const;
 
 	void SetTextureTarget(AUint target);
 	AUint GetTextureTarget() const;
 
-	void EnableClamp(bool bEnable);
-	bool ClampEnabled() const;
+	void SetClamp(AUint clamp);
+	AUint GetClamp() const;
 	
-	bool LoadTextures();
-	bool LoadRenderTargets();
+	bool Load();
+	void Unload();
+	//bool LoadRenderTargets();
+
 	bool IsReady();
 
-	void Unload();
-
-	void Bind(AUint unit, AUint index = 0) const;
-	void BindAsRenderTarget() const;
+	void Resize(AUint width, AUint height);
+	
+	void Bind(AUint unit) const;
 
 private:
 	AnimaAllocator* _allocator;
 	
 	AUint _width;
 	AUint _height;
-	AUint _texturesNumber;
 
-	AUint* _textureIDs;
-	AUint _frameBuffer;
-	AUint _renderBuffer;
+	AUint _textureID;
+	//AUint _frameBuffer;
+	//AUint _renderBuffer;
 
-	AUchar** _datas;
-	ASizeT* _datasSize;
+	AUchar* _data;
+	ASizeT _dataSize;
 		
 	AUint _textureTarget;
-	AUint* _filters;
-	AUint* _internalFormats;
-	AUint* _formats;
-	AUint* _attachments;
-	AUint* _dataTypes;
-
-	bool _enableClamp;
-
+	AUint _filter;
+	AUint _internalFormat;
+	AUint _format;
+	//AUint _attachment;
+	AUint _dataType;
+	AUint _clamp;
 	AUint _mipMapLevels;
 
 	bool _texturesReady;
-	bool _renderTargetsReady;
+	bool _needsResize;
+	//bool _renderTargetsReady;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

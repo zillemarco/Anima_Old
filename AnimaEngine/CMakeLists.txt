@@ -53,7 +53,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaLightsManager.h
 					AnimaVectorGenerator.h
 					AnimaStage.h
-					AnimaStagesManager.h)
+					AnimaStagesManager.h
+					AnimaGBuffer.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp 
 					AnimaEngine.cpp
@@ -94,7 +95,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaLightsManager.cpp
 					AnimaVectorGenerator.cpp
 					AnimaStage.cpp
-					AnimaStagesManager.cpp)
+					AnimaStagesManager.cpp
+					AnimaGBuffer.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

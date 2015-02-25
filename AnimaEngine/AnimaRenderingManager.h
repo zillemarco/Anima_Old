@@ -12,6 +12,8 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaStage.h"
 #include "AnimaString.h"
+#include "AnimaGBuffer.h"
+#include "AnimaVertex.h"
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -35,58 +37,58 @@ public:
 	AnimaRenderingManager& operator=(AnimaRenderingManager&& src);
 	
 protected:
-	class DeferredData
-	{
-	public:
-		DeferredData(const AnimaString& name, AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
-			_index = index;
-			_attachment = attachment;
-			_internalFormat = internalFormat;
-			_format = format;
-			_dataType = dataType;
-			_filter = filter;
-			_name = name;
-		}
+	//class DeferredData
+	//{
+	//public:
+	//	DeferredData(const AnimaString& name, AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
+	//		_index = index;
+	//		_attachment = attachment;
+	//		_internalFormat = internalFormat;
+	//		_format = format;
+	//		_dataType = dataType;
+	//		_filter = filter;
+	//		_name = name;
+	//	}
 
-		DeferredData(const DeferredData& src) {
-			_index = src._index;
-			_attachment = src._attachment;
-			_internalFormat = src._internalFormat;
-			_format = src._format;
-			_dataType = src._dataType;
-			_filter = src._filter;
-			_name = src._name;
-		}
+	//	DeferredData(const DeferredData& src) {
+	//		_index = src._index;
+	//		_attachment = src._attachment;
+	//		_internalFormat = src._internalFormat;
+	//		_format = src._format;
+	//		_dataType = src._dataType;
+	//		_filter = src._filter;
+	//		_name = src._name;
+	//	}
 
-		DeferredData(const DeferredData&& src) {
-			_index = src._index;
-			_attachment = src._attachment;
-			_internalFormat = src._internalFormat;
-			_format = src._format;
-			_dataType = src._dataType;
-			_filter = src._filter;
-			_name = src._name;
-		}
+	//	DeferredData(const DeferredData&& src) {
+	//		_index = src._index;
+	//		_attachment = src._attachment;
+	//		_internalFormat = src._internalFormat;
+	//		_format = src._format;
+	//		_dataType = src._dataType;
+	//		_filter = src._filter;
+	//		_name = src._name;
+	//	}
 
-	public:
-		AnimaString _name;
-		AUint _index;
-		AUint _attachment;
-		AUint _internalFormat;
-		AUint _format;
-		AUint _dataType;
-		AUint _filter;
-	};
+	//public:
+	//	AnimaString _name;
+	//	AUint _index;
+	//	AUint _attachment;
+	//	AUint _internalFormat;
+	//	AUint _format;
+	//	AUint _dataType;
+	//	AUint _filter;
+	//};
 
-	typedef multi_index_container<
-		DeferredData*,
-		indexed_by<
-		ordered_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AUint, _index)>,
-		hashed_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AnimaString, _name), AnimaString::Hasher> >
-	> DeferredDataSet;
+	//typedef multi_index_container<
+	//	DeferredData*,
+	//	indexed_by<
+	//	ordered_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AUint, _index)>,
+	//	hashed_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AnimaString, _name), AnimaString::Hasher> >
+	//> DeferredDataSet;
 
-	typedef DeferredDataSet::nth_index<0>::type DeferredDataSetByIndex;
-	typedef DeferredDataSet::nth_index<1>::type DeferredDataSetByName;
+	//typedef DeferredDataSet::nth_index<0>::type DeferredDataSetByIndex;
+	//typedef DeferredDataSet::nth_index<1>::type DeferredDataSetByName;
 	
 public:
 	void Start(AnimaStage* stage);
@@ -132,16 +134,18 @@ protected:
 	
 	void Clear();
 
-	void ApplyFilter(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
+	void ApplyEffect(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
+	void ApplyEffect(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst);
 
 protected:
-	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);
-	void SetTexture(const char* propertyName, AnimaTexture* value, bool deleteExistent = true);
-
 	void SetTextureSlot(AnimaString slotName, AUint value);
 	void SetTextureSlot(const char* slotName, AUint value);
-
-	void SetDeferredData(DeferredData* value);
+	
+	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);
+	void SetTexture(const char* propertyName, AnimaTexture* value, bool deleteExistent = true);
+	
+	void SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent = true);
+	void SetGBuffer(const char* name, AnimaGBuffer* value, bool deleteExistent = true);
 
 	void SetColor(AnimaString propertyName, AnimaColor3f value);
 	void SetColor(const char* propertyName, AnimaColor3f value);
@@ -175,17 +179,14 @@ protected:
 	void SetInteger(const char* propertyName, AInt value);
 
 public:
+	AUint GetTextureSlot(const AnimaString& slotName);
+	AUint GetTextureSlot(const char* slotName);
+	
 	AnimaTexture* GetTexture(AnimaString propertyName);
 	AnimaTexture* GetTexture(const char* propertyName);
 
-	AUint GetTextureSlot(const AnimaString& slotName);
-	AUint GetTextureSlot(const char* slotName);
-
-	AUint GetTextureIndex(const AnimaString& textureName);
-	AUint GetTextureIndex(const char* textureName);
-
-	DeferredData* GetDeferredData(const AnimaString& dataName);
-	DeferredData* GetDeferredData(const char* dataName);
+	AnimaGBuffer* GetGBuffer(const AnimaString& gBufferName);
+	AnimaGBuffer* GetGBuffer(const char* gBufferName);
 
 	AnimaColor3f GetColor3f(AnimaString propertyName);
 	AnimaColor3f GetColor3f(const char* propertyName);
@@ -217,7 +218,7 @@ protected:
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
-	DeferredDataSet															_deferredDataMap;
+	boost::unordered_map<AnimaString, AnimaGBuffer*, AnimaString::Hasher>	_gBuffersMap;
 
 	boost::unordered_map<AnimaString, AnimaColor3f, AnimaString::Hasher> _colors3fMap;
 	boost::unordered_map<AnimaString, AnimaColor4f, AnimaString::Hasher> _colors4fMap;

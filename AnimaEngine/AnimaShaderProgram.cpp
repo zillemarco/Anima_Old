@@ -777,7 +777,7 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 			}
 			else
 			{
-				texture->LoadTextures();
+				texture->Load();
 				texture->Bind(slot);
 			}
 		}
@@ -950,54 +950,85 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaStage* stage)
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)
 {
-	AnimaString str(_allocator);
+	AnimaString str1(_allocator);
+	AnimaString str2(_allocator);
 
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
 
-		if (!info._name.StartsWith("_rendering"))
+		// info._name: R_<nomevariabile>
+		if (!info._name.StartsWith("R_"))
 			continue;
-
-		str = info._name.Substring(10, info._name.GetBufferLength());
+		
+		// str1: <nomevariabile>
+		str1 = info._name.Substring(2, info._name.GetBufferLength());
 
 		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._name, renderingManager->GetVector2f(str));
+			SetUniform(info._name, renderingManager->GetVector2f(str1));
 		else if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._name, renderingManager->GetColor3f(str));
+			SetUniform(info._name, renderingManager->GetColor3f(str1));
 		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._name, renderingManager->GetColor4f(str));
+			SetUniform(info._name, renderingManager->GetColor4f(str1));
 		else if (info._type == GL_FLOAT)
-			SetUniformf(info._name, renderingManager->GetFloat(str));
+			SetUniformf(info._name, renderingManager->GetFloat(str1));
 		else if (info._type == GL_BOOL)
-			SetUniformi(info._name, renderingManager->GetBoolean(str) ? 1 : 0);
+			SetUniformi(info._name, renderingManager->GetBoolean(str1) ? 1 : 0);
 		else if (info._type == GL_INT)
-			SetUniformi(info._name, renderingManager->GetInteger(str));
+			SetUniformi(info._name, renderingManager->GetInteger(str1));
 		else if (info._type == GL_SAMPLER_2D)
 		{
-			AnimaTexture* texture = nullptr;
-
-			if (str.StartsWith("Deferred"))
+			// str1: GB_<nomebuffer>_<nometexturebuffer>
+			// str1: <nometexture>
+			if (str1.StartsWith("GB_"))
 			{
-				texture = renderingManager->GetTexture("DeferredInputMap");
-				str = str.Substring(8, str.GetBufferLength());
+				// str1: <nomebuffer>_<nometexturebuffer>
+				str1 = str1.Substring(3, str1.GetBufferLength());
+
+				AInt pos = str1.Find('_');
+				ANIMA_ASSERT(pos > 0);
+
+				// str2: <nomebuffer>
+				str2 = str1.Substring(0, pos);
+
+				// str1: <nometexturebuffer>
+				str1 = str1.Substring(pos + 1, str1.GetBufferLength());
+
+				AnimaGBuffer* buffer = renderingManager->GetGBuffer(str2);
+				if (!buffer)
+					continue;
+
+				AnimaTexture* texture = buffer->GetTexture(str1);
+				AUint slot = renderingManager->GetTextureSlot(str1);
+
+				SetUniformi(info._name, slot);
+				if (texture == nullptr)
+				{
+					glActiveTexture(GL_TEXTURE0 + slot);
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				else
+				{
+					texture->Load();
+					texture->Bind(slot);
+				}
 			}
 			else
-				texture = renderingManager->GetTexture(str);
-
-			AUint slot = renderingManager->GetTextureSlot(str);
-			AUint index = renderingManager->GetTextureIndex(str);
-			SetUniformi(info._name, slot);
-
-			if (texture == nullptr)
 			{
-				glActiveTexture(GL_TEXTURE0 + slot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			else
-			{
-				texture->LoadTextures();
-				texture->Bind(slot, index);
+				AnimaTexture* texture = renderingManager->GetTexture(str1);
+				AUint slot = renderingManager->GetTextureSlot(str1);
+
+				SetUniformi(info._name, slot);
+				if (texture == nullptr)
+				{
+					glActiveTexture(GL_TEXTURE0 + slot);
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				else
+				{
+					texture->Load();
+					texture->Bind(slot);
+				}
 			}
 		}
 		else

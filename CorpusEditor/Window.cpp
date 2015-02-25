@@ -273,7 +273,7 @@ void Window::Load()
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(0.2f, 0.2f, 0.2f);
+	l0->SetColor(1.0f, 1.0f, 1.0f);
 
 	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);
