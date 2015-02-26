@@ -14,6 +14,10 @@
 #include "AnimaStage.h"
 #include <boost/unordered_map.hpp>
 
+//#define TEST
+//#define TEST_SET_SINGOLA_RICERCA
+//#define TEST_SENZA_RICERCA
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShadersManager;
@@ -42,8 +46,18 @@ public:
 	struct AnimaUniformInfo {
 		AInt _location;
 		AUint _type;
-		AUint _arraySize;
 		AnimaString _name;
+#if defined TEST
+		AnimaString* _nameParts;
+		AUint _namePartsCount;
+
+		AnimaUniformInfo() {
+			_location = -1;
+			_type = GL_FLOAT;
+			_nameParts = nullptr;
+			_namePartsCount = 0;
+		}
+#endif
 	};
 
 	struct AnimaInputInfo {
@@ -116,6 +130,18 @@ public:
 	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose = false);
 	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
+
+	void SetUniformi(AInt location, int value);
+	void SetUniformf(AInt location, AFloat value);
+	void SetUniform(AInt location, const AnimaVertex2f& value);
+	void SetUniform(AInt location, const AnimaVertex3f& value);
+	void SetUniform(AInt location, const AnimaColor4f& value);
+	void SetUniform(AInt location, AFloat a, AFloat b, AFloat c);
+	void SetUniform(AInt location, AFloat a, AFloat b, AFloat c, AFloat d);
+	void SetUniform(AInt location, const AnimaMatrix& value, bool transpose = false);
+
+private:
+	void ClearUniforms();
 	
 private:
 	AnimaAllocator*	_allocator;

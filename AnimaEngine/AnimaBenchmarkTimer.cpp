@@ -7,6 +7,7 @@
 //
 
 #include "AnimaBenchmarkTimer.h"
+#include "AnimaEngine.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -27,7 +28,15 @@ double AnimaBenchmarkTimer::Elapsed() const
 
 void AnimaBenchmarkTimer::PrintElapsed()
 {
-	printf("%f seconds", Elapsed());
+	char szBuff[1024];
+	memset(szBuff, 0, 1024);
+	
+	sprintf(szBuff, "%f seconds\r\n", Elapsed());
+	#if defined _MSC_VER
+		OutputDebugStringA(szBuff);
+	#else
+		puts(szBuff);
+	#endif
 }
 
 END_ANIMA_ENGINE_NAMESPACE

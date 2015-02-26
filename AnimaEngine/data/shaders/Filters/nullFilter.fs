@@ -1,11 +1,11 @@
 #version 330
 
-uniform sampler2D _renderingFilterMap;
-uniform vec2 _renderingScreenSize;
+uniform sampler2D REN_FilterMap;
+uniform vec2 REN_ScreenSize;
 
 vec2 CalcTexCoord()
 {
-    return gl_FragCoord.xy / _renderingScreenSize;
+    return gl_FragCoord.xy / REN_ScreenSize;
 }
 
 out vec4 FragColor;
@@ -13,7 +13,7 @@ out vec4 FragColor;
 void main()
 {
     vec2 TexCoord = CalcTexCoord();
-	vec3 Color = texture(_renderingFilterMap, TexCoord).xyz;
+	vec3 Color = texture(REN_FilterMap, TexCoord).xyz;
 
 	FragColor = vec4(Color, 1.0);
 }

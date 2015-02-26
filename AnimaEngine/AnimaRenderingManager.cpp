@@ -9,6 +9,7 @@
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaLightsManager.h"
+#include "AnimaBenchmarkTimer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -760,6 +761,9 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 
 void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 {
+	//AnimaBenchmarkTimer timer;
+	//timer.Reset();
+
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
@@ -776,23 +780,26 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	Finish(stage);
 
-	//GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
-	//Start(stage);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//
-	////glEnable(GL_BLEND);
-	////glBlendFunc(GL_ONE, GL_ONE);
-	//glDisable(GL_BLEND);
+	GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
+	Start(stage);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	glDisable(GL_BLEND);
 
-	////DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
-	////DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
-	////DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
-	////DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
+	DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
+	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
+	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
+	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
 
-	//Finish(stage);
+	Finish(stage);
 
-	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
+	//ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
+	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
+
+	//timer.PrintElapsed();
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)

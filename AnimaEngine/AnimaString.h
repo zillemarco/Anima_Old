@@ -149,6 +149,8 @@ public:
 	AInt Find(AChar c, AInt startPos = -1) const;
 	AInt Find(AnimaString str, AInt startPos = -1) const;
 	AInt Find(const char* str, AInt startPos = -1) const;
+
+	AUint CountOf(AChar c) const;
 	
 	AInt ReverseFind(AChar c, AInt startPos = -1) const;
 	AInt ReverseFind(AnimaString str, AInt startPos = -1) const;
@@ -180,6 +182,8 @@ public:
 	bool StartsWith(AChar c) const;
 	bool StartsWith(const AnimaString& str) const;
 	bool StartsWith(const char* str) const;
+
+	bool IsEmpty() const;
 
 private:
 	ASizeT GetFormatStringLength(const char* format, va_list args);

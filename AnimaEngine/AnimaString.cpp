@@ -310,6 +310,18 @@ AInt AnimaString::Find(const char* str, AInt startPos) const
 	return -1;
 }
 
+AUint AnimaString::CountOf(AChar c) const
+{
+	AUint res = 0;
+	for (ASizeT i = 0; i < _stringLength; i++)
+	{
+		if (_string[i] == c)
+			res++;
+	}
+
+	return res;
+}
+
 AInt AnimaString::ReverseFind(AChar c, AInt startPos) const
 {
 	if(startPos <= -1)
@@ -633,6 +645,17 @@ bool AnimaString::StartsWith(const char* str) const
 			return false;
 	}
 	return true;
+}
+
+bool AnimaString::IsEmpty() const
+{
+	if (_stringLength == 0)
+		return true;
+
+	if (_stringLength == 1 && _string[0] == '\0')
+		return true;
+
+	return false;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
