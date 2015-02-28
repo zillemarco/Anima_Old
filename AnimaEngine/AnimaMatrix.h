@@ -68,7 +68,9 @@ public:
 	AFloat Determinant() const;
 
 	void MultiplyMatrix(const AnimaMatrix& p);
+	void MultiplyMatrix(const AFloat p[16]);
 	void MultiplyMatrixSSE(const AnimaMatrix& p);
+	void MultiplyMatrixSSE(const AFloat p[16]);
 
 	void LookAt(const AnimaVertex3f &position, const AnimaVertex3f &forward, const AnimaVertex3f &up);
 	void LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xForward, AFloat yForward, AFloat zForward, AFloat xUp, AFloat yUp, AFloat zUp);

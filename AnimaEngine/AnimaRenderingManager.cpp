@@ -761,11 +761,10 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 
 void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 {
-	//AnimaBenchmarkTimer timer;
-	//timer.Reset();
-
+	ANIMA_FRAME_PUSH("Frame");
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
+	ANIMA_FRAME_PUSH("Prepass");
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 
 	Start(stage);
@@ -779,7 +778,9 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	DeferredPreparePass(stage, shadersManager->GetProgramFromName("deferred-prepare"));
 
 	Finish(stage);
+	ANIMA_FRAME_POP();
 
+	ANIMA_FRAME_PUSH("Lightning");
 	GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
 	Start(stage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -789,17 +790,28 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	//glBlendFunc(GL_ONE, GL_ONE);
 	glDisable(GL_BLEND);
 
+	ANIMA_FRAME_PUSH("Ambient");
 	DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
+	ANIMA_FRAME_POP();
+	//ANIMA_FRAME_PUSH("Directional");
 	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
+	//ANIMA_FRAME_POP();
+	//ANIMA_FRAME_PUSH("Point");
 	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
+	//ANIMA_FRAME_POP();
+	//ANIMA_FRAME_PUSH("Spot");
 	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
+	//ANIMA_FRAME_POP();
 
 	Finish(stage);
+	ANIMA_FRAME_POP();
 
+	ANIMA_FRAME_PUSH("FXAA");
 	//ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
 	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
+	ANIMA_FRAME_POP();
 
-	//timer.PrintElapsed();
+	ANIMA_FRAME_POP();
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)

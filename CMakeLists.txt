@@ -28,10 +28,12 @@ endif()
 set(LIB_SUFFIX "" CACHE STRING "Takes an empty string or 64. Directory where lib will be installed: lib or lib64")
 set(ANIMA_ENGINE_BOOST_ROOT_PATH "" CACHE STRING "Path where CMake can find boost")
 set(ANIMA_ENGINE_QT5_ROOT_PATH "" CACHE STRING "Path where CMake can find Qt5")
+set(ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH "" CACHE STRING "Path where CMake can find NVToolsExt")
 
 option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" OFF)
 option(ANIMA_ENGINE_INSTALL "Generate installation target" OFF)
 option(BUILD_SHARED_LIBS "Build AnimaEngine as shared library" OFF)
+option(ANIMA_ENGINE_USE_NVTOOLSEXT "Enable NVToolsExt for debugging" OFF)
 
 if (MSVC)
     option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON)
@@ -66,6 +68,26 @@ find_package(Qt5Declarative)
 
 if(NOT Qt5Widgets_FOUND)
 	message("Qt5 not found but is needed to compile CorpusEditor")
+endif()
+
+if(ANIMA_ENGINE_USE_NVTOOLSEXT)
+	find_path(NVTEXT_INC NAMES "include/nvToolsExt.h" PATHS ${ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH} NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+	set(ANIMA_ENGINE_NVTOOLSEXT_INCLUDE "${NVTEXT_INC}/include")
+	find_path(NVTEXT_BIN NAMES "bin/x64/nvToolsExt64_1.dll" PATHS ${ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH} NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+	set(ANIMA_ENGINE_NVTOOLSEXT_BIN "${NVTEXT_BIN}/bin/x64/nvToolsExt64_1.dll")
+	find_path(NVTEXT_LIB NAMES "lib/x64/nvToolsExt64_1.lib" PATHS ${ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH} NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
+	set(ANIMA_ENGINE_NVTOOLSEXT_LIB "${NVTEXT_LIB}/lib/x64/nvToolsExt64_1.lib")
+	
+	if ("${NVTEXT_INC}" STREQUAL "NVTEXT_INC-NOTFOUND" OR "${NVTEXT_BIN}" STREQUAL "NVTEXT_BIN-NOTFOUND" OR "${NVTEXT_LIB}" STREQUAL "NVTEXT_LIB-NOTFOUND")
+		unset(NVTEXT_INC CACHE)
+		unset(NVTEXT_BIN CACHE)
+		unset(NVTEXT_LIB CACHE)
+		message(FATAL_ERROR "Trying to use NVToolsExt but can't find the directory")
+	endif()
+	
+	unset(NVTEXT_INC CACHE)
+	unset(NVTEXT_BIN CACHE)
+	unset(NVTEXT_LIB CACHE)
 endif()
 
 #--------------------------------------------------------------------

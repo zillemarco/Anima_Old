@@ -68,6 +68,12 @@ if (WIN32)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
 						COMMENT "Copia assimp.dll")
+	if(ANIMA_ENGINE_USE_NVTOOLSEXT)
+		INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngine/bin CONFIGURATIONS Debug)
+		add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${ANIMA_ENGINE_NVTOOLSEXT_BIN} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/nvToolsExt64_1.dll"
+							COMMENT "Copia nvtoolsext.dll")
+	endif()
 elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimpd.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimpd.3.1.1.dylib"
