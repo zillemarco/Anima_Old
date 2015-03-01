@@ -52,28 +52,40 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 
 void Window::DrawScene()
 {
-	int w, h;
-	this->GetWindowSize(&w, &h);
-
+	ANIMA_FRAME_PUSH("DrawScene");
+	
+	ANIMA_FRAME_PUSH("renderingManager check");
 	if (renderingManager == nullptr)
 	{
+		int w, h;
+		this->GetWindowSize(&w, &h);
 		int mul = 1;
 
 		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
 		renderingManager->InitRenderingTargets(w * mul, h * mul);
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
+	ANIMA_FRAME_POP();
 
+	ANIMA_FRAME_PUSH("Values update");
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
+	ANIMA_FRAME_POP();
 
-	MakeCurrentContext();
+	//MakeCurrentContext();
 
-	if (fxaa)
-		renderingManager->DeferredDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
-	else
-		renderingManager->ForwardDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	//ANIMA_FRAME_PUSH("Finish");
+	//glFinish();
+	//ANIMA_FRAME_POP();
+	
+	ANIMA_FRAME_PUSH("Deferred Draw");
+	renderingManager->DeferredDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	ANIMA_FRAME_POP();
 
+	ANIMA_FRAME_PUSH("Swap");
 	SwapBuffers();
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_POP();
 }
 
 void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)

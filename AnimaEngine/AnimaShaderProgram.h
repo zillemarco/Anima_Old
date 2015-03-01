@@ -14,10 +14,6 @@
 #include "AnimaStage.h"
 #include <boost/unordered_map.hpp>
 
-//#define TEST
-//#define TEST_SET_SINGOLA_RICERCA
-//#define TEST_SENZA_RICERCA
-
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShadersManager;
@@ -47,7 +43,7 @@ public:
 		AInt _location;
 		AUint _type;
 		AnimaString _name;
-#if defined TEST
+
 		AnimaString* _nameParts;
 		AUint _namePartsCount;
 
@@ -57,7 +53,6 @@ public:
 			_nameParts = nullptr;
 			_namePartsCount = 0;
 		}
-#endif
 	};
 
 	struct AnimaInputInfo {

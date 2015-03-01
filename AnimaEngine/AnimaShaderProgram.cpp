@@ -9,6 +9,10 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
+#define TEST
+//#define TEST_SET_SINGOLA_RICERCA
+#define TEST_SENZA_RICERCA
+
 const char* ModelPrefix				= "MOD";
 const char* CameraPrefix			= "CAM";
 const char* MaterialPrefix			= "MAT";

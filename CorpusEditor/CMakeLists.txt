@@ -29,6 +29,10 @@ qt5_add_resources(RC_SRC_FILES ${RC_FILES})
 include_directories(${PROJECT_SOURCE_DIR}/../AnimaEngine/)
 include_directories("${PROJECT_SOURCE_DIR}" ${AnimaEngine_INCLUDE_DIRS})
 
+if(ANIMA_ENGINE_USE_NVTOOLSEXT)
+	include_directories(${ANIMA_ENGINE_NVTOOLSEXT_INCLUDE})
+endif()
+
 if(APPLE)
 	set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 	set(CorpusEditor_ICON ${CMAKE_CURRENT_SOURCE_DIR}/Res/CorpusEditor.icns)
@@ -54,6 +58,10 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
+if(ANIMA_ENGINE_USE_NVTOOLSEXT)
+	target_link_libraries(${PROJECT_NAME} ${ANIMA_ENGINE_NVTOOLSEXT_LIB})
+endif()
+
 qt5_use_modules(${PROJECT_NAME} Widgets Gui OpenGL)
 
 if (WIN32)
@@ -69,7 +77,7 @@ if (WIN32)
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
 						COMMENT "Copia assimp.dll")
 	if(ANIMA_ENGINE_USE_NVTOOLSEXT)
-		INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngine/bin CONFIGURATIONS Debug)
+		INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngine/bin)
 		add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${ANIMA_ENGINE_NVTOOLSEXT_BIN} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/nvToolsExt64_1.dll"
 							COMMENT "Copia nvtoolsext.dll")

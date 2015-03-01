@@ -365,6 +365,31 @@ const char* AnimaEngine::GetVersionString()
 	return _AnimaEngineWindowPlatformGetVersionString();
 }
 
+
+AnimaEngineWindowmonitor* AnimaEngine::GetPrimaryMonitor(void)
+{
+	int count;
+	AnimaEngineWindowmonitor** monitors = (AnimaEngineWindowmonitor**)_AnimaEngineWindowPlatformGetMonitors(&count);
+
+	if (count > 0)
+		return monitors[0];
+	return nullptr;
+
+}
+
+void AnimaEngine::GetMonitorPos(AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos)
+{
+}
+
+void AnimaEngine::GetMonitorPhysicalSize(AnimaEngineWindowmonitor* monitor, int* width, int* height)
+{
+}
+
+const char* AnimaEngine::GetMonitorName(AnimaEngineWindowmonitor* monitor)
+{
+	return nullptr;
+}
+
 bool AnimaEngine::ExtensionSupported(const char* extension)
 {
 	const GLubyte* extensions;

@@ -1379,7 +1379,7 @@ void _AnimaEngineWindowPlatformPollEvents(AnimaEngine* engine)
 	MSG msg;
 	AnimaEngineWindow_Base* window;
 
-	while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
+	while(PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		if (msg.message == WM_QUIT)
 		{

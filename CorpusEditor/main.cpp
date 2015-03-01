@@ -107,8 +107,9 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
+	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, false);
 
-	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", NULL, NULL);
+	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
 	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");

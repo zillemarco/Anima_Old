@@ -47,8 +47,7 @@ bool __anima_get_working_dir(char* dest, int length)
 #endif
 }
 
-
-#if (defined _DEBUG && ANIMA_ENGINE_USE_NVTOOLS) && (!defined ANIMA_FRAME_DEBUG)
+#if (defined ANIMA_FORCE_GRAPHICS_DEBUG) || (defined _DEBUG && ANIMA_ENGINE_USE_NVTOOLS)
 	void AnimaFrameDebugPush(const char* title)	{ nvtxRangePushA(title);	}
 	void AnimaFrameDebugPop()					{ nvtxRangePop();			}
 #else

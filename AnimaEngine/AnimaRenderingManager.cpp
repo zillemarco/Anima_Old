@@ -272,7 +272,7 @@ void AnimaRenderingManager::Start(AnimaStage* stage)
 {
 	stage->GetShadersManager()->SetActiveProgram(nullptr);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glGetError();
 	//glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	//glEnable(GL_DEPTH_TEST);
@@ -780,19 +780,19 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	Finish(stage);
 	ANIMA_FRAME_POP();
 
-	ANIMA_FRAME_PUSH("Lightning");
-	GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
-	Start(stage);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//ANIMA_FRAME_PUSH("Lightning");
+	//GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
+	//Start(stage);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	//glEnable(GL_BLEND);
 	//glBlendFunc(GL_ONE, GL_ONE);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 
-	ANIMA_FRAME_PUSH("Ambient");
-	DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
-	ANIMA_FRAME_POP();
+	//ANIMA_FRAME_PUSH("Ambient");
+	//DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
+	//ANIMA_FRAME_POP();
 	//ANIMA_FRAME_PUSH("Directional");
 	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
 	//ANIMA_FRAME_POP();
@@ -803,12 +803,12 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
 	//ANIMA_FRAME_POP();
 
-	Finish(stage);
-	ANIMA_FRAME_POP();
+	//Finish(stage);
+	//ANIMA_FRAME_POP();
 
 	ANIMA_FRAME_PUSH("FXAA");
-	//ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
-	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
+	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
+	//ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
 	ANIMA_FRAME_POP();
 
 	ANIMA_FRAME_POP();
@@ -892,8 +892,11 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* 
 
 	program->EnableInputs(mesh);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
-	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	//for (int i = 0; i < 100; i++)
+	//{		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+		glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	//}
 
 	program->DisableInputs();
 }
