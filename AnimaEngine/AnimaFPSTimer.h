@@ -11,6 +11,8 @@
 
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
+#include <iostream>
+#include <chrono>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -21,29 +23,22 @@ public:
 	~AnimaFPSTimer(void);
 
 public:
-	bool Init();
+	void Init();
 	void Update();
-	float GetTime();
-	float GetElapsedSeconds();
-	float GetFPS();
+	double GetTime();
+	double GetElapsedSeconds();
+	double GetFPS();
 
 private:
-#ifdef WIN32
-	__int64	_performanceTimerStart;
-	__int64	_performanceTimerElapsed;
+#pragma warning (disable: 4251)
+	typedef std::chrono::high_resolution_clock _clock;
+	typedef std::chrono::duration<double, std::ratio<1> > _second;
 
-	unsigned long _mmTimerElapsed;
-	unsigned long _mmTimerStart;
-
-	__int64	_frequency;
-	float	_resolution;
-	bool	_performanceTimer;
-
-	float	_time1;
-	float	_time2;
-	float	_diffTime;
-#else
-#endif
+	std::chrono::time_point<_clock> _timerStart;
+	std::chrono::time_point<_clock> _time1;
+	std::chrono::time_point<_clock> _time2;
+	std::chrono::duration<double>	_diffTime;
+#pragma warning (default: 4251) 
 
 	float	_fps;
 	int		_framesElapsed;

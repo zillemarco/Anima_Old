@@ -25,9 +25,11 @@ public:
 	void PrintElapsed();
 	
 private:
+#pragma warning (disable: 4251) 
 	typedef std::chrono::high_resolution_clock _clock;
 	typedef std::chrono::duration<double, std::ratio<1> > _second;
 	std::chrono::time_point<_clock> _beg;
+#pragma warning (default: 4251) 
 };
 
 END_ANIMA_ENGINE_NAMESPACE
