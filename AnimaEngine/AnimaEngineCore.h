@@ -46,9 +46,7 @@ extern "C" ANIMA_ENGINE_EXPORT bool __anima_get_working_dir(char* dest, int leng
 
 #define _ANIMA_ENGINE_USE_OPENGL
 
-#define ANIMA_FORCE_GRAPHICS_DEBUG
-
-#if (defined ANIMA_FORCE_GRAPHICS_DEBUG) || ((defined _DEBUG && ANIMA_ENGINE_USE_NVTOOLS) && (!defined ANIMA_FRAME_DEBUG))
+#if (ANIMA_ENGINE_USE_NVTOOLS) && (!defined ANIMA_FRAME_DEBUG)
 #	include <nvToolsExt.h>
 	extern "C" ANIMA_ENGINE_EXPORT void AnimaFrameDebugPush(const char* title);
 	extern "C" ANIMA_ENGINE_EXPORT void AnimaFrameDebugPop();

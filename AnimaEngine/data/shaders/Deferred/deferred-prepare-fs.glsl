@@ -16,7 +16,7 @@ uniform bool MAT_HasBump;
 uniform vec3 MAT_SpecularColor;
 uniform float MAT_Shininess;
 
-out vec4 gl_FragColor[3];
+out vec4 FragColor[3];
 
 vec3 calcNormal(vec2 textureCoords)
 {
@@ -40,6 +40,6 @@ void main()
 		
 	vec3 normal = calcNormal(frag_textureCoord);	
 		
-	gl_FragColor[1] = color;
-	gl_FragColor[2] = vec4(normal * 0.5 + 0.5, 1.0);
+	FragColor[1] = color;
+	FragColor[2] = vec4(normal * 0.5 + 0.5, 1.0);
 }

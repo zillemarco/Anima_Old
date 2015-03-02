@@ -56,8 +56,7 @@ void Window::DrawScene()
 	{
 		int w, h;
 		this->GetWindowSize(&w, &h);
-		int mul = 1;
-
+		int mul = (int)GetResolutionMutiplier();
 		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
 		renderingManager->InitRenderingTargets(w * mul, h * mul);
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);

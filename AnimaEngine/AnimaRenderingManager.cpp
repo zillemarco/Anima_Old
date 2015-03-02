@@ -1117,7 +1117,7 @@ void AnimaRenderingManager::DeferredSpotPass(AnimaStage* stage, AnimaShaderProgr
 
 void AnimaRenderingManager::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
 {
-	auto& pair = _texturesMap.find(propertyName);
+	auto pair = _texturesMap.find(propertyName);
 	
 	if (pair == _texturesMap.end())
 		_texturesMap[propertyName] = value;
