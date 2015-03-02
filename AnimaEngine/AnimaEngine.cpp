@@ -496,6 +496,16 @@ bool AnimaEngine::InitializeGlewExtensions()
 	return _AnimaEngineWindowInitializeGlewExtensions();
 }
 
+void AnimaEngine::MakeContextCurrent(AnimaWindow* window)
+{
+	_AnimaEngineWindowPlatformMakeContextCurrent(window);
+}
+
+AnimaWindow* AnimaEngine::GetCurrentContext(void)
+{
+	return _AnimaEngineWindowPlatformGetCurrentContext();
+}
+
 void AnimaEngine::DumpMemory(const char* fileName, bool bLogToFile)
 {
 	bool bCanClose = true;

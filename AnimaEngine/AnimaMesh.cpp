@@ -1598,4 +1598,16 @@ void AnimaMesh::MakePlane()
 	AnimaAllocatorNamespace::DeallocateArray(*_allocator, facce);
 }
 
+void AnimaMesh::MakeSphere(AFloat radius, AUint widthSegments, AUint heightSegments, AFloat phiStart, AFloat phiLength, AFloat thetaStart, AFloat thetaLength)
+{
+	ClearChildren();
+	ClearMeshes();
+	ClearVertices();
+	ClearNormals();
+	ClearTextureCoords();
+	ClearTangents();
+	ClearBitangents();
+	ClearFaces();
+}
+
 END_ANIMA_ENGINE_NAMESPACE

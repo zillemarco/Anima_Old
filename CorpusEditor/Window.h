@@ -10,6 +10,8 @@
 #include <AnimaLight.h>
 #include <AnimaRenderingManager.h>
 #include <AnimaMesh.h>
+#include <AnimaFPSTimer.h>
+#include <AnimaBenchmarkTimer.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -25,7 +27,9 @@ public:
 
 	Anima::AnimaThirdPersonCamera* _tpcamera;
 	Anima::AnimaFirstPersonCamera* _fpcamera;
-
+	Anima::AnimaFPSTimer _timerFPS;
+	Anima::AnimaBenchmarkTimer _timer;
+	
 private:
 	ANIMA_WINDOW_EVENT void PaintCallback(Anima::AnimaWindow* window);
 	ANIMA_WINDOW_EVENT void MouseMoveCallback(Anima::AnimaWindow* window, double x, double y);

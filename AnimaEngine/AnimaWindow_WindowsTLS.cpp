@@ -26,7 +26,6 @@ void _AnimaEngineWindowSetCurrentContext(AnimaEngineWindow_Base* context)
 {
 	TlsSetValue(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TLS_STATE->_context, context);
 }
-
 AnimaEngineWindow_Base* _AnimaEngineWindowPlatformGetCurrentContext(void)
 {
 	return (AnimaEngineWindow_Base*)TlsGetValue(AnimaEngine::_GET_ANIMA_ENGINE_PLATFORM_LIBRARY_TLS_STATE->_context);

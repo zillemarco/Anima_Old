@@ -22,6 +22,7 @@ typedef struct _AnimaEngineWindowtlsWin32
 extern "C" ANIMA_ENGINE_EXPORT bool _AnimaEngineWindowInitTLS(void);
 extern "C" ANIMA_ENGINE_EXPORT void _AnimaEngineWindowTerminateTLS(void);
 extern "C" ANIMA_ENGINE_EXPORT void _AnimaEngineWindowSetCurrentContext(AnimaEngineWindow_Base* context);
+extern "C" ANIMA_ENGINE_EXPORT AnimaEngineWindow_Base* _AnimaEngineWindowGetCurrentContext();
 
 END_ANIMA_ENGINE_NAMESPACE
 

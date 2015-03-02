@@ -20,7 +20,12 @@
 #include "AnimaMaterial.h"
 #include "AnimaTransformation.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+#define M_2PI	2.0f * (AFloat)M_PI
 
 class ANIMA_ENGINE_EXPORT AnimaMesh
 {
@@ -52,6 +57,7 @@ public:
 	AnimaMesh* CreateMesh();
 
 	void MakePlane();
+	void MakeSphere(AFloat radius, AUint widthSegments = 3, AUint heightSegments = 2, AFloat phiStart = 0.0f, AFloat phiLength = (AFloat)M_2PI, AFloat thetaStart = 0.0f, AFloat thetaLength = (AFloat)M_PI);
 
 	void SetMeshName(const AnimaString& name);
 	void SetMeshName(const char* name);

@@ -15,6 +15,8 @@
 #include <AnimaMesh.h>
 #include <AnimaStage.h>
 #include <AnimaStagesManager.h>
+#include <AnimaMaterial.h>
+#include <AnimaMaterialsManager.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -92,14 +94,26 @@ int main(int argc, char** argv)
 	Anima::AnimaStage* stage = engine.GetStagesManager()->CreateStage("test-stage");
 	stage->Initialize();
 
-	Anima::AnimaString path(ANIMA_ENGINE_MODELS_PATH "scimmiaO.3ds", stage->GetStringAllocator());
-	Anima::AnimaString pathPlane(ANIMA_ENGINE_MODELS_PATH "piano.3ds", stage->GetStringAllocator());
-
+	Anima::AnimaString path(stage->GetStringAllocator());	
 	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
-	if (!manager->LoadModel(path, "scimmia"))
+	
+	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	//if (!manager->LoadModel(path, "scimmia"))
+	//	return 0;
+
+	//path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	//if (!manager->LoadModel(path, "piano"))
+	//	return 0;
+
+	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
+	if (!manager->LoadModel(path, "cono"))
 		return 0;
-	if (!manager->LoadModel(pathPlane, "piano"))
-		return 0;
+
+	//mesh->MakePlane();
+	//mesh->GetTransformation()->Scale(10.0f, 1.0f, 10.0f);
+	//mesh->SetMaterial(matMgr->CreateMaterial("piano-material"));
+	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+	//mesh->GetMaterial()->SetBoolean("TwoSided", true);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -107,7 +121,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
-	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, false);
+	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
 	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	

@@ -937,6 +937,8 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 
 			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
+			DeferredDrawModelMesh(stage, innerModel, program, modelMatrix);
+
 			ASizeT meshNumber = innerModel->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
 				DeferredDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
@@ -949,6 +951,7 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 	else
 	{
 		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
+		DeferredDrawModelMesh(stage, model, program, modelMatrix);
 
 		ASizeT meshNumber = model->GetMeshesNumber();
 		for (ASizeT i = 0; i < meshNumber; i++)

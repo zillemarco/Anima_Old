@@ -6,8 +6,8 @@
 //
 //
 
-#ifndef __Anima__AnimaMaterialsManager__
-#define __Anima__AnimaMaterialsManager__
+#ifndef __Anima__AnimaStagesManager__
+#define __Anima__AnimaStagesManager__
 
 #include "AnimaEngineCore.h"
 #include "AnimaAllocators.h"
@@ -47,4 +47,4 @@ private:
 
 END_ANIMA_ENGINE_NAMESPACE
 
-#endif /* defined(__Anima__AnimaMaterialsManager__) */
+#endif /* defined(__Anima__AnimaStagesManager__) */
