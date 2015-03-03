@@ -30,19 +30,24 @@ public:
 public:
 	void SetIndexes(AUint* indexes, ASizeT n);
 	void AddIndex(const AUint& index);
-	
-	void ClearIndexes();
-
-	ASizeT GetIndexesCount();
-
+	AUint GetIndex(ASizeT index) const;
 	AUint* GetIndexes();
 	const AUint* GetConstIndexes();
 	bool GetIndexes(AUint* outIndexes, ASizeT& inOutSize);
 	bool GetConstIndexes(AUint* outIndexes, ASizeT& inOutSize);
-	
+	void ClearIndexes();
+	ASizeT GetIndexesCount();
+	bool HasIndex(AUint index) const;
+
+	void SetNormal(const AnimaVertex3f& n);
+	void SetNormal(const AFloat& x, const AFloat& y, const AFloat& z);
+	AnimaVertex3f GetNormal() const;
+				
 protected:
 	AUint*	_indexes;
 	ASizeT	_indexesNumber;
+
+	AnimaVertex3f _normal;
 	
 	AnimaAllocator* _allocator;
 };

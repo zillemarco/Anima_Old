@@ -56,7 +56,7 @@ void Window::DrawScene()
 	{
 		int w, h;
 		this->GetWindowSize(&w, &h);
-		int mul = (int)GetResolutionMutiplier();
+		int mul = 1;
 		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
 		renderingManager->InitRenderingTargets(w * mul, h * mul);
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
@@ -202,6 +202,18 @@ void Window::Load()
 
 	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
 
+	mgr->CreateProgram("forward-ambient");
+	mgr->GetProgramFromName("forward-ambient")->Create();
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-ambient")->Link();
+
+	mgr->CreateProgram("forward-directional");
+	mgr->GetProgramFromName("forward-directional")->Create();
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("forward-directional")->Link();
+
 	mgr->CreateProgram("deferred-prepare");
 	mgr->GetProgramFromName("deferred-prepare")->Create();
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-vs.glsl", Anima::AnimaShader::VERTEX));
@@ -252,7 +264,7 @@ void Window::Load()
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(1.0f, 1.0f, 1.0f);
+	l0->SetColor(0.2f, 0.2f, 0.2f);
 
 	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);

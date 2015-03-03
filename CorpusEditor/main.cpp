@@ -112,10 +112,12 @@ int main(int argc, char** argv)
 
 	Anima::AnimaMesh* mesh = manager->CreateModel("sfera");
 	mesh->MakeIcosahedralSphere(3);
-	mesh->GetTransformation()->Scale(1.0f, 1.0f, 1.0f);
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
 	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
 	mesh->GetMaterial()->SetBoolean("TwoSided", false);
+	mesh->ComputeFlatNormals();
+	mesh->ComputeSmootNormals();
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);

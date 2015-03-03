@@ -12,6 +12,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+AInt AnimaMeshCreator::_index;
+
 void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 {
 	mesh->ClearAll();
@@ -23,10 +25,10 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*allocator, numeroVertici);
 	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, numeroFacce, allocator);
 	
-	vertici[0] = AnimaVertex3f(-0.5f, 0.0f, -0.5f);
-	vertici[1] = AnimaVertex3f(-0.5f, 0.0f, 0.5f);
-	vertici[2] = AnimaVertex3f(0.5f, 0.0f, 0.5f);
-	vertici[3] = AnimaVertex3f(0.5f, 0.0f, -0.5f);
+	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
+	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
+	vertici[2] = AnimaVertex3f(1.0f, 0.0f, 1.0f);
+	vertici[3] = AnimaVertex3f(1.0f, 0.0f, -1.0f);
 	
 	normali[0] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
 	normali[1] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
@@ -60,25 +62,25 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 	
 	std::vector<AnimaVertex3f> vertici;
 	std::vector<AnimaFace*> facce;
-	std::map<long, AInt> middlePointIndexCache;
-	AInt index = 0;
+	std::map<__int64, AInt> middlePointIndexCache;
+	_index = 0;
 	
 	float t = (1.0f + sqrtf(5.0f)) / 2.0f;
 	
-	AddVertex(AnimaVertex3f(-1.0f, t, 0.0f), vertici, index);
-	AddVertex(AnimaVertex3f(1.0f, t, 0.0f), vertici, index);
-	AddVertex(AnimaVertex3f(-1.0f, -t, 0.0f), vertici, index);
-	AddVertex(AnimaVertex3f(1.0f, -t, 0.0f), vertici, index);
+	AddVertex(AnimaVertex3f(-1.0f, t, 0.0f), vertici);
+	AddVertex(AnimaVertex3f(1.0f, t, 0.0f), vertici);
+	AddVertex(AnimaVertex3f(-1.0f, -t, 0.0f), vertici);
+	AddVertex(AnimaVertex3f(1.0f, -t, 0.0f), vertici);
 	
-	AddVertex(AnimaVertex3f(0.0f, -1.0f, t), vertici, index);
-	AddVertex(AnimaVertex3f(0.0f, 1.0f, t), vertici, index);
-	AddVertex(AnimaVertex3f(0.0f, -1.0f, -t), vertici, index);
-	AddVertex(AnimaVertex3f(0.0f, 1.0f, -t), vertici, index);
+	AddVertex(AnimaVertex3f(0.0f, -1.0f, t), vertici);
+	AddVertex(AnimaVertex3f(0.0f, 1.0f, t), vertici);
+	AddVertex(AnimaVertex3f(0.0f, -1.0f, -t), vertici);
+	AddVertex(AnimaVertex3f(0.0f, 1.0f, -t), vertici);
 	
-	AddVertex(AnimaVertex3f(t, 0.0f, -1.0f), vertici, index);
-	AddVertex(AnimaVertex3f(t, 0.0f, 1.0f), vertici, index);
-	AddVertex(AnimaVertex3f(-t, 0.0f, -1.0f), vertici, index);
-	AddVertex(AnimaVertex3f(-t, 0.0f, 1.0f), vertici, index);
+	AddVertex(AnimaVertex3f(t, 0.0f, -1.0f), vertici);
+	AddVertex(AnimaVertex3f(t, 0.0f, 1.0f), vertici);
+	AddVertex(AnimaVertex3f(-t, 0.0f, -1.0f), vertici);
+	AddVertex(AnimaVertex3f(-t, 0.0f, 1.0f), vertici);
 	
 	AddFace(facce, 0, 11, 5, allocator);
 	AddFace(facce, 0, 5, 1, allocator);
@@ -104,15 +106,15 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 	AddFace(facce, 8, 6, 7, allocator);
 	AddFace(facce, 9, 8, 1, allocator);
 	
-	for(AInt i = 0; i < recursionLevel; i++)
+	for(AUint i = 0; i < recursionLevel; i++)
 	{
 		std::vector<AnimaFace*> facce2;
 		for(auto face : facce)
 		{
 			AUint* indexes = face->GetIndexes();
-			AInt a = GetMiddlePoint(indexes[0], indexes[1], vertici, middlePointIndexCache, index);
-			AInt b = GetMiddlePoint(indexes[1], indexes[2], vertici, middlePointIndexCache, index);
-			AInt c = GetMiddlePoint(indexes[2], indexes[0], vertici, middlePointIndexCache, index);
+			AInt a = GetMiddlePoint(indexes[0], indexes[1], vertici, middlePointIndexCache);
+			AInt b = GetMiddlePoint(indexes[1], indexes[2], vertici, middlePointIndexCache);
+			AInt c = GetMiddlePoint(indexes[2], indexes[0], vertici, middlePointIndexCache);
 			
 			AddFace(facce2, indexes[0], a, c, allocator);
 			AddFace(facce2, indexes[1], b, a, allocator);
@@ -154,12 +156,12 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 	AnimaAllocatorNamespace::DeallocateArray(*allocator, meshFacce);
 }
 
-AInt AnimaMeshCreator::GetMiddlePoint(AInt p1, AInt p2, std::vector<AnimaVertex3f>& vertices, std::map<long, int>& cache, AInt& index)
+AInt AnimaMeshCreator::GetMiddlePoint(AInt p1, AInt p2, std::vector<AnimaVertex3f>& vertices, std::map<__int64, int>& cache)
 {
 	bool firstIsSmaller = p1 < p2;
-	long smallerIndex = firstIsSmaller ? p1 : p2;
-	long greaterIndex = firstIsSmaller ? p2 : p1;
-	long key = (smallerIndex << 32) + greaterIndex;
+	__int64 smallerIndex = firstIsSmaller ? p1 : p2;
+	__int64 greaterIndex = firstIsSmaller ? p2 : p1;
+	__int64 key = (smallerIndex << 32) + greaterIndex;
 	
 	auto ret = cache.find(key);
 	if(ret != cache.end())
@@ -169,16 +171,16 @@ AInt AnimaMeshCreator::GetMiddlePoint(AInt p1, AInt p2, std::vector<AnimaVertex3
 	AnimaVertex3f point2 = vertices[p2];
 	AnimaVertex3f middle = (point1 + point2) * 0.5f;
 	
-	AddVertex(middle, vertices, index);
-	cache[key] = index;
+	AInt i = AddVertex(middle, vertices);
+	cache[key] = i;
 	
-	return index;
+	return i;
 }
 
-void AnimaMeshCreator::AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f>& vertices, AInt& index)
+AInt AnimaMeshCreator::AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f>& vertices)
 {
 	vertices.push_back(vertex.Normalized());
-	index++;
+	return _index++;
 }
 
 void AnimaMeshCreator::AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2, AInt v3, AnimaAllocator* allocator)

@@ -15,6 +15,7 @@
 #include "AnimaMesh.h"
 #include "AnimaAllocators.h"
 #include "AnimaFace.h"
+#include <map>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -28,9 +29,11 @@ public:
 	static AnimaMesh* CreateIcosahedralSphere(AUint recursionLevel, AnimaAllocator* allocator);
 	
 private:
-	static void AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f>& vertices, AInt& index);
+	static AInt AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f>& vertices);
 	static void AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2, AInt v3, AnimaAllocator* allocator);
-	static AInt GetMiddlePoint(AInt p1, AInt p2, std::vector<AnimaVertex3f>& vertices, std::map<long, int>& cache, AInt& index);
+	static AInt GetMiddlePoint(AInt p1, AInt p2, std::vector<AnimaVertex3f>& vertices, std::map<__int64, int>& cache);
+
+	static AInt _index;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -1267,6 +1267,7 @@ float* AnimaMesh::GetFloatVerticesNormal()
 {
 	float* normals = nullptr;
 	ASizeT count = GetFloatVerticesNormalCount();
+
 	ASizeT offset = 0;
 
 	if (count > 0)
@@ -1553,6 +1554,59 @@ AnimaMatrix AnimaMesh::GetFinalMatrix() const
 	}
 
 	return m;
+}
+
+void AnimaMesh::ComputeSmootNormals()
+{
+	ClearNormals();
+
+	_normalsNumber = _verticesNumber;
+	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _normalsNumber);
+
+	for (ASizeT i = 0; i < _verticesNumber; i++)
+	{
+		ASizeT pos = GetNextFaceContainingVertex(0, i);
+
+		if (pos >= 0)
+		{
+			AnimaVertex3f normal = _faces[pos].GetNormal();
+			while ((pos = GetNextFaceContainingVertex(pos + 1, i)) != -1)
+				normal += _faces[pos].GetNormal();
+
+			normal.Normalize();
+			_normals[i] = normal;
+		}
+	}
+}
+
+void AnimaMesh::ComputeFlatNormals()
+{
+	ClearNormals();
+
+	for (ASizeT i = 0; i < _facesNumber; i++)
+	{
+		AnimaFace* face = &_faces[i];
+
+		AnimaVertex3f p1, p2, p3, u, v;
+		p1 = _vertices[face->GetIndex(0)];
+		p2 = _vertices[face->GetIndex(1)];
+		p3 = _vertices[face->GetIndex(2)];
+		u = p2 - p1;
+		v = p3 - p1;
+
+		face->SetNormal((u ^ v).Normalized());
+	}
+}
+
+ASizeT AnimaMesh::GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const
+{
+	for (ASizeT i = start; i < _facesNumber; i++)
+	{
+		if (_faces[i].HasIndex(vertexIndex))
+			return i;
+	}
+
+	return -1;
 }
 
 void AnimaMesh::MakePlane()

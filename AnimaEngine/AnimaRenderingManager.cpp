@@ -399,8 +399,11 @@ void AnimaRenderingManager::ForwardDrawAllModels(AnimaStage* stage)
 {
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 	
-	//GetTexture("DiffuseMap")->BindAsRenderTarget();
 	Start(stage);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glGetError();
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
 
 	ForwardAmbientPass(stage, shadersManager->GetProgramFromName("forward-ambient"));
 
@@ -410,8 +413,8 @@ void AnimaRenderingManager::ForwardDrawAllModels(AnimaStage* stage)
 	glDepthFunc(GL_EQUAL);
 
 	ForwardDirectionalPass(stage, shadersManager->GetProgramFromName("forward-directional"));
-	ForwardPointPass(stage, shadersManager->GetProgramFromName("forward-point"));
-	ForwardSpotPass(stage, shadersManager->GetProgramFromName("forward-spot"));
+	//ForwardPointPass(stage, shadersManager->GetProgramFromName("forward-point"));
+	//ForwardSpotPass(stage, shadersManager->GetProgramFromName("forward-spot"));
 
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
@@ -529,6 +532,8 @@ void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderPro
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
+				ForwardDrawModelMesh(stage, innerModel, program, modelMatrix);
+
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)
 					ForwardDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix);
@@ -596,6 +601,8 @@ void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShade
 				AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 				AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+
+				ForwardDrawModelMesh(stage, innerModel, program, modelMatrix);
 
 				ASizeT meshNumber = innerModel->GetMeshesNumber();
 				for (ASizeT i = 0; i < meshNumber; i++)

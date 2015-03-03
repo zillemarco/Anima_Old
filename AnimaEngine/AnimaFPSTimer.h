@@ -40,7 +40,7 @@ private:
 	std::chrono::duration<double>	_diffTime;
 #pragma warning (default: 4251) 
 
-	float	_fps;
+	double	_fps;
 	int		_framesElapsed;
 };
 

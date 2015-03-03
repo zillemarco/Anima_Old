@@ -17,6 +17,7 @@ AnimaFace::AnimaFace(AnimaAllocator* allocator)
 	
 	_indexes = nullptr;
 	_indexesNumber = 0;
+	_normal = AnimaVertex3f(0.0f, 1.0f, 0.0f);
 }
 
 AnimaFace::AnimaFace(const AnimaFace& src)
@@ -26,12 +27,14 @@ AnimaFace::AnimaFace(const AnimaFace& src)
 	_indexesNumber = 0;
 	
 	SetIndexes(src._indexes, src._indexesNumber);
+	SetNormal(src._normal);
 }
 
 AnimaFace::AnimaFace(AnimaFace&& src)
 : _indexes(src._indexes)
 , _indexesNumber(src._indexesNumber)
 , _allocator(src._allocator)
+, _normal(src._normal)
 {
 	src._indexes = nullptr;
 	src._indexesNumber = 0;
@@ -48,6 +51,7 @@ AnimaFace& AnimaFace::operator=(const AnimaFace& src)
 	{
 		_allocator = src._allocator;
 		SetIndexes(src._indexes, src._indexesNumber);
+		SetNormal(src._normal);
 	}
 	
 	return *this;
@@ -61,7 +65,8 @@ AnimaFace& AnimaFace::operator=(AnimaFace&& src)
 		
 		_indexes = src._indexes;
 		_indexesNumber = src._indexesNumber;
-		
+		_normal = src._normal;
+
 		src._indexes = nullptr;
 		src._indexesNumber = 0;
 	}
@@ -135,6 +140,12 @@ AUint* AnimaFace::GetIndexes()
 	return _indexes;
 }
 
+AUint AnimaFace::GetIndex(ASizeT index) const
+{
+	ANIMA_ASSERT(index >= 0 && index < _indexesNumber);
+	return _indexes[index];
+}
+
 const AUint* AnimaFace::GetConstIndexes()
 {
 	return const_cast<AUint*>(_indexes);
@@ -155,6 +166,34 @@ bool AnimaFace::GetConstIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
 
 	memcpy(outIndexes, _indexes, sizeof(AUint) * _indexesNumber);
 	return true;
+}
+
+void AnimaFace::SetNormal(const AnimaVertex3f& n)
+{
+	_normal = n;
+}
+
+void AnimaFace::SetNormal(const AFloat& x, const AFloat& y, const AFloat& z)
+{
+	_normal.x = x;
+	_normal.y = y;
+	_normal.z = z;
+}
+
+AnimaVertex3f AnimaFace::GetNormal() const
+{
+	return _normal;
+}
+
+bool AnimaFace::HasIndex(AUint index) const
+{
+	for (ASizeT i = 0; i < _indexesNumber; i++)
+	{
+		if (_indexes[i] == index)
+			return true;
+	}
+
+	return false;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

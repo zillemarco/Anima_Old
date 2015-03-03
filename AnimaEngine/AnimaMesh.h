@@ -102,6 +102,8 @@ public:
 	AnimaVertex3f* GetPNormal(ASizeT index);
 	AnimaVertex3f* GetNormals();
 	void ClearNormals();
+	void ComputeSmootNormals();
+	void ComputeFlatNormals();
 	
 	void SetTextureCoords(AnimaVertex2f* v, ASizeT n);
 	void AddTextureCoord(const AnimaVertex2f& v);
@@ -192,6 +194,9 @@ public:
 
 	AUint GetFloatVerticesBitangentsCount();
 	float* GetFloatVerticesBitangents();
+
+protected:
+	ASizeT GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const;
 
 protected:
 	AnimaAllocator* _allocator;

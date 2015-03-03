@@ -33,7 +33,7 @@ void AnimaFPSTimer::Update()
 	_time2 = _clock::now();
 	_diffTime = _time2 - _time1;
 	
-	_fps = 1.0f / _diffTime.count();
+	_fps = 1.0 / _diffTime.count();
 
 	_time1 = _clock::now();
 }
