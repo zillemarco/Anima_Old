@@ -41,8 +41,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager)
 	: _active(false)
-	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
+	, _camerasManager(camerasManager)
 {
 	ANIMA_ASSERT(allocator != nullptr);
 	_allocator = allocator;
@@ -58,8 +58,8 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
 	: _position(position)
 	, _active(false)
-	, _camerasManager(camerasManager)
 	, _projectionType(PERSPECTIVE)
+	, _camerasManager(camerasManager)
 {
 	ANIMA_ASSERT(allocator != nullptr);
 	_allocator = allocator;
@@ -77,10 +77,10 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _worldYAxis(src._worldYAxis)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
+	, _projectionType(src._projectionType)
 	, _viewMatrix(src._viewMatrix)
 	, _projectionMatrix(src._projectionMatrix)
 	, _camerasManager(src._camerasManager)
-	, _projectionType(src._projectionType)
 {
 	_allocator = src._allocator;
 
@@ -96,11 +96,11 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _worldYAxis(src._worldYAxis)
 	, _worldZAxis(src._worldZAxis)
 	, _active(src._active)
+	, _projectionType(src._projectionType)
 	, _viewMatrix(src._viewMatrix)
 	, _projectionMatrix(src._projectionMatrix)
 	, _allocator(src._allocator)
 	, _camerasManager(src._camerasManager)
-	, _projectionType(src._projectionType)
 {
 
 	INIT_WORLD_AXIS;

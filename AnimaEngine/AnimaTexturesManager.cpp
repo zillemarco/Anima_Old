@@ -544,7 +544,6 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 	fread(buffer, 1, bufsize, file);
 	fclose(file);
 
-	unsigned int components = (fourCC == FOURCC_DXT1) ? 3 : 4;
 	unsigned int format;
 
 	switch (fourCC)

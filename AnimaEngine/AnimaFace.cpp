@@ -87,22 +87,32 @@ void AnimaFace::SetIndexes(AUint* indexes, ASizeT n)
 void AnimaFace::AddIndex(const AUint& index)
 {
 	ANIMA_ASSERT(_allocator != nullptr);
-	AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
-	
-	for (int i = 0; i < _indexesNumber; i++)
-		tmpOldIndexes[i] = _indexes[i];
-	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, _indexes);
-	
-	_indexesNumber++;
-	_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
-	
-	for (int i = 0; i < _indexesNumber - 1; i++)
-		_indexes[i] = tmpOldIndexes[i];
-	
-	_indexes[_indexesNumber - 1] = index;
-	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldIndexes);
+	if(_indexesNumber > 0)
+	{
+		AUint* tmpOldIndexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
+		
+		for (int i = 0; i < _indexesNumber; i++)
+			tmpOldIndexes[i] = _indexes[i];
+		
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _indexes);
+		
+		_indexesNumber++;
+		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
+		
+		for (int i = 0; i < _indexesNumber - 1; i++)
+			_indexes[i] = tmpOldIndexes[i];
+		
+		_indexes[_indexesNumber - 1] = index;
+		
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldIndexes);
+	}
+	else
+	{
+		_indexesNumber++;
+		_indexes = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, _indexesNumber);
+		
+		_indexes[_indexesNumber - 1] = index;
+	}
 }
 
 void AnimaFace::ClearIndexes()

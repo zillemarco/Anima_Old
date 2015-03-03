@@ -40,6 +40,8 @@ public:
 	
 public:
 	// Gestione dati struttura
+	void ClearAll();
+	
 	void SetChildren(AnimaMesh* children, ASizeT n);
 	void AddChild(const AnimaMesh& child);
 	ASizeT GetChildrenNumber();
@@ -57,7 +59,7 @@ public:
 	AnimaMesh* CreateMesh();
 
 	void MakePlane();
-	void MakeSphere(AFloat radius, AUint widthSegments = 3, AUint heightSegments = 2, AFloat phiStart = 0.0f, AFloat phiLength = (AFloat)M_2PI, AFloat thetaStart = 0.0f, AFloat thetaLength = (AFloat)M_PI);
+	void MakeIcosahedralSphere(AInt recursionLevel = 0);
 
 	void SetMeshName(const AnimaString& name);
 	void SetMeshName(const char* name);

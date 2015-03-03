@@ -287,7 +287,6 @@ void AnimaRenderingManager::Finish(AnimaStage* stage)
 void AnimaRenderingManager::DrawAllModels(AnimaStage* stage)
 {
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
-	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
 	ASizeT nModels = modelsManager->GetModelsNumber();
@@ -316,7 +315,6 @@ void AnimaRenderingManager::DrawAllModels(AnimaStage* stage)
 void AnimaRenderingManager::DrawSingleModel(AnimaStage* stage, AnimaMesh* model)
 {
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
-	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
 	ASizeT nModels = modelsManager->GetModelsNumber();
@@ -892,11 +890,8 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* 
 
 	program->EnableInputs(mesh);
 
-	//for (int i = 0; i < 100; i++)
-	//{		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
-		glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	//}
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
 	program->DisableInputs();
 }
@@ -911,7 +906,6 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderPr
 
 	ASizeT nModels = modelsManager->GetModelsNumber();
 	ASizeT nAmbLights = lightsManager->GetAmbientLightsCount();
-	ASizeT nLights = lightsManager->GetTotalLightsCount();
 
 	if (nModels == 0 || nAmbLights == 0)
 		return;

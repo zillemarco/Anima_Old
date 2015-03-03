@@ -96,6 +96,7 @@ int main(int argc, char** argv)
 
 	Anima::AnimaString path(stage->GetStringAllocator());	
 	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
+	Anima::AnimaMaterialsManager* matMgr = stage->GetMaterialsManager();
 	
 	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
 	//if (!manager->LoadModel(path, "scimmia"))
@@ -105,15 +106,16 @@ int main(int argc, char** argv)
 	//if (!manager->LoadModel(path, "piano"))
 	//	return 0;
 
-	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
-	if (!manager->LoadModel(path, "cono"))
-		return 0;
+//	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
+//	if (!manager->LoadModel(path, "cono"))
+//		return 0;
 
-	//mesh->MakePlane();
-	//mesh->GetTransformation()->Scale(10.0f, 1.0f, 10.0f);
-	//mesh->SetMaterial(matMgr->CreateMaterial("piano-material"));
-	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	//mesh->GetMaterial()->SetBoolean("TwoSided", true);
+	Anima::AnimaMesh* mesh = manager->CreateModel("sfera");
+	mesh->MakeIcosahedralSphere(3);
+	mesh->GetTransformation()->Scale(1.0f, 1.0f, 1.0f);
+	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+	mesh->GetMaterial()->SetBoolean("TwoSided", false);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);

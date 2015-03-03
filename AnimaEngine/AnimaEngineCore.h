@@ -60,10 +60,10 @@ extern "C" ANIMA_ENGINE_EXPORT bool __anima_get_working_dir(char* dest, int leng
 #	define ANIMA_FRAME_POP()
 #endif
 
-#define _ANIMA_ENGINE_VERSION_MAJOR          0
-#define _ANIMA_ENGINE_VERSION_MINOR          0
-#define _ANIMA_ENGINE_VERSION_REVISION       0
-#define _ANIMA_ENGINE_VERSION_NUMBER "0.0.0"
+#define _ANIMA_ENGINE_VERSION_MAJOR			0
+#define _ANIMA_ENGINE_VERSION_MINOR			0
+#define _ANIMA_ENGINE_VERSION_REVISION		0
+#define _ANIMA_ENGINE_VERSION_NUMBER		"0.0.0"
 
 #include <vector>
 

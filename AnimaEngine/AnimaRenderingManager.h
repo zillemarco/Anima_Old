@@ -235,4 +235,4 @@ protected:
 
 END_ANIMA_ENGINE_NAMESPACE
 
-#endif __Anima__AnimaRenderingManager__
+#endif //__Anima__AnimaRenderingManager__

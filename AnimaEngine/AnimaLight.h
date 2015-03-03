@@ -13,6 +13,7 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaMappedValues.h"
+#include "AnimaMesh.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

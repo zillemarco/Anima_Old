@@ -60,9 +60,10 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaStage.h
 					AnimaStagesManager.h
 					AnimaGBuffer.h
-					AnimaFPSTimer.h)
+					AnimaFPSTimer.h
+					AnimaMeshCreator.h)
 
-set(common_SOURCES	AnimaEngineCore.cpp 
+set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
 					AnimaAssert.cpp 
 					AnimaWindow.cpp 
@@ -103,7 +104,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaStage.cpp
 					AnimaStagesManager.cpp
 					AnimaGBuffer.cpp
-					AnimaFPSTimer.cpp)
+					AnimaFPSTimer.cpp
+					AnimaMeshCreator.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

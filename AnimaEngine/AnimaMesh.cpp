@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "AnimaMesh.h"
+#include "AnimaMeshCreator.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -112,7 +113,17 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 }
 
 AnimaMesh::AnimaMesh(AnimaMesh&& src)
-	: _vertices(src._vertices)
+	: _allocator(src._allocator)
+	, _material(src._material)
+	, _meshName(src._meshName)
+	, _meshFileName(src._meshFileName)
+	, _parentMesh(src._parentMesh)
+	, _meshes(src._meshes)
+	, _meshesNumber(src._meshesNumber)
+	, _meshChildren(src._meshChildren)
+	, _meshChildrenNumber(src._meshChildrenNumber)
+	, _transformation(src._transformation)
+	, _vertices(src._vertices)
 	, _verticesNumber(src._verticesNumber)
 	, _normals(src._normals)
 	, _normalsNumber(src._normalsNumber)
@@ -124,7 +135,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _bitangentsNumber(src._bitangentsNumber)
 	, _faces(src._faces)
 	, _facesNumber(src._facesNumber)
-	, _material(src._material)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
@@ -132,16 +142,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _normalsBufferObject(src._normalsBufferObject)
 	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
 	, _tangentsBufferObject(src._tangentsBufferObject)
-	, _allocator(src._allocator)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
-	, _meshChildren(src._meshChildren)
-	, _meshChildrenNumber(src._meshChildrenNumber)
-	, _parentMesh(src._parentMesh)
-	, _meshes(src._meshes)
-	, _meshesNumber(src._meshesNumber)
-	, _meshName(src._meshName)
-	, _meshFileName(src._meshFileName)
-	, _transformation(src._transformation)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -166,16 +167,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 
 AnimaMesh::~AnimaMesh()
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-
-	ClearChildren();
-	ClearMeshes();
-	ClearVertices();
-	ClearNormals();
-	ClearTextureCoords();
-	ClearTangents();
-	ClearBitangents();
-	ClearFaces();
+	ClearAll();
 }
 
 AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
@@ -272,6 +264,20 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 	}
 	
 	return *this;
+}
+
+void AnimaMesh::ClearAll()
+{
+	ANIMA_ASSERT(_allocator != nullptr);
+	
+	ClearChildren();
+	ClearMeshes();
+	ClearVertices();
+	ClearNormals();
+	ClearTextureCoords();
+	ClearTangents();
+	ClearBitangents();
+	ClearFaces();
 }
 
 void AnimaMesh::ClearChildren()
@@ -1551,63 +1557,12 @@ AnimaMatrix AnimaMesh::GetFinalMatrix() const
 
 void AnimaMesh::MakePlane()
 {
-	ClearChildren();
-	ClearMeshes();
-	ClearVertices();
-	ClearNormals();
-	ClearTextureCoords();
-	ClearTangents();
-	ClearBitangents();
-	ClearFaces();
-	
-	AInt numeroVertici = 4;
-	AInt numeroFacce = 2;
-	AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
-	AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, numeroVertici);
-	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*_allocator, numeroVertici);
-	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, numeroFacce, _allocator);
-
-	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
-	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
-	vertici[2] = AnimaVertex3f(1.0f, 0.0f, 1.0f);
-	vertici[3] = AnimaVertex3f(1.0f, 0.0f, -1.0f);
-
-	normali[0] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[1] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[2] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	normali[3] = AnimaVertex3f(0.0f, 1.0f, 0.0f);
-
-	textCoords[0] = AnimaVertex2f(1.0f, 0.0f);
-	textCoords[1] = AnimaVertex2f(1.0f, 1.0f);
-	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
-	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
-
-	AUint indexes0[] = { 0, 1, 2 };
-	AUint indexes1[] = { 0, 2, 3 };
-	facce[0].SetIndexes(indexes0, 3);
-	facce[1].SetIndexes(indexes1, 3);
-
-	SetVertices(vertici, numeroVertici);
-	SetNormals(normali, numeroVertici);
-	SetTextureCoords(textCoords, numeroVertici);
-	SetFaces(facce, numeroFacce);
-
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertici);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, normali);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, textCoords);
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, facce);
+	AnimaMeshCreator::MakePlane(this, _allocator);
 }
 
-void AnimaMesh::MakeSphere(AFloat radius, AUint widthSegments, AUint heightSegments, AFloat phiStart, AFloat phiLength, AFloat thetaStart, AFloat thetaLength)
+void AnimaMesh::MakeIcosahedralSphere(AInt recursionLevel)
 {
-	ClearChildren();
-	ClearMeshes();
-	ClearVertices();
-	ClearNormals();
-	ClearTextureCoords();
-	ClearTangents();
-	ClearBitangents();
-	ClearFaces();
+	AnimaMeshCreator::MakeIcosahedralSphere(this, recursionLevel, _allocator);
 }
 
 END_ANIMA_ENGINE_NAMESPACE
