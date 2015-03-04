@@ -97,27 +97,32 @@ int main(int argc, char** argv)
 	Anima::AnimaString path(stage->GetStringAllocator());	
 	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
 	Anima::AnimaMaterialsManager* matMgr = stage->GetMaterialsManager();
-	
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if (!manager->LoadModel(path, "scimmia"))
-	//	return 0;
 
-	//path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	//if (!manager->LoadModel(path, "piano"))
-	//	return 0;
+	Anima::AnimaMesh* mesh = nullptr;
+
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->Scale(5.0f, 1.0f, 5.0f);
 
 //	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
 //	if (!manager->LoadModel(path, "cono"))
 //		return 0;
 
-	Anima::AnimaMesh* mesh = manager->CreateModel("sfera");
-	mesh->MakeIcosahedralSphere(3);
-	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
-	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	mesh->GetMaterial()->SetBoolean("TwoSided", false);
-	mesh->ComputeFlatNormals();
-	mesh->ComputeSmootNormals();
+	//path = ANIMA_ENGINE_MODELS_PATH "ae.3ds";
+	//if ((mesh = manager->LoadModel(path, "ae")) == nullptr)
+	//	return 0;
+
+	//Anima::AnimaMesh* mesh = manager->CreateModel("sfera");
+	//mesh->MakeIcosahedralSphere(3);
+	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+	//mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+	//mesh->GetMaterial()->SetBoolean("TwoSided", false);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -127,15 +132,15 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
-	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
+	Window* window = engine.CreateAnimaWindow<Window>(1024, 768, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
 	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 	
-	Anima::AnimaVertex3f pos(0, 0.5, 10);	
-	Anima::AnimaVertex3f tar(0, 0, 0);
-	Anima::AnimaVertex3f forw(0, 0, -1);
+	Anima::AnimaVertex3f pos(0.0f, 1.0f, 10.0f);
+	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
+	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
 
 	window->_tpcamera->LookAt(pos, tar);
 	window->_fpcamera->LookAt(pos, forw);
@@ -145,7 +150,7 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);
 	window->MakeCurrentContext();
-	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
+	window->FrameBufferResizeCallback(window, (int)(1024 * window->GetResolutionMutiplier()), (int)(768 * window->GetResolutionMutiplier()));
 	
 	window->Load();
 	

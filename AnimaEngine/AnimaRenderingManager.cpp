@@ -124,8 +124,11 @@ void AnimaRenderingManager::InitTextureSlots()
 	SetTextureSlot("DisplacementTexture", 2);
 
 	// Slot usati dal deferred shading
-	SetTextureSlot("AlbedoMap", 0);
-	SetTextureSlot("NormalMap", 1);
+	SetTextureSlot("DepthMap", 0);
+	SetTextureSlot("AlbedoMap", 1);
+	SetTextureSlot("NormalMap", 2);
+	SetTextureSlot("EmissiveMap", 3);
+	SetTextureSlot("SpecularMap", 4);
 
 	// Slot usati dai filtri
 	SetTextureSlot("FilterMap", 0);
@@ -150,6 +153,19 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			prepassBuffer->Create();
 
 			SetGBuffer("PrepassBuffer", prepassBuffer);
+		}
+
+		AnimaGBuffer* lightsBuffer = GetGBuffer("LightsBuffer");
+		if (lightsBuffer != nullptr)
+			lightsBuffer->Resize(screenWidth, screenHeight);
+		else
+		{
+			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			lightsBuffer->Create();
+
+			SetGBuffer("LightsBuffer", lightsBuffer);
 		}
 
 		AnimaGBuffer* diffuseBuffer = GetGBuffer("DiffuseBuffer");
@@ -191,11 +207,14 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	SetFloat("FxaaSpanMax", 8.0f);
 
 	//
-	// Inizializzazione del modello di supporto
+	// Inizializzazione delle mesh di supporto
 	//
 	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
+
+	_pointLightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
+	_pointLightMesh->MakeIcosahedralSphere(3);
 		
 	//
 	// Inizializzazione della camera di supporto
@@ -766,57 +785,46 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 
 void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 {
-	ANIMA_FRAME_PUSH("Frame");
 	Anima::AnimaShadersManager* shadersManager = stage->GetShadersManager();
 
-	ANIMA_FRAME_PUSH("Prepass");
+	//
+	//	Preparazione dei buffer iniziali
+	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
-
 	Start(stage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
-	DeferredPreparePass(stage, shadersManager->GetProgramFromName("deferred-prepare"));
-
-	Finish(stage);
-	ANIMA_FRAME_POP();
-
-	//ANIMA_FRAME_PUSH("Lightning");
-	//GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
-	//Start(stage);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE);
 	//glDisable(GL_BLEND);
 
-	//ANIMA_FRAME_PUSH("Ambient");
-	//DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
-	//ANIMA_FRAME_POP();
-	//ANIMA_FRAME_PUSH("Directional");
-	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
-	//ANIMA_FRAME_POP();
-	//ANIMA_FRAME_PUSH("Point");
-	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
-	//ANIMA_FRAME_POP();
-	//ANIMA_FRAME_PUSH("Spot");
-	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
-	//ANIMA_FRAME_POP();
+	DeferredPreparePass(stage, shadersManager->GetProgramFromName("deferred-prepare"));
+	Finish(stage);
 
-	//Finish(stage);
-	//ANIMA_FRAME_POP();
+	//
+	//	Preparazione dei buffer della luce
+	//
+	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	Start(stage);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
 
-	ANIMA_FRAME_PUSH("FXAA");
-	ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
-	//ApplyEffect(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
-	ANIMA_FRAME_POP();
+	DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
+	glCullFace(GL_BACK);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	Finish(stage);
 
-	ANIMA_FRAME_POP();
+	//
+	//	Composizione dei buffer nell'immagine finale
+	//
+	Start(stage);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		
+	DeferredCombinePass(stage, shadersManager->GetProgramFromName("deferred-combine"));
+	Finish(stage);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
@@ -847,7 +855,7 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh
 	//glDepthMask(GL_FALSE);
 	//glDepthFunc(GL_LEQUAL);
 
-	DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
+	//DeferredAmbientPass(stage, shadersManager->GetProgramFromName("deferred-ambient"));
 	//DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
 	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
 	//DeferredSpotPass(stage, shadersManager->GetProgramFromName("deferred-spot"));
@@ -857,6 +865,8 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh
 	//glDisable(GL_BLEND);
 
 	Finish(stage);
+
+	glDisable(GL_BLEND);
 
 	//ApplyFilter(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
@@ -1051,15 +1061,19 @@ void AnimaRenderingManager::DeferredPointPass(AnimaStage* stage, AnimaShaderProg
 		return;
 
 	AnimaShaderProgram* activeProgram = stage->GetShadersManager()->GetActiveProgram();
+	AnimaCamera* activeCamera = stage->GetCamerasManager()->GetActiveCamera();
+
+	if (activeCamera == nullptr)
+		return;
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
 		program->Use();
-		program->UpdateCameraProperies(_filterCamera);
+		program->UpdateCameraProperies(activeCamera);
 	}
 
-	if (_filterMesh->NeedsBuffersUpdate())
-		_filterMesh->UpdateBuffers();
+	if (_pointLightMesh->NeedsBuffersUpdate())
+		_pointLightMesh->UpdateBuffers();
 
 	for (ASizeT i = 0; i < nLights; i++)
 	{
@@ -1067,13 +1081,27 @@ void AnimaRenderingManager::DeferredPointPass(AnimaStage* stage, AnimaShaderProg
 		if (!light->IsPointLight())
 			continue;
 
+		AnimaVertex3f lPos = light->GetPosition();
+		AFloat range = light->GetRange();
+
+		AnimaMatrix m1, m2, m3;
+		m1.Translate(lPos);
+		m2.Scale(range, range, range, 1.0f);
+		m3 = m1 * m2;
+		
+		float dist = (lPos - activeCamera->GetPosition()).Length();
+		if (dist < light->GetRange())
+			glCullFace(GL_FRONT);
+		else
+			glCullFace(GL_BACK);
+
 		program->UpdateLightProperies(light);
-		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+		program->UpdateMeshProperies(_pointLightMesh, m3);
 		program->UpdateRenderingManagerProperies(this);
 
-		program->EnableInputs(_filterMesh);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
-		glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+		program->EnableInputs(_pointLightMesh);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _pointLightMesh->GetIndexesBufferObject());
+		glDrawElements(GL_TRIANGLES, _pointLightMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 		program->DisableInputs();
 	}
 }
@@ -1114,6 +1142,29 @@ void AnimaRenderingManager::DeferredSpotPass(AnimaStage* stage, AnimaShaderProgr
 		glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 		program->DisableInputs();
 	}
+}
+
+void AnimaRenderingManager::DeferredCombinePass(AnimaStage* stage, AnimaShaderProgram* program)
+{
+	AnimaShaderProgram* activeProgram = stage->GetShadersManager()->GetActiveProgram();
+
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		program->Use();
+		program->UpdateCameraProperies(_filterCamera);
+	}
+
+	if (_filterMesh->NeedsBuffersUpdate())
+		_filterMesh->UpdateBuffers();
+
+	program->UpdateLightProperies(stage->GetLightsManager()->GetLightFromName("ambient"));
+	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	program->UpdateRenderingManagerProperies(this);
+
+	program->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	program->DisableInputs();
 }
 
 void AnimaRenderingManager::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
@@ -1526,6 +1577,12 @@ void AnimaRenderingManager::Clear()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterMesh);
 		_filterMesh = nullptr;
+	}
+
+	if (_pointLightMesh != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _pointLightMesh);
+		_pointLightMesh = nullptr;
 	}
 
 	for (auto& pair : _texturesMap)

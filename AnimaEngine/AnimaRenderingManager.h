@@ -36,60 +36,6 @@ public:
 	AnimaRenderingManager& operator=(const AnimaRenderingManager& src);
 	AnimaRenderingManager& operator=(AnimaRenderingManager&& src);
 	
-protected:
-	//class DeferredData
-	//{
-	//public:
-	//	DeferredData(const AnimaString& name, AUint index, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter) {
-	//		_index = index;
-	//		_attachment = attachment;
-	//		_internalFormat = internalFormat;
-	//		_format = format;
-	//		_dataType = dataType;
-	//		_filter = filter;
-	//		_name = name;
-	//	}
-
-	//	DeferredData(const DeferredData& src) {
-	//		_index = src._index;
-	//		_attachment = src._attachment;
-	//		_internalFormat = src._internalFormat;
-	//		_format = src._format;
-	//		_dataType = src._dataType;
-	//		_filter = src._filter;
-	//		_name = src._name;
-	//	}
-
-	//	DeferredData(const DeferredData&& src) {
-	//		_index = src._index;
-	//		_attachment = src._attachment;
-	//		_internalFormat = src._internalFormat;
-	//		_format = src._format;
-	//		_dataType = src._dataType;
-	//		_filter = src._filter;
-	//		_name = src._name;
-	//	}
-
-	//public:
-	//	AnimaString _name;
-	//	AUint _index;
-	//	AUint _attachment;
-	//	AUint _internalFormat;
-	//	AUint _format;
-	//	AUint _dataType;
-	//	AUint _filter;
-	//};
-
-	//typedef multi_index_container<
-	//	DeferredData*,
-	//	indexed_by<
-	//	ordered_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AUint, _index)>,
-	//	hashed_unique<BOOST_MULTI_INDEX_MEMBER(DeferredData, AnimaString, _name), AnimaString::Hasher> >
-	//> DeferredDataSet;
-
-	//typedef DeferredDataSet::nth_index<0>::type DeferredDataSetByIndex;
-	//typedef DeferredDataSet::nth_index<1>::type DeferredDataSetByName;
-	
 public:
 	void Start(AnimaStage* stage);
 	void Finish(AnimaStage* stage);
@@ -127,6 +73,7 @@ protected:
 	void DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredCombinePass(AnimaStage* stage, AnimaShaderProgram* program);
 
 	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
 	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
@@ -214,6 +161,8 @@ protected:
 
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
+
+	AnimaMesh*		_pointLightMesh;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;

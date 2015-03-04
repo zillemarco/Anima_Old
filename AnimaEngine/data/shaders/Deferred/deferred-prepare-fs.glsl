@@ -13,10 +13,22 @@ uniform vec4 MAT_DiffuseColor;
 uniform sampler2D MAT_BumpTexture;
 uniform bool MAT_HasBump;
 
+uniform sampler2D MAT_DisplacementTexture;
+uniform float MAT_DisplacementScale;
+uniform float MAT_DisplacementBias;
+
 uniform vec3 MAT_SpecularColor;
 uniform float MAT_Shininess;
 
+uniform vec3 CAM_Position;
+
 out vec4 FragColor[3];
+
+vec2 CalcParallaxTexCoords(vec3 worldPos, vec3 camPos, vec2 originalTextCoords, mat3 tbnMatrix)
+{
+	vec3 directionToEye = normalize(camPos - worldPos);	
+	return originalTextCoords + (directionToEye * tbnMatrix).xy * (texture(MAT_DisplacementTexture, originalTextCoords).r * MAT_DisplacementScale + MAT_DisplacementBias);
+}
 
 vec3 calcNormal(vec2 textureCoords)
 {
@@ -33,6 +45,8 @@ vec3 calcNormal(vec2 textureCoords)
 
 void main()
 {
+	vec2 textureCoord = frag_textureCoord; //CalcParallaxTexCoords(frag_worldPosition, CAM_Position, frag_textureCoord, frag_TBNMatrix);
+
 	vec4 color = MAT_DiffuseColor;
     vec4 textureColor = texture(MAT_DiffuseTexture, frag_textureCoord);	
 	if(textureColor != vec4(0.0, 0.0, 0.0, 1.0))

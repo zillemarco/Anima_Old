@@ -202,17 +202,17 @@ void Window::Load()
 
 	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
 
-	mgr->CreateProgram("forward-ambient");
-	mgr->GetProgramFromName("forward-ambient")->Create();
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-ambient")->Link();
+	//mgr->CreateProgram("forward-ambient");
+	//mgr->GetProgramFromName("forward-ambient")->Create();
+	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-ambient")->Link();
 
-	mgr->CreateProgram("forward-directional");
-	mgr->GetProgramFromName("forward-directional")->Create();
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-directional")->Link();
+	//mgr->CreateProgram("forward-directional");
+	//mgr->GetProgramFromName("forward-directional")->Create();
+	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("forward-directional")->Link();
 
 	mgr->CreateProgram("deferred-prepare");
 	mgr->GetProgramFromName("deferred-prepare")->Create();
@@ -220,17 +220,17 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-prepare")->Link();
 
-	mgr->CreateProgram("deferred-ambient");
-	mgr->GetProgramFromName("deferred-ambient")->Create();
-	mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("deferred-ambient")->Link();
+	//mgr->CreateProgram("deferred-ambient");
+	//mgr->GetProgramFromName("deferred-ambient")->Create();
+	//mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("deferred-ambient")->Link();
 
-	mgr->CreateProgram("deferred-directional");
-	mgr->GetProgramFromName("deferred-directional")->Create();
-	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("deferred-directional")->Link();
+	//mgr->CreateProgram("deferred-directional");
+	//mgr->GetProgramFromName("deferred-directional")->Create();
+	//mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("deferred-directional")->Link();
 
 	mgr->CreateProgram("deferred-point");
 	mgr->GetProgramFromName("deferred-point")->Create();
@@ -238,27 +238,33 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-point")->AddShader(mgr->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-point")->Link();
 
-	mgr->CreateProgram("deferred-spot");
-	mgr->GetProgramFromName("deferred-spot")->Create();
-	mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("deferred-spot")->Link();
+	//mgr->CreateProgram("deferred-spot");
+	//mgr->GetProgramFromName("deferred-spot")->Create();
+	//mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("deferred-spot")->Link();
 
-	mgr->CreateProgram("nullFilter");
-	mgr->GetProgramFromName("nullFilter")->Create();
-	mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("nullFilter")->Link();
+	//mgr->CreateProgram("nullFilter");
+	//mgr->GetProgramFromName("nullFilter")->Create();
+	//mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("nullFilter")->Link();
 
-	mgr->CreateProgram("fxaaFilter");
-	mgr->GetProgramFromName("fxaaFilter")->Create();
-	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-vs.glsl", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("fxaaFilter")->Link();
+	mgr->CreateProgram("deferred-combine");
+	mgr->GetProgramFromName("deferred-combine")->Create();
+	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-combine")->Link();
 
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal.bmp", "texture-mattoni-bump"));
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	//mgr->CreateProgram("fxaaFilter");
+	//mgr->GetProgramFromName("fxaaFilter")->Create();
+	//mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-vs.glsl", Anima::AnimaShader::VERTEX));
+	//mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	//mgr->GetProgramFromName("fxaaFilter")->Link();
+
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal.bmp", "texture-mattoni-bump"));
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
@@ -276,25 +282,27 @@ void Window::Load()
 	l2->SetConstantAttenuation(0.0f);
 	l2->SetLinearAttenuation(0.0f);
 	l2->SetExponentAttenuation(0.01f);
-	l2->SetIntensity(1.0f);
+	l2->SetIntensity(0.8f);
 	l2->SetPosition(-10.0f, 0.0f, 0.0f);
+	l2->SetRange(40.0f);
 
 	Anima::AnimaLight* l3 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight1");
 	l3->SetColor(1.0f, 0.0f, 0.0f);
 	l3->SetConstantAttenuation(0.0f);
 	l3->SetLinearAttenuation(0.0f);
 	l3->SetExponentAttenuation(0.01f);
-	l3->SetIntensity(1.0f);
+	l3->SetIntensity(0.8f);
 	l3->SetPosition(0.0f, 0.0f, -10.0f);
+	l3->SetRange(40.0f);
 
-	Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
-	l4->SetColor(0.0f, 1.0f, 0.0f);
-	l4->SetConstantAttenuation(0.1f);
-	l4->SetLinearAttenuation(0.1f);
-	l4->SetExponentAttenuation(0.01f);
-	l4->SetIntensity(0.5f);
-	l4->SetPosition(0.0f, 0.5f, 5.0f);
-	l4->SetDirection(0.0f, 0.0f, -1.0f);
+	//Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
+	//l4->SetColor(0.0f, 1.0f, 0.0f);
+	//l4->SetConstantAttenuation(0.1f);
+	//l4->SetLinearAttenuation(0.1f);
+	//l4->SetExponentAttenuation(0.01f);
+	//l4->SetIntensity(0.5f);
+	//l4->SetPosition(0.0f, 0.5f, 5.0f);
+	//l4->SetDirection(0.0f, 0.0f, -1.0f);
 
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
 	//Anima::AnimaVertex3f min = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();

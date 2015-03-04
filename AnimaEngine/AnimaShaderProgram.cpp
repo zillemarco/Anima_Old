@@ -1094,7 +1094,8 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 {
 	if (light->IsAmbientLight())
 	{
-		SetUniform("_ambientLight", light->GetColor());
+		SetUniform("AML_Color", light->GetColor());
+		//SetUniform("_ambientLight", light->GetColor());
 	}
 	else if (light->IsDirectionalLight())
 	{
@@ -1104,13 +1105,19 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 	}
 	else if (light->IsPointLight())
 	{
-		SetUniform("_pointLight.position", light->GetPosition());
-		SetUniformf("_pointLight.range", light->GetRange());
-		SetUniform("_pointLight.base.color", light->GetColor());
-		SetUniformf("_pointLight.base.intensity", light->GetIntensity());
-		SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
-		SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
-		SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
+		SetUniform("PTL_Position", light->GetPosition());
+		SetUniformf("PTL_Range", light->GetRange());
+		SetUniform("PTL_Color", light->GetColor());
+		SetUniformf("PTL_ConstantAttenuation", light->GetConstantAttenuation());
+		SetUniformf("PTL_LinearAttenuation", light->GetLinearAttenuation());
+		SetUniformf("PTL_ExponentAttenuation", light->GetExponentAttenuation());
+		//SetUniform("_pointLight.position", light->GetPosition());
+		//SetUniformf("_pointLight.range", light->GetRange());
+		//SetUniform("_pointLight.base.color", light->GetColor());
+		//SetUniformf("_pointLight.base.intensity", light->GetIntensity());
+		//SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
+		//SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
+		//SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
 	}
 	else if (light->IsSpotLight())
 	{

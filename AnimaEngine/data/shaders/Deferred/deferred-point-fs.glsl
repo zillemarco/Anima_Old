@@ -1,91 +1,46 @@
-#version 410
+#version 150 core
 
-out vec4 fragColor;
+in mat4 frag_inverseProjectionViewMatrix;
+out vec4 FragColor[2];
 
-struct Attenuation
-{
-	float constant;
-	float linear;
-	float exponent;
-};
+uniform sampler2D REN_GB_PrepassBuffer_DepthMap;
+uniform sampler2D REN_GB_PrepassBuffer_NormalMap;
+uniform vec2 REN_InverseScreenSize;
+uniform vec3 CAM_Position;
 
-struct BaseLight
-{
-	vec3 color;
-	float intensity;
-};
-
-struct PointLight
-{
-	BaseLight base;
-	Attenuation attenuation;
-	vec3 position;
-};
-
-uniform PointLight _pointLight;
-uniform vec3 _cameraPosition;
-
-uniform vec2 _renderingScreenSize;
-uniform sampler2D _renderingDeferredAlbedoMap;
-uniform sampler2D _renderingDeferredNormalMap;
-uniform sampler2D _renderingDeferredWorldPosMap;
-uniform sampler2D _renderingDeferredSpecularMap;
-
-vec4 calcLight(BaseLight base, vec3 direction, vec3 normal, vec3 worldPosition, vec3 materialSpecularColor, float materialShininess)
-{
-	float diffuseFactor = dot(normal, -direction);
-	vec4 diffuseColor = vec4(0.0, 0.0, 0.0, 0.0);
-	vec4 specularColor = vec4(0.0, 0.0, 0.0, 0.0);
-	
-	if(diffuseFactor > 0.0)
-	{
-		diffuseColor = vec4(base.color, 1.0f) * base.intensity * diffuseFactor;
-		
-		vec3 directionToEye = normalize(_cameraPosition - worldPosition);
-		vec3 reflectDirection = normalize(reflect(direction, normal));
-		
-		float specularFactor = dot(directionToEye, reflectDirection);
-		specularFactor = pow(specularFactor, materialShininess);
-		
-		if(specularFactor > 0.0)
-		{
-			specularColor = vec4(base.color, 1.0f) * vec4(materialSpecularColor, 1.0) * specularFactor;
-		}
-	}
-
-	return diffuseColor + specularColor;
-}
-
-vec4 calcPointLight(PointLight pLight, vec3 normal, vec3 worldPosition, vec3 materialSpecularColor, float materialShininess)
-{
-	vec3 lightDirection = worldPosition - pLight.position;
-	float distanceToPoint = length(lightDirection);
-	
-	lightDirection = normalize(lightDirection);
-		
-	vec4 color = calcLight(pLight.base, lightDirection, normal, worldPosition, materialSpecularColor, materialShininess);
-	
-	float att = pLight.attenuation.constant + 
-				pLight.attenuation.linear * distanceToPoint + 
-				pLight.attenuation.exponent * distanceToPoint * distanceToPoint +
-				0.00001;
-				
-	return color / att;
-}
-
-vec2 CalcTexCoord()
-{
-    return gl_FragCoord.xy / _renderingScreenSize;
-}
+uniform float PTL_Range;
+uniform vec3 PTL_Position;
+uniform vec3 PTL_Color;
+uniform float PTL_ConstantAttenuation;
+uniform float PTL_LinearAttenuation;
+uniform float PTL_ExponentAttenuation;
 
 void main()
 {
-	vec2 textCoord = CalcTexCoord();
-	vec4 color = texture(_renderingDeferredAlbedoMap, textCoord);
-	vec3 normal = texture(_renderingDeferredNormalMap, textCoord).xyz;
-	vec3 worldPos = texture(_renderingDeferredWorldPosMap, textCoord).xyz;
-	vec3 specularColor = texture(_renderingDeferredSpecularMap, textCoord).xyz;
-	float shininess = texture(_renderingDeferredSpecularMap, textCoord).w;
-	
-	fragColor = color * calcPointLight(_pointLight, normal, worldPos, specularColor, shininess);
+	vec3 pos 	= vec3((gl_FragCoord.x * REN_InverseScreenSize.x), (gl_FragCoord.y * REN_InverseScreenSize.y), 0.0f);
+	pos.z 		= texture(REN_GB_PrepassBuffer_DepthMap, pos.xy).r;
+
+	vec3 normal = normalize(texture(REN_GB_PrepassBuffer_NormalMap, pos.xy).xyz * 2.0f - 1.0f);
+	vec4 clip 	= frag_inverseProjectionViewMatrix * vec4(pos * 2.0f - 1.0f, 1.0f);
+	pos 		= clip.xyz / clip.w;
+
+	float dist 	= length(PTL_Position - pos);
+
+	if(dist > PTL_Range)
+	{
+		discard;
+	}
+
+	float atten = (PTL_ConstantAttenuation + PTL_LinearAttenuation * dist +  PTL_ExponentAttenuation * dist * dist + 0.00001);
+
+	vec3 incident 	= normalize(PTL_Position - pos);
+	vec3 viewDir 	= normalize(CAM_Position - pos);
+	vec3 halfDir 	= normalize(incident + viewDir);
+
+	float lambert 	= clamp(dot(incident, normal), 0.0f, 1.0f);
+	float rFactor 	= clamp(dot(halfDir, normal), 0.0f, 1.0f);
+	float sFactor 	= pow(rFactor, 33.0f);
+
+	FragColor[0] = vec4(PTL_Color * lambert / atten, 1.0f);
+	FragColor[1] = vec4(PTL_Color * sFactor / atten * 0.33f, 1.0f);
 }
