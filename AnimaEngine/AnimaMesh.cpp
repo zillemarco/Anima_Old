@@ -1558,43 +1558,73 @@ AnimaMatrix AnimaMesh::GetFinalMatrix() const
 
 void AnimaMesh::ComputeSmootNormals()
 {
-	ClearNormals();
-
-	_normalsNumber = _verticesNumber;
-	_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _normalsNumber);
-
-	for (ASizeT i = 0; i < _verticesNumber; i++)
+	if (_facesNumber > 0 && _verticesNumber > 0)
 	{
-		ASizeT pos = GetNextFaceContainingVertex(0, i);
+		ClearNormals();
 
-		if (pos >= 0)
+		_normalsNumber = _verticesNumber;
+		_normals = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*_allocator, _normalsNumber);
+
+		for (ASizeT i = 0; i < _verticesNumber; i++)
 		{
-			AnimaVertex3f normal = _faces[pos].GetNormal();
-			while ((pos = GetNextFaceContainingVertex(pos + 1, i)) != -1)
-				normal += _faces[pos].GetNormal();
+			ASizeT pos = GetNextFaceContainingVertex(0, i);
 
-			normal.Normalize();
-			_normals[i] = normal;
+			if (pos >= 0)
+			{
+				AnimaVertex3f normal = _faces[pos].GetNormal();
+				while ((pos = GetNextFaceContainingVertex(pos + 1, i)) != -1)
+					normal += _faces[pos].GetNormal();
+
+				normal.Normalize();
+				_normals[i] = normal;
+			}
 		}
+	}
+
+	if (_meshes != nullptr)
+	{
+		for (ASizeT i = 0; i < _meshesNumber; i++)
+			_meshes[i].ComputeFlatNormals();
+	}
+
+	if (_meshChildren != nullptr)
+	{
+		for (ASizeT i = 0; i < _meshChildrenNumber; i++)
+			_meshChildren[i].ComputeSmootNormals();
 	}
 }
 
 void AnimaMesh::ComputeFlatNormals()
 {
-	ClearNormals();
-
-	for (ASizeT i = 0; i < _facesNumber; i++)
+	if (_facesNumber > 0)
 	{
-		AnimaFace* face = &_faces[i];
+		ClearNormals();
 
-		AnimaVertex3f p1, p2, p3, u, v;
-		p1 = _vertices[face->GetIndex(0)];
-		p2 = _vertices[face->GetIndex(1)];
-		p3 = _vertices[face->GetIndex(2)];
-		u = p2 - p1;
-		v = p3 - p1;
+		for (ASizeT i = 0; i < _facesNumber; i++)
+		{
+			AnimaFace* face = &_faces[i];
 
-		face->SetNormal((u ^ v).Normalized());
+			AnimaVertex3f p1, p2, p3, u, v;
+			p1 = _vertices[face->GetIndex(0)];
+			p2 = _vertices[face->GetIndex(1)];
+			p3 = _vertices[face->GetIndex(2)];
+			u = p2 - p1;
+			v = p3 - p1;
+
+			face->SetNormal((u ^ v).Normalized());
+		}
+	}
+
+	if (_meshes != nullptr)
+	{
+		for (ASizeT i = 0; i < _meshesNumber; i++)
+			_meshes[i].ComputeFlatNormals();
+	}
+	
+	if (_meshChildren != nullptr)
+	{
+		for (ASizeT i = 0; i < _meshChildrenNumber; i++)
+			_meshChildren[i].ComputeFlatNormals();
 	}
 }
 

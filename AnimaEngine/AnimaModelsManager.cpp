@@ -50,7 +50,7 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 		return nullptr;
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Fast);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
 	if(scene == nullptr)
 		return nullptr;
