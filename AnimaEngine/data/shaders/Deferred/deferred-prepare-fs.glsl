@@ -22,7 +22,7 @@ uniform float MAT_Shininess;
 
 uniform vec3 CAM_Position;
 
-out vec4 FragColor[3];
+out vec4 FragColor[4];
 
 vec2 CalcParallaxTexCoords(vec3 worldPos, vec3 camPos, vec2 originalTextCoords, mat3 tbnMatrix)
 {
@@ -45,7 +45,7 @@ vec3 calcNormal(vec2 textureCoords)
 
 void main()
 {
-	vec2 textureCoord = frag_textureCoord; //CalcParallaxTexCoords(frag_worldPosition, CAM_Position, frag_textureCoord, frag_TBNMatrix);
+	vec2 textureCoord = frag_textureCoord;
 
 	vec4 color = MAT_DiffuseColor;
     vec4 textureColor = texture(MAT_DiffuseTexture, frag_textureCoord);	
@@ -56,4 +56,5 @@ void main()
 		
 	FragColor[1] = color;
 	FragColor[2] = vec4(normal * 0.5 + 0.5, 1.0);
+	FragColor[3] = vec4(MAT_SpecularColor, 1.0 / MAT_Shininess);
 }

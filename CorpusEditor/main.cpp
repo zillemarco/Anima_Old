@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
 	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
 		return 0;
-	mesh->GetTransformation()->Scale(5.0f, 1.0f, 5.0f);
+	mesh->GetTransformation()->Scale(10.0f, 1.0f, 10.0f);
 
 //	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
 //	if (!manager->LoadModel(path, "cono"))
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
-	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
+	Window* window = engine.CreateAnimaWindow<Window>(1024, 768, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
 	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);
 	window->MakeCurrentContext();
-	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
+	window->FrameBufferResizeCallback(window, (int)(1024 * window->GetResolutionMutiplier()), (int)(768 * window->GetResolutionMutiplier()));
 	
 	window->Load();
 	

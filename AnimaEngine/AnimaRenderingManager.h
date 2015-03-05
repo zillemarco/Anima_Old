@@ -69,7 +69,6 @@ protected:
 	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 
 	void DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void DeferredAmbientPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
@@ -81,8 +80,10 @@ protected:
 	
 	void Clear();
 
-	void ApplyEffect(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
-	void ApplyEffect(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst);
+	void ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
+	void ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
+	void ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst);
+	void ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst);
 
 protected:
 	void SetTextureSlot(AnimaString slotName, AUint value);

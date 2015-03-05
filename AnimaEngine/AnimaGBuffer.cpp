@@ -228,7 +228,7 @@ void AnimaGBuffer::Destroy()
 
 void AnimaGBuffer::Resize(AUint width, AUint height)
 {
-	if (width != _width && height != _height)
+	if (width != _width || height != _height)
 	{
 		_width = width;
 		_height = height;

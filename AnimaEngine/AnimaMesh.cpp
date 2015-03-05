@@ -1632,8 +1632,8 @@ AInt AnimaMesh::GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) co
 {
 	for (ASizeT i = start; i < _facesNumber; i++)
 	{
-		if (_faces[i].HasIndex(vertexIndex))
-			return i;
+		if (_faces[i].HasIndex((AUint)vertexIndex))
+			return (AInt)i;
 	}
 
 	return -1;
