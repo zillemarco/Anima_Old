@@ -17,6 +17,11 @@
 #include "AnimaFace.h"
 #include <map>
 
+#ifndef WIN32
+#include <inttypes.h>
+typedef int64_t __int64;
+#endif
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMeshCreator

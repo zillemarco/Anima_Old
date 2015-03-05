@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
-	Window* window = engine.CreateAnimaWindow<Window>(1024, 768, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
+	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
 	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);
 	window->MakeCurrentContext();
-	window->FrameBufferResizeCallback(window, (int)(1024 * window->GetResolutionMutiplier()), (int)(768 * window->GetResolutionMutiplier()));
+	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
 	
 	window->Load();
 	

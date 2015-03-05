@@ -196,7 +196,7 @@ public:
 	float* GetFloatVerticesBitangents();
 
 protected:
-	ASizeT GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const;
+	AInt GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const;
 
 protected:
 	AnimaAllocator* _allocator;

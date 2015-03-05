@@ -796,7 +796,6 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
-	//glDisable(GL_BLEND);
 
 	DeferredPreparePass(stage, shadersManager->GetProgramFromName("deferred-prepare"));
 	Finish(stage);
@@ -810,10 +809,13 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-
+	glDepthMask(GL_FALSE);
+	
+	DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-drectional"));
 	DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
 	glCullFace(GL_BACK);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(GL_TRUE);
 	Finish(stage);
 
 	//
@@ -1015,34 +1017,41 @@ void AnimaRenderingManager::DeferredAmbientPass(AnimaStage* stage, AnimaShaderPr
 void AnimaRenderingManager::DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program)
 {
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
-
-	ASizeT nDirLights = lightsManager->GetDirectionalLightsCount();
+	
+	ASizeT nDirLights = lightsManager->GetPointLightsCount();
 	ASizeT nLights = lightsManager->GetTotalLightsCount();
-
+	
 	if (nDirLights == 0)
 		return;
-
+	
 	AnimaShaderProgram* activeProgram = stage->GetShadersManager()->GetActiveProgram();
-
+	AnimaCamera* activeCamera = stage->GetCamerasManager()->GetActiveCamera();
+	
+	if (activeCamera == nullptr)
+		return;
+	
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
 		program->Use();
 		program->UpdateCameraProperies(_filterCamera);
 	}
-
+	
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
-
+	
 	for (ASizeT i = 0; i < nLights; i++)
 	{
 		AnimaLight* light = lightsManager->GetLight((AUint)i);
 		if (!light->IsDirectionalLight())
 			continue;
-
+		
 		program->UpdateLightProperies(light);
 		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
-
+		
+		program->SetUniform("CAM_ProjectionViewInverseMatrix", (activeCamera->GetProjectionMatrix() * activeCamera->GetViewMatrix()).Inversed());
+		program->SetUniform("CAM_Position", activeCamera->GetPosition());
+		
 		program->EnableInputs(_filterMesh);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
 		glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);

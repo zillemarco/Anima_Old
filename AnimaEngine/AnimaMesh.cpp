@@ -1567,7 +1567,7 @@ void AnimaMesh::ComputeSmootNormals()
 
 		for (ASizeT i = 0; i < _verticesNumber; i++)
 		{
-			ASizeT pos = GetNextFaceContainingVertex(0, i);
+			AInt pos = GetNextFaceContainingVertex(0, i);
 
 			if (pos >= 0)
 			{
@@ -1628,7 +1628,7 @@ void AnimaMesh::ComputeFlatNormals()
 	}
 }
 
-ASizeT AnimaMesh::GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const
+AInt AnimaMesh::GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const
 {
 	for (ASizeT i = start; i < _facesNumber; i++)
 	{

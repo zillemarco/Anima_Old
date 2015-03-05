@@ -33,8 +33,8 @@ AnimaFace::AnimaFace(const AnimaFace& src)
 AnimaFace::AnimaFace(AnimaFace&& src)
 : _indexes(src._indexes)
 , _indexesNumber(src._indexesNumber)
-, _allocator(src._allocator)
 , _normal(src._normal)
+, _allocator(src._allocator)
 {
 	src._indexes = nullptr;
 	src._indexesNumber = 0;

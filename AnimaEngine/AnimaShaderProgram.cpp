@@ -1099,9 +1099,12 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 	}
 	else if (light->IsDirectionalLight())
 	{
-		SetUniform("_directionalLight.direction", light->GetDirection());
-		SetUniform("_directionalLight.base.color", light->GetColor());
-		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
+		SetUniform("DIL_Position", light->GetDirection());
+		SetUniform("DIL_Color", light->GetColor());
+		SetUniformf("DIL_Intensity", light->GetIntensity());
+//		SetUniform("_directionalLight.direction", light->GetDirection());
+//		SetUniform("_directionalLight.base.color", light->GetColor());
+//		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
 	}
 	else if (light->IsPointLight())
 	{

@@ -56,7 +56,7 @@ void Window::DrawScene()
 	{
 		int w, h;
 		this->GetWindowSize(&w, &h);
-		int mul = 1;
+		int mul = (int)GetResolutionMutiplier();
 		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
 		renderingManager->InitRenderingTargets(w * mul, h * mul);
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
@@ -220,17 +220,11 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-prepare")->Link();
 
-	//mgr->CreateProgram("deferred-ambient");
-	//mgr->GetProgramFromName("deferred-ambient")->Create();
-	//mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("deferred-ambient")->AddShader(mgr->LoadShaderFromFile("deferred-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("deferred-ambient")->Link();
-
-	//mgr->CreateProgram("deferred-directional");
-	//mgr->GetProgramFromName("deferred-directional")->Create();
-	//mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("deferred-directional")->Link();
+	mgr->CreateProgram("deferred-directional");
+	mgr->GetProgramFromName("deferred-directional")->Create();
+	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-directional")->Link();
 
 	mgr->CreateProgram("deferred-point");
 	mgr->GetProgramFromName("deferred-point")->Create();
@@ -277,23 +271,23 @@ void Window::Load()
 	l1->SetIntensity(0.8f);
 	l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
-	Anima::AnimaLight* l2 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight0");
-	l2->SetColor(0.0f, 0.0f, 1.0f);
-	l2->SetConstantAttenuation(0.0f);
-	l2->SetLinearAttenuation(0.0f);
-	l2->SetExponentAttenuation(0.01f);
-	l2->SetIntensity(0.8f);
-	l2->SetPosition(-10.0f, 0.0f, 0.0f);
-	l2->SetRange(40.0f);
-
-	Anima::AnimaLight* l3 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight1");
-	l3->SetColor(1.0f, 0.0f, 0.0f);
-	l3->SetConstantAttenuation(0.0f);
-	l3->SetLinearAttenuation(0.0f);
-	l3->SetExponentAttenuation(0.01f);
-	l3->SetIntensity(0.8f);
-	l3->SetPosition(0.0f, 0.0f, -10.0f);
-	l3->SetRange(40.0f);
+//	Anima::AnimaLight* l2 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight0");
+//	l2->SetColor(0.0f, 0.0f, 1.0f);
+//	l2->SetConstantAttenuation(0.0f);
+//	l2->SetLinearAttenuation(0.0f);
+//	l2->SetExponentAttenuation(0.01f);
+//	l2->SetIntensity(0.8f);
+//	l2->SetPosition(-10.0f, 0.0f, 0.0f);
+//	l2->SetRange(40.0f);
+//
+//	Anima::AnimaLight* l3 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight1");
+//	l3->SetColor(1.0f, 0.0f, 0.0f);
+//	l3->SetConstantAttenuation(0.0f);
+//	l3->SetLinearAttenuation(0.0f);
+//	l3->SetExponentAttenuation(0.01f);
+//	l3->SetIntensity(0.8f);
+//	l3->SetPosition(0.0f, 0.0f, -10.0f);
+//	l3->SetRange(40.0f);
 
 	//Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
 	//l4->SetColor(0.0f, 1.0f, 0.0f);
