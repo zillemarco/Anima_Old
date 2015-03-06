@@ -28,7 +28,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_needsResize = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
 {
 	_allocator = allocator;
 
@@ -41,6 +41,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	SetInternalFormat(internalFormat);
 	SetDataType(dataType);
 	SetClamp(clamp);
+	SetAttachment(attachment);
 
 	_textureID = 0;
 	
@@ -65,6 +66,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	SetInternalFormat(src._internalFormat);
 	SetDataType(src._dataType);
 	SetClamp(src._clamp);
+	SetAttachment(src._attachment);
 	
 	_textureID = 0;
 	_mipMapLevels = src._mipMapLevels;
@@ -88,6 +90,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	SetInternalFormat(src._internalFormat);
 	SetDataType(src._dataType);
 	SetClamp(src._clamp);
+	SetAttachment(src._attachment);
 
 	_textureID = 0;
 	_mipMapLevels = src._mipMapLevels;
@@ -137,6 +140,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		SetInternalFormat(src._internalFormat);
 		SetDataType(src._dataType);
 		SetClamp(src._clamp);
+		SetAttachment(src._attachment);
 		
 		_textureID = 0;
 		_mipMapLevels = src._mipMapLevels;
@@ -170,6 +174,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		SetInternalFormat(src._internalFormat);
 		SetDataType(src._dataType);
 		SetClamp(src._clamp);
+		SetAttachment(src._attachment);
 
 		_textureID = 0;
 		_mipMapLevels = src._mipMapLevels;
@@ -235,6 +240,16 @@ void AnimaTexture::SetFilter(AUint filter)
 AUint AnimaTexture::GetFilter() const
 {
 	return _filter;
+}
+
+void AnimaTexture::SetAttachment(AUint attachment)
+{
+	_attachment = attachment;
+}
+
+AUint AnimaTexture::GetAttachment() const
+{
+	return _attachment;
 }
 
 void AnimaTexture::SetInternalFormat(AUint internalFormat)
@@ -415,6 +430,59 @@ bool AnimaTexture::Load()
 	return true;
 }
 
+bool AnimaTexture::LoadRenderTargets()
+{
+	if (_renderTargetsReady && _texturesReady)
+		return Load();
+	
+	if(_attachment == GL_NONE)
+		return false;
+	
+	AUint drawBuffer;
+	bool hasDepth = false;
+	
+	ANIMA_ASSERT(Load());
+	
+	if (_attachment == GL_DEPTH_ATTACHMENT)
+	{
+		drawBuffer = GL_NONE;
+		hasDepth = true;
+	}
+	else
+		drawBuffer = _attachment;
+	
+	if (_frameBuffer == 0)
+	{
+		glGenFramebuffers(1, &_frameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+	}
+		
+	glFramebufferTexture2D(GL_FRAMEBUFFER, _attachment, _textureTarget, _textureID, 0);
+	
+	if (_frameBuffer == 0)
+		return false;
+	
+	if (!hasDepth)
+	{
+		glGenRenderbuffers(1, &_renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
+	}
+	
+	glDrawBuffers(1, &drawBuffer);
+	
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		ANIMA_ASSERT(false);
+		_renderTargetsReady = false;
+		return false;
+	}
+	
+	_renderTargetsReady = true;
+	return true;
+}
+
 bool AnimaTexture::IsReady()
 {
 	return _texturesReady;
@@ -447,6 +515,15 @@ void AnimaTexture::Bind(AUint unit) const
 
 	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(_textureTarget, _textureID);
+}
+
+void AnimaTexture::BindAsRenderTarget() const
+{
+	ANIMA_ASSERT(_renderTargetsReady);
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+	glViewport(0, 0, _width, _height);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

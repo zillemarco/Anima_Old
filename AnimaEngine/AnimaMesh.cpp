@@ -1492,9 +1492,29 @@ void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
 
 	if (_meshChildrenNumber <= 0 && _meshesNumber <= 0)
 	{
-		_boundingBoxMin.x = _boundingBoxMax.x = 0.0f;
-		_boundingBoxMin.y = _boundingBoxMax.y = 0.0f;
-		_boundingBoxMin.z = _boundingBoxMax.z = 0.0f;
+		if(_verticesNumber <= 0)
+		{
+			_boundingBoxMin.x = _boundingBoxMax.x = 0.0f;
+			_boundingBoxMin.y = _boundingBoxMax.y = 0.0f;
+			_boundingBoxMin.z = _boundingBoxMax.z = 0.0f;
+		}
+		else
+		{
+			_boundingBoxMin.x = _boundingBoxMax.x = _vertices[0].x;
+			_boundingBoxMin.y = _boundingBoxMax.y = _vertices[0].x;
+			_boundingBoxMin.z = _boundingBoxMax.z = _vertices[0].x;
+			
+			for(ASizeT i = 1; i < _verticesNumber; i++)
+			{
+				_boundingBoxMin.x = min(_boundingBoxMin.x, _vertices[i].x);
+				_boundingBoxMin.y = min(_boundingBoxMin.y, _vertices[i].y);
+				_boundingBoxMin.z = min(_boundingBoxMin.z, _vertices[i].z);
+				
+				_boundingBoxMax.x = max(_boundingBoxMax.x, _vertices[i].x);
+				_boundingBoxMax.y = max(_boundingBoxMax.y, _vertices[i].y);
+				_boundingBoxMax.z = max(_boundingBoxMax.z, _vertices[i].z);
+			}
+		}
 		return;
 	}
 

@@ -12,7 +12,7 @@ class ANIMA_ENGINE_EXPORT AnimaTexture
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp/*, AUint attachment*/);
+	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment = GL_NONE);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -38,10 +38,8 @@ public:
 	void SetFilter(AUint filter);
 	AUint GetFilter() const;
 
-	////void SetAttachments(AUint* attachments);
-	//void SetAttachment(AUint attachment);
-	//AUint GetAttachment() const;
-	////AUint* GetAttachments() const;
+	void SetAttachment(AUint attachment);
+	AUint GetAttachment() const;
 
 	void SetInternalFormat(AUint internalFormat);
 	AUint GetInternalFormat() const;
@@ -61,13 +59,14 @@ public:
 	
 	bool Load();
 	void Unload();
-	//bool LoadRenderTargets();
+	bool LoadRenderTargets();
 
 	bool IsReady();
 
 	void Resize(AUint width, AUint height);
 	
 	void Bind(AUint unit) const;
+	void BindAsRenderTarget() const;
 
 private:
 	AnimaAllocator* _allocator;
@@ -76,8 +75,8 @@ private:
 	AUint _height;
 
 	AUint _textureID;
-	//AUint _frameBuffer;
-	//AUint _renderBuffer;
+	AUint _frameBuffer;
+	AUint _renderBuffer;
 
 	AUchar* _data;
 	ASizeT _dataSize;
@@ -86,14 +85,14 @@ private:
 	AUint _filter;
 	AUint _internalFormat;
 	AUint _format;
-	//AUint _attachment;
+	AUint _attachment;
 	AUint _dataType;
 	AUint _clamp;
 	AUint _mipMapLevels;
 
 	bool _texturesReady;
 	bool _needsResize;
-	//bool _renderTargetsReady;
+	bool _renderTargetsReady;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

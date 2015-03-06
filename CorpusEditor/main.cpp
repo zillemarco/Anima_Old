@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
 	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
 		return 0;
-	mesh->GetTransformation()->Scale(10.0f, 1.0f, 10.0f);
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 
 //	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
 //	if (!manager->LoadModel(path, "cono"))
@@ -117,12 +117,14 @@ int main(int argc, char** argv)
 	//if ((mesh = manager->LoadModel(path, "ae")) == nullptr)
 	//	return 0;
 
-	//Anima::AnimaMesh* mesh = manager->CreateModel("sfera");
-	//mesh->MakeIcosahedralSphere(3);
-	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
-	//mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	//mesh->GetMaterial()->SetBoolean("TwoSided", false);
+//	mesh = manager->CreateModel("sfera");
+//	mesh->MakeIcosahedralSphere(3);
+//	mesh->ComputeFlatNormals();
+//	mesh->ComputeSmootNormals();
+//	mesh->GetTransformation()->Scale(2.0f, 2.0f, 2.0f);
+//	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+//	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+//	mesh->GetMaterial()->SetBoolean("TwoSided", false);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -132,7 +134,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
-	Window* window = engine.CreateAnimaWindow<Window>(1024, 768, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
+	Window* window = engine.CreateAnimaWindow<Window>(500, 500, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
 	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
@@ -150,7 +152,7 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	engine.SwapInterval(1);
 	window->MakeCurrentContext();
-	window->FrameBufferResizeCallback(window, (int)(1024 * window->GetResolutionMutiplier()), (int)(768 * window->GetResolutionMutiplier()));
+	window->FrameBufferResizeCallback(window, (int)(500 * window->GetResolutionMutiplier()), (int)(500 * window->GetResolutionMutiplier()));
 	
 	window->Load();
 	

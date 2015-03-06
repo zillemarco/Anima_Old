@@ -1111,6 +1111,7 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 		SetUniform("PTL_Position", light->GetPosition());
 		SetUniformf("PTL_Range", light->GetRange());
 		SetUniform("PTL_Color", light->GetColor());
+		SetUniformf("PTL_Intensity", light->GetIntensity());
 		SetUniformf("PTL_ConstantAttenuation", light->GetConstantAttenuation());
 		SetUniformf("PTL_LinearAttenuation", light->GetLinearAttenuation());
 		SetUniformf("PTL_ExponentAttenuation", light->GetExponentAttenuation());

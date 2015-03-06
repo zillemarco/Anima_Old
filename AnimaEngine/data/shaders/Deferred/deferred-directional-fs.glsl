@@ -37,5 +37,5 @@ void main()
 	vec3 sColor 	= specularColor * sFactor;
 
 	FragColor[0] = vec4(DIL_Color * lambert * DIL_Intensity, 1.0f);
-	FragColor[1] = vec4(DIL_Color * sColor, 1.0f);
+	FragColor[1] = vec4(DIL_Color * sColor * DIL_Intensity, 1.0f);
 }

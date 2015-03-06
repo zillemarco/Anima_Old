@@ -14,6 +14,7 @@
 #include "AnimaEngine.h"
 #include "AnimaMappedValues.h"
 #include "AnimaMesh.h"
+#include "AnimaTexture.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -76,7 +77,7 @@ public:
 	bool IsSpotLight();
 
 protected:
-	AnimaLightType _type;
+	AnimaLightType	_type;
 };
 
 //----------------------------------------------------------------

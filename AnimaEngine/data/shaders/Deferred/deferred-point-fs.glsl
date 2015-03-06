@@ -12,6 +12,7 @@ uniform vec3 CAM_Position;
 uniform float PTL_Range;
 uniform vec3 PTL_Position;
 uniform vec3 PTL_Color;
+uniform float PTL_Intensity;
 uniform float PTL_ConstantAttenuation;
 uniform float PTL_LinearAttenuation;
 uniform float PTL_ExponentAttenuation;
@@ -46,5 +47,6 @@ void main()
 	float sFactor 	= pow(rFactor, shininess);
 	vec3 sColor 	= specularColor * sFactor;
 
-	FragColor[0] = vec4(PTL_Color * lambert / atten, 1.0f);
+	FragColor[0] = vec4(PTL_Color * lambert * PTL_Intensity / atten, 1.0f);
+	FragColor[1] = vec4(PTL_Color * sColor * PTL_Intensity / atten, 1.0f);
 }

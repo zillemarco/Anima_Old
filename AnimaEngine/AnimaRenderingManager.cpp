@@ -169,18 +169,28 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			SetGBuffer("LightsBuffer", lightsBuffer);
 		}
 
-		AnimaGBuffer* diffuseBuffer = GetGBuffer("DiffuseBuffer");
-		if (diffuseBuffer != nullptr)
-			diffuseBuffer->Resize(screenWidth, screenHeight);
+//		AnimaGBuffer* diffuseBuffer = GetGBuffer("DiffuseBuffer");
+//		if (diffuseBuffer != nullptr)
+//			diffuseBuffer->Resize(screenWidth, screenHeight);
+//		else
+//		{
+//			diffuseBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+//			diffuseBuffer->AddTexture("DiffuseMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+//			diffuseBuffer->Create();
+//
+//			SetGBuffer("DiffuseBuffer", diffuseBuffer);
+//		}
+
+		AnimaTexture* diffuseTexture = GetTexture("DiffuseMap");
+		if(diffuseTexture != nullptr)
+			diffuseTexture->Resize(screenWidth, screenHeight);
 		else
 		{
-			diffuseBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			diffuseBuffer->AddTexture("DiffuseMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			diffuseBuffer->Create();
-
-			SetGBuffer("DiffuseBuffer", diffuseBuffer);
+			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			diffuseTexture->LoadRenderTargets();
+			SetTexture("DiffuseMap", diffuseTexture);
 		}
-
+		
 		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
 
@@ -231,7 +241,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* 
 	ANIMA_ASSERT(src != dst);
 
 	if (dst != nullptr)
-		;//dst->BindAsRenderTarget();
+		dst->BindAsRenderTarget();
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -323,7 +333,7 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* 
 void AnimaRenderingManager::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst)
 {
 	if (dst != nullptr)
-		;// dst->BindAsRenderTarget();
+		dst->BindAsRenderTarget();
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -885,7 +895,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	GetGBuffer("DiffuseBuffer")->BindAsRenderTarget();
+	GetTexture("DiffuseMap")->BindAsRenderTarget();
 	Start(stage);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -895,7 +905,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	//
 	//	Applicazione effetti
 	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("DiffuseBuffer")->GetTexture("DiffuseMap"), nullptr);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
