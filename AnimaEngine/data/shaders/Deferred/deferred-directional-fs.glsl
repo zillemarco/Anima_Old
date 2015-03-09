@@ -16,6 +16,23 @@ uniform float DIL_Intensity;
 uniform sampler2D LIG_ShadowMap;
 uniform mat4 LIG_ProjectionViewMatrix;
 
+float lineStep(float low, float hight, float compare)
+{
+	return clamp((compare - low) / (hight - low), 0.0f, 1.0f);
+}
+
+float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
+{
+	vec2 moments 	= texture(shadowMap, coords).xy;
+	float p 		= step(compare, moments.x);
+	float variance 	= max(moments.y - moments.x * moments.x, 0.00000002);
+
+	float d 		= compare - moments.x;
+	float pMax 		= lineStep(0.5f, 1.0f, variance / (variance + d * d));
+
+	return min(max(p, pMax), 1.0f);
+}
+
 void main()
 {
 	vec3 genPos	= vec3((gl_FragCoord.x * REN_InverseScreenSize.x), (gl_FragCoord.y * REN_InverseScreenSize.y), 0.0f);
@@ -30,7 +47,7 @@ void main()
 	shadowCoord 		/= shadowCoord.w;
 	shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-	float shadowAmount 	= step(shadowCoord.z - (1.0f / 16384.0f), texture(LIG_ShadowMap, shadowCoord.xy).r);
+	float shadowAmount 	= ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
 
 	vec3 specularColor 	= speclarData.xyz;
 	float shininess 	= 1.0f / speclarData.a;
