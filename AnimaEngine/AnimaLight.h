@@ -80,6 +80,7 @@ public:
 	bool IsSpotLight();
 
 	AnimaTexture* GetShadowTexture();
+	AnimaTexture* GetTempShadowTexture();
 
 	virtual AnimaMatrix GetViewMatrix();
 	virtual AnimaMatrix GetProjectionMatrix();
@@ -88,6 +89,7 @@ public:
 protected:
 	AnimaLightType	_type;
 	AnimaTexture*	_shadowTexture;
+	AnimaTexture*	_tempShadowTexture;
 	AnimaMatrix		_viewMatrix;
 	AnimaMatrix		_projectionMatrix;
 	AnimaMatrix		_projectionViewMatrix;

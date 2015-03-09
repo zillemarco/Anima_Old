@@ -1,6 +1,6 @@
-#version 330                                                                        
+#version 150 core
 
-layout (location = 0) in vec3 _position; 
+in vec3 _position; 
 
 uniform mat4 CAM_projectionViewMatrix;
 uniform mat4 MOD_modelMatrix;

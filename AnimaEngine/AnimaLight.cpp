@@ -18,6 +18,7 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
 	_shadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP, GL_COLOR_ATTACHMENT0);
+	_tempShadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP, GL_COLOR_ATTACHMENT0);
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
 }
@@ -27,6 +28,7 @@ AnimaLight::AnimaLight(const AnimaLight& src)
 {
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
+	_tempShadowTexture = src._tempShadowTexture;
 	_viewMatrix = src._viewMatrix;
 	_projectionMatrix = src._projectionMatrix;
 	_projectionViewMatrix = src._projectionViewMatrix;
@@ -37,6 +39,7 @@ AnimaLight::AnimaLight(AnimaLight&& src)
 {
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
+	_tempShadowTexture = src._tempShadowTexture;
 	_viewMatrix = src._viewMatrix;
 	_projectionMatrix = src._projectionMatrix;
 	_projectionViewMatrix = src._projectionViewMatrix;
@@ -49,6 +52,12 @@ AnimaLight::~AnimaLight()
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _shadowTexture);
 		_shadowTexture = nullptr;
 	}
+
+	if (_tempShadowTexture != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _tempShadowTexture);
+		_tempShadowTexture = nullptr;
+	}
 }
 
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
@@ -56,6 +65,7 @@ AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 	AnimaMappedValues::operator=(src);
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
+	_tempShadowTexture = src._tempShadowTexture;
 	_viewMatrix = src._viewMatrix;
 	_projectionMatrix = src._projectionMatrix;
 	_projectionViewMatrix = src._projectionViewMatrix;
@@ -67,6 +77,7 @@ AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 	AnimaMappedValues::operator=(src);
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
+	_tempShadowTexture = src._tempShadowTexture;
 	_viewMatrix = src._viewMatrix;
 	_projectionMatrix = src._projectionMatrix;
 	_projectionViewMatrix = src._projectionViewMatrix;
@@ -210,6 +221,11 @@ bool AnimaLight::IsSpotLight()
 AnimaTexture* AnimaLight::GetShadowTexture()
 {
 	return _shadowTexture;
+}
+
+AnimaTexture* AnimaLight::GetTempShadowTexture()
+{
+	return _tempShadowTexture;
 }
 
 AnimaMatrix AnimaLight::GetViewMatrix()

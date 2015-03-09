@@ -165,15 +165,13 @@ protected:
 	AnimaCamera*	_filterCamera;
 
 	AnimaMesh*		_pointLightMesh;
+	AnimaMesh*		_spotLightMesh;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
 	boost::unordered_map<AnimaString, AnimaGBuffer*, AnimaString::Hasher>	_gBuffersMap;
-
-	boost::unordered_map<AnimaString, AnimaColor3f, AnimaString::Hasher> _colors3fMap;
-	boost::unordered_map<AnimaString, AnimaColor4f, AnimaString::Hasher> _colors4fMap;
-	
+		
 	boost::unordered_map<AnimaString, AnimaVertex2f, AnimaString::Hasher> _vectors2fMap;
 	boost::unordered_map<AnimaString, AnimaVertex3f, AnimaString::Hasher> _vectors3fMap;
 	boost::unordered_map<AnimaString, AnimaVertex4f, AnimaString::Hasher> _vectors4fMap;

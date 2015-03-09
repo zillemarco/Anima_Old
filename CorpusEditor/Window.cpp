@@ -61,13 +61,17 @@ void Window::DrawScene()
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
-	
+
+	Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(0.5f);
+
 	Anima::AnimaVertex3f pos = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->GetPosition();
-	
-	Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(1.0f);
 	pos = m * pos;
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->SetPosition(pos);
-	
+
+	//Anima::AnimaVertex3f dir = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
+	//dir = m * dir;
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
+
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 	
 	renderingManager->DeferredDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
@@ -267,6 +271,12 @@ void Window::Load()
 	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-vs.glsl", Anima::AnimaShader::VERTEX));
 	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("fxaaFilter")->Link();
+
+	mgr->CreateProgram("gaussBlur7x1Filter");
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->Create();
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
 
 //	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
 //	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));

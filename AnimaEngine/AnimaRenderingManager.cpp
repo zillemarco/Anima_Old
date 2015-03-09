@@ -30,8 +30,6 @@ AnimaRenderingManager::AnimaRenderingManager(const AnimaRenderingManager& src)
 	_textureSlotsMap = src._textureSlotsMap;
 	_gBuffersMap = src._gBuffersMap;
 
-	_colors3fMap = src._colors3fMap;
-	_colors4fMap = src._colors4fMap;
 	_vectors2fMap = src._vectors2fMap;
 	_vectors3fMap = src._vectors3fMap;
 	_vectors4fMap = src._vectors4fMap;
@@ -48,8 +46,6 @@ AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
 	_textureSlotsMap = src._textureSlotsMap;
 	_gBuffersMap = src._gBuffersMap;
 
-	_colors3fMap = src._colors3fMap;
-	_colors4fMap = src._colors4fMap;
 	_vectors2fMap = src._vectors2fMap;
 	_vectors3fMap = src._vectors3fMap;
 	_vectors4fMap = src._vectors4fMap;
@@ -76,8 +72,6 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(const AnimaRenderingMana
 		_textureSlotsMap = src._textureSlotsMap;
 		_gBuffersMap = src._gBuffersMap;
 
-		_colors3fMap = src._colors3fMap;
-		_colors4fMap = src._colors4fMap;
 		_vectors2fMap = src._vectors2fMap;
 		_vectors3fMap = src._vectors3fMap;
 		_vectors4fMap = src._vectors4fMap;
@@ -102,8 +96,6 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(AnimaRenderingManager&& 
 		_textureSlotsMap = src._textureSlotsMap;
 		_gBuffersMap = src._gBuffersMap;
 
-		_colors3fMap = src._colors3fMap;
-		_colors4fMap = src._colors4fMap;
 		_vectors2fMap = src._vectors2fMap;
 		_vectors3fMap = src._vectors3fMap;
 		_vectors4fMap = src._vectors4fMap;
@@ -219,7 +211,8 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	// Inizializzazione della camera di supporto
 	//
 	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr);
-	_filterCamera->SetProjectionMatrix(AnimaMatrix()/*AnimaMatrix::MakeOrtho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 10.0f)*/);
+	_filterCamera->SetProjectionMatrix(AnimaMatrix());
+	_filterCamera->SetViewMatrix(AnimaMatrix());
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);
 	_filterCamera->RotateYDeg(180.0f);
 }
@@ -241,6 +234,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* 
 		_filterMesh->UpdateBuffers();
 
 	SetTexture("FilterMap", src, false);
+	SetVector("TextureSize", AnimaVertex2f(src->GetWidth(), src->GetHeight()));
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
@@ -270,6 +264,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* 
 		_filterMesh->UpdateBuffers();
 
 	SetTexture("FilterMap", src, false);
+	SetVector("TextureSize", AnimaVertex2f(src->GetWidth(), src->GetHeight()));
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
@@ -876,7 +871,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	glDepthMask(GL_FALSE);
 	DeferredDirectionalPass(stage, shadersManager->GetProgramFromName("deferred-directional"));
-	//DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
+	DeferredPointPass(stage, shadersManager->GetProgramFromName("deferred-point"));
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 
@@ -967,6 +962,12 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaMesh* mode
 
 void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial)
 {
+	if (mesh->NeedsBuffersUpdate())
+		mesh->UpdateBuffers();
+
+	if (mesh->GetVertexArrayObject() <= 0)
+		return;
+
 	if (updateMaterial)
 	{
 		AnimaMaterial* material = mesh->GetMaterial();
@@ -977,10 +978,7 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* 
 	}
 
 	program->UpdateMeshProperies(mesh, parentTransformation);
-
-	if (mesh->NeedsBuffersUpdate())
-		mesh->UpdateBuffers();
-
+	
 	glBindVertexArray(mesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1209,6 +1207,8 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaSha
 {
 	AnimaLightsManager* lightsManager = stage->GetLightsManager();
 	AnimaModelsManager* modelsManager = stage->GetModelsManager();
+	AnimaShadersManager* shadersManager = stage->GetShadersManager();
+
 	ASizeT nLights = lightsManager->GetTotalLightsCount();
 	ASizeT nModels = modelsManager->GetModelsNumber();
 
@@ -1230,12 +1230,16 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaSha
 		if (!light->IsDirectionalLight())
 			continue;
 
+		AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
 		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!tmpShadowMap->AreRenderTargetsReady())
+			tmpShadowMap->LoadRenderTargets();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
@@ -1263,6 +1267,14 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaSha
 			for (ASizeT i = 0; i < childrenNumber; i++)
 				DeferredDrawModel(stage, innerModel->GetChild(i), program, modelMatrix, false);
 		}
+
+		AFloat blurAmount = 1.0f;
+
+		SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
+		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
+
+		SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
+		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
 	}
 }
 
@@ -1332,7 +1344,7 @@ void AnimaRenderingManager::SetGBuffer(const char* name, AnimaGBuffer* value, bo
 
 void AnimaRenderingManager::SetColor(AnimaString propertyName, AnimaColor3f value)
 {
-	_colors3fMap[propertyName] = value;
+	_vectors3fMap[propertyName] = value;
 }
 
 void AnimaRenderingManager::SetColor(const char* propertyName, AnimaColor3f value)
@@ -1355,7 +1367,7 @@ void AnimaRenderingManager::SetColor(const char* propertyName, AFloat r, AFloat 
 
 void AnimaRenderingManager::SetColor(AnimaString propertyName, AnimaColor4f value)
 {
-	_colors3fMap[propertyName] = value;
+	_vectors4fMap[propertyName] = value;
 }
 
 void AnimaRenderingManager::SetColor(const char* propertyName, AnimaColor4f value)
@@ -1549,8 +1561,8 @@ AnimaGBuffer* AnimaRenderingManager::GetGBuffer(const char* gBufferName)
 
 AnimaColor3f AnimaRenderingManager::GetColor3f(AnimaString propertyName)
 {
-	if (_colors3fMap.find(propertyName) != _colors3fMap.end())
-		return _colors3fMap[propertyName];
+	if (_vectors3fMap.find(propertyName) != _vectors3fMap.end())
+		return _vectors3fMap[propertyName];
 
 	AnimaColor3f color(0.0f, 0.0f, 0.0f);
 	return color;
@@ -1564,8 +1576,8 @@ AnimaColor3f AnimaRenderingManager::GetColor3f(const char* propertyName)
 
 AnimaColor4f AnimaRenderingManager::GetColor4f(AnimaString propertyName)
 {
-	if (_colors4fMap.find(propertyName) != _colors4fMap.end())
-		return _colors4fMap[propertyName];
+	if (_vectors4fMap.find(propertyName) != _vectors4fMap.end())
+		return _vectors4fMap[propertyName];
 
 	AnimaColor4f color(0.0f, 0.0f, 0.0f, 1.0f);
 	return color;
@@ -1705,9 +1717,6 @@ void AnimaRenderingManager::Clear()
 	_texturesMap.clear();
 	_textureSlotsMap.clear();
 	_gBuffersMap.clear();
-
-	_colors3fMap.clear();
-	_colors4fMap.clear();
 
 	_vectors2fMap.clear();
 	_vectors3fMap.clear();
