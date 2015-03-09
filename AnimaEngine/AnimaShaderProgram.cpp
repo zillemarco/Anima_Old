@@ -911,12 +911,12 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 {
 	SetUniform("LIG_ProjectionViewMatrix", light->GetProjectionViewMatrix());
 
-	if (light->GetShadowTexture())
+	if (light->IsDirectionalLight() && light->GetShadowTexture())
 	{
 		AnimaTexture* texture = light->GetShadowTexture();
 
 		AUint slot = renderingManager->GetTextureSlot("ShadowMap");
-		SetUniformi("ShadowMap", slot);
+		SetUniformi("LIG_ShadowMap", slot);
 
 		if (texture == nullptr)
 		{

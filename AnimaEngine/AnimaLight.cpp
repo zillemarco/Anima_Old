@@ -17,7 +17,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
-	_shadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_NEAREST, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_DEPTH_ATTACHMENT);
+	_shadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_NEAREST, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_CLAMP, GL_DEPTH_ATTACHMENT);
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
 }
@@ -329,8 +329,8 @@ void AnimaDirectionalLight::ComputeViewMatrix()
 
 void AnimaDirectionalLight::ComputeProjectionMatrix()
 {
-	float t = 1.0f;
-	_projectionMatrix = AnimaMatrix::MakeOrtho(-10.0f * t, 10.0f * t, -10.0f * t, 10.0f * t, -1000.0f, 1000.0f);
+	float t = 40.0f;
+	_projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -1000.0f, 1000.0f);
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 }
 

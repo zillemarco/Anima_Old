@@ -100,7 +100,7 @@ int main(int argc, char** argv)
 
 	Anima::AnimaMesh* mesh = nullptr;
 
-	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	path = ANIMA_ENGINE_MODELS_PATH "cubo.3ds";
 	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
 		return 0;
 
@@ -135,8 +135,8 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
 #if defined WIN32
-	Anima::AInt width = 1024;
-	Anima::AInt height = 768;
+	Anima::AInt width = 500;
+	Anima::AInt height = 500;
 #else
 	Anima::AInt width = 500;
 	Anima::AInt height = 500;

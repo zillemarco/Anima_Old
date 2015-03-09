@@ -26,11 +26,11 @@ void main()
 	vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 	vec3 pos 			= clip.xyz / clip.w;
 
-	vec4 shadowCoord 	= LIG_ProjectionViewMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
+	vec4 shadowCoord 	= LIG_ProjectionViewMatrix * vec4(pos, 1.0f);
 	shadowCoord 		/= shadowCoord.w;
 	shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-	float shadowAmount 	= step(shadowCoord.z, texture(LIG_ShadowMap, shadowCoord.xy).r);
+	float shadowAmount 	= step(shadowCoord.z - (1.0f / 16384.0f), texture(LIG_ShadowMap, shadowCoord.xy).r);
 
 	vec3 specularColor 	= speclarData.xyz;
 	float shininess 	= 1.0f / speclarData.a;

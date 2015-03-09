@@ -129,6 +129,7 @@ void AnimaRenderingManager::InitTextureSlots()
 	SetTextureSlot("NormalMap", 2);
 	SetTextureSlot("EmissiveMap", 3);
 	SetTextureSlot("SpecularMap", 4);
+	SetTextureSlot("ShadowMap", 5);
 
 	// Slot usati dai filtri
 	SetTextureSlot("FilterMap", 0);
@@ -147,10 +148,10 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			prepassBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
+			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
+			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
+			prepassBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
 			prepassBuffer->Create();
 
 			SetGBuffer("PrepassBuffer", prepassBuffer);
@@ -162,8 +163,8 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
+			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
 			lightsBuffer->Create();
 
 			SetGBuffer("LightsBuffer", lightsBuffer);
@@ -173,7 +174,7 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			diffuseTexture->Resize(screenWidth, screenHeight);
 		else
 		{
-			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP, GL_COLOR_ATTACHMENT0);
 			diffuseTexture->LoadRenderTargets();
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
@@ -885,17 +886,17 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	//GetTexture("DiffuseMap")->BindAsRenderTarget();
 	Start(stage);	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	DeferredCombinePass(stage, shadersManager->GetProgramFromName("deferred-combine"));
 	Finish(stage);
 
-	//
-	//	Applicazione effetti
-	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	////
+	////	Applicazione effetti
+	////
+	//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
@@ -966,14 +967,16 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaStage* stage, AnimaMesh* mode
 
 void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial)
 {
-	AnimaMaterial* material = mesh->GetMaterial();
-	if (material == nullptr)
-		return;
+	if (updateMaterial)
+	{
+		AnimaMaterial* material = mesh->GetMaterial();
+		if (material == nullptr)
+			return;
+
+		program->UpdateMaterialProperies(material, this);
+	}
 
 	program->UpdateMeshProperies(mesh, parentTransformation);
-
-	if (updateMaterial)
-		program->UpdateMaterialProperies(material, this);
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
@@ -1244,11 +1247,17 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaSha
 			AnimaMesh* innerModel = modelsManager->GetModel(j);
 			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
+			glCullFace(GL_FRONT);
 			DeferredDrawModelMesh(stage, innerModel, program, modelMatrix, false);
+			glCullFace(GL_BACK);
 
 			ASizeT meshNumber = innerModel->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
+			{
+				glCullFace(GL_FRONT);
 				DeferredDrawModelMesh(stage, innerModel->GetMesh(i), program, modelMatrix, false);
+				glCullFace(GL_BACK);
+			}
 
 			ASizeT childrenNumber = innerModel->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
