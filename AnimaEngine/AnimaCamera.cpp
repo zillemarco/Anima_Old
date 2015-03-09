@@ -50,6 +50,10 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 	_position.x = 0.0f;
 	_position.y = 0.0f;
 	_position.z = 5.0f;
+
+	_fov = 0.0f;
+	_zNear = 0.0f;
+	_zFar = 0.0f;
 	
 	INIT_AXIS;
 	INIT_WORLD_AXIS;
@@ -63,6 +67,10 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 {
 	ANIMA_ASSERT(allocator != nullptr);
 	_allocator = allocator;
+
+	_fov = 0.0f;
+	_zNear = 0.0f;
+	_zFar = 0.0f;
 	
 	INIT_AXIS;
 	INIT_WORLD_AXIS;
@@ -81,6 +89,9 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _viewMatrix(src._viewMatrix)
 	, _projectionMatrix(src._projectionMatrix)
 	, _camerasManager(src._camerasManager)
+	, _fov(src._fov)
+	, _zNear(src._zNear)
+	, _zFar(src._zFar)
 {
 	_allocator = src._allocator;
 
@@ -101,6 +112,9 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _projectionMatrix(src._projectionMatrix)
 	, _allocator(src._allocator)
 	, _camerasManager(src._camerasManager)
+	, _fov(src._fov)
+	, _zNear(src._zNear)
+	, _zFar(src._zFar)
 {
 
 	INIT_WORLD_AXIS;
@@ -127,6 +141,10 @@ AnimaCamera& AnimaCamera::operator=(const AnimaCamera& src)
 		_yAxis = src._yAxis;
 		_zAxis = src._zAxis;
 
+		_fov = src._fov;
+		_zNear = src._zNear;
+		_zFar = src._zFar;
+
 		INIT_WORLD_AXIS;
 	}
 
@@ -149,6 +167,10 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 		_xAxis = src._xAxis;
 		_yAxis = src._yAxis;
 		_zAxis = src._zAxis;
+
+		_fov = src._fov;
+		_zNear = src._zNear;
+		_zFar = src._zFar;
 		
 		INIT_WORLD_AXIS;
 	}
@@ -217,6 +239,9 @@ AnimaVertex3f AnimaCamera::GetRight()
 void AnimaCamera::SetViewMatrix(const AnimaMatrix& matrix)
 {
 	_viewMatrix = matrix;
+
+	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 }
 
 AnimaMatrix AnimaCamera::GetViewMatrix()
@@ -227,6 +252,9 @@ AnimaMatrix AnimaCamera::GetViewMatrix()
 void AnimaCamera::SetProjectionMatrix(const AnimaMatrix& matrix)
 {
 	_projectionMatrix = matrix;
+
+	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 }
 
 AnimaMatrix AnimaCamera::GetProjectionMatrix()
@@ -236,10 +264,18 @@ AnimaMatrix AnimaCamera::GetProjectionMatrix()
 
 void AnimaCamera::CalculateProjectionMatrix(float fov, const AnimaVertex2f& size, float zNear, float zFar)
 {
-	_windowSize = size;
-	_projectionMatrix.SetIdentity();
-	_projectionMatrix.Perspective(fov, size.x / size.y, zNear, zFar);
-	_projectionType = PERSPECTIVE;
+	if (_windowSize != size)
+		_windowSize = size;
+
+	if (fov != _fov || zNear != _zNear || zFar != zFar)
+	{
+		_projectionMatrix.SetIdentity();
+		_projectionMatrix.Perspective(fov, size.x / size.y, zNear, zFar);
+		_projectionType = PERSPECTIVE;
+
+		_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+		_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+	}
 }
 
 void AnimaCamera::CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar)
@@ -247,6 +283,9 @@ void AnimaCamera::CalculateProjectionMatrix(float left, float right, float botto
 	_projectionMatrix.SetIdentity();
 	_projectionMatrix.Ortho(left, right, bottom, top, zNear, zFar);
 	_projectionType = ORTHO;
+
+	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 }
 
 bool AnimaCamera::IsPerspectiveProjectionType()
@@ -262,6 +301,16 @@ bool AnimaCamera::IsOrthoProjectionType()
 AnimaVertex2f AnimaCamera::GetWindowSize()
 {
 	return _windowSize;
+}
+
+AnimaMatrix AnimaCamera::GetProjectionViewMatrix()
+{
+	return _projectionViewMatrix;
+}
+
+AnimaMatrix AnimaCamera::GetInversedProjectionViewMatrix()
+{
+	return _InverseProjectionViewMatrix;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

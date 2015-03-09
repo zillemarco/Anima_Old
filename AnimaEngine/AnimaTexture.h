@@ -62,6 +62,7 @@ public:
 	bool LoadRenderTargets();
 
 	bool IsReady();
+	bool AreRenderTargetsReady();
 
 	void Resize(AUint width, AUint height);
 	

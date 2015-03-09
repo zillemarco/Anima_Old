@@ -70,6 +70,9 @@ public:
 	virtual void CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar);
 	virtual void SetProjectionMatrix(const AnimaMatrix& matrix);
 	virtual AnimaMatrix GetProjectionMatrix();
+
+	virtual AnimaMatrix GetProjectionViewMatrix();
+	virtual AnimaMatrix GetInversedProjectionViewMatrix();
 	
 	virtual void Activate();
 	virtual void Deactivate();
@@ -91,12 +94,18 @@ protected:
 	AnimaVertex3f _worldZAxis;
 
 	AnimaVertex2f _windowSize;
+
+	AFloat _fov;
+	AFloat _zNear;
+	AFloat _zFar;
 	
 	bool _active;
 	AnimaCameraProjectionType _projectionType;
 
 	AnimaMatrix _viewMatrix;
 	AnimaMatrix _projectionMatrix;
+	AnimaMatrix _projectionViewMatrix;
+	AnimaMatrix _InverseProjectionViewMatrix;
 
 	AnimaAllocator* _allocator;	
 	AnimaCamerasManager* _camerasManager;

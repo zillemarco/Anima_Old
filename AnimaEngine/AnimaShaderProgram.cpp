@@ -9,10 +9,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
-#define TEST
-//#define TEST_SET_SINGOLA_RICERCA
-#define TEST_SENZA_RICERCA
-
 const char* ModelPrefix				= "MOD";
 const char* CameraPrefix			= "CAM";
 const char* MaterialPrefix			= "MAT";
@@ -231,7 +227,6 @@ void AnimaShaderProgram::ClearShaders()
 
 void AnimaShaderProgram::ClearUniforms()
 {
-#if defined TEST
 	for (auto& pair : _uniforms)
 	{
 		if (pair.second._nameParts != nullptr)
@@ -241,7 +236,6 @@ void AnimaShaderProgram::ClearUniforms()
 			pair.second._namePartsCount = 0;
 		}
 	}
-#endif
 	_uniforms.clear();
 }
 
@@ -358,14 +352,9 @@ AInt AnimaShaderProgram::GetID()
 
 void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform1i(pair->second._location, value);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform1i(_uniforms.at(uniformName)._location, value);
-#endif
 }
 
 void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
@@ -376,14 +365,9 @@ void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
 
 void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat value)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform1f(pair->second._location, value);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform1f(_uniforms.at(uniformName)._location, value);
-#endif
 }
 
 void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
@@ -394,14 +378,9 @@ void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform2f(pair->second._location, value.x, value.y);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform2f(_uniforms.at(uniformName)._location, value.x, value.y);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
@@ -412,14 +391,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform3f(pair->second._location, value.x, value.y, value.z);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform3f(_uniforms.at(uniformName)._location, value.x, value.y, value.z);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
@@ -430,14 +404,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaColor4f& value)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform4f(pair->second._location, value.x, value.y, value.z, value.w);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform4f(_uniforms.at(uniformName)._location, value.x, value.y, value.z, value.w);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
@@ -448,14 +417,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f&
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform3f(pair->second._location, a, b, c);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform3f(_uniforms.at(uniformName)._location, a, b, c);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
@@ -466,14 +430,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b,
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform4f(pair->second._location, a, b, c, d);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniform4f(_uniforms.at(uniformName)._location, a, b, c, d);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
@@ -484,14 +443,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b,
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose)
 {
-#if defined TEST_SET_SINGOLA_RICERCA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniformMatrix4fv(pair->second._location, 1, transpose ? GL_TRUE : GL_FALSE, value.m);
-#else
-	if (_uniforms.find(uniformName) != _uniforms.end())
-		glUniformMatrix4fv(_uniforms.at(uniformName)._location, 1, transpose ? GL_TRUE : GL_FALSE, value.m);
-#endif
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
@@ -572,7 +526,6 @@ void AnimaShaderProgram::ScanVariables()
 			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0] + 1, NULL, name.GetBuffer());
 			name.Trim();
 
-#if defined TEST
 			namePart1 = name;
 
 			AUint offset = namePart1.CountOf('_') + 1;
@@ -598,12 +551,6 @@ void AnimaShaderProgram::ScanVariables()
 			info._name = name;
 			info._nameParts = nameParts;
 			info._namePartsCount = offset;
-#else
-			AnimaUniformInfo info;
-			info._location = values[2];
-			info._type = values[1];
-			info._name = name;
-#endif
 
 			_uniforms[name] = info;
 		}
@@ -666,7 +613,6 @@ void AnimaShaderProgram::ScanVariables()
 			
 			location = glGetUniformLocation(_id, name.GetConstBuffer());
 
-#if defined TEST
 			namePart1 = name;
 
 			AUint offset = namePart1.CountOf('_') + 1;
@@ -692,12 +638,6 @@ void AnimaShaderProgram::ScanVariables()
 			info._name = name;
 			info._nameParts = nameParts;
 			info._namePartsCount = offset;
-#else
-			AnimaUniformInfo info;
-			info._location = location;
-			info._type = type;
-			info._name = name;
-#endif
 
 			_uniforms[name] = info;
 		}
@@ -819,11 +759,7 @@ void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix&
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_MAT4)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, transformation);
-#else
-			SetUniform(info._name, transformation);
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -843,11 +779,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_VEC3)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, camera->GetPosition());
-#else
-			SetUniform(info._name, camera->GetPosition());
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -860,11 +792,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_VEC2)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, camera->GetWindowSize());
-#else
-			SetUniform(info._name, camera->GetWindowSize());
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -877,11 +805,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_VEC2)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
-#else
-			SetUniform(info._name, AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -894,11 +818,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_MAT4)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, camera->GetViewMatrix());
-#else
-			SetUniform(info._name, camera->GetViewMatrix());
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -911,11 +831,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_MAT4)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, camera->GetProjectionMatrix());
-#else
-			SetUniform(info._name, camera->GetProjectionMatrix());
-#endif
 		else
 		{
 			UPD_ERROR;
@@ -928,11 +844,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 		info = _uniforms[str];
 		
 		if (info._type == GL_FLOAT_MAT4)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, camera->GetProjectionMatrix() * camera->GetViewMatrix());
-#else
-			SetUniform(info._name, camera->GetProjectionMatrix() * camera->GetViewMatrix());
-#endif
+			SetUniform(info._location, camera->GetProjectionViewMatrix());
 		else
 		{
 			UPD_ERROR;
@@ -945,7 +857,6 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 	if (material == nullptr)
 		return;
 
-#if defined TEST
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
@@ -954,45 +865,21 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 			continue;
 		
 		if (info._type == GL_FLOAT_VEC3)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, material->GetColor3f(info._nameParts[1]));
-#else
-			SetUniform(info._name, material->GetColor3f(info._nameParts[1]));
-#endif
 		else if (info._type == GL_FLOAT_VEC4)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, material->GetColor4f(info._nameParts[1]));
-#else
-			SetUniform(info._name, material->GetColor4f(info._nameParts[1]));
-#endif
 		else if (info._type == GL_FLOAT)
-#if defined TEST_SENZA_RICERCA
 			SetUniformf(info._location, material->GetFloat(info._nameParts[1]));
-#else
-			SetUniformf(info._name, material->GetFloat(info._nameParts[1]));
-#endif
 		else if (info._type == GL_BOOL)
-#if defined TEST_SENZA_RICERCA
 			SetUniformi(info._location, material->GetBoolean(info._nameParts[1]) ? 1 : 0);
-#else
-			SetUniformi(info._name, material->GetBoolean(info._nameParts[1]) ? 1 : 0);
-#endif
 		else if (info._type == GL_INT)
-#if defined TEST_SENZA_RICERCA
 			SetUniformi(info._location, material->GetInteger(info._nameParts[1]));
-#else
-			SetUniformi(info._name, material->GetInteger(info._nameParts[1]));
-#endif
 		else if (info._type == GL_SAMPLER_2D)
 		{
 			AnimaTexture* texture = material->GetTexture(info._nameParts[1]);
 
 			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-#if defined TEST_SENZA_RICERCA
 			SetUniformi(info._location, slot);
-#else
-			SetUniformi(info._name, slot);
-#endif
 
 			if (texture == nullptr)
 			{
@@ -1010,76 +897,6 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 			ANIMA_ASSERT(false);
 		}
 	}
-#else
-	AnimaString str(_allocator);
-
-	for (auto& pair : _uniforms)
-	{
-		AnimaUniformInfo info = pair.second;
-
-		if (!info._name.StartsWith("MAT_"))
-			continue;
-
-		str = info._name.Substring(4, info._name.GetBufferLength());
-
-		if (info._type == GL_FLOAT_VEC3)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, material->GetColor3f(str));
-#else
-			SetUniform(info._name, material->GetColor3f(str));
-#endif
-		else if (info._type == GL_FLOAT_VEC4)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, material->GetColor4f(str));
-#else
-			SetUniform(info._name, material->GetColor4f(str));
-#endif
-		else if (info._type == GL_FLOAT)
-#if defined TEST_SENZA_RICERCA
-			SetUniformf(info._location, material->GetFloat(str));
-#else
-			SetUniformf(info._name, material->GetFloat(str));
-#endif
-		else if (info._type == GL_BOOL)
-#if defined TEST_SENZA_RICERCA
-			SetUniformi(info._location, material->GetBoolean(str) ? 1 : 0);
-#else
-			SetUniformi(info._name, material->GetBoolean(str) ? 1 : 0);
-#endif
-		else if (info._type == GL_INT)
-#if defined TEST_SENZA_RICERCA
-			SetUniformi(info._location, material->GetInteger(str));
-#else
-			SetUniformi(info._name, material->GetInteger(str));
-#endif
-		else if (info._type == GL_SAMPLER_2D)
-		{
-			AnimaTexture* texture = material->GetTexture(str);
-
-			AUint slot = renderingManager->GetTextureSlot(str);
-#if defined TEST_SENZA_RICERCA
-			SetUniformi(info._location, slot);
-#else
-			SetUniformi(info._name, slot);
-#endif
-
-			if (texture == nullptr)
-			{
-				glActiveTexture(GL_TEXTURE0 + slot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			else
-			{
-				texture->Load();
-				texture->Bind(slot);
-			}
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-	}
-#endif
 
 	if (material->GetBoolean("TwoSided"))
 		glDisable(GL_CULL_FACE);
@@ -1092,6 +909,8 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 
 void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
 {
+	SetUniform("LIG_ProjectionViewMatrix", light->GetProjectionViewMatrix());
+
 	if (light->IsAmbientLight())
 	{
 		SetUniform("AML_Color", light->GetColor());
@@ -1255,7 +1074,6 @@ void AnimaShaderProgram::UpdateLightsProperies(AnimaStage* stage)
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)
 {
-#if defined TEST
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
@@ -1264,41 +1082,17 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 			continue;
 
 		if (info._type == GL_FLOAT_VEC2)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, renderingManager->GetVector2f(info._nameParts[1]));
-#else
-			SetUniform(info._name, renderingManager->GetVector2f(info._nameParts[1]));
-#endif
 		else if (info._type == GL_FLOAT_VEC3)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, renderingManager->GetColor3f(info._nameParts[1]));
-#else
-			SetUniform(info._name, renderingManager->GetColor3f(info._nameParts[1]));
-#endif
 		else if (info._type == GL_FLOAT_VEC4)
-#if defined TEST_SENZA_RICERCA
 			SetUniform(info._location, renderingManager->GetColor4f(info._nameParts[1]));
-#else
-			SetUniform(info._name, renderingManager->GetColor4f(info._nameParts[1]));
-#endif
 		else if (info._type == GL_FLOAT)
-#if defined TEST_SENZA_RICERCA
 			SetUniformf(info._location, renderingManager->GetFloat(info._nameParts[1]));
-#else
-			SetUniformf(info._name, renderingManager->GetFloat(info._nameParts[1]));
-#endif
 		else if (info._type == GL_BOOL)
-#if defined TEST_SENZA_RICERCA
 			SetUniformi(info._location, renderingManager->GetBoolean(info._nameParts[1]) ? 1 : 0);
-#else
-			SetUniformi(info._name, renderingManager->GetBoolean(info._nameParts[1]) ? 1 : 0);
-#endif
 		else if (info._type == GL_INT)
-#if defined TEST_SENZA_RICERCA
 			SetUniformi(info._location, renderingManager->GetInteger(info._nameParts[1]));
-#else
-			SetUniformi(info._name, renderingManager->GetInteger(info._nameParts[1]));
-#endif
 		else if (info._type == GL_SAMPLER_2D)
 		{
 			if (info._namePartsCount == 4 && info._nameParts[1] == GBufferPrefix)
@@ -1309,12 +1103,8 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 
 				AnimaTexture* texture = buffer->GetTexture(info._nameParts[3]);
 				AUint slot = renderingManager->GetTextureSlot(info._nameParts[3]);
-
-#if defined TEST_SENZA_RICERCA
 				SetUniformi(info._location, slot);
-#else
-				SetUniformi(info._name, slot);
-#endif
+
 				if (texture == nullptr)
 				{
 					glActiveTexture(GL_TEXTURE0 + slot);
@@ -1330,12 +1120,8 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 			{
 				AnimaTexture* texture = renderingManager->GetTexture(info._nameParts[1]);
 				AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-
-#if defined TEST_SENZA_RICERCA
 				SetUniformi(info._location, slot);
-#else
-				SetUniformi(info._name, slot);
-#endif
+
 				if (texture == nullptr)
 				{
 					glActiveTexture(GL_TEXTURE0 + slot);
@@ -1353,126 +1139,6 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 			ANIMA_ASSERT(false);
 		}
 	}
-#else
-	AnimaString str1(_allocator);
-	AnimaString str2(_allocator);
-
-	for (auto& pair : _uniforms)
-	{
-		AnimaUniformInfo info = pair.second;
-
-		// info._name: R_<nomevariabile>
-		if (!info._name.StartsWith("REN_"))
-			continue;
-		
-		// str1: <nomevariabile>
-		str1 = info._name.Substring(4, info._name.GetBufferLength());
-
-		if (info._type == GL_FLOAT_VEC2)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, renderingManager->GetVector2f(str1));
-#else
-			SetUniform(info._name, renderingManager->GetVector2f(str1));
-#endif
-		else if (info._type == GL_FLOAT_VEC3)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, renderingManager->GetColor3f(str1));
-#else
-			SetUniform(info._name, renderingManager->GetColor3f(str1));
-#endif
-		else if (info._type == GL_FLOAT_VEC4)
-#if defined TEST_SENZA_RICERCA
-			SetUniform(info._location, renderingManager->GetColor4f(str1));
-#else
-			SetUniform(info._name, renderingManager->GetColor4f(str1));
-#endif
-		else if (info._type == GL_FLOAT)
-#if defined TEST_SENZA_RICERCA
-			SetUniformf(info._location, renderingManager->GetFloat(str1));
-#else
-			SetUniformf(info._name, renderingManager->GetFloat(str1));
-#endif
-		else if (info._type == GL_BOOL)
-#if defined TEST_SENZA_RICERCA
-			SetUniformi(info._location, renderingManager->GetBoolean(str1) ? 1 : 0);
-#else
-			SetUniformi(info._name, renderingManager->GetBoolean(str1) ? 1 : 0);
-#endif
-		else if (info._type == GL_INT)
-#if defined TEST_SENZA_RICERCA
-			SetUniformi(info._location, renderingManager->GetInteger(str1));
-#else
-			SetUniformi(info._name, renderingManager->GetInteger(str1));
-#endif
-		else if (info._type == GL_SAMPLER_2D)
-		{
-			// str1: GB_<nomebuffer>_<nometexturebuffer>
-			// str1: <nometexture>
-			if (str1.StartsWith("GB_"))
-			{
-				// str1: <nomebuffer>_<nometexturebuffer>
-				str1 = str1.Substring(3, str1.GetBufferLength());
-
-				AInt pos = str1.Find('_');
-				ANIMA_ASSERT(pos > 0);
-
-				// str2: <nomebuffer>
-				str2 = str1.Substring(0, pos);
-
-				// str1: <nometexturebuffer>
-				str1 = str1.Substring(pos + 1, str1.GetBufferLength());
-
-				AnimaGBuffer* buffer = renderingManager->GetGBuffer(str2);
-				if (!buffer)
-					continue;
-
-				AnimaTexture* texture = buffer->GetTexture(str1);
-				AUint slot = renderingManager->GetTextureSlot(str1);
-
-#if defined TEST_SENZA_RICERCA
-				SetUniformi(info._location, slot);
-#else
-				SetUniformi(info._name, slot);
-#endif
-				if (texture == nullptr)
-				{
-					glActiveTexture(GL_TEXTURE0 + slot);
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}
-				else
-				{
-					texture->Load();
-					texture->Bind(slot);
-				}
-			}
-			else
-			{
-				AnimaTexture* texture = renderingManager->GetTexture(str1);
-				AUint slot = renderingManager->GetTextureSlot(str1);
-
-#if defined TEST_SENZA_RICERCA
-				SetUniformi(info._location, slot);
-#else
-				SetUniformi(info._name, slot);
-#endif
-				if (texture == nullptr)
-				{
-					glActiveTexture(GL_TEXTURE0 + slot);
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}
-				else
-				{
-					texture->Load();
-					texture->Bind(slot);
-				}
-			}
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-	}
-#endif
 }
 
 END_ANIMA_ENGINE_NAMESPACE

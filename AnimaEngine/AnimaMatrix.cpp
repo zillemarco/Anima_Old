@@ -691,15 +691,6 @@ AnimaMatrix AnimaMatrix::MakeLookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AF
 
 void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar)
 {
-	char szBuff[1024];
-	sprintf(szBuff, "%f\n", aspect);
-
-#if defined _MSC_VER
-	OutputDebugStringA(szBuff);
-#else
-	puts(szBuff);
-#endif
-
 	SetIdentity();
 
 	float radians = (fov / 2.0f) *(float)M_PI / 180.0f;
@@ -726,7 +717,16 @@ AnimaMatrix AnimaMatrix::MakePerspective(AFloat fov, AFloat aspect, AFloat zNear
 
 void AnimaMatrix::Ortho(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar)
 {
-	// TODO
+	SetIdentity();
+	
+	float width = (right - left);
+	float height = (top - bottom);
+	float depth = (zFar - zNear);
+
+	m[0] = 2.0f / width;				m[1] = 0.0f;						m[2] = 0.0f;						m[3] = 0.0f;
+	m[4] = 0.0f;						m[5] = 2.0f / height;				m[6] = 0.0f;						m[7] = 0.0f;
+	m[8] = 0.0f;						m[9] = 0.0f;						m[10] = -2.0f / depth;				m[11] = 0.0f;
+	m[12] = -(right + left) / width;	m[13] = -(top + bottom) / height;	m[14] = -(zFar + zNear) / depth;	m[15] = 1.0f;
 }
 
 AnimaMatrix AnimaMatrix::MakeOrtho(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar)

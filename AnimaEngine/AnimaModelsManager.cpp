@@ -470,6 +470,16 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		material->AddBoolean("TwoSided", true);
 	else
 		material->AddBoolean("TwoSided", false);
+
+	AInt textureIndex = 0;
+	aiReturn textureFound = AI_SUCCESS;
+	aiString path;
+
+	while (textureFound == AI_SUCCESS)
+	{
+		textureFound = mtl->GetTexture(aiTextureType_DIFFUSE, textureIndex, &path);
+		textureIndex++;
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -186,9 +186,10 @@ AInt AnimaMeshCreator::AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f
 void AnimaMeshCreator::AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2, AInt v3, AnimaAllocator* allocator)
 {
 	AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator, allocator);
-	face->AddIndex(v1);
-	face->AddIndex(v2);
-	face->AddIndex(v3);
+	face->SetIndexes(v1, v2, v3);
+	//face->AddIndex(v1);
+	//face->AddIndex(v2);
+	//face->AddIndex(v3);
 	
 	facce.push_back(face);
 }

@@ -29,6 +29,7 @@ public:
 	
 public:
 	void SetIndexes(AUint* indexes, ASizeT n);
+	void SetIndexes(AUint a, AUint b, AUint c);
 	void AddIndex(const AUint& index);
 	AUint GetIndex(ASizeT index) const;
 	AUint* GetIndexes();
@@ -44,12 +45,12 @@ public:
 	AnimaVertex3f GetNormal() const;
 				
 protected:
-	AUint*	_indexes;
-	ASizeT	_indexesNumber;
+	AUint _indexes[3];
+	//ASizeT	_indexesNumber;
 
 	AnimaVertex3f _normal;
 	
-	AnimaAllocator* _allocator;
+	//AnimaAllocator* _allocator;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -71,13 +71,26 @@ public:
 	virtual void SetCutoff(AFloat c);
 	virtual AFloat GetCutoff();
 
+	virtual void ComputeViewMatrix();
+	virtual void ComputeProjectionMatrix();
+
 	bool IsAmbientLight();
 	bool IsDirectionalLight();
 	bool IsPointLight();
 	bool IsSpotLight();
 
+	AnimaTexture* GetShadowTexture();
+
+	virtual AnimaMatrix GetViewMatrix();
+	virtual AnimaMatrix GetProjectionMatrix();
+	virtual AnimaMatrix GetProjectionViewMatrix();
+
 protected:
 	AnimaLightType	_type;
+	AnimaTexture*	_shadowTexture;
+	AnimaMatrix		_viewMatrix;
+	AnimaMatrix		_projectionMatrix;
+	AnimaMatrix		_projectionViewMatrix;
 };
 
 //----------------------------------------------------------------
@@ -110,6 +123,9 @@ public:
 
 	AnimaVertex3f GetDirection() override;
 	AFloat GetIntensity() override;
+
+	void ComputeViewMatrix() override;
+	void ComputeProjectionMatrix() override;
 };
 
 //----------------------------------------------------------------

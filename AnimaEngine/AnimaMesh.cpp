@@ -996,6 +996,10 @@ void AnimaMesh::UpdateBuffers()
 		float* vertices = GetFloatVertices();
 		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesCount(), vertices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertices);
 		vertices = nullptr;
 	}
@@ -1005,28 +1009,23 @@ void AnimaMesh::UpdateBuffers()
 		float* normals = GetFloatVerticesNormal();
 		glBindBuffer(GL_ARRAY_BUFFER, _normalsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesNormalCount(), normals, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, normals);
 		normals = nullptr;
 	}
-	
-	//if (GetFloatVerticesColorCount() > 0)
-	//{
-	//	float* colors = GetFloatVerticesColor();
-	//	glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
-	//	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesColorCount(), colors, GL_STATIC_DRAW);
 
-	//	for (int i = 0; i < GetFloatVerticesColorCount(); i += 3)
-	//		printf("VertCol:\t%f\t%f\t%f\n", colors[i], colors[i + 1], colors[i + 2]);
-
-	//	AnimaAllocatorNamespace::DeallocateArray(*_allocator, colors);
-	//	colors = nullptr;
-	//}
-	
 	if (GetFloatVerticesTextureCoordCount() > 0)
 	{
 		float* textureCoords = GetFloatVerticesTextureCoord();
 		glBindBuffer(GL_ARRAY_BUFFER, _textureCoordsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesTextureCoordCount(), textureCoords, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, textureCoords);
 		textureCoords = nullptr;
 	}
@@ -1036,6 +1035,10 @@ void AnimaMesh::UpdateBuffers()
 		float* tangents = GetFloatVerticesTangents();
 		glBindBuffer(GL_ARRAY_BUFFER, _tangentsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesTangentsCount(), tangents, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tangents);
 		tangents = nullptr;
 	}
@@ -1045,9 +1048,15 @@ void AnimaMesh::UpdateBuffers()
 		float* bitangents = GetFloatVerticesBitangents();
 		glBindBuffer(GL_ARRAY_BUFFER, _bitangentsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetFloatVerticesBitangentsCount(), bitangents, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, bitangents);
 		bitangents = nullptr;
 	}
+
+	glBindVertexArray(0);
 
 	_needsBuffersUpdate = false;
 }
@@ -1205,10 +1214,11 @@ bool AnimaMesh::NeedsBuffersUpdate()
 
 AUint AnimaMesh::GetFacesIndicesCount()
 {
-	AUint count = 0;
-	for (int i = 0; i < _facesNumber; i++)
-		count += (AUint)_faces[i].GetIndexesCount();
-	return count;
+	//AUint count = 0;
+	//for (int i = 0; i < _facesNumber; i++)
+	//	count += (AUint)_faces[i].GetIndexesCount();
+	//return count;
+	return (AUint)_facesNumber * 3;
 }
 
 AUint* AnimaMesh::GetFacesIndices()

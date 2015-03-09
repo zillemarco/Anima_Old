@@ -206,6 +206,9 @@ void AnimaThirdPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat z
 void AnimaThirdPersonCamera::CalculateViewMatrix()
 {
 	_viewMatrix.LookAt(_position, (_target - _position), _worldYAxis);
+
+	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

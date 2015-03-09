@@ -226,6 +226,12 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-prepare")->Link();
 
+	mgr->CreateProgram("deferred-shadowMap");
+	mgr->GetProgramFromName("deferred-shadowMap")->Create();
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-shadowMap")->Link();
+
 	mgr->CreateProgram("deferred-directional");
 	mgr->GetProgramFromName("deferred-directional")->Create();
 	mgr->GetProgramFromName("deferred-directional")->AddShader(mgr->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
@@ -265,8 +271,8 @@ void Window::Load()
 //	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
 //	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
 //	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
@@ -308,18 +314,18 @@ void Window::Load()
 	//l4->SetPosition(0.0f, 0.5f, 5.0f);
 	//l4->SetDirection(0.0f, 0.0f, -1.0f);
 
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
-	Anima::AnimaVertex3f min = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();
-	Anima::AnimaVertex3f max = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMax();
+	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
+	//Anima::AnimaVertex3f min = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();
+	//Anima::AnimaVertex3f max = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMax();
 
-	Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
-	
-	center = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->GetTransformationMatrix() * center;
-	
-	Anima::AnimaVertex3f pos = center;
-	pos.z += 5.0f;
+	//Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
+	//
+	//center = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->GetTransformationMatrix() * center;
+	//
+	//Anima::AnimaVertex3f pos = center;
+	//pos.z += 5.0f;
 
-	_tpcamera->LookAt(pos, center);
+	//_tpcamera->LookAt(pos, center);
 
 	_timerFPS.Init();
 	_timer.Reset();

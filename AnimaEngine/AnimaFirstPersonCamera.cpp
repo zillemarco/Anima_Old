@@ -154,6 +154,9 @@ void AnimaFirstPersonCamera::LookAt(AFloat xPosition, AFloat yPosition, AFloat z
 void AnimaFirstPersonCamera::CalculateViewMatrix()
 {
 	_viewMatrix.LookAt(_position, _zAxis, _yAxis);
+	
+	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

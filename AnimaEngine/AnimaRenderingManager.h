@@ -73,10 +73,11 @@ protected:
 	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
 	void DeferredCombinePass(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredUpdateShadowMaps(AnimaStage* stage, AnimaShaderProgram* program);
 
-	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
-	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true);
+	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
+	void DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
 	
 	void Clear();
 

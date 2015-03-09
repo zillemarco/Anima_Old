@@ -23,7 +23,10 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_format = 0;
 	_dataType = 0;
 	_clamp = 0;
-	
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_renderTargetsReady = false;
 	_texturesReady = false;
 	_needsResize = false;
 }
@@ -44,13 +47,16 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	SetAttachment(attachment);
 
 	_textureID = 0;
-	
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+		
 	_mipMapLevels = mipMapLevels;
 	_width = width;
 	_height = height;
 	_textureTarget = textureTarget;
 	_texturesReady = false;
 	_needsResize = false;
+	_renderTargetsReady = false;
 }
 
 AnimaTexture::AnimaTexture(const AnimaTexture& src)
@@ -69,12 +75,16 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	SetAttachment(src._attachment);
 	
 	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
 	_mipMapLevels = src._mipMapLevels;
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
 	_texturesReady = false;
 	_needsResize = false;
+	_renderTargetsReady = false;
 }
 
 AnimaTexture::AnimaTexture(AnimaTexture&& src)
@@ -93,12 +103,16 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	SetAttachment(src._attachment);
 
 	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
 	_mipMapLevels = src._mipMapLevels;
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
 	_texturesReady = false;
 	_needsResize = false;
+	_renderTargetsReady = false;
 }
 
 AnimaTexture::~AnimaTexture()
@@ -143,12 +157,16 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		SetAttachment(src._attachment);
 		
 		_textureID = 0;
+		_frameBuffer = 0;
+		_renderBuffer = 0;
+
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
 		_texturesReady = false;
 		_needsResize = false;
+		_renderTargetsReady = false;
 	}
 	return *this;
 }
@@ -177,12 +195,16 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		SetAttachment(src._attachment);
 
 		_textureID = 0;
+		_frameBuffer = 0;
+		_renderBuffer = 0;
+
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
 		_texturesReady = false;
 		_needsResize = false;
+		_renderTargetsReady = false;
 	}
 	return *this;
 }
@@ -488,6 +510,11 @@ bool AnimaTexture::IsReady()
 	return _texturesReady;
 }
 
+bool AnimaTexture::AreRenderTargetsReady()
+{
+	return _texturesReady && _renderTargetsReady;
+}
+
 void AnimaTexture::Unload()
 {
 	if (!IsReady())
@@ -495,6 +522,12 @@ void AnimaTexture::Unload()
 
 	if(_textureID != 0) 
 		glDeleteTextures(1, &_textureID);
+
+	if (AreRenderTargetsReady())
+	{
+		glDeleteFramebuffers(1, &_frameBuffer);
+		glDeleteRenderbuffers(1, &_renderBuffer);
+	}
 		
 	_texturesReady = false;
 }
