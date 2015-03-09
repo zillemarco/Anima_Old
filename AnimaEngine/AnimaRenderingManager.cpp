@@ -597,7 +597,7 @@ void AnimaRenderingManager::ForwardAmbientPass(AnimaStage* stage, AnimaShaderPro
 		if (!light->IsAmbientLight())
 			continue;
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 
 		if (model == nullptr)
 		{
@@ -667,7 +667,7 @@ void AnimaRenderingManager::ForwardDirectionalPass(AnimaStage* stage, AnimaShade
 		if (!light->IsDirectionalLight())
 			continue;
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 
 		if (model == nullptr)
 		{
@@ -737,7 +737,7 @@ void AnimaRenderingManager::ForwardPointPass(AnimaStage* stage, AnimaShaderProgr
 		if (!light->IsPointLight())
 			continue;
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 
 		if (model == nullptr)
 		{
@@ -805,7 +805,7 @@ void AnimaRenderingManager::ForwardSpotPass(AnimaStage* stage, AnimaShaderProgra
 		if (!light->IsSpotLight())
 			continue;
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 
 		if (model == nullptr)
 		{
@@ -1077,7 +1077,7 @@ void AnimaRenderingManager::DeferredDirectionalPass(AnimaStage* stage, AnimaShad
 		if (!light->IsDirectionalLight())
 			continue;
 		
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 				
@@ -1132,7 +1132,7 @@ void AnimaRenderingManager::DeferredPointPass(AnimaStage* stage, AnimaShaderProg
 		else
 			glCullFace(GL_BACK);
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 		program->UpdateMeshProperies(_pointLightMesh, m3);
 		program->UpdateRenderingManagerProperies(this);
 
@@ -1169,7 +1169,7 @@ void AnimaRenderingManager::DeferredSpotPass(AnimaStage* stage, AnimaShaderProgr
 		if (!light->IsSpotLight())
 			continue;
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
@@ -1193,7 +1193,7 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaStage* stage, AnimaShaderPr
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
 
-	program->UpdateLightProperies(stage->GetLightsManager()->GetLightFromName("ambient"));
+	program->UpdateLightProperies(stage->GetLightsManager()->GetLightFromName("ambient"), this);
 	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	program->UpdateRenderingManagerProperies(this);
 
@@ -1236,7 +1236,7 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaSha
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateLightProperies(light);
+		program->UpdateLightProperies(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		for (ASizeT j = 0; j < nModels; j++)

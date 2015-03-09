@@ -277,7 +277,7 @@ void Window::Load()
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 	
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 3.0f, 0.0f);
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 1.0f, 0.0f);
 
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.2f, 0.2f, 0.2f);

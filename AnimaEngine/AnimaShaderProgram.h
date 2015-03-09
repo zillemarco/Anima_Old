@@ -105,7 +105,7 @@ public:
 	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& transformation);
 	void UpdateCameraProperies(AnimaCamera* camera);
 	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager);
-	void UpdateLightProperies(AnimaLight* light);
+	void UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager);
 	void UpdateLightsProperies(AnimaStage* stage);
 	void UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager);
 

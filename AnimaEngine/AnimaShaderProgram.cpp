@@ -907,9 +907,28 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 	glCullFace(material->GetInteger("CullFace"));
 }
 
-void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light)
+void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager)
 {
 	SetUniform("LIG_ProjectionViewMatrix", light->GetProjectionViewMatrix());
+
+	if (light->GetShadowTexture())
+	{
+		AnimaTexture* texture = light->GetShadowTexture();
+
+		AUint slot = renderingManager->GetTextureSlot("ShadowMap");
+		SetUniformi("ShadowMap", slot);
+
+		if (texture == nullptr)
+		{
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else
+		{
+			texture->Load();
+			texture->Bind(slot);
+		}
+	}
 
 	if (light->IsAmbientLight())
 	{
