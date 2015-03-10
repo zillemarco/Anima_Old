@@ -395,17 +395,17 @@ bool AnimaTexture::Load()
 
 		return true;
 	}
-
+	
 	glGenTextures(1, &_textureID);
-
+	
 	glBindTexture(_textureTarget, _textureID);
-
+	
 	glTexParameteri(_textureTarget, GL_TEXTURE_MAG_FILTER, _filter);
 	glTexParameteri(_textureTarget, GL_TEXTURE_MIN_FILTER, _filter);
-		
+	
 	glTexParameteri(_textureTarget, GL_TEXTURE_WRAP_S, _clamp);
 	glTexParameteri(_textureTarget, GL_TEXTURE_WRAP_T, _clamp);
-		
+	
 	if (_mipMapLevels == 0)
 		glTexImage2D(_textureTarget, 0, _internalFormat, _width, _height, 0, _format, _dataType, _data);
 	else if (_mipMapLevels > 0)
@@ -429,7 +429,7 @@ bool AnimaTexture::Load()
 	}
 	else
 		return false;
-
+	
 	if (_filter == GL_NEAREST_MIPMAP_NEAREST || _filter == GL_NEAREST_MIPMAP_LINEAR || _filter == GL_LINEAR_MIPMAP_NEAREST || _filter == GL_LINEAR_MIPMAP_LINEAR)
 	{
 		glGenerateMipmap(_textureTarget);
@@ -494,7 +494,7 @@ bool AnimaTexture::LoadRenderTargets()
 	
 	glDrawBuffers(1, &drawBuffer);
 	
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || glGetError() != GL_NO_ERROR)
 	{
 		ANIMA_ASSERT(false);
 		_renderTargetsReady = false;

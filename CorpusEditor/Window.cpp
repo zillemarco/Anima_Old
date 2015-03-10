@@ -62,15 +62,15 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 
-	Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(0.5f);
+	Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(1.0f);
 
 	Anima::AnimaVertex3f pos = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->GetPosition();
 	pos = m * pos;
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->SetPosition(pos);
 
-	//Anima::AnimaVertex3f dir = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
-	//dir = m * dir;
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
+	Anima::AnimaVertex3f dir = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
+	dir = m * dir;
+	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
 
 	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
 	
@@ -131,26 +131,31 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 	wnd->_lastPTY = y;
 }
 
+float amount = 0.01f;
+
 void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int action, int mods)
 {
 	if (action == ANIMA_ENGINE_RELEASE)
+	{
+		amount = 0.01f;
 		return;
+	}
 
 	Window* wnd = (Window*)window;
 	
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(-0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(-amount, 0.0f, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(amount, 0.0f, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_UP:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(-0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, amount, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(0.5f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, -amount, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_W:
 		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
@@ -165,10 +170,10 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_L:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(-1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, amount);
 		break;
 	case ANIMA_ENGINE_KEY_O:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(1.0f);
+		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, -amount);
 		break;
 	case ANIMA_ENGINE_KEY_C:
 
@@ -185,6 +190,11 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 		fxaa = !fxaa;
 		break;
 	}
+	
+	amount += 0.01f;
+	
+	if(amount >= 0.3f)
+		amount = 0.3f;
 }
 
 void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int action, int mods)
@@ -287,8 +297,6 @@ void Window::Load()
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 	
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 1.0f, 0.0f);
-
 	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.2f, 0.2f, 0.2f);
 

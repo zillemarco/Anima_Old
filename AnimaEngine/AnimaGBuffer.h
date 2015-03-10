@@ -44,7 +44,7 @@ public:
 
 	void Resize(AUint width, AUint height);
 
-	void Create();
+	bool Create();
 	void Destroy();
 
 	void BindAsRenderTarget() const;

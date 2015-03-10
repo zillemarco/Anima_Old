@@ -140,11 +140,11 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			prepassBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			prepassBuffer->Create();
+			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			ANIMA_ASSERT(prepassBuffer->Create());
 
 			SetGBuffer("PrepassBuffer", prepassBuffer);
 		}
@@ -155,9 +155,9 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP);
-			lightsBuffer->Create();
+			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			ANIMA_ASSERT(lightsBuffer->Create());
 
 			SetGBuffer("LightsBuffer", lightsBuffer);
 		}
@@ -166,8 +166,8 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			diffuseTexture->Resize(screenWidth, screenHeight);
 		else
 		{
-			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP, GL_COLOR_ATTACHMENT0);
-			diffuseTexture->LoadRenderTargets();
+			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
 		
@@ -241,10 +241,17 @@ void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* 
 	filterProgram->UpdateCameraProperies(_filterCamera);
 	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
-
+	
+#ifdef WIN32
 	glBindVertexArray(_filterMesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+#else
+	filterProgram->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	filterProgram->DisableInputs();
+#endif
 
 	SetTexture("FilterMap", nullptr, false);
 }
@@ -271,10 +278,17 @@ void AnimaRenderingManager::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* 
 	filterProgram->UpdateCameraProperies(_filterCamera);
 	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
-
+	
+#ifdef WIN32
 	glBindVertexArray(_filterMesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+#else
+	filterProgram->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	filterProgram->DisableInputs();
+#endif
 
 	SetTexture("FilterMap", nullptr, false);
 }
@@ -302,11 +316,18 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* 
 	filterProgram->UpdateCameraProperies(_filterCamera);
 	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
-
+	
+#ifdef WIN32
 	glBindVertexArray(_filterMesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-
+#else
+	filterProgram->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	filterProgram->DisableInputs();
+#endif
+	
 	SetGBuffer("FilterBuffer", nullptr, false);
 }
 
@@ -331,10 +352,17 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* 
 	filterProgram->UpdateCameraProperies(_filterCamera);
 	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
-
+	
+#ifdef WIN32
 	glBindVertexArray(_filterMesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+#else
+	filterProgram->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	filterProgram->DisableInputs();
+#endif
 
 	SetGBuffer("FilterBuffer", nullptr, false);
 }
@@ -851,14 +879,14 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	DeferredPreparePass(stage, shadersManager->GetProgramFromName("deferred-prepare"));
 	Finish(stage);
-
+	
 	//
 	//	Aggiorno le mappature per le ombre
 	//
 	Start(stage);
 	DeferredUpdateShadowMaps(stage, shadersManager->GetProgramFromName("deferred-shadowMap"));
 	Finish(stage);
-
+	
 	//
 	//	Preparazione dei buffer della luce
 	//
@@ -877,21 +905,21 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaStage* stage)
 
 	glBlendFunc(GL_ONE, GL_ZERO);
 	Finish(stage);
-
+	
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	//GetTexture("DiffuseMap")->BindAsRenderTarget();
-	Start(stage);	
+	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	Start(stage);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	DeferredCombinePass(stage, shadersManager->GetProgramFromName("deferred-combine"));
 	Finish(stage);
-
-	////
-	////	Applicazione effetti
-	////
-	//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	
+	//
+	//	Applicazione effetti
+	//
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model)
@@ -979,9 +1007,16 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* 
 
 	program->UpdateMeshProperies(mesh, parentTransformation);
 	
+#ifdef WIN32
 	glBindVertexArray(mesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+#else
+	program->EnableInputs(mesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	program->DisableInputs();
+#endif
 }
 
 void AnimaRenderingManager::DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model)
@@ -1081,10 +1116,17 @@ void AnimaRenderingManager::DeferredDirectionalPass(AnimaStage* stage, AnimaShad
 		program->UpdateLightProperies(light, this);
 		program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 		program->UpdateRenderingManagerProperies(this);
-				
+		
+#ifdef WIN32
 		glBindVertexArray(_filterMesh->GetVertexArrayObject());
 		glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+#else
+		program->EnableInputs(_filterMesh);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+		glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+		program->DisableInputs();
+#endif
 	}
 }
 
@@ -1136,10 +1178,17 @@ void AnimaRenderingManager::DeferredPointPass(AnimaStage* stage, AnimaShaderProg
 		program->UpdateLightProperies(light, this);
 		program->UpdateMeshProperies(_pointLightMesh, m3);
 		program->UpdateRenderingManagerProperies(this);
-
+		
+#ifdef WIN32
 		glBindVertexArray(_pointLightMesh->GetVertexArrayObject());
 		glDrawElements(GL_TRIANGLES, _pointLightMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+#else
+		program->EnableInputs(_pointLightMesh);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _pointLightMesh->GetIndexesBufferObject());
+		glDrawElements(GL_TRIANGLES, _pointLightMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+		program->DisableInputs();
+#endif
 	}
 }
 
@@ -1197,10 +1246,17 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaStage* stage, AnimaShaderPr
 	program->UpdateLightProperies(stage->GetLightsManager()->GetLightFromName("ambient"), this);
 	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	program->UpdateRenderingManagerProperies(this);
-
+	
+#ifdef WIN32
 	glBindVertexArray(_filterMesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+#else
+	program->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	program->DisableInputs();
+#endif
 }
 
 void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaStage* stage, AnimaShaderProgram* program)

@@ -129,7 +129,7 @@ bool AnimaGBuffer::AddTexture(const AnimaString& name, AUint target, AUint attac
 	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, target, _width, _height, nullptr, 0, 0, filter, internalFormat, format, dataType, clamp/*, attachment*/);
 	AnimaGBufferData* data = AnimaAllocatorNamespace::AllocateNew<AnimaGBufferData>(*_allocator, name, texture, index, attachment);
 	_texturesSet.insert(data);
-
+	
 	return true;
 }
 
@@ -139,7 +139,7 @@ bool AnimaGBuffer::AddTexture(const char* name, AUint target, AUint attachment, 
 	return AddTexture(str, target, attachment, internalFormat, format, dataType, filter, clamp);
 }
 
-void AnimaGBuffer::Create()
+bool AnimaGBuffer::Create()
 {
 	if (_created)
 	{
@@ -152,12 +152,12 @@ void AnimaGBuffer::Create()
 			_needsResize = false;
 		}
 
-		return;
+		return true;
 	}
 	
 	AUint size = (AUint)_texturesSet.size();
 	if (size == 0)
-		return;
+		return false;
 		
 	AUint drawBuffers[32];
 	ANIMA_ASSERT(size <= 32);
@@ -192,7 +192,7 @@ void AnimaGBuffer::Create()
 	}
 	
 	if (_frameBuffer == 0)
-		return;
+		return false;
 	
 	if (!hasDepth)
 	{
@@ -204,15 +204,15 @@ void AnimaGBuffer::Create()
 	
 	glDrawBuffers(size, drawBuffers);
 	
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || glGetError() != GL_NO_ERROR)
 	{
 		ANIMA_ASSERT(false);
 		_created = false;
-		return;
+		return false;
 	}
 	
 	_created = true;
-	return;
+	return true;
 }
 
 void AnimaGBuffer::Destroy()
@@ -245,6 +245,7 @@ AnimaTexture* AnimaGBuffer::GetTexture(const AnimaString& name)
 	auto element = nameIterator.find(name);
 	if (element != nameIterator.end())
 		return (*element)->_texture;
+	
 	return nullptr;
 }
 
@@ -258,9 +259,15 @@ void AnimaGBuffer::BindAsRenderTarget() const
 {
 	ANIMA_ASSERT(_created);
 
+	if(glGetError() != GL_NO_ERROR)
+		return;
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	glViewport(0, 0, _width, _height);
+	
+	if(glGetError() != GL_NO_ERROR)
+		return;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -25,10 +25,10 @@ float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
 {
 	vec2 moments 	= texture(shadowMap, coords).xy;
 	float p 		= step(compare, moments.x);
-	float variance 	= max(moments.y - moments.x * moments.x, 0.00000002);
+	float variance 	= max(moments.y - moments.x * moments.x, 0.0000002);
 
 	float d 		= compare - moments.x;
-	float pMax 		= lineStep(0.2f, 1.0f, variance / (variance + d * d));
+	float pMax 		= lineStep(0.02f, 1.0f, variance / (variance + d * d));
 
 	return min(max(p, pMax), 1.0f);
 }

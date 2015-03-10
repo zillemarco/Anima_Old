@@ -138,8 +138,8 @@ int main(int argc, char** argv)
 	Anima::AInt width = 1024;
 	Anima::AInt height = 768;
 #else
-	Anima::AInt width = 500;
-	Anima::AInt height = 500;
+	Anima::AInt width = 512;
+	Anima::AInt height = 512;
 #endif
 
 	Window* window = engine.CreateAnimaWindow<Window>(width, height, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
