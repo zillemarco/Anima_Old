@@ -8,7 +8,7 @@
 #include "AnimaString.h"
 #include "AnimaShader.h"
 #include "AnimaShaderProgram.h"
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -17,7 +17,7 @@ class ANIMA_ENGINE_EXPORT AnimaShadersManager
 	friend AnimaShaderProgram;
 
 public:
-	AnimaShadersManager(AnimaStage* stage);
+	AnimaShadersManager(AnimaScene* scene);
 	~AnimaShadersManager();
 
 	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShader::AnimaShaderType type);
@@ -57,7 +57,7 @@ private:
 	void NotifyProgramDeactivation(AnimaShaderProgram* program);
 
 private:
-	AnimaStage* _stage;
+	AnimaScene* _scene;
 
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;

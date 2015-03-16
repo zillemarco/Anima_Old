@@ -13,10 +13,11 @@
 #include <AnimaCamerasManager.h>
 #include <AnimaBenchmarkTimer.h>
 #include <AnimaMesh.h>
-#include <AnimaStage.h>
-#include <AnimaStagesManager.h>
+#include <AnimaScene.h>
+#include <AnimaScenesManager.h>
 #include <AnimaMaterial.h>
 #include <AnimaMaterialsManager.h>
+#include <AnimaArray.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -91,13 +92,13 @@ int main(int argc, char** argv)
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 
-	Anima::AnimaStage* stage = engine.GetStagesManager()->CreateStage("test-stage");
-	stage->Initialize();
+	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateStage("test-scene");
+	scene->Initialize();
 
-	Anima::AnimaString path(stage->GetStringAllocator());	
-	Anima::AnimaModelsManager* manager = stage->GetModelsManager();
-	Anima::AnimaMaterialsManager* matMgr = stage->GetMaterialsManager();
-
+	Anima::AnimaString path(scene->GetStringAllocator());	
+	Anima::AnimaModelsManager* manager = scene->GetModelsManager();
+	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
+	
 	Anima::AnimaMesh* mesh = nullptr;
 
 	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
@@ -109,6 +110,13 @@ int main(int argc, char** argv)
 		return 0;
 	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano2")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->Scale(2.0f, 2.0f, 2.0f);
+	mesh->GetTransformation()->RotateXDeg(90.0f);
+	mesh->GetTransformation()->SetTranslationY(-1.0f);
+
 //	path = ANIMA_ENGINE_MODELS_PATH "cono.3ds";
 //	if (!manager->LoadModel(path, "cono"))
 //		return 0;
@@ -117,14 +125,14 @@ int main(int argc, char** argv)
 	//if ((mesh = manager->LoadModel(path, "ae")) == nullptr)
 	//	return 0;
 
-//	mesh = manager->CreateModel("sfera");
-//	mesh->MakeIcosahedralSphere(3);
-//	mesh->ComputeFlatNormals();
-//	mesh->ComputeSmootNormals();
-//	mesh->GetTransformation()->Scale(2.0f, 2.0f, 2.0f);
-//	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-//	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-//	mesh->GetMaterial()->SetBoolean("TwoSided", false);
+	//mesh = manager->CreateModel("sfera");
+	//mesh->MakeIcosahedralSphere(0);
+	//mesh->ComputeFlatNormals();
+	//mesh->ComputeSmootNormals();
+	//mesh->GetTransformation()->Scale(2.0f, 2.0f, 2.0f);
+	//mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+	//mesh->GetMaterial()->SetBoolean("TwoSided", false);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -144,7 +152,7 @@ int main(int argc, char** argv)
 
 	Window* window = engine.CreateAnimaWindow<Window>(width, height, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
 	
-	Anima::AnimaCamerasManager* camMan = stage->GetCamerasManager();
+	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 	

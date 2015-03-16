@@ -975,9 +975,9 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 	}
 }
 
-void AnimaShaderProgram::UpdateLightsProperies(AnimaStage* stage)
+void AnimaShaderProgram::UpdateLightsProperies(AnimaScene* scene)
 {
-	AnimaLightsManager* lightsManager = stage->GetLightsManager();
+	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 
 	AInt lightsCount = lightsManager->GetTotalLightsCount();
 

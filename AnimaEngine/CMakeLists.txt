@@ -57,11 +57,13 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaLight.h
 					AnimaLightsManager.h
 					AnimaVectorGenerator.h
-					AnimaStage.h
-					AnimaStagesManager.h
+					AnimaScene.h
+					AnimaScenesManager.h
 					AnimaGBuffer.h
 					AnimaFPSTimer.h
-					AnimaMeshCreator.h)
+					AnimaMeshCreator.h
+					AnimaSceneObject.h
+					AnimaArray.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -101,11 +103,13 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaLight.cpp
 					AnimaLightsManager.cpp
 					AnimaVectorGenerator.cpp
-					AnimaStage.cpp
-					AnimaStagesManager.cpp
+					AnimaScene.cpp
+					AnimaScenesManager.cpp
 					AnimaGBuffer.cpp
 					AnimaFPSTimer.cpp
-					AnimaMeshCreator.cpp)
+					AnimaMeshCreator.cpp
+					AnimaSceneObject.cpp
+					AnimaArray.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}

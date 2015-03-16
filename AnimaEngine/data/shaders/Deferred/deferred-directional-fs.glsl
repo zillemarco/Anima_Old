@@ -28,9 +28,10 @@ float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
 	float variance 	= max(moments.y - moments.x * moments.x, 0.0000002);
 
 	float d 		= compare - moments.x;
-	float pMax 		= lineStep(0.02f, 1.0f, variance / (variance + d * d));
+	float pMax 		= variance / (variance + d * d);
+	pMax 			= lineStep(0.02f, 1.0f, pMax);
 
-	return min(max(p, pMax), 1.0f);
+	return pMax;
 }
 
 void main()
@@ -47,7 +48,7 @@ void main()
 	shadowCoord 		/= shadowCoord.w;
 	shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-	float shadowAmount 	= ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
+	float shadowAmount 	= 1.0f;//ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
 
 	vec3 specularColor 	= speclarData.xyz;
 	float shininess 	= 1.0f / speclarData.a;

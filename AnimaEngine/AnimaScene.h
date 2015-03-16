@@ -1,13 +1,13 @@
 //
-//  AnimaStage.h
+//  AnimaScene.h
 //  Anima
 //
 //  Created by Marco Zille on 26/11/14.
 //
 //
 
-#ifndef __Anima__AnimaStage__
-#define __Anima__AnimaStage__
+#ifndef __Anima__AnimaScene__
+#define __Anima__AnimaScene__
 
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
@@ -25,18 +25,18 @@ class AnimaMaterialsManager;
 class AnimaLightsManager;
 class AnimaEngine;
 
-class ANIMA_ENGINE_EXPORT AnimaStage
+class ANIMA_ENGINE_EXPORT AnimaScene
 {
 	friend class AnimaEngine;
 
 public:
-	AnimaStage();
-	AnimaStage(const AnimaStage& src);
-	AnimaStage(AnimaStage&& src);
-	~AnimaStage();
+	AnimaScene();
+	AnimaScene(const AnimaScene& src);
+	AnimaScene(AnimaScene&& src);
+	~AnimaScene();
 	
-	AnimaStage& operator=(const AnimaStage& src);
-	AnimaStage& operator=(AnimaStage&& src);
+	AnimaScene& operator=(const AnimaScene& src);
+	AnimaScene& operator=(AnimaScene&& src);
 
 public:
 	void Initialize();
@@ -163,4 +163,4 @@ protected:
 
 END_ANIMA_ENGINE_NAMESPACE
 
-#endif /* defined(__Anima__AnimaStage__) */
+#endif /* defined(__Anima__AnimaScene__) */

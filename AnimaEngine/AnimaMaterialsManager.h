@@ -15,14 +15,14 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaMaterial.h"
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMaterialsManager
 {
 public:
-	AnimaMaterialsManager(AnimaStage* stage);
+	AnimaMaterialsManager(AnimaScene* scene);
 	~AnimaMaterialsManager();
 	
 	AnimaMaterial* CreateMaterial(const AnimaString& name);
@@ -36,7 +36,7 @@ private:
 	void ClearMaterials(bool bDeleteObjects = true, bool bResetNumber = true);
 	
 private:
-	AnimaStage* _stage;
+	AnimaScene* _scene;
 	
 	AnimaMaterial** _materials;
 	ASizeT _materialsNumber;

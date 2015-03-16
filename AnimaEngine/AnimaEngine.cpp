@@ -1,5 +1,5 @@
 #include "AnimaEngine.h"
-#include "AnimaStagesManager.h"
+#include "AnimaScenesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -35,7 +35,7 @@ AnimaEngine::AnimaEngine()
 	_sharedMemorySize = 0;
 	_sharedMemoryAllocator = nullptr;	
 
-	_stagesManager = nullptr;
+	_scenesManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -100,7 +100,7 @@ bool AnimaEngine::InitializeWindowSystem()
 
 void AnimaEngine::InitializeManagers()
 {
-	_stagesManager = AnimaAllocatorNamespace::AllocateNew<AnimaStagesManager>(*_sharedMemoryAllocator, _sharedMemoryAllocator);
+	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_sharedMemoryAllocator, _sharedMemoryAllocator);
 }
 
 void AnimaEngine::Terminate()
@@ -129,10 +129,10 @@ void AnimaEngine::TerminateMemorySystem()
 
 void AnimaEngine::TerminateManagers()
 {
-	if (_stagesManager != nullptr)
+	if (_scenesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_sharedMemoryAllocator, _stagesManager);
-		_stagesManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_sharedMemoryAllocator, _scenesManager);
+		_scenesManager = nullptr;
 	}
 }
 

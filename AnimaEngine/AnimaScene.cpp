@@ -1,12 +1,12 @@
 //
-//  AnimaStage.cpp
+//  AnimaScene.cpp
 //  Anima
 //
 //  Created by Marco Zille on 26/11/14.
 //
 //
 
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 #include "AnimaModelsManager.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
@@ -14,6 +14,7 @@
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaLightsManager.h"
+#include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -22,7 +23,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #define _ANIMA_ALLOCATORS_NUMBER			10
 #define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MODELS_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
-AnimaStage::AnimaStage()
+AnimaScene::AnimaScene()
 {
 	_localMemory = nullptr;
 	_localMemorySize = 0;
@@ -48,7 +49,7 @@ AnimaStage::AnimaStage()
 	_lightsManager = nullptr;
 }
 
-AnimaStage::AnimaStage(const AnimaStage& src)
+AnimaScene::AnimaScene(const AnimaScene& src)
 {
 	_localMemory = src._localMemory;
 	_localMemorySize = src._localMemorySize;
@@ -74,7 +75,7 @@ AnimaStage::AnimaStage(const AnimaStage& src)
 	_lightsManager = src._lightsManager;
 }
 
-AnimaStage::AnimaStage(AnimaStage&& src)
+AnimaScene::AnimaScene(AnimaScene&& src)
 {
 	_localMemory = src._localMemory;
 	_localMemorySize = src._localMemorySize;
@@ -100,12 +101,12 @@ AnimaStage::AnimaStage(AnimaStage&& src)
 	_lightsManager = src._lightsManager;
 }
 
-AnimaStage::~AnimaStage()
+AnimaScene::~AnimaScene()
 {
 	Terminate();
 }
 
-AnimaStage& AnimaStage::operator=(const AnimaStage& src)
+AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 {
 	if (this != &src)
 	{
@@ -132,7 +133,7 @@ AnimaStage& AnimaStage::operator=(const AnimaStage& src)
 	return *this;
 }
 
-AnimaStage& AnimaStage::operator=(AnimaStage&& src)
+AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 {
 	if (this != &src)
 	{
@@ -159,13 +160,13 @@ AnimaStage& AnimaStage::operator=(AnimaStage&& src)
 	return *this;
 }
 
-void AnimaStage::Initialize()
+void AnimaScene::Initialize()
 {
 	InitializeMemorySystem();
 	InitializeManagers();
 }
 
-void AnimaStage::InitializeMemorySystem()
+void AnimaScene::InitializeMemorySystem()
 {
 	ANIMA_ASSERT(_localMemory == nullptr && _localMemorySize == 0);
 
@@ -191,7 +192,7 @@ void AnimaStage::InitializeMemorySystem()
 	ANIMA_ASSERT((_modelDataAllocator->GetSize() + _modelsAllocator->GetSize() + _genericAllocator->GetSize() + _managersAllocator->GetSize() + _stringAllocator->GetSize() + _shadersAllocator->GetSize() + _camerasAllocator->GetSize() + _texturesAllocator->GetSize() + _materialsAllocator->GetSize() + _lightsAllocator->GetSize() + _dataGeneratorsAllocator->GetSize()) < _localMemorySize - 1000);
 }
 
-void AnimaStage::InitializeManagers()
+void AnimaScene::InitializeManagers()
 {
 	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
@@ -202,13 +203,13 @@ void AnimaStage::InitializeManagers()
 	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_managersAllocator, this);
 }
 
-void AnimaStage::Terminate()
+void AnimaScene::Terminate()
 {
 	TerminateManagers();
 	TerminateMemorySystem();
 }
 
-void AnimaStage::TerminateMemorySystem()
+void AnimaScene::TerminateMemorySystem()
 {
 	if (_modelDataAllocator != nullptr)
 	{
@@ -291,7 +292,7 @@ void AnimaStage::TerminateMemorySystem()
 	}
 }
 
-void AnimaStage::TerminateManagers()
+void AnimaScene::TerminateManagers()
 {
 	if (_modelsManager != nullptr)
 	{

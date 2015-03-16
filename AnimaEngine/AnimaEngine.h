@@ -45,7 +45,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 typedef AnimaEngineWindow_Base AnimaWindow;
 
-class AnimaStagesManager;
+class AnimaScenesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -179,9 +179,9 @@ private:
 	static AChar _logFilePath[PATH_MAX];			/*!< Path del file di log */
 
 public:
-	inline AnimaStagesManager* GetStagesManager() {
-		ANIMA_ASSERT(_stagesManager != nullptr);
-		return _stagesManager;
+	inline AnimaScenesManager* GetScenesManager() {
+		ANIMA_ASSERT(_scenesManager != nullptr);
+		return _scenesManager;
 	}
 
 	inline AnimaAllocator* GetSharedMemoryAllocator() {
@@ -190,7 +190,7 @@ public:
 	}
 
 private:
-	AnimaStagesManager* _stagesManager;
+	AnimaScenesManager* _scenesManager;
 };
 
 template<class T>

@@ -7,8 +7,8 @@
 #include <AnimaMesh.h>
 #include <AnimaShader.h>
 #include <AnimaEngine.h>
-#include <AnimaStage.h>
-#include <AnimaStagesManager.h>
+#include <AnimaScene.h>
+#include <AnimaScenesManager.h>
 #include <QMouseEvent>
 #include <QWheelEvent>
 
@@ -38,7 +38,7 @@ CRModelViewer::~CRModelViewer()
 
 void CRModelViewer::Initialize()
 {
-	Anima::AnimaShadersManager* mgr = _engine->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
+	Anima::AnimaShadersManager* mgr = _engine->GetScenesManager()->GetStage("test-scene")->GetShadersManager();
 
 	mgr->CreateProgram("phong");
 	mgr->GetProgramFromName("phong")->Create();
@@ -79,15 +79,15 @@ void CRModelViewer::Render()
 	
 	glViewport(0, 0, w, h);
 
-	_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
-	_engine->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
+	_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
+	_engine->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 
-	_renderingManager->Start(_engine->GetStagesManager()->GetStage("test-stage"));
+	_renderingManager->Start(_engine->GetScenesManager()->GetStage("test-scene"));
 
 	if (_selectedModel != nullptr)
-		_renderingManager->ForwardDrawSingleModel(_engine->GetStagesManager()->GetStage("test-stage"), _selectedModel);
+		_renderingManager->ForwardDrawSingleModel(_engine->GetScenesManager()->GetStage("test-scene"), _selectedModel);
 
-	_renderingManager->Finish(_engine->GetStagesManager()->GetStage("test-stage"));
+	_renderingManager->Finish(_engine->GetScenesManager()->GetStage("test-scene"));
 
 	++_frame;
 }
@@ -102,8 +102,8 @@ void CRModelViewer::mouseMoveEvent(QMouseEvent* mEvent)
 			double dx = _lastMouseXPos - mEvent->x();
 			double dy = _lastMouseYPos - mEvent->y();
 
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
 
 			UPDATE_VIEW;
 		}
@@ -112,8 +112,8 @@ void CRModelViewer::mouseMoveEvent(QMouseEvent* mEvent)
 			double dx = _lastMouseXPos - mEvent->x();
 			double dy = _lastMouseYPos - mEvent->y();
 
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
 
 			UPDATE_VIEW;
 		}
@@ -125,8 +125,8 @@ void CRModelViewer::mouseMoveEvent(QMouseEvent* mEvent)
 			double dx = _lastMouseXPos - mEvent->x();
 			double dy = _lastMouseYPos - mEvent->y();
 
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, dx / translateDivisor);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, dy / translateDivisor);
 
 			UPDATE_VIEW;
 		}
@@ -135,8 +135,8 @@ void CRModelViewer::mouseMoveEvent(QMouseEvent* mEvent)
 			double dx = _lastMouseXPos - mEvent->x();
 			double dy = _lastMouseYPos - mEvent->y();
 
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
-			_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy);
+			_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx);
 
 			UPDATE_VIEW;
 		}
@@ -163,7 +163,7 @@ void CRModelViewer::wheelEvent(QWheelEvent* wEvent)
 		zoomAmount = (float)numSteps.y();
 	}
 
-	_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
+	_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
 }
 
 void CRModelViewer::setSelectedModel(Anima::AnimaMesh* model)
@@ -184,6 +184,6 @@ void CRModelViewer::setSelectedModel(Anima::AnimaMesh* model)
 		Anima::AnimaVertex3f pos = center;
 		pos.z += (boxH / 2.0f) / sinf(60.0f * (float)M_PI / 180.0f);
 
-		_engine->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->LookAt(pos, center);
+		_engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->LookAt(pos, center);
 	}
 }

@@ -11,7 +11,7 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 #include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -106,7 +106,7 @@ public:
 	void UpdateCameraProperies(AnimaCamera* camera);
 	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager);
 	void UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager);
-	void UpdateLightsProperies(AnimaStage* stage);
+	void UpdateLightsProperies(AnimaScene* scene);
 	void UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);

@@ -15,14 +15,14 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaLight.h"
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaLightsManager
 {
 public:
-	AnimaLightsManager(AnimaStage* stage);
+	AnimaLightsManager(AnimaScene* scene);
 	~AnimaLightsManager();
 	
 	AnimaAmbientLight* CreateAmbientLight(const AnimaString& name);
@@ -51,7 +51,7 @@ private:
 	void ClearLights(bool bDeleteObjects = true, bool bResetNumber = true);
 	
 private:
-	AnimaStage* _stage;
+	AnimaScene* _scene;
 	
 	AnimaLight** _lights;
 	ASizeT _lightsNumber;

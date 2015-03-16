@@ -13,8 +13,8 @@
 #include <AnimaLight.h>
 #include <AnimaLightsManager.h>
 #include <AnimaMath.h>
-#include <AnimaStage.h>
-#include <AnimaStagesManager.h>
+#include <AnimaScene.h>
+#include <AnimaScenesManager.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -62,19 +62,19 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 
-	Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(1.0f);
+	//Anima::AnimaMatrix m = Anima::AnimaMatrix::MakeRotationYDeg(1.0f);
 
-	Anima::AnimaVertex3f pos = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->GetPosition();
-	pos = m * pos;
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("pointLight1")->SetPosition(pos);
+	//Anima::AnimaVertex3f pos = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("pointLight1")->GetPosition();
+	//pos = m * pos;
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("pointLight1")->SetPosition(pos);
 
-	Anima::AnimaVertex3f dir = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
-	dir = m * dir;
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
+	//Anima::AnimaVertex3f dir = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
+	//dir = m * dir;
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
 
-	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetDataGeneratorsManager()->UpdateValues();
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
-	renderingManager->DeferredDrawAllModels(GetEngine()->GetStagesManager()->GetStage("test-stage"));
+	renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
 	
 	SwapBuffers();
 	
@@ -96,7 +96,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		glViewport(0, 0, w, h);
-		window->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+		window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
 
 		if (((Window*)window)->renderingManager != nullptr)
 		{
@@ -123,8 +123,8 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 		double dy = wnd->_lastPTY - y;
 		double dx = wnd->_lastPTX - x;
 
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * -0.1);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * -0.1);
 	}
 
 	wnd->_lastPTX = x;
@@ -146,34 +146,34 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(-amount, 0.0f, 0.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(-amount, 0.0f, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(amount, 0.0f, 0.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(amount, 0.0f, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_UP:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, amount, 0.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, amount, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, -amount, 0.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, -amount, 0.0f);
 		break;
 	case ANIMA_ENGINE_KEY_W:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_S:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, -1.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, -1.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_D:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(-1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(-1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_A:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(1.0f, 0.0f, 0.0f, 1.0f);
 		break;
 	case ANIMA_ENGINE_KEY_L:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, amount);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, amount);
 		break;
 	case ANIMA_ENGINE_KEY_O:
-		wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, -amount);
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, 0.0f, -amount);
 		break;
 	case ANIMA_ENGINE_KEY_C:
 
@@ -212,7 +212,7 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
 	Window* wnd = (Window*)window;
-	wnd->GetEngine()->GetStagesManager()->GetStage("test-stage")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
+	wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
 }
 
 void Window::Load()
@@ -220,7 +220,7 @@ void Window::Load()
 	int w, h;
 	this->GetWindowSize(&w, &h);
 
-	Anima::AnimaShadersManager* mgr = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetShadersManager();
+	Anima::AnimaShadersManager* mgr = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetShadersManager();
 
 	//mgr->CreateProgram("forward-ambient");
 	//mgr->GetProgramFromName("forward-ambient")->Create();
@@ -288,24 +288,24 @@ void Window::Load()
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
 
-//	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-//	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
-//	GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetStagesManager()->GetStage("test-stage")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 	
-	Anima::AnimaLight* l0 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateAmbientLight("ambient");
+	Anima::AnimaLight* l0 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.2f, 0.2f, 0.2f);
 
-	Anima::AnimaLight* l1 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateDirectionalLight("directional");
+	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);
 	l1->SetIntensity(1.0f);
 	l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
-	Anima::AnimaLight* l2 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight0");
+	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	l2->SetColor(0.0f, 0.0f, 1.0f);
 	l2->SetConstantAttenuation(0.0f);
 	l2->SetLinearAttenuation(0.0f);
@@ -314,7 +314,7 @@ void Window::Load()
 	l2->SetPosition(-10.0f, 5.0f, 0.0f);
 	l2->SetRange(40.0f);
 
-	Anima::AnimaLight* l3 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreatePointLight("pointLight1");
+	Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
 	l3->SetColor(1.0f, 0.0f, 0.0f);
 	l3->SetConstantAttenuation(0.0f);
 	l3->SetLinearAttenuation(0.0f);
@@ -323,7 +323,7 @@ void Window::Load()
 	l3->SetPosition(0.0f, 5.0f, -10.0f);
 	l3->SetRange(40.0f);
 
-	//Anima::AnimaLight* l4 = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetLightsManager()->CreateSpotLight("spotLight0");
+	//Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
 	//l4->SetColor(0.0f, 1.0f, 0.0f);
 	//l4->SetConstantAttenuation(0.1f);
 	//l4->SetLinearAttenuation(0.1f);
@@ -332,13 +332,13 @@ void Window::Load()
 	//l4->SetPosition(0.0f, 0.5f, 5.0f);
 	//l4->SetDirection(0.0f, 0.0f, -1.0f);
 
-	//GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
-	//Anima::AnimaVertex3f min = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();
-	//Anima::AnimaVertex3f max = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMax();
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
+	//Anima::AnimaVertex3f min = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();
+	//Anima::AnimaVertex3f max = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMax();
 
 	//Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
 	//
-	//center = GetEngine()->GetStagesManager()->GetStage("test-stage")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->GetTransformationMatrix() * center;
+	//center = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->GetTransformationMatrix() * center;
 	//
 	//Anima::AnimaVertex3f pos = center;
 	//pos.z += 5.0f;

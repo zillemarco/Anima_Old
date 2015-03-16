@@ -10,7 +10,7 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
-#include "AnimaStage.h"
+#include "AnimaScene.h"
 #include "AnimaString.h"
 #include "AnimaGBuffer.h"
 #include "AnimaVertex.h"
@@ -37,17 +37,17 @@ public:
 	AnimaRenderingManager& operator=(AnimaRenderingManager&& src);
 	
 public:
-	void Start(AnimaStage* stage);
-	void Finish(AnimaStage* stage);
+	void Start(AnimaScene* scene);
+	void Finish(AnimaScene* scene);
 
-	void DrawAllModels(AnimaStage* stage);
-	void DrawSingleModel(AnimaStage* stage, AnimaMesh* model);
+	void DrawAllModels(AnimaScene* scene);
+	void DrawSingleModel(AnimaScene* scene, AnimaMesh* model);
 
-	void ForwardDrawAllModels(AnimaStage* stage);
-	void ForwardDrawSingleModel(AnimaStage* stage, AnimaMesh* model);
+	void ForwardDrawAllModels(AnimaScene* scene);
+	void ForwardDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
 
-	void DeferredDrawAllModels(AnimaStage* stage);
-	void DeferredDrawSingleModel(AnimaStage* stage, AnimaMesh* model);
+	void DeferredDrawAllModels(AnimaScene* scene);
+	void DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
 	
 public:
 	void InitTextureSlots();
@@ -55,29 +55,29 @@ public:
 	void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
 
 protected:
-	void DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
-	void DrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void DrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program);
+	void DrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void DrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 	
-	void ForwardAmbientPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardPointPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardSpotPass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardAmbientPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardDirectionalPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardPointPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void ForwardSpotPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
 
-	void ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program);
-	void ForwardDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void ForwardDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program);
+	void ForwardDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
+	void ForwardDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
 
-	void DeferredPreparePass(AnimaStage* stage, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void DeferredDirectionalPass(AnimaStage* stage, AnimaShaderProgram* program);
-	void DeferredPointPass(AnimaStage* stage, AnimaShaderProgram* program);
-	void DeferredSpotPass(AnimaStage* stage, AnimaShaderProgram* program);
-	void DeferredCombinePass(AnimaStage* stage, AnimaShaderProgram* program);
-	void DeferredUpdateShadowMaps(AnimaStage* stage, AnimaShaderProgram* program);
+	void DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
+	void DeferredDirectionalPass(AnimaScene* scene, AnimaShaderProgram* program);
+	void DeferredPointPass(AnimaScene* scene, AnimaShaderProgram* program);
+	void DeferredSpotPass(AnimaScene* scene, AnimaShaderProgram* program);
+	void DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* program);
+	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
 
-	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true);
-	void DeferredDrawModel(AnimaStage* stage, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
-	void DeferredDrawModelMesh(AnimaStage* stage, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
+	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
 	
 	void Clear();
 
