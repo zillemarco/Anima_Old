@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 
 	Anima::AnimaString path(scene->GetStringAllocator());	
 	Anima::AnimaModelsManager* manager = scene->GetModelsManager();
-	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
+//	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
 	
 	Anima::AnimaMesh* mesh = nullptr;
 

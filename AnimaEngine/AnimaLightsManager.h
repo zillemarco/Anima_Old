@@ -16,6 +16,7 @@
 #include "AnimaString.h"
 #include "AnimaLight.h"
 #include "AnimaScene.h"
+#include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -48,13 +49,11 @@ public:
 	AInt GetSpotLightsCount();
 
 private:
-	void ClearLights(bool bDeleteObjects = true, bool bResetNumber = true);
+	void ClearLights();
 	
 private:
 	AnimaScene* _scene;
-	
-	AnimaLight** _lights;
-	ASizeT _lightsNumber;
+	AnimaArray<AnimaLight*, AnimaLight*> _lights;
 	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _lightsMap;

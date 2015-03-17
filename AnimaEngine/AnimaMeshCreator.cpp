@@ -21,7 +21,7 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*allocator, numeroVertici);
 	AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*allocator, numeroVertici);
 	AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*allocator, numeroVertici);
-	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, numeroFacce, allocator);
+	AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, numeroFacce);
 	
 	vertici[0] = AnimaVertex3f(-1.0f, 0.0f, -1.0f);
 	vertici[1] = AnimaVertex3f(-1.0f, 0.0f, 1.0f);
@@ -38,10 +38,10 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
 	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
 	
-	AUint indexes0[] = { 0, 1, 2 };
-	AUint indexes1[] = { 0, 2, 3 };
-	facce[0].SetIndexes(indexes0, 3);
-	facce[1].SetIndexes(indexes1, 3);
+//	AUint indexes0[] = { 0, 1, 2 };
+//	AUint indexes1[] = { 0, 2, 3 };
+	facce[0].SetIndexes(0, 1, 2);
+	facce[1].SetIndexes(0, 2, 3);
 	
 	mesh->SetVertices(vertici, numeroVertici);
 	mesh->SetNormals(normali, numeroVertici);
@@ -131,7 +131,7 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 	}
 	
 	AnimaVertex3f* meshVertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*allocator, vertici.size());
-	AnimaFace* meshFacce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, facce.size(), allocator);
+	AnimaFace* meshFacce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, facce.size());
 	
 	AInt offset = 0;
 	for(auto vertice : vertici)
@@ -140,7 +140,7 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 	offset = 0;
 	for(auto faccia : facce)
 	{
-		meshFacce[offset++].SetIndexes(faccia->GetIndexes(), faccia->GetIndexesCount());
+		meshFacce[offset++].SetIndexes(faccia->GetIndexes());
 		AnimaAllocatorNamespace::DeallocateObject(*allocator, faccia);
 		faccia = nullptr;
 	}
@@ -183,7 +183,7 @@ AInt AnimaMeshCreator::AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f
 
 void AnimaMeshCreator::AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2, AInt v3, AnimaAllocator* allocator)
 {
-	AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator, allocator);
+	AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
 	face->SetIndexes(v1, v2, v3);
 	
 	facce.push_back(face);

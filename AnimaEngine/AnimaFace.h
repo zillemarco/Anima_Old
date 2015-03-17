@@ -19,7 +19,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaFace
 {
 public:
-	AnimaFace(AnimaAllocator* allocator);
+	AnimaFace();
+	AnimaFace(AUint indexes[3]);
+	AnimaFace(AUint a, AUint b, AUint c);
 	AnimaFace(const AnimaFace& src);
 	AnimaFace(AnimaFace&& src);
 	~AnimaFace();
@@ -28,15 +30,13 @@ public:
 	AnimaFace& operator=(AnimaFace&& src);
 	
 public:
-	void SetIndexes(AUint* indexes, ASizeT n);
+	void SetIndexes(AUint indexes[3]);
 	void SetIndexes(AUint a, AUint b, AUint c);
-	void AddIndex(const AUint& index);
 	AUint GetIndex(ASizeT index) const;
 	AUint* GetIndexes();
 	const AUint* GetConstIndexes();
 	bool GetIndexes(AUint* outIndexes, ASizeT& inOutSize);
 	bool GetConstIndexes(AUint* outIndexes, ASizeT& inOutSize);
-	void ClearIndexes();
 	ASizeT GetIndexesCount();
 	bool HasIndex(AUint index) const;
 
@@ -46,11 +46,7 @@ public:
 				
 protected:
 	AUint _indexes[3];
-	//ASizeT	_indexesNumber;
-
 	AnimaVertex3f _normal;
-	
-	//AnimaAllocator* _allocator;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

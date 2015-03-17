@@ -118,7 +118,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 			int numeroVertici = mesh->mNumVertices;
 
 			AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
-			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_scene->GetGenericAllocator()), numeroFacce, _scene->GetModelDataAllocator());
+			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_scene->GetGenericAllocator()), numeroFacce);
 		
 			int offsetFacce = 0;
 			int offsetVertici = 0;
@@ -139,6 +139,9 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				const aiFace* face = &mesh->mFaces[t];
 				
 				int numeroIndiciFaccia = face->mNumIndices;
+				
+				ANIMA_ASSERT(numeroIndiciFaccia == 3);
+				
 				AUint* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_scene->GetGenericAllocator()), numeroIndiciFaccia);
 				
 				int offsetIndiciFaccia = 0;
@@ -146,7 +149,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				for(int i = 0; i < numeroIndiciFaccia; i++)
 					indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
 								
-				facce[offsetFacce++].SetIndexes(indiciFaccia, offsetIndiciFaccia);
+				facce[offsetFacce++].SetIndexes(indiciFaccia);
 				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), indiciFaccia);
 			}
 

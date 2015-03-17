@@ -11,11 +11,12 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaLightsManager::AnimaLightsManager(AnimaScene* scene)
+	: _lights(scene->GetLightsAllocator())
 {
 	_scene = scene;
 	
-	_lights = nullptr;
-	_lightsNumber = 0;
+//	_lights = nullptr;
+//	_lightsNumber = 0;
 }
 
 AnimaLightsManager::~AnimaLightsManager()
@@ -27,37 +28,15 @@ AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& nam
 {
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
-
+	
 	ANIMA_ASSERT(_scene != nullptr);
-	if (_lightsNumber > 0)
-	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
+	
+	AnimaAmbientLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
 
-		for (int i = 0; i < _lightsNumber; i++)
-			tmpOldLights[i] = _lights[i];
-
-		ClearLights(false, false);
-
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber - 1; i++)
-			_lights[i] = tmpOldLights[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetLightsAllocator()), tmpOldLights);
-		tmpOldLights = nullptr;
-	}
-	else
-	{
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-	}
-
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-
-	_lightsMap[name] = (AUint)(_lightsNumber - 1);
-
-	return (AnimaAmbientLight*)_lights[_lightsNumber - 1];
+	AUint index = (AUint)_lights.Add(newLight);
+	_lightsMap[name] = index;
+	
+	return (AnimaAmbientLight*)_lights[index];
 }
 
 AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const char* name)
@@ -70,37 +49,15 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 {
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
-
+	
 	ANIMA_ASSERT(_scene != nullptr);
-	if (_lightsNumber > 0)
-	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber; i++)
-			tmpOldLights[i] = _lights[i];
-
-		ClearLights(false, false);
-
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber - 1; i++)
-			_lights[i] = tmpOldLights[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetLightsAllocator()), tmpOldLights);
-		tmpOldLights = nullptr;
-	}
-	else
-	{
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-	}
-
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-
-	_lightsMap[name] = (AUint)(_lightsNumber - 1);
-
-	return (AnimaDirectionalLight*)_lights[_lightsNumber - 1];
+	
+	AnimaDirectionalLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	
+	AUint index = (AUint)_lights.Add(newLight);
+	_lightsMap[name] = index;
+	
+	return (AnimaDirectionalLight*)_lights[index];
 }
 
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const char* name)
@@ -113,37 +70,15 @@ AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 {
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
-
+	
 	ANIMA_ASSERT(_scene != nullptr);
-	if (_lightsNumber > 0)
-	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber; i++)
-			tmpOldLights[i] = _lights[i];
-
-		ClearLights(false, false);
-
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber - 1; i++)
-			_lights[i] = tmpOldLights[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetLightsAllocator()), tmpOldLights);
-		tmpOldLights = nullptr;
-	}
-	else
-	{
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-	}
-
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-
-	_lightsMap[name] = (AUint)(_lightsNumber - 1);
-
-	return (AnimaPointLight*)_lights[_lightsNumber - 1];
+	
+	AnimaPointLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	
+	AUint index = (AUint)_lights.Add(newLight);
+	_lightsMap[name] = index;
+	
+	return (AnimaPointLight*)_lights[index];
 }
 
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const char* name)
@@ -156,37 +91,15 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 {
 	if (_lightsMap.find(name) != _lightsMap.end())
 		return nullptr;
-
+	
 	ANIMA_ASSERT(_scene != nullptr);
-	if (_lightsNumber > 0)
-	{
-		AnimaLight** tmpOldLights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber; i++)
-			tmpOldLights[i] = _lights[i];
-
-		ClearLights(false, false);
-
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-
-		for (int i = 0; i < _lightsNumber - 1; i++)
-			_lights[i] = tmpOldLights[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetLightsAllocator()), tmpOldLights);
-		tmpOldLights = nullptr;
-	}
-	else
-	{
-		_lightsNumber++;
-		_lights = AnimaAllocatorNamespace::AllocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lightsNumber);
-	}
-
-	_lights[_lightsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-
-	_lightsMap[name] = (AUint)(_lightsNumber - 1);
-
-	return (AnimaSpotLight*)_lights[_lightsNumber - 1];
+	
+	AnimaSpotLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	
+	AUint index = (AUint)_lights.Add(newLight);
+	_lightsMap[name] = index;
+	
+	return (AnimaSpotLight*)_lights[index];
 }
 
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
@@ -195,30 +108,19 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
 	return CreateSpotLight(str);
 }
 
-void AnimaLightsManager::ClearLights(bool bDeleteObjects, bool bResetNumber)
+void AnimaLightsManager::ClearLights()
 {
-	if (_lights != nullptr)
+	for(AInt i = 0; i < _lights.GetSize(); i++)
 	{
-		if (bDeleteObjects)
-		{
-			for (int i = 0; i < (int)_lightsNumber; i++)
-			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), _lights[i]);
-				_lights[i] = nullptr;
-			}
-		}
-		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaLight*>(*(_scene->GetLightsAllocator()), _lights);
-		_lights = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), _lights[i]);
+		_lights[i] = nullptr;
 	}
 	
-	if (bResetNumber)
-		_lightsNumber = 0;
+	_lights.RemoveAll();
 }
 
 AnimaLight* AnimaLightsManager::GetLight(AUint index)
 {
-	ANIMA_ASSERT(index >= 0 && index < _lightsNumber);
 	return _lights[index];
 }
 
@@ -237,13 +139,13 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 
 AInt AnimaLightsManager::GetTotalLightsCount()
 {
-	return (AInt)_lightsNumber;
+	return _lights.GetSize();
 }
 
 AInt AnimaLightsManager::GetAmbientLightsCount()
 {
 	AInt c = 0;
-	for (ASizeT i = 0; i < _lightsNumber; i++)
+	for (ASizeT i = 0; i < _lights.GetSize(); i++)
 	{
 		if (_lights[i]->IsAmbientLight())
 			c++;
@@ -254,7 +156,7 @@ AInt AnimaLightsManager::GetAmbientLightsCount()
 AInt AnimaLightsManager::GetDirectionalLightsCount()
 {
 	AInt c = 0;
-	for (ASizeT i = 0; i < _lightsNumber; i++)
+	for (ASizeT i = 0; i < _lights.GetSize(); i++)
 	{
 		if (_lights[i]->IsDirectionalLight())
 			c++;
@@ -265,7 +167,7 @@ AInt AnimaLightsManager::GetDirectionalLightsCount()
 AInt AnimaLightsManager::GetPointLightsCount()
 {
 	AInt c = 0;
-	for (ASizeT i = 0; i < _lightsNumber; i++)
+	for (ASizeT i = 0; i < _lights.GetSize(); i++)
 	{
 		if (_lights[i]->IsPointLight())
 			c++;
@@ -276,7 +178,7 @@ AInt AnimaLightsManager::GetPointLightsCount()
 AInt AnimaLightsManager::GetSpotLightsCount()
 {
 	AInt c = 0;
-	for (ASizeT i = 0; i < _lightsNumber; i++)
+	for (ASizeT i = 0; i < _lights.GetSize(); i++)
 	{
 		if (_lights[i]->IsSpotLight())
 			c++;

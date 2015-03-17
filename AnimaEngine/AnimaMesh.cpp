@@ -751,7 +751,7 @@ void AnimaMesh::SetFaces(AnimaFace* faces, ASizeT n)
 	if(faces != nullptr && n > 0)
 	{
 		_facesNumber = n;
-		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber, _allocator);
+		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber);
 	
 		for (int i = 0; i < _facesNumber; i++)
 			_faces[i] = faces[i];
@@ -763,7 +763,7 @@ void AnimaMesh::AddFace(const AnimaFace& index)
 	ANIMA_ASSERT(_allocator != nullptr);
 	if(_facesNumber > 0)
 	{
-		AnimaFace* tmpOldFaces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber, _allocator);
+		AnimaFace* tmpOldFaces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber);
 	
 		for (int i = 0; i < _facesNumber; i++)
 			tmpOldFaces[i] = _faces[i];
@@ -771,7 +771,7 @@ void AnimaMesh::AddFace(const AnimaFace& index)
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _textureCoords);
 	
 		_facesNumber++;
-		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber, _allocator);
+		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber);
 	
 		for (int i = 0; i < _facesNumber - 1; i++)
 			_faces[i] = tmpOldFaces[i];
@@ -783,7 +783,7 @@ void AnimaMesh::AddFace(const AnimaFace& index)
 	else
 	{
 		_facesNumber++;
-		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber, _allocator);
+		_faces = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*_allocator, _facesNumber);
 		
 		_faces[_facesNumber - 1] = index;
 	}

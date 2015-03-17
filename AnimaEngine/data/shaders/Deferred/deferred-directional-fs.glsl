@@ -48,7 +48,7 @@ void main()
 	shadowCoord 		/= shadowCoord.w;
 	shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-	float shadowAmount 	= 1.0f;//ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
+	float shadowAmount 	= ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
 
 	vec3 specularColor 	= speclarData.xyz;
 	float shininess 	= 1.0f / speclarData.a;
