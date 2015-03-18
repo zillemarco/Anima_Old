@@ -850,6 +850,19 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 			UPD_ERROR;
 		}
 	}
+
+	str = "CAM_ProjectionViewInverseMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._location, camera->GetInversedProjectionViewMatrix());
+		else
+		{
+			UPD_ERROR;
+		}
+	}
 }
 
 void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager)
@@ -977,118 +990,118 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 
 void AnimaShaderProgram::UpdateLightsProperies(AnimaScene* scene)
 {
-	AnimaLightsManager* lightsManager = scene->GetLightsManager();
+	//AnimaLightsManager* lightsManager = scene->GetLightsManager();
 
-	AInt lightsCount = lightsManager->GetTotalLightsCount();
+	//AInt lightsCount = lightsManager->GetTotalLightsCount();
 
-	if (lightsCount <= 0)
-		return;
+	//if (lightsCount <= 0)
+	//	return;
 
-	int nextPointLight = 0;
-	int nextSpotLight = 0;
+	//int nextPointLight = 0;
+	//int nextSpotLight = 0;
 
-	AnimaString str(_allocator);
-	AnimaLight* light = nullptr;
-	
-	for (int i = 0; i < lightsCount; i++)
-	{
-		light = lightsManager->GetLight(i);
+	//AnimaString str(_allocator);
+	//AnimaLight* light = nullptr;
+	//
+	//for (int i = 0; i < lightsCount; i++)
+	//{
+	//	light = lightsManager->GetLight(i);
 
-		if (light->IsAmbientLight())
-		{
-			SetUniform("_ambientLight", light->GetColor());
-		}
-		else if (light->IsDirectionalLight())
-		{
-			SetUniform("_directionalLight.direction", light->GetDirection());
-			SetUniform("_directionalLight.base.color", light->GetColor());
-			SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
-		}
-		else if (light->IsPointLight())
-		{
-			if (_maxPointLights == 0)
-			{
-				SetUniform("_pointLight.position", light->GetPosition());
-				SetUniformf("_pointLight.range", light->GetRange());
-				SetUniform("_pointLight.base.color", light->GetColor());
-				SetUniformf("_pointLight.base.intensity", light->GetIntensity());
-				SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
-				SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
-				SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
-			}
-			else
-			{
-				str.Format("_pointLight[%d].position", nextPointLight);
-				SetUniform(str, light->GetPosition());
+	//	if (light->IsAmbientLight())
+	//	{
+	//		SetUniform("_ambientLight", light->GetColor());
+	//	}
+	//	else if (light->IsDirectionalLight())
+	//	{
+	//		SetUniform("_directionalLight.direction", light->GetDirection());
+	//		SetUniform("_directionalLight.base.color", light->GetColor());
+	//		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
+	//	}
+	//	else if (light->IsPointLight())
+	//	{
+	//		if (_maxPointLights == 0)
+	//		{
+	//			SetUniform("_pointLight.position", light->GetPosition());
+	//			SetUniformf("_pointLight.range", light->GetRange());
+	//			SetUniform("_pointLight.base.color", light->GetColor());
+	//			SetUniformf("_pointLight.base.intensity", light->GetIntensity());
+	//			SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
+	//			SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
+	//			SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
+	//		}
+	//		else
+	//		{
+	//			str.Format("_pointLight[%d].position", nextPointLight);
+	//			SetUniform(str, light->GetPosition());
 
-				str.Format("_pointLight[%d].range", nextPointLight);
-				SetUniformf(str, light->GetRange());
+	//			str.Format("_pointLight[%d].range", nextPointLight);
+	//			SetUniformf(str, light->GetRange());
 
-				str.Format("_pointLight[%d].base.color", nextPointLight);
-				SetUniform(str, light->GetColor());
+	//			str.Format("_pointLight[%d].base.color", nextPointLight);
+	//			SetUniform(str, light->GetColor());
 
-				str.Format("_pointLight[%d].base.intensity", nextPointLight);
-				SetUniformf(str, light->GetIntensity());
+	//			str.Format("_pointLight[%d].base.intensity", nextPointLight);
+	//			SetUniformf(str, light->GetIntensity());
 
-				str.Format("_pointLight[%d].attenuation.constant", nextPointLight);
-				SetUniformf(str, light->GetConstantAttenuation());
+	//			str.Format("_pointLight[%d].attenuation.constant", nextPointLight);
+	//			SetUniformf(str, light->GetConstantAttenuation());
 
-				str.Format("_pointLight[%d].attenuation.linear", nextPointLight);
-				SetUniformf(str, light->GetLinearAttenuation());
+	//			str.Format("_pointLight[%d].attenuation.linear", nextPointLight);
+	//			SetUniformf(str, light->GetLinearAttenuation());
 
-				str.Format("_pointLight[%d].attenuation.exponent", nextPointLight);
-				SetUniformf(str, light->GetExponentAttenuation());
+	//			str.Format("_pointLight[%d].attenuation.exponent", nextPointLight);
+	//			SetUniformf(str, light->GetExponentAttenuation());
 
-				nextPointLight++;
-			}
-		}
-		else if (light->IsSpotLight())
-		{
-			if (_maxPointLights == 0)
-			{
-				SetUniform("_spotLight.direction", light->GetDirection());
-				SetUniformf("_spotLight.cutoff", light->GetCutoff());
-				SetUniform("_spotLight.pointLight.position", light->GetPosition());
-				SetUniformf("_spotLight.pointLight.range", light->GetRange());
-				SetUniform("_spotLight.pointLight.base.color", light->GetColor());
-				SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
-				SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
-				SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
-				SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
-			}
-			else
-			{
-				str.Format("_spotLight[%d].direction", nextSpotLight);
-				SetUniform(str, light->GetDirection());
+	//			nextPointLight++;
+	//		}
+	//	}
+	//	else if (light->IsSpotLight())
+	//	{
+	//		if (_maxPointLights == 0)
+	//		{
+	//			SetUniform("_spotLight.direction", light->GetDirection());
+	//			SetUniformf("_spotLight.cutoff", light->GetCutoff());
+	//			SetUniform("_spotLight.pointLight.position", light->GetPosition());
+	//			SetUniformf("_spotLight.pointLight.range", light->GetRange());
+	//			SetUniform("_spotLight.pointLight.base.color", light->GetColor());
+	//			SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
+	//			SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
+	//			SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
+	//			SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
+	//		}
+	//		else
+	//		{
+	//			str.Format("_spotLight[%d].direction", nextSpotLight);
+	//			SetUniform(str, light->GetDirection());
 
-				str.Format("_spotLight[%d].cutoff", nextSpotLight);
-				SetUniformf(str, light->GetCutoff());
+	//			str.Format("_spotLight[%d].cutoff", nextSpotLight);
+	//			SetUniformf(str, light->GetCutoff());
 
-				str.Format("_spotLight[%d].pointLight.position", nextSpotLight);
-				SetUniform(str, light->GetPosition());
+	//			str.Format("_spotLight[%d].pointLight.position", nextSpotLight);
+	//			SetUniform(str, light->GetPosition());
 
-				str.Format("_spotLight[%d].pointLight.range", nextSpotLight);
-				SetUniformf(str, light->GetRange());
+	//			str.Format("_spotLight[%d].pointLight.range", nextSpotLight);
+	//			SetUniformf(str, light->GetRange());
 
-				str.Format("_spotLight[%d].pointLight.base.color", nextSpotLight);
-				SetUniform(str, light->GetColor());
+	//			str.Format("_spotLight[%d].pointLight.base.color", nextSpotLight);
+	//			SetUniform(str, light->GetColor());
 
-				str.Format("_spotLight[%d].pointLight.base.intensity", nextSpotLight);
-				SetUniformf(str, light->GetIntensity());
+	//			str.Format("_spotLight[%d].pointLight.base.intensity", nextSpotLight);
+	//			SetUniformf(str, light->GetIntensity());
 
-				str.Format("_spotLight[%d].pointLight.attenuation.constant", nextSpotLight);
-				SetUniformf(str, light->GetConstantAttenuation());
+	//			str.Format("_spotLight[%d].pointLight.attenuation.constant", nextSpotLight);
+	//			SetUniformf(str, light->GetConstantAttenuation());
 
-				str.Format("_spotLight[%d].pointLight.attenuation.linear", nextSpotLight);
-				SetUniformf(str, light->GetLinearAttenuation());
+	//			str.Format("_spotLight[%d].pointLight.attenuation.linear", nextSpotLight);
+	//			SetUniformf(str, light->GetLinearAttenuation());
 
-				str.Format("_spotLight[%d].pointLight.attenuation.exponent", nextSpotLight);
-				SetUniformf(str, light->GetExponentAttenuation());
+	//			str.Format("_spotLight[%d].pointLight.attenuation.exponent", nextSpotLight);
+	//			SetUniformf(str, light->GetExponentAttenuation());
 
-				nextSpotLight++;
-			}
-		}
-	}
+	//			nextSpotLight++;
+	//		}
+	//	}
+	//}
 }
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)

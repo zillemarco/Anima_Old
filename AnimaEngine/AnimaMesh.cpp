@@ -1679,4 +1679,9 @@ void AnimaMesh::MakeIcosahedralSphere(AInt recursionLevel)
 	AnimaMeshCreator::MakeIcosahedralSphere(this, recursionLevel, _allocator);
 }
 
+void AnimaMesh::MakeCylinder(AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded)
+{
+	AnimaMeshCreator::MakeCylinder(this, topRadius, bottomRadius, height, radialSegments, heightSegments, openEnded, _allocator);
+}
+
 END_ANIMA_ENGINE_NAMESPACE

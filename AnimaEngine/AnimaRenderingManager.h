@@ -14,6 +14,7 @@
 #include "AnimaString.h"
 #include "AnimaGBuffer.h"
 #include "AnimaVertex.h"
+#include "AnimaArray.h"
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -40,12 +41,6 @@ public:
 	void Start(AnimaScene* scene);
 	void Finish(AnimaScene* scene);
 
-	void DrawAllModels(AnimaScene* scene);
-	void DrawSingleModel(AnimaScene* scene, AnimaMesh* model);
-
-	void ForwardDrawAllModels(AnimaScene* scene);
-	void ForwardDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
-
 	void DeferredDrawAllModels(AnimaScene* scene);
 	void DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
 	
@@ -55,25 +50,10 @@ public:
 	void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
 
 protected:
-	void DrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program);
-	void DrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void DrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	
-	void ForwardAmbientPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardDirectionalPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardPointPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void ForwardSpotPass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-
-	void ForwardDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program);
-	void ForwardDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-	void ForwardDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation);
-
 	void DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void DeferredDirectionalPass(AnimaScene* scene, AnimaShaderProgram* program);
-	void DeferredPointPass(AnimaScene* scene, AnimaShaderProgram* program);
-	void DeferredSpotPass(AnimaScene* scene, AnimaShaderProgram* program);
 	void DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* program);
 	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
+	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*, AnimaLight*>* lights);
 
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true);
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
@@ -87,6 +67,8 @@ protected:
 	void ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst);
 
 protected:
+	template<class T> AnimaMesh* CreateMeshForLightType();
+
 	void SetTextureSlot(AnimaString slotName, AUint value);
 	void SetTextureSlot(const char* slotName, AUint value);
 	
@@ -163,10 +145,7 @@ protected:
 
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
-
-	AnimaMesh*		_pointLightMesh;
-	AnimaMesh*		_spotLightMesh;
-
+	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
@@ -179,8 +158,25 @@ protected:
 	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher>	_floatsMap;
 	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher>	_integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaString::Hasher>	_booleansMap;
+
+	boost::unordered_map<AnimaString, AnimaMesh*, AnimaString::Hasher>	_lightsMeshMap;
 #pragma warning (default: 4251)
 };
+
+template<class T> 
+AnimaMesh* AnimaRenderingManager::CreateMeshForLightType()
+{
+	AnimaString type(typeid(T).name(), _allocator);
+
+	auto pair = _lightsMeshMap.find(type);
+	if (pair != _lightsMeshMap.end())
+		return pair->second;
+
+	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
+	_lightsMeshMap[type] = lightMesh;
+
+	return lightMesh;
+}
 
 END_ANIMA_ENGINE_NAMESPACE
 

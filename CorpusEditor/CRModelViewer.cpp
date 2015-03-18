@@ -39,36 +39,6 @@ CRModelViewer::~CRModelViewer()
 void CRModelViewer::Initialize()
 {
 	Anima::AnimaShadersManager* mgr = _engine->GetScenesManager()->GetStage("test-scene")->GetShadersManager();
-
-	mgr->CreateProgram("phong");
-	mgr->GetProgramFromName("phong")->Create();
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("phong")->AddShader(mgr->LoadShaderFromFile("phong-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Phong/phong.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("phong")->Link();
-
-	mgr->CreateProgram("forward-ambient");
-	mgr->GetProgramFromName("forward-ambient")->Create();
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-ambient.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-ambient")->Link();
-
-	mgr->CreateProgram("forward-directional");
-	mgr->GetProgramFromName("forward-directional")->Create();
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-directional.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-directional")->Link();
-
-	mgr->CreateProgram("forward-point");
-	mgr->GetProgramFromName("forward-point")->Create();
-	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-point")->AddShader(mgr->LoadShaderFromFile("forward-point-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-point.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-point")->Link();
-
-	mgr->CreateProgram("forward-spot");
-	mgr->GetProgramFromName("forward-spot")->Create();
-	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-vs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.vs", Anima::AnimaShader::VERTEX));
-	mgr->GetProgramFromName("forward-spot")->AddShader(mgr->LoadShaderFromFile("forward-spot-fs", "D:/Git/AnimaEngine/AnimaEngine/data/shaders/Forward/forward-spot.fs", Anima::AnimaShader::FRAGMENT));
-	mgr->GetProgramFromName("forward-spot")->Link();
 }
 
 void CRModelViewer::Render()
@@ -85,7 +55,7 @@ void CRModelViewer::Render()
 	_renderingManager->Start(_engine->GetScenesManager()->GetStage("test-scene"));
 
 	if (_selectedModel != nullptr)
-		_renderingManager->ForwardDrawSingleModel(_engine->GetScenesManager()->GetStage("test-scene"), _selectedModel);
+		_renderingManager->DeferredDrawSingleModel(_engine->GetScenesManager()->GetStage("test-scene"), _selectedModel);
 
 	_renderingManager->Finish(_engine->GetScenesManager()->GetStage("test-scene"));
 

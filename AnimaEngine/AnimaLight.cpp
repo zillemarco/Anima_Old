@@ -8,6 +8,8 @@
 
 #include "AnimaLight.h"
 #include "AnimaDataGeneratorsManager.h"
+#include "AnimaShaderProgram.h"
+#include "AnimaShadersManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -291,6 +293,30 @@ AnimaColor3f AnimaAmbientLight::GetColor()
 	return AnimaMappedValues::GetColor3f("color");
 }
 
+void AnimaAmbientLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
+{
+}
+
+void AnimaAmbientLight::UpdateCullFace(AnimaCamera* activeCamera)
+{
+}
+
+const char* AnimaAmbientLight::GetShaderPrefix()
+{
+	return "AML";
+}
+
+const char* AnimaAmbientLight::GetShaderName()
+{
+	return "";
+}
+
+bool AnimaAmbientLight::CreateShader(AnimaShadersManager* shadersManager)
+{
+	// La luce ambientale non ha uno shader (vale solo per il deferred shading [standard]) 
+	return true;
+}
+
 //----------------------------------------------------------------
 //						ANIMA DIRECTIONAL LIGHT
 //----------------------------------------------------------------
@@ -348,6 +374,49 @@ void AnimaDirectionalLight::ComputeProjectionMatrix()
 	float t = 20.0f;
 	_projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -1000.0f, 1000.0f);
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+}
+
+void AnimaDirectionalLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
+{
+	meshTransformation->SetRotationDeg(90.0f, 0.0f, 0.0f);
+	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
+	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
+}
+
+void AnimaDirectionalLight::UpdateCullFace(AnimaCamera* activeCamera)
+{
+}
+
+const char* AnimaDirectionalLight::GetShaderPrefix()
+{
+	return "DIL";
+}
+
+const char* AnimaDirectionalLight::GetShaderName()
+{
+	return "deferred-directional";
+}
+
+bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
+{
+	if (shadersManager->GetProgramFromName("deferred-directional"))
+		return true;
+
+	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-directional");
+
+	if (pgr == nullptr)
+		return false;
+
+	if (!pgr->Create())
+		return false;
+
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+
+	if (!pgr->Link())
+		return false;
+
+	return true;
 }
 
 //----------------------------------------------------------------
@@ -435,6 +504,61 @@ AFloat AnimaPointLight::GetRange()
 	return AnimaMappedValues::GetFloat("range");
 }
 
+void AnimaPointLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
+{
+	AFloat range = GetRange();
+	AnimaVertex3f position = GetPosition();
+
+	meshTransformation->SetRotationDeg(0.0f, 0.0f, 0.0f);
+	meshTransformation->SetScale(range, range, range);
+	meshTransformation->SetTranslation(position);
+}
+
+void AnimaPointLight::UpdateCullFace(AnimaCamera* activeCamera)
+{
+	AFloat range = GetRange();
+	AnimaVertex3f position = GetPosition();
+	AnimaVertex3f cameraPosition = activeCamera->GetPosition();
+
+	float dist = (position - cameraPosition).Length();
+	if (dist < range)
+		glCullFace(GL_FRONT);
+	else
+		glCullFace(GL_BACK);
+}
+
+const char* AnimaPointLight::GetShaderPrefix()
+{
+	return "PTL";
+}
+
+const char* AnimaPointLight::GetShaderName()
+{
+	return "deferred-point";
+}
+
+bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
+{
+	if (shadersManager->GetProgramFromName("deferred-point"))
+		return true;
+
+	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-point");
+
+	if (pgr == nullptr)
+		return false;
+
+	if (!pgr->Create())
+		return false;
+
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::AnimaShader::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::AnimaShader::FRAGMENT));
+
+	if (!pgr->Link())
+		return false;
+
+	return true;
+}
+
 //----------------------------------------------------------------
 //						ANIMA SPOT LIGHT
 //----------------------------------------------------------------
@@ -474,6 +598,33 @@ AnimaVertex3f AnimaSpotLight::GetDirection()
 AFloat AnimaSpotLight::GetCutoff()
 {
 	return AnimaMappedValues::GetFloat("cutoff");
+}
+
+void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
+{
+	meshTransformation->SetRotationDeg(0.0f, 0.0f, 0.0f);
+	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
+	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
+}
+
+void AnimaSpotLight::UpdateCullFace(AnimaCamera* activeCamera)
+{
+}
+
+const char* AnimaSpotLight::GetShaderPrefix()
+{
+	return "SPL";
+}
+
+const char* AnimaSpotLight::GetShaderName()
+{
+	return "deferred-spot";
+}
+
+bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
+{
+	// La luce ambientale non ha uno shader (vale solo per il deferred shading [standard]) 
+	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

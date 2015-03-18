@@ -26,8 +26,10 @@ public:
 		_allocator = allocator;
 	}
 
-	AnimaArray(const AnimaArray& src)
+	AnimaArray(AnimaArray& src)
 	{
+		_allocator = src._allocator;
+
 		Copy(src);
 	}
 
@@ -49,7 +51,7 @@ public:
 		}
 	}
 
-	AnimaArray& operator=(const AnimaArray& src)
+	AnimaArray& operator=(AnimaArray& src)
 	{
 		Copy(src);
 		return *this;
@@ -264,12 +266,12 @@ public:
 	}
 
 	template<typename... Args>
-	void Copy(const AnimaArray& src, Args&&... args)
+	void Copy(AnimaArray& src, Args&&... args)
 	{
 		ANIMA_ASSERT(this != &src);
 		SetSize(1, std::forward<Args>(args)..., -1);
 		InsertAt(0, &src, std::forward<Args>(args)...);
-		RemoveAt(_size - 1, std::forward<Args>(args)...);
+		RemoveAt(_size - 1, std::forward<Args>(args)..., -1);
 	}
 
 	template<typename... Args>
@@ -301,7 +303,7 @@ public:
 	}
 
 	template<typename... Args>
-	void InserAt(AInt index, AnimaArray* newArray, Args&&... args)
+	void InsertAt(AInt index, AnimaArray* newArray, Args&&... args)
 	{
 		ANIMA_ASSERT(index >= 0);
 

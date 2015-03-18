@@ -15,8 +15,12 @@
 #include "AnimaMappedValues.h"
 #include "AnimaMesh.h"
 #include "AnimaTexture.h"
+#include "AnimaCamera.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaShaderProgram;
+class AnimaShadersManager;
 
 //----------------------------------------------------------------
 //						ANIMA LIGHT
@@ -86,6 +90,13 @@ public:
 	virtual AnimaMatrix GetProjectionMatrix();
 	virtual AnimaMatrix GetProjectionViewMatrix();
 
+	virtual void UpdateMeshTransformation(AnimaTransformation* meshTransformation) = 0;
+	virtual void UpdateCullFace(AnimaCamera* activeCamera) = 0;
+
+	virtual const char* GetShaderPrefix() = 0;
+	virtual const char* GetShaderName() = 0;
+	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
+
 protected:
 	AnimaLightType	_type;
 	AnimaTexture*	_shadowTexture;
@@ -108,6 +119,13 @@ public:
 	void SetColor(AFloat r, AFloat g, AFloat b) override;
 
 	AnimaColor3f GetColor() override;
+
+	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	void UpdateCullFace(AnimaCamera* activeCamera) override;
+
+	const char* GetShaderPrefix() override;
+	const char* GetShaderName() override;
+	bool CreateShader(AnimaShadersManager* shadersManager) override;
 };
 
 //----------------------------------------------------------------
@@ -128,6 +146,13 @@ public:
 
 	void ComputeViewMatrix() override;
 	void ComputeProjectionMatrix() override;
+
+	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	void UpdateCullFace(AnimaCamera* activeCamera) override;
+
+	const char* GetShaderPrefix() override;
+	const char* GetShaderName() override;
+	bool CreateShader(AnimaShadersManager* shadersManager) override;
 };
 
 //----------------------------------------------------------------
@@ -153,6 +178,13 @@ public:
 	AFloat GetLinearAttenuation() override;
 	AFloat GetExponentAttenuation() override;
 	AFloat GetRange() override;
+	
+	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	void UpdateCullFace(AnimaCamera* activeCamera) override;
+
+	const char* GetShaderPrefix() override;
+	const char* GetShaderName() override;
+	bool CreateShader(AnimaShadersManager* shadersManager) override;
 };
 
 //----------------------------------------------------------------
@@ -170,6 +202,13 @@ public:
 
 	AnimaVertex3f GetDirection() override;
 	AFloat GetCutoff() override;
+
+	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	void UpdateCullFace(AnimaCamera* activeCamera) override;
+
+	const char* GetShaderPrefix() override;
+	const char* GetShaderName() override;
+	bool CreateShader(AnimaShadersManager* shadersManager) override;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

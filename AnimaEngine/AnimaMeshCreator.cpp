@@ -38,8 +38,6 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	textCoords[2] = AnimaVertex2f(0.0f, 1.0f);
 	textCoords[3] = AnimaVertex2f(0.0f, 0.0f);
 	
-//	AUint indexes0[] = { 0, 1, 2 };
-//	AUint indexes1[] = { 0, 2, 3 };
 	facce[0].SetIndexes(0, 1, 2);
 	facce[1].SetIndexes(0, 2, 3);
 	
@@ -52,6 +50,121 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	AnimaAllocatorNamespace::DeallocateArray(*allocator, normali);
 	AnimaAllocatorNamespace::DeallocateArray(*allocator, textCoords);
 	AnimaAllocatorNamespace::DeallocateArray(*allocator, facce);
+}
+
+void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator)
+{
+	mesh->ClearAll();
+
+	AFloat thetaStart = 0.0f;
+	AFloat thetaLength = M_2PI;
+
+	AFloat heightHalf = height / 2.0f;
+	std::vector<AnimaVertex3f> vertici;
+	std::vector<AnimaFace*> facce;
+
+	std::vector<std::vector<ASizeT>> righeVertici;
+
+	for (AUint y = 0; y <= heightSegments; y++)
+	{
+		std::vector<ASizeT> rigaVertici;
+		AFloat v = (AFloat)y / (AFloat)heightSegments;
+		AFloat radius = v * (bottomRadius - topRadius) + topRadius;
+
+		for (AUint x = 0; x <= radialSegments; x++)
+		{
+			AFloat u = (AFloat)x / (AFloat)radialSegments;
+			AnimaVertex3f vertice;
+			vertice.x = radius * sinf(u * thetaLength + thetaStart);
+			vertice.y = -v * height + heightHalf;
+			vertice.z = radius * cosf(u * thetaLength + thetaStart);
+
+			vertici.push_back(vertice);
+			rigaVertici.push_back(vertici.size() - 1);
+		}
+
+		righeVertici.push_back(rigaVertici);
+	}
+
+	AFloat tanTheta = ((AFloat)bottomRadius - (AFloat)topRadius) / (AFloat)height;
+	AnimaVertex3f na, nb;
+
+	for (AUint x = 0; x < radialSegments; x++)
+	{
+		for (AUint y = 0; y < heightSegments; y++)
+		{
+			AUint v1 = (AUint)righeVertici[y][x];
+			AUint v2 = (AUint)righeVertici[y + 1][x];
+			AUint v3 = (AUint)righeVertici[y + 1][x + 1];
+			AUint v4 = (AUint)righeVertici[y][x + 1];
+
+			AnimaFace* face1 = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
+			face1->SetIndexes(v1, v2, v4);
+
+			AnimaFace* face2 = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
+			face2->SetIndexes(v2, v3, v4);
+
+			facce.push_back(face1);
+			facce.push_back(face2);
+		}
+	}
+
+	if (openEnded == false && topRadius > 0.0f)
+	{
+		vertici.push_back(AnimaVertex3f(0.0f, heightHalf, 0.0f));
+
+		for (AUint x = 0; x < radialSegments; x++)
+		{
+			AUint v1 = (AUint)righeVertici[0][x];
+			AUint v2 = (AUint)righeVertici[0][x + 1];
+			AUint v3 = (AUint)vertici.size() - 1;
+
+			AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
+			face->SetIndexes(v1, v2, v3);
+
+			facce.push_back(face);
+		}
+	}
+
+	if (openEnded == false && bottomRadius > 0.0f)
+	{
+		vertici.push_back(AnimaVertex3f(0.0f, -heightHalf, 0.0f));
+
+		for (AUint x = 0; x < radialSegments; x++)
+		{
+			AUint v1 = (AUint)righeVertici[heightSegments][x + 1];
+			AUint v2 = (AUint)righeVertici[heightSegments][x];
+			AUint v3 = (AUint)vertici.size() - 1;
+
+			AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
+			face->SetIndexes(v1, v2, v3);
+
+			facce.push_back(face);
+		}
+	}
+
+	AnimaVertex3f* meshVertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*allocator, vertici.size());
+	AnimaFace* meshFacce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, facce.size());
+
+	AInt offset = 0;
+	for (auto vertice : vertici)
+		meshVertici[offset++] = vertice;
+
+	offset = 0;
+	for (auto faccia : facce)
+	{
+		meshFacce[offset++].SetIndexes(faccia->GetIndexes());
+		AnimaAllocatorNamespace::DeallocateObject(*allocator, faccia);
+		faccia = nullptr;
+	}
+
+	mesh->SetVertices(meshVertici, vertici.size());
+	mesh->SetFaces(meshFacce, facce.size());
+
+	vertici.clear();
+	facce.clear();
+	AnimaAllocatorNamespace::DeallocateArray(*allocator, meshVertici);
+	AnimaAllocatorNamespace::DeallocateArray(*allocator, meshFacce);
 }
 
 void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLevel, AnimaAllocator* allocator)
@@ -193,6 +306,13 @@ AnimaMesh* AnimaMeshCreator::CreatePlane(AnimaAllocator* allocator)
 {
 	AnimaMesh* mesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*allocator, allocator);
 	MakePlane(mesh, allocator);	
+	return mesh;
+}
+
+AnimaMesh* AnimaMeshCreator::CreateCylinder(AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator)
+{
+	AnimaMesh* mesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*allocator, allocator);
+	MakeCylinder(mesh, topRadius, bottomRadius, height, radialSegments, heightSegments, openEnded, allocator);
 	return mesh;
 }
 

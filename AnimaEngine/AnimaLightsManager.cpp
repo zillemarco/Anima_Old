@@ -11,12 +11,8 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaLightsManager::AnimaLightsManager(AnimaScene* scene)
-	: _lights(scene->GetLightsAllocator())
 {
 	_scene = scene;
-	
-//	_lights = nullptr;
-//	_lightsNumber = 0;
 }
 
 AnimaLightsManager::~AnimaLightsManager()
@@ -26,109 +22,74 @@ AnimaLightsManager::~AnimaLightsManager()
 
 AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& name)
 {
-	if (_lightsMap.find(name) != _lightsMap.end())
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	
-	AnimaAmbientLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaAmbientLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-
-	AUint index = (AUint)_lights.Add(newLight);
-	_lightsMap[name] = index;
-	
-	return (AnimaAmbientLight*)_lights[index];
+	return CreateLight<AnimaAmbientLight>(name);
 }
 
 AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
-	return CreateAmbientLight(str);
+	return CreateLight<AnimaAmbientLight>(name);
 }
 
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaString& name)
 {
-	if (_lightsMap.find(name) != _lightsMap.end())
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	
-	AnimaDirectionalLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-	
-	AUint index = (AUint)_lights.Add(newLight);
-	_lightsMap[name] = index;
-	
-	return (AnimaDirectionalLight*)_lights[index];
+	return CreateLight<AnimaDirectionalLight>(name);
 }
 
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
-	return CreateDirectionalLight(str);
+	return CreateLight<AnimaDirectionalLight>(name);
 }
 
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 {
-	if (_lightsMap.find(name) != _lightsMap.end())
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	
-	AnimaPointLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-	
-	AUint index = (AUint)_lights.Add(newLight);
-	_lightsMap[name] = index;
-	
-	return (AnimaPointLight*)_lights[index];
+	return CreateLight<AnimaPointLight>(name);
 }
 
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
-	return CreatePointLight(str);
+	return CreateLight<AnimaPointLight>(name);
 }
 
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 {
-	if (_lightsMap.find(name) != _lightsMap.end())
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	
-	AnimaSpotLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-	
-	AUint index = (AUint)_lights.Add(newLight);
-	_lightsMap[name] = index;
-	
-	return (AnimaSpotLight*)_lights[index];
+	return CreateLight<AnimaSpotLight>(name);
 }
 
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
-	return CreateSpotLight(str);
+	return CreateLight<AnimaSpotLight>(name);
 }
 
 void AnimaLightsManager::ClearLights()
 {
-	for(AInt i = 0; i < _lights.GetSize(); i++)
+	for (auto pair : _lightsMap)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), _lights[i]);
-		_lights[i] = nullptr;
+		if (pair.second != nullptr)
+		{
+			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), pair.second);
+			pair.second = nullptr;
+		}
 	}
-	
-	_lights.RemoveAll();
-}
 
-AnimaLight* AnimaLightsManager::GetLight(AUint index)
-{
-	return _lights[index];
+	_lightsMap.clear();
 }
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 {
-	if (_lightsMap.find(name) == _lightsMap.end())
-		return nullptr;
-	return GetLight(_lightsMap[name]);
+	auto namesPair = _lightsName.find(name);
+
+	if (namesPair != _lightsMap.end())
+	{
+		boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* lightsMap = namesPair->second->GetLightsMap();
+		AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = namesPair->second->GetLightsArray();
+
+		auto lightsPair = lightsMap->find(name);
+
+		if (lightsPair != lightsMap->end())
+			return lightsArray->ElementAt(lightsPair->second);
+	}
+
+	return nullptr;
 }
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
@@ -139,51 +100,85 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 
 AInt AnimaLightsManager::GetTotalLightsCount()
 {
-	return _lights.GetSize();
+	AInt count = 0;
+	for (auto pair : _lightsMap)
+	{
+		if (pair.second != nullptr)
+			count += pair.second->GetLightsArray()->GetSize();
+	}
+
+	return count;
 }
 
-AInt AnimaLightsManager::GetAmbientLightsCount()
+boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* AnimaLightsManager::GetLightsMap()
 {
-	AInt c = 0;
-	for (ASizeT i = 0; i < _lights.GetSize(); i++)
-	{
-		if (_lights[i]->IsAmbientLight())
-			c++;
-	}
-	return c;
+	return &_lightsMap;
 }
 
-AInt AnimaLightsManager::GetDirectionalLightsCount()
+AnimaLightsMapData::AnimaLightsMapData(AnimaAllocator* allocator)
+	: _lights(allocator)
 {
-	AInt c = 0;
-	for (ASizeT i = 0; i < _lights.GetSize(); i++)
-	{
-		if (_lights[i]->IsDirectionalLight())
-			c++;
-	}
-	return c;
+	_allocator = allocator;
 }
 
-AInt AnimaLightsManager::GetPointLightsCount()
+AnimaLightsMapData::AnimaLightsMapData(AnimaLightsMapData& src)
+	: _lights(src._allocator)
 {
-	AInt c = 0;
-	for (ASizeT i = 0; i < _lights.GetSize(); i++)
-	{
-		if (_lights[i]->IsPointLight())
-			c++;
-	}
-	return c;
+	_allocator = src._allocator;
+	_lights = src._lights;
+	_lightsMap = src._lightsMap;
 }
 
-AInt AnimaLightsManager::GetSpotLightsCount()
+AnimaLightsMapData::AnimaLightsMapData(AnimaLightsMapData&& src)
+	: _lights(src._allocator)
 {
-	AInt c = 0;
-	for (ASizeT i = 0; i < _lights.GetSize(); i++)
+	_allocator = src._allocator;
+	_lights = src._lights;
+	_lightsMap = src._lightsMap;
+}
+
+AnimaLightsMapData::~AnimaLightsMapData()
+{
+	for (AInt i = 0; i < _lights.GetSize(); i++)
 	{
-		if (_lights[i]->IsSpotLight())
-			c++;
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _lights[i]);
+		_lights[i] = nullptr;
 	}
-	return c;
+
+	_lights.RemoveAll();
+	_lightsMap.clear();
+}
+
+AnimaLightsMapData& AnimaLightsMapData::operator=(AnimaLightsMapData& src)
+{
+	if (this != &src)
+	{
+		_lights = src._lights;
+		_lightsMap = src._lightsMap;
+	}
+
+	return *this;
+}
+
+AnimaLightsMapData& AnimaLightsMapData::operator=(AnimaLightsMapData&& src)
+{
+	if (this != &src)
+	{
+		_lights = src._lights;
+		_lightsMap = src._lightsMap;
+	}
+
+	return *this;
+}
+
+AnimaArray<AnimaLight*, AnimaLight*>* AnimaLightsMapData::GetLightsArray()
+{
+	return &_lights;
+}
+
+boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* AnimaLightsMapData::GetLightsMap()
+{
+	return &_lightsMap;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -424,7 +424,7 @@ void AnimaTransformation::UpdateMatrix()
 	AnimaMatrix rotationMatrix = (AnimaQuaternion(AnimaVertex3f(1.0, 0.0, 0.0), _rotation.x) * AnimaQuaternion(AnimaVertex3f(0.0, 1.0, 0.0), _rotation.y) * AnimaQuaternion(AnimaVertex3f(0.0, 0.0, 1.0), _rotation.z)).GetMatrix();
 	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
 
-	_transformationMatrix = scaleMatrix * rotationMatrix * translationMatrix * _initialTransformationMatrix;
+	_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix * _initialTransformationMatrix;
 }
 
 void AnimaTransformation::SetTransformationMatrix(const AnimaMatrix& m)

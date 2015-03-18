@@ -285,9 +285,10 @@ AnimaShaderProgram* AnimaShadersManager::GetProgram(ASizeT index)
 
 AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const AnimaString& name)
 {
-	if (_programsMap.find(name) == _programsMap.end())
+	auto pair = _programsMap.find(name);
+	if (pair == _programsMap.end())
 		return nullptr;
-	return GetProgram((ASizeT)_programsMap[name]);
+	return GetProgram((ASizeT)pair->second);
 }
 
 AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const char* name)

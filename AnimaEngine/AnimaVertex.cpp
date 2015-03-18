@@ -1,6 +1,9 @@
 #include "AnimaVertex.h"
 #include "AnimaMatrix.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 #ifndef min
@@ -446,6 +449,22 @@ AFloat AnimaVertex3f::Length() const
 AFloat AnimaVertex3f::Length2() const
 {
 	return vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
+}
+
+										//	Y				X			Z
+void AnimaVertex3f::GetEulerAngles(AFloat& yaw, AFloat& pitch, AFloat& roll) const
+{
+	AnimaVertex3f D = Normalized();
+
+	AnimaVertex3f right = D ^ AnimaVertex3f(0.0f, 1.0f, 0.0f);
+	AnimaVertex3f U = D ^ right;
+	AnimaVertex3f W0(-D.y, D.x, 0.0f);
+	AnimaVertex3f U0 = W0 ^ D;
+
+	yaw = atan2f(D.y, D.x) * 180.0f / (AFloat)M_PI;
+	pitch = -asin(D.z) * 180.0f / (AFloat)M_PI;
+	//roll = atan2f((W0 * U) / (U0 * U) / W0.Length() * U0.Length()) * 180.0f / (AFloat)M_PI;
+	roll = atanf(((W0 * U) / W0.Length()) / ((U0 * U) / U0.Length())) * 180.0f / (AFloat)M_PI;
 }
 
 //---------------------------------------------------------------------------------------

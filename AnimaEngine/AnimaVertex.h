@@ -141,6 +141,8 @@ public:
 	AnimaVertex3f Clamped(const AFloat lower, const AFloat upper) const;
 	AnimaVertex3f Clamped(const AnimaVertex3f& lower, const AnimaVertex3f& upper) const;
 
+	void GetEulerAngles(AFloat& yaw, AFloat& pitch, AFloat& roll) const;
+
 	AFloat Length() const;
 	AFloat Length2() const;
 };

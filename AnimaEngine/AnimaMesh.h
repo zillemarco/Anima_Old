@@ -60,6 +60,7 @@ public:
 
 	void MakePlane();
 	void MakeIcosahedralSphere(AInt recursionLevel = 0);
+	void MakeCylinder(AFloat topRadius = 1.0f, AFloat bottomRadius = 1.0f, AFloat height = 1.0f, AUint radialSegments = 8, AUint heightSegments = 1, bool openEnded = false);
 
 	void SetMeshName(const AnimaString& name);
 	void SetMeshName(const char* name);
