@@ -130,22 +130,22 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 		}
 	}
 
-	if (openEnded == false && bottomRadius > 0.0f)
-	{
+	//if (openEnded == false && bottomRadius > 0.0f)
+	//{
 		vertici.push_back(AnimaVertex3f(0.0f + offsetX, -heightHalf + offsetY, 0.0f + offsetZ));
 
-		for (AUint x = 0; x < radialSegments; x++)
-		{
-			AUint v1 = (AUint)righeVertici[heightSegments][x + 1];
-			AUint v2 = (AUint)righeVertici[heightSegments][x];
-			AUint v3 = (AUint)vertici.size() - 1;
+		//for (AUint x = 0; x < radialSegments; x++)
+		//{
+		//	AUint v1 = (AUint)righeVertici[heightSegments][x + 1];
+		//	AUint v2 = (AUint)righeVertici[heightSegments][x];
+		//	AUint v3 = (AUint)vertici.size() - 1;
 
-			AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
-			face->SetIndexes(v1, v2, v3);
+		//	AnimaFace* face = AnimaAllocatorNamespace::AllocateNew<AnimaFace>(*allocator);
+		//	face->SetIndexes(v1, v2, v3);
 
-			facce.push_back(face);
-		}
-	}
+		//	facce.push_back(face);
+		//}
+	//}
 
 	AnimaVertex3f* meshVertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*allocator, vertici.size());
 	AnimaFace* meshFacce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*allocator, facce.size());

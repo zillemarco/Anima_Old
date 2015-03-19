@@ -50,6 +50,32 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 	((Window*)window)->DrawScene();
 }
 
+bool Inside(Anima::AnimaVertex3f point, Anima::AnimaVertex3f apex, Anima::AnimaVertex3f bottom, float cutoff)
+{
+	Anima::AnimaVertex3f apexToPoint = apex - point;
+	Anima::AnimaVertex3f axis = apex - bottom;
+
+	bool isInInfiniteCone = ((apexToPoint * axis) / apexToPoint.Length() / axis.Length()) > cutoff;
+
+	if (!isInInfiniteCone)
+		return false;
+
+	bool isUnderRoundCap = ((apexToPoint * axis) / axis.Length()) < axis.Length();
+	return isUnderRoundCap;
+}
+
+bool Inside(Anima::AnimaVertex3f point, Anima::AnimaVertex3f coneTip, Anima::AnimaVertex3f coneDirection, float cutoff, float maxDistance)
+{
+	Anima::AnimaVertex3f dv = point - coneTip;
+	float len = dv.Length();
+
+	if (len > maxDistance)
+		return false;
+
+	dv.Normalize();
+	return (coneDirection * dv >= cutoff);
+}
+
 void Window::DrawScene()
 {
 	int w, h;
@@ -62,7 +88,24 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 	
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
+
+	Anima::AnimaVertex3f bottom = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetVertex(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetVerticesNumber() - 1);
+	Anima::AnimaVertex3f apex = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetPosition();
+	Anima::AnimaVertex3f direction = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetDirection();
+	Anima::AnimaVertex3f point = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->GetPosition();
+	float maxDistance = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetRange();
+	float cutoff = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetCutoff();
+
+	float coseno = acosf(cutoff) * 2.0f;
+
+	bottom = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation()->GetTransformationMatrix() * bottom;
+
+	//if (Inside(point, apex, bottom, cutoff))
+	if (Inside(point, apex, direction, cutoff / 2.0f, maxDistance))
+		OutputDebugStringA("Dentro\r\n");
+	else
+		OutputDebugStringA("Fuori\r\n");
 	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
@@ -278,7 +321,7 @@ void Window::Load()
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 	
 	Anima::AnimaLight* l0 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(0.0f, 0.0f, 0.0f);
+	l0->SetColor(1.0f, 1.0f, 1.0f);
 
 	//Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
 	//l1->SetColor(1.0f, 1.0f, 1.0f);

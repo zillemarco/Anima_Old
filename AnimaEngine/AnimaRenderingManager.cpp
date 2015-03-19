@@ -643,7 +643,7 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 
 	AnimaString type(typeid((*lights->ElementAt(0))).name(), _allocator);
 
-	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE")
+	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE" || type == "class Anima::AnimaSpotLight")
 		return;
 
 	auto pair = _lightsMeshMap.find(type);

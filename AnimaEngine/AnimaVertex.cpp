@@ -479,30 +479,6 @@ void AnimaVertex3f::GetRotation(AFloat& rx, AFloat& ry) const
 	
 	rx *= 180.0f / (AFloat)M_PI;
 	ry *= 180.0f / (AFloat)M_PI;
-	
-//	AnimaVertex3f S = (D ^ AnimaVertex3f(0.0f, 1.0f, 0.0f));
-//	
-//	if(S.IsNull())
-//	{
-//		if (D.y > 0)
-//			S.x = 1.0f;
-//		else
-//			S.x = -1.0f;
-//	}
-//	
-//	AnimaVertex3f U = (D ^ S).Normalized();
-//	
-//	AnimaMatrix m;
-//	m.x[0] = D.x;	m.x[1] = D.y;	m.x[2] = D.z;
-//	m.y[0] = S.x;	m.y[1] = S.y;	m.y[2] = S.z;
-//	m.z[0] = U.x;	m.z[1] = U.y;	m.z[2] = U.z;
-//	
-//	AnimaVertex3f rot = m.GetRotationAxes();
-//	rot *= 180.0f / (AFloat)M_PI;
-//	
-//	pitch = -rot.x;
-//	yaw = rot.y;
-//	roll = rot.z;
 }
 
 //---------------------------------------------------------------------------------------

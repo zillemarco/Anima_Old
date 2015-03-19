@@ -125,13 +125,13 @@ int main(int argc, char** argv)
 	//if ((mesh = manager->LoadModel(path, "ae")) == nullptr)
 	//	return 0;
 	
-	//mesh = manager->CreateModel("cilindro");
-	//mesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
-	//mesh->ComputeFlatNormals();
-	//mesh->ComputeSmootNormals();
-	//mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	//mesh->GetMaterial()->SetBoolean("TwoSided", true);
+	mesh = manager->CreateModel("cilindro");
+	mesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60, 1, true);
+	mesh->ComputeFlatNormals();
+	mesh->ComputeSmootNormals();
+	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+	mesh->GetMaterial()->SetBoolean("TwoSided", true);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
