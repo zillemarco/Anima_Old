@@ -168,6 +168,58 @@ AnimaMatrix& AnimaMatrix::operator*=(const AFloat p[16])
 	return *this;
 }
 
+AnimaMatrix AnimaMatrix::operator*(const AFloat p) const
+{
+	AnimaMatrix r(this->m);
+	r.MultiplyMatrix(p);
+	return r;
+}
+
+AnimaMatrix& AnimaMatrix::operator*=(const AFloat p)
+{
+	MultiplyMatrix(p);
+	return *this;
+}
+
+AnimaMatrix AnimaMatrix::operator+(const AnimaMatrix& p) const
+{
+	AnimaMatrix r(this->m);
+	r.AddMatrix(p);
+	return r;
+}
+
+AnimaMatrix& AnimaMatrix::operator+=(const AnimaMatrix& p)
+{
+	AddMatrix(p);
+	return *this;
+}
+
+AnimaMatrix AnimaMatrix::operator+(const AFloat p[16]) const
+{
+	AnimaMatrix r(this->m);
+	r.AddMatrix(p);
+	return r;
+}
+
+AnimaMatrix& AnimaMatrix::operator+=(const AFloat p[16])
+{
+	AddMatrix(p);
+	return *this;
+}
+
+AnimaMatrix AnimaMatrix::operator+(const AFloat p) const
+{
+	AnimaMatrix r(this->m);
+	r.AddMatrix(p);
+	return r;
+}
+
+AnimaMatrix& AnimaMatrix::operator+=(const AFloat p)
+{
+	AddMatrix(p);
+	return *this;
+}
+
 bool AnimaMatrix::operator==(const AnimaMatrix& p) const
 {
 	for (int i = 0; i < 16; i++)
@@ -551,6 +603,30 @@ void AnimaMatrix::MultiplyMatrix(const AFloat p[16])
 	r.m[14] = m[2] * p[12] + m[6] * p[13] + m[10] * p[14] + m[14] * p[15];
 	r.m[15] = m[3] * p[12] + m[7] * p[13] + m[11] * p[14] + m[15] * p[15];
 	memcpy(m, r.m, sizeof(float) * 16);
+}
+
+void AnimaMatrix::MultiplyMatrix(const AFloat p)
+{
+	for(AInt i = 0; i < 16; i++)
+		m[i] *= p;
+}
+
+void AnimaMatrix::AddMatrix(const AnimaMatrix& p)
+{
+	for(AInt i = 0; i < 16; i++)
+		m[i] += p.m[i];
+}
+
+void AnimaMatrix::AddMatrix(const AFloat p[16])
+{
+	for(AInt i = 0; i < 16; i++)
+		m[i] += p[i];
+}
+
+void AnimaMatrix::AddMatrix(const AFloat p)
+{
+	for(AInt i = 0; i < 16; i++)
+		m[i] += p;
 }
 
 void AnimaMatrix::MultiplyMatrixSSE(const AnimaMatrix& p)

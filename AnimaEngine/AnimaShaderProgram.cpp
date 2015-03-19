@@ -976,15 +976,24 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 	}
 	else if (light->IsSpotLight())
 	{
-		SetUniform("_spotLight.direction", light->GetDirection());
-		SetUniformf("_spotLight.cutoff", light->GetCutoff());
-		SetUniform("_spotLight.pointLight.position", light->GetPosition());
-		SetUniformf("_spotLight.pointLight.range", light->GetRange());
-		SetUniform("_spotLight.pointLight.base.color", light->GetColor());
-		SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
-		SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
-		SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
-		SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
+		SetUniform("SPL_Position", light->GetPosition());
+		SetUniformf("SPL_Range", light->GetRange());
+		SetUniform("SPL_Color", light->GetColor());
+		SetUniformf("SPL_Intensity", light->GetIntensity());
+		SetUniformf("SPL_ConstantAttenuation", light->GetConstantAttenuation());
+		SetUniformf("SPL_LinearAttenuation", light->GetLinearAttenuation());
+		SetUniformf("SPL_ExponentAttenuation", light->GetExponentAttenuation());
+		SetUniform("SPL_Direction", light->GetDirection());
+		SetUniformf("SPL_Cutoff", light->GetCutoff());
+//		SetUniform("_spotLight.direction", light->GetDirection());
+//		SetUniformf("_spotLight.cutoff", light->GetCutoff());
+//		SetUniform("_spotLight.pointLight.position", light->GetPosition());
+//		SetUniformf("_spotLight.pointLight.range", light->GetRange());
+//		SetUniform("_spotLight.pointLight.base.color", light->GetColor());
+//		SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
+//		SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
+//		SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
+//		SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
 	}
 }
 

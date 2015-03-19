@@ -62,6 +62,8 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 	
+//	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
+	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
 	renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
@@ -278,10 +280,10 @@ void Window::Load()
 	Anima::AnimaLight* l0 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.0f, 0.0f, 0.0f);
 
-	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-	l1->SetColor(1.0f, 1.0f, 1.0f);
-	l1->SetIntensity(1.0f);
-	l1->SetDirection(-1.0f, -1.0f, -1.0f);
+//	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+//	l1->SetColor(1.0f, 1.0f, 1.0f);
+//	l1->SetIntensity(1.0f);
+//	l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
 	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	//l2->SetColor(0.0f, 0.0f, 1.0f);
@@ -303,14 +305,14 @@ void Window::Load()
 
 	Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
 	l4->SetColor(0.0f, 1.0f, 0.0f);
-	l4->SetConstantAttenuation(0.1f);
-	l4->SetLinearAttenuation(0.1f);
+	l4->SetConstantAttenuation(0.0f);
+	l4->SetLinearAttenuation(0.0f);
 	l4->SetExponentAttenuation(0.01f);
-	l4->SetIntensity(0.5f);
+	l4->SetIntensity(1.0f);
 	l4->SetPosition(0.0f, 0.5f, 5.0f);
 	l4->SetDirection(0.0f, 0.0f, -1.0f);
-	
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation()->Scale(l4->GetCutoff(), l4->GetRange(), l4->GetCutoff());
+	l4->SetRange(40.0f);
+//	l4->SetCutoff(1.0f);
 
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
 	//Anima::AnimaVertex3f min = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();

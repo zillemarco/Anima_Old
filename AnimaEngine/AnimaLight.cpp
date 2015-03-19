@@ -578,11 +578,13 @@ AnimaSpotLight::~AnimaSpotLight()
 void AnimaSpotLight::SetDirection(const AnimaVertex3f& direction)
 {
 	AnimaMappedValues::SetVector("direction", direction.Normalized());
+	UpdateConeRotation();
 }
 
 void AnimaSpotLight::SetDirection(AFloat x, AFloat y, AFloat z)
 {
 	AnimaMappedValues::SetVector("direction", AnimaVertex3f(x, y, z).Normalized());
+	UpdateConeRotation();
 }
 
 void AnimaSpotLight::SetCutoff(AFloat c)
@@ -602,13 +604,43 @@ AFloat AnimaSpotLight::GetCutoff()
 
 void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
 {
-	meshTransformation->SetRotationDeg(0.0f, 0.0f, 0.0f);
-	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
-	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
+	AFloat cutoff = 2.0f * GetCutoff();
+	AFloat range = GetRange();
+	
+	meshTransformation->SetRotation(_coneRotation);
+	meshTransformation->SetScale(cutoff, range, cutoff);
+	meshTransformation->SetTranslation(GetPosition());
 }
 
 void AnimaSpotLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
+	glCullFace(GL_BACK);
+}
+
+void AnimaSpotLight::UpdateConeRotation()
+{
+	Anima::AnimaVertex3f A = GetDirection();
+	
+	// Questa è la direzione in cui punta i cono quando creato
+	Anima::AnimaVertex3f B(0.0f, -1.0f, 0.0f);
+	
+	A.Normalize();
+	
+	Anima::AnimaVertex3f v = A ^ B;
+	float s = v.Length2();
+	float c = A * B;
+	
+	Anima::AnimaMatrix vx;
+	vx.x[0] = 0.0f;	vx.x[1] = v.z;	vx.x[2] = -v.y;
+	vx.y[0] = -v.z;	vx.y[1] = 0.0f;	vx.y[2] = v.x;
+	vx.z[0] = v.y;	vx.z[1] = -v.x;	vx.z[2] = 0.0f;
+	
+	Anima::AnimaMatrix vx2 = vx * vx;
+	
+	Anima::AnimaMatrix m;
+	m += vx + (vx2 * ((1 - c) / s));
+	
+	_coneRotation = m.GetRotationAxes();
 }
 
 const char* AnimaSpotLight::GetShaderPrefix()
@@ -623,7 +655,23 @@ const char* AnimaSpotLight::GetShaderName()
 
 bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 {
-	// La luce ambientale non ha uno shader (vale solo per il deferred shading [standard]) 
+	if (shadersManager->GetProgramFromName("deferred-spot"))
+		return true;
+	
+	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-spot");
+	
+	if (pgr == nullptr)
+		return false;
+	
+	if (!pgr->Create())
+		return false;
+	
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::AnimaShader::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	
+	if (!pgr->Link())
+		return false;
+	
 	return true;
 }
 

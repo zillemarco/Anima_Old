@@ -46,7 +46,7 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 }
 
 int main(int argc, char** argv)
-{	
+{
 	//Anima::AnimaEngine::SetUsedExternal();
 	//
 	//QDateTime dateTime = QDateTime::currentDateTime();
@@ -101,14 +101,14 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
-	//	return 0;
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
 
-	//path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	//if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
-	//	return 0;
-	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 
 	//path = ANIMA_ENGINE_MODELS_PATH "cubo.3ds";
 	//if ((mesh = manager->LoadModel(path, "piano2")) == nullptr)
@@ -124,20 +124,14 @@ int main(int argc, char** argv)
 	//path = ANIMA_ENGINE_MODELS_PATH "ae.3ds";
 	//if ((mesh = manager->LoadModel(path, "ae")) == nullptr)
 	//	return 0;
-
-	float x, y, z;
-	Anima::AnimaVertex3f d(0.0f, 0.0f, -1.0f);
-	d.GetEulerAngles(y, x, z);
-
-	mesh = manager->CreateModel("cilindro");
-	mesh->MakeCylinder(0.0f, 1.0f, 1.0f, 60);
-	mesh->ComputeFlatNormals();
-	mesh->ComputeSmootNormals();
-	mesh->GetTransformation()->SetScale(1.0f, 1.0f, 1.0f);
-	mesh->GetTransformation()->SetRotationDeg(x, y, z);
-	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	mesh->GetMaterial()->SetBoolean("TwoSided", true);
+	
+//	mesh = manager->CreateModel("cilindro");
+//	mesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
+//	mesh->ComputeFlatNormals();
+//	mesh->ComputeSmootNormals();
+//	mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
+//	mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
+//	mesh->GetMaterial()->SetBoolean("TwoSided", true);
 	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);

@@ -39,6 +39,14 @@ public:
 	AnimaMatrix& operator*=(const AnimaMatrix& p);
 	AnimaMatrix operator*(const AFloat p[16]) const;
 	AnimaMatrix& operator*=(const AFloat p[16]);
+	AnimaMatrix operator*(const AFloat p) const;
+	AnimaMatrix& operator*=(const AFloat p);
+	AnimaMatrix operator+(const AnimaMatrix& p) const;
+	AnimaMatrix& operator+=(const AnimaMatrix& p);
+	AnimaMatrix operator+(const AFloat p[16]) const;
+	AnimaMatrix& operator+=(const AFloat p[16]);
+	AnimaMatrix operator+(const AFloat p) const;
+	AnimaMatrix& operator+=(const AFloat p);
 	
 	bool operator==(const AnimaMatrix& p) const;
 	bool operator!=(const AnimaMatrix& p) const;
@@ -69,6 +77,10 @@ public:
 
 	void MultiplyMatrix(const AnimaMatrix& p);
 	void MultiplyMatrix(const AFloat p[16]);
+	void MultiplyMatrix(const AFloat p);
+	void AddMatrix(const AnimaMatrix& p);
+	void AddMatrix(const AFloat p[16]);
+	void AddMatrix(const AFloat p);
 	void MultiplyMatrixSSE(const AnimaMatrix& p);
 	void MultiplyMatrixSSE(const AFloat p[16]);
 

@@ -451,20 +451,58 @@ AFloat AnimaVertex3f::Length2() const
 	return vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
 }
 
-										//	Y				X			Z
-void AnimaVertex3f::GetEulerAngles(AFloat& yaw, AFloat& pitch, AFloat& roll) const
+void AnimaVertex3f::GetRotation(AFloat& rx, AFloat& ry) const
 {
 	AnimaVertex3f D = Normalized();
-
-	AnimaVertex3f right = D ^ AnimaVertex3f(0.0f, 1.0f, 0.0f);
-	AnimaVertex3f U = D ^ right;
-	AnimaVertex3f W0(-D.y, D.x, 0.0f);
-	AnimaVertex3f U0 = W0 ^ D;
-
-	yaw = atan2f(D.y, D.x) * 180.0f / (AFloat)M_PI;
-	pitch = -asin(D.z) * 180.0f / (AFloat)M_PI;
-	//roll = atan2f((W0 * U) / (U0 * U) / W0.Length() * U0.Length()) * 180.0f / (AFloat)M_PI;
-	roll = atanf(((W0 * U) / W0.Length()) / ((U0 * U) / U0.Length())) * 180.0f / (AFloat)M_PI;
+	
+	rx = 0.0f;
+	ry = 0.0f;
+	
+	AFloat d = sqrtf(D.y * D.y + D.z * D.z);
+	
+	if(D.z < 0.0f)
+	{
+		if(fabs(d) > 0.00001f)
+		{
+			rx = -((AFloat)M_PI - acosf(D.z / d));
+			ry = (AFloat)M_PI - asinf(D.x);
+		}
+	}
+	else
+	{
+		if(fabs(d) > 0.00001f)
+		{
+			rx = asinf(D.y / d);
+			ry = asinf(D.x);
+		}
+	}
+	
+	rx *= 180.0f / (AFloat)M_PI;
+	ry *= 180.0f / (AFloat)M_PI;
+	
+//	AnimaVertex3f S = (D ^ AnimaVertex3f(0.0f, 1.0f, 0.0f));
+//	
+//	if(S.IsNull())
+//	{
+//		if (D.y > 0)
+//			S.x = 1.0f;
+//		else
+//			S.x = -1.0f;
+//	}
+//	
+//	AnimaVertex3f U = (D ^ S).Normalized();
+//	
+//	AnimaMatrix m;
+//	m.x[0] = D.x;	m.x[1] = D.y;	m.x[2] = D.z;
+//	m.y[0] = S.x;	m.y[1] = S.y;	m.y[2] = S.z;
+//	m.z[0] = U.x;	m.z[1] = U.y;	m.z[2] = U.z;
+//	
+//	AnimaVertex3f rot = m.GetRotationAxes();
+//	rot *= 180.0f / (AFloat)M_PI;
+//	
+//	pitch = -rot.x;
+//	yaw = rot.y;
+//	roll = rot.z;
 }
 
 //---------------------------------------------------------------------------------------

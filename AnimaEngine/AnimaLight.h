@@ -209,6 +209,12 @@ public:
 	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
+	
+protected:
+	void UpdateConeRotation();
+	
+protected:
+	AnimaVertex3f _coneRotation;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

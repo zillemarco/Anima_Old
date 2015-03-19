@@ -58,12 +58,16 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 
 	AFloat thetaStart = 0.0f;
 	AFloat thetaLength = M_2PI;
+	
+	AFloat offsetX = 0.0f;
+	AFloat offsetY = -height / 2.0f;
+	AFloat offsetZ = 0.0f;
 
 	AFloat heightHalf = height / 2.0f;
 	std::vector<AnimaVertex3f> vertici;
 	std::vector<AnimaFace*> facce;
 
-	std::vector<std::vector<ASizeT>> righeVertici;
+	std::vector<std::vector<ASizeT> > righeVertici;
 
 	for (AUint y = 0; y <= heightSegments; y++)
 	{
@@ -75,9 +79,9 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 		{
 			AFloat u = (AFloat)x / (AFloat)radialSegments;
 			AnimaVertex3f vertice;
-			vertice.x = radius * sinf(u * thetaLength + thetaStart);
-			vertice.y = -v * height + heightHalf;
-			vertice.z = radius * cosf(u * thetaLength + thetaStart);
+			vertice.x = radius * sinf(u * thetaLength + thetaStart) + offsetX;
+			vertice.y = -v * height + heightHalf + offsetY;
+			vertice.z = radius * cosf(u * thetaLength + thetaStart) + offsetZ;
 
 			vertici.push_back(vertice);
 			rigaVertici.push_back(vertici.size() - 1);
@@ -111,7 +115,7 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 
 	if (openEnded == false && topRadius > 0.0f)
 	{
-		vertici.push_back(AnimaVertex3f(0.0f, heightHalf, 0.0f));
+		vertici.push_back(AnimaVertex3f(0.0f + offsetX, heightHalf + offsetY, 0.0f + offsetZ));
 
 		for (AUint x = 0; x < radialSegments; x++)
 		{
@@ -128,7 +132,7 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 
 	if (openEnded == false && bottomRadius > 0.0f)
 	{
-		vertici.push_back(AnimaVertex3f(0.0f, -heightHalf, 0.0f));
+		vertici.push_back(AnimaVertex3f(0.0f + offsetX, -heightHalf + offsetY, 0.0f + offsetZ));
 
 		for (AUint x = 0; x < radialSegments; x++)
 		{

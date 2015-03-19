@@ -217,6 +217,9 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 
 	AnimaMesh* dilMesh = CreateMeshForLightType<AnimaDirectionalLight>();
 	dilMesh->MakePlane();
+	
+	AnimaMesh* splMesh = CreateMeshForLightType<AnimaSpotLight>();
+	splMesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
 
 	//
 	// Inizializzazione della camera di supporto
@@ -448,7 +451,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	//
 	//	Applicazione effetti
 	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap")/*GetTexture("DiffuseMap")*/, nullptr);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model)
@@ -573,7 +576,6 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 		return;
 
 	AnimaModelsManager* modelsManager = scene->GetModelsManager();
-	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 
 	ASizeT nModels = modelsManager->GetModelsNumber();
 
@@ -641,7 +643,7 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 
 	AnimaString type(typeid((*lights->ElementAt(0))).name(), _allocator);
 
-	if (type == "class Anima::AnimaAmbientLight" || type == "class Anima::AnimaSpotLight")
+	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE")
 		return;
 
 	auto pair = _lightsMeshMap.find(type);
