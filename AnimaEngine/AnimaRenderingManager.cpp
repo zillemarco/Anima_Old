@@ -451,7 +451,7 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	//
 	//	Applicazione effetti
 	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), /*GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap")*/GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model)
@@ -683,6 +683,7 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 		glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 		program->DisableInputs();
 #endif
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 	}
 }

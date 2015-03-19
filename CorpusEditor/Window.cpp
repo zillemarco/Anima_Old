@@ -62,7 +62,7 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 	
-//	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
 	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
@@ -268,11 +268,11 @@ void Window::Load()
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
 
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
+	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
@@ -280,10 +280,10 @@ void Window::Load()
 	Anima::AnimaLight* l0 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambient");
 	l0->SetColor(0.0f, 0.0f, 0.0f);
 
-//	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-//	l1->SetColor(1.0f, 1.0f, 1.0f);
-//	l1->SetIntensity(1.0f);
-//	l1->SetDirection(-1.0f, -1.0f, -1.0f);
+	//Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	//l1->SetColor(1.0f, 1.0f, 1.0f);
+	//l1->SetIntensity(1.0f);
+	//l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
 	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	//l2->SetColor(0.0f, 0.0f, 1.0f);
@@ -312,7 +312,7 @@ void Window::Load()
 	l4->SetPosition(0.0f, 0.5f, 5.0f);
 	l4->SetDirection(0.0f, 0.0f, -1.0f);
 	l4->SetRange(40.0f);
-//	l4->SetCutoff(1.0f);
+	l4->SetCutoff(0.2);
 
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
 	//Anima::AnimaVertex3f min = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();

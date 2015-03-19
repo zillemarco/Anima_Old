@@ -33,7 +33,7 @@ void main()
 	float dist 	= length(direction);
 
 	direction = normalize(direction);
-	float spotFactor = dot(direction, SPL_Direction);
+	float spotFactor = dot(direction, -SPL_Direction);
 
 	if(dist > SPL_Range)
 	{

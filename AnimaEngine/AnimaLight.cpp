@@ -604,8 +604,8 @@ AFloat AnimaSpotLight::GetCutoff()
 
 void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
 {
-	AFloat cutoff = 2.0f * GetCutoff();
 	AFloat range = GetRange();
+	AFloat cutoff = 2.0f * range * GetCutoff();
 	
 	meshTransformation->SetRotation(_coneRotation);
 	meshTransformation->SetScale(cutoff, range, cutoff);
@@ -614,7 +614,8 @@ void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransform
 
 void AnimaSpotLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
 }
 
 void AnimaSpotLight::UpdateConeRotation()
