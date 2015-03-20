@@ -451,4 +451,16 @@ AnimaMatrix* AnimaTransformation::GetPTransformationMatrix()
 	return &_transformationMatrix;
 }
 
+void AnimaTransformation::SetInitialTransformationMatrix(const AnimaMatrix& m)
+{
+	_initialTransformationMatrix = m;
+	UpdateMatrix();
+}
+
+void AnimaTransformation::SetInitialTransformationMatrix(AFloat m[16])
+{
+	_initialTransformationMatrix = m;
+	UpdateMatrix();
+}
+
 END_ANIMA_ENGINE_NAMESPACE

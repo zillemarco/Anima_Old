@@ -58,9 +58,6 @@ public:
 	
 	template<class T> AInt GetLightOfTypeCount();
 	
-	AnimaAmbientLight* CreateAmbientLight(const AnimaString& name);
-	AnimaAmbientLight* CreateAmbientLight(const char* name);
-
 	AnimaDirectionalLight* CreateDirectionalLight(const AnimaString& name);
 	AnimaDirectionalLight* CreateDirectionalLight(const char* name);
 

@@ -17,8 +17,12 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaSceneObject;
+
 class ANIMA_ENGINE_EXPORT AnimaTransformation
 {
+	friend class AnimaSceneObject;
+
 public:
 	AnimaTransformation();
 	AnimaTransformation(const AnimaMatrix& initialTransformationMatrix);
@@ -92,6 +96,10 @@ public:
 	void SetTransformationMatrix(AFloat m[16]);
 	AnimaMatrix GetTransformationMatrix();
 	AnimaMatrix* GetPTransformationMatrix();
+
+protected:
+	void SetInitialTransformationMatrix(const AnimaMatrix& m);
+	void SetInitialTransformationMatrix(AFloat m[16]);
 	
 protected:
 	AnimaVertex3f _translation;

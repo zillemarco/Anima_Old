@@ -35,7 +35,7 @@ void main()
 	direction = normalize(direction);
 	float spotFactor = dot(direction, -SPL_Direction);
 
-	if(dist > SPL_Range)
+	if(dist > SPL_Range || spotFactor <= SPL_Cutoff)
 	{
 		discard;
 	}
@@ -55,6 +55,6 @@ void main()
 	float sFactor 	= pow(rFactor, shininess);
 	vec3 sColor 	= specularColor * sFactor;
 
-	FragColor[0] = vec4(spotAttenuation * SPL_Color * lambert * SPL_Intensity / atten, 1.0f);
-	FragColor[1] = vec4(spotAttenuation * SPL_Color * sColor * SPL_Intensity / atten, 1.0f);
+	FragColor[0] = vec4(SPL_Color * lambert * SPL_Intensity / atten, 1.0f);
+	FragColor[1] = vec4(SPL_Color * sColor * SPL_Intensity / atten, 1.0f);
 }

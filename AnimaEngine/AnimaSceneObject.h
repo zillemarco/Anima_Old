@@ -19,10 +19,14 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class ANIMA_ENGINE_EXPORT AnimaSceneObject : public AnimaMappedValues
+class AnimaShaderProgram;
+
+class ANIMA_ENGINE_EXPORT AnimaSceneObject : protected AnimaMappedValues
 {
+	friend class AnimaShaderProgram;
+
 protected:
-	AnimaSceneObject(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorsManager, const AnimaString& name);
+	AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
 	
 public:
 	AnimaSceneObject(const AnimaSceneObject& src);
@@ -33,8 +37,11 @@ public:
 	AnimaSceneObject& operator=(AnimaSceneObject&& src);
 
 public:
+	virtual void SetPosition(const AnimaVertex3f& position);
+	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
+	virtual AnimaVertex3f GetPosition();
 
-public:
+	virtual const char* GetShaderPrefix() = 0;
 
 protected:
 	AnimaTransformation _transformation;

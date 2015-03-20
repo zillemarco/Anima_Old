@@ -204,6 +204,7 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
+	SetColor("AmbientLight", 0.1f, 0.1f, 0.1f);
 
 	//
 	// Inizializzazione delle mesh di supporto
@@ -228,7 +229,6 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	_filterCamera->SetProjectionMatrix(AnimaMatrix());
 	_filterCamera->SetViewMatrix(AnimaMatrix());
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);
-	//_filterCamera->RotateYDeg(180.0f);
 }
 
 void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst)
@@ -643,7 +643,7 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 
 	AnimaString type(typeid((*lights->ElementAt(0))).name(), _allocator);
 
-	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE" || type == "class Anima::AnimaSpotLight")
+	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE")
 		return;
 
 	auto pair = _lightsMeshMap.find(type);
@@ -701,7 +701,7 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaScene* scene, AnimaShaderPr
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
 
-	program->UpdateLightProperies(scene->GetLightsManager()->GetLightFromName("ambient"), this);
+	//program->UpdateLightProperies(scene->GetLightsManager()->GetLightFromName("ambient"), this);
 	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	program->UpdateRenderingManagerProperies(this);
 	

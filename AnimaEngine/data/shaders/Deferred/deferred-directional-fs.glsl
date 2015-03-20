@@ -13,8 +13,8 @@ uniform float DIL_Range;
 uniform vec3 DIL_Direction;
 uniform vec3 DIL_Color;
 uniform float DIL_Intensity;
-uniform sampler2D LIG_ShadowMap;
-uniform mat4 LIG_ProjectionViewMatrix;
+uniform sampler2D DIL_ShadowMap;
+uniform mat4 DIL_ProjectionViewMatrix;
 
 float lineStep(float low, float hight, float compare)
 {
@@ -44,11 +44,11 @@ void main()
 	vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 	vec3 pos 			= clip.xyz / clip.w;
 
-	vec4 shadowCoord 	= LIG_ProjectionViewMatrix * vec4(pos, 1.0f);
+	vec4 shadowCoord 	= DIL_ProjectionViewMatrix * vec4(pos, 1.0f);
 	shadowCoord 		/= shadowCoord.w;
 	shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-	float shadowAmount 	= 1.0f;//ComputeShadowAmount(LIG_ShadowMap, shadowCoord.xy, shadowCoord.z);
+	float shadowAmount 	= 1.0f;//ComputeShadowAmount(DIL_ShadowMap, shadowCoord.xy, shadowCoord.z);
 
 	vec3 specularColor 	= speclarData.xyz;
 	float shininess 	= 1.0f / speclarData.a;

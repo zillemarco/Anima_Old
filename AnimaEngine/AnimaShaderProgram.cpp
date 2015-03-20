@@ -876,11 +876,21 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 
 		if (info._namePartsCount != 2 || info._nameParts[0] != MaterialPrefix)
 			continue;
-		
+
 		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._location, material->GetColor3f(info._nameParts[1]));
+		{
+			if (material->HasColor(info._nameParts[1]))
+				SetUniform(info._location, material->GetColor3f(info._nameParts[1]));
+			else
+				SetUniform(info._location, material->GetVector3f(info._nameParts[1]));
+		}
 		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._location, material->GetColor4f(info._nameParts[1]));
+		{
+			if (material->HasColor(info._nameParts[1]))
+				SetUniform(info._location, material->GetColor4f(info._nameParts[1]));
+			else
+				SetUniform(info._location, material->GetVector4f(info._nameParts[1]));
+		}
 		else if (info._type == GL_FLOAT)
 			SetUniformf(info._location, material->GetFloat(info._nameParts[1]));
 		else if (info._type == GL_BOOL)
@@ -922,195 +932,61 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 
 void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager)
 {
-	SetUniform("LIG_ProjectionViewMatrix", light->GetProjectionViewMatrix());
+	if (light == nullptr)
+		return;
 
-	if (light->IsDirectionalLight() && light->GetShadowTexture())
+	const char* prefix = light->GetShaderPrefix();
+
+	for (auto& pair : _uniforms)
 	{
-		AnimaTexture* texture = light->GetShadowTexture();
+		AnimaUniformInfo info = pair.second;
 
-		AUint slot = renderingManager->GetTextureSlot("ShadowMap");
-		SetUniformi("LIG_ShadowMap", slot);
+		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
+			continue;
 
-		if (texture == nullptr)
+		if (info._type == GL_FLOAT_VEC3)
 		{
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			if (light->HasColor(info._nameParts[1]))
+				SetUniform(info._location, light->GetColor3f(info._nameParts[1]));
+			else
+				SetUniform(info._location, light->GetVector3f(info._nameParts[1]));
+		}
+		else if (info._type == GL_FLOAT_VEC4)
+		{
+			if (light->HasColor(info._nameParts[1]))
+				SetUniform(info._location, light->GetColor4f(info._nameParts[1]));
+			else
+				SetUniform(info._location, light->GetVector4f(info._nameParts[1]));
+		}
+		else if (info._type == GL_FLOAT)
+			SetUniformf(info._location, light->GetFloat(info._nameParts[1]));
+		else if (info._type == GL_BOOL)
+			SetUniformi(info._location, light->GetBoolean(info._nameParts[1]) ? 1 : 0);
+		else if (info._type == GL_INT)
+			SetUniformi(info._location, light->GetInteger(info._nameParts[1]));
+		else if (info._type == GL_SAMPLER_2D)
+		{
+			AnimaTexture* texture = light->GetTexture(info._nameParts[1]);
+
+			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+			SetUniformi(info._location, slot);
+
+			if (texture == nullptr)
+			{
+				glActiveTexture(GL_TEXTURE0 + slot);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				texture->Load();
+				texture->Bind(slot);
+			}
 		}
 		else
 		{
-			texture->Load();
-			texture->Bind(slot);
+			ANIMA_ASSERT(false);
 		}
 	}
-
-	if (light->IsAmbientLight())
-	{
-		SetUniform("AML_Color", light->GetColor());
-		//SetUniform("_ambientLight", light->GetColor());
-	}
-	else if (light->IsDirectionalLight())
-	{
-		SetUniform("DIL_Direction", light->GetDirection());
-		SetUniform("DIL_Color", light->GetColor());
-		SetUniformf("DIL_Intensity", light->GetIntensity());
-//		SetUniform("_directionalLight.direction", light->GetDirection());
-//		SetUniform("_directionalLight.base.color", light->GetColor());
-//		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
-	}
-	else if (light->IsPointLight())
-	{
-		SetUniform("PTL_Position", light->GetPosition());
-		SetUniformf("PTL_Range", light->GetRange());
-		SetUniform("PTL_Color", light->GetColor());
-		SetUniformf("PTL_Intensity", light->GetIntensity());
-		SetUniformf("PTL_ConstantAttenuation", light->GetConstantAttenuation());
-		SetUniformf("PTL_LinearAttenuation", light->GetLinearAttenuation());
-		SetUniformf("PTL_ExponentAttenuation", light->GetExponentAttenuation());
-		//SetUniform("_pointLight.position", light->GetPosition());
-		//SetUniformf("_pointLight.range", light->GetRange());
-		//SetUniform("_pointLight.base.color", light->GetColor());
-		//SetUniformf("_pointLight.base.intensity", light->GetIntensity());
-		//SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
-		//SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
-		//SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
-	}
-	else if (light->IsSpotLight())
-	{
-		SetUniform("SPL_Position", light->GetPosition());
-		SetUniformf("SPL_Range", light->GetRange());
-		SetUniform("SPL_Color", light->GetColor());
-		SetUniformf("SPL_Intensity", light->GetIntensity());
-		SetUniformf("SPL_ConstantAttenuation", light->GetConstantAttenuation());
-		SetUniformf("SPL_LinearAttenuation", light->GetLinearAttenuation());
-		SetUniformf("SPL_ExponentAttenuation", light->GetExponentAttenuation());
-		SetUniform("SPL_Direction", light->GetDirection());
-		SetUniformf("SPL_Cutoff", light->GetCutoff());
-//		SetUniform("_spotLight.direction", light->GetDirection());
-//		SetUniformf("_spotLight.cutoff", light->GetCutoff());
-//		SetUniform("_spotLight.pointLight.position", light->GetPosition());
-//		SetUniformf("_spotLight.pointLight.range", light->GetRange());
-//		SetUniform("_spotLight.pointLight.base.color", light->GetColor());
-//		SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
-//		SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
-//		SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
-//		SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
-	}
-}
-
-void AnimaShaderProgram::UpdateLightsProperies(AnimaScene* scene)
-{
-	//AnimaLightsManager* lightsManager = scene->GetLightsManager();
-
-	//AInt lightsCount = lightsManager->GetTotalLightsCount();
-
-	//if (lightsCount <= 0)
-	//	return;
-
-	//int nextPointLight = 0;
-	//int nextSpotLight = 0;
-
-	//AnimaString str(_allocator);
-	//AnimaLight* light = nullptr;
-	//
-	//for (int i = 0; i < lightsCount; i++)
-	//{
-	//	light = lightsManager->GetLight(i);
-
-	//	if (light->IsAmbientLight())
-	//	{
-	//		SetUniform("_ambientLight", light->GetColor());
-	//	}
-	//	else if (light->IsDirectionalLight())
-	//	{
-	//		SetUniform("_directionalLight.direction", light->GetDirection());
-	//		SetUniform("_directionalLight.base.color", light->GetColor());
-	//		SetUniformf("_directionalLight.base.intensity", light->GetIntensity());
-	//	}
-	//	else if (light->IsPointLight())
-	//	{
-	//		if (_maxPointLights == 0)
-	//		{
-	//			SetUniform("_pointLight.position", light->GetPosition());
-	//			SetUniformf("_pointLight.range", light->GetRange());
-	//			SetUniform("_pointLight.base.color", light->GetColor());
-	//			SetUniformf("_pointLight.base.intensity", light->GetIntensity());
-	//			SetUniformf("_pointLight.attenuation.constant", light->GetConstantAttenuation());
-	//			SetUniformf("_pointLight.attenuation.linear", light->GetLinearAttenuation());
-	//			SetUniformf("_pointLight.attenuation.exponent", light->GetExponentAttenuation());
-	//		}
-	//		else
-	//		{
-	//			str.Format("_pointLight[%d].position", nextPointLight);
-	//			SetUniform(str, light->GetPosition());
-
-	//			str.Format("_pointLight[%d].range", nextPointLight);
-	//			SetUniformf(str, light->GetRange());
-
-	//			str.Format("_pointLight[%d].base.color", nextPointLight);
-	//			SetUniform(str, light->GetColor());
-
-	//			str.Format("_pointLight[%d].base.intensity", nextPointLight);
-	//			SetUniformf(str, light->GetIntensity());
-
-	//			str.Format("_pointLight[%d].attenuation.constant", nextPointLight);
-	//			SetUniformf(str, light->GetConstantAttenuation());
-
-	//			str.Format("_pointLight[%d].attenuation.linear", nextPointLight);
-	//			SetUniformf(str, light->GetLinearAttenuation());
-
-	//			str.Format("_pointLight[%d].attenuation.exponent", nextPointLight);
-	//			SetUniformf(str, light->GetExponentAttenuation());
-
-	//			nextPointLight++;
-	//		}
-	//	}
-	//	else if (light->IsSpotLight())
-	//	{
-	//		if (_maxPointLights == 0)
-	//		{
-	//			SetUniform("_spotLight.direction", light->GetDirection());
-	//			SetUniformf("_spotLight.cutoff", light->GetCutoff());
-	//			SetUniform("_spotLight.pointLight.position", light->GetPosition());
-	//			SetUniformf("_spotLight.pointLight.range", light->GetRange());
-	//			SetUniform("_spotLight.pointLight.base.color", light->GetColor());
-	//			SetUniformf("_spotLight.pointLight.base.intensity", light->GetIntensity());
-	//			SetUniformf("_spotLight.pointLight.attenuation.constant", light->GetConstantAttenuation());
-	//			SetUniformf("_spotLight.pointLight.attenuation.linear", light->GetLinearAttenuation());
-	//			SetUniformf("_spotLight.pointLight.attenuation.exponent", light->GetExponentAttenuation());
-	//		}
-	//		else
-	//		{
-	//			str.Format("_spotLight[%d].direction", nextSpotLight);
-	//			SetUniform(str, light->GetDirection());
-
-	//			str.Format("_spotLight[%d].cutoff", nextSpotLight);
-	//			SetUniformf(str, light->GetCutoff());
-
-	//			str.Format("_spotLight[%d].pointLight.position", nextSpotLight);
-	//			SetUniform(str, light->GetPosition());
-
-	//			str.Format("_spotLight[%d].pointLight.range", nextSpotLight);
-	//			SetUniformf(str, light->GetRange());
-
-	//			str.Format("_spotLight[%d].pointLight.base.color", nextSpotLight);
-	//			SetUniform(str, light->GetColor());
-
-	//			str.Format("_spotLight[%d].pointLight.base.intensity", nextSpotLight);
-	//			SetUniformf(str, light->GetIntensity());
-
-	//			str.Format("_spotLight[%d].pointLight.attenuation.constant", nextSpotLight);
-	//			SetUniformf(str, light->GetConstantAttenuation());
-
-	//			str.Format("_spotLight[%d].pointLight.attenuation.linear", nextSpotLight);
-	//			SetUniformf(str, light->GetLinearAttenuation());
-
-	//			str.Format("_spotLight[%d].pointLight.attenuation.exponent", nextSpotLight);
-	//			SetUniformf(str, light->GetExponentAttenuation());
-
-	//			nextSpotLight++;
-	//		}
-	//	}
-	//}
 }
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)
@@ -1125,9 +1001,9 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* 
 		if (info._type == GL_FLOAT_VEC2)
 			SetUniform(info._location, renderingManager->GetVector2f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._location, renderingManager->GetColor3f(info._nameParts[1]));
+			SetUniform(info._location, renderingManager->GetVector3f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._location, renderingManager->GetColor4f(info._nameParts[1]));
+			SetUniform(info._location, renderingManager->GetVector4f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT)
 			SetUniformf(info._location, renderingManager->GetFloat(info._nameParts[1]));
 		else if (info._type == GL_BOOL)

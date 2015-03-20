@@ -10,6 +10,7 @@
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaShadersManager.h"
+#include "AnimaMath.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -17,16 +18,20 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 //						ANIMA LIGHT
 //----------------------------------------------------------------
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
-	: AnimaMappedValues(allocator, dataGeneratorManager, name)
+	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
 	_shadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
 	_tempShadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
+
+	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
+	AnimaSceneObject::SetFloat("Intensity", 1.0f);
 }
 
 AnimaLight::AnimaLight(const AnimaLight& src)
-	: AnimaMappedValues(src)
+	: AnimaSceneObject(src)
 {
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
@@ -37,7 +42,7 @@ AnimaLight::AnimaLight(const AnimaLight& src)
 }
 
 AnimaLight::AnimaLight(AnimaLight&& src)
-	: AnimaMappedValues(src)
+	: AnimaSceneObject(src)
 {
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
@@ -64,7 +69,7 @@ AnimaLight::~AnimaLight()
 
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 {
-	AnimaMappedValues::operator=(src);
+	AnimaSceneObject::operator=(src);
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
 	_tempShadowTexture = src._tempShadowTexture;
@@ -76,7 +81,7 @@ AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 
 AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 {
-	AnimaMappedValues::operator=(src);
+	AnimaSceneObject::operator=(src);
 	_type = src._type;
 	_shadowTexture = src._shadowTexture;
 	_tempShadowTexture = src._tempShadowTexture;
@@ -88,17 +93,17 @@ AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 
 void AnimaLight::SetColor(const AnimaColor3f& color)
 {
-	ANIMA_ASSERT(false);
+	AnimaSceneObject::SetColor("Color", color);
 }
 
 void AnimaLight::SetColor(AFloat r, AFloat g, AFloat b)
 {
-	ANIMA_ASSERT(false);
+	AnimaSceneObject::SetColor("Color", r, g, b);
 }
 
 void AnimaLight::SetIntensity(AFloat intensity)
 {
-	ANIMA_ASSERT(false);
+	AnimaSceneObject::SetFloat("Intensity", intensity);
 }
 
 void AnimaLight::SetDirection(const AnimaVertex3f& direction)
@@ -113,33 +118,15 @@ void AnimaLight::SetDirection(AFloat x, AFloat y, AFloat z)
 
 AnimaColor3f AnimaLight::GetColor()
 {
-	ANIMA_ASSERT(false);
-	return AnimaColor3f();
+	return AnimaSceneObject::GetColor3f("Color");
 }
 
 AFloat AnimaLight::GetIntensity()
 {
-	ANIMA_ASSERT(false);
-	return 0.0f;
+	return AnimaSceneObject::GetFloat("Intensity");
 }
 
 AnimaVertex3f AnimaLight::GetDirection()
-{
-	ANIMA_ASSERT(false);
-	return AnimaVertex3f();
-}
-
-void AnimaLight::SetPosition(const AnimaVertex3f& position)
-{
-	ANIMA_ASSERT(false);
-}
-
-void AnimaLight::SetPosition(AFloat x, AFloat y, AFloat z)
-{
-	ANIMA_ASSERT(false);
-}
-
-AnimaVertex3f AnimaLight::GetPosition()
 {
 	ANIMA_ASSERT(false);
 	return AnimaVertex3f();
@@ -200,11 +187,6 @@ AFloat AnimaLight::GetCutoff()
 	return 0.0f;
 }
 
-bool AnimaLight::IsAmbientLight()
-{
-	return _type == AMBIENT;
-}
-
 bool AnimaLight::IsDirectionalLight()
 {
 	return _type == DIRECTIONAL;
@@ -260,71 +242,12 @@ void AnimaLight::ComputeViewMatrix()
 }
 
 //----------------------------------------------------------------
-//						ANIMA AMBIENT LIGHT
-//----------------------------------------------------------------
-AnimaAmbientLight::AnimaAmbientLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
-	: AnimaLight(allocator, dataGeneratorManager, name)
-{
-	AnimaMappedValues::SetColor("color", 1.0f, 1.0f, 1.0f);
-	AnimaMappedValues::SetFloat("intensity", 1.0f);
-	
-	ComputeProjectionMatrix();
-	ComputeViewMatrix();
-	
-	_type = AMBIENT;
-}
-
-AnimaAmbientLight::~AnimaAmbientLight()
-{
-}
-
-void AnimaAmbientLight::SetColor(const AnimaColor3f& color)
-{
-	AnimaMappedValues::SetColor("color", color);
-}
-
-void AnimaAmbientLight::SetColor(AFloat r, AFloat g, AFloat b)
-{
-	AnimaMappedValues::SetColor("color", r, g, b);
-}
-
-AnimaColor3f AnimaAmbientLight::GetColor()
-{
-	return AnimaMappedValues::GetColor3f("color");
-}
-
-void AnimaAmbientLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
-{
-}
-
-void AnimaAmbientLight::UpdateCullFace(AnimaCamera* activeCamera)
-{
-}
-
-const char* AnimaAmbientLight::GetShaderPrefix()
-{
-	return "AML";
-}
-
-const char* AnimaAmbientLight::GetShaderName()
-{
-	return "";
-}
-
-bool AnimaAmbientLight::CreateShader(AnimaShadersManager* shadersManager)
-{
-	// La luce ambientale non ha uno shader (vale solo per il deferred shading [standard]) 
-	return true;
-}
-
-//----------------------------------------------------------------
 //						ANIMA DIRECTIONAL LIGHT
 //----------------------------------------------------------------
 AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
-	: AnimaAmbientLight(allocator, dataGeneratorManager, name)
+	: AnimaLight(allocator, dataGeneratorManager, name)
 {
-	AnimaMappedValues::SetVector("direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
-	AnimaMappedValues::SetFloat("intensity", 0.0f);
+	AnimaLight::SetVector("Direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
@@ -338,29 +261,19 @@ AnimaDirectionalLight::~AnimaDirectionalLight()
 
 void AnimaDirectionalLight::SetDirection(const AnimaVertex3f& direction)
 {
-	AnimaMappedValues::SetVector("direction", direction.Normalized());
+	AnimaSceneObject::SetVector("Direction", direction.Normalized());
 	ComputeViewMatrix();
 }
 
 void AnimaDirectionalLight::SetDirection(AFloat x, AFloat y, AFloat z)
 {
-	AnimaMappedValues::SetVector("direction", AnimaVertex3f(x, y, z).Normalized());
+	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(x, y, z).Normalized());
 	ComputeViewMatrix();
-}
-
-void AnimaDirectionalLight::SetIntensity(AFloat intensity)
-{
-	AnimaMappedValues::SetFloat("intensity", intensity);
 }
 
 AnimaVertex3f AnimaDirectionalLight::GetDirection()
 {
-	return AnimaMappedValues::GetVector3f("direction");
-}
-
-AFloat AnimaDirectionalLight::GetIntensity()
-{
-	return AnimaMappedValues::GetFloat("intensity");
+	return AnimaSceneObject::GetVector3f("Direction");
 }
 
 void AnimaDirectionalLight::ComputeViewMatrix()
@@ -423,14 +336,12 @@ bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
 //						ANIMA POINT LIGHT
 //----------------------------------------------------------------
 AnimaPointLight::AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
-	: AnimaAmbientLight(allocator, dataGeneratorManager, name)
+	: AnimaLight(allocator, dataGeneratorManager, name)
 {
-	AnimaMappedValues::SetVector("position", 0.0f, 0.0f, 0.0f);
-	AnimaMappedValues::SetFloat("intensity", 0.0f);
-	AnimaMappedValues::SetFloat("constantAttenuation", 0.0f);
-	AnimaMappedValues::SetFloat("linearAttenuation", 0.0f);
-	AnimaMappedValues::SetFloat("exponentAttenuation", 1.0f);
-	AnimaMappedValues::SetFloat("range", 20.0f);
+	AnimaSceneObject::SetFloat("ConstantAttenuation", 0.0f);
+	AnimaSceneObject::SetFloat("LinearAttenuation", 0.0f);
+	AnimaSceneObject::SetFloat("ExponentAttenuation", 1.0f);
+	AnimaSceneObject::SetFloat("Range", 20.0f);
 
 	_type = POINT;
 }
@@ -439,69 +350,44 @@ AnimaPointLight::~AnimaPointLight()
 {
 }
 
-void AnimaPointLight::SetPosition(const AnimaVertex3f& position)
-{
-	AnimaMappedValues::SetVector("position", position);
-}
-
-void AnimaPointLight::SetPosition(AFloat x, AFloat y, AFloat z)
-{
-	AnimaMappedValues::SetVector("position", x, y, z);
-}
-
-void AnimaPointLight::SetIntensity(AFloat intensity)
-{
-	AnimaMappedValues::SetFloat("intensity", intensity);
-}
-
 void AnimaPointLight::SetConstantAttenuation(AFloat attenuation)
 {
-	AnimaMappedValues::SetFloat("constantAttenuation", attenuation);
+	AnimaSceneObject::SetFloat("ConstantAttenuation", attenuation);
 }
 
 void AnimaPointLight::SetLinearAttenuation(AFloat attenuation)
 {
-	AnimaMappedValues::SetFloat("linearAttenuation", attenuation);
+	AnimaSceneObject::SetFloat("LinearAttenuation", attenuation);
 }
 
 void AnimaPointLight::SetExponentAttenuation(AFloat attenuation)
 {
-	AnimaMappedValues::SetFloat("exponentAttenuation", attenuation);
+	AnimaSceneObject::SetFloat("ExponentAttenuation", attenuation);
 }
 
 void AnimaPointLight::SetRange(AFloat range)
 {
-	AnimaMappedValues::SetFloat("range", range);
-}
-
-AnimaVertex3f AnimaPointLight::GetPosition()
-{
-	return AnimaMappedValues::GetVector3f("position");
-}
-
-AFloat AnimaPointLight::GetIntensity()
-{
-	return AnimaMappedValues::GetFloat("intensity");
+	AnimaSceneObject::SetFloat("Range", range);
 }
 
 AFloat AnimaPointLight::GetConstantAttenuation()
 {
-	return AnimaMappedValues::GetFloat("constantAttenuation");
+	return AnimaSceneObject::GetFloat("ConstantAttenuation");
 }
 
 AFloat AnimaPointLight::GetLinearAttenuation()
 {
-	return AnimaMappedValues::GetFloat("linearAttenuation");
+	return AnimaSceneObject::GetFloat("LinearAttenuation");
 }
 
 AFloat AnimaPointLight::GetExponentAttenuation()
 {
-	return AnimaMappedValues::GetFloat("exponentAttenuation");
+	return AnimaSceneObject::GetFloat("ExponentAttenuation");
 }
 
 AFloat AnimaPointLight::GetRange()
 {
-	return AnimaMappedValues::GetFloat("range");
+	return AnimaSceneObject::GetFloat("Range");
 }
 
 void AnimaPointLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
@@ -516,12 +402,7 @@ void AnimaPointLight::UpdateMeshTransformation(AnimaTransformation* meshTransfor
 
 void AnimaPointLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
-	AFloat range = GetRange();
-	AnimaVertex3f position = GetPosition();
-	AnimaVertex3f cameraPosition = activeCamera->GetPosition();
-
-	float dist = (position - cameraPosition).Length();
-	if (dist < range)
+	if (AnimaMath::PointInsideSphere(activeCamera->GetPosition(), GetPosition(), GetRange()))
 		glCullFace(GL_FRONT);
 	else
 		glCullFace(GL_BACK);
@@ -565,8 +446,8 @@ bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
 AnimaSpotLight::AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager,  const AnimaString& name)
 	: AnimaPointLight(allocator, dataGeneratorManager, name)
 {
-	AnimaMappedValues::SetVector("direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
-	AnimaMappedValues::SetFloat("cutoff", 0.7f);
+	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
+	AnimaSceneObject::SetFloat("Cutoff", 0.7f);
 
 	_type = SPOT;
 }
@@ -577,45 +458,47 @@ AnimaSpotLight::~AnimaSpotLight()
 
 void AnimaSpotLight::SetDirection(const AnimaVertex3f& direction)
 {
-	AnimaMappedValues::SetVector("direction", direction.Normalized());
+	AnimaSceneObject::SetVector("Direction", direction.Normalized());
 	UpdateConeRotation();
 }
 
 void AnimaSpotLight::SetDirection(AFloat x, AFloat y, AFloat z)
 {
-	AnimaMappedValues::SetVector("direction", AnimaVertex3f(x, y, z).Normalized());
+	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(x, y, z).Normalized());
 	UpdateConeRotation();
 }
 
 void AnimaSpotLight::SetCutoff(AFloat c)
 {
-	AnimaMappedValues::SetFloat("cutoff", c);
+	AnimaSceneObject::SetFloat("Cutoff", c);
 }
 
 AnimaVertex3f AnimaSpotLight::GetDirection()
 {
-	return AnimaMappedValues::GetVector3f("direction");
+	return AnimaSceneObject::GetVector3f("Direction");
 }
 
 AFloat AnimaSpotLight::GetCutoff()
 {
-	return AnimaMappedValues::GetFloat("cutoff");
+	return AnimaSceneObject::GetFloat("Cutoff");
 }
 
 void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
 {
 	AFloat range = GetRange();
-	AFloat cutoff = 2.0f * range * GetCutoff();
+	AFloat raggio = range * tanf(acosf(GetCutoff()) / 2.0f);
 	
 	meshTransformation->SetRotation(_coneRotation);
-	meshTransformation->SetScale(cutoff, range, cutoff);
+	meshTransformation->SetScale(raggio, range, raggio);
 	meshTransformation->SetTranslation(GetPosition());
 }
 
 void AnimaSpotLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
-	//glCullFace(GL_BACK);
-	glDisable(GL_CULL_FACE);
+	if (AnimaMath::PointInsideCone(activeCamera->GetPosition(), GetPosition(), GetDirection(), GetRange(), acosf(GetCutoff()) / 2.0f))
+		glCullFace(GL_FRONT);
+	else
+		glCullFace(GL_BACK);
 }
 
 void AnimaSpotLight::UpdateConeRotation()

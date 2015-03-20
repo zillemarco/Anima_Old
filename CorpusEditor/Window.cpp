@@ -50,32 +50,6 @@ void Window::PaintCallback(Anima::AnimaWindow* window)
 	((Window*)window)->DrawScene();
 }
 
-bool Inside(Anima::AnimaVertex3f point, Anima::AnimaVertex3f apex, Anima::AnimaVertex3f bottom, float cutoff)
-{
-	Anima::AnimaVertex3f apexToPoint = apex - point;
-	Anima::AnimaVertex3f axis = apex - bottom;
-
-	bool isInInfiniteCone = ((apexToPoint * axis) / apexToPoint.Length() / axis.Length()) > cutoff;
-
-	if (!isInInfiniteCone)
-		return false;
-
-	bool isUnderRoundCap = ((apexToPoint * axis) / axis.Length()) < axis.Length();
-	return isUnderRoundCap;
-}
-
-bool Inside(Anima::AnimaVertex3f point, Anima::AnimaVertex3f coneTip, Anima::AnimaVertex3f coneDirection, float cutoff, float maxDistance)
-{
-	Anima::AnimaVertex3f dv = point - coneTip;
-	float len = dv.Length();
-
-	if (len > maxDistance)
-		return false;
-
-	dv.Normalize();
-	return (coneDirection * dv >= cutoff);
-}
-
 void Window::DrawScene()
 {
 	int w, h;
@@ -87,25 +61,6 @@ void Window::DrawScene()
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
-	
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->UpdateMeshTransformation(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation());
-
-	Anima::AnimaVertex3f bottom = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetVertex(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetVerticesNumber() - 1);
-	Anima::AnimaVertex3f apex = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetPosition();
-	Anima::AnimaVertex3f direction = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetDirection();
-	Anima::AnimaVertex3f point = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->GetPosition();
-	float maxDistance = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetRange();
-	float cutoff = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("spotLight0")->GetCutoff();
-
-	float coseno = acosf(cutoff) * 2.0f;
-
-	bottom = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("cilindro")->GetTransformation()->GetTransformationMatrix() * bottom;
-
-	//if (Inside(point, apex, bottom, cutoff))
-	if (Inside(point, apex, direction, cutoff / 2.0f, maxDistance))
-		OutputDebugStringA("Dentro\r\n");
-	else
-		OutputDebugStringA("Fuori\r\n");
 	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
@@ -131,7 +86,7 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		glViewport(0, 0, w, h);
-		window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+		window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 1.0f, 100000.0f);
 
 		if (((Window*)window)->renderingManager != nullptr)
 		{
@@ -257,18 +212,6 @@ void Window::Load()
 
 	Anima::AnimaShadersManager* mgr = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetShadersManager();
 
-	//mgr->CreateProgram("forward-ambient");
-	//mgr->GetProgramFromName("forward-ambient")->Create();
-	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("forward-ambient")->AddShader(mgr->LoadShaderFromFile("forward-ambient-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-ambient-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("forward-ambient")->Link();
-
-	//mgr->CreateProgram("forward-directional");
-	//mgr->GetProgramFromName("forward-directional")->Create();
-	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("forward-directional")->AddShader(mgr->LoadShaderFromFile("forward-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Forward/forward-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("forward-directional")->Link();
-
 	mgr->CreateProgram("deferred-prepare");
 	mgr->GetProgramFromName("deferred-prepare")->Create();
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-vs.glsl", Anima::AnimaShader::VERTEX));
@@ -281,18 +224,6 @@ void Window::Load()
 	//mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	//mgr->GetProgramFromName("deferred-shadowMap")->Link();
 	
-	//mgr->CreateProgram("deferred-spot");
-	//mgr->GetProgramFromName("deferred-spot")->Create();
-	//mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("deferred-spot")->AddShader(mgr->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("deferred-spot")->Link();
-
-	//mgr->CreateProgram("nullFilter");
-	//mgr->GetProgramFromName("nullFilter")->Create();
-	//mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("nullFilter")->AddShader(mgr->LoadShaderFromFile("nullFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/nullFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("nullFilter")->Link();
-
 	mgr->CreateProgram("deferred-combine");
 	mgr->GetProgramFromName("deferred-combine")->Create();
 	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-vs.glsl", Anima::AnimaShader::VERTEX));
@@ -311,65 +242,49 @@ void Window::Load()
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
 
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
+	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 	
-	Anima::AnimaLight* l0 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambient");
-	l0->SetColor(1.0f, 1.0f, 1.0f);
-
-	//Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-	//l1->SetColor(1.0f, 1.0f, 1.0f);
-	//l1->SetIntensity(1.0f);
-	//l1->SetDirection(-1.0f, -1.0f, -1.0f);
+	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	l1->SetColor(1.0f, 1.0f, 1.0f);
+	l1->SetIntensity(1.0f);
+	l1->SetDirection(-1.0f, -1.0f, -1.0f);
 	
-	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
-	//l2->SetColor(0.0f, 0.0f, 1.0f);
-	//l2->SetConstantAttenuation(0.0f);
-	//l2->SetLinearAttenuation(0.0f);
-	//l2->SetExponentAttenuation(0.01f);
-	//l2->SetIntensity(1.0f);
-	//l2->SetPosition(-10.0f, 5.0f, 0.0f);
-	//l2->SetRange(40.0f);
+	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
+	l2->SetColor(0.0f, 0.0f, 1.0f);
+	l2->SetConstantAttenuation(0.0f);
+	l2->SetLinearAttenuation(0.0f);
+	l2->SetExponentAttenuation(0.01f);
+	l2->SetIntensity(1.0f);
+	l2->SetPosition(-10.0f, 5.0f, 0.0f);
+	l2->SetRange(40.0f);
 
-	//Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
-	//l3->SetColor(1.0f, 0.0f, 0.0f);
-	//l3->SetConstantAttenuation(0.0f);
-	//l3->SetLinearAttenuation(0.0f);
-	//l3->SetExponentAttenuation(0.01f);
-	//l3->SetIntensity(1.0f);
-	//l3->SetPosition(0.0f, 5.0f, -10.0f);
-	//l3->SetRange(40.0f);
+	Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
+	l3->SetColor(1.0f, 0.0f, 0.0f);
+	l3->SetConstantAttenuation(0.0f);
+	l3->SetLinearAttenuation(0.0f);
+	l3->SetExponentAttenuation(0.01f);
+	l3->SetIntensity(1.0f);
+	l3->SetPosition(0.0f, 5.0f, -10.0f);
+	l3->SetRange(40.0f);
 
-	Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
-	l4->SetColor(0.0f, 1.0f, 0.0f);
-	l4->SetConstantAttenuation(0.0f);
-	l4->SetLinearAttenuation(0.0f);
-	l4->SetExponentAttenuation(0.01f);
-	l4->SetIntensity(1.0f);
-	l4->SetPosition(0.0f, 0.5f, 5.0f);
-	l4->SetDirection(0.0f, 0.0f, -1.0f);
-	l4->SetRange(40.0f);
-	l4->SetCutoff(0.2);
-
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->ComputeBoundingBox(true);
-	//Anima::AnimaVertex3f min = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMin();
-	//Anima::AnimaVertex3f max = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetBoundingBoxMax();
-
-	//Anima::AnimaVertex3f center((min.x + max.x) / 2.0f, (min.z + max.z) / 2.0f, (min.z + max.z) / 2.0f);
-	//
-	//center = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->GetTransformationMatrix() * center;
-	//
-	//Anima::AnimaVertex3f pos = center;
-	//pos.z += 5.0f;
-
-	//_tpcamera->LookAt(pos, center);
-
+	//Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
+	//l4->SetColor(0.0f, 1.0f, 0.0f);
+	//l4->SetConstantAttenuation(0.0f);
+	//l4->SetLinearAttenuation(0.0f);
+	//l4->SetExponentAttenuation(0.01f);
+	//l4->SetIntensity(1.0f);
+	//l4->SetPosition(0.0f, 0.5f, 5.0f);
+	//l4->SetDirection(0.0f, 0.0f, -1.0f);
+	//l4->SetRange(40.0f);
+	//l4->SetCutoff(0.9f);
+	
 	_timerFPS.Init();
 	_timer.Reset();
 }

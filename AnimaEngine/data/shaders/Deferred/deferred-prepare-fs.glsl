@@ -1,9 +1,7 @@
-#version 150 core
+#version 410 core
 
 in vec2 frag_textureCoord;
 in vec3 frag_normal;
-//in vec3 frag_tangent;
-//in vec3 frag_bitangent;
 in vec3 frag_worldPosition;
 in mat3 frag_TBNMatrix;
 

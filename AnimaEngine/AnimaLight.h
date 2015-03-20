@@ -12,7 +12,7 @@
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
-#include "AnimaMappedValues.h"
+#include "AnimaSceneObject.h"
 #include "AnimaMesh.h"
 #include "AnimaTexture.h"
 #include "AnimaCamera.h"
@@ -25,11 +25,10 @@ class AnimaShadersManager;
 //----------------------------------------------------------------
 //						ANIMA LIGHT
 //----------------------------------------------------------------
-class ANIMA_ENGINE_EXPORT AnimaLight : protected AnimaMappedValues
+class ANIMA_ENGINE_EXPORT AnimaLight : public AnimaSceneObject
 {
 public:
 	enum AnimaLightType {
-		AMBIENT,
 		DIRECTIONAL,
 		POINT,
 		SPOT
@@ -58,10 +57,6 @@ public:
 	virtual void SetDirection(AFloat x, AFloat y, AFloat z);
 	virtual AnimaVertex3f GetDirection();
 
-	virtual void SetPosition(const AnimaVertex3f& position);
-	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
-	virtual AnimaVertex3f GetPosition();
-
 	virtual void SetConstantAttenuation(AFloat attenuation);
 	virtual void SetLinearAttenuation(AFloat attenuation);
 	virtual void SetExponentAttenuation(AFloat attenuation);
@@ -78,7 +73,6 @@ public:
 	virtual void ComputeViewMatrix();
 	virtual void ComputeProjectionMatrix();
 
-	bool IsAmbientLight();
 	bool IsDirectionalLight();
 	bool IsPointLight();
 	bool IsSpotLight();
@@ -93,7 +87,6 @@ public:
 	virtual void UpdateMeshTransformation(AnimaTransformation* meshTransformation) = 0;
 	virtual void UpdateCullFace(AnimaCamera* activeCamera) = 0;
 
-	virtual const char* GetShaderPrefix() = 0;
 	virtual const char* GetShaderName() = 0;
 	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
 
@@ -107,31 +100,9 @@ protected:
 };
 
 //----------------------------------------------------------------
-//						ANIMA AMBIENT LIGHT
-//----------------------------------------------------------------
-class ANIMA_ENGINE_EXPORT AnimaAmbientLight : public AnimaLight
-{
-public:
-	AnimaAmbientLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
-	virtual ~AnimaAmbientLight();
-
-	void SetColor(const AnimaColor3f& color) override;
-	void SetColor(AFloat r, AFloat g, AFloat b) override;
-
-	AnimaColor3f GetColor() override;
-
-	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
-	void UpdateCullFace(AnimaCamera* activeCamera) override;
-
-	const char* GetShaderPrefix() override;
-	const char* GetShaderName() override;
-	bool CreateShader(AnimaShadersManager* shadersManager) override;
-};
-
-//----------------------------------------------------------------
 //						ANIMA DIRECTIONAL LIGHT
 //----------------------------------------------------------------
-class ANIMA_ENGINE_EXPORT AnimaDirectionalLight : public AnimaAmbientLight
+class ANIMA_ENGINE_EXPORT AnimaDirectionalLight : public AnimaLight
 {
 public:
 	AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
@@ -139,11 +110,9 @@ public:
 	
 	void SetDirection(const AnimaVertex3f& direction) override;
 	void SetDirection(AFloat x, AFloat y, AFloat z) override;
-	void SetIntensity(AFloat intensity) override;
-
+	
 	AnimaVertex3f GetDirection() override;
-	AFloat GetIntensity() override;
-
+	
 	void ComputeViewMatrix() override;
 	void ComputeProjectionMatrix() override;
 
@@ -158,22 +127,17 @@ public:
 //----------------------------------------------------------------
 //						ANIMA POINT LIGHT
 //----------------------------------------------------------------
-class ANIMA_ENGINE_EXPORT AnimaPointLight : public AnimaAmbientLight
+class ANIMA_ENGINE_EXPORT AnimaPointLight : public AnimaLight
 {
 public:
 	AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaPointLight();
 
-	void SetPosition(const AnimaVertex3f& position) override;
-	void SetPosition(AFloat x, AFloat y, AFloat z) override;
-	void SetIntensity(AFloat intensity) override;
 	void SetConstantAttenuation(AFloat attenuation) override;
 	void SetLinearAttenuation(AFloat attenuation) override;
 	void SetExponentAttenuation(AFloat attenuation) override;
 	void SetRange(AFloat range) override;
 
-	AnimaVertex3f GetPosition() override;
-	AFloat GetIntensity() override;
 	AFloat GetConstantAttenuation() override;
 	AFloat GetLinearAttenuation() override;
 	AFloat GetExponentAttenuation() override;

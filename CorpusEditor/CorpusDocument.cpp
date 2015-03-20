@@ -91,8 +91,6 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
-	_engine->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
-
 	_hasModifications = true;
 	_newDocument = true;
 	
@@ -118,8 +116,6 @@ bool CorpusDocument::OpenDocument(QString path)
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 
-	_engine->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateAmbientLight("ambientLight")->SetColor(1.0f, 1.0f, 1.0f);
-	
 	_hasModifications = false;
 	_newDocument = false;
 	

@@ -20,16 +20,6 @@ AnimaLightsManager::~AnimaLightsManager()
 	ClearLights();
 }
 
-AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const AnimaString& name)
-{
-	return CreateLight<AnimaAmbientLight>(name);
-}
-
-AnimaAmbientLight* AnimaLightsManager::CreateAmbientLight(const char* name)
-{
-	return CreateLight<AnimaAmbientLight>(name);
-}
-
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaString& name)
 {
 	return CreateLight<AnimaDirectionalLight>(name);

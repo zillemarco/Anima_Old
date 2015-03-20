@@ -11,7 +11,7 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaSceneObject::AnimaSceneObject(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorsManager, const AnimaString& name)
+AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 : AnimaMappedValues(allocator, dataGeneratorsManager, name)
 {
 }
@@ -48,6 +48,23 @@ AnimaSceneObject& AnimaSceneObject::operator=(AnimaSceneObject&& src)
 	}
 
 	return *this;
+}
+
+void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)
+{
+	AnimaMappedValues::SetVector("Position", position);
+	_transformation.SetInitialTransformationMatrix(AnimaMatrix::MakeTranslation(position));
+}
+
+void AnimaSceneObject::SetPosition(AFloat x, AFloat y, AFloat z)
+{
+	AnimaMappedValues::SetVector("Position", x, y, z);
+	_transformation.SetInitialTransformationMatrix(AnimaMatrix::MakeTranslation(x, y, z));
+}
+
+AnimaVertex3f AnimaSceneObject::GetPosition()
+{
+	return AnimaMappedValues::GetVector3f("Position");
 }
 
 END_ANIMA_ENGINE_NAMESPACE
