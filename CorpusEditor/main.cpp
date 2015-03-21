@@ -101,14 +101,27 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
+	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
 		return 0;
+	mesh->ComputeBoundingBox(true);
 
-	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
-		return 0;
-	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	//if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+	//	return 0;
+	//mesh->ComputeBoundingBox(true);
+
+	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	//if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+	//	return 0;
+	//mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	//mesh->ComputeBoundingBox(true);
+
+	//path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	//if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+	//	return 0;
+	//mesh->ComputeBoundingBox(true);
+	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 	
 	//mesh = manager->CreateModel("cilindro");
 	//mesh->MakeCylinder(0.0f, 1.0f, 1.0f, 60, 1, true);
@@ -122,7 +135,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
-	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_COMPAT_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 

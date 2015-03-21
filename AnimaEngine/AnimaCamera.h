@@ -13,6 +13,7 @@
 #include "AnimaVertex.h"
 #include "AnimaTypes.h"
 #include "AnimaMatrix.h"
+#include "AnimaFrustum.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -70,7 +71,7 @@ public:
 	virtual void CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar);
 	virtual void SetProjectionMatrix(const AnimaMatrix& matrix);
 	virtual AnimaMatrix GetProjectionMatrix();
-
+	
 	virtual AnimaMatrix GetProjectionViewMatrix();
 	virtual AnimaMatrix GetInversedProjectionViewMatrix();
 	
@@ -82,6 +83,8 @@ public:
 
 	AnimaVertex2f GetWindowSize();
 
+	AnimaFrustum* GetFrustum();
+		
 protected:
 	AnimaVertex3f _position;
 
@@ -98,6 +101,8 @@ protected:
 	AFloat _fov;
 	AFloat _zNear;
 	AFloat _zFar;
+
+	AnimaFrustum _frustum;
 	
 	bool _active;
 	AnimaCameraProjectionType _projectionType;

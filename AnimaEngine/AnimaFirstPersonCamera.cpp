@@ -157,6 +157,9 @@ void AnimaFirstPersonCamera::CalculateViewMatrix()
 	
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+
+	//_frustum.SetCameraView(_position, _zAxis, _yAxis);
+	_frustum.ComputeFrustum(_projectionViewMatrix);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

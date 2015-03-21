@@ -35,6 +35,7 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 	_floatsMap = src._floatsMap;
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
+	_matricesMap = src._matricesMap;
 }
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
@@ -49,6 +50,7 @@ AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 	_floatsMap = src._floatsMap;
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
+	_matricesMap = src._matricesMap;
 }
 
 AnimaMappedValues::~AnimaMappedValues()
@@ -59,6 +61,7 @@ AnimaMappedValues::~AnimaMappedValues()
 	_floatsMap.clear();
 	_integersMap.clear();
 	_booleansMap.clear();
+	_matricesMap.clear();
 }
 
 AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
@@ -75,6 +78,7 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 		_floatsMap = src._floatsMap;
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
+		_matricesMap = src._matricesMap;
 	}
 	
 	return *this;
@@ -94,6 +98,7 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 		_floatsMap = src._floatsMap;
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
+		_matricesMap = src._matricesMap;
 	}
 	
 	return *this;
@@ -343,6 +348,33 @@ void AnimaMappedValues::AddInteger(const char* propertyName, AInt value)
 	AddInteger(str, value);
 }
 
+void AnimaMappedValues::AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value)
+{
+	AnimaString pName = _name + propertyName;
+	if (_matricesMap.find(pName) != _matricesMap.end())
+		return;
+	_matricesMap[pName] = value;
+}
+
+void AnimaMappedValues::AddMatrix(const char* propertyName, const AnimaMatrix& value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddMatrix(str, value);
+}
+
+void AnimaMappedValues::AddMatrix(const AnimaString& propertyName, AFloat value[16])
+{
+	AnimaMatrix mat(value);
+	AddMatrix(propertyName, mat);
+}
+
+void AnimaMappedValues::AddMatrix(const char* propertyName, AFloat value[16])
+{
+	AnimaString str(propertyName, _allocator);
+	AnimaMatrix mat(value);
+	AddMatrix(str, mat);
+}
+
 void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture* value)
 {
 	AnimaString pName = _name + propertyName;
@@ -567,6 +599,34 @@ void AnimaMappedValues::SetInteger(const char* propertyName, AInt value)
 	SetInteger(str, value);
 }
 
+void AnimaMappedValues::SetMatrix(const AnimaString& propertyName, const AnimaMatrix& value)
+{
+	AnimaString pName = _name + propertyName;
+	if (_matricesMap.find(pName) == _matricesMap.end())
+		AddMatrix(propertyName, value);
+	else
+		_matricesMap[pName] = value;
+}
+
+void AnimaMappedValues::SetMatrix(const char* propertyName, const AnimaMatrix& value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetMatrix(str, value);
+}
+
+void AnimaMappedValues::SetMatrix(const AnimaString& propertyName, AFloat value[16])
+{
+	AnimaMatrix mat(value);
+	SetMatrix(propertyName, mat);
+}
+
+void AnimaMappedValues::SetMatrix(const char* propertyName, AFloat value[16])
+{
+	AnimaString str(propertyName, _allocator);
+	AnimaMatrix mat(value);
+	SetMatrix(str, mat);
+}
+
 AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
 {
 	AnimaString pName = _name + propertyName;
@@ -703,6 +763,20 @@ AInt AnimaMappedValues::GetInteger(const char* propertyName)
 	return GetInteger(str);
 }
 
+AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName)
+{
+	AnimaString pName = _name + propertyName;
+	if (_matricesMap.find(pName) != _matricesMap.end())
+		return _matricesMap[pName];
+	return AnimaMatrix();
+}
+
+AnimaMatrix AnimaMappedValues::GetMatrix(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return GetMatrix(str);
+}
+
 bool AnimaMappedValues::HasTexture(const AnimaString& propertyName)
 {
 	AnimaString pName = _name + propertyName;
@@ -773,6 +847,18 @@ bool AnimaMappedValues::HasBoolean(const char* propertyName)
 {
 	AnimaString str(propertyName, _allocator);
 	return HasBoolean(str);
+}
+
+bool AnimaMappedValues::HasMatrix(const AnimaString& propertyName)
+{
+	AnimaString pName = _name + propertyName;
+	return (_matricesMap.find(pName) != _matricesMap.end());
+}
+
+bool AnimaMappedValues::HasMatrix(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return HasMatrix(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

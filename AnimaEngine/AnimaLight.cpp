@@ -20,8 +20,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
-	_shadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
-	_tempShadowTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
+	AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
@@ -33,61 +33,41 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 AnimaLight::AnimaLight(const AnimaLight& src)
 	: AnimaSceneObject(src)
 {
-	_type = src._type;
-	_shadowTexture = src._shadowTexture;
-	_tempShadowTexture = src._tempShadowTexture;
-	_viewMatrix = src._viewMatrix;
-	_projectionMatrix = src._projectionMatrix;
-	_projectionViewMatrix = src._projectionViewMatrix;
 }
 
 AnimaLight::AnimaLight(AnimaLight&& src)
 	: AnimaSceneObject(src)
 {
-	_type = src._type;
-	_shadowTexture = src._shadowTexture;
-	_tempShadowTexture = src._tempShadowTexture;
-	_viewMatrix = src._viewMatrix;
-	_projectionMatrix = src._projectionMatrix;
-	_projectionViewMatrix = src._projectionViewMatrix;
 }
 
 AnimaLight::~AnimaLight()
 {
-	if (_shadowTexture != nullptr)
+	AnimaTexture* shadowMap = AnimaSceneObject::GetTexture("ShadowMap");
+	if (shadowMap != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _shadowTexture);
-		_shadowTexture = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, shadowMap);
+		shadowMap = nullptr;
 	}
 
-	if (_tempShadowTexture != nullptr)
+	AnimaTexture* tempShadowMap = AnimaSceneObject::GetTexture("TempShadowMap");
+	if (tempShadowMap != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _tempShadowTexture);
-		_tempShadowTexture = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, tempShadowMap);
+		tempShadowMap = nullptr;
 	}
 }
 
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 {
-	AnimaSceneObject::operator=(src);
-	_type = src._type;
-	_shadowTexture = src._shadowTexture;
-	_tempShadowTexture = src._tempShadowTexture;
-	_viewMatrix = src._viewMatrix;
-	_projectionMatrix = src._projectionMatrix;
-	_projectionViewMatrix = src._projectionViewMatrix;
+	if (this != &src)
+		AnimaSceneObject::operator=(src);
 	return *this;
 }
 
 AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 {
-	AnimaSceneObject::operator=(src);
-	_type = src._type;
-	_shadowTexture = src._shadowTexture;
-	_tempShadowTexture = src._tempShadowTexture;
-	_viewMatrix = src._viewMatrix;
-	_projectionMatrix = src._projectionMatrix;
-	_projectionViewMatrix = src._projectionViewMatrix;
+	if (this != &src)
+		AnimaSceneObject::operator=(src);
 	return *this;
 }
 
@@ -187,58 +167,43 @@ AFloat AnimaLight::GetCutoff()
 	return 0.0f;
 }
 
-bool AnimaLight::IsDirectionalLight()
-{
-	return _type == DIRECTIONAL;
-}
-
-bool AnimaLight::IsPointLight()
-{
-	return _type == POINT;
-}
-
-bool AnimaLight::IsSpotLight()
-{
-	return _type == SPOT;
-}
-
 AnimaTexture* AnimaLight::GetShadowTexture()
 {
-	return _shadowTexture;
+	return AnimaSceneObject::GetTexture("ShadowMap");
 }
 
 AnimaTexture* AnimaLight::GetTempShadowTexture()
 {
-	return _tempShadowTexture;
+	return AnimaSceneObject::GetTexture("TempShadowMap");
 }
 
 AnimaMatrix AnimaLight::GetViewMatrix()
 {
-	return _viewMatrix;
+	return AnimaSceneObject::GetMatrix("ViewMatrix");
 }
 
 AnimaMatrix AnimaLight::GetProjectionMatrix()
 {
-	return _projectionMatrix;
+	return AnimaSceneObject::GetMatrix("ProjectionMatrix");
 }
 
 AnimaMatrix AnimaLight::GetProjectionViewMatrix()
 {
-	return _projectionViewMatrix;
+	return AnimaSceneObject::GetMatrix("ProjectionViewMatrix");
 }
 
 void AnimaLight::ComputeProjectionMatrix()
 {
-	_viewMatrix.SetIdentity();
-	_projectionMatrix.SetIdentity();
-	_projectionViewMatrix.SetIdentity();
+	AnimaSceneObject::SetMatrix("ViewMatrix", AnimaMatrix());
+	AnimaSceneObject::SetMatrix("ProjectionMatrix", AnimaMatrix());
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", AnimaMatrix());
 }
 
 void AnimaLight::ComputeViewMatrix()
 {
-	_viewMatrix.SetIdentity();
-	_projectionMatrix.SetIdentity();
-	_projectionViewMatrix.SetIdentity();
+	AnimaSceneObject::SetMatrix("ViewMatrix", AnimaMatrix());
+	AnimaSceneObject::SetMatrix("ProjectionMatrix", AnimaMatrix());
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", AnimaMatrix());
 }
 
 //----------------------------------------------------------------
@@ -251,8 +216,6 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
-
-	_type = DIRECTIONAL;
 }
 
 AnimaDirectionalLight::~AnimaDirectionalLight()
@@ -278,15 +241,21 @@ AnimaVertex3f AnimaDirectionalLight::GetDirection()
 
 void AnimaDirectionalLight::ComputeViewMatrix()
 {
-	_viewMatrix.LookAt(AnimaVertex3f(0.0f, 0.0f, 0.0f), GetDirection(), AnimaVertex3f(0.0f, 1.0f, 0.0f));
-	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(AnimaVertex3f(0.0f, 0.0f, 0.0f), GetDirection(), AnimaVertex3f(0.0f, 1.0f, 0.0f));
+	AnimaMatrix projectionViewMatrix = AnimaSceneObject::GetMatrix("ProjectionMatrix") * viewMatrix;
+
+	AnimaSceneObject::SetMatrix("ViewMatrix", viewMatrix);
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);
 }
 
 void AnimaDirectionalLight::ComputeProjectionMatrix()
 {
-	float t = 20.0f;
-	_projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -1000.0f, 1000.0f);
-	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
+	float t = 2800.0f;
+	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -10000.0f, 10000.0f);
+	AnimaMatrix projectionViewMatrix = projectionMatrix * AnimaSceneObject::GetMatrix("ViewMatrix");
+
+	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);
 }
 
 void AnimaDirectionalLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
@@ -342,8 +311,6 @@ AnimaPointLight::AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsM
 	AnimaSceneObject::SetFloat("LinearAttenuation", 0.0f);
 	AnimaSceneObject::SetFloat("ExponentAttenuation", 1.0f);
 	AnimaSceneObject::SetFloat("Range", 20.0f);
-
-	_type = POINT;
 }
 
 AnimaPointLight::~AnimaPointLight()
@@ -448,8 +415,6 @@ AnimaSpotLight::AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsMan
 {
 	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
 	AnimaSceneObject::SetFloat("Cutoff", 0.7f);
-
-	_type = SPOT;
 }
 
 AnimaSpotLight::~AnimaSpotLight()

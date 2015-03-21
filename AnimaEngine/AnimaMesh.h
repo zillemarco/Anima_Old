@@ -83,6 +83,7 @@ public:
 	void ComputeBoundingBox(bool updateRecursively);
 	AnimaVertex3f GetBoundingBoxMin() const;
 	AnimaVertex3f GetBoundingBoxMax() const;
+	AnimaVertex3f GetBoundingBoxCenter() const;
 
 	AnimaTransformation* GetTransformation();
 	AnimaTransformation GetTransformationCopy();
@@ -196,6 +197,9 @@ public:
 	AUint GetFloatVerticesBitangentsCount();
 	float* GetFloatVerticesBitangents();
 
+	void SetIsVisible(bool visible);
+	bool IsVisible();
+
 protected:
 	AInt GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const;
 
@@ -210,6 +214,7 @@ protected:
 	AnimaMesh*		_parentMesh;
 	AnimaVertex3f	_boundingBoxMin;
 	AnimaVertex3f	_boundingBoxMax;
+	AnimaVertex3f	_boundingBoxCenter;
 
 	AnimaMesh*		_meshes;
 	ASizeT			_meshesNumber;
@@ -246,6 +251,8 @@ protected:
 	AUint			_textureCoordsBufferObject;
 	AUint			_tangentsBufferObject;
 	AUint			_bitangentsBufferObject;
+
+	bool _visible;
 	
 	bool _needsBuffersUpdate;
 };

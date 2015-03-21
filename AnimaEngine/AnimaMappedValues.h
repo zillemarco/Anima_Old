@@ -18,6 +18,7 @@
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
+#include "AnimaMatrix.h"
 #include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -78,6 +79,11 @@ public:
 	void AddInteger(const AnimaString& propertyName, AInt value);
 	void AddInteger(const char* propertyName, AInt value);
 
+	void AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
+	void AddMatrix(const char* propertyName, const AnimaMatrix& value);
+	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
+	void AddMatrix(const char* propertyName, AFloat value[16]);
+
 	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
 	void SetTexture(const char* propertyName, AnimaTexture* value);
 
@@ -116,6 +122,11 @@ public:
 	void SetInteger(const AnimaString& propertyName, AInt value);
 	void SetInteger(const char* propertyName, AInt value);
 
+	void SetMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
+	void SetMatrix(const char* propertyName, const AnimaMatrix& value);
+	void SetMatrix(const AnimaString& propertyName, AFloat value[16]);
+	void SetMatrix(const char* propertyName, AFloat value[16]);
+
 	AnimaTexture* GetTexture(const AnimaString& propertyName);
 	AnimaTexture* GetTexture(const char* propertyName);
 
@@ -140,6 +151,9 @@ public:
 	bool GetBoolean(const AnimaString& propertyName);
 	bool GetBoolean(const char* propertyName);
 
+	AnimaMatrix GetMatrix(const AnimaString& propertyName);
+	AnimaMatrix GetMatrix(const char* propertyName);
+
 	bool HasTexture(const AnimaString& propertyName);
 	bool HasTexture(const char* propertyName);
 	
@@ -157,6 +171,9 @@ public:
 	
 	bool HasBoolean(const AnimaString& propertyName);
 	bool HasBoolean(const char* propertyName);
+
+	bool HasMatrix(const AnimaString& propertyName);
+	bool HasMatrix(const char* propertyName);
 	
 protected:
 	AnimaAllocator* _allocator;
@@ -167,6 +184,7 @@ protected:
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher> _texturesMap;
 	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaString::Hasher> _colorsMap;
 	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaString::Hasher> _vectorsMap;
+	boost::unordered_map<AnimaString, AnimaMatrix, AnimaString::Hasher> _matricesMap;
 	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher> _floatsMap;
 	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaString::Hasher> _booleansMap;

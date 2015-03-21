@@ -52,6 +52,7 @@ AnimaMesh::AnimaMesh(AnimaAllocator* allocator)
 	_bitangentsBufferObject = 0;
 	_vertexArrayObject = 0;
 	_needsBuffersUpdate = true;
+	_visible = true;
 
 	_verticesNumber = 0;
 	_normalsNumber = 0;
@@ -89,6 +90,11 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	_material = src._material;
+	_visible = src._visible;
+
+	_boundingBoxMin = src._boundingBoxMin;
+	_boundingBoxMax = src._boundingBoxMax;
+	_boundingBoxCenter = src._boundingBoxCenter;
 	
 	_vertices = nullptr;
 	_normals = nullptr;
@@ -143,6 +149,10 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
+	, _visible(src._visible)
+	, _boundingBoxMin(src._boundingBoxMin)
+	, _boundingBoxMax(src._boundingBoxMax)
+	, _boundingBoxCenter(src._boundingBoxCenter)
 {
 	src._vertices = nullptr;
 	src._normals = nullptr;
@@ -187,6 +197,10 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_material = src._material;
 		_transformation = src._transformation;
 		_parentMesh = src._parentMesh;
+		_visible = src._visible;
+		_boundingBoxMin = src._boundingBoxMin;
+		_boundingBoxMax = src._boundingBoxMax;
+		_boundingBoxCenter = src._boundingBoxCenter;
 
 		SetMeshName(src._meshName);
 		SetMeshFileName(src._meshFileName);
@@ -247,6 +261,10 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_bitangentsBufferObject = src._bitangentsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
+		_visible = src._visible;
+		_boundingBoxMin = src._boundingBoxMin;
+		_boundingBoxMax = src._boundingBoxMax;
+		_boundingBoxCenter = src._boundingBoxCenter;
 
 		src._vertices = nullptr;
 		src._normals = nullptr;
@@ -1379,6 +1397,16 @@ float* AnimaMesh::GetFloatVerticesBitangents()
 	return bitangents;
 }
 
+void AnimaMesh::SetIsVisible(bool visible)
+{
+	_visible = visible;
+}
+
+bool AnimaMesh::IsVisible()
+{
+	return _visible;
+}
+
 void AnimaMesh::SetMaterial(AnimaMaterial* material)
 {
 	_material = material;
@@ -1511,8 +1539,8 @@ void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
 		else
 		{
 			_boundingBoxMin.x = _boundingBoxMax.x = _vertices[0].x;
-			_boundingBoxMin.y = _boundingBoxMax.y = _vertices[0].x;
-			_boundingBoxMin.z = _boundingBoxMax.z = _vertices[0].x;
+			_boundingBoxMin.y = _boundingBoxMax.y = _vertices[0].y;
+			_boundingBoxMin.z = _boundingBoxMax.z = _vertices[0].z;
 			
 			for(ASizeT i = 1; i < _verticesNumber; i++)
 			{
@@ -1525,6 +1553,9 @@ void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
 				_boundingBoxMax.z = max(_boundingBoxMax.z, _vertices[i].z);
 			}
 		}
+		
+		_boundingBoxCenter = AnimaVertex3f((_boundingBoxMin.x + _boundingBoxMax.x) / 2.0f, (_boundingBoxMin.y + _boundingBoxMax.y) / 2.0f, (_boundingBoxMin.z + _boundingBoxMax.z) / 2.0f);
+
 		return;
 	}
 
@@ -1560,6 +1591,8 @@ void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
 		_boundingBoxMax.y = max(_boundingBoxMax.y, _meshChildren[i].GetBoundingBoxMax().y);
 		_boundingBoxMax.z = max(_boundingBoxMax.z, _meshChildren[i].GetBoundingBoxMax().z);
 	}
+
+	_boundingBoxCenter = AnimaVertex3f((_boundingBoxMin.x + _boundingBoxMax.x) / 2.0f, (_boundingBoxMin.y + _boundingBoxMax.y) / 2.0f, (_boundingBoxMin.z + _boundingBoxMax.z) / 2.0f);
 }
 
 AnimaVertex3f AnimaMesh::GetBoundingBoxMin() const
@@ -1570,6 +1603,11 @@ AnimaVertex3f AnimaMesh::GetBoundingBoxMin() const
 AnimaVertex3f AnimaMesh::GetBoundingBoxMax() const
 {
 	return _boundingBoxMax;
+}
+
+AnimaVertex3f AnimaMesh::GetBoundingBoxCenter() const
+{
+	return _boundingBoxCenter;
 }
 
 AnimaMatrix AnimaMesh::GetFinalMatrix() const

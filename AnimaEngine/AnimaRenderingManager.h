@@ -15,6 +15,7 @@
 #include "AnimaGBuffer.h"
 #include "AnimaVertex.h"
 #include "AnimaArray.h"
+#include "AnimaFrustum.h"
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -41,8 +42,10 @@ public:
 	void Start(AnimaScene* scene);
 	void Finish(AnimaScene* scene);
 
-	void DeferredDrawAllModels(AnimaScene* scene);
+	int DeferredDrawAllModels(AnimaScene* scene);
 	void DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
+
+	int UpdateModelsVisibility(AnimaScene* scene);
 	
 public:
 	void InitTextureSlots();
@@ -55,9 +58,9 @@ protected:
 	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
 	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*, AnimaLight*>* lights);
 
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true);
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
-	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true, bool forceDraw = false);
+	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true, bool forceDraw = false);
 	
 	void Clear();
 
@@ -65,6 +68,8 @@ protected:
 	void ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
 	void ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst);
 	void ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst);
+
+	void UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix);
 
 protected:
 	template<class T> AnimaMesh* CreateMeshForLightType();

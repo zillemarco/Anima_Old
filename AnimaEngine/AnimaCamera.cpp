@@ -267,25 +267,38 @@ void AnimaCamera::CalculateProjectionMatrix(float fov, const AnimaVertex2f& size
 	if (_windowSize != size)
 		_windowSize = size;
 
-	if (fov != _fov || zNear != _zNear || zFar != zFar)
+	if (fov != _fov || zNear != _zNear || zFar != _zFar)
 	{
+		_zNear = zNear;
+		_zFar = zFar;
+		_fov = fov;
+
 		_projectionMatrix.SetIdentity();
 		_projectionMatrix.Perspective(fov, size.x / size.y, zNear, zFar);
 		_projectionType = PERSPECTIVE;
 
 		_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 		_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+
+		//_frustum.SetCameraProjection(_fov, _windowSize.x / _windowSize.y, _zNear, _zFar);
+		_frustum.ComputeFrustum(_projectionViewMatrix);
 	}
 }
 
 void AnimaCamera::CalculateProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar)
 {
+	_zNear = zNear;
+	_zFar = zFar;
+
 	_projectionMatrix.SetIdentity();
 	_projectionMatrix.Ortho(left, right, bottom, top, zNear, zFar);
 	_projectionType = ORTHO;
 
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+
+	//_frustum.SetCameraProjection(_fov, _windowSize.x / _windowSize.y, _zNear, _zFar);
+	_frustum.ComputeFrustum(_projectionViewMatrix);
 }
 
 bool AnimaCamera::IsPerspectiveProjectionType()
@@ -311,6 +324,11 @@ AnimaMatrix AnimaCamera::GetProjectionViewMatrix()
 AnimaMatrix AnimaCamera::GetInversedProjectionViewMatrix()
 {
 	return _InverseProjectionViewMatrix;
+}
+
+AnimaFrustum* AnimaCamera::GetFrustum()
+{
+	return &_frustum;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

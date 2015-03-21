@@ -73,6 +73,9 @@ public:
 	void operator/=(const AFloat val);
 	void operator/=(const AnimaVertex2f& val);
 
+	void Fill(AFloat v[2]);
+	void Fill(AFloat x, AFloat y);
+
 	void Normalize();
 	AnimaVertex2f Normalized() const;
 
@@ -133,6 +136,10 @@ public:
 	void operator/=(const AFloat val);
 	void operator/=(const AnimaVertex3f& val);
 
+	void Fill(AFloat v[3]);
+	void Fill(AFloat x, AFloat y, AFloat z);
+	void Fill(const AnimaVertex2f& v, AFloat z);
+
 	void Normalize();
 	AnimaVertex3f Normalized() const;
 
@@ -141,7 +148,7 @@ public:
 	AnimaVertex3f Clamped(const AFloat lower, const AFloat upper) const;
 	AnimaVertex3f Clamped(const AnimaVertex3f& lower, const AnimaVertex3f& upper) const;
 
-	void GetRotation(AFloat& rx, AFloat& ry) const;
+	AFloat InnerProduct(const AnimaVertex3f& v);
 
 	AFloat Length() const;
 	AFloat Length2() const;
@@ -194,6 +201,11 @@ public:
 
 	void operator/=(const AFloat val);
 	void operator/=(const AnimaVertex4f& val);
+
+	void Fill(AFloat v[4]);
+	void Fill(AFloat x, AFloat y, AFloat z, AFloat w);
+	void Fill(const AnimaVertex2f& v, AFloat z, AFloat w);
+	void Fill(const AnimaVertex3f& v, AFloat w);
 
 	void Normalize();
 	AnimaVertex4f Normalized() const;

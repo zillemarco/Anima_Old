@@ -27,13 +27,6 @@ class AnimaShadersManager;
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaLight : public AnimaSceneObject
 {
-public:
-	enum AnimaLightType {
-		DIRECTIONAL,
-		POINT,
-		SPOT
-	};
-
 protected:
 	AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaLight(const AnimaLight& src);
@@ -73,10 +66,6 @@ public:
 	virtual void ComputeViewMatrix();
 	virtual void ComputeProjectionMatrix();
 
-	bool IsDirectionalLight();
-	bool IsPointLight();
-	bool IsSpotLight();
-
 	AnimaTexture* GetShadowTexture();
 	AnimaTexture* GetTempShadowTexture();
 
@@ -91,12 +80,6 @@ public:
 	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
 
 protected:
-	AnimaLightType	_type;
-	AnimaTexture*	_shadowTexture;
-	AnimaTexture*	_tempShadowTexture;
-	AnimaMatrix		_viewMatrix;
-	AnimaMatrix		_projectionMatrix;
-	AnimaMatrix		_projectionViewMatrix;
 };
 
 //----------------------------------------------------------------

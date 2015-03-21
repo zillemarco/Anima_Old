@@ -964,6 +964,8 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 			SetUniformi(info._location, light->GetBoolean(info._nameParts[1]) ? 1 : 0);
 		else if (info._type == GL_INT)
 			SetUniformi(info._location, light->GetInteger(info._nameParts[1]));
+		else if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._location, light->GetMatrix(info._nameParts[1]));
 		else if (info._type == GL_SAMPLER_2D)
 		{
 			AnimaTexture* texture = light->GetTexture(info._nameParts[1]);

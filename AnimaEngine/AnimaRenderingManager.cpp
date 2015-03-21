@@ -13,6 +13,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+int numeroDisegnati = 0;
+
 AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
 {
 	_allocator = allocator;
@@ -391,8 +393,11 @@ void AnimaRenderingManager::Finish(AnimaScene* scene)
 	scene->GetShadersManager()->SetActiveProgram(nullptr);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-void AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
+
+int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 {
+	numeroDisegnati = 0;
+
 	Anima::AnimaShadersManager* shadersManager = scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 
@@ -407,14 +412,18 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	glDepthMask(GL_TRUE);
 
 	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"));
+	
 	Finish(scene);
 	
-	////
-	////	Aggiorno le mappature per le ombre
-	////
-	//Start(scene);
-	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	//Finish(scene);
+	//
+	//	Aggiorno le mappature per le ombre
+	//
+	Start(scene);
+	numeroDisegnati = 0;
+	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
+
+	int num = numeroDisegnati;
+	Finish(scene);
 	
 	//
 	//	Preparazione dei buffer della luce
@@ -451,7 +460,9 @@ void AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	//
 	//	Applicazione effetti
 	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), /*GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap")*/GetTexture("DiffuseMap"), nullptr);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+
+	return num;
 }
 
 void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model)
@@ -470,6 +481,7 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh
 	glDepthMask(GL_TRUE);
 
 	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"), model);
+
 	Finish(scene);
 
 	////
@@ -517,30 +529,33 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw)
 {
 	AnimaMatrix identityMatrix;
-	DeferredDrawModel(scene, model, program, identityMatrix, updateMaterial);
+	DeferredDrawModel(scene, model, program, identityMatrix, updateMaterial, forceDraw);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw)
 {
-	if (scene == nullptr || model == nullptr || program == nullptr)
+	if (scene == nullptr || model == nullptr || program == nullptr || (!model->IsVisible() && !forceDraw))
 		return;
-
+	
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, updateMaterial);
+		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, updateMaterial, forceDraw);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, updateMaterial);
+		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, updateMaterial, forceDraw);
 }
 
-void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial)
+void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw)
 {
+	if (!mesh->IsVisible() && !forceDraw)
+		return;
+
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
 
@@ -568,6 +583,8 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* 
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	program->DisableInputs();
 #endif
+
+	numeroDisegnati++;
 }
 
 void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model)
@@ -642,10 +659,6 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 		return;
 
 	AnimaString type(typeid((*lights->ElementAt(0))).name(), _allocator);
-
-	if (type == "class Anima::AnimaAmbientLight" || type == "N5Anima17AnimaAmbientLightE")
-		return;
-
 	auto pair = _lightsMeshMap.find(type);
 
 	ANIMA_ASSERT(pair != _lightsMeshMap.end());
@@ -701,7 +714,6 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaScene* scene, AnimaShaderPr
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
 
-	//program->UpdateLightProperies(scene->GetLightsManager()->GetLightFromName("ambient"), this);
 	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
 	program->UpdateRenderingManagerProperies(this);
 	
@@ -719,77 +731,125 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaScene* scene, AnimaShaderPr
 
 void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program)
 {
-	//AnimaLightsManager* lightsManager = scene->GetLightsManager();
-	//AnimaModelsManager* modelsManager = scene->GetModelsManager();
-	//AnimaShadersManager* shadersManager = scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = scene->GetLightsManager();
+	AnimaModelsManager* modelsManager = scene->GetModelsManager();
+	AnimaShadersManager* shadersManager = scene->GetShadersManager();
 
-	//ASizeT nLights = lightsManager->GetTotalLightsCount();
-	//ASizeT nModels = modelsManager->GetModelsNumber();
+	AnimaArray<AnimaLight*, AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
 
-	//if (nLights == 0 || nModels == 0)
-	//	return;
+	AInt nLights = lights->GetSize();
+	ASizeT nModels = modelsManager->GetModelsNumber();
 
-	//AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
-	//AnimaCamera* activeCamera = scene->GetCamerasManager()->GetActiveCamera();
+	if (nLights == 0 || nModels == 0)
+		return;
 
-	//if (activeCamera == nullptr)
-	//	return;
+	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
+	AnimaCamera* activeCamera = scene->GetCamerasManager()->GetActiveCamera();
 
-	//if (activeProgram == nullptr || (*activeProgram) != (*program))
-	//	program->Use();
+	if (activeCamera == nullptr)
+		return;
 
-	//for (ASizeT i = 0; i < nLights; i++)
-	//{
-	//	AnimaLight* light = lightsManager->GetLight((AUint)i);
-	//	if (!light->IsDirectionalLight())
-	//		continue;
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
 
-	//	AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
-	//	AnimaTexture* shadowMap = light->GetShadowTexture();
-	//	if (!tmpShadowMap->AreRenderTargetsReady())
-	//		tmpShadowMap->LoadRenderTargets();
-	//	if (!shadowMap->AreRenderTargetsReady())
-	//		shadowMap->LoadRenderTargets();
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
 
-	//	shadowMap->BindAsRenderTarget();
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	//	glEnable(GL_DEPTH_TEST);
-	//	glDepthMask(GL_TRUE);
+		AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!tmpShadowMap->AreRenderTargetsReady())
+			tmpShadowMap->LoadRenderTargets();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
 
-	//	program->UpdateLightProperies(light, this);
-	//	program->UpdateRenderingManagerProperies(this);
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 
-	//	for (ASizeT j = 0; j < nModels; j++)
-	//	{
-	//		AnimaMesh* innerModel = modelsManager->GetModel(j);
-	//		AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
 
-	//		glCullFace(GL_FRONT);
-	//		DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false);
-	//		glCullFace(GL_BACK);
+		for (ASizeT j = 0; j < nModels; j++)
+		{
+			AnimaMesh* innerModel = modelsManager->GetModel(j);
+			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
-	//		ASizeT meshNumber = innerModel->GetMeshesNumber();
-	//		for (ASizeT i = 0; i < meshNumber; i++)
-	//		{
-	//			glCullFace(GL_FRONT);
-	//			DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false);
-	//			glCullFace(GL_BACK);
-	//		}
+			glCullFace(GL_FRONT);
+			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false, true);
+			glCullFace(GL_BACK);
 
-	//		ASizeT childrenNumber = innerModel->GetChildrenNumber();
-	//		for (ASizeT i = 0; i < childrenNumber; i++)
-	//			DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false);
-	//	}
+			ASizeT meshNumber = innerModel->GetMeshesNumber();
+			for (ASizeT i = 0; i < meshNumber; i++)
+			{
+				glCullFace(GL_FRONT);
+				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+				glCullFace(GL_BACK);
+			}
 
-	//	AFloat blurAmount = 1.0f;
+			ASizeT childrenNumber = innerModel->GetChildrenNumber();
+			for (ASizeT i = 0; i < childrenNumber; i++)
+				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+		}
 
-	//	SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
-	//	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
+		AFloat blurAmount = 1.0f;
 
-	//	SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
-	//	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
-	//}
+		SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
+		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
+
+		SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
+		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
+	}
+}
+
+int AnimaRenderingManager::UpdateModelsVisibility(AnimaScene* scene)
+{
+	numeroDisegnati = 0;
+
+	Anima::AnimaModelsManager* modelsManager = scene->GetModelsManager();
+	Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+
+	Anima::AnimaFrustum* frustum = scene->GetCamerasManager()->GetActiveCamera()->GetFrustum();
+
+	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
+		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
+
+	return numeroDisegnati;
+}
+
+void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix)
+{
+	AnimaMatrix modelMatrix = parentMeshMatrix * mesh->GetTransformation()->GetTransformationMatrix();
+
+	if (mesh->GetVerticesNumber() > 0)
+	{
+		if (!frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+		{
+			mesh->SetIsVisible(false);
+			return;
+		}
+		else
+		{
+			mesh->SetIsVisible(true);
+			numeroDisegnati++;
+		}
+	}
+
+	ASizeT meshNumber = mesh->GetMeshesNumber();
+	for (ASizeT i = 0; i < meshNumber; i++)
+	{
+		AnimaMesh* subMesh = mesh->GetMesh(i);
+		subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
+		
+		if (subMesh->IsVisible())
+			numeroDisegnati++;
+	}
+
+	ASizeT childrenNumber = mesh->GetChildrenNumber();
+	for (ASizeT i = 0; i < childrenNumber; i++)
+		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
 void AnimaRenderingManager::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
@@ -826,11 +886,6 @@ void AnimaRenderingManager::SetTextureSlot(const char* propertyName, AUint value
 	AnimaString str(propertyName, _allocator);
 	SetTextureSlot(str, value);
 }
-
-//void AnimaRenderingManager::SetDeferredData(AnimaRenderingManager::DeferredData* value)
-//{
-//	_gBuffersMap.insert(value);
-//}
 
 void AnimaRenderingManager::SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent)
 {

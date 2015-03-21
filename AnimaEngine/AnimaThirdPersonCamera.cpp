@@ -159,6 +159,11 @@ void AnimaThirdPersonCamera::RotateYDeg(AFloat angle)
 	RotateY(angle * (float)M_PI / 180.0f);
 }
 
+AnimaVertex3f AnimaThirdPersonCamera::GetTarget()
+{
+	return _target;
+}
+
 AFloat AnimaThirdPersonCamera::GetDistance()
 {
 	AnimaVertex3f direction = _position - _target;
@@ -209,6 +214,9 @@ void AnimaThirdPersonCamera::CalculateViewMatrix()
 
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+
+	//_frustum.SetCameraView(_position, (_target - _position), _worldYAxis);
+	_frustum.ComputeFrustum(_projectionViewMatrix);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -15,6 +15,7 @@
 #include <AnimaMath.h>
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
+#include <AnimaFrustum.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -64,19 +65,25 @@ void Window::DrawScene()
 	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
-	renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
-	
+	int nD = renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
+		
 	SwapBuffers();
+
+	int nVR = renderingManager->UpdateModelsVisibility(GetEngine()->GetScenesManager()->GetStage("test-scene"));
 	
 	_timerFPS.Update();
 
 	if (_timer.Elapsed() >= 0.2)
 	{
-		char szBuff[100];
-		sprintf(szBuff, "%f FPS", _timerFPS.GetFPS());
-		SetWindowTitle(szBuff);
+		//char szBuff[100];
+		//sprintf(szBuff, "%f FPS", _timerFPS.GetFPS());
+		//SetWindowTitle(szBuff);
 		_timer.Reset();
 	}
+
+	char szBuff[100];
+	sprintf(szBuff, "Disegnati: %d Visibili R: %d", nD, nVR);
+	SetWindowTitle(szBuff);
 }
 
 void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
@@ -132,21 +139,24 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	}
 
 	Window* wnd = (Window*)window;
-	
+	Anima::AnimaVertex3f dir;
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_LEFT:
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(-amount, 0.0f, 0.0f);
+		dir = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
+		dir.x -= 0.1f;
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
 		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(amount, 0.0f, 0.0f);
+		dir = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->GetDirection();
+		dir.x += 0.1f;
+		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional")->SetDirection(dir);
 		break;
-	case ANIMA_ENGINE_KEY_UP:
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, amount, 0.0f);
-		break;
-	case ANIMA_ENGINE_KEY_DOWN:
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, -amount, 0.0f);
-		break;
+	//case ANIMA_ENGINE_KEY_UP:
+	//	wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("scimmia")->GetTransformation()->Translate(0.0f, amount, 0.0f);
+	//	break;
+	//case ANIMA_ENGINE_KEY_DOWN:
+	//	break;
 	case ANIMA_ENGINE_KEY_W:
 		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Move(0.0f, 1.0f, 0.0f, 1.0f);
 		break;
@@ -202,7 +212,7 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
 	Window* wnd = (Window*)window;
-	wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 0.1);
+	wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 1.0f);
 }
 
 void Window::Load()
@@ -218,11 +228,11 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-prepare")->Link();
 
-	//mgr->CreateProgram("deferred-shadowMap");
-	//mgr->GetProgramFromName("deferred-shadowMap")->Create();
-	//mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-vs.glsl", Anima::AnimaShader::VERTEX));
-	//mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-fs.glsl", Anima::AnimaShader::FRAGMENT));
-	//mgr->GetProgramFromName("deferred-shadowMap")->Link();
+	mgr->CreateProgram("deferred-shadowMap");
+	mgr->GetProgramFromName("deferred-shadowMap")->Create();
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-shadowMap")->Link();
 	
 	mgr->CreateProgram("deferred-combine");
 	mgr->GetProgramFromName("deferred-combine")->Create();
@@ -254,16 +264,16 @@ void Window::Load()
 	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);
 	l1->SetIntensity(1.0f);
-	l1->SetDirection(-1.0f, -1.0f, -1.0f);
+	l1->SetDirection(0.0f, -1.0f, 0.0f);
 	
 	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	l2->SetColor(0.0f, 0.0f, 1.0f);
-	l2->SetConstantAttenuation(0.0f);
+	l2->SetConstantAttenuation(1.0f);
 	l2->SetLinearAttenuation(0.0f);
-	l2->SetExponentAttenuation(0.01f);
+	l2->SetExponentAttenuation(0.0f);
 	l2->SetIntensity(1.0f);
-	l2->SetPosition(-10.0f, 5.0f, 0.0f);
-	l2->SetRange(40.0f);
+	l2->SetPosition(0.0f, 100.0f, 0.0f);
+	l2->SetRange(2000.0f);
 
 	Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
 	l3->SetColor(1.0f, 0.0f, 0.0f);

@@ -159,6 +159,18 @@ void AnimaVertex2f::operator/=(const AnimaVertex2f& val)
 	this->vec[1] /= val.vec[1];
 }
 
+void AnimaVertex2f::Fill(AFloat v[2])
+{
+	x = v[0];
+	y = v[1];
+}
+
+void AnimaVertex2f::Fill(AFloat x, AFloat y)
+{
+	this->x = x;
+	this->y = y;
+}
+
 void AnimaVertex2f::Normalize()
 {
 	float invlen = 1.0f / sqrt(vec[0] * vec[0] + vec[1] * vec[1]);
@@ -383,6 +395,27 @@ void AnimaVertex3f::operator/=(const AnimaVertex3f& val)
 	this->vec[2] /= val.vec[2];
 }
 
+void AnimaVertex3f::Fill(AFloat v[3])
+{
+	x = v[0];
+	y = v[1];
+	z = v[2];
+}
+
+void AnimaVertex3f::Fill(AFloat x, AFloat y, AFloat z)
+{
+	this->x = x;
+	this->y = y;
+	this->z = z;
+}
+
+void AnimaVertex3f::Fill(const AnimaVertex2f& v, AFloat z)
+{
+	this->x = v.x;
+	this->y = v.y;
+	this->z = z;
+}
+
 void AnimaVertex3f::Normalize()
 {
 	float invlen = 1.0f / sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
@@ -451,34 +484,9 @@ AFloat AnimaVertex3f::Length2() const
 	return vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2];
 }
 
-void AnimaVertex3f::GetRotation(AFloat& rx, AFloat& ry) const
+AFloat AnimaVertex3f::InnerProduct(const AnimaVertex3f& v)
 {
-	AnimaVertex3f D = Normalized();
-	
-	rx = 0.0f;
-	ry = 0.0f;
-	
-	AFloat d = sqrtf(D.y * D.y + D.z * D.z);
-	
-	if(D.z < 0.0f)
-	{
-		if(fabs(d) > 0.00001f)
-		{
-			rx = -((AFloat)M_PI - acosf(D.z / d));
-			ry = (AFloat)M_PI - asinf(D.x);
-		}
-	}
-	else
-	{
-		if(fabs(d) > 0.00001f)
-		{
-			rx = asinf(D.y / d);
-			ry = asinf(D.x);
-		}
-	}
-	
-	rx *= 180.0f / (AFloat)M_PI;
-	ry *= 180.0f / (AFloat)M_PI;
+	return (x * v.x + y * v.y + z * v.z);
 }
 
 //---------------------------------------------------------------------------------------
@@ -660,6 +668,38 @@ void AnimaVertex4f::operator/=(const AnimaVertex4f& val)
 	this->vec[1] /= val.vec[1];
 	this->vec[2] /= val.vec[2];
 	this->vec[3] /= val.vec[3];
+}
+
+void AnimaVertex4f::Fill(AFloat v[4])
+{
+	x = v[0];
+	y = v[1];
+	z = v[2];
+	w = v[3];
+}
+
+void AnimaVertex4f::Fill(AFloat x, AFloat y, AFloat z, AFloat w)
+{
+	this->x = x;
+	this->y = y;
+	this->z = z;
+	this->w = w;
+}
+
+void AnimaVertex4f::Fill(const AnimaVertex2f& v, AFloat z, AFloat w)
+{
+	this->x = v.x;
+	this->y = v.y;
+	this->z = z;
+	this->w = w;
+}
+
+void AnimaVertex4f::Fill(const AnimaVertex3f& v, AFloat w)
+{
+	this->x = v.x;
+	this->y = v.y;
+	this->z = v.z;
+	this->w = w;
 }
 
 void AnimaVertex4f::Normalize()
