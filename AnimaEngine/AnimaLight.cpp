@@ -250,8 +250,9 @@ void AnimaDirectionalLight::ComputeViewMatrix()
 
 void AnimaDirectionalLight::ComputeProjectionMatrix()
 {
-	float t = 2800.0f;
-	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -10000.0f, 10000.0f);
+	//float t = 2800.0f;
+	float t = 20.0f;
+	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -1000.0f, 1000.0f);
 	AnimaMatrix projectionViewMatrix = projectionMatrix * AnimaSceneObject::GetMatrix("ViewMatrix");
 
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);
@@ -521,6 +522,94 @@ bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 	if (!pgr->Link())
 		return false;
 	
+	return true;
+}
+
+
+//----------------------------------------------------------------
+//						ANIMA HEMISPHERE LIGHT
+//----------------------------------------------------------------
+AnimaHemisphereLight::AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaLight(allocator, dataGeneratorManager, name)
+{
+	AnimaSceneObject::SetColor("SkyColor", AnimaColor3f(1.0f, 1.0f, 1.0f));
+	AnimaSceneObject::SetColor("GroundColor", AnimaColor3f(0.0f, 0.0f, 0.0f));
+}
+
+AnimaHemisphereLight::~AnimaHemisphereLight()
+{
+}
+
+void AnimaHemisphereLight::SetSkyColor(const AnimaColor3f& color)
+{
+	AnimaSceneObject::SetColor("SkyColor", color);
+}
+
+void AnimaHemisphereLight::SetSkyColor(AFloat r, AFloat g, AFloat b)
+{
+	AnimaSceneObject::SetColor("SkyColor", AnimaColor3f(r, g, b));
+}
+
+AnimaColor3f AnimaHemisphereLight::GetSkyColor()
+{
+	return AnimaSceneObject::GetColor3f("SkyColor");
+}
+
+void AnimaHemisphereLight::SetGroundColor(const AnimaColor3f& color)
+{
+	AnimaSceneObject::SetColor("GroundColor", color);
+}
+
+void AnimaHemisphereLight::SetGroundColor(AFloat r, AFloat g, AFloat b)
+{
+	AnimaSceneObject::SetColor("GroundColor", AnimaColor3f(r, g, b));
+}
+
+AnimaColor3f AnimaHemisphereLight::GetGroundColor()
+{
+	return AnimaSceneObject::GetColor3f("GroundColor");
+}
+
+void AnimaHemisphereLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
+{
+	meshTransformation->SetRotationDeg(90.0f, 0.0f, 0.0f);
+	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
+	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
+}
+
+void AnimaHemisphereLight::UpdateCullFace(AnimaCamera* activeCamera)
+{
+}
+
+const char* AnimaHemisphereLight::GetShaderPrefix()
+{
+	return "HEL";
+}
+
+const char* AnimaHemisphereLight::GetShaderName()
+{
+	return "deferred-hemisphere";
+}
+
+bool AnimaHemisphereLight::CreateShader(AnimaShadersManager* shadersManager)
+{
+	if (shadersManager->GetProgramFromName("deferred-hemisphere"))
+		return true;
+
+	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-hemisphere");
+
+	if (pgr == nullptr)
+		return false;
+
+	if (!pgr->Create())
+		return false;
+
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::AnimaShader::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::AnimaShader::FRAGMENT));
+
+	if (!pgr->Link())
+		return false;
+
 	return true;
 }
 

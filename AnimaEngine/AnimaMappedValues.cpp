@@ -408,7 +408,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AnimaColorGenerator* 
 void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColor3f value)
 {
 	AnimaColor4f color(value, 1.0f);
-	AddColor(propertyName, color);
+	SetColor(propertyName, color);
 }
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor3f value)

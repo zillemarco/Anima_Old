@@ -144,9 +144,9 @@ void AnimaThirdPersonCamera::RotateY(AFloat angle)
 {
 	_position -= _target;
 
-	AnimaMath::RotateVector(_xAxis, -angle, _worldYAxis);
-	AnimaMath::RotateVector(_yAxis, -angle, _worldYAxis);
-	AnimaMath::RotateVector(_zAxis, -angle, _worldYAxis);
+	AnimaMath::RotateVector(_xAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_yAxis, angle, _worldYAxis);
+	AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
 
 	float dist = _position.Length();
 	_position = _target + _zAxis * dist;

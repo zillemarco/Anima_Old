@@ -101,28 +101,29 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
+#if 1
 	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
 	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
 		return 0;
 	mesh->ComputeBoundingBox(true);
+#else
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
 
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
-	//	return 0;
-	//mesh->ComputeBoundingBox(true);
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	mesh->ComputeBoundingBox(true);
 
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
-	//	return 0;
-	//mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
-	//mesh->ComputeBoundingBox(true);
-
-	//path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	//if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
-	//	return 0;
-	//mesh->ComputeBoundingBox(true);
-	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
-	
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+#endif
 	//mesh = manager->CreateModel("cilindro");
 	//mesh->MakeCylinder(0.0f, 1.0f, 1.0f, 60, 1, true);
 	//mesh->ComputeFlatNormals();

@@ -164,6 +164,33 @@ protected:
 	AnimaVertex3f _coneRotation;
 };
 
+//----------------------------------------------------------------
+//						ANIMA HEMISPHERE LIGHT
+//----------------------------------------------------------------
+class ANIMA_ENGINE_EXPORT AnimaHemisphereLight : public AnimaLight
+{
+public:
+	AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
+	virtual ~AnimaHemisphereLight();
+
+public:
+	void SetSkyColor(const AnimaColor3f& color);
+	void SetSkyColor(AFloat r, AFloat g, AFloat b);
+	AnimaColor3f GetSkyColor();
+
+	void SetGroundColor(const AnimaColor3f& color);
+	void SetGroundColor(AFloat r, AFloat g, AFloat b);
+	AnimaColor3f GetGroundColor();
+
+public:
+	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	void UpdateCullFace(AnimaCamera* activeCamera) override;
+
+	const char* GetShaderPrefix() override;
+	const char* GetShaderName() override;
+	bool CreateShader(AnimaShadersManager* shadersManager) override;
+};
+
 END_ANIMA_ENGINE_NAMESPACE
 
 #endif /* defined(__Anima__AnimaLight__) */

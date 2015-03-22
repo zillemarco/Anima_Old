@@ -220,6 +220,9 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 
 	AnimaMesh* dilMesh = CreateMeshForLightType<AnimaDirectionalLight>();
 	dilMesh->MakePlane();
+
+	AnimaMesh* helMesh = CreateMeshForLightType<AnimaHemisphereLight>();
+	helMesh->MakePlane();
 	
 	AnimaMesh* splMesh = CreateMeshForLightType<AnimaSpotLight>();
 	splMesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
@@ -411,7 +414,10 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
+	numeroDisegnati = 0;
 	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"));
+
+	int num = numeroDisegnati;
 	
 	Finish(scene);
 	
@@ -419,10 +425,7 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	//	Aggiorno le mappature per le ombre
 	//
 	Start(scene);
-	numeroDisegnati = 0;
 	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-
-	int num = numeroDisegnati;
 	Finish(scene);
 	
 	//
@@ -529,32 +532,42 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
 	AnimaMatrix identityMatrix;
-	DeferredDrawModel(scene, model, program, identityMatrix, updateMaterial, forceDraw);
+	DeferredDrawModel(scene, model, program, identityMatrix, updateMaterial, forceDraw, frustum);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
-	if (scene == nullptr || model == nullptr || program == nullptr || (!model->IsVisible() && !forceDraw))
+	if (scene == nullptr || model == nullptr || program == nullptr)
 		return;
 	
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, updateMaterial, forceDraw);
+		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, updateMaterial, forceDraw, frustum);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, updateMaterial, forceDraw);
+		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, updateMaterial, forceDraw, frustum);
 }
 
-void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw)
+#define TEST
+
+void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
-	if (!mesh->IsVisible() && !forceDraw)
+#if defined TEST
+	if (!forceDraw)
+	{
+		if (frustum != nullptr && !frustum->SphereInFrustum(parentTransformation * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			return;
+	}
+#else
+	if (!forceDraw && !mesh->IsVisible())
 		return;
+#endif
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
@@ -601,6 +614,8 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 
 	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
 
+	AnimaFrustum* frustum = nullptr;
+
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
 		AnimaCamera* camera = scene->GetCamerasManager()->GetActiveCamera();
@@ -609,8 +624,10 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 
 		program->Use();
 		program->UpdateCameraProperies(camera);
-	}
 
+		frustum = camera->GetFrustum();
+	}
+	
 	if (model == nullptr)
 	{
 		for (ASizeT j = 0; j < nModels; j++)
@@ -619,29 +636,29 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 
 			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
 
-			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix);
+			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, true, false, frustum);
 
 			ASizeT meshNumber = innerModel->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix);
+				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, true, false, frustum);
 
 			ASizeT childrenNumber = innerModel->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix);
+				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, true, false, frustum);
 		}
 	}
 	else
 	{
 		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
-		DeferredDrawModelMesh(scene, model, program, modelMatrix);
+		DeferredDrawModelMesh(scene, model, program, modelMatrix, true, false, frustum);
 
 		ASizeT meshNumber = model->GetMeshesNumber();
 		for (ASizeT i = 0; i < meshNumber; i++)
-			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix);
+			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, true, false, frustum);
 
 		ASizeT childrenNumber = model->GetChildrenNumber();
 		for (ASizeT i = 0; i < childrenNumber; i++)
-			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix);
+			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, true, false, frustum);
 	}
 }
 
@@ -736,6 +753,9 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 	AnimaShadersManager* shadersManager = scene->GetShadersManager();
 
 	AnimaArray<AnimaLight*, AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr)
+		return;
 
 	AInt nLights = lights->GetSize();
 	ASizeT nModels = modelsManager->GetModelsNumber();
