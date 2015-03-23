@@ -134,6 +134,12 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 
 	Window* wnd = (Window*)window;
 	Anima::AnimaCamera* camera = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera();
+	Anima::AnimaLight* dirL = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional");
+
+	Anima::AnimaVertex3f direction;
+	
+	if (dirL)
+		direction = dirL->GetDirection();
 
 	switch (key)
 	{
@@ -159,7 +165,22 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	case ANIMA_ENGINE_KEY_T:
 		wnd->_tpcamera->Activate();
 		break;
+	case ANIMA_ENGINE_KEY_L:
+		direction.x -= 0.01f;
+		break;
+	case ANIMA_ENGINE_KEY_J:
+			direction.x += 0.01f;
+		break;
+	case ANIMA_ENGINE_KEY_I:
+			direction.z += 0.01f;
+		break;
+	case ANIMA_ENGINE_KEY_K:
+			direction.z -= 0.01f;
+		break;
 	}
+
+	if (dirL)
+		dirL->SetDirection(direction);
 	
 	amount += 0.1f;
 	
@@ -232,24 +253,24 @@ void Window::Load()
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
 	Anima::AnimaHemisphereLight* hemL = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
-	hemL->SetIntensity(0.6f);
+	hemL->SetIntensity(0.3f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
-	hemL->SetPosition(0.0f, 20.0f, 0.0f);
+	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
 
 	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
 	l1->SetColor(1.0f, 1.0f, 1.0f);
 	l1->SetIntensity(1.0f);
-	l1->SetDirection(-1.0f, -1.0f, -1.0f);
+	l1->SetDirection(-1.0f, -1.0f, 0.0f);
 	
-	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
-	//l2->SetColor(0.0f, 0.0f, 1.0f);
-	//l2->SetConstantAttenuation(1.0f);
-	//l2->SetLinearAttenuation(0.0f);
-	//l2->SetExponentAttenuation(0.0f);
-	//l2->SetIntensity(1.0f);
-	//l2->SetPosition(0.0f, 100.0f, 0.0f);
-	//l2->SetRange(2000.0f);
+	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
+	l2->SetColor(1.0f, 1.0f, 1.0f);
+	l2->SetConstantAttenuation(1.0f);
+	l2->SetLinearAttenuation(0.0f);
+	l2->SetExponentAttenuation(0.0f);
+	l2->SetIntensity(0.7f);
+	l2->SetPosition(0.0f, 100.0f, 0.0f);
+	l2->SetRange(2000.0f);
 
 	//Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
 	//l3->SetColor(1.0f, 0.0f, 0.0f);

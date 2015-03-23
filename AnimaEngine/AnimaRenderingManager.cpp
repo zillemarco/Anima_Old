@@ -150,7 +150,7 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
@@ -487,12 +487,12 @@ void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh
 
 	Finish(scene);
 
-	////
-	////	Aggiorno le mappature per le ombre
-	////
-	//Start(scene);
-	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	//Finish(scene);
+	//
+	//	Aggiorno le mappature per le ombre
+	//
+	Start(scene);
+	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
+	Finish(scene);
 
 	//
 	//	Preparazione dei buffer della luce
@@ -764,11 +764,6 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 		return;
 
 	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
-	AnimaCamera* activeCamera = scene->GetCamerasManager()->GetActiveCamera();
-
-	if (activeCamera == nullptr)
-		return;
-
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
 

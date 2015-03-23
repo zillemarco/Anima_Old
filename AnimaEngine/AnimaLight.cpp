@@ -20,8 +20,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
-	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
-	AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
+	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
+	AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
@@ -250,9 +250,11 @@ void AnimaDirectionalLight::ComputeViewMatrix()
 
 void AnimaDirectionalLight::ComputeProjectionMatrix()
 {
-	//float t = 2800.0f;
-	float t = 20.0f;
-	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -1000.0f, 1000.0f);
+	float t = 2800.0f;
+	float z = 10000.0f;
+	//float t = 20.0f;
+	//float z = 1000.0f;
+	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -z, z);
 	AnimaMatrix projectionViewMatrix = projectionMatrix * AnimaSceneObject::GetMatrix("ViewMatrix");
 
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);

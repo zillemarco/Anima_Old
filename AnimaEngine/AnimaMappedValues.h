@@ -39,6 +39,8 @@ public:
 	
 	AnimaMappedValues& operator=(const AnimaMappedValues& src);
 	AnimaMappedValues& operator=(AnimaMappedValues&& src);
+
+	AnimaString GetName() const;
 	
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);

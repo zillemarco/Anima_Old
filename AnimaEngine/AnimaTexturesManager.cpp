@@ -33,7 +33,7 @@ AnimaTexturesManager::~AnimaTexturesManager()
 AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
 {
 	if (_texturesMap.find(textureName) != _texturesMap.end())
-		return nullptr;
+		return _textures[_texturesMap[textureName]];
 
 	ANIMA_ASSERT(_scene != nullptr);
 	if (_texturesNumber > 0)
@@ -76,7 +76,7 @@ AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName
 AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
 {
 	if (_texturesMap.find(textureName) != _texturesMap.end())
-		return nullptr;
+		return _textures[_texturesMap[textureName]];
 
 	ANIMA_ASSERT(_scene != nullptr);
 	if (_texturesNumber > 0)
@@ -145,6 +145,9 @@ void AnimaTexturesManager::ClearTextures(bool bDeleteObjects, bool bResetNumber)
 
 AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
 {
+	if (_texturesMap.find(textureName) != _texturesMap.end())
+		return _textures[_texturesMap[textureName]];
+
 	AInt pos = filePath.ReverseFind('.');
 
 	if (pos == -1)
@@ -183,6 +186,9 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const char* filePath, co
 
 AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
 {
+	if (_texturesMap.find(textureName) != _texturesMap.end())
+		return _textures[_texturesMap[textureName]];
+
 	unsigned char header[54];
 	unsigned int dataPos;
 	unsigned int width, height;
@@ -244,6 +250,9 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const char* filePath,
 
 AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp)
 {
+	if (_texturesMap.find(textureName) != _texturesMap.end())
+		return _textures[_texturesMap[textureName]];
+
 	FILE* file;
 	file = fopen(filePath.GetConstBuffer(), "rb");
 
@@ -512,6 +521,9 @@ AnimaTexture* AnimaTexturesManager::LoadCompressedTGA(FILE * file, const AnimaSt
 
 AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint dataType, AUint clamp)
 {
+	if (_texturesMap.find(textureName) != _texturesMap.end())
+		return _textures[_texturesMap[textureName]];
+
 	unsigned char Header[124];
 	FILE * file;
 

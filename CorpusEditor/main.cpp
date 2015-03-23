@@ -95,43 +95,6 @@ int main(int argc, char** argv)
 	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateStage("test-scene");
 	scene->Initialize();
 
-	Anima::AnimaString path(scene->GetStringAllocator());	
-	Anima::AnimaModelsManager* manager = scene->GetModelsManager();
-	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
-	
-	Anima::AnimaMesh* mesh = nullptr;
-
-#if 1
-	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
-	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
-		return 0;
-	mesh->ComputeBoundingBox(true);
-#else
-	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
-		return 0;
-	mesh->ComputeBoundingBox(true);
-
-	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
-		return 0;
-	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
-	mesh->ComputeBoundingBox(true);
-
-	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
-		return 0;
-	mesh->ComputeBoundingBox(true);
-	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
-#endif
-	//mesh = manager->CreateModel("cilindro");
-	//mesh->MakeCylinder(0.0f, 1.0f, 1.0f, 60, 1, true);
-	//mesh->ComputeFlatNormals();
-	//mesh->ComputeSmootNormals();
-	//mesh->SetMaterial(matMgr->CreateMaterial("sfera-material"));
-	//mesh->GetMaterial()->SetColor("DiffuseColor", 0.0f, 1.0f, 1.0f);
-	//mesh->GetMaterial()->SetBoolean("TwoSided", true);
-	
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
@@ -149,25 +112,75 @@ int main(int argc, char** argv)
 #endif
 
 	Window* window = engine.CreateAnimaWindow<Window>(width, height, "AnimaEngine Custom Window", /*Anima::AnimaEngine::GetPrimaryMonitor()*/NULL, NULL);
+
+	window->MakeCurrentContext();
+	engine.SwapInterval(1);
+	window->MakeCurrentContext();
+	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
+
+	Anima::AnimaString path(scene->GetStringAllocator());	
+	Anima::AnimaModelsManager* manager = scene->GetModelsManager();
+	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
 	
+	Anima::AnimaMesh* mesh = nullptr;
+
+#if 1
+	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
+	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
-	
+
+	Anima::AnimaVertex3f pos(0.0f, 100.0f, 0.0f);
+	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
+	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
+
+	window->_tpcamera->LookAt(pos, tar);
+	window->_fpcamera->LookAt(pos, forw);
+
+	window->_fpcamera->Activate();
+
+#else
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	mesh->ComputeBoundingBox(true);
+
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+
+	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
+	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
+	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
+
 	Anima::AnimaVertex3f pos(0.0f, 1.0f, 10.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
 	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
 
 	window->_tpcamera->LookAt(pos, tar);
 	window->_fpcamera->LookAt(pos, forw);
-	
+
 	window->_tpcamera->Activate();
-		
-	window->MakeCurrentContext();
-	engine.SwapInterval(1);
-	window->MakeCurrentContext();
+
+#endif
+
 	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
-	
 	window->Load();
 	
 	while (!window->ShouldClose())

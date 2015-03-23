@@ -104,6 +104,11 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 	return *this;
 }
 
+AnimaString AnimaMappedValues::GetName() const
+{
+	return _name;
+}
+
 void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture* value)
 {
 	AnimaString pName = _name + propertyName;

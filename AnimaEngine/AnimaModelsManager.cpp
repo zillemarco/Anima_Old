@@ -8,6 +8,7 @@
 
 #include "AnimaModelsManager.h"
 #include "AnimaMaterialsManager.h"
+#include "AnimaTexturesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -398,21 +399,29 @@ AnimaMesh* AnimaModelsManager::GetModelFromName(const char* name)
 	return GetModelFromName(str);
 }
 
+int texturesCaricate = 0;
+
 void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 {
+	AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+	AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+	AnimaAllocator* stringAllocator = _scene->GetStringAllocator();
+
 	AnimaMaterial* material = mesh->GetMaterial();
+	AnimaString materialName(stringAllocator);
 
 	if (material == nullptr)
 	{
 		int i = 1;
 
 		AnimaString prefix = mesh->GetAnimaMeshName();
-		AnimaString suffix(_scene->GetStringAllocator());
+		AnimaString suffix(stringAllocator);
 		suffix.Format(".material.%d", i);
 
 		while (material == nullptr)
 		{
-			material = _scene->GetMaterialsManager()->CreateMaterial(prefix + suffix);
+			materialName = prefix + suffix;
+			material = materialsManager->CreateMaterial(materialName);
 
 			i++;
 			suffix.Format(".material.%d", i);
@@ -420,6 +429,8 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 
 		mesh->SetMaterial(material);
 	}
+	else
+		materialName = material->GetName();
 
 	int ret1, ret2;
 	aiColor4D diffuse;
@@ -473,15 +484,118 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		material->AddBoolean("TwoSided", true);
 	else
 		material->AddBoolean("TwoSided", false);
-
-	AInt textureIndex = 0;
-	aiReturn textureFound = AI_SUCCESS;
+	
 	aiString path;
-
-	while (textureFound == AI_SUCCESS)
+	if (mtl->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
 	{
-		textureFound = mtl->GetTexture(aiTextureType_DIFFUSE, textureIndex, &path);
-		textureIndex++;
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("DiffuseTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		texturesCaricate++;
+	}
+
+	if (mtl->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+
+	if (mtl->GetTexture(aiTextureType_AMBIENT, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_DISPLACEMENT, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_LIGHTMAP, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
+	}
+	if (mtl->GetTexture(aiTextureType_REFLECTION, 0, &path) == AI_SUCCESS)
+	{
+		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
+		AnimaString txtPath(path.C_Str(), stringAllocator);
+		txtCompletePath += txtPath;
+
+		material->SetTexture("BumpTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
+		material->SetBoolean("HasBump", true);
+		texturesCaricate++;
 	}
 }
 
