@@ -124,6 +124,8 @@ void AnimaRenderingManager::InitTextureSlots()
 	SetTextureSlot("DiffuseTexture", 0);
 	SetTextureSlot("BumpTexture", 1);
 	SetTextureSlot("DisplacementTexture", 2);
+	SetTextureSlot("OpacityTexture", 3);
+	SetTextureSlot("SpecularTexture", 4);
 
 	// Slot usati dal deferred shading
 	SetTextureSlot("DepthMap", 0);

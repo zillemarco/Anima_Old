@@ -253,7 +253,7 @@ void Window::Load()
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
 	Anima::AnimaHemisphereLight* hemL = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
-	hemL->SetIntensity(0.3f);
+	hemL->SetIntensity(0.1f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
@@ -264,11 +264,11 @@ void Window::Load()
 	l1->SetDirection(-1.0f, -1.0f, 0.0f);
 	
 	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
-	l2->SetColor(1.0f, 1.0f, 1.0f);
+	l2->SetColor(1.0f, 1.0f, 0.78f);
 	l2->SetConstantAttenuation(1.0f);
-	l2->SetLinearAttenuation(0.0f);
+	l2->SetLinearAttenuation(0.001f);
 	l2->SetExponentAttenuation(0.0f);
-	l2->SetIntensity(0.7f);
+	l2->SetIntensity(1.0f);
 	l2->SetPosition(0.0f, 100.0f, 0.0f);
 	l2->SetRange(2000.0f);
 

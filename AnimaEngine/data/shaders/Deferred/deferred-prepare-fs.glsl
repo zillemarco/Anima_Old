@@ -11,12 +11,17 @@ uniform vec4 MAT_DiffuseColor;
 uniform sampler2D MAT_BumpTexture;
 uniform bool MAT_HasBump;
 
+uniform sampler2D MAT_OpacityTexture;
+uniform bool MAT_HasOpacity;
+
+uniform sampler2D MAT_SpecularTexture;
+uniform bool MAT_HasSpecular;
+uniform vec3 MAT_SpecularColor;
+uniform float MAT_Shininess;
+
 uniform sampler2D MAT_DisplacementTexture;
 uniform float MAT_DisplacementScale;
 uniform float MAT_DisplacementBias;
-
-uniform vec3 MAT_SpecularColor;
-uniform float MAT_Shininess;
 
 uniform vec3 CAM_Position;
 
@@ -45,14 +50,27 @@ void main()
 {
 	vec2 textureCoord = frag_textureCoord;
 
-	vec4 color = MAT_DiffuseColor;
-    vec4 textureColor = texture(MAT_DiffuseTexture, frag_textureCoord);	
+	if(MAT_HasOpacity)
+	{
+		if(texture(MAT_OpacityTexture, frag_textureCoord).r <= 0.1)
+			discard;
+	}
+
+	vec4 diffuseColor = MAT_DiffuseColor;
+	vec3 specularColor = MAT_SpecularColor;
+
+    vec4 textureColor = texture(MAT_DiffuseTexture, frag_textureCoord);
 	if(textureColor != vec4(0.0, 0.0, 0.0, 1.0))
-		color *= textureColor;
+		diffuseColor = textureColor;
+
+	if(MAT_HasSpecular)
+	{
+		specularColor = texture(MAT_SpecularTexture, frag_textureCoord).rgb;
+	}
 		
-	vec3 normal = calcNormal(frag_textureCoord);	
+	vec3 normal = calcNormal(frag_textureCoord);
 		
-	FragColor[1] = color;
+	FragColor[1] = diffuseColor;
 	FragColor[2] = vec4(normal * 0.5 + 0.5, 1.0);
-	FragColor[3] = vec4(MAT_SpecularColor, 1.0 / MAT_Shininess);
+	FragColor[3] = vec4(specularColor, 1.0 / MAT_Shininess);
 }
