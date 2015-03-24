@@ -348,8 +348,8 @@ AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const Anima
 		return nullptr;
 	}
 
-	//for (GLuint cswap = 0; cswap < (int)tga.imageSize; cswap += tga.bytesPerPixel)
-	//	imageData[cswap] ^= imageData[cswap + 2] ^=	imageData[cswap] ^= imageData[cswap + 2];
+	for (GLuint cswap = 0; cswap < (int)tga.imageSize; cswap += tga.bytesPerPixel)
+		imageData[cswap] ^= imageData[cswap + 2] ^=	imageData[cswap] ^= imageData[cswap + 2];
 
 	fclose(file);
 

@@ -11,8 +11,6 @@ uniform mat4 MOD_modelMatrix;
 
 out vec2 frag_textureCoord;
 out vec3 frag_normal;
-//out vec3 frag_tangent;
-//out vec3 frag_bitangent;
 out vec3 frag_worldPosition;
 out mat3 frag_TBNMatrix;
 

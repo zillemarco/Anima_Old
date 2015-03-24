@@ -243,6 +243,12 @@ void Window::Load()
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
 
+	mgr->CreateProgram("ssao");
+	mgr->GetProgramFromName("ssao")->Create();
+	mgr->GetProgramFromName("ssao")->AddShader(mgr->LoadShaderFromFile("ssao-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/ssao-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("ssao")->AddShader(mgr->LoadShaderFromFile("ssao-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/ssao-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("ssao")->Link();
+
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
@@ -258,10 +264,10 @@ void Window::Load()
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
 
-	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-	l1->SetColor(1.0f, 1.0f, 1.0f);
-	l1->SetIntensity(1.0f);
-	l1->SetDirection(-1.0f, -1.0f, 0.0f);
+	//Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	//l1->SetColor(1.0f, 1.0f, 1.0f);
+	//l1->SetIntensity(1.0f);
+	//l1->SetDirection(-1.0f, -1.0f, 0.0f);
 	
 	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	l2->SetColor(1.0f, 1.0f, 0.78f);

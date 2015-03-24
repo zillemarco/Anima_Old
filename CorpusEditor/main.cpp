@@ -124,13 +124,9 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-#if 1
+#ifndef _DEBUG
 	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
 	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
-		return 0;
-	mesh->ComputeBoundingBox(true);
-	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
 		return 0;
 	mesh->ComputeBoundingBox(true);
 
@@ -151,6 +147,7 @@ int main(int argc, char** argv)
 	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
 	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
 		return 0;
+	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
 	mesh->ComputeBoundingBox(true);
 
 	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
@@ -163,13 +160,13 @@ int main(int argc, char** argv)
 	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
 		return 0;
 	mesh->ComputeBoundingBox(true);
-	mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
+	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
 
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 
-	Anima::AnimaVertex3f pos(0.0f, 1.0f, 10.0f);
+	Anima::AnimaVertex3f pos(0.0f, 10.0f, 30.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
 	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
 

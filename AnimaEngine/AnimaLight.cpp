@@ -20,8 +20,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
-	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
-	AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
+	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_DEPTH_ATTACHMENT));
+	//AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
+	//AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
@@ -213,6 +214,8 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	: AnimaLight(allocator, dataGeneratorManager, name)
 {
 	AnimaLight::SetVector("Direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
+	AnimaLight::SetVector("ShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
+	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
 	
 	ComputeProjectionMatrix();
 	ComputeViewMatrix();
@@ -250,10 +253,14 @@ void AnimaDirectionalLight::ComputeViewMatrix()
 
 void AnimaDirectionalLight::ComputeProjectionMatrix()
 {
+#ifndef _DEBUG
 	float t = 2800.0f;
 	float z = 10000.0f;
-	//float t = 20.0f;
-	//float z = 1000.0f;
+#else
+	float t = 20.0f;
+	float z = 1000.0f;
+#endif
+
 	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -z, z);
 	AnimaMatrix projectionViewMatrix = projectionMatrix * AnimaSceneObject::GetMatrix("ViewMatrix");
 

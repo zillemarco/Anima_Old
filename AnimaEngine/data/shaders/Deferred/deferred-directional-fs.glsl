@@ -14,6 +14,8 @@ uniform vec3 DIL_Direction;
 uniform vec3 DIL_Color;
 uniform float DIL_Intensity;
 uniform sampler2D DIL_ShadowMap;
+uniform float DIL_ShadowMapBias;
+uniform vec2 DIL_ShadowMapTexelSize;
 uniform mat4 DIL_ProjectionViewMatrix;
 
 float lineStep(float low, float hight, float compare)
@@ -23,15 +25,29 @@ float lineStep(float low, float hight, float compare)
 
 float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
 {
-	vec2 moments 	= texture(shadowMap, coords).xy;
-	float p 		= step(compare, moments.x);
-	float variance 	= max(moments.y - moments.x * moments.x, 0.0000002);
+	//VAR vec2 moments 	= texture(shadowMap, coords).xy;
+	//VAR float p 		= step(compare, moments.x);
+	//VAR float variance 	= max(moments.y - moments.x * moments.x, 0.0000002);
 
-	float d 		= compare - moments.x;
-	float pMax 		= variance / (variance + d * d);
-	pMax 			= lineStep(0.02f, 1.0f, pMax);
+	//VAR float d 		= compare - moments.x;
+	//VAR float pMax 		= variance / (variance + d * d);
+	//VAR pMax 			= lineStep(0.02f, 1.0f, pMax);
 
-	return pMax;
+	//VAR return pMax;
+
+	vec2 pixelPos = coords / DIL_ShadowMapTexelSize + vec2(0.5f);
+	vec2 fractPart = fract(pixelPos);
+	vec2 startTexel = (pixelPos - fractPart) * DIL_ShadowMapTexelSize;
+
+	float bl = step(compare, texture(shadowMap, startTexel).r + DIL_ShadowMapBias);
+	float br = step(compare, texture(shadowMap, startTexel + vec2(DIL_ShadowMapTexelSize.x, 0.0f)).r + DIL_ShadowMapBias);
+	float tl = step(compare, texture(shadowMap, startTexel + vec2(0.0f, DIL_ShadowMapTexelSize.t)).r + DIL_ShadowMapBias);
+	float tr = step(compare, texture(shadowMap, startTexel + DIL_ShadowMapTexelSize).r + DIL_ShadowMapBias);
+
+	float mixA = mix(bl, tl, fractPart.y);
+	float mixB = mix(br, tr, fractPart.y);
+
+	return mix(mixA, mixB, fractPart.x);
 }
 
 void main()

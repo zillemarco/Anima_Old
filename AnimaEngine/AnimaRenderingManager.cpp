@@ -182,6 +182,16 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
+
+		AnimaTexture* ssaoTexture = GetTexture("SSAOMap");
+		if (ssaoTexture != nullptr)
+			ssaoTexture->Resize(screenWidth, screenHeight);
+		else
+		{
+			ssaoTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			ANIMA_ASSERT(ssaoTexture->LoadRenderTargets());
+			SetTexture("SSAOMap", ssaoTexture);
+		}
 		
 		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
@@ -209,6 +219,9 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
 	SetColor("AmbientLight", 0.1f, 0.1f, 0.1f);
+
+	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
+	SetFloat("SSAODistanceThreshold", 5.0f);
 
 	//
 	// Inizializzazione delle mesh di supporto
@@ -422,50 +435,55 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	int num = numeroDisegnati;
 	
 	Finish(scene);
-	
-	//
-	//	Aggiorno le mappature per le ombre
-	//
-	Start(scene);
-	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	Finish(scene);
-	
-	//
-	//	Preparazione dei buffer della luce
-	//
-	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
-	Start(scene);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
 
-	glDepthMask(GL_FALSE);
-
-	boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	for (auto pair : (*lights))
-		DeferredLightPass(scene, pair.second->GetLightsArray());
-
-	glDepthMask(GL_TRUE);
-	glCullFace(GL_BACK);
-
-	glBlendFunc(GL_ONE, GL_ZERO);
-	Finish(scene);
+	//
+	//	Aggiorno il buffer per SSAO
+	//
+	ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
 	
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start(scene);
+	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish(scene);
 	//
-	//	Composizione dei buffer nell'immagine finale
+	////
+	////	Preparazione dei buffer della luce
+	////
+	//GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	//Start(scene);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
+
+	//glDepthMask(GL_FALSE);
+
+	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
+	//for (auto pair : (*lights))
+	//	DeferredLightPass(scene, pair.second->GetLightsArray());
+
+	//glDepthMask(GL_TRUE);
+	//glCullFace(GL_BACK);
+
+	//glBlendFunc(GL_ONE, GL_ZERO);
+	//Finish(scene);
 	//
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
-	Start(scene);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-	Finish(scene);
-	
+	////
+	////	Composizione dei buffer nell'immagine finale
+	////
+	//GetTexture("DiffuseMap")->BindAsRenderTarget();
+	//Start(scene);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
+	//Finish(scene);
 	//
-	//	Applicazione effetti
-	//
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	////
+	////	Applicazione effetti
+	////
+	//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 
 	return num;
 }
@@ -773,10 +791,10 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 	{
 		AnimaLight* light = lights->ElementAt(i);
 
-		AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
+		//AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
 		AnimaTexture* shadowMap = light->GetShadowTexture();
-		if (!tmpShadowMap->AreRenderTargetsReady())
-			tmpShadowMap->LoadRenderTargets();
+		//if (!tmpShadowMap->AreRenderTargetsReady())
+		//	tmpShadowMap->LoadRenderTargets();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
 
@@ -811,13 +829,13 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
 		}
 
-		AFloat blurAmount = 1.0f;
+		//AFloat blurAmount = 1.0f;
 
-		SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
-		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
+		//SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
+		//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
 
-		SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
-		ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
+		//SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
+		//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
 	}
 }
 

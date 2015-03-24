@@ -944,7 +944,9 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
 			continue;
 
-		if (info._type == GL_FLOAT_VEC3)
+		if (info._type == GL_FLOAT_VEC2)
+			SetUniform(info._location, light->GetVector2f(info._nameParts[1]));
+		else if (info._type == GL_FLOAT_VEC3)
 		{
 			if (light->HasColor(info._nameParts[1]))
 				SetUniform(info._location, light->GetColor3f(info._nameParts[1]));

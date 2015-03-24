@@ -572,6 +572,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 	}
 	if (mtl->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
 	{
+		ANIMA_ASSERT(false);
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
