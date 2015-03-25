@@ -63,8 +63,7 @@ public:
 	virtual void SetCutoff(AFloat c);
 	virtual AFloat GetCutoff();
 
-	virtual void ComputeViewMatrix();
-	virtual void ComputeProjectionMatrix();
+	virtual void ComputeLightMatrix(AnimaCamera* activeCamera);
 
 	AnimaTexture* GetShadowTexture();
 	AnimaTexture* GetTempShadowTexture();
@@ -96,8 +95,7 @@ public:
 	
 	AnimaVertex3f GetDirection() override;
 	
-	void ComputeViewMatrix() override;
-	void ComputeProjectionMatrix() override;
+	void ComputeLightMatrix(AnimaCamera* activeCamera) override;
 
 	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
 	void UpdateCullFace(AnimaCamera* activeCamera) override;

@@ -14,6 +14,10 @@ class ANIMA_ENGINE_EXPORT AnimaMatrix
 public:
 	union
 	{
+		//	0[11]	1[12]	2[13]	3[14]
+		//	4[21]	5[22]	6[23]	7[24]
+		//	8[31]	9[32]	10[33]	11[34]
+		//	12[41]	13[42]	14[43]	15[44]
 		float m[16];
 		struct
 		{

@@ -66,6 +66,18 @@ void Window::DrawScene()
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
 	int nD = renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
+
+	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
+	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
+	vertici.Add(Anima::AnimaVertex3f(-1.0f, 1.0f, 0.0f));
+	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
+	renderingManager->DrawPrimitive(GetEngine()->GetScenesManager()->GetStage("test-scene"), &vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
+
+	vertici.RemoveAll();
+	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
+	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
+	vertici.Add(Anima::AnimaVertex3f(1.0f, -1.0f, 0.0f));
+	renderingManager->DrawPrimitive(GetEngine()->GetScenesManager()->GetStage("test-scene"), &vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
 		
 	SwapBuffers();
 
@@ -87,7 +99,12 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	if (ctx)
 	{
 		glViewport(0, 0, w, h);
-		window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 1.0f, 100000.0f);
+
+		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+
+		camerasManager->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetActiveCamera());
 
 		if (((Window*)window)->renderingManager != nullptr)
 		{
@@ -113,9 +130,15 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 	{
 		double dy = wnd->_lastPTY - y;
 		double dx = wnd->_lastPTX - x;
+		
+		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
 
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateXDeg(dy * 0.1);
-		wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->RotateYDeg(dx * 0.1);
+		Anima::AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
+		activeCamera->RotateXDeg(dy * 0.1);
+		activeCamera->RotateYDeg(dx * 0.1);
+
+		lightsManager->UpdateLightsMatrix(activeCamera);
 	}
 
 	wnd->_lastPTX = x;
@@ -133,8 +156,11 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	}
 
 	Window* wnd = (Window*)window;
+	
+	Anima::AnimaLightsManager* lightsManager = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+
 	Anima::AnimaCamera* camera = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera();
-	Anima::AnimaLight* dirL = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->GetLightFromName("directional");
+	Anima::AnimaLight* dirL = lightsManager->GetLightFromName("directional");
 
 	Anima::AnimaVertex3f direction;
 	
@@ -146,18 +172,22 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	case ANIMA_ENGINE_KEY_W:
 	case ANIMA_ENGINE_KEY_UP:
 		camera->Move(camera->GetForward(), amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_S:
 	case ANIMA_ENGINE_KEY_DOWN:
 		camera->Move(camera->GetForward(), -amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_D:
 	case ANIMA_ENGINE_KEY_RIGHT:
 		camera->Move(camera->GetRight(), amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_A:
 	case ANIMA_ENGINE_KEY_LEFT:
 		camera->Move(camera->GetRight(), -amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_F:
 		wnd->_fpcamera->Activate();
@@ -202,8 +232,13 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
-	Window* wnd = (Window*)window;
-	wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera()->Zoom(y * 1.0f);
+	Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+
+	Anima::AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
+	activeCamera->Zoom(y * 1.0f);
+
+	lightsManager->UpdateLightsMatrix(activeCamera);
 }
 
 void Window::Load()
@@ -264,19 +299,19 @@ void Window::Load()
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
 
-	//Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-	//l1->SetColor(1.0f, 1.0f, 1.0f);
-	//l1->SetIntensity(1.0f);
-	//l1->SetDirection(-1.0f, -1.0f, 0.0f);
+	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	l1->SetColor(1.0f, 1.0f, 1.0f);
+	l1->SetIntensity(1.0f);
+	l1->SetDirection(-1.0f, -1.0f, 0.0f);
 	
-	Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
-	l2->SetColor(1.0f, 1.0f, 0.78f);
-	l2->SetConstantAttenuation(1.0f);
-	l2->SetLinearAttenuation(0.001f);
-	l2->SetExponentAttenuation(0.0f);
-	l2->SetIntensity(1.0f);
-	l2->SetPosition(0.0f, 100.0f, 0.0f);
-	l2->SetRange(2000.0f);
+	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
+	//l2->SetColor(1.0f, 1.0f, 0.78f);
+	//l2->SetConstantAttenuation(1.0f);
+	//l2->SetLinearAttenuation(0.001f);
+	//l2->SetExponentAttenuation(0.0f);
+	//l2->SetIntensity(1.0f);
+	//l2->SetPosition(0.0f, 100.0f, 0.0f);
+	//l2->SetRange(2000.0f);
 
 	//Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
 	//l3->SetColor(1.0f, 0.0f, 0.0f);

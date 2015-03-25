@@ -215,7 +215,6 @@ void AnimaThirdPersonCamera::CalculateViewMatrix()
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
 	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 
-	//_frustum.SetCameraView(_position, (_target - _position), _worldYAxis);
 	_frustum.ComputeFrustum(_projectionViewMatrix);
 }
 

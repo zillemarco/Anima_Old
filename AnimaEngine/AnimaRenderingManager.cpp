@@ -10,16 +10,27 @@
 #include "AnimaTexturesManager.h"
 #include "AnimaLightsManager.h"
 #include "AnimaBenchmarkTimer.h"
+#include <fstream>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 int numeroDisegnati = 0;
+
+template class AnimaArray<AnimaVertex3f, AnimaVertex3f>;
 
 AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
 {
 	_allocator = allocator;
 	_filterCamera = nullptr;
 	_filterMesh = nullptr;
+
+	_primitiveDrawShader = nullptr;
+	_primitiveDrawVertexShader = nullptr;
+	_primitiveDrawFragmentShader = nullptr;
+	
+	_indexesBufferObject = 0;
+	_verticesBufferObject = 0;
+	_vertexArrayObject = 0;
 
 	InitTextureSlots();
 }
@@ -41,6 +52,14 @@ AnimaRenderingManager::AnimaRenderingManager(const AnimaRenderingManager& src)
 	_booleansMap = src._booleansMap;
 
 	_lightsMeshMap = src._lightsMeshMap;
+
+	_indexesBufferObject = src._indexesBufferObject;
+	_verticesBufferObject = src._verticesBufferObject;
+	_vertexArrayObject = src._vertexArrayObject;
+
+	_primitiveDrawShader = nullptr;
+	_primitiveDrawVertexShader = nullptr;
+	_primitiveDrawFragmentShader = nullptr;
 }
 
 AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
@@ -59,6 +78,14 @@ AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
 	_booleansMap = src._booleansMap;
 
 	_lightsMeshMap = src._lightsMeshMap;
+
+	_indexesBufferObject = src._indexesBufferObject;
+	_verticesBufferObject = src._verticesBufferObject;
+	_vertexArrayObject = src._vertexArrayObject;
+
+	_primitiveDrawShader = nullptr;
+	_primitiveDrawVertexShader = nullptr;
+	_primitiveDrawFragmentShader = nullptr;
 }
 
 AnimaRenderingManager::~AnimaRenderingManager()
@@ -87,6 +114,14 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(const AnimaRenderingMana
 		_booleansMap = src._booleansMap;
 
 		_lightsMeshMap = src._lightsMeshMap;
+
+		_indexesBufferObject = src._indexesBufferObject;
+		_verticesBufferObject = src._verticesBufferObject;
+		_vertexArrayObject = src._vertexArrayObject;
+
+		_primitiveDrawShader = nullptr;
+		_primitiveDrawVertexShader = nullptr;
+		_primitiveDrawFragmentShader = nullptr;
 	}
 
 	return *this;
@@ -113,6 +148,14 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(AnimaRenderingManager&& 
 		_booleansMap = src._booleansMap;
 
 		_lightsMeshMap = src._lightsMeshMap;
+
+		_indexesBufferObject = src._indexesBufferObject;
+		_verticesBufferObject = src._verticesBufferObject;
+		_vertexArrayObject = src._vertexArrayObject;
+
+		_primitiveDrawShader = nullptr;
+		_primitiveDrawVertexShader = nullptr;
+		_primitiveDrawFragmentShader = nullptr;
 	}
 
 	return *this;
@@ -249,6 +292,85 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	_filterCamera->SetProjectionMatrix(AnimaMatrix());
 	_filterCamera->SetViewMatrix(AnimaMatrix());
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);
+
+	glGenVertexArrays(1, &_vertexArrayObject);
+	glGenBuffers(1, &_indexesBufferObject);
+	glGenBuffers(1, &_verticesBufferObject);
+}
+
+void AnimaRenderingManager::InitPrimitiveDrawShader()
+{
+	if (_primitiveDrawShader == nullptr)
+	{
+		_primitiveDrawShader = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*_allocator, _allocator, nullptr);
+
+		if (_primitiveDrawVertexShader == nullptr)
+		{
+			_primitiveDrawVertexShader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*_allocator, _allocator);
+
+			AnimaString str(_allocator);
+			bool readCompletely = true;
+
+			std::ifstream is(ANIMA_ENGINE_SHADERS_PATH "Common/primitive-vs.glsl", std::ifstream::binary);
+			if (is)
+			{
+				is.seekg(0, is.end);
+				int length = (int)is.tellg();
+				is.seekg(0, is.beg);
+
+				str.Reserve(length);
+
+				// read data as a block:
+				is.read(str.GetBuffer(), length);
+
+				if (!is)
+					readCompletely = false;
+
+				is.close();
+			}
+
+			ANIMA_ASSERT(readCompletely);
+
+			_primitiveDrawVertexShader->SetText(str);
+			_primitiveDrawVertexShader->SetType(AnimaShader::VERTEX);
+		}
+
+		if (_primitiveDrawFragmentShader == nullptr)
+		{
+			_primitiveDrawFragmentShader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*_allocator, _allocator);
+
+			AnimaString str(_allocator);
+			bool readCompletely = true;
+
+			std::ifstream is(ANIMA_ENGINE_SHADERS_PATH "Common/primitive-fs.glsl", std::ifstream::binary);
+			if (is)
+			{
+				is.seekg(0, is.end);
+				int length = (int)is.tellg();
+				is.seekg(0, is.beg);
+
+				str.Reserve(length);
+
+				// read data as a block:
+				is.read(str.GetBuffer(), length);
+
+				if (!is)
+					readCompletely = false;
+
+				is.close();
+			}
+
+			ANIMA_ASSERT(readCompletely);
+
+			_primitiveDrawFragmentShader->SetText(str);
+			_primitiveDrawFragmentShader->SetType(AnimaShader::FRAGMENT);
+		}
+
+		_primitiveDrawShader->Create();
+		_primitiveDrawShader->AddShader(_primitiveDrawVertexShader);
+		_primitiveDrawShader->AddShader(_primitiveDrawFragmentShader);
+		ANIMA_ASSERT(_primitiveDrawShader->Link());
+	}
 }
 
 void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst)
@@ -436,54 +558,54 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	
 	Finish(scene);
 
-	//
-	//	Aggiorno il buffer per SSAO
-	//
-	ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
+	////
+	////	Aggiorno il buffer per SSAO
+	////
+	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
 	
-	////
-	////	Aggiorno le mappature per le ombre
-	////
-	//Start(scene);
-	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	//Finish(scene);
 	//
-	////
-	////	Preparazione dei buffer della luce
-	////
-	//GetGBuffer("LightsBuffer")->BindAsRenderTarget();
-	//Start(scene);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE);
-
-	//glDepthMask(GL_FALSE);
-
-	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	//for (auto pair : (*lights))
-	//	DeferredLightPass(scene, pair.second->GetLightsArray());
-
-	//glDepthMask(GL_TRUE);
-	//glCullFace(GL_BACK);
-
-	//glBlendFunc(GL_ONE, GL_ZERO);
-	//Finish(scene);
+	//	Aggiorno le mappature per le ombre
 	//
-	////
-	////	Composizione dei buffer nell'immagine finale
-	////
-	//GetTexture("DiffuseMap")->BindAsRenderTarget();
-	//Start(scene);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-	//Finish(scene);
+	Start(scene);
+	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
+	Finish(scene);
+	
 	//
-	////
-	////	Applicazione effetti
-	////
-	//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	//	Preparazione dei buffer della luce
+	//
+	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	Start(scene);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glDepthMask(GL_FALSE);
+
+	boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
+	for (auto pair : (*lights))
+		DeferredLightPass(scene, pair.second->GetLightsArray());
+
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
+
+	glBlendFunc(GL_ONE, GL_ZERO);
+	Finish(scene);
+	
+	//
+	//	Composizione dei buffer nell'immagine finale
+	//
+	GetTexture("DiffuseMap")->BindAsRenderTarget();
+	Start(scene);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
+	Finish(scene);
+	
+	//
+	//	Applicazione effetti
+	//
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 
 	return num;
 }
@@ -887,6 +1009,78 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
+void AnimaRenderingManager::DrawPrimitive(AnimaScene* scene, AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
+{
+	if (vertices == nullptr)
+		return;
+
+	InitPrimitiveDrawShader();
+
+	if (_primitiveDrawShader == nullptr)
+		return;
+	
+	AnimaVertex2f size = GetVector2f("ScreenSize");
+	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+	//if (color.w < 1.0f)
+	//	glEnable(GL_BLEND);
+	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+
+	_primitiveDrawShader->Use();
+	_primitiveDrawShader->SetUniform("_color", color);
+	_primitiveDrawShader->SetUniform("_modelMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
+	_primitiveDrawShader->SetUniform("_projectionViewMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
+
+	glInvalidateBufferData(_verticesBufferObject);
+	glInvalidateBufferData(_indexesBufferObject);
+
+	AInt nVertices = vertices->GetSize();
+	AInt nCoordinate = nVertices * 3;
+	AFloat* coordinate = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, (ASizeT)nCoordinate);
+
+	AInt offset = 0;
+	for (AInt i = 0; i < nVertices; i++)
+	{
+		coordinate[offset++] = (*vertices)[i].x;
+		coordinate[offset++] = (*vertices)[i].y;
+		coordinate[offset++] = (*vertices)[i].z;
+	}
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _verticesBufferObject);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AFloat) * nCoordinate, coordinate, GL_STATIC_DRAW);
+	AnimaAllocatorNamespace::DeallocateArray(*_allocator, coordinate);
+	coordinate = nullptr;
+
+	if (indices != nullptr)
+	{
+		AInt nIndici = indices->GetSize();
+		AUint* indici = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, (ASizeT)nIndici);
+
+		for (AInt i = 0; i < nIndici; i++)
+			indici[i] = (*indices)[i];
+
+		glBindVertexArray(_vertexArrayObject);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * nIndici, indici, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indici);
+		indici = nullptr;
+
+		_primitiveDrawShader->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
+		glDrawElements(primitiveType, nIndici, GL_UNSIGNED_INT, 0);
+	}
+	else
+	{
+		glBindVertexArray(_vertexArrayObject);
+		_primitiveDrawShader->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
+		glDrawArrays(primitiveType, 0, nCoordinate);
+	}
+
+	glDisable(GL_BLEND);
+}
+
 void AnimaRenderingManager::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
 {
 	auto pair = _texturesMap.find(propertyName);
@@ -1252,6 +1446,10 @@ AInt AnimaRenderingManager::GetInteger(const char* propertyName)
 
 void AnimaRenderingManager::Clear()
 {
+	glDeleteVertexArrays(1, &_vertexArrayObject);
+	glDeleteBuffers(1, &_verticesBufferObject);
+	glDeleteBuffers(1, &_indexesBufferObject);
+
 	if (_filterCamera != nullptr)
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterCamera);
@@ -1289,6 +1487,24 @@ void AnimaRenderingManager::Clear()
 			AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
 			pair.second = nullptr;
 		}
+	}
+
+	if (_primitiveDrawFragmentShader != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawFragmentShader);
+		_primitiveDrawFragmentShader = nullptr;
+	}
+
+	if (_primitiveDrawVertexShader != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawVertexShader);
+		_primitiveDrawVertexShader = nullptr;
+	}
+
+	if (_primitiveDrawShader != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawShader);
+		_primitiveDrawShader = nullptr;
 	}
 
 	_texturesMap.clear();

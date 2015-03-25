@@ -17,6 +17,7 @@
 #include "AnimaLight.h"
 #include "AnimaScene.h"
 #include "AnimaArray.h"
+#include "AnimaCamera.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -73,6 +74,8 @@ public:
 	AInt GetTotalLightsCount();
 
 	boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* GetLightsMap();
+
+	void UpdateLightsMatrix(AnimaCamera* activeCamera);
 			
 private:
 	void ClearLights();

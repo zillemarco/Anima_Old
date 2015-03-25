@@ -100,6 +100,8 @@ public:
 	void ScanVariables();
 
 	void EnableInputs(AnimaMesh* mesh);
+	void EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer);
+	void EnableInput(const char* inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();
 
 	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& transformation);

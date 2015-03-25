@@ -726,10 +726,10 @@ void AnimaMatrix::LookAt(const AnimaVertex3f &position, const AnimaVertex3f &for
 	SetIdentity();
 	
 	AnimaVertex3f f, s, u;
-	//f = (target - position).Normalized();
-	f = forward.Normalized();
-	s = Cross(f, up).Normalized();
-	u = Cross(s, f);
+
+	f = forward.Normalized();			// asse z
+	s = Cross(f, up).Normalized();		// asse x
+	u = Cross(s, f);					// asse y
 
 	m[0] = s.vec[0];
 	m[4] = s.vec[1];
@@ -769,7 +769,7 @@ void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zF
 {
 	SetIdentity();
 
-	float radians = (fov / 2.0f) *(float)M_PI / 180.0f;
+	float radians = (fov * 0.5f) * (float)M_PI / 180.0f;
 	float sine = sinf(radians);
 
 	if (sine == 0.0f)

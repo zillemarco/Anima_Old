@@ -105,6 +105,21 @@ boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* Ani
 	return &_lightsMap;
 }
 
+void AnimaLightsManager::UpdateLightsMatrix(AnimaCamera* activeCamera)
+{
+	for (auto pair : _lightsMap)
+	{
+		if (pair.second != nullptr)
+		{
+			AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = pair.second->GetLightsArray();
+			AInt size = lightsArray->GetSize();
+
+			for (AInt i = 0; i < size; i++)
+				lightsArray->ElementAt(i)->ComputeLightMatrix(activeCamera);
+		}
+	}
+}
+
 AnimaLightsMapData::AnimaLightsMapData(AnimaAllocator* allocator)
 	: _lights(allocator)
 {

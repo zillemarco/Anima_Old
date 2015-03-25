@@ -51,36 +51,26 @@ public:
 	AnimaFrustum& operator=(const AnimaFrustum& src);
 	AnimaFrustum& operator=(AnimaFrustum&& src);
 
+	AnimaVertex3f GetFrustumVertex(AInt index) const;
+	void GetFrustumVertices(AnimaVertex3f vertices[8]) const;
+
+	AnimaVertex3f GetBoundingBoxMin() const;
+	AnimaVertex3f GetBoundingBoxMax() const;
+	AnimaVertex3f GetBoundingBoxCenter() const;
+
 public:
-	//void SetCameraProjection(AFloat fov, AFloat ratio, AFloat zNear, AFloat zFar);
-	//void SetCameraView(const AnimaVertex3f& viewPoint, const AnimaVertex3f& forward, const AnimaVertex3f& up);
 	void ComputeFrustum(const AnimaMatrix& projectionViewMatrix);
 
-	bool SphereInFrustum(const AnimaVertex3f& center, AFloat radius);
-
-	//bool PointInFrustum(const AnimaVertex3f& p);
-	//bool SphereInFrustum(const AnimaVertex3f& p, AFloat radius);
+public:
+	bool SphereInFrustum(const AnimaVertex3f& center, AFloat radius) const;
 
 protected:
-	AFloat _frustum[6][4];
+	AFloat			_frustum[6][4];
+	AnimaVertex3f	_frustumVertices[8];
 
-	//AnimaFrustumPlane	_planes[6];
-	//AnimaVertex3f		_nearPlanePoints[4];
-	//AnimaVertex3f		_farPlanePoints[4];
-	//AnimaVertex3f		_xAxis;
-	//AnimaVertex3f		_yAxis;
-	//AnimaVertex3f		_zAxis;
-	//AnimaVertex3f		_position;
-	//AFloat				_zNear;
-	//AFloat				_zFar;
-	//AFloat				_ratio;
-	//AFloat				_fov;
-	//AnimaVertex2f		_sphereFactor;
-	//AFloat				_tangent;
-	//AFloat				_nearPlaneWidth;
-	//AFloat				_nearPlaneHeight;
-	//AFloat				_farPlaneWidth;
-	//AFloat				_farPlaneHeight;
+	AnimaVertex3f	_boundingBoxMin;
+	AnimaVertex3f	_boundingBoxMax;
+	AnimaVertex3f	_boundingBoxCenter;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

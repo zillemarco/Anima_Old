@@ -12,18 +12,61 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#ifndef min
+#	define min(a,b) (a < b ? a : b)
+#endif
+
+#ifndef max
+#	define max(a,b) (a > b ? a : b)
+#endif
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaFrustum::AnimaFrustum()
 {
+	for (AInt i = 0; i < 6; i++)
+	{
+		_frustum[i][0] = 0.0f;
+		_frustum[i][1] = 0.0f;
+		_frustum[i][2] = 0.0f;
+		_frustum[i][3] = 0.0f;
+	}
 }
 
 AnimaFrustum::AnimaFrustum(const AnimaFrustum& src)
 {
+	for (AInt i = 0; i < 8; i++)
+		_frustumVertices[i] = src._frustumVertices[i];
+
+	for (AInt i = 0; i < 6; i++)
+	{
+		_frustum[i][0] = src._frustum[i][0];
+		_frustum[i][1] = src._frustum[i][1];
+		_frustum[i][2] = src._frustum[i][2];
+		_frustum[i][3] = src._frustum[i][3];
+	}
+
+	_boundingBoxMin = src._boundingBoxMin;
+	_boundingBoxMax = src._boundingBoxMax;
+	_boundingBoxCenter = src._boundingBoxCenter;
 }
 
 AnimaFrustum::AnimaFrustum(AnimaFrustum&& src)
 {
+	for (AInt i = 0; i < 8; i++)
+		_frustumVertices[i] = src._frustumVertices[i];
+
+	for (AInt i = 0; i < 6; i++)
+	{
+		_frustum[i][0] = src._frustum[i][0];
+		_frustum[i][1] = src._frustum[i][1];
+		_frustum[i][2] = src._frustum[i][2];
+		_frustum[i][3] = src._frustum[i][3];
+	}
+
+	_boundingBoxMin = src._boundingBoxMin;
+	_boundingBoxMax = src._boundingBoxMax;
+	_boundingBoxCenter = src._boundingBoxCenter;
 }
 
 AnimaFrustum::~AnimaFrustum()
@@ -34,6 +77,20 @@ AnimaFrustum& AnimaFrustum::operator=(const AnimaFrustum& src)
 {
 	if (this != &src)
 	{
+		for (AInt i = 0; i < 8; i++)
+			_frustumVertices[i] = src._frustumVertices[i];
+
+		for (AInt i = 0; i < 6; i++)
+		{
+			_frustum[i][0] = src._frustum[i][0];
+			_frustum[i][1] = src._frustum[i][1];
+			_frustum[i][2] = src._frustum[i][2];
+			_frustum[i][3] = src._frustum[i][3];
+		}
+
+		_boundingBoxMin = src._boundingBoxMin;
+		_boundingBoxMax = src._boundingBoxMax;
+		_boundingBoxCenter = src._boundingBoxCenter;
 	}
 
 	return *this;
@@ -43,13 +100,83 @@ AnimaFrustum& AnimaFrustum::operator=(AnimaFrustum&& src)
 {
 	if (this != &src)
 	{
+		for (AInt i = 0; i < 8; i++)
+			_frustumVertices[i] = src._frustumVertices[i];
+
+		for (AInt i = 0; i < 6; i++)
+		{
+			_frustum[i][0] = src._frustum[i][0];
+			_frustum[i][1] = src._frustum[i][1];
+			_frustum[i][2] = src._frustum[i][2];
+			_frustum[i][3] = src._frustum[i][3];
+		}
+
+		_boundingBoxMin = src._boundingBoxMin;
+		_boundingBoxMax = src._boundingBoxMax;
+		_boundingBoxCenter = src._boundingBoxCenter;
 	}
 
 	return *this;
 }
 
-void AnimaFrustum::ComputeFrustum(const AnimaMatrix& projectionViewMatrix)
+AnimaVertex3f AnimaFrustum::GetFrustumVertex(AInt index) const
 {
+	ANIMA_ASSERT(index >= 0 && index < 8);
+	return _frustumVertices[index];
+}
+
+void AnimaFrustum::GetFrustumVertices(AnimaVertex3f vertices[8]) const
+{
+	for (AInt i = 0; i < 8; i++)
+		vertices[i] = _frustumVertices[i];
+}
+
+AnimaVertex3f AnimaFrustum::GetBoundingBoxMin() const
+{
+	return _boundingBoxMin;
+}
+
+AnimaVertex3f AnimaFrustum::GetBoundingBoxMax() const
+{
+	return _boundingBoxMax;
+}
+
+AnimaVertex3f AnimaFrustum::GetBoundingBoxCenter() const
+{
+	return _boundingBoxCenter;
+}
+
+void AnimaFrustum::ComputeFrustum(const AnimaMatrix& projectionViewMatrix)
+{	
+	AnimaMatrix inverseProjectionViewMatrix = projectionViewMatrix.Inversed();
+
+	AnimaVertex3f points[8];
+
+	_frustumVertices[0] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f,  1.0f, -1.0f);	// near top-left
+	_frustumVertices[1] = inverseProjectionViewMatrix * AnimaVertex3f( 1.0f,  1.0f, -1.0f);	// near top-right
+	_frustumVertices[2] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f, -1.0f, -1.0f);	// near bottom-left
+	_frustumVertices[3] = inverseProjectionViewMatrix * AnimaVertex3f( 1.0f, -1.0f, -1.0f);	// near bottom-right
+	_frustumVertices[4] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f,  1.0f,  1.0f);	// far top-left
+	_frustumVertices[5] = inverseProjectionViewMatrix * AnimaVertex3f( 1.0f,  1.0f,  1.0f);	// far top-right
+	_frustumVertices[6] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f, -1.0f,  1.0f);	// far bottom-left
+	_frustumVertices[7] = inverseProjectionViewMatrix * AnimaVertex3f( 1.0f, -1.0f,  1.0f);	// far bottom-right
+
+	_boundingBoxMin = _frustumVertices[0];
+	_boundingBoxMax = _frustumVertices[0];
+
+	for (AInt i = 1; i < 8; i++)
+	{
+		_boundingBoxMin.x = min(_boundingBoxMin.x, _frustumVertices[i].x);
+		_boundingBoxMin.y = min(_boundingBoxMin.y, _frustumVertices[i].y);
+		_boundingBoxMin.z = min(_boundingBoxMin.z, _frustumVertices[i].z);
+
+		_boundingBoxMax.x = max(_boundingBoxMax.x, _frustumVertices[i].x);
+		_boundingBoxMax.y = max(_boundingBoxMax.y, _frustumVertices[i].y);
+		_boundingBoxMax.z = max(_boundingBoxMax.z, _frustumVertices[i].z);
+	}
+
+	_boundingBoxCenter = AnimaVertex3f((_boundingBoxMin.x + _boundingBoxMax.x) / 2.0f, (_boundingBoxMin.y + _boundingBoxMax.y) / 2.0f, (_boundingBoxMin.z + _boundingBoxMax.z) / 2.0f);
+
 	/* Extract the numbers for the RIGHT plane */
 	_frustum[0][0] = projectionViewMatrix.m[3] - projectionViewMatrix.m[0];
 	_frustum[0][1] = projectionViewMatrix.m[7] - projectionViewMatrix.m[4];
@@ -130,192 +257,12 @@ void AnimaFrustum::ComputeFrustum(const AnimaMatrix& projectionViewMatrix)
 
 }
 
-bool AnimaFrustum::SphereInFrustum(const AnimaVertex3f& center, AFloat radius)
+bool AnimaFrustum::SphereInFrustum(const AnimaVertex3f& center, AFloat radius) const
 {
 	for (AInt p = 0; p < 6; p++)
 		if (_frustum[p][0] * center.x + _frustum[p][1] * center.y + _frustum[p][2] * center.z + _frustum[p][3] <= -radius)
 			return false;
 	return true;
 }
-
-//void AnimaFrustum::SetCameraProjection(AFloat fov, AFloat ratio, AFloat zNear, AFloat zFar)
-//{
-//	this->_ratio	= ratio;
-//	this->_fov		= fov;
-//	this->_zNear	= zNear;
-//	this->_zFar		= zFar;
-//
-//	_tangent = tanf(this->_fov);
-//	_sphereFactor.y = 1.0f / cosf(this->_fov);
-//
-//	AFloat anglex = atanf(_tangent * ratio);
-//	_sphereFactor.x = 1.0f / cosf(anglex);
-//
-//	_nearPlaneHeight	= zNear * _tangent;
-//	_nearPlaneWidth = _nearPlaneHeight * ratio;
-//
-//	_farPlaneHeight = zFar * _tangent;
-//	_farPlaneWidth = _farPlaneWidth * ratio;
-//}
-//
-//void AnimaFrustum::SetCameraView(const AnimaVertex3f& viewPoint, const AnimaVertex3f& forward, const AnimaVertex3f& up)
-//{
-//	AnimaVertex3f dir, nc, fc;
-//
-//	_position = viewPoint;
-//
-//	_zAxis = forward;
-//	_zAxis.Normalize();
-//
-//	_xAxis = up ^ _zAxis;
-//	_xAxis.Normalize();
-//
-//	_yAxis = _zAxis ^ _xAxis;
-//
-//	nc = viewPoint - _zAxis * _zNear;
-//	fc = viewPoint - _zAxis * _zFar;
-//
-//	_nearPlanePoints[TOPLEFT]		= nc + _yAxis * _nearPlaneHeight - _xAxis * _nearPlaneWidth;
-//	_nearPlanePoints[TOPRIGHT]		= nc + _yAxis * _nearPlaneHeight + _xAxis * _nearPlaneWidth;
-//	_nearPlanePoints[BOTTOMLEFT]	= nc - _yAxis * _nearPlaneHeight - _xAxis * _nearPlaneWidth;
-//	_nearPlanePoints[BOTTOMRIGHT]	= nc - _yAxis * _nearPlaneHeight + _xAxis * _nearPlaneWidth;
-//
-//	_farPlanePoints[TOPLEFT]		= fc + _yAxis * _farPlaneHeight - _xAxis * _farPlaneWidth;
-//	_farPlanePoints[BOTTOMRIGHT]	= fc - _yAxis * _farPlaneHeight + _xAxis * _farPlaneWidth;
-//	_farPlanePoints[TOPRIGHT]		= fc + _yAxis * _farPlaneHeight + _xAxis * _farPlaneWidth;
-//	_farPlanePoints[BOTTOMLEFT]		= fc - _yAxis * _farPlaneHeight - _xAxis * _farPlaneWidth;
-//
-//	_planes[TOP].SetPoints(_nearPlanePoints[TOPRIGHT], _nearPlanePoints[TOPLEFT], _farPlanePoints[TOPLEFT]);
-//	_planes[BOTTOM].SetPoints(_nearPlanePoints[BOTTOMLEFT], _nearPlanePoints[BOTTOMRIGHT], _farPlanePoints[BOTTOMRIGHT]);
-//	_planes[LEFT].SetPoints(_nearPlanePoints[TOPLEFT], _nearPlanePoints[BOTTOMLEFT], _farPlanePoints[BOTTOMLEFT]);
-//	_planes[RIGHT].SetPoints(_nearPlanePoints[BOTTOMRIGHT], _nearPlanePoints[TOPRIGHT], _farPlanePoints[BOTTOMRIGHT]);
-//
-//	_planes[NEARP].SetNormalAndPoint(-_zAxis, nc);
-//	_planes[FARP].SetNormalAndPoint(_zAxis, fc);
-//
-//	AnimaVertex3f aux, normal;
-//
-//	aux = (nc + _yAxis * _nearPlaneHeight) - viewPoint;
-//	normal = aux * _xAxis;
-//	_planes[TOP].SetNormalAndPoint(normal, nc + _yAxis * _nearPlaneHeight);
-//
-//	aux = (nc - _yAxis * _nearPlaneHeight) - viewPoint;
-//	normal = _xAxis * aux;
-//	_planes[BOTTOM].SetNormalAndPoint(normal, nc - _yAxis * _nearPlaneHeight);
-//
-//	aux = (nc - _xAxis * _nearPlaneWidth) - viewPoint;
-//	normal = aux * _yAxis;
-//	_planes[LEFT].SetNormalAndPoint(normal, nc - _xAxis * _nearPlaneWidth);
-//
-//	aux = (nc + _xAxis * _nearPlaneWidth) - viewPoint;
-//	normal = _yAxis * aux;
-//	_planes[RIGHT].SetNormalAndPoint(normal, nc + _xAxis * _nearPlaneWidth);
-//}
-//
-//bool AnimaFrustum::PointInFrustum(const AnimaVertex3f& p)
-//{
-//	AFloat pcz, pcx, pcy, aux;
-//	AnimaVertex3f v = p - _position;
-//
-//	pcz = v.InnerProduct(-_zAxis);
-//	if (pcz > _zFar || pcz < _zNear)
-//		return false;
-//
-//	pcy = v.InnerProduct(_yAxis);
-//	aux = pcz * _tangent;
-//	if (pcy > aux || pcy < -aux)
-//		return false;
-//
-//	pcx = v.InnerProduct(_xAxis);
-//	aux = aux * _ratio;
-//	if (pcx > aux || pcx < -aux)
-//		return false;
-//	
-//	return true;
-//}
-//
-//bool AnimaFrustum::SphereInFrustum(const AnimaVertex3f& p, AFloat radius)
-//{
-//	AFloat d1, d2;
-//	AFloat az, ax, ay, zz1, zz2;
-//
-//	AnimaVertex3f v = p - _position;
-//
-//	az = v.InnerProduct(-_zAxis);
-//	if (az > _zFar + radius || az < _zNear - radius)
-//		return false;
-//
-//	ax = v.InnerProduct(_xAxis);
-//	zz1 = az * _tangent * _ratio;
-//	d1 = _sphereFactor.x * radius;
-//	if (ax > zz1 + d1 || ax < -zz1 - d1)
-//		return false;
-//
-//	ay = v.InnerProduct(_yAxis);
-//	zz2 = az * _tangent;
-//	d2 = _sphereFactor.y * radius;
-//	if (ay > zz2 + d2 || ay < -zz2 - d2)
-//		return false;
-//
-//	// Questo testa le intersezioni
-//	if (az > _zFar - radius || az < _zNear + radius)
-//		return true;
-//	if (ay > zz2 - d2 || ay < -zz2 + d2)
-//		return true;
-//	if (ax > zz1 - d1 || ax < -zz1 + d1)
-//		return true;
-//
-//	return true;
-//}
-//
-//AnimaFrustum::AnimaFrustumPlane::AnimaFrustumPlane()
-//{
-//}
-//
-//AnimaFrustum::AnimaFrustumPlane::AnimaFrustumPlane(const AnimaVertex3f& v1, const AnimaVertex3f& v2, const AnimaVertex3f& v3)
-//{
-//	SetPoints(v1, v2, v3);
-//}
-//
-//AnimaFrustum::AnimaFrustumPlane::~AnimaFrustumPlane()
-//{
-//}
-//
-//void AnimaFrustum::AnimaFrustumPlane::SetPoints(const AnimaVertex3f& v1, const AnimaVertex3f& v2, const AnimaVertex3f& v3)
-//{
-//	AnimaVertex3f aux1, aux2;
-//
-//	aux1 = v1 - v2;
-//	aux2 = v3 - v2;
-//
-//	_normal = aux1 ^ aux2;
-//	_normal.Normalize();
-//
-//	_point = v1;
-//
-//	_d = -(_normal.InnerProduct(_point));
-//}
-//
-//void AnimaFrustum::AnimaFrustumPlane::SetNormalAndPoint(const AnimaVertex3f& normal, const AnimaVertex3f& point)
-//{
-//	_normal = normal;
-//	_normal.Normalize();
-//	_d = -(_normal.InnerProduct(point));
-//}
-//
-//void AnimaFrustum::AnimaFrustumPlane::SetCoefficents(AFloat a, AFloat b, AFloat c, AFloat d)
-//{
-//	_normal.Fill(a, b, c);
-//	
-//	AFloat l = _normal.Length();
-//	_normal.Fill(a / l, b / l, c / l);
-//
-//	this->_d = d / l;
-//}
-//
-//AFloat AnimaFrustum::AnimaFrustumPlane::Distance(const AnimaVertex3f& p)
-//{
-//	return (_d + _normal.InnerProduct(p));
-//}
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -11,6 +11,15 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaShadersManager.h"
 #include "AnimaMath.h"
+#include "AnimaFrustum.h"
+
+#ifndef min
+#	define min(a,b) (a < b ? a : b)
+#endif
+
+#ifndef max
+#	define max(a,b) (a > b ? a : b)
+#endif
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -24,8 +33,7 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 	//AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	//AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	
-	ComputeProjectionMatrix();
-	ComputeViewMatrix();
+	ComputeLightMatrix(nullptr);
 
 	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
 	AnimaSceneObject::SetFloat("Intensity", 1.0f);
@@ -193,14 +201,7 @@ AnimaMatrix AnimaLight::GetProjectionViewMatrix()
 	return AnimaSceneObject::GetMatrix("ProjectionViewMatrix");
 }
 
-void AnimaLight::ComputeProjectionMatrix()
-{
-	AnimaSceneObject::SetMatrix("ViewMatrix", AnimaMatrix());
-	AnimaSceneObject::SetMatrix("ProjectionMatrix", AnimaMatrix());
-	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", AnimaMatrix());
-}
-
-void AnimaLight::ComputeViewMatrix()
+void AnimaLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 {
 	AnimaSceneObject::SetMatrix("ViewMatrix", AnimaMatrix());
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", AnimaMatrix());
@@ -217,8 +218,7 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	AnimaLight::SetVector("ShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
 	
-	ComputeProjectionMatrix();
-	ComputeViewMatrix();
+	ComputeLightMatrix(nullptr);
 }
 
 AnimaDirectionalLight::~AnimaDirectionalLight()
@@ -228,13 +228,13 @@ AnimaDirectionalLight::~AnimaDirectionalLight()
 void AnimaDirectionalLight::SetDirection(const AnimaVertex3f& direction)
 {
 	AnimaSceneObject::SetVector("Direction", direction.Normalized());
-	ComputeViewMatrix();
+	ComputeLightMatrix(nullptr);	// TODO
 }
 
 void AnimaDirectionalLight::SetDirection(AFloat x, AFloat y, AFloat z)
 {
 	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(x, y, z).Normalized());
-	ComputeViewMatrix();
+	ComputeLightMatrix(nullptr);	// TODO
 }
 
 AnimaVertex3f AnimaDirectionalLight::GetDirection()
@@ -242,17 +242,11 @@ AnimaVertex3f AnimaDirectionalLight::GetDirection()
 	return AnimaSceneObject::GetVector3f("Direction");
 }
 
-void AnimaDirectionalLight::ComputeViewMatrix()
+void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 {
-	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(AnimaVertex3f(0.0f, 0.0f, 0.0f), GetDirection(), AnimaVertex3f(0.0f, 1.0f, 0.0f));
-	AnimaMatrix projectionViewMatrix = AnimaSceneObject::GetMatrix("ProjectionMatrix") * viewMatrix;
+	if (activeCamera == nullptr)
+		return;
 
-	AnimaSceneObject::SetMatrix("ViewMatrix", viewMatrix);
-	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);
-}
-
-void AnimaDirectionalLight::ComputeProjectionMatrix()
-{
 #ifndef _DEBUG
 	float t = 2800.0f;
 	float z = 10000.0f;
@@ -261,11 +255,46 @@ void AnimaDirectionalLight::ComputeProjectionMatrix()
 	float z = 1000.0f;
 #endif
 
-	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-t, t, -t, t, -z, z);
-	AnimaMatrix projectionViewMatrix = projectionMatrix * AnimaSceneObject::GetMatrix("ViewMatrix");
+	AnimaFrustum* frustum = activeCamera->GetFrustum();
 
+	AnimaVertex3f direction = -GetDirection();
+	AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();
+	AnimaVertex3f perpVec2 = (direction ^ perpVec1).Normalized();
+
+	AnimaMatrix rotMat;	
+	rotMat.m[0] = perpVec1.x;	rotMat.m[1] = perpVec2.x;	rotMat.m[2] =	direction.x;
+	rotMat.m[4] = perpVec1.y;	rotMat.m[5] = perpVec2.y;	rotMat.m[6] =	direction.y;
+	rotMat.m[8] = perpVec1.z;	rotMat.m[9] = perpVec2.z;	rotMat.m[10] =	direction.z;
+
+	AnimaVertex3f frustumVertices[8];
+	frustum->GetFrustumVertices(frustumVertices);
+
+	for (AInt i = 0; i < 8; i++)
+		frustumVertices[i] = rotMat * frustumVertices[i];
+
+	AnimaVertex3f minV = frustumVertices[0], maxV = frustumVertices[0];
+
+	for (AInt i = 1; i < 8; i++)
+	{
+		minV.x = min(minV.x, frustumVertices[i].x);
+		minV.y = min(minV.y, frustumVertices[i].y);
+		minV.z = min(minV.z, frustumVertices[i].z);
+		maxV.x = max(maxV.x, frustumVertices[i].x);
+		maxV.y = max(maxV.y, frustumVertices[i].y);
+		maxV.z = max(maxV.z, frustumVertices[i].z);
+	}
+
+	AnimaVertex3f extends = maxV - minV;
+	extends *= 0.5f;
+
+	AnimaMatrix viewMatrix(rotMat);
+	viewMatrix.Translate(-((minV + maxV) * 0.5f));
+
+	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extends.x, extends.x, -extends.y, extends.y, -extends.z, extends.z);
+
+	AnimaSceneObject::SetMatrix("ViewMatrix", viewMatrix);
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);
-	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionMatrix * viewMatrix);
 }
 
 void AnimaDirectionalLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
