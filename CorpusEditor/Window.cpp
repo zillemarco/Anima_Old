@@ -87,6 +87,9 @@ void Window::DrawScene()
 
 void Window::DrawCameraFrustum()
 {
+	if (_tpcamera->IsActive())
+		return;
+
 	Anima::AnimaFrustum* frustum = _tpcamera->GetFrustum();
 
 	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
@@ -99,12 +102,12 @@ void Window::DrawCameraFrustum()
 	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
 
 	vertici.RemoveAll();
-	vertici.Add(frustum->GetFrustumVertex(6));
-	vertici.Add(frustum->GetFrustumVertex(5));
 	vertici.Add(frustum->GetFrustumVertex(4));
-	vertici.Add(frustum->GetFrustumVertex(7));
 	vertici.Add(frustum->GetFrustumVertex(5));
 	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(7));
 	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
 
 	vertici.RemoveAll();
@@ -146,6 +149,9 @@ void Window::DrawCameraFrustum()
 
 void Window::DrawLightFrustum()
 {
+	if (_tpcamera->IsActive())
+		return;
+
 	Anima::AnimaFrustum* frustum = _directionalLight->GetFrustum();
 
 	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
@@ -158,12 +164,12 @@ void Window::DrawLightFrustum()
 	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
 
 	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(6));
 	vertici.Add(frustum->GetFrustumVertex(6));
 	vertici.Add(frustum->GetFrustumVertex(5));
 	vertici.Add(frustum->GetFrustumVertex(4));
-	vertici.Add(frustum->GetFrustumVertex(7));
-	vertici.Add(frustum->GetFrustumVertex(5));
-	vertici.Add(frustum->GetFrustumVertex(6));
 	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
 
 	vertici.RemoveAll();

@@ -205,7 +205,7 @@ void AnimaCamera::Activate()
 
 void AnimaCamera::Deactivate()
 {
-	_active = true;
+	_active = false;
 
 	if (_camerasManager != nullptr)
 		_camerasManager->NotifyCameraDeactivation(this);
