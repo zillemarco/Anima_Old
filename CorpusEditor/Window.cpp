@@ -65,19 +65,19 @@ void Window::DrawScene()
 	
 	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
 	
-	int nD = renderingManager->DeferredDrawAllModels(GetEngine()->GetScenesManager()->GetStage("test-scene"));
-
 	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
 	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
 	vertici.Add(Anima::AnimaVertex3f(-1.0f, 1.0f, 0.0f));
 	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
-	renderingManager->DrawPrimitive(GetEngine()->GetScenesManager()->GetStage("test-scene"), &vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
-
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
+	
 	vertici.RemoveAll();
 	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
 	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
 	vertici.Add(Anima::AnimaVertex3f(1.0f, -1.0f, 0.0f));
-	renderingManager->DrawPrimitive(GetEngine()->GetScenesManager()->GetStage("test-scene"), &vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
+	
+	renderingManager->DeferredDrawAll(GetEngine()->GetScenesManager()->GetStage("test-scene"));
 		
 	SwapBuffers();
 
@@ -265,7 +265,19 @@ void Window::Load()
 	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-vs.glsl", Anima::AnimaShader::VERTEX));
 	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-combine")->Link();
+	
+	mgr->CreateProgram("primitive-draw");
+	mgr->GetProgramFromName("primitive-draw")->Create();
+	mgr->GetProgramFromName("primitive-draw")->AddShader(mgr->LoadShaderFromFile("primitive-draw-vs", ANIMA_ENGINE_SHADERS_PATH "Primitive/primitive-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("primitive-draw")->AddShader(mgr->LoadShaderFromFile("primitive-draw-fs", ANIMA_ENGINE_SHADERS_PATH "Primitive/primitive-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("primitive-draw")->Link();
 
+	mgr->CreateProgram("primitive-combine");
+	mgr->GetProgramFromName("primitive-combine")->Create();
+	mgr->GetProgramFromName("primitive-combine")->AddShader(mgr->LoadShaderFromFile("primitive-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Primitive/combine-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("primitive-combine")->AddShader(mgr->LoadShaderFromFile("primitive-combine-fs", ANIMA_ENGINE_SHADERS_PATH "Primitive/combine-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("primitive-combine")->Link();
+	
 	mgr->CreateProgram("fxaaFilter");
 	mgr->GetProgramFromName("fxaaFilter")->Create();
 	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-vs.glsl", Anima::AnimaShader::VERTEX));

@@ -14,19 +14,14 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-int numeroDisegnati = 0;
-
 template class AnimaArray<AnimaVertex3f, AnimaVertex3f>;
 
 AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
+	: _primitives(allocator)
 {
 	_allocator = allocator;
 	_filterCamera = nullptr;
 	_filterMesh = nullptr;
-
-	_primitiveDrawShader = nullptr;
-	_primitiveDrawVertexShader = nullptr;
-	_primitiveDrawFragmentShader = nullptr;
 	
 	_indexesBufferObject = 0;
 	_verticesBufferObject = 0;
@@ -35,7 +30,8 @@ AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
 	InitTextureSlots();
 }
 
-AnimaRenderingManager::AnimaRenderingManager(const AnimaRenderingManager& src)
+AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager& src)
+	: _primitives(src._primitives)
 {
 	_allocator = src._allocator;
 
@@ -56,13 +52,10 @@ AnimaRenderingManager::AnimaRenderingManager(const AnimaRenderingManager& src)
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
-
-	_primitiveDrawShader = nullptr;
-	_primitiveDrawVertexShader = nullptr;
-	_primitiveDrawFragmentShader = nullptr;
 }
 
 AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
+	: _primitives(src._primitives)
 {
 	_allocator = src._allocator;
 	_texturesMap = src._texturesMap;
@@ -82,10 +75,6 @@ AnimaRenderingManager::AnimaRenderingManager(AnimaRenderingManager&& src)
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
-
-	_primitiveDrawShader = nullptr;
-	_primitiveDrawVertexShader = nullptr;
-	_primitiveDrawFragmentShader = nullptr;
 }
 
 AnimaRenderingManager::~AnimaRenderingManager()
@@ -118,10 +107,6 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(const AnimaRenderingMana
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
-
-		_primitiveDrawShader = nullptr;
-		_primitiveDrawVertexShader = nullptr;
-		_primitiveDrawFragmentShader = nullptr;
 	}
 
 	return *this;
@@ -152,10 +137,6 @@ AnimaRenderingManager& AnimaRenderingManager::operator=(AnimaRenderingManager&& 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
-
-		_primitiveDrawShader = nullptr;
-		_primitiveDrawVertexShader = nullptr;
-		_primitiveDrawFragmentShader = nullptr;
 	}
 
 	return *this;
@@ -216,6 +197,20 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 
 			SetGBuffer("LightsBuffer", lightsBuffer);
 		}
+		
+		AnimaGBuffer* primitivesBuffer = GetGBuffer("PrimitivesBuffer");
+		if (primitivesBuffer != nullptr)
+			primitivesBuffer->Resize(screenWidth, screenHeight);
+		else
+		{
+			primitivesBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			primitivesBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			primitivesBuffer->AddTexture("ColorMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			ANIMA_ASSERT(primitivesBuffer->Create());
+			
+			SetGBuffer("PrimitivesBuffer", primitivesBuffer);
+		}
+		
 		AnimaTexture* diffuseTexture = GetTexture("DiffuseMap");
 		if(diffuseTexture != nullptr)
 			diffuseTexture->Resize(screenWidth, screenHeight);
@@ -224,6 +219,16 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
+		}
+		
+		AnimaTexture* diffuse2Texture = GetTexture("Diffuse2Map");
+		if(diffuse2Texture != nullptr)
+			diffuse2Texture->Resize(screenWidth, screenHeight);
+		else
+		{
+			diffuse2Texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			ANIMA_ASSERT(diffuse2Texture->LoadRenderTargets());
+			SetTexture("Diffuse2Map", diffuse2Texture);
 		}
 
 		AnimaTexture* ssaoTexture = GetTexture("SSAOMap");
@@ -296,81 +301,6 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	glGenVertexArrays(1, &_vertexArrayObject);
 	glGenBuffers(1, &_indexesBufferObject);
 	glGenBuffers(1, &_verticesBufferObject);
-}
-
-void AnimaRenderingManager::InitPrimitiveDrawShader()
-{
-	if (_primitiveDrawShader == nullptr)
-	{
-		_primitiveDrawShader = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*_allocator, _allocator, nullptr);
-
-		if (_primitiveDrawVertexShader == nullptr)
-		{
-			_primitiveDrawVertexShader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*_allocator, _allocator);
-
-			AnimaString str(_allocator);
-			bool readCompletely = true;
-
-			std::ifstream is(ANIMA_ENGINE_SHADERS_PATH "Common/primitive-vs.glsl", std::ifstream::binary);
-			if (is)
-			{
-				is.seekg(0, is.end);
-				int length = (int)is.tellg();
-				is.seekg(0, is.beg);
-
-				str.Reserve(length);
-
-				// read data as a block:
-				is.read(str.GetBuffer(), length);
-
-				if (!is)
-					readCompletely = false;
-
-				is.close();
-			}
-
-			ANIMA_ASSERT(readCompletely);
-
-			_primitiveDrawVertexShader->SetText(str);
-			_primitiveDrawVertexShader->SetType(AnimaShader::VERTEX);
-		}
-
-		if (_primitiveDrawFragmentShader == nullptr)
-		{
-			_primitiveDrawFragmentShader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*_allocator, _allocator);
-
-			AnimaString str(_allocator);
-			bool readCompletely = true;
-
-			std::ifstream is(ANIMA_ENGINE_SHADERS_PATH "Common/primitive-fs.glsl", std::ifstream::binary);
-			if (is)
-			{
-				is.seekg(0, is.end);
-				int length = (int)is.tellg();
-				is.seekg(0, is.beg);
-
-				str.Reserve(length);
-
-				// read data as a block:
-				is.read(str.GetBuffer(), length);
-
-				if (!is)
-					readCompletely = false;
-
-				is.close();
-			}
-
-			ANIMA_ASSERT(readCompletely);
-
-			_primitiveDrawFragmentShader->SetText(str);
-			_primitiveDrawFragmentShader->SetType(AnimaShader::FRAGMENT);
-		}
-
-		_primitiveDrawShader->Create();
-		_primitiveDrawShader->AddShader(_primitiveDrawVertexShader);
-		_primitiveDrawShader->AddShader(_primitiveDrawFragmentShader);
-		ANIMA_ASSERT(_primitiveDrawShader->Link());
-	}
 }
 
 void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst)
@@ -534,10 +464,8 @@ void AnimaRenderingManager::Finish(AnimaScene* scene)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
+void AnimaRenderingManager::DeferredDrawAll(AnimaScene* scene)
 {
-	numeroDisegnati = 0;
-
 	Anima::AnimaShadersManager* shadersManager = scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 
@@ -551,10 +479,7 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
-	numeroDisegnati = 0;
 	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"));
-
-	int num = numeroDisegnati;
 	
 	Finish(scene);
 
@@ -595,22 +520,49 @@ int AnimaRenderingManager::DeferredDrawAllModels(AnimaScene* scene)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
-	Start(scene);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-	Finish(scene);
+	if(_primitives.GetSize() <= 0)
+	{
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start(scene);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
+		Finish(scene);
+	}
+	else
+	{
+		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
+		GetTexture("Diffuse2Map")->BindAsRenderTarget();
+		Start(scene);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
+		Finish(scene);
+		
+		// Disegno le primitive in PrimitivesBuffer
+		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
+		Start(scene);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawPrimitives(scene, shadersManager->GetProgramFromName("primitive-draw"));
+		Finish(scene);
+		
+		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
+		// ed il colore + profondità da PrimitivesBuffer
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start(scene);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePrimitives(scene, shadersManager->GetProgramFromName("primitive-combine"));
+		Finish(scene);
+		
+		ClearPrimitives();
+	}
 	
-	//
-	//	Applicazione effetti
-	//
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
-
-	return num;
 }
 
-void AnimaRenderingManager::DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model)
 {
 	Anima::AnimaShadersManager* shadersManager = scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = scene->GetLightsManager();
@@ -738,8 +690,6 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* 
 	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	program->DisableInputs();
 #endif
-
-	numeroDisegnati++;
 }
 
 void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model)
@@ -892,7 +842,6 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 {
 	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 	AnimaModelsManager* modelsManager = scene->GetModelsManager();
-	AnimaShadersManager* shadersManager = scene->GetShadersManager();
 
 	AnimaArray<AnimaLight*, AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
 
@@ -961,19 +910,15 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 	}
 }
 
-int AnimaRenderingManager::UpdateModelsVisibility(AnimaScene* scene)
+void AnimaRenderingManager::UpdateModelsVisibility(AnimaScene* scene)
 {
-	numeroDisegnati = 0;
-
 	Anima::AnimaModelsManager* modelsManager = scene->GetModelsManager();
 	Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
 
-	Anima::AnimaFrustum* frustum = scene->GetCamerasManager()->GetActiveCamera()->GetFrustum();
+	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
 	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
 		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
-
-	return numeroDisegnati;
 }
 
 void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix)
@@ -982,15 +927,12 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 
 	if (mesh->GetVerticesNumber() > 0)
 	{
-		if (!frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+		if (frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			mesh->SetIsVisible(true);
+		else
 		{
 			mesh->SetIsVisible(false);
 			return;
-		}
-		else
-		{
-			mesh->SetIsVisible(true);
-			numeroDisegnati++;
 		}
 	}
 
@@ -999,9 +941,6 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 	{
 		AnimaMesh* subMesh = mesh->GetMesh(i);
 		subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
-		
-		if (subMesh->IsVisible())
-			numeroDisegnati++;
 	}
 
 	ASizeT childrenNumber = mesh->GetChildrenNumber();
@@ -1009,38 +948,54 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
-void AnimaRenderingManager::DrawPrimitive(AnimaScene* scene, AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
+void AnimaRenderingManager::AddPrimitive(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
 {
 	if (vertices == nullptr)
 		return;
+	AnimaPrimitiveData* primitive = AnimaAllocatorNamespace::AllocateNew<AnimaPrimitiveData>(*_allocator, _allocator);
+	primitive->SetVertices(vertices);
+	primitive->SetIndices(indices);
+	primitive->SetColor(color);
+	primitive->SetType(primitiveType);
+	primitive->SetModelMatrix(modelMatrix);
+	
+	_primitives.Add(primitive);
+}
 
-	InitPrimitiveDrawShader();
-
-	if (_primitiveDrawShader == nullptr)
+void AnimaRenderingManager::DrawPrimitives(AnimaScene* scene, AnimaShaderProgram* program)
+{
+	if(program == nullptr)
 		return;
 	
-	AnimaVertex2f size = GetVector2f("ScreenSize");
-	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	program->Use();
+	program->SetUniform("_projectionViewMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
 	
-	//if (color.w < 1.0f)
-	//	glEnable(GL_BLEND);
-	glDisable(GL_BLEND);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
+	AInt nPrimitives = _primitives.GetSize();
+	for(AInt i = 0; i < nPrimitives; i++)
+		DrawPrimitive(_primitives[i], program);
+}
 
-	_primitiveDrawShader->Use();
-	_primitiveDrawShader->SetUniform("_color", color);
-	_primitiveDrawShader->SetUniform("_modelMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
-	_primitiveDrawShader->SetUniform("_projectionViewMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
-
-	glInvalidateBufferData(_verticesBufferObject);
-	glInvalidateBufferData(_indexesBufferObject);
-
+void AnimaRenderingManager::DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProgram* program)
+{
+	if(primitive == nullptr)
+		return;
+	
+	AnimaColor4f color = primitive->GetColor();
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices = primitive->GetVertices();
+	AnimaArray<AUint, AUint>* indices = primitive->GetIndices();
+	AUint type = primitive->GetType();
+	AnimaMatrix modelMatrix = primitive->GetModelMatrix();
+	
+	if (color.w < 1.0f)
+		glEnable(GL_BLEND);
+	
+	program->SetUniform("_color", color);
+	program->SetUniform("_modelMatrix", modelMatrix);
+	
 	AInt nVertices = vertices->GetSize();
 	AInt nCoordinate = nVertices * 3;
 	AFloat* coordinate = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, (ASizeT)nCoordinate);
-
+	
 	AInt offset = 0;
 	for (AInt i = 0; i < nVertices; i++)
 	{
@@ -1048,37 +1003,64 @@ void AnimaRenderingManager::DrawPrimitive(AnimaScene* scene, AnimaArray<AnimaVer
 		coordinate[offset++] = (*vertices)[i].y;
 		coordinate[offset++] = (*vertices)[i].z;
 	}
-
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _verticesBufferObject);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AFloat) * nCoordinate, coordinate, GL_STATIC_DRAW);
 	AnimaAllocatorNamespace::DeallocateArray(*_allocator, coordinate);
 	coordinate = nullptr;
-
-	if (indices != nullptr)
+	
+	if (indices->GetSize() > 0)
 	{
 		AInt nIndici = indices->GetSize();
 		AUint* indici = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, (ASizeT)nIndici);
-
+		
 		for (AInt i = 0; i < nIndici; i++)
 			indici[i] = (*indices)[i];
-
+		
 		glBindVertexArray(_vertexArrayObject);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * nIndici, indici, GL_STATIC_DRAW);
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indici);
 		indici = nullptr;
-
-		_primitiveDrawShader->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
-		glDrawElements(primitiveType, nIndici, GL_UNSIGNED_INT, 0);
+		
+		program->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
+		glDrawElements(type, nIndici, GL_UNSIGNED_INT, 0);
 	}
 	else
 	{
 		glBindVertexArray(_vertexArrayObject);
-		_primitiveDrawShader->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
-		glDrawArrays(primitiveType, 0, nCoordinate);
+		program->EnableInput("_position", 3, GL_FLOAT, _verticesBufferObject);
+		glDrawArrays(type, 0, nCoordinate);
 	}
-
+	
 	glDisable(GL_BLEND);
+}
+
+void AnimaRenderingManager::CombinePrimitives(AnimaScene* scene, AnimaShaderProgram* program)
+{
+	program->Use();
+	program->UpdateRenderingManagerProperies(this);
+	if(glGetError() != GL_NO_ERROR)
+		return;
+	
+	if (_filterMesh->NeedsBuffersUpdate())
+		_filterMesh->UpdateBuffers();
+	
+	program->Use();
+	program->UpdateCameraProperies(_filterCamera);
+	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	program->UpdateRenderingManagerProperies(this);
+	
+#ifdef WIN32
+	glBindVertexArray(_filterMesh->GetVertexArrayObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+#else
+	program->EnableInputs(_filterMesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _filterMesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _filterMesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	program->DisableInputs();
+#endif
 }
 
 void AnimaRenderingManager::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
@@ -1488,25 +1470,7 @@ void AnimaRenderingManager::Clear()
 			pair.second = nullptr;
 		}
 	}
-
-	if (_primitiveDrawFragmentShader != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawFragmentShader);
-		_primitiveDrawFragmentShader = nullptr;
-	}
-
-	if (_primitiveDrawVertexShader != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawVertexShader);
-		_primitiveDrawVertexShader = nullptr;
-	}
-
-	if (_primitiveDrawShader != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitiveDrawShader);
-		_primitiveDrawShader = nullptr;
-	}
-
+	
 	_texturesMap.clear();
 	_textureSlotsMap.clear();
 	_gBuffersMap.clear();
@@ -1519,7 +1483,109 @@ void AnimaRenderingManager::Clear()
 	_integersMap.clear();
 	_booleansMap.clear();
 
-	_lightsMeshMap;
+	_lightsMeshMap.clear();
+	
+	ClearPrimitives();
+}
+
+void AnimaRenderingManager::ClearPrimitives()
+{
+	AInt nPrimitives = _primitives.GetSize();
+	for(AInt i = 0; i < nPrimitives; i++)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitives[i]);
+		_primitives[i] = nullptr;
+	}
+	
+	_primitives.RemoveAll();
+}
+
+AnimaPrimitiveData::AnimaPrimitiveData(AnimaAllocator* allocator)
+	: _vertices(allocator)
+	, _indices(allocator)
+{
+}
+
+AnimaPrimitiveData::AnimaPrimitiveData(AnimaPrimitiveData& src)
+	: _vertices(src._vertices)
+	, _indices(src._indices)
+{
+}
+
+AnimaPrimitiveData::AnimaPrimitiveData(AnimaPrimitiveData&& src)
+	: _vertices(src._vertices)
+	, _indices(src._indices)
+{
+}
+
+AnimaPrimitiveData::~AnimaPrimitiveData()
+{
+	_vertices.RemoveAll();
+	_indices.RemoveAll();
+}
+
+void AnimaPrimitiveData::SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices)
+{
+	_vertices.RemoveAll();
+	
+	if(vertices != nullptr)
+	{
+		AInt vSize = vertices->GetSize();
+		for(AInt i = 0; i < vSize; i++)
+			_vertices.Add(vertices->ElementAt(i));
+	}
+}
+
+AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaPrimitiveData::GetVertices()
+{
+	return &_vertices;
+}
+
+void AnimaPrimitiveData::SetIndices(AnimaArray<AUint, AUint>* indices)
+{
+	_indices.RemoveAll();
+	
+	if(indices != nullptr)
+	{
+		AInt vSize = indices->GetSize();
+		for(AInt i = 0; i < vSize; i++)
+			_indices.Add(indices->ElementAt(i));
+	}
+}
+
+AnimaArray<AUint, AUint>* AnimaPrimitiveData::GetIndices()
+{
+	return &_indices;
+}
+
+void AnimaPrimitiveData::SetColor(const AnimaColor4f& color)
+{
+	_color = color;
+}
+
+AnimaColor4f AnimaPrimitiveData::GetColor()
+{
+	return _color;
+}
+
+void AnimaPrimitiveData::SetType(AUint type)
+{
+	_type = type;
+}
+
+AUint AnimaPrimitiveData::GetType()
+{
+	return _type;
+}
+
+void AnimaPrimitiveData::SetModelMatrix(const AnimaMatrix& modelMatrix)
+{
+	_modelMatrix = modelMatrix;
+}
+
+AnimaMatrix AnimaPrimitiveData::GetModelMatrix()
+{
+	return _modelMatrix;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

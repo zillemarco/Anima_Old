@@ -1,7 +1,8 @@
 #version 150 core
 
-in mat4 frag_inverseProjectionViewMatrix;
 out vec4 FragColor[2];
+
+uniform mat4 CAM_ProjectionViewInverseMatrix;
 
 uniform sampler2D REN_GB_PrepassBuffer_DepthMap;
 uniform sampler2D REN_GB_PrepassBuffer_NormalMap;
@@ -18,7 +19,7 @@ void main()
 	pos.z 		= texture(REN_GB_PrepassBuffer_DepthMap, pos.xy).r;
 
 	vec3 normal 		= normalize(texture(REN_GB_PrepassBuffer_NormalMap, pos.xy).xyz * 2.0f - 1.0f);
-	vec4 clip 			= frag_inverseProjectionViewMatrix * vec4(pos * 2.0f - 1.0f, 1.0f);
+	vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(pos * 2.0f - 1.0f, 1.0f);
 	pos 				= clip.xyz / clip.w;
 
 	vec3 lightVec 	= normalize(HEL_Position - pos);

@@ -55,7 +55,7 @@ void CRModelViewer::Render()
 	_renderingManager->Start(_engine->GetScenesManager()->GetStage("test-scene"));
 
 	if (_selectedModel != nullptr)
-		_renderingManager->DeferredDrawSingleModel(_engine->GetScenesManager()->GetStage("test-scene"), _selectedModel);
+		_renderingManager->DeferredDrawModel(_engine->GetScenesManager()->GetStage("test-scene"), _selectedModel);
 
 	_renderingManager->Finish(_engine->GetScenesManager()->GetStage("test-scene"));
 

@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_CORE_PROFILE, false);
-	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_COMPAT_PROFILE);
+	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_PROFILE, ANIMA_ENGINE_OPENGL_CORE_PROFILE);
 	engine.SetWindowHint(ANIMA_ENGINE_RESIZABLE, true);
 	engine.SetWindowHint(ANIMA_ENGINE_DECORATED, true);
 
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-#ifndef _DEBUG
+#if !defined _DEBUG && defined WIN32
 	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
 	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
 		return 0;

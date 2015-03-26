@@ -16,6 +16,7 @@
 #include "AnimaVertex.h"
 #include "AnimaArray.h"
 #include "AnimaFrustum.h"
+#include "AnimaMatrix.h"
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -27,11 +28,43 @@ using namespace boost::multi_index;
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class ANIMA_ENGINE_EXPORT AnimaPrimitiveData
+{
+public:
+	AnimaPrimitiveData(AnimaAllocator* allocator);
+	AnimaPrimitiveData(AnimaPrimitiveData& src);
+	AnimaPrimitiveData(AnimaPrimitiveData&& src);
+	~AnimaPrimitiveData();
+	
+public:
+	void SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices);
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetVertices();
+	
+	void SetIndices(AnimaArray<AUint, AUint>* indices);
+	AnimaArray<AUint, AUint>* GetIndices();
+	
+	void SetColor(const AnimaColor4f& color);
+	AnimaColor4f GetColor();
+	
+	void SetType(AUint type);
+	AUint GetType();
+	
+	void SetModelMatrix(const AnimaMatrix& modelMatrix);
+	AnimaMatrix GetModelMatrix();
+	
+protected:
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>	_vertices;
+	AnimaArray<AUint, AUint>					_indices;
+	AnimaColor4f								_color;
+	AUint										_type;
+	AnimaMatrix									_modelMatrix;
+};
+
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
 {
 public:
 	AnimaRenderingManager(AnimaAllocator* allocator);
-	AnimaRenderingManager(const AnimaRenderingManager& src);
+	AnimaRenderingManager(AnimaRenderingManager& src);
 	AnimaRenderingManager(AnimaRenderingManager&& src);
 	~AnimaRenderingManager();
 
@@ -42,17 +75,17 @@ public:
 	void Start(AnimaScene* scene);
 	void Finish(AnimaScene* scene);
 
-	int DeferredDrawAllModels(AnimaScene* scene);
-	void DeferredDrawSingleModel(AnimaScene* scene, AnimaMesh* model);
-	void DrawPrimitive(AnimaScene* scene, AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
+	void DeferredDrawAll(AnimaScene* scene);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model);
+	
+	void AddPrimitive(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
 
-	int UpdateModelsVisibility(AnimaScene* scene);
+	void UpdateModelsVisibility(AnimaScene* scene);
 	
 public:
 	virtual void InitTextureSlots();
 	virtual void InitRenderingTargets(AInt screenWidth, AInt screenHeight);
 	virtual void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
-	virtual void InitPrimitiveDrawShader();
 
 protected:
 	void DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
@@ -65,6 +98,11 @@ protected:
 	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
 		
 	void Clear();
+	void ClearPrimitives();
+	
+	void DrawPrimitives(AnimaScene* scene, AnimaShaderProgram* program);
+	void DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProgram* program);
+	void CombinePrimitives(AnimaScene* scene, AnimaShaderProgram* program);
 
 	void ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
 	void ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
@@ -153,9 +191,7 @@ protected:
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
 
-	AnimaShaderProgram* _primitiveDrawShader;
-	AnimaShader*		_primitiveDrawVertexShader;
-	AnimaShader*		_primitiveDrawFragmentShader;
+	AnimaArray<AnimaPrimitiveData*, AnimaPrimitiveData*> _primitives;
 	AUint				_vertexArrayObject;
 	AUint				_verticesBufferObject;
 	AUint				_indexesBufferObject;
