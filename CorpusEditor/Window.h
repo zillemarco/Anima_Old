@@ -23,12 +23,15 @@ public:
 
 public:
 	void DrawScene();
+	void DrawCameraFrustum();
+	void DrawLightFrustum();
 	void Load();
 
 	Anima::AnimaThirdPersonCamera* _tpcamera;
 	Anima::AnimaFirstPersonCamera* _fpcamera;
 	Anima::AnimaFPSTimer _timerFPS;
 	Anima::AnimaBenchmarkTimer _timer;
+	Anima::AnimaDirectionalLight* _directionalLight;
 	
 private:
 	ANIMA_WINDOW_EVENT void PaintCallback(Anima::AnimaWindow* window);

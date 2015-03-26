@@ -159,6 +159,14 @@ void AnimaRenderingManager::InitTextureSlots()
 	SetTextureSlot("SpecularMap", 4);
 	SetTextureSlot("ShadowMap", 5);
 
+	// Slot usati dal disegno di primitive
+	SetTextureSlot("DepthMap", 0);
+	SetTextureSlot("Diffuse2Map", 1);
+	SetTextureSlot("PDepthMap", 2);
+	SetTextureSlot("PColorMap", 3);
+
+	// Slot usati dal deferred shading
+
 	// Slot usati dai filtri
 	SetTextureSlot("FilterMap", 0);
 }
@@ -204,8 +212,8 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 		else
 		{
 			primitivesBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			primitivesBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			primitivesBuffer->AddTexture("ColorMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			primitivesBuffer->AddTexture("PDepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
+			primitivesBuffer->AddTexture("PColorMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			ANIMA_ASSERT(primitivesBuffer->Create());
 			
 			SetGBuffer("PrimitivesBuffer", primitivesBuffer);

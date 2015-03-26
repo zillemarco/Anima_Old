@@ -208,6 +208,11 @@ void AnimaLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", AnimaMatrix());
 }
 
+AnimaFrustum* AnimaLight::GetFrustum()
+{
+	return &_frustum;
+}
+
 //----------------------------------------------------------------
 //						ANIMA DIRECTIONAL LIGHT
 //----------------------------------------------------------------
@@ -257,15 +262,15 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 
 	AnimaFrustum* frustum = activeCamera->GetFrustum();
 
-	AnimaVertex3f direction = -GetDirection();
-	AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();
-	AnimaVertex3f perpVec2 = (direction ^ perpVec1).Normalized();
+	AnimaVertex3f direction = -GetDirection();												// asse z
+	AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();	// asse y
+	AnimaVertex3f perpVec2 = (direction ^ perpVec1).Normalized();							// asse x
 
 	AnimaMatrix rotMat;	
-	rotMat.m[0] = perpVec1.x;	rotMat.m[1] = perpVec2.x;	rotMat.m[2] =	direction.x;
-	rotMat.m[4] = perpVec1.y;	rotMat.m[5] = perpVec2.y;	rotMat.m[6] =	direction.y;
-	rotMat.m[8] = perpVec1.z;	rotMat.m[9] = perpVec2.z;	rotMat.m[10] =	direction.z;
-
+	rotMat.m[0] = perpVec2.x;	rotMat.m[1] = perpVec1.x;	rotMat.m[2] =	direction.x;
+	rotMat.m[4] = perpVec2.y;	rotMat.m[5] = perpVec1.y;	rotMat.m[6] =	direction.y;
+	rotMat.m[8] = perpVec2.z;	rotMat.m[9] = perpVec1.z;	rotMat.m[10] =	direction.z;
+	
 	AnimaVertex3f frustumVertices[8];
 	frustum->GetFrustumVertices(frustumVertices);
 
@@ -287,14 +292,18 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	AnimaVertex3f extends = maxV - minV;
 	extends *= 0.5f;
 
-	AnimaMatrix viewMatrix(rotMat);
-	viewMatrix.Translate(-((minV + maxV) * 0.5f));
+	AnimaMatrix viewMatrix1(rotMat);
+	viewMatrix1.Translate(-((minV + maxV) * 0.5f));
+	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt((minV + maxV) * 0.5f, direction, perpVec1);
 
 	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extends.x, extends.x, -extends.y, extends.y, -extends.z, extends.z);
+	AnimaMatrix projectionViewMatrix = projectionMatrix * viewMatrix;
 
 	AnimaSceneObject::SetMatrix("ViewMatrix", viewMatrix);
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);
-	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionMatrix * viewMatrix);
+	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);
+
+	_frustum.ComputeFrustum(projectionMatrix);
 }
 
 void AnimaDirectionalLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)

@@ -38,6 +38,10 @@ Window::Window()
 
 	_lastPTX = 0.0;
 	_lastPTY = 0.0;
+
+	_fpcamera = nullptr;
+	_tpcamera = nullptr;
+
 	type = true;
 }
 
@@ -62,21 +66,10 @@ void Window::DrawScene()
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
-	
-	GetEngine()->GetScenesManager()->GetStage("test-scene")->GetDataGeneratorsManager()->UpdateValues();
-	
-	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
-	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
-	vertici.Add(Anima::AnimaVertex3f(-1.0f, 1.0f, 0.0f));
-	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
-	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
-	
-	vertici.RemoveAll();
-	vertici.Add(Anima::AnimaVertex3f(-1.0f, -1.0f, 0.0f));
-	vertici.Add(Anima::AnimaVertex3f(1.0f, 1.0f, 0.0f));
-	vertici.Add(Anima::AnimaVertex3f(1.0f, -1.0f, 0.0f));
-	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_LINE_STRIP);
-	
+		
+	DrawCameraFrustum();
+	DrawLightFrustum();
+
 	renderingManager->DeferredDrawAll(GetEngine()->GetScenesManager()->GetStage("test-scene"));
 		
 	SwapBuffers();
@@ -92,6 +85,124 @@ void Window::DrawScene()
 	}
 }
 
+void Window::DrawCameraFrustum()
+{
+	Anima::AnimaFrustum* frustum = _tpcamera->GetFrustum();
+
+	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(6));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 0.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 0.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 0.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 0.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+}
+
+void Window::DrawLightFrustum()
+{
+	Anima::AnimaFrustum* frustum = _directionalLight->GetFrustum();
+
+	Anima::AnimaArray<Anima::AnimaVertex3f, Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(1.0f, 0.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(6));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 0.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(0));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(4));
+	vertici.Add(frustum->GetFrustumVertex(1));
+	vertici.Add(frustum->GetFrustumVertex(5));
+	vertici.Add(frustum->GetFrustumVertex(0));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+
+	vertici.RemoveAll();
+	vertici.Add(frustum->GetFrustumVertex(6));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	vertici.Add(frustum->GetFrustumVertex(7));
+	vertici.Add(frustum->GetFrustumVertex(3));
+	vertici.Add(frustum->GetFrustumVertex(2));
+	renderingManager->AddPrimitive(&vertici, nullptr, Anima::AnimaColor4f(0.0f, 1.0f, 1.0f, 1.0f), Anima::AnimaMatrix(), GL_TRIANGLES);
+}
+
 void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 {
 	void* ctx = window->GetOpenGLContext();
@@ -103,8 +214,12 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
 		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
 
-		camerasManager->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetActiveCamera());
+		camerasManager->UpdatePerspectiveCameras(30.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 500.0f);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+
+		if (((Window*)window)->_fpcamera != nullptr)
+			((Window*)window)->_fpcamera->CalculateProjectionMatrix(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 5000.0f);
 
 		if (((Window*)window)->renderingManager != nullptr)
 		{
@@ -138,7 +253,8 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 		activeCamera->RotateXDeg(dy * 0.1);
 		activeCamera->RotateYDeg(dx * 0.1);
 
-		lightsManager->UpdateLightsMatrix(activeCamera);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 	}
 
 	wnd->_lastPTX = x;
@@ -158,8 +274,9 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	Window* wnd = (Window*)window;
 	
 	Anima::AnimaLightsManager* lightsManager = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
 
-	Anima::AnimaCamera* camera = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->GetActiveCamera();
+	Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
 	Anima::AnimaLight* dirL = lightsManager->GetLightFromName("directional");
 
 	Anima::AnimaVertex3f direction;
@@ -170,24 +287,44 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_W:
+		camerasManager->GetCameraFromName("tp")->RotateXDeg(1.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		break;
 	case ANIMA_ENGINE_KEY_UP:
-		camera->Move(camera->GetForward(), amount);
-		lightsManager->UpdateLightsMatrix(camera);
+		//camera->Move(camera->GetForward(), amount);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), amount);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 		break;
 	case ANIMA_ENGINE_KEY_S:
+		camerasManager->GetCameraFromName("tp")->RotateXDeg(-1.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		camera->Move(camera->GetForward(), -amount);
-		lightsManager->UpdateLightsMatrix(camera);
+		//camera->Move(camera->GetForward(), -amount);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), -amount);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 		break;
 	case ANIMA_ENGINE_KEY_D:
+		camerasManager->GetCameraFromName("tp")->RotateYDeg(1.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		camera->Move(camera->GetRight(), amount);
-		lightsManager->UpdateLightsMatrix(camera);
+		//camera->Move(camera->GetRight(), amount);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), amount);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 		break;
 	case ANIMA_ENGINE_KEY_A:
+		camerasManager->GetCameraFromName("tp")->RotateYDeg(-1.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		break;
 	case ANIMA_ENGINE_KEY_LEFT:
-		camera->Move(camera->GetRight(), -amount);
-		lightsManager->UpdateLightsMatrix(camera);
+		//camera->Move(camera->GetRight(), -amount);
+		//lightsManager->UpdateLightsMatrix(activeCamera);
+		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), -amount);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 		break;
 	case ANIMA_ENGINE_KEY_F:
 		wnd->_fpcamera->Activate();
@@ -206,6 +343,18 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 		break;
 	case ANIMA_ENGINE_KEY_K:
 			direction.z -= 0.01f;
+			break;
+	case ANIMA_ENGINE_KEY_G:
+		camerasManager->GetCameraFromName("fp")->Move(camerasManager->GetCameraFromName("fp")->GetForward(), amount);
+		break;
+	case ANIMA_ENGINE_KEY_B:
+		camerasManager->GetCameraFromName("fp")->Move(camerasManager->GetCameraFromName("fp")->GetForward(), -amount);
+		break;
+	case ANIMA_ENGINE_KEY_N:
+		camerasManager->GetCameraFromName("fp")->Move(camerasManager->GetCameraFromName("fp")->GetRight(), amount);
+		break;
+	case ANIMA_ENGINE_KEY_V:
+		camerasManager->GetCameraFromName("fp")->Move(camerasManager->GetCameraFromName("fp")->GetRight(), -amount);
 		break;
 	}
 
@@ -236,9 +385,10 @@ void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
 
 	Anima::AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
-	activeCamera->Zoom(y * 1.0f);
+	activeCamera->Zoom(y * 0.1f);
 
-	lightsManager->UpdateLightsMatrix(activeCamera);
+	//lightsManager->UpdateLightsMatrix(activeCamera);
+	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 }
 
 void Window::Load()
@@ -311,10 +461,10 @@ void Window::Load()
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
 
-	Anima::AnimaLight* l1 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
-	l1->SetColor(1.0f, 1.0f, 1.0f);
-	l1->SetIntensity(1.0f);
-	l1->SetDirection(-1.0f, -1.0f, 0.0f);
+	_directionalLight = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	_directionalLight->SetColor(1.0f, 1.0f, 1.0f);
+	_directionalLight->SetIntensity(1.0f);
+	_directionalLight->SetDirection(-1.0f, -1.0f, 0.0f);
 	
 	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	//l2->SetColor(1.0f, 1.0f, 0.78f);

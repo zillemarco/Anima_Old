@@ -751,17 +751,17 @@ void AnimaMatrix::LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, A
 	LookAt(AnimaVertex3f(xPosition, yPosition, zPosition), AnimaVertex3f(xForward, yForward, zForward), AnimaVertex3f(xUp, yUp, zUp));
 }
 
-AnimaMatrix AnimaMatrix::MakeLookAt(const AnimaVertex3f &from, const AnimaVertex3f &to, const AnimaVertex3f &up)
+AnimaMatrix AnimaMatrix::MakeLookAt(const AnimaVertex3f &position, const AnimaVertex3f &forward, const AnimaVertex3f &up)
 {
 	AnimaMatrix mat;
-	mat.LookAt(from, to, up);
+	mat.LookAt(position, forward, up);
 	return mat;
 }
 
-AnimaMatrix AnimaMatrix::MakeLookAt(AFloat xFrom, AFloat yFrom, AFloat zFrom, AFloat xTo, AFloat yTo, AFloat zTo, AFloat xUp, AFloat yUp, AFloat zUp)
+AnimaMatrix AnimaMatrix::MakeLookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xForward, AFloat yForward, AFloat zForward, AFloat xUp, AFloat yUp, AFloat zUp)
 {
 	AnimaMatrix mat;
-	mat.LookAt(xFrom, yFrom, zFrom, xTo, yTo, zTo, xUp, yUp, zUp);
+	mat.LookAt(xPosition, yPosition, zPosition, xForward, yForward, zForward, xUp, yUp, zUp);
 	return mat;
 }
 

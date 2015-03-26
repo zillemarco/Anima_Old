@@ -144,17 +144,17 @@ int main(int argc, char** argv)
 	window->_fpcamera->Activate();
 
 #else
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
-	//	return 0;
-	//mesh->GetTransformation()->Scale(10.0f, 10.0f, 10.0f);
-	//mesh->ComputeBoundingBox(true);
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->Scale(5.0f, 5.0f, 5.0f);
+	mesh->ComputeBoundingBox(true);
 
-	//path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	//if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
-	//	return 0;
-	//mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
-	//mesh->ComputeBoundingBox(true);
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	mesh->ComputeBoundingBox(true);
 
 	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
 	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
@@ -166,7 +166,7 @@ int main(int argc, char** argv)
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 
-	Anima::AnimaVertex3f pos(0.0f, 0.0f, 10.0f);
+	Anima::AnimaVertex3f pos(0.0f, 0.0f, 30.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
 	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
 

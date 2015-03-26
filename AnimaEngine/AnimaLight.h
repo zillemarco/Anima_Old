@@ -16,6 +16,7 @@
 #include "AnimaMesh.h"
 #include "AnimaTexture.h"
 #include "AnimaCamera.h"
+#include "AnimaFrustum.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -72,6 +73,8 @@ public:
 	virtual AnimaMatrix GetProjectionMatrix();
 	virtual AnimaMatrix GetProjectionViewMatrix();
 
+	AnimaFrustum* GetFrustum();
+
 	virtual void UpdateMeshTransformation(AnimaTransformation* meshTransformation) = 0;
 	virtual void UpdateCullFace(AnimaCamera* activeCamera) = 0;
 
@@ -79,6 +82,7 @@ public:
 	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
 
 protected:
+	AnimaFrustum _frustum;
 };
 
 //----------------------------------------------------------------
