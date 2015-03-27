@@ -39,6 +39,7 @@ public:
 	AnimaMatrix& operator=(AnimaMatrix&& src);
 
 	AnimaVertex3f operator*(const AnimaVertex3f& p) const;
+	AnimaVertex4f operator*(const AnimaVertex4f& p) const;
 	AnimaMatrix operator*(const AnimaMatrix& p) const;
 	AnimaMatrix& operator*=(const AnimaMatrix& p);
 	AnimaMatrix operator*(const AFloat p[16]) const;

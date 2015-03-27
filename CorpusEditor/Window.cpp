@@ -220,12 +220,12 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
 		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
 
-		camerasManager->UpdatePerspectiveCameras(30.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 500.0f);
-		//lightsManager->UpdateLightsMatrix(activeCamera);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		camerasManager->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 5000.0f);
+		lightsManager->UpdateLightsMatrix(camerasManager->GetActiveCamera());
+		//lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
 
-		if (((Window*)window)->_fpcamera != nullptr)
-			((Window*)window)->_fpcamera->CalculateProjectionMatrix(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 5000.0f);
+		//if (((Window*)window)->_fpcamera != nullptr)
+		//	((Window*)window)->_fpcamera->CalculateProjectionMatrix(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 5000.0f);
 
 		if (((Window*)window)->renderingManager != nullptr)
 		{

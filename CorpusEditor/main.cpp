@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
 
-	Anima::AnimaVertex3f pos(0.0f, 100.0f, 0.0f);
+	Anima::AnimaVertex3f pos(0.0f, 1000.0f, 1000.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
 	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
 

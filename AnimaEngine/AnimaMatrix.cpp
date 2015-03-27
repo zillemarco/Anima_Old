@@ -74,6 +74,17 @@ AnimaVertex3f AnimaMatrix::operator*(const AnimaVertex3f& p) const
 	return r;
 }
 
+AnimaVertex4f AnimaMatrix::operator*(const AnimaVertex4f& p) const
+{
+	AnimaVertex4f r;
+	r.x = m[0] * p.x + m[4] * p.y + m[8] * p.z + m[12] * p.w;
+	r.y = m[1] * p.x + m[5] * p.y + m[9] * p.z + m[13] * p.w;
+	r.z = m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14] * p.w;
+	r.w = m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15] * p.w;
+
+	return r;
+}
+
 AnimaMatrix AnimaMatrix::operator*(const AnimaMatrix& p) const
 {
 	AnimaMatrix r(this->m);

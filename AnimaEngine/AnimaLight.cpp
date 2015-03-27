@@ -252,15 +252,7 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	if (activeCamera == nullptr)
 		return;
 
-#ifndef _DEBUG
-	float t = 2800.0f;
-	float z = 10000.0f;
-#else
-	float t = 20.0f;
-	float z = 1000.0f;
-#endif
-
-	AnimaFrustum* frustum = activeCamera->GetFrustum();
+	AnimaFrustum* cameraFrustum = activeCamera->GetFrustum();
 
 	AnimaVertex3f direction = GetDirection();												// asse z
 	AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();	// asse y
@@ -272,13 +264,12 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	rotMat.m[8] = perpVec2.z;	rotMat.m[9] = perpVec1.z;	rotMat.m[10] =	direction.z;
 	
 	AnimaVertex3f frustumVertices[8];
-	frustum->GetFrustumVertices(frustumVertices);
-
+	cameraFrustum->GetFrustumVertices(frustumVertices);
+	
 	for (AInt i = 0; i < 8; i++)
 		frustumVertices[i] = rotMat * frustumVertices[i];
 
 	AnimaVertex3f minV = frustumVertices[0], maxV = frustumVertices[0];
-
 	for (AInt i = 1; i < 8; i++)
 	{
 		minV.x = min(minV.x, frustumVertices[i].x);
@@ -291,9 +282,8 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 
 	AnimaVertex3f extends = maxV - minV;
 	extends *= 0.5f;
-
-	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt((minV + maxV) * 0.5f, direction, perpVec1);
-
+	
+	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(cameraFrustum->GetBoundingBoxCenter(), direction, perpVec1);
 	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extends.x, extends.x, -extends.y, extends.y, -extends.z, extends.z);
 	AnimaMatrix projectionViewMatrix = projectionMatrix * viewMatrix;
 
