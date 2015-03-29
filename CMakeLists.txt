@@ -218,7 +218,7 @@ set(CORPUS_EDITOR_NAME CorpusEditor)
 # AnimaEngine dependencies
 #--------------------------------------------------------------------
 if (WIN32)	
-	set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimpd.lib)
+	set(AnimaEngine_DEP_ASSIMP_DEBUG ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimp.lib)
 	set(AnimaEngine_DEP_ASSIMP_RELEASE ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimp.lib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
 elseif(APPLE)

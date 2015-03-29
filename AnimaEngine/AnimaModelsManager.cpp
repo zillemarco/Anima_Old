@@ -509,6 +509,11 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 			material->SetTexture("SpecularTexture", texture);
 			material->SetBoolean("HasSpecular", true);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
+
 		texturesCaricate++;
 	}
 
@@ -524,6 +529,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		{
 			material->SetTexture("AmbientTexture", texture);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
 		texturesCaricate++;
 	}
 	if (mtl->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
@@ -537,6 +546,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		if (texture != nullptr)
 		{
 			material->SetTexture("EmissiveTexture", texture);
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
 		}
 		texturesCaricate++;
 	}
@@ -553,6 +566,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 			material->SetTexture("BumpTexture", texture);
 			material->SetBoolean("HasBump", true);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
 		texturesCaricate++;
 	}
 	if (mtl->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
@@ -567,6 +584,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		{
 			material->SetTexture("BumpTexture", texture);
 			material->SetBoolean("HasBump", true);
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
 		}
 		texturesCaricate++;
 	}
@@ -583,6 +604,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		{
 			material->SetTexture("ShininessTexture", texture);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
 		texturesCaricate++;
 	}
 	if (mtl->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
@@ -598,6 +623,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 			material->SetTexture("OpacityTexture", texture);
 			material->SetBoolean("HasOpacity", true);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
 		texturesCaricate++;
 	}
 	if (mtl->GetTexture(aiTextureType_DISPLACEMENT, 0, &path) == AI_SUCCESS)
@@ -611,6 +640,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		if (texture != nullptr)
 		{
 			material->SetTexture("DisplacementTexture", texture);
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
 		}
 		texturesCaricate++;
 	}
@@ -626,10 +659,15 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		{
 			material->SetTexture("LightMapTexture", texture);
 		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
 		texturesCaricate++;
 	}
 	if (mtl->GetTexture(aiTextureType_REFLECTION, 0, &path) == AI_SUCCESS)
 	{
+		ANIMA_ASSERT(false);
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
@@ -638,6 +676,10 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		if (texture != nullptr)
 		{
 			material->SetTexture("ReflectionTexture", texture);
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
 		}
 
 		texturesCaricate++;

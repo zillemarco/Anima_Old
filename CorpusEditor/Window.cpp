@@ -67,8 +67,8 @@ void Window::DrawScene()
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
 		
-	DrawCameraFrustum();
-	DrawLightFrustum();
+	//DrawCameraFrustum();
+	//DrawLightFrustum();
 
 	renderingManager->DeferredDrawAll(GetEngine()->GetScenesManager()->GetStage("test-scene"));
 		
@@ -293,45 +293,65 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 	switch (key)
 	{
 	case ANIMA_ENGINE_KEY_W:
-		camerasManager->GetCameraFromName("tp")->RotateXDeg(1.0f);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
-		break;
 	case ANIMA_ENGINE_KEY_UP:
-		//camera->Move(camera->GetForward(), amount);
-		//lightsManager->UpdateLightsMatrix(activeCamera);
-		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), amount);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		camera->Move(camera->GetForward(), amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_S:
-		camerasManager->GetCameraFromName("tp")->RotateXDeg(-1.0f);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
-		break;
 	case ANIMA_ENGINE_KEY_DOWN:
-		//camera->Move(camera->GetForward(), -amount);
-		//lightsManager->UpdateLightsMatrix(activeCamera);
-		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), -amount);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		camera->Move(camera->GetForward(), -amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_D:
-		camerasManager->GetCameraFromName("tp")->RotateYDeg(1.0f);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
-		break;
 	case ANIMA_ENGINE_KEY_RIGHT:
-		//camera->Move(camera->GetRight(), amount);
-		//lightsManager->UpdateLightsMatrix(activeCamera);
-		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), amount);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		camera->Move(camera->GetRight(), amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
 	case ANIMA_ENGINE_KEY_A:
-		camerasManager->GetCameraFromName("tp")->RotateYDeg(-1.0f);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
-		break;
 	case ANIMA_ENGINE_KEY_LEFT:
-		//camera->Move(camera->GetRight(), -amount);
-		//lightsManager->UpdateLightsMatrix(activeCamera);
-		camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), -amount);
-		lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+		camera->Move(camera->GetRight(), -amount);
+		lightsManager->UpdateLightsMatrix(camera);
 		break;
+	//case ANIMA_ENGINE_KEY_W:
+	//	camerasManager->GetCameraFromName("tp")->RotateXDeg(1.0f);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_UP:
+	//	//camera->Move(camera->GetForward(), amount);
+	//	//lightsManager->UpdateLightsMatrix(activeCamera);
+	//	camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), amount);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_S:
+	//	camerasManager->GetCameraFromName("tp")->RotateXDeg(-1.0f);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_DOWN:
+	//	//camera->Move(camera->GetForward(), -amount);
+	//	//lightsManager->UpdateLightsMatrix(activeCamera);
+	//	camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetForward(), -amount);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_D:
+	//	camerasManager->GetCameraFromName("tp")->RotateYDeg(1.0f);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_RIGHT:
+	//	//camera->Move(camera->GetRight(), amount);
+	//	//lightsManager->UpdateLightsMatrix(activeCamera);
+	//	camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), amount);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_A:
+	//	camerasManager->GetCameraFromName("tp")->RotateYDeg(-1.0f);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
+	//case ANIMA_ENGINE_KEY_LEFT:
+	//	//camera->Move(camera->GetRight(), -amount);
+	//	//lightsManager->UpdateLightsMatrix(activeCamera);
+	//	camerasManager->GetCameraFromName("tp")->Move(camerasManager->GetCameraFromName("tp")->GetRight(), -amount);
+	//	lightsManager->UpdateLightsMatrix(camerasManager->GetCameraFromName("tp"));
+	//	break;
 	case ANIMA_ENGINE_KEY_F:
 		wnd->_fpcamera->Activate();
 		break;
@@ -470,8 +490,8 @@ void Window::Load()
 	_directionalLight = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
 	_directionalLight->SetColor(1.0f, 1.0f, 1.0f);
 	_directionalLight->SetIntensity(1.0f);
-	_directionalLight->SetDirection(-1.0f, -1.0f, 0.0f);
-	
+	_directionalLight->SetDirection(-1.0f, 0.0f, -1.0f);
+
 	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	//l2->SetColor(1.0f, 1.0f, 0.78f);
 	//l2->SetConstantAttenuation(1.0f);

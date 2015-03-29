@@ -8,6 +8,7 @@ in vec3 _bitangent;
 
 uniform mat4 CAM_projectionViewMatrix;
 uniform mat4 MOD_modelMatrix;
+uniform mat4 MOD_normalMatrix;
 
 out vec2 frag_textureCoord;
 out vec3 frag_normal;
@@ -18,9 +19,9 @@ void main()
 {
     gl_Position = CAM_projectionViewMatrix *  MOD_modelMatrix * vec4(_position, 1.0);
     
-	frag_normal = (MOD_modelMatrix * vec4(_normal, 0.0)).xyz;
-    vec3 tangent = (MOD_modelMatrix * vec4(_tangent, 0.0)).xyz;
-    vec3 bitangent = (MOD_modelMatrix * vec4(_bitangent, 0.0)).xyz;
+	frag_normal = normalize((MOD_normalMatrix * vec4(_normal, 0.0)).xyz);
+    vec3 tangent = normalize((MOD_normalMatrix * vec4(_tangent, 0.0)).xyz);
+    vec3 bitangent = normalize((MOD_normalMatrix * vec4(_bitangent, 0.0)).xyz);
 	frag_worldPosition = (MOD_modelMatrix * vec4(_position, 1.0)).xyz;
     frag_textureCoord = _textureCoord;
 	frag_TBNMatrix = mat3(tangent, bitangent, frag_normal);

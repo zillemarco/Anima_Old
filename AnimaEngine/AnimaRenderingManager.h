@@ -94,8 +94,8 @@ protected:
 	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*, AnimaLight*>* lights);
 
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
 		
 	void Clear();
 	void ClearPrimitives();

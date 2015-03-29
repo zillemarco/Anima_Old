@@ -14,7 +14,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-GLubyte animaUTGAcompare[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed TGA Header
+GLubyte animaUTGAcompareRGBA[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed RGB/RGBA TGA Header
+GLubyte animaUTGAcompareBW[12] = { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed BW TGA Header
 GLubyte animaCTGAcompare[12] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Compressed TGA Header
 
 AnimaTexturesManager::AnimaTexturesManager(AnimaScene* scene)
@@ -222,7 +223,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& fi
 	fread(data, 1, imageSize, file);
 	
 	fclose(file);
-
+	
 	AnimaTexture* texture = LoadTextureFromData(textureName, data, imageSize, width, height, textureTarget, filter, internalFormat, format, dataType, clamp);
 
 	delete[] data;
@@ -267,7 +268,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 		return nullptr;
 	}
 
-	if (memcmp(animaUTGAcompare, &tgaHeader, sizeof(tgaHeader)) == 0)
+	if (memcmp(animaUTGAcompareRGBA, &tgaHeader, sizeof(tgaHeader)) == 0 || memcmp(animaUTGAcompareBW, &tgaHeader, sizeof(tgaHeader)) == 0)
 		return LoadUncompressedTGA(file, textureName, textureTarget, filter, internalFormat, format, dataType, clamp);
 	else if (memcmp(animaCTGAcompare, &tgaHeader, sizeof(tgaHeader)) == 0)
 		return LoadCompressedTGA(file, textureName, textureTarget, filter, internalFormat, format, dataType, clamp);
@@ -318,17 +319,24 @@ AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const Anima
 	tga.Height = height;
 	tga.Bpp = bpp;
 
-	if ((width <= 0) || (height <= 0) || ((bpp != 24) && (bpp != 32)))
+	if ((width <= 0) || (height <= 0) || ((bpp != 8) && (bpp != 24) && (bpp != 32)))
 	{
 		if (file != NULL)
 			fclose(file);
 		return nullptr;
 	}
 
+	bool invert = true;
+
 	if (bpp == 24)
 		type = GL_RGB;
-	else
+	else if (bpp == 32)
 		type = GL_RGBA;
+	else
+	{
+		type = GL_RGBA;
+		invert = false;
+	}
 
 	tga.bytesPerPixel = (tga.Bpp / 8);
 	tga.imageSize = (tga.bytesPerPixel * tga.Width * tga.Height);
@@ -348,7 +356,7 @@ AnimaTexture* AnimaTexturesManager::LoadUncompressedTGA(FILE * file, const Anima
 		return nullptr;
 	}
 
-	for (GLuint cswap = 0; cswap < (int)tga.imageSize; cswap += tga.bytesPerPixel)
+	for (GLuint cswap = 0; cswap < (int)tga.imageSize && invert; cswap += tga.bytesPerPixel)
 		imageData[cswap] ^= imageData[cswap + 2] ^=	imageData[cswap] ^= imageData[cswap + 2];
 
 	fclose(file);

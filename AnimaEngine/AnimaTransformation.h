@@ -96,6 +96,8 @@ public:
 	void SetTransformationMatrix(AFloat m[16]);
 	AnimaMatrix GetTransformationMatrix();
 	AnimaMatrix* GetPTransformationMatrix();
+	AnimaMatrix GetNormalMatrix();
+	AnimaMatrix* GetPNormalMatrix();
 
 protected:
 	void SetInitialTransformationMatrix(const AnimaMatrix& m);
@@ -107,6 +109,7 @@ protected:
 	AnimaVertex3f _scale;
 
 	AnimaMatrix _transformationMatrix;
+	AnimaMatrix _normalMatrix;
 	AnimaMatrix _initialTransformationMatrix;
 };
 

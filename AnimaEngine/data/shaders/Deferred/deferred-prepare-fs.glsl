@@ -69,8 +69,10 @@ void main()
 	}
 		
 	vec3 normal = calcNormal(frag_textureCoord);
-		
-	FragColor[1] = diffuseColor;
+
+	float len = length(normal);
+
+	FragColor[1] = diffuseColor * len;
 	FragColor[2] = vec4(normal * 0.5 + 0.5, 1.0);
 	FragColor[3] = vec4(specularColor, 1.0 / MAT_Shininess);
 }

@@ -206,18 +206,18 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			SetGBuffer("LightsBuffer", lightsBuffer);
 		}
 		
-		AnimaGBuffer* primitivesBuffer = GetGBuffer("PrimitivesBuffer");
-		if (primitivesBuffer != nullptr)
-			primitivesBuffer->Resize(screenWidth, screenHeight);
-		else
-		{
-			primitivesBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
-			primitivesBuffer->AddTexture("PDepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			primitivesBuffer->AddTexture("PColorMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
-			ANIMA_ASSERT(primitivesBuffer->Create());
-			
-			SetGBuffer("PrimitivesBuffer", primitivesBuffer);
-		}
+		//AnimaGBuffer* primitivesBuffer = GetGBuffer("PrimitivesBuffer");
+		//if (primitivesBuffer != nullptr)
+		//	primitivesBuffer->Resize(screenWidth, screenHeight);
+		//else
+		//{
+		//	primitivesBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+		//	primitivesBuffer->AddTexture("PDepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
+		//	primitivesBuffer->AddTexture("PColorMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
+		//	ANIMA_ASSERT(primitivesBuffer->Create());
+		//	
+		//	SetGBuffer("PrimitivesBuffer", primitivesBuffer);
+		//}
 		
 		AnimaTexture* diffuseTexture = GetTexture("DiffuseMap");
 		if(diffuseTexture != nullptr)
@@ -229,25 +229,25 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
 		
-		AnimaTexture* diffuse2Texture = GetTexture("Diffuse2Map");
-		if(diffuse2Texture != nullptr)
-			diffuse2Texture->Resize(screenWidth, screenHeight);
-		else
-		{
-			diffuse2Texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
-			ANIMA_ASSERT(diffuse2Texture->LoadRenderTargets());
-			SetTexture("Diffuse2Map", diffuse2Texture);
-		}
+		//AnimaTexture* diffuse2Texture = GetTexture("Diffuse2Map");
+		//if(diffuse2Texture != nullptr)
+		//	diffuse2Texture->Resize(screenWidth, screenHeight);
+		//else
+		//{
+		//	diffuse2Texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+		//	ANIMA_ASSERT(diffuse2Texture->LoadRenderTargets());
+		//	SetTexture("Diffuse2Map", diffuse2Texture);
+		//}
 
-		AnimaTexture* ssaoTexture = GetTexture("SSAOMap");
-		if (ssaoTexture != nullptr)
-			ssaoTexture->Resize(screenWidth, screenHeight);
-		else
-		{
-			ssaoTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
-			ANIMA_ASSERT(ssaoTexture->LoadRenderTargets());
-			SetTexture("SSAOMap", ssaoTexture);
-		}
+		//AnimaTexture* ssaoTexture = GetTexture("SSAOMap");
+		//if (ssaoTexture != nullptr)
+		//	ssaoTexture->Resize(screenWidth, screenHeight);
+		//else
+		//{
+		//	ssaoTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+		//	ANIMA_ASSERT(ssaoTexture->LoadRenderTargets());
+		//	SetTexture("SSAOMap", ssaoTexture);
+		//}
 		
 		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
@@ -333,7 +333,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -370,7 +370,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -408,7 +408,7 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -444,7 +444,7 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -496,12 +496,12 @@ void AnimaRenderingManager::DeferredDrawAll(AnimaScene* scene)
 	////
 	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
 	
-	//
-	//	Aggiorno le mappature per le ombre
-	//
-	Start(scene);
-	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	Finish(scene);
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start(scene);
+	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish(scene);
 	
 	//
 	//	Preparazione dei buffer della luce
@@ -637,28 +637,29 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
 	AnimaMatrix identityMatrix;
-	DeferredDrawModel(scene, model, program, identityMatrix, updateMaterial, forceDraw, frustum);
+	DeferredDrawModel(scene, model, program, identityMatrix, identityMatrix, updateMaterial, forceDraw, frustum);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
 	if (scene == nullptr || model == nullptr || program == nullptr)
 		return;
 	
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
+	AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
 
 	ASizeT meshNumber = model->GetMeshesNumber();
 	for (ASizeT i = 0; i < meshNumber; i++)
-		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, updateMaterial, forceDraw, frustum);
+		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 
 	ASizeT childrenNumber = model->GetChildrenNumber();
 	for (ASizeT i = 0; i < childrenNumber; i++)
-		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, updateMaterial, forceDraw, frustum);
+		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 }
 
 #define TEST
 
-void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
 #if defined TEST
 	if (!forceDraw)
@@ -686,7 +687,7 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* 
 		program->UpdateMaterialProperies(material, this);
 	}
 
-	program->UpdateMeshProperies(mesh, parentTransformation);
+	program->UpdateMeshProperies(mesh, parentTransformation, parentNormalMatrix);
 	
 #ifdef WIN32
 	glBindVertexArray(mesh->GetVertexArrayObject());
@@ -735,30 +736,32 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 			AnimaMesh* innerModel = modelsManager->GetModel(j);
 
 			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+			AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
 
-			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, true, false, frustum);
+			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
 
 			ASizeT meshNumber = innerModel->GetMeshesNumber();
 			for (ASizeT i = 0; i < meshNumber; i++)
-				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, true, false, frustum);
+				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
 
 			ASizeT childrenNumber = innerModel->GetChildrenNumber();
 			for (ASizeT i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, true, false, frustum);
+				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 		}
 	}
 	else
 	{
 		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
-		DeferredDrawModelMesh(scene, model, program, modelMatrix, true, false, frustum);
+		AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
+		DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
 
 		ASizeT meshNumber = model->GetMeshesNumber();
 		for (ASizeT i = 0; i < meshNumber; i++)
-			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, true, false, frustum);
+			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
 
 		ASizeT childrenNumber = model->GetChildrenNumber();
 		for (ASizeT i = 0; i < childrenNumber; i++)
-			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, true, false, frustum);
+			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 	}
 }
 
@@ -800,7 +803,7 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 		light->UpdateCullFace(activeCamera);
 
 		program->UpdateLightProperies(light, this);
-		program->UpdateMeshProperies(mesh, mesh->GetTransformation()->GetTransformationMatrix());
+		program->UpdateMeshProperies(mesh, mesh->GetTransformation()->GetTransformationMatrix(), mesh->GetTransformation()->GetNormalMatrix());
 		program->UpdateRenderingManagerProperies(this);
 
 #ifdef WIN32
@@ -831,7 +834,7 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaScene* scene, AnimaShaderPr
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
 
-	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	program->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -1056,7 +1059,7 @@ void AnimaRenderingManager::CombinePrimitives(AnimaScene* scene, AnimaShaderProg
 	
 	program->Use();
 	program->UpdateCameraProperies(_filterCamera);
-	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix());
+	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
 	program->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32

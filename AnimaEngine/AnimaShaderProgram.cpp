@@ -782,7 +782,7 @@ void AnimaShaderProgram::DisableInputs()
 	}
 }
 
-void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& transformation)
+void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix)
 {
 	AnimaString str(_allocator);
 	AnimaUniformInfo info;
@@ -794,7 +794,20 @@ void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix&
 		info = _uniforms[str];
 
 		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, transformation);
+			SetUniform(info._location, modelMatrix);
+		else
+		{
+			UPD_ERROR;
+		}
+	}
+
+	str = "MOD_normalMatrix";
+	if (_uniforms.find(str) != end)
+	{
+		info = _uniforms[str];
+
+		if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._location, normalMatrix);
 		else
 		{
 			UPD_ERROR;
