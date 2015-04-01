@@ -1,12 +1,12 @@
 #pragma once
 
-#include "CorpusOGLWindowBase.h"
+#include "AnimaEditorOGLWindowBase.h"
 #include <AnimaRenderingManager.h>
 
 class QMouseEvent;
 class QWheelEvent;
 
-class CRModelViewer : public CorpusOGLWindowBase
+class CRModelViewer : public AnimaEditorOGLWindowBase
 {
 public:
 	explicit CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent = nullptr);

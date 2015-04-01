@@ -1,24 +1,24 @@
 //
-//  CorpusDocument.h
+//  AnimaEditorDocument.h
 //  Anima
 //
 //  Created by Marco Zille on 04/12/14.
 //
 //
 
-#ifndef __Anima__CorpusDocument__
-#define __Anima__CorpusDocument__
+#ifndef __Anima__AnimaEditorDocument__
+#define __Anima__AnimaEditorDocument__
 
 #include <QString>
 #include <AnimaEngine.h>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
-class CorpusDocument
+class AnimaEditorDocument
 {
 public:
-	CorpusDocument();
-	~CorpusDocument();
+	AnimaEditorDocument();
+	~AnimaEditorDocument();
 
 	bool NewDocument(QString name, QString path);
 	bool OpenDocument(QString path);
@@ -231,4 +231,4 @@ private:
 	Anima::AnimaEngine* _engine;
 };
 
-#endif /* defined(__Anima__CorpusDocument__) */
+#endif /* defined(__Anima__AnimaEditorDocument__) */

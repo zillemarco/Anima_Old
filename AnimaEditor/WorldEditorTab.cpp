@@ -7,9 +7,9 @@
 //
 
 #include "WorldEditorTab.h"
-#include "CorpusDocument.h"
+#include "AnimaEditorDocument.h"
 
-WorldEditorTab::WorldEditorTab(CorpusDocument* doc)
+WorldEditorTab::WorldEditorTab(AnimaEditorDocument* doc)
 {
 	_document = doc;
 	

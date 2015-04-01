@@ -7,11 +7,11 @@ set(ANIMA_ENGINE_VERSION_PATCH "0")
 
 set(ANIMA_ENGINE_VERSION "${ANIMA_ENGINE_VERSION_MAJOR}.${ANIMA_ENGINE_VERSION_MINOR}.${ANIMA_ENGINE_VERSION_PATCH}")
 
-set(CORPUS_EDITOR_VERSION_MAJOR "0")
-set(CORPUS_EDITOR_VERSION_MINOR "0")
-set(CORPUS_EDITOR_VERSION_PATCH "0")
+set(ANIMA_EDITOR_VERSION_MAJOR "0")
+set(ANIMA_EDITOR_VERSION_MINOR "0")
+set(ANIMA_EDITOR_VERSION_PATCH "0")
 
-set(CORPUS_EDITOR_VERSION "${CORPUS_EDITOR_VERSION_MAJOR}.${CORPUS_EDITOR_VERSION_MINOR}.${CORPUS_EDITOR_VERSION_PATCH}")
+set(ANIMA_EDITOR_VERSION "${ANIMA_EDITOR_VERSION_MAJOR}.${ANIMA_EDITOR_VERSION_MINOR}.${ANIMA_EDITOR_VERSION_PATCH}")
 
 if(WIN32)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/lib)
@@ -67,7 +67,7 @@ find_package(Qt5Widgets)
 find_package(Qt5Declarative)
 
 if(NOT Qt5Widgets_FOUND)
-	message("Qt5 not found but is needed to compile CorpusEditor")
+	message("Qt5 not found but is needed to compile AnimaEditor")
 endif()
 
 if(ANIMA_ENGINE_USE_NVTOOLSEXT)
@@ -212,7 +212,7 @@ set(ANIMA_ENGINE_LIBRARIES ${AnimaEngine_LIBRARIES} CACHE STRING "Dependencies o
 # Choose library output name
 #--------------------------------------------------------------------
 set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
-set(CORPUS_EDITOR_NAME CorpusEditor)
+set(ANIMA_EDITOR_NAME AnimaEditor)
 
 #--------------------------------------------------------------------
 # AnimaEngine dependencies
@@ -234,7 +234,7 @@ list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(AnimaEngine)
-add_subdirectory(CorpusEditor)
+add_subdirectory(AnimaEditor)
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
     add_subdirectory(docs)

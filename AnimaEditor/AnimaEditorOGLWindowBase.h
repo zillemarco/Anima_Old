@@ -1,13 +1,13 @@
 //
-//  CorpusOGLWindow.h
+//  AnimaEditorOGLWindow.h
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
 //
 //
 
-#ifndef __Anima__CorpusOGLWindow__
-#define __Anima__CorpusOGLWindow__
+#ifndef __Anima__AnimaEditorOGLWindow__
+#define __Anima__AnimaEditorOGLWindow__
 
 #include <qwindow>
 #include <qopenglfunctions>
@@ -19,12 +19,12 @@ namespace Anima {
 	class AnimaEngine;
 }
 
-class CorpusOGLWindowBase : public QWindow, protected QOpenGLFunctions
+class AnimaEditorOGLWindowBase : public QWindow, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
-	explicit CorpusOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent = nullptr);
-	~CorpusOGLWindowBase();
+	explicit AnimaEditorOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent = nullptr);
+	~AnimaEditorOGLWindowBase();
 	
 	virtual void Render(QPainter* painter);
 	virtual void Render();
@@ -54,4 +54,4 @@ protected:
 	Anima::AnimaEngine* _engine;
 };
 
-#endif /* defined(__Anima__CorpusOGLWindow__) */
+#endif /* defined(__Anima__AnimaEditorOGLWindow__) */

@@ -7,7 +7,7 @@
 //
 
 #include "ResourceManagerTab.h"
-#include "CorpusDocument.h"
+#include "AnimaEditorDocument.h"
 #include "CRModelViewer.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -21,13 +21,13 @@
 
 Q_DECLARE_METATYPE(Anima::AnimaMesh*)
 
-ResourceTreeItemModel::ResourceTreeItemModel(CorpusDocument* doc, QObject *parent)
+ResourceTreeItemModel::ResourceTreeItemModel(AnimaEditorDocument* doc, QObject *parent)
 	: QStandardItemModel(parent)
 {
 	_document = doc;
 }
 
-ResourceTreeItemModel::ResourceTreeItemModel(CorpusDocument* doc, int rows, int columns, QObject *parent)
+ResourceTreeItemModel::ResourceTreeItemModel(AnimaEditorDocument* doc, int rows, int columns, QObject *parent)
 	: QStandardItemModel(rows, columns, parent)
 {
 	_document = doc;
@@ -104,7 +104,7 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 	return QStandardItemModel::setData(index, value, role);
 }
 
-ResourceManagerTab::ResourceManagerTab(CorpusDocument* doc)
+ResourceManagerTab::ResourceManagerTab(AnimaEditorDocument* doc)
 {
 	_document = doc;
 	

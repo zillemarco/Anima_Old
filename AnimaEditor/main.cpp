@@ -4,8 +4,8 @@
 #include <QDateTime>
 #include <AnimaEngine.h>
 #include <AnimaWindow.h>
-#include "CorpusMainWindow.h"
-#include "CorpusDocument.h"
+#include "AnimaEditorMainWindow.h"
+#include "AnimaEditorDocument.h"
 #include <AnimaString.h>
 #include <AnimaModelsManager.h>
 #include "Window.h"
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	////palette.setColor(QPalette::HighlightedText, Qt::black);
 	////qApp->setPalette(palette);
 
-	//CorpusMainWindow mainWindow;
+	//AnimaEditorMainWindow mainWindow;
 	//
 	//mainWindow.show();
 	//return app.exec();

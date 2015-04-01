@@ -1,5 +1,5 @@
 //
-//  CorpusOGLWindowBase.cpp
+//  AnimaEditorOGLWindowBase.cpp
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
@@ -7,14 +7,14 @@
 //
 
 #include <AnimaEngine.h>
-#include "CorpusOGLWindowBase.h"
+#include "AnimaEditorOGLWindowBase.h"
 #include <QtCore/QCoreApplication>
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
 #include <QPainter>
 #include <qmessagebox>
 
-CorpusOGLWindowBase::CorpusOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
+AnimaEditorOGLWindowBase::AnimaEditorOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
 : QWindow(parent)
 , _animating(true)
 , _updatePending(false)
@@ -25,21 +25,21 @@ CorpusOGLWindowBase::CorpusOGLWindowBase(Anima::AnimaEngine* engine, QWindow* pa
 	setSurfaceType(QWindow::OpenGLSurface);
 }
 
-CorpusOGLWindowBase::~CorpusOGLWindowBase()
+AnimaEditorOGLWindowBase::~AnimaEditorOGLWindowBase()
 {
 	delete _device;
 }
 
-void CorpusOGLWindowBase::Render(QPainter* painter)
+void AnimaEditorOGLWindowBase::Render(QPainter* painter)
 {
 	Q_UNUSED(painter);
 }
 
-void CorpusOGLWindowBase::Initialize()
+void AnimaEditorOGLWindowBase::Initialize()
 {
 }
 
-void CorpusOGLWindowBase::Render()
+void AnimaEditorOGLWindowBase::Render()
 {
 	if(!_device)
 		_device = new QOpenGLPaintDevice;
@@ -53,7 +53,7 @@ void CorpusOGLWindowBase::Render()
 	Render(&painter);
 }
 
-void CorpusOGLWindowBase::RenderLater()
+void AnimaEditorOGLWindowBase::RenderLater()
 {
 	if(!_updatePending)
 	{
@@ -62,7 +62,7 @@ void CorpusOGLWindowBase::RenderLater()
 	}
 }
 
-bool CorpusOGLWindowBase::event(QEvent* event)
+bool AnimaEditorOGLWindowBase::event(QEvent* event)
 {
 	switch (event->type()) {
 		case QEvent::UpdateRequest:
@@ -75,7 +75,7 @@ bool CorpusOGLWindowBase::event(QEvent* event)
 	}
 }
 
-void CorpusOGLWindowBase::exposeEvent(QExposeEvent* event)
+void AnimaEditorOGLWindowBase::exposeEvent(QExposeEvent* event)
 {
 	Q_UNUSED(event);
 	
@@ -83,7 +83,7 @@ void CorpusOGLWindowBase::exposeEvent(QExposeEvent* event)
 		RenderNow();
 }
 
-void CorpusOGLWindowBase::RenderNow()
+void AnimaEditorOGLWindowBase::RenderNow()
 {
 	if (!isExposed())
 		return;

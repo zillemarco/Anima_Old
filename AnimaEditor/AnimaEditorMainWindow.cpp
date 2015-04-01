@@ -1,13 +1,13 @@
 //
-//  CorpusCorpusMainWindow.cpp
+//  AnimaEditorMainWindow.cpp
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
 //
 //
 
-#include "CorpusMainWindow.h"
-#include "CorpusDocument.h"
+#include "AnimaEditorMainWindow.h"
+#include "AnimaEditorDocument.h"
 #include "ResourceManagerTab.h"
 #include "WorldEditorTab.h"
 #include <QObject>
@@ -34,7 +34,7 @@
 
 #include "NewProjectWindow.h"
 
-CorpusMainWindow::CorpusMainWindow()
+AnimaEditorMainWindow::AnimaEditorMainWindow()
 {
 	_activeDocument = nullptr;
 	_resourceManagerTab = nullptr;
@@ -62,17 +62,17 @@ CorpusMainWindow::CorpusMainWindow()
 	createStatusBar();
 	updateMenus();
 	
-	setWindowTitle(tr("CorpusEditor"));
+	setWindowTitle(tr("AnimaEditor"));
 	setUnifiedTitleAndToolBarOnMac(true);
 }
 
-void CorpusMainWindow::closeEvent(QCloseEvent *event)
+void AnimaEditorMainWindow::closeEvent(QCloseEvent *event)
 {
 	if(!closeProject())
 		event->ignore();
 }
 
-void CorpusMainWindow::newProject()
+void AnimaEditorMainWindow::newProject()
 {
 	NewProjectWindow dlg;
 	if(dlg.exec())
@@ -87,7 +87,7 @@ void CorpusMainWindow::newProject()
 			closeProject();
 		}
 		
-		_activeDocument = new CorpusDocument;
+		_activeDocument = new AnimaEditorDocument;
 		if(!_activeDocument->NewDocument(dlg.getProjectName(), dlg.getProjectFolderPath()))
 		{
 			QMessageBox msg;
@@ -95,7 +95,7 @@ void CorpusMainWindow::newProject()
 			msg.setStandardButtons(QMessageBox::Ok);
 			msg.exec();
 			
-			setWindowTitle(tr("CorpusEditor"));
+			setWindowTitle(tr("AnimaEditor"));
 			
 			return;
 		}
@@ -111,18 +111,18 @@ void CorpusMainWindow::newProject()
 		
 		_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
 		
-		QSettings settings("ZEB", "CorpusEditor");
+		QSettings settings("ZEB", "AnimaEditor");
 		if(_resourceManagerTab != nullptr)
 			_resourceManagerTab->readSettings(&settings);
 		
 		if(_worldEditorTab != nullptr)
 			_worldEditorTab->readSettings(&settings);
 		
-		setWindowTitle(tr("CorpusEditor - ") + _activeDocument->projectName());
+		setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
 	}
 }
 
-void CorpusMainWindow::openProject()
+void AnimaEditorMainWindow::openProject()
 {
 	QString filePath = tr("");
 	
@@ -154,7 +154,7 @@ void CorpusMainWindow::openProject()
 			closeProject();
 		}
 		
-		_activeDocument = new CorpusDocument;
+		_activeDocument = new AnimaEditorDocument;
 		if(!_activeDocument->OpenDocument(filePath))
 		{
 			QMessageBox msg;
@@ -162,7 +162,7 @@ void CorpusMainWindow::openProject()
 			msg.setStandardButtons(QMessageBox::Ok);
 			msg.exec();
 			
-			setWindowTitle(tr("CorpusEditor"));
+			setWindowTitle(tr("AnimaEditor"));
 			
 			return;
 		}
@@ -180,18 +180,18 @@ void CorpusMainWindow::openProject()
 		
 		_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
 		
-		QSettings settings("ZEB", "CorpusEditor");
+		QSettings settings("ZEB", "AnimaEditor");
 		if(_resourceManagerTab != nullptr)
 			_resourceManagerTab->readSettings(&settings);
 		
 		if(_worldEditorTab != nullptr)
 			_worldEditorTab->readSettings(&settings);
 		
-		setWindowTitle(tr("CorpusEditor - ") + _activeDocument->projectName());
+		setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
 	}
 }
 
-void CorpusMainWindow::updateMenus()
+void AnimaEditorMainWindow::updateMenus()
 {
 	if(_activeDocument)
 	{
@@ -241,7 +241,7 @@ void CorpusMainWindow::updateMenus()
 	connect(_recentFilesMapper, SIGNAL(mapped(int)), this, SLOT(loadProjectFromRecentFiles(int)));
 }
 
-void CorpusMainWindow::createActions()
+void AnimaEditorMainWindow::createActions()
 {
 	_newAct = new QAction(tr("&New project"), this);
 	_newAct->setShortcuts(QKeySequence::New);
@@ -260,7 +260,7 @@ void CorpusMainWindow::createActions()
 	
 	_exitAct = new QAction(tr("E&xit"), this);
 	_exitAct->setShortcuts(QKeySequence::Quit);
-	_exitAct->setStatusTip(tr("Exit from CorpusEditor"));
+	_exitAct->setStatusTip(tr("Exit from AnimaEditor"));
 	connect(_exitAct, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
 	
 	_importModelAct = new QAction(tr("Import &model"), this);
@@ -276,7 +276,7 @@ void CorpusMainWindow::createActions()
 	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewMaterial()));
 }
 
-void CorpusMainWindow::createMenus()
+void AnimaEditorMainWindow::createMenus()
 {
 	_fileMenu = menuBar()->addMenu(tr("&File"));
 	_fileMenu->addAction(_newAct);
@@ -295,16 +295,16 @@ void CorpusMainWindow::createMenus()
 	_resourcesMenu->addAction(_addNewMaterialAct);
 }
 
-void CorpusMainWindow::createStatusBar()
+void AnimaEditorMainWindow::createStatusBar()
 {
 	statusBar()->showMessage(tr("Ready"));
 }
 
-void CorpusMainWindow::readSettings()
+void AnimaEditorMainWindow::readSettings()
 {
-	QSettings settings("ZEB", "CorpusEditor");
+	QSettings settings("ZEB", "AnimaEditor");
 	
-	settings.beginGroup("CorpusMainWindow");
+	settings.beginGroup("AnimaEditorMainWindow");
 	bool fullScreen = settings.value("full", false).toBool();
 	QPoint pos = settings.value("pos", QPoint(0, 0)).toPoint();
 	QSize size = settings.value("size", QSize(600, 500)).toSize();
@@ -331,9 +331,9 @@ void CorpusMainWindow::readSettings()
 		_worldEditorTab->readSettings(&settings);
 }
 
-void CorpusMainWindow::writeSettings()
+void AnimaEditorMainWindow::writeSettings()
 {
-	QSettings settings("ZEB", "CorpusEditor");
+	QSettings settings("ZEB", "AnimaEditor");
 	
 #if defined WIN32
 	bool bMax = isMaximized();
@@ -341,7 +341,7 @@ void CorpusMainWindow::writeSettings()
 	bool bMax = isFullScreen();
 #endif
 
-	settings.beginGroup("CorpusMainWindow");
+	settings.beginGroup("AnimaEditorMainWindow");
 	settings.setValue("full", bMax);
 
 	if (!bMax)
@@ -359,7 +359,7 @@ void CorpusMainWindow::writeSettings()
 		_worldEditorTab->saveSettings(&settings);
 }
 
-void CorpusMainWindow::setActiveSubWindow(QWidget *window)
+void AnimaEditorMainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window)
 		return;
@@ -367,7 +367,7 @@ void CorpusMainWindow::setActiveSubWindow(QWidget *window)
 	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
-bool CorpusMainWindow::closeProject()
+bool AnimaEditorMainWindow::closeProject()
 {
 	if (_activeDocument && _activeDocument->HasModifications())
 	{
@@ -410,12 +410,12 @@ bool CorpusMainWindow::closeProject()
 		_worldEditorTab = nullptr;
 	}
 
-	setWindowTitle(tr("CorpusEditor"));
+	setWindowTitle(tr("AnimaEditor"));
 	
 	return true;
 }
 
-void CorpusMainWindow::importModel()
+void AnimaEditorMainWindow::importModel()
 {
 	if(_activeDocument->ImportModel())
 	{
@@ -423,17 +423,17 @@ void CorpusMainWindow::importModel()
 	}
 }
 
-void CorpusMainWindow::importTexture()
+void AnimaEditorMainWindow::importTexture()
 {
 	
 }
 
-void CorpusMainWindow::addNewMaterial()
+void AnimaEditorMainWindow::addNewMaterial()
 {
 	
 }
 
-void CorpusMainWindow::loadProjectFromRecentFiles(int index)
+void AnimaEditorMainWindow::loadProjectFromRecentFiles(int index)
 {
 	QString filePath = _recentFiles[index]._filePath;
 	
@@ -457,7 +457,7 @@ void CorpusMainWindow::loadProjectFromRecentFiles(int index)
 		closeProject();
 	}
 	
-	_activeDocument = new CorpusDocument;
+	_activeDocument = new AnimaEditorDocument;
 	if(!_activeDocument->OpenDocument(filePath))
 	{
 		QMessageBox msg;
@@ -465,7 +465,7 @@ void CorpusMainWindow::loadProjectFromRecentFiles(int index)
 		msg.setStandardButtons(QMessageBox::Ok);
 		msg.exec();
 		
-		setWindowTitle(tr("CorpusEditor"));
+		setWindowTitle(tr("AnimaEditor"));
 		
 		return;
 	}
@@ -483,17 +483,17 @@ void CorpusMainWindow::loadProjectFromRecentFiles(int index)
 	
 	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
 	
-	QSettings settings("ZEB", "CorpusEditor");
+	QSettings settings("ZEB", "AnimaEditor");
 	if(_resourceManagerTab != nullptr)
 		_resourceManagerTab->readSettings(&settings);
 	
 	if(_worldEditorTab != nullptr)
 		_worldEditorTab->readSettings(&settings);
 	
-	setWindowTitle(tr("CorpusEditor - ") + _activeDocument->projectName());
+	setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
 }
 
-void CorpusMainWindow::saveRecentFileList()
+void AnimaEditorMainWindow::saveRecentFileList()
 {
 	int recentFileIndex = -1;
 	for(int i = 0; i < _recentFiles.count() && recentFileIndex == -1; i++)
@@ -519,7 +519,7 @@ void CorpusMainWindow::saveRecentFileList()
 		_recentFiles.insert(0, rfe);
 	}
 	
-	QSettings settings("ZEB", "CorpusEditor");
+	QSettings settings("ZEB", "AnimaEditor");
 	settings.beginGroup("RecentFiles");
 	settings.setValue("n", _recentFiles.count());
 	
@@ -534,9 +534,9 @@ void CorpusMainWindow::saveRecentFileList()
 	settings.endGroup();
 }
 
-void CorpusMainWindow::readRecentFileList()
+void AnimaEditorMainWindow::readRecentFileList()
 {
-	QSettings settings("ZEB", "CorpusEditor");
+	QSettings settings("ZEB", "AnimaEditor");
 	settings.beginGroup("RecentFiles");
 	
 	int n =	settings.value("n", 0).toInt();

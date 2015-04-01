@@ -1,12 +1,12 @@
 //
-//  CorpusDocument.cpp
+//  AnimaEditorDocument.cpp
 //  Anima
 //
 //  Created by Marco Zille on 04/12/14.
 //
 //
 
-#include "CorpusDocument.h"
+#include "AnimaEditorDocument.h"
 #include <QDir>
 #include <QString>
 #include <AnimaModelsManager.h>
@@ -22,7 +22,7 @@
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
 
-CorpusDocument::CorpusDocument()
+AnimaEditorDocument::AnimaEditorDocument()
 {
 	_projectName = QString("");
 	_projectPath = QString("");
@@ -63,12 +63,12 @@ CorpusDocument::CorpusDocument()
 	_newDocument = false;
 }
 
-CorpusDocument::~CorpusDocument()
+AnimaEditorDocument::~AnimaEditorDocument()
 {
 	delete _engine;
 }
 
-bool CorpusDocument::NewDocument(QString name, QString path)
+bool AnimaEditorDocument::NewDocument(QString name, QString path)
 {
 	_projectName = name;
 	_projectPath = path;
@@ -85,7 +85,7 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	_engine = new Anima::AnimaEngine();
 	if(!_engine->Initialize())
 		return false;
-	_engine->GetScenesManager()->CreateStage("corpus");
+	_engine->GetScenesManager()->CreateStage("AnimaEditor");
 
 	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
@@ -99,7 +99,7 @@ bool CorpusDocument::NewDocument(QString name, QString path)
 	return true;
 }
 
-bool CorpusDocument::OpenDocument(QString path)
+bool AnimaEditorDocument::OpenDocument(QString path)
 {
 	if(_engine != nullptr)
 	{
@@ -136,7 +136,7 @@ bool CorpusDocument::OpenDocument(QString path)
 			continue;
 		else if (token == QXmlStreamReader::StartElement)
 		{
-			if(xmlReader->name() == QString("CorpusProject"))
+			if(xmlReader->name() == QString("AnimaEditorProject"))
 				continue;
 			else if(xmlReader->name() == QString("Project"))
 			{
@@ -164,7 +164,7 @@ bool CorpusDocument::OpenDocument(QString path)
 	return true;
 }
 
-bool CorpusDocument::SaveDocument()
+bool AnimaEditorDocument::SaveDocument()
 {
 	QFile file(projectFilePath());
 	
@@ -176,7 +176,7 @@ bool CorpusDocument::SaveDocument()
 	xmlWriter->setDevice(&file);
 	
 	xmlWriter->writeStartDocument();
-	xmlWriter->writeStartElement("CorpusProject");
+	xmlWriter->writeStartElement("AnimaEditorProject");
 	
 	SaveProjectData(xmlWriter);
 	SaveModels(xmlWriter);
@@ -191,7 +191,7 @@ bool CorpusDocument::SaveDocument()
 	return true;
 }
 
-bool CorpusDocument::CreateProjectFolderStructure()
+bool AnimaEditorDocument::CreateProjectFolderStructure()
 {
 	_projectRootPath				= _projectPath + QString("/") + _projectName;
 	_projectCodePath				= _projectRootPath + QString("/") + _projectName + QString("_Code");
@@ -288,7 +288,7 @@ bool CorpusDocument::CreateProjectFolderStructure()
 	return true;
 }
 
-void CorpusDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
+void AnimaEditorDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
 {
 	xmlWriter->writeStartElement("Project");
 	xmlWriter->writeTextElement("Path", _projectPath);
@@ -326,7 +326,7 @@ void CorpusDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
 	xmlWriter->writeEndElement();
 }
 
-bool CorpusDocument::ReadProjectData(QXmlStreamReader* xmlReader)
+bool AnimaEditorDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 {
 	int nodeRead = 0;
 	int maxNodesToRead = 32;
@@ -643,12 +643,12 @@ bool CorpusDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 	return true;
 }
 
-bool CorpusDocument::ImportModel()
+bool AnimaEditorDocument::ImportModel()
 {
 	QString selfilter = QString("3ds Max 3DS (*.3ds)");
 	QString filters = QString("3ds Max 3DS (*.3ds);;3ds Max ASE (*.ase);;Collada (*.dae);;Wavefront Object (*.obj);;Blender 3D (*.blend);;Industry Foundation Classes [IFC/Step] (*.ifc);;XGL (*.xgl);; XGL (*.zgl);;Stanford Polygon Library (*.ply);;All files (*.*)");
 	
-	QString originalFilePath = QFileDialog::getOpenFileName(NULL, QString("CorpusEditor - Import model"), QString(""), filters, &selfilter);
+	QString originalFilePath = QFileDialog::getOpenFileName(NULL, QString("AnimaEditor - Import model"), QString(""), filters, &selfilter);
 	
 	if(originalFilePath.isEmpty())
 		return false;
@@ -671,7 +671,7 @@ bool CorpusDocument::ImportModel()
 	if(!QFile::copy(originalFilePath, copiedFilePath))
 	{
 		QMessageBox msg;
-		msg.setWindowTitle(QString("CorpusEditor"));
+		msg.setWindowTitle(QString("AnimaEditor"));
 		msg.setText(QString("Unable to copy the model file into the project's models folder."));
 		msg.exec();
 		return false;
@@ -680,7 +680,7 @@ bool CorpusDocument::ImportModel()
 	if (!_engine->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
 	{
 		QMessageBox msg;
-		msg.setWindowTitle(QString("CorpusEditor"));
+		msg.setWindowTitle(QString("AnimaEditor"));
 		msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
 		msg.exec();
 		
@@ -693,17 +693,17 @@ bool CorpusDocument::ImportModel()
 	return true;
 }
 
-bool CorpusDocument::ImportTexture()
+bool AnimaEditorDocument::ImportTexture()
 {
 	return true;
 }
 
-bool CorpusDocument::AddMaterial()
+bool AnimaEditorDocument::AddMaterial()
 {
 	return true;
 }
 
-void CorpusDocument::SaveModels(QXmlStreamWriter* xmlWriter)
+void AnimaEditorDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 {
 	Anima::AnimaModelsManager* mgr = _engine->GetScenesManager()->GetStage("test-scene")->GetModelsManager();
 	Anima::ASizeT numeroModelli = mgr->GetModelsNumber();
@@ -724,7 +724,7 @@ void CorpusDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 	xmlWriter->writeEndElement();
 }
 
-bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
+bool AnimaEditorDocument::ReadModels(QXmlStreamReader* xmlReader)
 {
 	if(xmlReader->atEnd() || xmlReader->hasError())
 		return false;
@@ -795,7 +795,7 @@ bool CorpusDocument::ReadModels(QXmlStreamReader* xmlReader)
 	return true;
 }
 
-bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileName)
+bool AnimaEditorDocument::ImportModelInternal(QString modelName, QString modelFileName)
 {
 	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
 	
@@ -810,7 +810,7 @@ bool CorpusDocument::ImportModelInternal(QString modelName, QString modelFileNam
 	return true;
 }
 
-void CorpusDocument::DeleteProject()
+void AnimaEditorDocument::DeleteProject()
 {
 	QDir dir(_projectRootPath);
 	dir.removeRecursively();

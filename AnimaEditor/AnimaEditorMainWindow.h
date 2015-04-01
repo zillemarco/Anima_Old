@@ -1,17 +1,17 @@
 //
-//  CorpusCorpusMainWindow.h
+//  AnimaEditorMainWindow.h
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
 //
 //
 
-#ifndef __Anima__CorpusCorpusMainWindow__
-#define __Anima__CorpusCorpusMainWindow__
+#ifndef __Anima__AnimaEditorMainWindow__
+#define __Anima__AnimaEditorMainWindow__
 
 #include <QMainWindow>
 
-class CorpusDocument;
+class AnimaEditorDocument;
 class ResourceManagerTab;
 class WorldEditorTab;
 class EditWindow;
@@ -30,12 +30,12 @@ struct RecentFileElement
 	QString _fileName;
 };
 
-class CorpusMainWindow : public QMainWindow
+class AnimaEditorMainWindow : public QMainWindow
 {
 	Q_OBJECT
 	
 public:
-	CorpusMainWindow();
+	AnimaEditorMainWindow();
 	
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -83,7 +83,7 @@ private:
 	QAction*	_importTextureAct;
 	QAction*	_addNewMaterialAct;
 	
-	CorpusDocument* _activeDocument;
+	AnimaEditorDocument* _activeDocument;
 	
 	ResourceManagerTab* _resourceManagerTab;
 	WorldEditorTab*		_worldEditorTab;
@@ -91,4 +91,4 @@ private:
 	QList<RecentFileElement> _recentFiles;
 };
 
-#endif /* defined(__Anima__CorpusCorpusMainWindow__) */
+#endif /* defined(__Anima__AnimaEditorMainWindow__) */

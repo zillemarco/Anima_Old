@@ -23,29 +23,29 @@
 #include <QAction>
 #include <QMenu>
 
-class CorpusDocument;
+class AnimaEditorDocument;
 class CRModelViewer;
 
 class ResourceTreeItemModel : public QStandardItemModel
 {
 	Q_OBJECT
 public:
-	ResourceTreeItemModel(CorpusDocument* doc, QObject *parent = 0);
-	ResourceTreeItemModel(CorpusDocument* doc, int rows, int columns, QObject *parent = 0);
+	ResourceTreeItemModel(AnimaEditorDocument* doc, QObject *parent = 0);
+	ResourceTreeItemModel(AnimaEditorDocument* doc, int rows, int columns, QObject *parent = 0);
 	~ResourceTreeItemModel();
 
 public:
 	virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
 
 private:
-	CorpusDocument* _document;
+	AnimaEditorDocument* _document;
 };
 
 class ResourceManagerTab : public QFrame
 {
 	Q_OBJECT
 public:
-	ResourceManagerTab(CorpusDocument* doc);
+	ResourceManagerTab(AnimaEditorDocument* doc);
 	
 	void saveSettings(QSettings* settings);
 	void readSettings(QSettings* settings);
@@ -77,7 +77,7 @@ private slots:
 	void resourceTreeItemSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
 	
 private:
-	CorpusDocument* _document;
+	AnimaEditorDocument* _document;
 	
 	QSplitter* _mainSplitter;
 	QTreeView* _resourcesTree;

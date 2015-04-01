@@ -23,7 +23,7 @@
 #define UPDATE_VIEW QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
 
 CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
-	: CorpusOGLWindowBase(engine, parent)
+	: AnimaEditorOGLWindowBase(engine, parent)
 	, _frame(0)
 {
 	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetSharedMemoryAllocator());
