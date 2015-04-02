@@ -14,8 +14,6 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-template class AnimaArray<AnimaVertex3f, AnimaVertex3f>;
-
 AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
 	: _primitives(allocator)
 {
@@ -765,7 +763,7 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 	}
 }
 
-void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*, AnimaLight*>* lights)
+void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights)
 {
 	AInt size = lights->GetSize();
 
@@ -854,7 +852,7 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 	AnimaLightsManager* lightsManager = scene->GetLightsManager();
 	AnimaModelsManager* modelsManager = scene->GetModelsManager();
 
-	AnimaArray<AnimaLight*, AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
 
 	if (lights == nullptr)
 		return;
@@ -959,7 +957,7 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
-void AnimaRenderingManager::AddPrimitive(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
+void AnimaRenderingManager::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
 {
 	if (vertices == nullptr)
 		return;
@@ -992,8 +990,8 @@ void AnimaRenderingManager::DrawPrimitive(AnimaPrimitiveData* primitive, AnimaSh
 		return;
 	
 	AnimaColor4f color = primitive->GetColor();
-	AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices = primitive->GetVertices();
-	AnimaArray<AUint, AUint>* indices = primitive->GetIndices();
+	AnimaArray<AnimaVertex3f>* vertices = primitive->GetVertices();
+	AnimaArray<AUint>* indices = primitive->GetIndices();
 	AUint type = primitive->GetType();
 	AnimaMatrix modelMatrix = primitive->GetModelMatrix();
 	
@@ -1535,7 +1533,7 @@ AnimaPrimitiveData::~AnimaPrimitiveData()
 	_indices.RemoveAll();
 }
 
-void AnimaPrimitiveData::SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices)
+void AnimaPrimitiveData::SetVertices(AnimaArray<AnimaVertex3f>* vertices)
 {
 	_vertices.RemoveAll();
 	
@@ -1547,12 +1545,12 @@ void AnimaPrimitiveData::SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* v
 	}
 }
 
-AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaPrimitiveData::GetVertices()
+AnimaArray<AnimaVertex3f>* AnimaPrimitiveData::GetVertices()
 {
 	return &_vertices;
 }
 
-void AnimaPrimitiveData::SetIndices(AnimaArray<AUint, AUint>* indices)
+void AnimaPrimitiveData::SetIndices(AnimaArray<AUint>* indices)
 {
 	_indices.RemoveAll();
 	
@@ -1564,7 +1562,7 @@ void AnimaPrimitiveData::SetIndices(AnimaArray<AUint, AUint>* indices)
 	}
 }
 
-AnimaArray<AUint, AUint>* AnimaPrimitiveData::GetIndices()
+AnimaArray<AUint>* AnimaPrimitiveData::GetIndices()
 {
 	return &_indices;
 }

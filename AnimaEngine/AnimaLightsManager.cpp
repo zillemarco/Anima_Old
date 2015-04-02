@@ -71,7 +71,7 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 	if (namesPair != _lightsMap.end())
 	{
 		boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* lightsMap = namesPair->second->GetLightsMap();
-		AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = namesPair->second->GetLightsArray();
+		AnimaArray<AnimaLight*>* lightsArray = namesPair->second->GetLightsArray();
 
 		auto lightsPair = lightsMap->find(name);
 
@@ -111,7 +111,7 @@ void AnimaLightsManager::UpdateLightsMatrix(AnimaCamera* activeCamera)
 	{
 		if (pair.second != nullptr)
 		{
-			AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = pair.second->GetLightsArray();
+			AnimaArray<AnimaLight*>* lightsArray = pair.second->GetLightsArray();
 			AInt size = lightsArray->GetSize();
 
 			for (AInt i = 0; i < size; i++)
@@ -176,7 +176,7 @@ AnimaLightsMapData& AnimaLightsMapData::operator=(AnimaLightsMapData&& src)
 	return *this;
 }
 
-AnimaArray<AnimaLight*, AnimaLight*>* AnimaLightsMapData::GetLightsArray()
+AnimaArray<AnimaLight*>* AnimaLightsMapData::GetLightsArray()
 {
 	return &_lights;
 }

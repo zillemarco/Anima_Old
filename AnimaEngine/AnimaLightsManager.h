@@ -32,13 +32,13 @@ public:
 	AnimaLightsMapData& operator=(const AnimaLightsMapData& src);
 	AnimaLightsMapData& operator=(AnimaLightsMapData&& src);
 
-	AnimaArray<AnimaLight*, AnimaLight*>* GetLightsArray();
+	AnimaArray<AnimaLight*>* GetLightsArray();
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* GetLightsMap();
 
 protected:
 	AnimaAllocator* _allocator;
 
-	AnimaArray<AnimaLight*, AnimaLight*> _lights;
+	AnimaArray<AnimaLight*> _lights;
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _lightsMap;
 #pragma warning (default: 4251)
@@ -53,7 +53,7 @@ public:
 	template<class T> T* CreateLight(const AnimaString& name);
 	template<class T> T* CreateLight(const char* name);
 
-	template<class T> AnimaArray<AnimaLight*, AnimaLight*>* GetLightsArrayOfType();
+	template<class T> AnimaArray<AnimaLight*>* GetLightsArrayOfType();
 	template<class T> AnimaLight* GetLightOfTypeFromName(const AnimaString& name);
 	template<class T> AnimaLight* GetLightOfTypeFromName(const char* name);
 	
@@ -109,7 +109,7 @@ T* AnimaLightsManager::CreateLight(const AnimaString& name)
 	}
 		
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* lightsMap = lightsMapData->GetLightsMap();
-	AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = lightsMapData->GetLightsArray();
+	AnimaArray<AnimaLight*>* lightsArray = lightsMapData->GetLightsArray();
 
 	if (lightsMap->find(name) != lightsMap->end())
 		return nullptr;
@@ -134,7 +134,7 @@ T* AnimaLightsManager::CreateLight(const char* name)
 }
 
 template<class T> 
-AnimaArray<AnimaLight*, AnimaLight*>* AnimaLightsManager::GetLightsArrayOfType()
+AnimaArray<AnimaLight*>* AnimaLightsManager::GetLightsArrayOfType()
 {
 	AnimaString type(typeid(T).name(), _scene->GetStringAllocator());
 	auto pair = _lightsMap.find(type);
@@ -153,7 +153,7 @@ AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const AnimaString& name)
 	if (pair != _lightsMap.end())
 	{
 		boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* lightsMap = pair->second->GetLightsMap();
-		AnimaArray<AnimaLight*, AnimaLight*>* lightsArray = pair->second->GetLightsArray();
+		AnimaArray<AnimaLight*>* lightsArray = pair->second->GetLightsArray();
 
 		auto lightsPair = lightsMap->find(name);
 

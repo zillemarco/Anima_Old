@@ -561,7 +561,7 @@ AnimaMesh* AnimaMesh::GetMeshes()
 	return _meshes;
 }
 
-void AnimaMesh::SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices)
+void AnimaMesh::SetVertices(AnimaArray<AnimaVertex3f>* vertices)
 {
 	_vertices.Copy(*vertices);
 }
@@ -619,7 +619,7 @@ void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 	//}
 }
 
-void AnimaMesh::SetNormals(AnimaArray<AnimaVertex3f, AnimaVertex3f>* normals)
+void AnimaMesh::SetNormals(AnimaArray<AnimaVertex3f>* normals)
 {
 	_normals.Copy(*normals);
 }
@@ -677,7 +677,7 @@ void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 	//}
 }
 
-void AnimaMesh::SetTextureCoords(AnimaArray<AnimaVertex2f, AnimaVertex2f>* textureCoords)
+void AnimaMesh::SetTextureCoords(AnimaArray<AnimaVertex2f>* textureCoords)
 {
 	_textureCoords.Copy(*textureCoords);
 }
@@ -735,7 +735,7 @@ void AnimaMesh::AddTextureCoord(const AnimaVertex2f& v)
 	//}
 }
 
-void AnimaMesh::SetTangents(AnimaArray<AnimaVertex3f, AnimaVertex3f>* tangents)
+void AnimaMesh::SetTangents(AnimaArray<AnimaVertex3f>* tangents)
 {
 	_tangents.Copy(*tangents);
 }
@@ -792,7 +792,7 @@ void AnimaMesh::AddTangent(const AnimaVertex3f& v)
 	//}
 }
 
-void AnimaMesh::SetBitangents(AnimaArray<AnimaVertex3f, AnimaVertex3f>* bitangents)
+void AnimaMesh::SetBitangents(AnimaArray<AnimaVertex3f>* bitangents)
 {
 	_bitangents.Copy(*bitangents);
 }
@@ -850,7 +850,7 @@ void AnimaMesh::AddBitangent(const AnimaVertex3f& v)
 	//}
 }
 
-void AnimaMesh::SetFaces(AnimaArray<AnimaFace, AnimaFace>* faces)
+void AnimaMesh::SetFaces(AnimaArray<AnimaFace>* faces)
 {
 	_faces.Copy(*faces);
 }
@@ -925,7 +925,7 @@ AnimaVertex3f* AnimaMesh::GetPVertex(AInt index)
 	return &_vertices[index];
 }
 
-AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaMesh::GetVertices()
+AnimaArray<AnimaVertex3f>* AnimaMesh::GetVertices()
 {
 	return &_vertices;
 }
@@ -948,7 +948,7 @@ AnimaVertex3f* AnimaMesh::GetPNormal(AInt index)
 	return &_normals[index];
 }
 
-AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaMesh::GetNormals()
+AnimaArray<AnimaVertex3f>* AnimaMesh::GetNormals()
 {
 	return &_normals;
 }
@@ -971,7 +971,7 @@ AnimaVertex2f* AnimaMesh::GetPTextureCoord(AInt index)
 	return &_textureCoords[index];
 }
 
-AnimaArray<AnimaVertex2f, AnimaVertex2f>* AnimaMesh::GetTextureCoords()
+AnimaArray<AnimaVertex2f>* AnimaMesh::GetTextureCoords()
 {
 	return &_textureCoords;
 }
@@ -994,7 +994,7 @@ AnimaVertex3f* AnimaMesh::GetPTangent(AInt index)
 	return &_tangents[index];
 }
 
-AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaMesh::GetTangents()
+AnimaArray<AnimaVertex3f>* AnimaMesh::GetTangents()
 {
 	return &_tangents;
 }
@@ -1017,7 +1017,7 @@ AnimaVertex3f* AnimaMesh::GetPBitangent(AInt index)
 	return &_bitangents[index];
 }
 
-AnimaArray<AnimaVertex3f, AnimaVertex3f>* AnimaMesh::GetBitangents()
+AnimaArray<AnimaVertex3f>* AnimaMesh::GetBitangents()
 {
 	return &_bitangents;
 }
@@ -1040,7 +1040,7 @@ AnimaFace* AnimaMesh::GetPFace(AInt index)
 	return &_faces[index];
 }
 
-AnimaArray<AnimaFace, AnimaFace>* AnimaMesh::GetFaces()
+AnimaArray<AnimaFace>* AnimaMesh::GetFaces()
 {
 	return &_faces;
 }

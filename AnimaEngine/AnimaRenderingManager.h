@@ -37,11 +37,11 @@ public:
 	~AnimaPrimitiveData();
 	
 public:
-	void SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices);
-	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetVertices();
+	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
+	AnimaArray<AnimaVertex3f>* GetVertices();
 	
-	void SetIndices(AnimaArray<AUint, AUint>* indices);
-	AnimaArray<AUint, AUint>* GetIndices();
+	void SetIndices(AnimaArray<AUint>* indices);
+	AnimaArray<AUint>* GetIndices();
 	
 	void SetColor(const AnimaColor4f& color);
 	AnimaColor4f GetColor();
@@ -53,8 +53,8 @@ public:
 	AnimaMatrix GetModelMatrix();
 	
 protected:
-	AnimaArray<AnimaVertex3f, AnimaVertex3f>	_vertices;
-	AnimaArray<AUint, AUint>					_indices;
+	AnimaArray<AnimaVertex3f>	_vertices;
+	AnimaArray<AUint>					_indices;
 	AnimaColor4f								_color;
 	AUint										_type;
 	AnimaMatrix									_modelMatrix;
@@ -78,7 +78,7 @@ public:
 	void DeferredDrawAll(AnimaScene* scene);
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model);
 	
-	void AddPrimitive(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices, AnimaArray<AUint, AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
+	void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
 
 	void UpdateModelsVisibility(AnimaScene* scene);
 	
@@ -91,7 +91,7 @@ protected:
 	void DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
 	void DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* program);
 	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
-	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*, AnimaLight*>* lights);
+	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights);
 
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
 	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
@@ -191,7 +191,7 @@ protected:
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
 
-	AnimaArray<AnimaPrimitiveData*, AnimaPrimitiveData*> _primitives;
+	AnimaArray<AnimaPrimitiveData*> _primitives;
 	AUint				_vertexArrayObject;
 	AUint				_verticesBufferObject;
 	AUint				_indexesBufferObject;
