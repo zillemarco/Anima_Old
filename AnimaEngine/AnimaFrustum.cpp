@@ -150,8 +150,6 @@ void AnimaFrustum::ComputeFrustum(const AnimaMatrix& projectionViewMatrix)
 {	
 	AnimaMatrix inverseProjectionViewMatrix = projectionViewMatrix.Inversed();
 
-	AnimaVertex3f points[8];
-
 	_frustumVertices[0] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f,  1.0f, -1.0f);	// near top-left
 	_frustumVertices[1] = inverseProjectionViewMatrix * AnimaVertex3f( 1.0f,  1.0f, -1.0f);	// near top-right
 	_frustumVertices[2] = inverseProjectionViewMatrix * AnimaVertex3f(-1.0f, -1.0f, -1.0f);	// near bottom-left

@@ -77,9 +77,15 @@ public:
 	{
 		return _size - 1;
 	}
-
+	
 	template<typename... Args>
-	void SetSize(AInt newSize, AInt growBy = -1, Args...args)
+	void SetSize(AInt newSize, Args...args)
+	{
+		SetSize(newSize, -1, args...);
+	}
+	
+	template<typename... Args>
+	void SetSize(AInt newSize, AInt growBy, Args...args)
 	{
 		ANIMA_ASSERT(newSize >= 0);
 
@@ -213,9 +219,15 @@ public:
 	}
 
 	template<typename... Args>
-	void RemoveAll(AInt growBy = 1, Args... args)
+	void RemoveAll(AInt growBy, Args... args)
 	{
 		SetSize(0, growBy, args...);
+	}
+	
+	template<typename... Args>
+	void RemoveAll(Args... args)
+	{
+		RemoveAll(1, args...);
 	}
 
 	inline TYPE GetAt(AInt index) const
@@ -247,11 +259,17 @@ public:
 	}
 
 	template<typename... Args>
-	AInt Add(ARG_TYPE newElement, AInt growBy = 1, Args... args)
+	AInt Add(ARG_TYPE newElement, AInt growBy, Args... args)
 	{
 		AInt index = _size;
 		SetAtGrow(index, newElement, growBy, args...);
 		return index;
+	}
+	
+	template<typename... Args>
+	AInt Add(ARG_TYPE newElement, Args... args)
+	{
+		return Add(newElement, 1, args...);
 	}
 
 	template<typename... Args>
@@ -278,7 +296,7 @@ public:
 	}
 
 	template<typename... Args>
-	void InsertAt(AInt index, ARG_TYPE newElement, AInt count = 1, AInt growBy = 1, Args... args)
+	void InsertAt(AInt index, ARG_TYPE newElement, AInt count, AInt growBy, Args... args)
 	{
 		ANIMA_ASSERT(index >= 0);
 		ANIMA_ASSERT(count > 0);
@@ -304,7 +322,19 @@ public:
 		while (count--)
 			*(_data[index++]) = newElement;
 	}
-
+	
+	template<typename... Args>
+	void InsertAt(AInt index, ARG_TYPE newElement, Args... args)
+	{
+		InsertAt(index, newElement, 1, 1, args...);
+	}
+	
+	template<typename... Args>
+	void InsertAt(AInt index, ARG_TYPE newElement, AInt count, Args... args)
+	{
+		InsertAt(index, newElement, count, 1, args...);
+	}
+	
 	template<typename... Args>
 	void InsertAt(AInt index, const AnimaArray* newArray, Args... args)
 	{
@@ -317,9 +347,15 @@ public:
 				SetAt(index + i, newArray->GetAt(i));
 		}
 	}
-
+	
 	template<typename... Args>
-	void RemoveAt(AInt index, AInt count = 1, Args...args)
+	void RemoveAt(AInt index, Args...args)
+	{
+		RemoveAt(index, 1, args...);
+	}
+	
+	template<typename... Args>
+	void RemoveAt(AInt index, AInt count, Args...args)
 	{
 		ANIMA_ASSERT(index >= 0);
 		ANIMA_ASSERT(count >= 1);

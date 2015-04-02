@@ -49,11 +49,12 @@ public:
 		
 		_usedMemory		= 0;
 		_numAllocations = 0;
+		_numArrayAllocations = 0;
 	}
 	
 	virtual ~AnimaAllocator()
 	{
-		ANIMA_ASSERT(_numAllocations == 0 && _usedMemory == 0);
+		ANIMA_ASSERT(_numAllocations == 0 && _usedMemory == 0 && _numArrayAllocations == 0);
 		
 		_start	= nullptr;
 		_size	= 0;
@@ -81,6 +82,14 @@ public:
 	{
 		return _numAllocations;
 	}
+	
+	ASizeT GetNumArrayAllocations() const
+	{
+		return _numArrayAllocations;
+	}
+	
+	void AddArrayAllocation() { _numArrayAllocations++; }
+	void SubArrayAllocation() { _numArrayAllocations--; }
 
 	void Dump() const
 	{
@@ -95,6 +104,7 @@ protected:
 	
 	ASizeT	_usedMemory;
 	ASizeT	_numAllocations;
+	ASizeT	_numArrayAllocations;
 };
 
 BEGIN_ANIMA_ALLOCATOR_NAMESPACE
@@ -142,6 +152,8 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
 		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_ALIGN_OF(T))) + headerSize;
 		
+		allocator.AddArrayAllocation();
+		
 		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
 		*(((ASizeT*)p) - 1) = length;
 		
@@ -161,6 +173,8 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 
 		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
 		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_ALIGN_OF(T))) + headerSize;
+		
+		allocator.AddArrayAllocation();
 
 		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
 		*(((ASizeT*)p) - 1) = length;
@@ -181,6 +195,8 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 
 		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
 		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_ALIGN_OF(T))) + headerSize;
+		
+		allocator.AddArrayAllocation();
 
 		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
 		*(((ASizeT*)p) - 1) = length;
@@ -201,6 +217,8 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 
 		// Alloco spazio extra all'inizio per memorizzare la lunghezza dell'array prima dell'array
 		T* p = ((T*)allocator.Allocate(sizeof(T) * (length + headerSize), ANIMA_ENGINE_ALIGN_OF(T))) + headerSize;
+		
+		allocator.AddArrayAllocation();
 
 		// Memorizzo la lunghezza dell'array in memoria prima dell'array vero e proprio
 		*(((ASizeT*)p) - 1) = length;
@@ -219,6 +237,8 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		
 		for(ASizeT i = 0; i < length; i++)
 			array[i].~T();
+		
+		allocator.SubArrayAllocation();
 		
 		// Calcolo quanto spazio avevo aggiunto all'array per memorizzare la lunghezza
 		AU8 headerSize = sizeof(ASizeT) / sizeof(T);

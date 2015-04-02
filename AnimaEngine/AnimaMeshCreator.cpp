@@ -90,7 +90,7 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 		righeVertici.push_back(rigaVertici);
 	}
 
-	AFloat tanTheta = ((AFloat)bottomRadius - (AFloat)topRadius) / (AFloat)height;
+//	AFloat tanTheta = ((AFloat)bottomRadius - (AFloat)topRadius) / (AFloat)height;
 	AnimaVertex3f na, nb;
 
 	for (AUint x = 0; x < radialSegments; x++)

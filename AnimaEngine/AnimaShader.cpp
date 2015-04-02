@@ -44,11 +44,11 @@ AnimaShader::AnimaShader(const AnimaShader& src)
 }
 
 AnimaShader::AnimaShader(AnimaShader&& src)
-	: _text(src._text)
-	, _id(src._id)
+	: _allocator(src._allocator)
 	, _type(src._type)
+	, _text(src._text)
+	, _id(src._id)
 	, _compiled(src._compiled)
-	, _allocator(src._allocator)
 {
 	src._id = 0;
 	src._compiled = false;

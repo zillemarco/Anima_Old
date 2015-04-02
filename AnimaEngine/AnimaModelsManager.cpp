@@ -491,6 +491,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		material->SetTexture("DiffuseTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
 		texturesCaricate++;
@@ -501,6 +502,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 		
@@ -522,6 +524,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -540,6 +543,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -558,6 +562,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -577,6 +582,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -597,6 +603,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -615,6 +622,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -634,6 +642,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -652,6 +661,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -671,6 +681,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
 		AnimaString txtPath(path.C_Str(), stringAllocator);
 		txtCompletePath += txtPath;
+		txtCompletePath.Replace('\\', '/');
 
 		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 		if (texture != nullptr)

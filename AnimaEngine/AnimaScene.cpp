@@ -175,7 +175,7 @@ void AnimaScene::InitializeMemorySystem()
 	_localMemory = malloc(_localMemorySize);
 
 	// L'unica new di AnimaEngine.
-	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
+	// Tutta la rimanente memoria utilizzata verrˆ 'allocata' dai custom allocators
 	_localMemoryAllocator = new AnimaFreeListAllocator(_localMemorySize, _localMemory);
 
 	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_MODELS_MEMORY_SIZE, *_localMemoryAllocator);
