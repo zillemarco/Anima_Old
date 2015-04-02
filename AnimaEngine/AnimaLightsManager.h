@@ -25,11 +25,11 @@ class ANIMA_ENGINE_EXPORT AnimaLightsMapData
 {
 public:
 	AnimaLightsMapData(AnimaAllocator* allocator);
-	AnimaLightsMapData(AnimaLightsMapData& src);
+	AnimaLightsMapData(const AnimaLightsMapData& src);
 	AnimaLightsMapData(AnimaLightsMapData&& src);
 	virtual ~AnimaLightsMapData();
 
-	AnimaLightsMapData& operator=(AnimaLightsMapData& src);
+	AnimaLightsMapData& operator=(const AnimaLightsMapData& src);
 	AnimaLightsMapData& operator=(AnimaLightsMapData&& src);
 
 	AnimaArray<AnimaLight*, AnimaLight*>* GetLightsArray();

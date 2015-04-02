@@ -162,8 +162,8 @@ void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bo
 		faccia = nullptr;
 	}
 
-	mesh->SetVertices(meshVertici, vertici.size());
-	mesh->SetFaces(meshFacce, facce.size());
+	mesh->SetVertices(meshVertici, (AInt)vertici.size());
+	mesh->SetFaces(meshFacce, (AInt)facce.size());
 
 	vertici.clear();
 	facce.clear();
@@ -262,8 +262,8 @@ void AnimaMeshCreator::MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLev
 		faccia = nullptr;
 	}
 	
-	mesh->SetVertices(meshVertici, vertici.size());
-	mesh->SetFaces(meshFacce, facce.size());
+	mesh->SetVertices(meshVertici, (AInt)vertici.size());
+	mesh->SetFaces(meshFacce, (AInt)facce.size());
 	
 	vertici.clear();
 	facce.clear();

@@ -648,12 +648,12 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
 	AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
 
-	ASizeT meshNumber = model->GetMeshesNumber();
-	for (ASizeT i = 0; i < meshNumber; i++)
+	AInt meshNumber = model->GetMeshesNumber();
+	for (AInt i = 0; i < meshNumber; i++)
 		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 
-	ASizeT childrenNumber = model->GetChildrenNumber();
-	for (ASizeT i = 0; i < childrenNumber; i++)
+	AInt childrenNumber = model->GetChildrenNumber();
+	for (AInt i = 0; i < childrenNumber; i++)
 		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 }
 
@@ -740,12 +740,12 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 
 			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
 
-			ASizeT meshNumber = innerModel->GetMeshesNumber();
-			for (ASizeT i = 0; i < meshNumber; i++)
+			AInt meshNumber = innerModel->GetMeshesNumber();
+			for (AInt i = 0; i < meshNumber; i++)
 				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
 
-			ASizeT childrenNumber = innerModel->GetChildrenNumber();
-			for (ASizeT i = 0; i < childrenNumber; i++)
+			AInt childrenNumber = innerModel->GetChildrenNumber();
+			for (AInt i = 0; i < childrenNumber; i++)
 				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 		}
 	}
@@ -755,12 +755,12 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 		AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
 		DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
 
-		ASizeT meshNumber = model->GetMeshesNumber();
-		for (ASizeT i = 0; i < meshNumber; i++)
+		AInt meshNumber = model->GetMeshesNumber();
+		for (AInt i = 0; i < meshNumber; i++)
 			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
 
-		ASizeT childrenNumber = model->GetChildrenNumber();
-		for (ASizeT i = 0; i < childrenNumber; i++)
+		AInt childrenNumber = model->GetChildrenNumber();
+		for (AInt i = 0; i < childrenNumber; i++)
 			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 	}
 }
@@ -898,16 +898,16 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false, true);
 			glCullFace(GL_BACK);
 
-			ASizeT meshNumber = innerModel->GetMeshesNumber();
-			for (ASizeT i = 0; i < meshNumber; i++)
+			AInt meshNumber = innerModel->GetMeshesNumber();
+			for (AInt i = 0; i < meshNumber; i++)
 			{
 				glCullFace(GL_FRONT);
 				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
 				glCullFace(GL_BACK);
 			}
 
-			ASizeT childrenNumber = innerModel->GetChildrenNumber();
-			for (ASizeT i = 0; i < childrenNumber; i++)
+			AInt childrenNumber = innerModel->GetChildrenNumber();
+			for (AInt i = 0; i < childrenNumber; i++)
 				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
 		}
 
@@ -947,15 +947,15 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 		}
 	}
 
-	ASizeT meshNumber = mesh->GetMeshesNumber();
-	for (ASizeT i = 0; i < meshNumber; i++)
+	AInt meshNumber = mesh->GetMeshesNumber();
+	for (AInt i = 0; i < meshNumber; i++)
 	{
 		AnimaMesh* subMesh = mesh->GetMesh(i);
 		subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
 	}
 
-	ASizeT childrenNumber = mesh->GetChildrenNumber();
-	for (ASizeT i = 0; i < childrenNumber; i++)
+	AInt childrenNumber = mesh->GetChildrenNumber();
+	for (AInt i = 0; i < childrenNumber; i++)
 		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 

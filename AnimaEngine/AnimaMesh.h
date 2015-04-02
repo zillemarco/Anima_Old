@@ -19,13 +19,12 @@
 #include "AnimaMatrix.h"
 #include "AnimaMaterial.h"
 #include "AnimaTransformation.h"
+#include "AnimaArray.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
-
-#define M_2PI	2.0f * (AFloat)M_PI
 
 class ANIMA_ENGINE_EXPORT AnimaMesh
 {
@@ -42,17 +41,17 @@ public:
 	// Gestione dati struttura
 	void ClearAll();
 	
-	void SetChildren(AnimaMesh* children, ASizeT n);
-	void AddChild(const AnimaMesh& child);
-	ASizeT GetChildrenNumber();
-	AnimaMesh* GetChild(ASizeT index);
+	void SetChildren(AnimaMesh* children, AInt n);
+	void AddChild(AnimaMesh& child);
+	AInt GetChildrenNumber();
+	AnimaMesh* GetChild(AInt index);
 	AnimaMesh* GetChildren();
 	void ClearChildren();
 
-	void SetMeshes(AnimaMesh* meshes, ASizeT n);
-	void AddMesh(const AnimaMesh& mesh);
-	ASizeT GetMeshesNumber();
-	AnimaMesh* GetMesh(ASizeT index);
+	void SetMeshes(AnimaMesh* meshes, AInt n);
+	void AddMesh(AnimaMesh& mesh);
+	AInt GetMeshesNumber();
+	AnimaMesh* GetMesh(AInt index);
 	AnimaMesh* GetMeshes();
 	void ClearMeshes();
 
@@ -89,54 +88,60 @@ public:
 	AnimaTransformation GetTransformationCopy();
 
 	// Gestione dati grafici
-	void SetVertices(AnimaVertex3f* v, ASizeT n);
+	void SetVertices(AnimaArray<AnimaVertex3f, AnimaVertex3f>* vertices);
+	void SetVertices(AnimaVertex3f* v, AInt n);
 	void AddVertex(const AnimaVertex3f& v);
-	ASizeT GetVerticesNumber();
-	AnimaVertex3f GetVertex(ASizeT index);
-	AnimaVertex3f* GetPVertex(ASizeT index);
-	AnimaVertex3f* GetVertices();
+	AInt GetVerticesNumber();
+	AnimaVertex3f GetVertex(AInt index);
+	AnimaVertex3f* GetPVertex(AInt index);
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetVertices();
 	void ClearVertices();
-	
-	void SetNormals(AnimaVertex3f* v, ASizeT n);
+
+	void SetNormals(AnimaArray<AnimaVertex3f, AnimaVertex3f>* normals);
+	void SetNormals(AnimaVertex3f* v, AInt n);
 	void AddNormal(const AnimaVertex3f& v);
-	ASizeT GetNormalsNumber();
-	AnimaVertex3f GetNormal(ASizeT index);
-	AnimaVertex3f* GetPNormal(ASizeT index);
-	AnimaVertex3f* GetNormals();
+	AInt GetNormalsNumber();
+	AnimaVertex3f GetNormal(AInt index);
+	AnimaVertex3f* GetPNormal(AInt index);
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetNormals();
 	void ClearNormals();
 	void ComputeSmootNormals();
 	void ComputeFlatNormals();
-	
-	void SetTextureCoords(AnimaVertex2f* v, ASizeT n);
+
+	void SetTextureCoords(AnimaArray<AnimaVertex2f, AnimaVertex2f>* textureCoords);
+	void SetTextureCoords(AnimaVertex2f* v, AInt n);
 	void AddTextureCoord(const AnimaVertex2f& v);
-	ASizeT GetTextureCoordsNumber();
-	AnimaVertex2f GetTextureCoord(ASizeT index);
-	AnimaVertex2f* GetPTextureCoord(ASizeT index);
-	AnimaVertex2f* GetTextureCoords();
+	AInt GetTextureCoordsNumber();
+	AnimaVertex2f GetTextureCoord(AInt index);
+	AnimaVertex2f* GetPTextureCoord(AInt index);
+	AnimaArray<AnimaVertex2f, AnimaVertex2f>* GetTextureCoords();
 	void ClearTextureCoords();
 
-	void SetTangents(AnimaVertex3f* v, ASizeT n);
+	void SetTangents(AnimaArray<AnimaVertex3f, AnimaVertex3f>* tangents);
+	void SetTangents(AnimaVertex3f* v, AInt n);
 	void AddTangent(const AnimaVertex3f& v);
-	ASizeT GetTangentsNumber();
-	AnimaVertex3f GetTangent(ASizeT index);
-	AnimaVertex3f* GetPTangent(ASizeT index);
-	AnimaVertex3f* GetTangents();
+	AInt GetTangentsNumber();
+	AnimaVertex3f GetTangent(AInt index);
+	AnimaVertex3f* GetPTangent(AInt index);
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetTangents();
 	void ClearTangents();
 
-	void SetBitangents(AnimaVertex3f* v, ASizeT n);
+	void SetBitangents(AnimaArray<AnimaVertex3f, AnimaVertex3f>* bitangents);
+	void SetBitangents(AnimaVertex3f* v, AInt n);
 	void AddBitangent(const AnimaVertex3f& v);
-	ASizeT GetBitangentsNumber();
-	AnimaVertex3f GetBitangent(ASizeT index);
-	AnimaVertex3f* GetPBitangent(ASizeT index);
-	AnimaVertex3f* GetBitangents();
+	AInt GetBitangentsNumber();
+	AnimaVertex3f GetBitangent(AInt index);
+	AnimaVertex3f* GetPBitangent(AInt index);
+	AnimaArray<AnimaVertex3f, AnimaVertex3f>* GetBitangents();
 	void ClearBitangents();
-	
-	void SetFaces(AnimaFace* faces, ASizeT n);
+
+	void SetFaces(AnimaArray<AnimaFace, AnimaFace>* faces);
+	void SetFaces(AnimaFace* faces, AInt n);
 	void AddFace(const AnimaFace& face);
-	ASizeT GetFacesNumber();
-	AnimaFace GetFace(ASizeT index);
-	AnimaFace* GetPFace(ASizeT index);
-	AnimaFace* GetFaces();
+	AInt GetFacesNumber();
+	AnimaFace GetFace(AInt index);
+	AnimaFace* GetPFace(AInt index);
+	AnimaArray<AnimaFace, AnimaFace>* GetFaces();
 	void ClearFaces();
 	
 	bool CreateBuffers();
@@ -201,7 +206,7 @@ public:
 	bool IsVisible();
 
 protected:
-	AInt GetNextFaceContainingVertex(ASizeT start, ASizeT vertexIndex) const;
+	AInt GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const;
 
 protected:
 	AnimaAllocator* _allocator;
@@ -217,31 +222,37 @@ protected:
 	AnimaVertex3f	_boundingBoxCenter;
 
 	AnimaMesh*		_meshes;
-	ASizeT			_meshesNumber;
+	AInt			_meshesNumber;
 
 	AnimaMesh*		_meshChildren;
-	ASizeT			_meshChildrenNumber;
+	AInt			_meshChildrenNumber;
 
 	AnimaTransformation _transformation;
 
 	// Dati grafica
-	AnimaVertex3f*	_vertices;
-	ASizeT			_verticesNumber;
+	//AnimaVertex3f*	_vertices;
+	//AInt			_verticesNumber;
+	AnimaArray<AnimaVertex3f, AnimaVertex3f> _vertices;
 	
-	AnimaVertex3f*	_normals;
-	ASizeT			_normalsNumber;
-	
-	AnimaVertex2f*	_textureCoords;
-	ASizeT			_textureCoordsNumber;
+	//AnimaVertex3f*	_normals;
+	//AInt			_normalsNumber;
+	AnimaArray<AnimaVertex3f, AnimaVertex3f> _normals;
 
-	AnimaVertex3f*	_tangents;
-	ASizeT			_tangentsNumber;
+	//AnimaVertex2f*	_textureCoords;
+	//AInt			_textureCoordsNumber;
+	AnimaArray<AnimaVertex2f, AnimaVertex2f> _textureCoords;
 
-	AnimaVertex3f*	_bitangents;
-	ASizeT			_bitangentsNumber;
-	
-	AnimaFace*		_faces;
-	ASizeT			_facesNumber;
+	//AnimaVertex3f*	_tangents;
+	//AInt			_tangentsNumber;
+	AnimaArray<AnimaVertex3f, AnimaVertex3f> _tangents;
+
+	//AnimaVertex3f*	_bitangents;
+	//AInt			_bitangentsNumber;
+	AnimaArray<AnimaVertex3f, AnimaVertex3f> _bitangents;
+
+	//AnimaFace*		_faces;
+	//AInt			_facesNumber;
+	AnimaArray<AnimaFace, AnimaFace> _faces;
 	
 	AUint			_vertexArrayObject;
 	AUint			_indexesBufferObject;

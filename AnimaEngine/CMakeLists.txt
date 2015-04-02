@@ -64,7 +64,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMeshCreator.h
 					AnimaSceneObject.h
 					AnimaArray.h
-					AnimaFrustum.h)
+					AnimaFrustum.h
+					AnimaMappedArray.h
+					AnimaTypeMappedArray.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -111,7 +113,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMeshCreator.cpp
 					AnimaSceneObject.cpp
 					AnimaArray.cpp
-					AnimaFrustum.cpp)
+					AnimaFrustum.cpp
+					AnimaMappedArray.cpp
+					AnimaTypeMappedArray.cpp)
 
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}
@@ -186,6 +190,25 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 	target_link_libraries(${PROJECT_NAME} ${ANIMA_ENGINE_NVTOOLSEXT_LIB})
+endif()
+
+
+if (WIN32)
+	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
+						COMMENT "Copia glew32.dll")						
+elseif(APPLE)						
+	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.0.dylib"
+						COMMENT "Copia libGLEW.1.11.0.dylib")
+						
+	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.dylib"
+						COMMENT "Copia libGLEW.1.11.dylib")
+						
+	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.dylib"
+						COMMENT "Copia libGLEW.dylib")
 endif()
 
 if (ANIMA_ENGINE_INSTALL)

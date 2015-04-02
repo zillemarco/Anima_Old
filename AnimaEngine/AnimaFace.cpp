@@ -78,7 +78,7 @@ void AnimaFace::SetIndexes(AUint indexes[3])
 	SetIndexes(indexes[0], indexes[1], indexes[2]);
 }
 
-ASizeT AnimaFace::GetIndexesCount()
+AInt AnimaFace::GetIndexesCount()
 {
 	return 3;
 }
@@ -88,7 +88,7 @@ AUint* AnimaFace::GetIndexes()
 	return _indexes;
 }
 
-AUint AnimaFace::GetIndex(ASizeT index) const
+AUint AnimaFace::GetIndex(AInt index) const
 {
 	ANIMA_ASSERT(index >= 0 && index < 3);
 	return _indexes[index];
@@ -99,7 +99,7 @@ const AUint* AnimaFace::GetConstIndexes()
 	return const_cast<AUint*>(_indexes);
 }
 
-bool AnimaFace::GetIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
+bool AnimaFace::GetIndexes(AUint* outIndexes, AInt& outIndexesSize)
 {
 	if (outIndexesSize < 3)
 		return false;
@@ -107,7 +107,7 @@ bool AnimaFace::GetIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
 	return true;
 }
 
-bool AnimaFace::GetConstIndexes(AUint* outIndexes, ASizeT& outIndexesSize)
+bool AnimaFace::GetConstIndexes(AUint* outIndexes, AInt& outIndexesSize)
 {
 	if (outIndexesSize < 3)
 		return false;

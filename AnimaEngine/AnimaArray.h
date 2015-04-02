@@ -26,7 +26,7 @@ public:
 		_allocator = allocator;
 	}
 
-	AnimaArray(AnimaArray& src)
+	AnimaArray(const AnimaArray& src)
 	{
 		_allocator = src._allocator;
 
@@ -51,7 +51,7 @@ public:
 		}
 	}
 
-	AnimaArray& operator=(AnimaArray& src)
+	AnimaArray& operator=(const AnimaArray& src)
 	{
 		Copy(src);
 		return *this;
@@ -79,7 +79,7 @@ public:
 	}
 
 	template<typename... Args>
-	void SetSize(AInt newSize, Args&&... args, AInt growBy = -1)
+	void SetSize(AInt newSize, AInt growBy = -1, Args...args)
 	{
 		ANIMA_ASSERT(newSize >= 0);
 
@@ -113,7 +113,7 @@ public:
 			_data = AnimaAllocatorNamespace::AllocateArray<TYPE*>(*_allocator, newSize);
 
 			for (AInt i = 0; i < newSize; i++)
-				_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, std::forward<Args>(args)...);
+				_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
 
 			_size = newSize;
 			_maxSize = newSize;
@@ -130,7 +130,7 @@ public:
 						_data[i] = nullptr;
 					}
 
-					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, std::forward<Args>(args)...);
+					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
 				}
 			}
 			else if (_size > newSize)
@@ -143,7 +143,7 @@ public:
 						_data[i] = nullptr;
 					}
 
-					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, std::forward<Args>(args)...);
+					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
 				}
 			}
 
@@ -174,7 +174,7 @@ public:
 			ANIMA_ASSERT(newSize > _size);
 
 			for (AInt i = _maxSize; i < newMax; i++)
-				newData[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, std::forward<Args>(args)...);
+				newData[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
 
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
 			_data = newData;
@@ -213,9 +213,9 @@ public:
 	}
 
 	template<typename... Args>
-	void RemoveAll(Args&&... args)
+	void RemoveAll(AInt growBy = 1, Args... args)
 	{
-		SetSize(0, std::forward<Args>(args)..., -1);
+		SetSize(0, growBy, args...);
 	}
 
 	inline TYPE GetAt(AInt index) const
@@ -237,55 +237,58 @@ public:
 	}
 
 	template<typename... Args>
-	void SetAtGrow(AInt index, ARG_TYPE newElement, Args&&... args)
+	void SetAtGrow(AInt index, ARG_TYPE newElement, AInt growBy, Args... args)
 	{
 		ANIMA_ASSERT(index >= 0);
 
 		if (index >= _size)
-			SetSize(index + 1, std::forward<Args>(args)..., -1);
+			SetSize(index + 1, growBy, args...);
 		*(_data[index]) = newElement;
 	}
 
 	template<typename... Args>
-	AInt Add(ARG_TYPE newElement, Args&&... args)
+	AInt Add(ARG_TYPE newElement, AInt growBy = 1, Args... args)
 	{
 		AInt index = _size;
-		SetAtGrow(index, newElement, std::forward<Args>(args)...);
+		SetAtGrow(index, newElement, growBy, args...);
 		return index;
 	}
 
 	template<typename... Args>
-	AInt Append(const AnimaArray& src, Args&&... args)
+	AInt Append(const AnimaArray& src, Args... args)
 	{
 		ANIMA_ASSERT(this != &src);
 
 		AInt oldSize = _size;
-		InsertAt(oldSize, &src, std::forward<Args>(args)...);
+		InsertAt(oldSize, &src, args...);
 
 		return oldSize;
 	}
 
 	template<typename... Args>
-	void Copy(AnimaArray& src, Args&&... args)
+	void Copy(const AnimaArray& src, Args... args)
 	{
 		ANIMA_ASSERT(this != &src);
-		SetSize(1, std::forward<Args>(args)..., -1);
-		InsertAt(0, &src, std::forward<Args>(args)...);
-		RemoveAt(_size - 1, std::forward<Args>(args)..., -1);
+
+		_growBy = src._growBy;
+
+		SetSize(1, _growBy, args...);
+		InsertAt(0, &src, args...);
+		RemoveAt(_size - 1, 1, args...);
 	}
 
 	template<typename... Args>
-	void InsertAt(AInt index, ARG_TYPE newElement, Args&&... args, AInt count = 1)
+	void InsertAt(AInt index, ARG_TYPE newElement, AInt count = 1, AInt growBy = 1, Args... args)
 	{
 		ANIMA_ASSERT(index >= 0);
 		ANIMA_ASSERT(count > 0);
 
 		if (index >= _size)
-			SetSize(index + count, std::forward<Args>(args)..., -1);
+			SetSize(index + count, growBy, args...);
 		else
 		{
 			int oldSize = _size;
-			SetSize(_size + count, std::forward<Args>(args)..., -1);
+			SetSize(_size + count, growBy, args...);
 
 			TYPE** newData = AnimaAllocatorNamespace::AllocateArray<TYPE*>(*_allocator, count);
 			memcpy(newData, &_data[oldSize], count * sizeof(TYPE*));
@@ -303,23 +306,23 @@ public:
 	}
 
 	template<typename... Args>
-	void InsertAt(AInt index, AnimaArray* newArray, Args&&... args)
+	void InsertAt(AInt index, const AnimaArray* newArray, Args... args)
 	{
 		ANIMA_ASSERT(index >= 0);
 
 		if (newArray->GetSize() > 0)
 		{
-			InsertAt(index, newArray->GetAt(0), std::forward<Args>(args)..., newArray->GetSize());
+			InsertAt(index, newArray->GetAt(0), newArray->GetSize(), args...);
 			for (int i = 0; i < newArray->GetSize(); i++)
 				SetAt(index + i, newArray->GetAt(i));
 		}
 	}
 
 	template<typename... Args>
-	void RemoveAt(AInt index, Args&&... args, AInt count = 1)
+	void RemoveAt(AInt index, AInt count = 1, Args...args)
 	{
 		ANIMA_ASSERT(index >= 0);
-		ANIMA_ASSERT(count >= 0);
+		ANIMA_ASSERT(count >= 1);
 		ANIMA_ASSERT(index + count <= _size);
 
 		int moveCount = _size - (index + count);
@@ -332,7 +335,7 @@ public:
 				_data[index + i] = nullptr;
 			}
 
-			_data[index + i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, std::forward<Args>(args)...);
+			_data[index + i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
 		}
 
 		if (moveCount)

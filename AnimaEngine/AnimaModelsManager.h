@@ -36,8 +36,8 @@ public:
 	AnimaMesh* LoadModel(const char* modelPath, const char* name);
 	AnimaMesh* LoadModel(const AnimaString& modelPath, const AnimaString& name);
 	AnimaMesh* LoadModel(const AnimaString& modelPath, const char* name);
-	void AddModel(const AnimaMesh& model, const AnimaString& name);
-	void AddModel(const AnimaMesh& model, const char* name);
+	void AddModel(AnimaMesh& model, const AnimaString& name);
+	void AddModel(AnimaMesh& model, const char* name);
 
 	AnimaMesh* CreatePlane(const AnimaString& name);
 	AnimaMesh* CreatePlane(const char* name);

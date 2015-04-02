@@ -247,13 +247,13 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 	}
 }
 
-void AnimaModelsManager::AddModel(const AnimaMesh& model, const char* name)
+void AnimaModelsManager::AddModel(AnimaMesh& model, const char* name)
 {
 	AnimaString str(name, _scene->GetStringAllocator());
 	AddModel(model, str);
 }
 
-void AnimaModelsManager::AddModel(const AnimaMesh& model, const AnimaString& name)
+void AnimaModelsManager::AddModel(AnimaMesh& model, const AnimaString& name)
 {
 	ANIMA_ASSERT(_scene != nullptr);
 	if(_modelsNumber > 0)

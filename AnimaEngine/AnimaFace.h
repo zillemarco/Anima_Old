@@ -32,12 +32,12 @@ public:
 public:
 	void SetIndexes(AUint indexes[3]);
 	void SetIndexes(AUint a, AUint b, AUint c);
-	AUint GetIndex(ASizeT index) const;
+	AUint GetIndex(AInt index) const;
 	AUint* GetIndexes();
 	const AUint* GetConstIndexes();
-	bool GetIndexes(AUint* outIndexes, ASizeT& inOutSize);
-	bool GetConstIndexes(AUint* outIndexes, ASizeT& inOutSize);
-	ASizeT GetIndexesCount();
+	bool GetIndexes(AUint* outIndexes, AInt& inOutSize);
+	bool GetConstIndexes(AUint* outIndexes, AInt& inOutSize);
+	AInt GetIndexesCount();
 	bool HasIndex(AUint index) const;
 
 	void SetNormal(const AnimaVertex3f& n);

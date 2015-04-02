@@ -126,7 +126,7 @@ AnimaLightsMapData::AnimaLightsMapData(AnimaAllocator* allocator)
 	_allocator = allocator;
 }
 
-AnimaLightsMapData::AnimaLightsMapData(AnimaLightsMapData& src)
+AnimaLightsMapData::AnimaLightsMapData(const AnimaLightsMapData& src)
 	: _lights(src._allocator)
 {
 	_allocator = src._allocator;
@@ -154,7 +154,7 @@ AnimaLightsMapData::~AnimaLightsMapData()
 	_lightsMap.clear();
 }
 
-AnimaLightsMapData& AnimaLightsMapData::operator=(AnimaLightsMapData& src)
+AnimaLightsMapData& AnimaLightsMapData::operator=(const AnimaLightsMapData& src)
 {
 	if (this != &src)
 	{

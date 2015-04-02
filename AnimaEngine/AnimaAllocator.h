@@ -114,9 +114,9 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_ALIGN_OF(T))) T(t);
 	}
 
-	template<class T, typename... Args> T* AllocateNew(AnimaAllocator& allocator, Args&&... args)
+	template<class T, typename... Args> T* AllocateNew(AnimaAllocator& allocator, Args... args)
 	{
-		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_ALIGN_OF(T))) T(std::forward<Args>(args)...);
+		return new (allocator.Allocate(sizeof(T), ANIMA_ENGINE_ALIGN_OF(T))) T(args...);
 	}
 	
 	template<class T> void DeallocateObject(AnimaAllocator& allocator, T& object)
@@ -191,7 +191,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		return p;
 	}
 
-	template<class T, typename... Args> T* AllocateArray(AnimaAllocator& allocator, ASizeT length, Args&&... args)
+	template<class T, typename... Args> T* AllocateArray(AnimaAllocator& allocator, ASizeT length, Args... args)
 	{
 		ANIMA_ASSERT(length > 0);
 		AU8 headerSize = sizeof(ASizeT) / sizeof(T);
@@ -206,7 +206,7 @@ BEGIN_ANIMA_ALLOCATOR_NAMESPACE
 		*(((ASizeT*)p) - 1) = length;
 
 		for (ASizeT i = 0; i < length; i++)
-			new (&p[i]) T(std::forward<Args>(args)...);
+			new (&p[i]) T(args...);
 
 		return p;
 	}
