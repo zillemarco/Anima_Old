@@ -26,12 +26,14 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_frameBuffer = 0;
 	_renderBuffer = 0;
 
+	_name = AnimaString("AnimaTexture", _allocator);
+
 	_renderTargetsReady = false;
 	_texturesReady = false;
 	_needsResize = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
 {
 	_allocator = allocator;
 
@@ -49,7 +51,39 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint
 	_textureID = 0;
 	_frameBuffer = 0;
 	_renderBuffer = 0;
+
+	_name = name;
 		
+	_mipMapLevels = mipMapLevels;
+	_width = width;
+	_height = height;
+	_textureTarget = textureTarget;
+	_texturesReady = false;
+	_needsResize = false;
+	_renderTargetsReady = false;
+}
+
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
+{
+	_allocator = allocator;
+
+	_data = nullptr;
+	_dataSize = 0;
+
+	SetData(data, dataSize);
+	SetFilter(filter);
+	SetFormat(format);
+	SetInternalFormat(internalFormat);
+	SetDataType(dataType);
+	SetClamp(clamp);
+	SetAttachment(attachment);
+
+	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_name = AnimaString(name, _allocator);
+
 	_mipMapLevels = mipMapLevels;
 	_width = width;
 	_height = height;
@@ -160,6 +194,8 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_frameBuffer = 0;
 		_renderBuffer = 0;
 
+		_name = src._name;
+
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
@@ -197,6 +233,8 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_textureID = 0;
 		_frameBuffer = 0;
 		_renderBuffer = 0;
+
+		_name = src._name;
 
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
@@ -557,6 +595,27 @@ void AnimaTexture::BindAsRenderTarget() const
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	glViewport(0, 0, _width, _height);
+}
+
+void AnimaTexture::SetName(const AnimaString& name)
+{
+	_name = name;
+}
+
+void AnimaTexture::SetName(const char* name)
+{
+	AnimaString str(name, _allocator);
+	_name = str;
+}
+
+AnimaString AnimaTexture::GetAnimaName() const
+{
+	return _name;
+}
+
+const char* AnimaTexture::GetName() const
+{
+	return _name.GetConstBuffer();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

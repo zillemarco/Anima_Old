@@ -29,7 +29,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
-	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_DEPTH_ATTACHMENT));
+	AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_CLAMP_TO_BORDER, GL_DEPTH_ATTACHMENT));
 	//AnimaSceneObject::SetTexture("ShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	//AnimaSceneObject::SetTexture("TempShadowMap", AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, 1024, 1024, nullptr, 0, 0, GL_LINEAR, GL_RG32F, GL_RGBA, GL_FLOAT, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0));
 	

@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-//#if defined _DEBUG
+#if !defined _DEBUG
 	
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
@@ -144,39 +144,39 @@ int main(int argc, char** argv)
 
 	window->_fpcamera->Activate();
 
-//#else
-//	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-//	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
-//		return 0;
-//	mesh->GetTransformation()->Scale(5.0f, 5.0f, 5.0f);
-//	mesh->ComputeBoundingBox(true);
-//
-//	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-//	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
-//		return 0;
-//	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
-//	mesh->ComputeBoundingBox(true);
-//
-//	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-//	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
-//		return 0;
-//	mesh->ComputeBoundingBox(true);
-//	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
-//
-//	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
-//	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
-//	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
-//
-//	Anima::AnimaVertex3f pos(0.0f, 0.0f, 30.0f);
-//	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
-//	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
-//
-//	window->_tpcamera->LookAt(pos, tar);
-//	window->_fpcamera->LookAt(pos, forw);
-//
-//	window->_tpcamera->Activate();
-//
-//#endif
+#else
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->Scale(5.0f, 5.0f, 5.0f);
+	mesh->ComputeBoundingBox(true);
+
+	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
+	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+		return 0;
+	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	mesh->ComputeBoundingBox(true);
+
+	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
+	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+		return 0;
+	mesh->ComputeBoundingBox(true);
+	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
+
+	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
+	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
+	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
+
+	Anima::AnimaVertex3f pos(0.0f, 0.0f, 30.0f);
+	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
+	Anima::AnimaVertex3f forw(0.0f, 0.0f, -1.0f);
+
+	window->_tpcamera->LookAt(pos, tar);
+	window->_fpcamera->LookAt(pos, forw);
+
+	window->_tpcamera->Activate();
+
+#endif
 
 	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
 	window->Load();

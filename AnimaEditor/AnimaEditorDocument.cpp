@@ -715,7 +715,7 @@ void AnimaEditorDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 	{
 		xmlWriter->writeStartElement("Model");
 		
-		xmlWriter->writeTextElement("Name", mgr->GetModel(i)->GetMeshName());
+		xmlWriter->writeTextElement("Name", mgr->GetModel(i)->GetName());
 		xmlWriter->writeTextElement("FileName", mgr->GetModel(i)->GetMeshFileName());
 		
 		xmlWriter->writeEndElement();
@@ -804,7 +804,7 @@ bool AnimaEditorDocument::ImportModelInternal(QString modelName, QString modelFi
 	if(!model)
 		return false;
 	
-	model->SetMeshName(modelName.toLocal8Bit().constData());
+	model->SetName(modelName.toLocal8Bit().constData());
 	model->SetMeshFileName(modelFileName.toLocal8Bit().constData());
 	
 	return true;

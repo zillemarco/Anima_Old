@@ -62,7 +62,7 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 
 	AnimaString tmpName(_scene->GetStringAllocator());
 	tmpName.Format("AnimaModel_%lu", GetNextModelID());
-	newModel->SetMeshName(tmpName);
+	newModel->SetName(tmpName);
 
 	AInt pos = modelPath.ReverseFind('/');
 	
@@ -91,7 +91,7 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScene *scene, const aiNode* sceneNode)
 {
 	if (sceneNode->mName.length > 0)
-		currentModel->SetMeshName(sceneNode->mName.C_Str());
+		currentModel->SetName(sceneNode->mName.C_Str());
 
 	AnimaMatrix modelMatrix;
 	modelMatrix.m[0] = sceneNode->mTransformation.a1;	modelMatrix.m[1] = sceneNode->mTransformation.a2;	modelMatrix.m[2] = sceneNode->mTransformation.a3;	modelMatrix.m[3] = sceneNode->mTransformation.a4;
@@ -414,7 +414,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 	{
 		int i = 1;
 
-		AnimaString prefix = mesh->GetAnimaMeshName();
+		AnimaString prefix = mesh->GetAnimaName();
 		AnimaString suffix(stringAllocator);
 		suffix.Format(".material.%d", i);
 

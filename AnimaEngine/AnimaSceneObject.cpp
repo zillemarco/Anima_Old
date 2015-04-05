@@ -12,12 +12,12 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
-: AnimaMappedValues(allocator, dataGeneratorsManager, name)
+	: AnimaMappedValues(allocator, dataGeneratorsManager, name)
 {
 }
 
 AnimaSceneObject::AnimaSceneObject(const AnimaSceneObject& src)
-: AnimaMappedValues(src)
+	: AnimaMappedValues(src)
 {
 }
 

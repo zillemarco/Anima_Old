@@ -16,6 +16,7 @@
 #include "AnimaString.h"
 #include "AnimaTexture.h"
 #include "AnimaScene.h"
+#include "AnimaMappedArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -39,7 +40,7 @@ class ANIMA_ENGINE_EXPORT AnimaTexturesManager
 public:
 	AnimaTexturesManager(AnimaScene* scene);
 	~AnimaTexturesManager();
-	
+
 	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadTextureFromFile(const char* filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const char* textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
@@ -75,22 +76,17 @@ public:
 	AnimaTexture* CreateTexture(const char* textureName, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp);
 
 private:
-	void ClearTextures(bool bDeleteObjects = true, bool bResetNumber = true);
+	void ClearTextures();
 
 	AnimaTexture* LoadUncompressedTGA(FILE* file, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadUncompressedTGA(FILE* file, const char* textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadCompressedTGA(FILE* file, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadCompressedTGA(FILE* file, const char* textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-		
+
 private:
 	AnimaScene* _scene;
 
-	AnimaTexture**	_textures;
-	ASizeT			_texturesNumber;
-
-#pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _texturesMap;
-#pragma warning (default: 4251) 
+	AnimaMappedArray<AnimaTexture*> _textures;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

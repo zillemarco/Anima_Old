@@ -16,6 +16,7 @@
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
 #include <AnimaFrustum.h>
+#include <AnimaMappedArray.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -481,13 +482,14 @@ void Window::Load()
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
 	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
-	Anima::AnimaHemisphereLight* hemL = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
+	Anima::AnimaLightsManager* lightsManager = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
 	hemL->SetIntensity(0.1f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
 
-	_directionalLight = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateDirectionalLight("directional");
+	_directionalLight = lightsManager->CreateDirectionalLight("directional");
 	_directionalLight->SetColor(1.0f, 1.0f, 1.0f);
 	_directionalLight->SetIntensity(1.0f);
 	_directionalLight->SetDirection(-1.0f, 0.0f, -1.0f);

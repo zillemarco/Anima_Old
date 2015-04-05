@@ -7,6 +7,7 @@
 //
 
 #include "AnimaArray.h"
+#include "AnimaMesh.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

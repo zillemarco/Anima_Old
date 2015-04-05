@@ -12,7 +12,8 @@ class ANIMA_ENGINE_EXPORT AnimaTexture
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator);
-	AnimaTexture(AnimaAllocator* allocator, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment = GL_NONE);
+	AnimaTexture(AnimaAllocator* allocator, const char* name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment = GL_NONE);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment = GL_NONE);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -69,8 +70,16 @@ public:
 	void Bind(AUint unit) const;
 	void BindAsRenderTarget() const;
 
+	void SetName(const AnimaString& name);
+	void SetName(const char* name);
+
+	AnimaString GetAnimaName() const;
+	const char* GetName() const;
+
 private:
 	AnimaAllocator* _allocator;
+
+	AnimaString _name;
 	
 	AUint _width;
 	AUint _height;

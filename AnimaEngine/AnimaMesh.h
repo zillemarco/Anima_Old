@@ -20,6 +20,7 @@
 #include "AnimaMaterial.h"
 #include "AnimaTransformation.h"
 #include "AnimaArray.h"
+#include "AnimaMappedArray.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -36,6 +37,9 @@ public:
 	
 	AnimaMesh& operator=(const AnimaMesh& src);
 	AnimaMesh& operator=(AnimaMesh&& src);
+
+	bool operator==(const AnimaMesh& other);
+	bool operator!=(const AnimaMesh& other);
 	
 public:
 	// Gestione dati struttura
@@ -61,10 +65,10 @@ public:
 	void MakeIcosahedralSphere(AInt recursionLevel = 0);
 	void MakeCylinder(AFloat topRadius = 1.0f, AFloat bottomRadius = 1.0f, AFloat height = 1.0f, AUint radialSegments = 8, AUint heightSegments = 1, bool openEnded = false);
 
-	void SetMeshName(const AnimaString& name);
-	void SetMeshName(const char* name);
-	AnimaString GetAnimaMeshName();
-	const char* GetMeshName();
+	void SetName(const AnimaString& name);
+	void SetName(const char* name);
+	AnimaString GetAnimaName();
+	const char* GetName();
 
 	void SetMeshFileName(const AnimaString& name);
 	void SetMeshFileName(const char* name);
@@ -249,7 +253,7 @@ protected:
 	//AnimaVertex3f*	_bitangents;
 	//AInt			_bitangentsNumber;
 	AnimaArray<AnimaVertex3f> _bitangents;
-
+	
 	//AnimaFace*		_faces;
 	//AInt			_facesNumber;
 	AnimaArray<AnimaFace> _faces;

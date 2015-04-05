@@ -28,26 +28,17 @@ public:
 		_allocator = allocator;
 	}
 
-	AnimaObjArray(const AnimaObjArray& src)
+	template<typename... Args>
+	AnimaObjArray(const AnimaObjArray& src, Args... args)
 	{
 		_allocator = src._allocator;
-
-		Copy(src);
+		Copy(src, args...);
 	}
 
 	virtual ~AnimaObjArray()
 	{
 		if (_data != nullptr)
 		{
-			//for (AInt i = 0; i < _maxSize; i++)
-			//{
-			//	if (_data[i] != nullptr)
-			//	{
-			//		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _data[i]);
-			//		_data[i] = nullptr;
-			//	}
-			//}
-
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
 			_data = nullptr;
 		}
@@ -98,15 +89,6 @@ public:
 		{
 			if (_data != nullptr)
 			{
-				//for (AInt i = 0; i < _maxSize; i++)
-				//{
-				//	if (_data[i] != nullptr)
-				//	{
-				//		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _data[i]);
-				//		_data[i] = nullptr;
-				//	}
-				//}
-
 				AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
 				_data = nullptr;
 			}
@@ -120,41 +102,11 @@ public:
 
 			_data = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, newSize);
 
-			//for (AInt i = 0; i < newSize; i++)
-			//	_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
-
 			_size = newSize;
 			_maxSize = newSize;
 		}
 		else if (newSize <= _maxSize)
 		{
-			if (newSize > _size)
-			{
-				//for (AInt i = _size; i < newSize; i++)
-				//{
-					//if (_data[i] != nullptr)
-					//{
-					//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, _data[i]);
-					//	_data[i] = nullptr;
-					//}
-
-					//_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
-				//}
-			}
-			else if (_size > newSize)
-			{
-				//for (AInt i = newSize; i < _size; i++)
-				//{
-				//	if (_data[i] != nullptr)
-				//	{
-				//		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _data[i]);
-				//		_data[i] = nullptr;
-				//	}
-
-				//	_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
-				//}
-			}
-
 			_size = newSize;
 		}
 		else
@@ -180,10 +132,7 @@ public:
 			memcpy(newData, _data, _maxSize * sizeof(TYPE));
 
 			ANIMA_ASSERT(newSize > _size);
-
-			//for (AInt i = _maxSize; i < newMax; i++)
-			//	newData[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
-
+			
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
 			_data = newData;
 			_size = newSize;
@@ -203,15 +152,6 @@ public:
 				newData = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, _size);
 
 				memcpy(newData, _data, _size * sizeof(TYPE));
-
-				//for (AInt i = _size; i < _maxSize; i++)
-				//{
-				//	if (_data[i] != nullptr)
-				//	{
-				//		delete _data[i];
-				//		_data[i] = nullptr;
-				//	}
-				//}
 			}
 
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
@@ -366,15 +306,7 @@ public:
 		int moveCount = _size - (index + count);
 
 		for (int i = 0; i < count; i++)
-		{
-			//if (_data[index + i] != nullptr)
-			//{
-			//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, _data[index + i]);
-			//	_data[index + i] = nullptr;
-			//}
-
-			_data[index + i] = TYPE(args...);// AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
-		}
+			_data[index + i] = TYPE(args...);
 
 		if (moveCount)
 		{
@@ -395,7 +327,7 @@ public:
 		_size -= count;
 	}
 
-	bool Contains(TYPE element)
+	AInt Contains(TYPE element)
 	{
 		if (_data == nullptr)
 		{
@@ -404,14 +336,14 @@ public:
 		}
 		else
 		{
-			for (int i = 0; i < _size; i++)
+			for (AInt i = 0; i < _size; i++)
 			{
 				if (_data[i] == element)
-					return true;
+					return i;
 			}
 		}
 
-		return false;
+		return -1;
 	}
 
 protected:
@@ -439,7 +371,6 @@ public:
 	AnimaObjPtrArray(const AnimaObjPtrArray& src)
 	{
 		_allocator = src._allocator;
-
 		Copy(src);
 	}
 
@@ -488,14 +419,12 @@ public:
 		return _size - 1;
 	}
 	
-	template<typename... Args>
-	void SetSize(AInt newSize, Args...args)
+	void SetSize(AInt newSize)
 	{
-		SetSize(newSize, -1, args...);
+		SetSize(newSize, -1);
 	}
 	
-	template<typename... Args>
-	void SetSize(AInt newSize, AInt growBy, Args...args)
+	void SetSize(AInt newSize, AInt growBy)
 	{
 		ANIMA_ASSERT(newSize >= 0);
 
@@ -529,7 +458,7 @@ public:
 			_data = AnimaAllocatorNamespace::AllocateArray<TYPE*>(*_allocator, newSize);
 
 			for (AInt i = 0; i < newSize; i++)
-				_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
+				_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator);
 
 			_size = newSize;
 			_maxSize = newSize;
@@ -546,7 +475,7 @@ public:
 						_data[i] = nullptr;
 					}
 
-					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
+					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator);
 				}
 			}
 			else if (_size > newSize)
@@ -559,7 +488,7 @@ public:
 						_data[i] = nullptr;
 					}
 
-					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
+					_data[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator);
 				}
 			}
 
@@ -590,7 +519,7 @@ public:
 			ANIMA_ASSERT(newSize > _size);
 
 			for (AInt i = _maxSize; i < newMax; i++)
-				newData[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
+				newData[i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator);
 
 			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _data);
 			_data = newData;
@@ -628,16 +557,14 @@ public:
 		}
 	}
 
-	template<typename... Args>
-	void RemoveAll(AInt growBy, Args... args)
+	void RemoveAll(AInt growBy)
 	{
-		SetSize(0, growBy, args...);
+		SetSize(0, growBy);
 	}
 	
-	template<typename... Args>
-	void RemoveAll(Args... args)
+	void RemoveAll()
 	{
-		RemoveAll(1, args...);
+		RemoveAll(1);
 	}
 
 	inline TYPE GetAt(AInt index) const
@@ -658,65 +585,59 @@ public:
 		return *_data[index];
 	}
 
-	template<typename... Args>
-	void SetAtGrow(AInt index, TYPE newElement, AInt growBy, Args... args)
+	void SetAtGrow(AInt index, TYPE newElement, AInt growBy)
 	{
 		ANIMA_ASSERT(index >= 0);
 
 		if (index >= _size)
-			SetSize(index + 1, growBy, args...);
+			SetSize(index + 1, growBy);
 		*(_data[index]) = newElement;
 	}
 
-	template<typename... Args>
-	AInt Add(TYPE newElement, AInt growBy, Args... args)
+	AInt Add(TYPE newElement, AInt growBy)
 	{
 		AInt index = _size;
-		SetAtGrow(index, newElement, growBy, args...);
+		SetAtGrow(index, newElement, growBy);
 		return index;
 	}
 	
-	template<typename... Args>
-	AInt Add(TYPE newElement, Args... args)
+	AInt Add(TYPE newElement)
 	{
-		return Add(newElement, 1, args...);
+		return Add(newElement, 1);
 	}
 
-	template<typename... Args>
-	AInt Append(const AnimaObjPtrArray& src, Args... args)
+	AInt Append(const AnimaObjPtrArray& src)
 	{
 		ANIMA_ASSERT(this != &src);
 
 		AInt oldSize = _size;
-		InsertAt(oldSize, &src, args...);
+		InsertAt(oldSize, &src);
 
 		return oldSize;
 	}
 
-	template<typename... Args>
-	void Copy(const AnimaObjPtrArray& src, Args... args)
+	void Copy(const AnimaObjPtrArray& src)
 	{
 		ANIMA_ASSERT(this != &src);
 
 		_growBy = src._growBy;
 
-		SetSize(1, _growBy, args...);
-		InsertAt(0, &src, args...);
-		RemoveAt(_size - 1, 1, args...);
+		SetSize(1, _growBy);
+		InsertAt(0, &src);
+		RemoveAt(_size - 1, 1);
 	}
 
-	template<typename... Args>
-	void InsertAt(AInt index, TYPE newElement, AInt count, AInt growBy, Args... args)
+	void InsertAt(AInt index, TYPE newElement, AInt count, AInt growBy)
 	{
 		ANIMA_ASSERT(index >= 0);
 		ANIMA_ASSERT(count > 0);
 
 		if (index >= _size)
-			SetSize(index + count, growBy, args...);
+			SetSize(index + count, growBy);
 		else
 		{
 			int oldSize = _size;
-			SetSize(_size + count, growBy, args...);
+			SetSize(_size + count, growBy);
 
 			TYPE** newData = AnimaAllocatorNamespace::AllocateArray<TYPE*>(*_allocator, count);
 			memcpy(newData, &_data[oldSize], count * sizeof(TYPE*));
@@ -733,39 +654,34 @@ public:
 			*(_data[index++]) = newElement;
 	}
 	
-	template<typename... Args>
-	void InsertAt(AInt index, TYPE newElement, Args... args)
+	void InsertAt(AInt index, TYPE newElement)
 	{
-		InsertAt(index, newElement, 1, 1, args...);
+		InsertAt(index, newElement, 1, 1);
 	}
 	
-	template<typename... Args>
-	void InsertAt(AInt index, TYPE newElement, AInt count, Args... args)
+	void InsertAt(AInt index, TYPE newElement, AInt count)
 	{
-		InsertAt(index, newElement, count, 1, args...);
+		InsertAt(index, newElement, count, 1);
 	}
 	
-	template<typename... Args>
-	void InsertAt(AInt index, const AnimaObjPtrArray* newArray, Args... args)
+	void InsertAt(AInt index, const AnimaObjPtrArray* newArray)
 	{
 		ANIMA_ASSERT(index >= 0);
 
 		if (newArray->GetSize() > 0)
 		{
-			InsertAt(index, newArray->GetAt(0), newArray->GetSize(), args...);
+			InsertAt(index, newArray->GetAt(0), newArray->GetSize());
 			for (int i = 0; i < newArray->GetSize(); i++)
 				SetAt(index + i, newArray->GetAt(i));
 		}
 	}
 	
-	template<typename... Args>
-	void RemoveAt(AInt index, Args...args)
+	void RemoveAt(AInt index)
 	{
-		RemoveAt(index, 1, args...);
+		RemoveAt(index, 1);
 	}
 	
-	template<typename... Args>
-	void RemoveAt(AInt index, AInt count, Args...args)
+	void RemoveAt(AInt index, AInt count)
 	{
 		ANIMA_ASSERT(index >= 0);
 		ANIMA_ASSERT(count >= 1);
@@ -781,7 +697,7 @@ public:
 				_data[index + i] = nullptr;
 			}
 
-			_data[index + i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator, args...);
+			_data[index + i] = AnimaAllocatorNamespace::AllocateNew<TYPE>(*_allocator);
 		}
 
 		if (moveCount)

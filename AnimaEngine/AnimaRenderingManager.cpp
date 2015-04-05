@@ -11,6 +11,9 @@
 #include "AnimaLightsManager.h"
 #include "AnimaBenchmarkTimer.h"
 #include <fstream>
+#include "AnimaTypeMappedArray.h"
+#include "AnimaMappedArray.h"
+#include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -222,7 +225,7 @@ void AnimaRenderingManager::InitRenderingTargets(AInt screenWidth, AInt screenHe
 			diffuseTexture->Resize(screenWidth, screenHeight);
 		else
 		{
-			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
@@ -513,9 +516,14 @@ void AnimaRenderingManager::DeferredDrawAll(AnimaScene* scene)
 
 	glDepthMask(GL_FALSE);
 
-	boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	for (auto pair : (*lights))
-		DeferredLightPass(scene, pair.second->GetLightsArray());
+	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
+	//for (auto pair : (*lights))
+	//	DeferredLightPass(scene, pair.second->GetLightsArray());
+	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	for (auto pair : (*lightsMap))
+		DeferredLightPass(scene, pair.second->GetArray());
+
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
@@ -606,9 +614,13 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 
 	glDepthMask(GL_FALSE);
 
-	boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	for (auto pair : (*lights))
-		DeferredLightPass(scene, pair.second->GetLightsArray());
+	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
+	//for (auto pair : (*lights))
+	//	DeferredLightPass(scene, pair.second->GetLightsArray());
+	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	for (auto pair : (*lightsMap))
+		DeferredLightPass(scene, pair.second->GetArray());
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);

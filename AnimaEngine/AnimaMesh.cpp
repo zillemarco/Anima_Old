@@ -218,11 +218,11 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_boundingBoxMax = src._boundingBoxMax;
 		_boundingBoxCenter = src._boundingBoxCenter;
 
-		SetMeshName(src._meshName);
+		SetName(src._meshName);
 		SetMeshFileName(src._meshFileName);
 		SetChildren(src._meshChildren, src._meshChildrenNumber);
 		SetMeshes(src._meshes, src._meshesNumber);
-		SetMeshName(src._meshName);
+		SetName(src._meshName);
 
 		_vertices = src._vertices;
 		_normals = src._normals;
@@ -306,6 +306,16 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 	}
 	
 	return *this;
+}
+
+bool AnimaMesh::operator==(const AnimaMesh& other)
+{
+	return true;
+}
+
+bool AnimaMesh::operator!=(const AnimaMesh& other)
+{
+	return true;
 }
 
 void AnimaMesh::ClearAll()
@@ -1569,22 +1579,22 @@ AUint AnimaMesh::GetBitangentsBufferObject()
 	return _bitangentsBufferObject;
 }
 
-void AnimaMesh::SetMeshName(const AnimaString& name)
+void AnimaMesh::SetName(const AnimaString& name)
 {
 	_meshName = name;
 }
 
-void AnimaMesh::SetMeshName(const char* name)
+void AnimaMesh::SetName(const char* name)
 {
 	_meshName = name;
 }
 
-AnimaString AnimaMesh::GetAnimaMeshName()
+AnimaString AnimaMesh::GetAnimaName()
 {
 	return _meshName;
 }
 
-const char* AnimaMesh::GetMeshName()
+const char* AnimaMesh::GetName()
 {
 	return _meshName.GetConstBuffer();
 }

@@ -46,13 +46,13 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 		
 		if(index.column() == 0)
 		{
-			if(model->GetAnimaMeshName() == newString)
+			if(model->GetAnimaName() == newString)
 				return false;
 			
 			bool bFound = false;
 			for (int i = 0; i < _document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if (_document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaMeshName() == newString)
+				if (_document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaName() == newString)
 					bFound = true;
 			}
 		
@@ -66,7 +66,7 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			}
 		
-			model->SetMeshName(newString);
+			model->SetName(newString);
 			_document->SetMofications();
 		}
 		else if(index.column() == 1)
@@ -171,7 +171,7 @@ void ResourceManagerTab::LoadModelsTree()
 	{
 		QList<QStandardItem*> newItem;
 		
-		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetMeshName()));
+		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetName()));
 		resourceNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
 		resourceNameItem->setEditable(true);
 		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetMeshFileName()));

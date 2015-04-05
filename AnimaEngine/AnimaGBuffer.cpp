@@ -126,7 +126,7 @@ bool AnimaGBuffer::AddTexture(const AnimaString& name, AUint target, AUint attac
 
 	AUint index = (AUint)_texturesSet.size();
 
-	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, target, _width, _height, nullptr, 0, 0, filter, internalFormat, format, dataType, clamp/*, attachment*/);
+	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, name, target, _width, _height, nullptr, 0, 0, filter, internalFormat, format, dataType, clamp/*, attachment*/);
 	AnimaGBufferData* data = AnimaAllocatorNamespace::AllocateNew<AnimaGBufferData>(*_allocator, name, texture, index, attachment);
 	_texturesSet.insert(data);
 	

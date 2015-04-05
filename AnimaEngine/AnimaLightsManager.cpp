@@ -11,6 +11,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaLightsManager::AnimaLightsManager(AnimaScene* scene)
+	: _lights(scene->GetLightsAllocator())
 {
 	_scene = scene;
 }
@@ -52,34 +53,24 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
 
 void AnimaLightsManager::ClearLights()
 {
-	for (auto pair : _lightsMap)
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = _lights.GetArraysMap();
+	for (auto lightsPair : (*lightsMap))
 	{
-		if (pair.second != nullptr)
+		AnimaMappedArray<AnimaLight*>* lightsArray = lightsPair.second;
+		AInt count = lightsArray->GetSize();
+		for (AInt i = 0; i < count; i++)
 		{
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), pair.second);
-			pair.second = nullptr;
+			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), lightsArray->Get(i));
+			lightsArray->Get(i) = nullptr;
 		}
 	}
 
-	_lightsMap.clear();
+	_lights.RemoveAll();
 }
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 {
-	auto namesPair = _lightsName.find(name);
-
-	if (namesPair != _lightsMap.end())
-	{
-		boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* lightsMap = namesPair->second->GetLightsMap();
-		AnimaArray<AnimaLight*>* lightsArray = namesPair->second->GetLightsArray();
-
-		auto lightsPair = lightsMap->find(name);
-
-		if (lightsPair != lightsMap->end())
-			return lightsArray->ElementAt(lightsPair->second);
-	}
-
-	return nullptr;
+	return _lights.GetWithName(name);
 }
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
@@ -91,99 +82,29 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 AInt AnimaLightsManager::GetTotalLightsCount()
 {
 	AInt count = 0;
-	for (auto pair : _lightsMap)
-	{
-		if (pair.second != nullptr)
-			count += pair.second->GetLightsArray()->GetSize();
-	}
+	
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = _lights.GetArraysMap();
+	for (auto lightsPair : (*lightsMap))
+		count += lightsPair.second->GetSize();
 
 	return count;
 }
 
-boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* AnimaLightsManager::GetLightsMap()
-{
-	return &_lightsMap;
-}
-
-void AnimaLightsManager::UpdateLightsMatrix(AnimaCamera* activeCamera)
-{
-	for (auto pair : _lightsMap)
-	{
-		if (pair.second != nullptr)
-		{
-			AnimaArray<AnimaLight*>* lightsArray = pair.second->GetLightsArray();
-			AInt size = lightsArray->GetSize();
-
-			for (AInt i = 0; i < size; i++)
-				lightsArray->ElementAt(i)->ComputeLightMatrix(activeCamera);
-		}
-	}
-}
-
-AnimaLightsMapData::AnimaLightsMapData(AnimaAllocator* allocator)
-	: _lights(allocator)
-{
-	_allocator = allocator;
-}
-
-AnimaLightsMapData::AnimaLightsMapData(const AnimaLightsMapData& src)
-	: _lights(src._allocator)
-{
-	_allocator = src._allocator;
-	_lights = src._lights;
-	_lightsMap = src._lightsMap;
-}
-
-AnimaLightsMapData::AnimaLightsMapData(AnimaLightsMapData&& src)
-	: _lights(src._allocator)
-{
-	_allocator = src._allocator;
-	_lights = src._lights;
-	_lightsMap = src._lightsMap;
-}
-
-AnimaLightsMapData::~AnimaLightsMapData()
-{
-	for (AInt i = 0; i < _lights.GetSize(); i++)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _lights[i]);
-		_lights[i] = nullptr;
-	}
-
-	_lights.RemoveAll();
-	_lightsMap.clear();
-}
-
-AnimaLightsMapData& AnimaLightsMapData::operator=(const AnimaLightsMapData& src)
-{
-	if (this != &src)
-	{
-		_lights = src._lights;
-		_lightsMap = src._lightsMap;
-	}
-
-	return *this;
-}
-
-AnimaLightsMapData& AnimaLightsMapData::operator=(AnimaLightsMapData&& src)
-{
-	if (this != &src)
-	{
-		_lights = src._lights;
-		_lightsMap = src._lightsMap;
-	}
-
-	return *this;
-}
-
-AnimaArray<AnimaLight*>* AnimaLightsMapData::GetLightsArray()
+AnimaTypeMappedArray<AnimaLight*>* AnimaLightsManager::GetLights()
 {
 	return &_lights;
 }
 
-boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>* AnimaLightsMapData::GetLightsMap()
+void AnimaLightsManager::UpdateLightsMatrix(AnimaCamera* activeCamera)
 {
-	return &_lightsMap;
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = _lights.GetArraysMap();
+	for (auto lightsPair : (*lightsMap))
+	{
+		AnimaMappedArray<AnimaLight*>* lightsArray = lightsPair.second;
+		AInt count = lightsArray->GetSize();
+		for (AInt i = 0; i < count; i++)
+			lightsArray->Get(i)->ComputeLightMatrix(activeCamera);
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE
