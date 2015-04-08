@@ -234,28 +234,11 @@ protected:
 	AnimaTransformation _transformation;
 
 	// Dati grafica
-	//AnimaVertex3f*	_vertices;
-	//AInt			_verticesNumber;
 	AnimaArray<AnimaVertex3f> _vertices;
-	
-	//AnimaVertex3f*	_normals;
-	//AInt			_normalsNumber;
 	AnimaArray<AnimaVertex3f> _normals;
-
-	//AnimaVertex2f*	_textureCoords;
-	//AInt			_textureCoordsNumber;
 	AnimaArray<AnimaVertex2f> _textureCoords;
-
-	//AnimaVertex3f*	_tangents;
-	//AInt			_tangentsNumber;
 	AnimaArray<AnimaVertex3f> _tangents;
-
-	//AnimaVertex3f*	_bitangents;
-	//AInt			_bitangentsNumber;
 	AnimaArray<AnimaVertex3f> _bitangents;
-	
-	//AnimaFace*		_faces;
-	//AInt			_facesNumber;
 	AnimaArray<AnimaFace> _faces;
 	
 	AUint			_vertexArrayObject;
@@ -267,8 +250,7 @@ protected:
 	AUint			_tangentsBufferObject;
 	AUint			_bitangentsBufferObject;
 
-	bool _visible;
-	
+	bool _visible;	
 	bool _needsBuffersUpdate;
 };
 

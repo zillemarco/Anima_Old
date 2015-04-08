@@ -9,6 +9,8 @@
 #include "AnimaShader.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaScene.h"
+#include "AnimaMappedArray.h"
+#include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -58,19 +60,22 @@ private:
 
 private:
 	AnimaScene* _scene;
+	
+	AnimaMappedArray<AnimaShader*> _shaders;
+	AnimaMappedArray<AnimaShaderProgram*> _programs;
 
-	AnimaShader**	_shaders;
-	ASizeT			_shadersNumber;
-
+//	AnimaShader**	_shaders;
+//	ASizeT			_shadersNumber;
+//	
+//	AnimaShaderProgram**	_programs;
+//	ASizeT					_programsNumber;
+	
 	AnimaShaderProgram* _activeProgram;
 
-	AnimaShaderProgram**	_programs;
-	ASizeT					_programsNumber;
-
-#pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _shadersMap;
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _programsMap;
-#pragma warning (default: 4251)
+//#pragma warning (disable: 4251)
+//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _shadersMap;
+//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _programsMap;
+//#pragma warning (default: 4251)
 };
 
 END_ANIMA_ENGINE_NAMESPACE

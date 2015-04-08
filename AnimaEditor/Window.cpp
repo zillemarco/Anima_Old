@@ -71,7 +71,7 @@ void Window::DrawScene()
 	//DrawCameraFrustum();
 	//DrawLightFrustum();
 
-	renderingManager->DeferredDrawAll(GetEngine()->GetScenesManager()->GetStage("test-scene"));
+	renderingManager->DeferredDrawAll(GetEngine()->GetScenesManager()->GetScene("test-scene"));
 		
 	SwapBuffers();
 
@@ -93,7 +93,7 @@ void Window::DrawCameraFrustum()
 
 	Anima::AnimaFrustum* frustum = _tpcamera->GetFrustum();
 	
-	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
+	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetScene("test-scene")->GetGenericAllocator());
 	vertici.Add(frustum->GetFrustumVertex(2));
 	vertici.Add(frustum->GetFrustumVertex(1));
 	vertici.Add(frustum->GetFrustumVertex(0));
@@ -155,7 +155,7 @@ void Window::DrawLightFrustum()
 
 	Anima::AnimaFrustum* frustum = _directionalLight->GetFrustum();
 
-	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetStage("test-scene")->GetGenericAllocator());
+	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetScene("test-scene")->GetGenericAllocator());
 	vertici.Add(frustum->GetFrustumVertex(2));
 	vertici.Add(frustum->GetFrustumVertex(1));
 	vertici.Add(frustum->GetFrustumVertex(0));
@@ -218,8 +218,8 @@ void Window::FrameBufferResizeCallback(Anima::AnimaWindow* window, int w, int h)
 	{
 		glViewport(0, 0, w, h);
 
-		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
-		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager();
+		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetCamerasManager();
 
 		camerasManager->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 5000.0f);
 		lightsManager->UpdateLightsMatrix(camerasManager->GetActiveCamera());
@@ -253,8 +253,8 @@ void Window::MouseMoveCallback(Anima::AnimaWindow* window, double x, double y)
 		double dy = wnd->_lastPTY - y;
 		double dx = wnd->_lastPTX - x;
 		
-		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
-		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+		Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager();
+		Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetCamerasManager();
 
 		Anima::AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
 		activeCamera->RotateXDeg(dy * 0.1);
@@ -280,8 +280,8 @@ void Window::KeyCallback(Anima::AnimaWindow* window, int key, int scancode, int 
 
 	Window* wnd = (Window*)window;
 	
-	Anima::AnimaLightsManager* lightsManager = wnd->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
-	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+	Anima::AnimaLightsManager* lightsManager = wnd->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager();
+	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetCamerasManager();
 
 	Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
 	Anima::AnimaLight* dirL = lightsManager->GetLightFromName("directional");
@@ -408,8 +408,8 @@ void Window::MouseClickCallback(Anima::AnimaWindow* window, int button, int acti
 
 void Window::ScrollCallback(Anima::AnimaWindow* window, double x, double y)
 {
-	Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
-	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetCamerasManager();
+	Anima::AnimaLightsManager* lightsManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager();
+	Anima::AnimaCamerasManager* camerasManager = window->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetCamerasManager();
 
 	Anima::AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
 	activeCamera->Zoom(y * 0.1f);
@@ -423,7 +423,7 @@ void Window::Load()
 	int w, h;
 	this->GetWindowSize(&w, &h);
 
-	Anima::AnimaShadersManager* mgr = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetShadersManager();
+	Anima::AnimaShadersManager* mgr = GetEngine()->GetScenesManager()->GetScene("test-scene")->GetShadersManager();
 
 	mgr->CreateProgram("deferred-prepare");
 	mgr->GetProgramFromName("deferred-prepare")->Create();
@@ -473,16 +473,16 @@ void Window::Load()
 	mgr->GetProgramFromName("ssao")->AddShader(mgr->LoadShaderFromFile("ssao-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/ssao-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("ssao")->Link();
 
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetScenesManager()->GetStage("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
-	//GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DiffuseTexture", GetEngine()->GetScenesManager()->GetScene("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks.bmp", "texture-mattoni"));
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("BumpTexture", GetEngine()->GetScenesManager()->GetScene("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_normal_old.bmp", "texture-mattoni-bump"));
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetBoolean("HasBump", true);
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetColor("SpecularColor", 0.3f, 0.3f, 0.3f);
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("Shininess", 50.0f);
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetTexture("DisplacementTexture", GetEngine()->GetScenesManager()->GetScene("test-scene")->GetTexturesManager()->LoadTextureFromFile(ANIMA_ENGINE_TEXTURES_PATH "bricks_disp.bmp", "texture-mattoni-disp"));
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementScale", 0.05f);
+	//GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelFromName("piano")->GetChild(0)->GetMesh(0)->GetMaterial()->SetFloat("DisplacementBias", -(0.05f / 2.0f));
 
-	Anima::AnimaLightsManager* lightsManager = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager();
+	Anima::AnimaLightsManager* lightsManager = GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager();
 	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
 	hemL->SetIntensity(0.1f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
@@ -494,7 +494,7 @@ void Window::Load()
 	_directionalLight->SetIntensity(1.0f);
 	_directionalLight->SetDirection(-1.0f, 0.0f, -1.0f);
 
-	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
+	//Anima::AnimaLight* l2 = GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager()->CreatePointLight("pointLight0");
 	//l2->SetColor(1.0f, 1.0f, 0.78f);
 	//l2->SetConstantAttenuation(1.0f);
 	//l2->SetLinearAttenuation(0.001f);
@@ -503,7 +503,7 @@ void Window::Load()
 	//l2->SetPosition(0.0f, 100.0f, 0.0f);
 	//l2->SetRange(2000.0f);
 
-	//Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
+	//Anima::AnimaLight* l3 = GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager()->CreatePointLight("pointLight1");
 	//l3->SetColor(1.0f, 0.0f, 0.0f);
 	//l3->SetConstantAttenuation(0.0f);
 	//l3->SetLinearAttenuation(0.0f);
@@ -512,7 +512,7 @@ void Window::Load()
 	//l3->SetPosition(0.0f, 5.0f, -10.0f);
 	//l3->SetRange(40.0f);
 
-	//Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetStage("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
+	//Anima::AnimaLight* l4 = GetEngine()->GetScenesManager()->GetScene("test-scene")->GetLightsManager()->CreateSpotLight("spotLight0");
 	//l4->SetColor(0.0f, 1.0f, 0.0f);
 	//l4->SetConstantAttenuation(0.0f);
 	//l4->SetLinearAttenuation(0.0f);

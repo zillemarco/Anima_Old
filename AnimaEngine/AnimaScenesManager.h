@@ -15,6 +15,8 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaScene.h"
+#include "AnimaMappedArray.h"
+#include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -24,25 +26,26 @@ public:
 	AnimaScenesManager(AnimaAllocator* allocator);
 	~AnimaScenesManager();
 	
-	AnimaScene* CreateStage(const AnimaString& name);
-	AnimaScene* CreateStage(const char* name);
+	AnimaScene* CreateScene(const AnimaString& name);
+	AnimaScene* CreateScene(const char* name);
 
-	AnimaScene* GetStage(AUint index);
-	AnimaScene* GetStage(const AnimaString& name);
-	AnimaScene* GetStage(const char* name);
+	AnimaScene* GetScene(AUint index);
+	AnimaScene* GetScene(const AnimaString& name);
+	AnimaScene* GetScene(const char* name);
 
 private:
-	void ClearScenes(bool bDeleteObjects = true, bool bResetNumber = true);
+	void ClearScenes();
 	
 private:
 	AnimaAllocator* _allocator;
+	AnimaMappedArray<AnimaScene*> _scenes;
 	
-	AnimaScene** _scenes;
-	ASizeT _scenesNumber;
-	
-#pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _scenesMap;
-#pragma warning (default: 4251) 
+//	AnimaScene** _scenes;
+//	ASizeT _scenesNumber;
+//	
+//#pragma warning (disable: 4251)
+//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _scenesMap;
+//#pragma warning (default: 4251)
 };
 
 END_ANIMA_ENGINE_NAMESPACE

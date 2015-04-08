@@ -60,8 +60,9 @@ void AnimaLightsManager::ClearLights()
 		AInt count = lightsArray->GetSize();
 		for (AInt i = 0; i < count; i++)
 		{
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), lightsArray->Get(i));
-			lightsArray->Get(i) = nullptr;
+			AnimaLight* light = (*lightsArray)[i];
+			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), light);
+			light = nullptr;
 		}
 	}
 

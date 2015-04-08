@@ -16,7 +16,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 GLubyte animaUTGAcompareRGBA[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed RGB/RGBA TGA Header
 GLubyte animaUTGAcompareBW[12] = { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed BW TGA Header
-GLubyte animaCTGAcompare[12] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Compressed TGA Header
+GLubyte animaCTGAcompare[12] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };		// Compressed TGA Header
 
 AnimaTexturesManager::AnimaTexturesManager(AnimaScene* scene)
 	: _textures(scene->GetTexturesAllocator())
@@ -76,8 +76,9 @@ void AnimaTexturesManager::ClearTextures()
 	AInt texturesCount = _textures.GetSize();
 	for (AInt i = 0; i < texturesCount; i++)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetTexturesAllocator()), _textures[i]);
-		_textures[i] = nullptr;
+		AnimaTexture* texture = _textures[i];
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetTexturesAllocator()), texture);
+		texture = nullptr;
 	}
 
 	_textures.RemoveAll();

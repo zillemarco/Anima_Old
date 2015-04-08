@@ -91,7 +91,7 @@ public:
 	BASE_TYPE GetWithName(const char* name) const
 	{
 		AnimaString str(name, _allocator);
-		return GetWithName(str, newElement);
+		return GetWithName(str);
 	}
 
 	template<class TYPE> TYPE GetWithNameAndType(AInt index) const
@@ -165,7 +165,7 @@ public:
 	template<class TYPE> void RemoveFromType(const char* name)
 	{
 		AnimaString str(name, _allocator);
-		return RemoveFromType(str, newElement);
+		return RemoveFromType(str);
 	}
 
 	void RemoveAll()

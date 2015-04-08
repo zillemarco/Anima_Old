@@ -41,7 +41,7 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 {
 	if (role == Qt::EditRole)
 	{
-		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetStringAllocator());
+		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetStringAllocator());
 		Anima::AnimaMesh* model = itemFromIndex(index)->data().value<Anima::AnimaMesh*>();
 		
 		if(index.column() == 0)
@@ -50,9 +50,9 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			
 			bool bFound = false;
-			for (int i = 0; i < _document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			for (int i = 0; i < _document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if (_document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaName() == newString)
+				if (_document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaName() == newString)
 					bFound = true;
 			}
 		
@@ -75,9 +75,9 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 				return false;
 			
 			bool bFound = false;
-			for (int i = 0; i < _document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
+			for (int i = 0; i < _document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModelsNumber() && !bFound; i++)
 			{
-				if (_document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaMeshFileName() == newString)
+				if (_document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->GetModel(i)->GetAnimaMeshFileName() == newString)
 					bFound = true;
 			}
 			
@@ -166,7 +166,7 @@ void ResourceManagerTab::LoadModelsTree()
 {
 	_modelResourcesTreeItem->removeRows(0, _modelResourcesTreeItem->rowCount());
 	
-	Anima::AnimaModelsManager* mgr = _document->GetEngine()->GetScenesManager()->GetStage("test-scene")->GetModelsManager();
+	Anima::AnimaModelsManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetModelsManager();
 	for(int i = 0; i < mgr->GetModelsNumber(); i++)
 	{
 		QList<QStandardItem*> newItem;

@@ -9,6 +9,7 @@
 #include "AnimaModelsManager.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaTexturesManager.h"
+#include "AnimaBenchmarkTimer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -49,16 +50,25 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 {
 	if (_modelsMap.find(name) != _modelsMap.end())
 		return nullptr;
-
+	
+	AnimaBenchmarkTimer timer;
+	timer.Reset();
+	
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
 	if(scene == nullptr)
 		return nullptr;
 	
+	timer.PrintElapsed();
+	timer.Reset();
+	
 	AnimaMesh* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetModelsAllocator()), _scene->GetModelDataAllocator());
 	
 	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
+	
+	timer.PrintElapsed();
+	timer.Reset();
 
 	AnimaString tmpName(_scene->GetStringAllocator());
 	tmpName.Format("AnimaModel_%lu", GetNextModelID());
@@ -80,6 +90,8 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 	AddModel(*newModel, name);
 	
 	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetModelsAllocator()), newModel);
+	
+	timer.PrintElapsed();
 	
 	importer.FreeScene();
 
@@ -338,7 +350,7 @@ AnimaMesh* AnimaModelsManager::CreatePlane(const AnimaString& name)
 
 	while (material == nullptr)
 	{
-		material = _scene->GetMaterialsManager()->CreateMaterial(prefix + suffix);
+		material = _scene->GetMaterialsManager()->CreateGenericMaterial(prefix + suffix);
 
 		i++;
 		suffix.Format(".material.%d", i);
@@ -421,7 +433,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		while (material == nullptr)
 		{
 			materialName = prefix + suffix;
-			material = materialsManager->CreateMaterial(materialName);
+			material = materialsManager->CreateGenericMaterial(materialName);
 
 			i++;
 			suffix.Format(".material.%d", i);

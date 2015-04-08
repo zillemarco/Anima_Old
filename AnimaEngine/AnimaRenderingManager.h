@@ -54,10 +54,10 @@ public:
 	
 protected:
 	AnimaArray<AnimaVertex3f>	_vertices;
-	AnimaArray<AUint>					_indices;
-	AnimaColor4f								_color;
-	AUint										_type;
-	AnimaMatrix									_modelMatrix;
+	AnimaArray<AUint>			_indices;
+	AnimaColor4f				_color;
+	AUint						_type;
+	AnimaMatrix					_modelMatrix;
 };
 
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
@@ -66,7 +66,7 @@ public:
 	AnimaRenderingManager(AnimaAllocator* allocator);
 	AnimaRenderingManager(AnimaRenderingManager& src);
 	AnimaRenderingManager(AnimaRenderingManager&& src);
-	~AnimaRenderingManager();
+	virtual ~AnimaRenderingManager();
 
 	AnimaRenderingManager& operator=(const AnimaRenderingManager& src);
 	AnimaRenderingManager& operator=(AnimaRenderingManager&& src);

@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 
-	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateStage("test-scene");
+	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateScene("test-scene");
 	scene->Initialize();
 
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-#if !defined _DEBUG
+#if defined _DEBUG
 	
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
@@ -164,8 +164,8 @@ int main(int argc, char** argv)
 	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
 
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
-	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
-	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
+	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
+	window->_fpcamera = camMan->CreateFirstPersonCamera("fp");
 
 	Anima::AnimaVertex3f pos(0.0f, 0.0f, 30.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);

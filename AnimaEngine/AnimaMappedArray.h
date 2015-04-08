@@ -306,29 +306,41 @@ public:
 		return GetConst(index);
 	}
 
-	inline TYPE& operator[](AInt index)
+	inline TYPE operator[](AInt index)
 	{
 		return Get(index);
 	}
 
 	inline TYPE operator[](const char* name) const
 	{
-		return GetConst(Contains(name));
+		AInt index = Contains(name);
+		if(index >= 0)
+			return GetConst(index);
+		return nullptr;
 	}
 
-	inline TYPE& operator[](const char* name)
+	inline TYPE operator[](const char* name)
 	{
-		return Get(Contains(name));
+		AInt index = Contains(name);
+		if(index >= 0)
+			return Get(index);
+		return nullptr;
 	}
 
 	inline TYPE operator[](const AnimaString& name) const
 	{
-		return GetConst(Contains(name));
+		AInt index = Contains(name);
+		if(index >= 0)
+			return GetConst(index);
+		return nullptr;
 	}
 
-	inline TYPE& operator[](const AnimaString& name)
+	inline TYPE operator[](const AnimaString& name)
 	{
-		return Get(Contains(name));
+		AInt index = Contains(name);
+		if(index >= 0)
+			return Get(index);
+		return nullptr;
 	}
 
 	void Copy(const AnimaObjPtrMappedArray& src)
@@ -349,14 +361,20 @@ public:
 		_namesMap.clear();
 	}
 
-	inline TYPE& Get(AInt index)
+	inline TYPE Get(AInt index)
 	{
-		return _array[index];
+		if (index >= 0 && index < _array.GetSize())
+			return _array[index];
+		else
+			return nullptr;
 	}
 
 	inline TYPE GetConst(AInt index) const
 	{
-		return _array[index];
+		if (index >= 0 && index < _array.GetSize())
+			return _array[index];
+		else
+			return nullptr;
 	}
 
 	inline TYPE Get(const AnimaString& name)
@@ -377,7 +395,7 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE& Get(const char* name)
+	inline TYPE Get(const char* name)
 	{
 		AInt index = Contains(name);
 		if (index >= 0 && index < _array.GetSize())

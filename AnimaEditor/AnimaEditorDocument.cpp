@@ -85,9 +85,9 @@ bool AnimaEditorDocument::NewDocument(QString name, QString path)
 	_engine = new Anima::AnimaEngine();
 	if(!_engine->Initialize())
 		return false;
-	_engine->GetScenesManager()->CreateStage("AnimaEditor");
+	_engine->GetScenesManager()->CreateScene("AnimaEditor");
 
-	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("test-scene")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
@@ -112,7 +112,7 @@ bool AnimaEditorDocument::OpenDocument(QString path)
 	if(!_engine->Initialize())
 		return false;
 
-	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetStage("test-scene")->GetCamerasManager()->CreateNewThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("test-scene")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 
@@ -677,7 +677,7 @@ bool AnimaEditorDocument::ImportModel()
 		return false;
 	}
 	
-	if (!_engine->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
+	if (!_engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
 	{
 		QMessageBox msg;
 		msg.setWindowTitle(QString("AnimaEditor"));
@@ -705,7 +705,7 @@ bool AnimaEditorDocument::AddMaterial()
 
 void AnimaEditorDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 {
-	Anima::AnimaModelsManager* mgr = _engine->GetScenesManager()->GetStage("test-scene")->GetModelsManager();
+	Anima::AnimaModelsManager* mgr = _engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager();
 	Anima::ASizeT numeroModelli = mgr->GetModelsNumber();
 	
 	xmlWriter->writeStartElement("Models");
@@ -799,7 +799,7 @@ bool AnimaEditorDocument::ImportModelInternal(QString modelName, QString modelFi
 {
 	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
 	
-	Anima::AnimaMesh* model = _engine->GetScenesManager()->GetStage("test-scene")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
+	Anima::AnimaMesh* model = _engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
 	
 	if(!model)
 		return false;

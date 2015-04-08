@@ -11,11 +11,9 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaDataGeneratorsManager::AnimaDataGeneratorsManager(AnimaScene* scene)
+	: _dataGenerators(scene->GetDataGeneratorsAllocator())
 {
 	_scene = scene;
-	
-	_generators = nullptr;
-	_generatorsNumber = 0;
 }
 
 AnimaDataGeneratorsManager::~AnimaDataGeneratorsManager()
@@ -25,39 +23,7 @@ AnimaDataGeneratorsManager::~AnimaDataGeneratorsManager()
 
 AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const AnimaString& name)
 {
-	if (_generatorsMap.find(name) != _generatorsMap.end())
-		return nullptr;
-
-	ANIMA_ASSERT(_scene != nullptr);
-	if (_generatorsNumber > 0)
-	{
-		AnimaDataGenerator** tmpOldGenerators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-
-		for (int i = 0; i < _generatorsNumber; i++)
-			tmpOldGenerators[i] = _generators[i];
-
-		ClearGenerators(false, false);
-
-		_generatorsNumber++;
-		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-
-		for (int i = 0; i < _generatorsNumber - 1; i++)
-			_generators[i] = tmpOldGenerators[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetDataGeneratorsAllocator()), tmpOldGenerators);
-		tmpOldGenerators = nullptr;
-	}
-	else
-	{
-		_generatorsNumber++;
-		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-	}
-
-	_generators[_generatorsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaColorGenerator>(*(_scene->GetDataGeneratorsAllocator()), _scene->GetDataGeneratorsAllocator());
-
-	_generatorsMap[name] = (AUint)(_generatorsNumber - 1);
-
-	return (AnimaColorGenerator*)_generators[_generatorsNumber - 1];
+	return CreateDataGenerator<AnimaColorGenerator>(name);
 }
 
 AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char* name)
@@ -68,39 +34,7 @@ AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char
 
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const AnimaString& name)
 {
-	if (_generatorsMap.find(name) != _generatorsMap.end())
-		return nullptr;
-
-	ANIMA_ASSERT(_scene != nullptr);
-	if (_generatorsNumber > 0)
-	{
-		AnimaDataGenerator** tmpOldGenerators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-
-		for (int i = 0; i < _generatorsNumber; i++)
-			tmpOldGenerators[i] = _generators[i];
-
-		ClearGenerators(false, false);
-
-		_generatorsNumber++;
-		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-
-		for (int i = 0; i < _generatorsNumber - 1; i++)
-			_generators[i] = tmpOldGenerators[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetDataGeneratorsAllocator()), tmpOldGenerators);
-		tmpOldGenerators = nullptr;
-	}
-	else
-	{
-		_generatorsNumber++;
-		_generators = AnimaAllocatorNamespace::AllocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generatorsNumber);
-	}
-
-	_generators[_generatorsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*(_scene->GetDataGeneratorsAllocator()), _scene->GetDataGeneratorsAllocator());
-
-	_generatorsMap[name] = (AUint)(_generatorsNumber - 1);
-
-	return (AnimaVectorGenerator*)_generators[_generatorsNumber - 1];
+	return CreateDataGenerator<AnimaVectorGenerator>(name);
 }
 
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const char* name)
@@ -109,38 +43,27 @@ AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const ch
 	return CreateVectorGenerator(str);
 }
 
-void AnimaDataGeneratorsManager::ClearGenerators(bool bDeleteObjects, bool bResetNumber)
+void AnimaDataGeneratorsManager::ClearGenerators()
 {
-	if (_generators != nullptr)
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
-		if (bDeleteObjects)
+		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
+		AInt count = dataGeneratorsArray->GetSize();
+		for (AInt i = 0; i < count; i++)
 		{
-			for (int i = 0; i < (int)_generatorsNumber; i++)
-			{
-				AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetDataGeneratorsAllocator()), _generators[i]);
-				_generators[i] = nullptr;
-			}
+			AnimaDataGenerator* dataGenerator = (*dataGeneratorsArray)[i];
+			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetDataGeneratorsAllocator()), dataGenerator);
+			dataGenerator = nullptr;
 		}
-		
-		AnimaAllocatorNamespace::DeallocateArray<AnimaDataGenerator*>(*(_scene->GetDataGeneratorsAllocator()), _generators);
-		_generators = nullptr;
 	}
 	
-	if (bResetNumber)
-		_generatorsNumber = 0;
-}
-
-AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(AUint index)
-{
-	ANIMA_ASSERT(index >= 0 && index < _generatorsNumber);
-	return _generators[index];
+	_dataGenerators.RemoveAll();
 }
 
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const AnimaString& name)
 {
-	if (_generatorsMap.find(name) == _generatorsMap.end())
-		return nullptr;
-	return GetGenerator(_generatorsMap[name]);
+	return _dataGenerators.GetWithName(name);
 }
 
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
@@ -151,8 +74,30 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
 
 void AnimaDataGeneratorsManager::UpdateValues()
 {
-	for (ASizeT i = 0; i < _generatorsNumber; i++)
-		_generators[i]->UpdateValue();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
+	{
+		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
+		AInt count = dataGeneratorsArray->GetSize();
+		for (AInt i = 0; i < count; i++)
+			dataGeneratorsArray->Get(i)->UpdateValue();
+	}
+}
+
+AInt AnimaDataGeneratorsManager::GetTotalDataGeneratorsCount()
+{
+	AInt count = 0;
+	
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
+		count += dataGeneratorsPair.second->GetSize();
+	
+	return count;
+}
+
+AnimaTypeMappedArray<AnimaDataGenerator*>* AnimaDataGeneratorsManager::GetDataGeneratorsTypeMappedArray()
+{
+	return &_dataGenerators;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

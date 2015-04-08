@@ -16,6 +16,9 @@
 #include "AnimaString.h"
 #include "AnimaMaterial.h"
 #include "AnimaScene.h"
+#include "AnimaArray.h"
+#include "AnimaMappedArray.h"
+#include "AnimaTypeMappedArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -25,26 +28,70 @@ public:
 	AnimaMaterialsManager(AnimaScene* scene);
 	~AnimaMaterialsManager();
 	
-	AnimaMaterial* CreateMaterial(const AnimaString& name);
-	AnimaMaterial* CreateMaterial(const char* name);
+	template<class T> T* CreateMaterial(const AnimaString& name);
+	template<class T> T* CreateMaterial(const char* name);
+	
+	template<class T> AnimaArray<AnimaMaterial*>* GetMaterialsArrayOfType();
+	template<class T> AnimaMaterial* GetMaterialOfTypeFromName(const AnimaString& name);
+	template<class T> AnimaMaterial* GetMaterialOfTypeFromName(const char* name);
+	
+	AnimaMaterial* CreateGenericMaterial(const AnimaString& name);
+	AnimaMaterial* CreateGenericMaterial(const char* name);
 
-	AnimaMaterial* GetMaterial(AUint index);
-	AnimaMaterial* GetMaterial(const AnimaString& name);
-	AnimaMaterial* GetMaterial(const char* name);
-
+	AnimaMaterial* GetMaterialFromName(const AnimaString& name);
+	AnimaMaterial* GetMaterialFromName(const char* name);
+	
+	AInt GetTotalMaterialsCount();
+	
+	AnimaTypeMappedArray<AnimaMaterial*>* GetMaterials();
+	
 private:
-	void ClearMaterials(bool bDeleteObjects = true, bool bResetNumber = true);
+	void ClearMaterials();
 	
 private:
 	AnimaScene* _scene;
-	
-	AnimaMaterial** _materials;
-	ASizeT _materialsNumber;
-	
-#pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _materialsMap;
-#pragma warning (default: 4251) 
+	AnimaTypeMappedArray<AnimaMaterial*> _materials;
 };
+
+template<class T>
+T* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
+{
+	AnimaMaterial* material = _materials.Contains(name);
+	if (material != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	T* newMaterial = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_materials.Add<T*>(name, newMaterial);
+	
+	return newMaterial;
+}
+
+template<class T>
+T* AnimaMaterialsManager::CreateMaterial(const char* name)
+{
+	AnimaString str(name, _scene->GetStringAllocator());
+	return CreateMaterial<T>(str);
+}
+
+template<class T>
+AnimaArray<AnimaMaterial*>* AnimaMaterialsManager::GetMaterialsArrayOfType()
+{
+	return _materials.GetMappedArrayArrayOfType<T*>();
+}
+
+template<class T>
+AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const AnimaString& name)
+{
+	return _materials.GetWithNameAndType<T*>(name);
+}
+
+template<class T>
+AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const char* name)
+{
+	AnimaString str(name, _scene->GetStringAllocator());
+	return GetMaterialOfTypeFromName<T*>(str);
+}
 
 END_ANIMA_ENGINE_NAMESPACE
 
