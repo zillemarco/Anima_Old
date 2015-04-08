@@ -93,7 +93,6 @@ int main(int argc, char** argv)
 	engine.Initialize();
 
 	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateScene("test-scene");
-	scene->Initialize();
 
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
@@ -118,17 +117,17 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
 
-	Anima::AnimaString path(scene->GetStringAllocator());	
-	Anima::AnimaModelsManager* manager = scene->GetModelsManager();
-	Anima::AnimaMaterialsManager* matMgr = scene->GetMaterialsManager();
+	Anima::AnimaString path(engine.GetStringAllocator());
+	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
+	Anima::AnimaMaterialsManager* matMgr = engine.GetMaterialsManager();
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
-#if defined _DEBUG
+#if !defined _DEBUG
 	
 	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
-	window->_tpcamera = camMan->CreateNewThirdPersonCamera("tp");
-	window->_fpcamera = camMan->CreateNewFirstPersonCamera("fp");
+	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
+	window->_fpcamera = camMan->CreateFirstPersonCamera("fp");
 	
 	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
 	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)

@@ -10,10 +10,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaCamerasManager::AnimaCamerasManager(AnimaScene* scene)
-: _cameras(scene->GetCamerasAllocator())
+AnimaCamerasManager::AnimaCamerasManager(AnimaEngine* engine)
+: _cameras(engine->GetCamerasAllocator())
 {
-	_scene = scene;
+	_engine = engine;
 	_activeCamera = nullptr;
 }
 
@@ -29,7 +29,7 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const Anima
 
 AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateFirstPersonCamera(str);
 }
 
@@ -40,7 +40,7 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const Anima
 
 AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateThirdPersonCamera(str);
 }
 
@@ -54,7 +54,7 @@ void AnimaCamerasManager::ClearCameras()
 		for (AInt i = 0; i < count; i++)
 		{
 			AnimaCamera* camera = (*camerasArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetCamerasAllocator()), camera);
+			AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetCamerasAllocator()), camera);
 			camera = nullptr;
 		}
 	}
@@ -159,7 +159,7 @@ AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)
 
 AnimaCamera* AnimaCamerasManager::GetCameraFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetCameraFromName(str);
 }
 

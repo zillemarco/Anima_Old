@@ -14,16 +14,16 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
-#include "AnimaScene.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaScenesManager
 {
 public:
-	AnimaScenesManager(AnimaAllocator* allocator);
+	AnimaScenesManager(AnimaEngine* engine);
 	~AnimaScenesManager();
 	
 	AnimaScene* CreateScene(const AnimaString& name);
@@ -37,15 +37,8 @@ private:
 	void ClearScenes();
 	
 private:
-	AnimaAllocator* _allocator;
+	AnimaEngine* _engine;
 	AnimaMappedArray<AnimaScene*> _scenes;
-	
-//	AnimaScene** _scenes;
-//	ASizeT _scenesNumber;
-//	
-//#pragma warning (disable: 4251)
-//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _scenesMap;
-//#pragma warning (default: 4251)
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -63,7 +63,7 @@ void Window::DrawScene()
 	int mul = (int)GetResolutionMutiplier();
 	if (renderingManager == nullptr)
 	{
-		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetSharedMemoryAllocator());
+		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetGenericAllocator());
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
@@ -93,7 +93,7 @@ void Window::DrawCameraFrustum()
 
 	Anima::AnimaFrustum* frustum = _tpcamera->GetFrustum();
 	
-	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetScene("test-scene")->GetGenericAllocator());
+	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetGenericAllocator());
 	vertici.Add(frustum->GetFrustumVertex(2));
 	vertici.Add(frustum->GetFrustumVertex(1));
 	vertici.Add(frustum->GetFrustumVertex(0));
@@ -155,7 +155,7 @@ void Window::DrawLightFrustum()
 
 	Anima::AnimaFrustum* frustum = _directionalLight->GetFrustum();
 
-	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetScenesManager()->GetScene("test-scene")->GetGenericAllocator());
+	Anima::AnimaArray<Anima::AnimaVertex3f> vertici(GetEngine()->GetGenericAllocator());
 	vertici.Add(frustum->GetFrustumVertex(2));
 	vertici.Add(frustum->GetFrustumVertex(1));
 	vertici.Add(frustum->GetFrustumVertex(0));

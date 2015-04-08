@@ -15,7 +15,6 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaMaterial.h"
-#include "AnimaScene.h"
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaTypeMappedArray.h"
@@ -25,7 +24,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMaterialsManager
 {
 public:
-	AnimaMaterialsManager(AnimaScene* scene);
+	AnimaMaterialsManager(AnimaEngine* engine);
 	~AnimaMaterialsManager();
 	
 	template<class T> T* CreateMaterial(const AnimaString& name);
@@ -49,7 +48,7 @@ private:
 	void ClearMaterials();
 	
 private:
-	AnimaScene* _scene;
+	AnimaEngine* _engine;
 	AnimaTypeMappedArray<AnimaMaterial*> _materials;
 };
 
@@ -60,8 +59,8 @@ T* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 	if (material != nullptr)
 		return nullptr;
 	
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newMaterial = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	ANIMA_ASSERT(_engine != nullptr);
+	T* newMaterial = AnimaAllocatorNamespace::AllocateNew<T>(*(_engine->GetMaterialsAllocator()), _engine->GetMaterialsAllocator(), _engine->GetDataGeneratorsManager(), name);
 	_materials.Add<T*>(name, newMaterial);
 	
 	return newMaterial;
@@ -70,7 +69,7 @@ T* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 template<class T>
 T* AnimaMaterialsManager::CreateMaterial(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateMaterial<T>(str);
 }
 
@@ -89,7 +88,7 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const AnimaStrin
 template<class T>
 AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetMaterialOfTypeFromName<T*>(str);
 }
 

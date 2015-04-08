@@ -41,7 +41,7 @@ bool ResourceTreeItemModel::setData(const QModelIndex & index, const QVariant & 
 {
 	if (role == Qt::EditRole)
 	{
-		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetScenesManager()->GetScene("test-scene")->GetStringAllocator());
+		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetStringAllocator());
 		Anima::AnimaMesh* model = itemFromIndex(index)->data().value<Anima::AnimaMesh*>();
 		
 		if(index.column() == 0)

@@ -8,7 +8,6 @@
 #include "AnimaString.h"
 #include "AnimaShader.h"
 #include "AnimaShaderProgram.h"
-#include "AnimaScene.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
 
@@ -19,7 +18,7 @@ class ANIMA_ENGINE_EXPORT AnimaShadersManager
 	friend AnimaShaderProgram;
 
 public:
-	AnimaShadersManager(AnimaScene* scene);
+	AnimaShadersManager(AnimaEngine* engine);
 	~AnimaShadersManager();
 
 	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShader::AnimaShaderType type);
@@ -59,23 +58,11 @@ private:
 	void NotifyProgramDeactivation(AnimaShaderProgram* program);
 
 private:
-	AnimaScene* _scene;
-	
+	AnimaEngine* _engine;	
 	AnimaMappedArray<AnimaShader*> _shaders;
 	AnimaMappedArray<AnimaShaderProgram*> _programs;
 
-//	AnimaShader**	_shaders;
-//	ASizeT			_shadersNumber;
-//	
-//	AnimaShaderProgram**	_programs;
-//	ASizeT					_programsNumber;
-	
 	AnimaShaderProgram* _activeProgram;
-
-//#pragma warning (disable: 4251)
-//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _shadersMap;
-//	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _programsMap;
-//#pragma warning (default: 4251)
 };
 
 END_ANIMA_ENGINE_NAMESPACE

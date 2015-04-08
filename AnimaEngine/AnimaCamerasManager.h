@@ -17,7 +17,6 @@
 #include "AnimaCamera.h"
 #include "AnimaFirstPersonCamera.h"
 #include "AnimaThirdPersonCamera.h"
-#include "AnimaScene.h"
 #include "AnimaTypeMappedArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
@@ -31,7 +30,7 @@ class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 	friend AnimaThirdPersonCamera;
 	
 public:
-	AnimaCamerasManager(AnimaScene* scene);
+	AnimaCamerasManager(AnimaEngine* engine);
 	~AnimaCamerasManager();
 	
 	template<class T> T* CreateCamera(const AnimaString& name);
@@ -63,7 +62,7 @@ private:
 	void NotifyCameraDeactivation(AnimaCamera* camera);
 	
 private:
-	AnimaScene* _scene;
+	AnimaEngine* _engine;
 	AnimaTypeMappedArray<AnimaCamera*> _cameras;
 	
 	AnimaCamera*	_activeCamera;
@@ -76,8 +75,8 @@ T* AnimaCamerasManager::CreateCamera(const AnimaString& name)
 	if (camera != nullptr)
 		return nullptr;
 	
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newCamera = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this);
+	ANIMA_ASSERT(_engine != nullptr);
+	T* newCamera = AnimaAllocatorNamespace::AllocateNew<T>(*(_engine->GetCamerasAllocator()), _engine->GetCamerasAllocator(), this);
 	_cameras.Add<T*>(name, newCamera);
 	
 	return newCamera;
@@ -86,7 +85,7 @@ T* AnimaCamerasManager::CreateCamera(const AnimaString& name)
 template<class T>
 T* AnimaCamerasManager::CreateCamera(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateCamera<T>(str);
 }
 
@@ -105,7 +104,7 @@ AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const AnimaString& nam
 template<class T>
 AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetCameraOfTypeFromName<T*>(str);
 }
 

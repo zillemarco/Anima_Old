@@ -234,12 +234,12 @@ protected:
 	AnimaTransformation _transformation;
 
 	// Dati grafica
-	AnimaArray<AnimaVertex3f> _vertices;
-	AnimaArray<AnimaVertex3f> _normals;
-	AnimaArray<AnimaVertex2f> _textureCoords;
-	AnimaArray<AnimaVertex3f> _tangents;
-	AnimaArray<AnimaVertex3f> _bitangents;
-	AnimaArray<AnimaFace> _faces;
+	AnimaArray<AnimaVertex3f>	_vertices;
+	AnimaArray<AnimaVertex3f>	_normals;
+	AnimaArray<AnimaVertex2f>	_textureCoords;
+	AnimaArray<AnimaVertex3f>	_tangents;
+	AnimaArray<AnimaVertex3f>	_bitangents;
+	AnimaArray<AnimaFace>		_faces;
 	
 	AUint			_vertexArrayObject;
 	AUint			_indexesBufferObject;

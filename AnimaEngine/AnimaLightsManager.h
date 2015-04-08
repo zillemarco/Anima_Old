@@ -15,7 +15,6 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaLight.h"
-#include "AnimaScene.h"
 #include "AnimaArray.h"
 #include "AnimaCamera.h"
 #include "AnimaMappedArray.h"
@@ -26,7 +25,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaLightsManager
 {
 public:
-	AnimaLightsManager(AnimaScene* scene);
+	AnimaLightsManager(AnimaEngine* engine);
 	~AnimaLightsManager();
 
 	template<class T> T* CreateLight(const AnimaString& name);
@@ -58,7 +57,7 @@ private:
 	void ClearLights();
 	
 private:
-	AnimaScene* _scene;
+	AnimaEngine* _engine;
 	AnimaTypeMappedArray<AnimaLight*> _lights;
 };
 
@@ -69,8 +68,8 @@ T* AnimaLightsManager::CreateLight(const AnimaString& name)
 	if (light != nullptr)
 		return nullptr;
 
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newLight = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	ANIMA_ASSERT(_engine != nullptr);
+	T* newLight = AnimaAllocatorNamespace::AllocateNew<T>(*(_engine->GetLightsAllocator()), _engine->GetLightsAllocator(), _engine->GetDataGeneratorsManager(), name);
 	_lights.Add<T*>(name, newLight);
 
 	return newLight;
@@ -79,7 +78,7 @@ T* AnimaLightsManager::CreateLight(const AnimaString& name)
 template<class T> 
 T* AnimaLightsManager::CreateLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateLight<T>(str);
 }
 
@@ -98,7 +97,7 @@ AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const AnimaString& name)
 template<class T> 
 AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetLightOfTypeFromName<T*>(str);
 }
 

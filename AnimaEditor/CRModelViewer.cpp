@@ -26,7 +26,7 @@ CRModelViewer::CRModelViewer(Anima::AnimaEngine* engine, QWindow* parent)
 	: AnimaEditorOGLWindowBase(engine, parent)
 	, _frame(0)
 {
-	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetSharedMemoryAllocator());
+	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetGenericAllocator());
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
 	_selectedModel = nullptr;

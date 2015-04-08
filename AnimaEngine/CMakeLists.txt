@@ -117,6 +117,30 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMappedArray.cpp
 					AnimaTypeMappedArray.cpp)
 
+source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/AnimaEngine_automoc.cpp)
+
+source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaBenchmarkTimer.h AnimaBenchmarkTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
+source_group(Engine\\Types FILES AnimaTypes.h)
+
+source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaRenderingManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaRenderingManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp)
+
+source_group(Engine\\DataStructures\\Arrays FILES AnimaArray.h AnimaMappedArray.h AnimaTypeMappedArray.h AnimaArray.cpp AnimaMappedArray.cpp AnimaTypeMappedArray.cpp)
+source_group(Engine\\DataStructures\\MappedValues FILES AnimaMappedValues.h AnimaMappedValues.cpp)
+source_group(Engine\\DataStructures\\Strings FILES AnimaString.h AnimaString.cpp)
+source_group(Engine\\DataStructures\\Transformations FILES AnimaTransformation.h AnimaTransformation.cpp)
+source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h AnimaVertex.cpp AnimaFace.h AnimaFace.cpp AnimaMatrix.h AnimaMatrix.cpp AnimaMath.h AnimaMath.cpp AnimaFrustum.h AnimaFrustum.cpp AnimaGBuffer.h AnimaGBuffer.cpp AnimaQuaternion.h AnimaQuaternion.cpp)
+
+source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
+source_group(Engine\\Scene\\Objects\\Cameras FILES AnimaCamera.h AnimaFirstPersonCamera.h AnimaThirdPersonCamera.h AnimaCamera.cpp AnimaFirstPersonCamera.cpp AnimaThirdPersonCamera.cpp)
+source_group(Engine\\Scene\\Objects\\Models FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp)
+source_group(Engine\\Scene\\Objects\\Lights FILES AnimaLight.h AnimaLight.cpp)
+source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp)
+source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)
+source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
+source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp)
+
+source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h AnimaLinearAllocator.h AnimaFreeListAllocator.h AnimaPoolAllocator.h AnimaProxyAllocator.h AnimaAllocator.cpp AnimaStackAllocator.cpp AnimaLinearAllocator.cpp AnimaFreeListAllocator.cpp AnimaPoolAllocator.cpp AnimaProxyAllocator.cpp)
+
 if (_ANIMA_ENGINE_COCOA)
     set(AnimaEngineCore_HEADERS	${common_HEADERS}
                                 AnimaWindow_CocoaJoystick.h
@@ -126,6 +150,9 @@ if (_ANIMA_ENGINE_COCOA)
                                 AnimaWindow_CocoaJoystick.mm
                                 AnimaWindow_CocoaPlatform.mm
                                 AnimaWindow_CocoaTLS.cpp)
+
+	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_CocoaJoystick.h AnimaWindow_CocoaPlatform.h AnimaWindow_CocoaTLS.h AnimaWindow_CocoaJoystick.mm AnimaWindow_CocoaPlatform.mm AnimaWindow_CocoaTLS.cpp)
+
 elseif (_ANIMA_ENGINE_WIN32)
     set(AnimaEngineCore_HEADERS	${common_HEADERS} 
 								AnimaWindow_WindowsJoystick.h 
@@ -135,14 +162,21 @@ elseif (_ANIMA_ENGINE_WIN32)
 								AnimaWindow_WindowsJoystick.cpp 
 								AnimaWindow_WindowsPlatform.cpp 
 								AnimaWindow_WindowsTLS.cpp)
+
+	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_WindowsJoystick.h AnimaWindow_WindowsPlatform.h AnimaWindow_WindowsTLS.h AnimaWindow.cpp AnimaWindow_WindowsJoystick.cpp AnimaWindow_WindowsPlatform.cpp AnimaWindow_WindowsTLS.cpp)
 endif()
 
 if (_ANIMA_ENGINE_NSGL)
     list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_NSGLContext.h)
     list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_NSGLContext.mm)
+
+	source_group("Engine\\Window System" FILES AnimaWindow_NSGLContext.h AnimaWindow_NSGLContext.mm)
+
 elseif (_ANIMA_ENGINE_WGL)
     list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_WGLContext.h)
     list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_WGLContext.cpp)
+
+	source_group("Engine\\Window System" FILES AnimaWindow_WGLContext.h AnimaWindow_WGLContext.cpp)
 endif()
 
 if (APPLE)

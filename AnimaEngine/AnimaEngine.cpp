@@ -1,5 +1,12 @@
 #include "AnimaEngine.h"
 #include "AnimaScenesManager.h"
+#include "AnimaModelsManager.h"
+#include "AnimaShadersManager.h"
+#include "AnimaCamerasManager.h"
+#include "AnimaTexturesManager.h"
+#include "AnimaDataGeneratorsManager.h"
+#include "AnimaMaterialsManager.h"
+#include "AnimaLightsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -24,18 +31,41 @@ bool								AnimaEngine::_usedExternal = false;
 bool								AnimaEngine::_glewExtensionsInitialized = false;
 AChar								AnimaEngine::_logFilePath[PATH_MAX] = "";
 
-#define _ANIMA_SHARED_MEMORY_SIZE	5242880	// 5 MB
+#define _ANIMA_LOCAL_MEMORY_SIZE			524288000 	// 500 MB
+#define _ANIMA_MODELS_MEMORY_SIZE			52428800	// 50 MB
+#define _ANIMA_TEXTURES_MEMORY_SIZE			419430400	// 400 MB
+#define _ANIMA_ALLOCATORS_NUMBER			10
+#define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MODELS_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
 {
 	_windowListHead = nullptr;
 	_focusedWindow = nullptr;
 
-	_sharedMemory = nullptr;
-	_sharedMemorySize = 0;
-	_sharedMemoryAllocator = nullptr;	
+	_localMemory = nullptr;
+	_localMemorySize = 0;
+	_localMemoryAllocator = nullptr;
+
+	_modelDataAllocator = nullptr;
+	_modelsAllocator = nullptr;
+	_genericAllocator = nullptr;
+	_stringAllocator = nullptr;
+	_shadersAllocator = nullptr;
+	_camerasAllocator = nullptr;
+	_texturesAllocator = nullptr;
+	_materialsAllocator = nullptr;
+	_lightsAllocator = nullptr;
+	_dataGeneratorsAllocator = nullptr;
+	_scenesAllocator = nullptr;
 
 	_scenesManager = nullptr;
+	_modelsManager = nullptr;
+	_shadersManager = nullptr;
+	_camerasManager = nullptr;
+	_texturesManager = nullptr;
+	_dataGeneratorsManager = nullptr;
+	_materialsManager = nullptr;
+	_lightsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -66,11 +96,31 @@ bool AnimaEngine::Initialize()
 
 void AnimaEngine::InitializeMemorySystem()
 {
-	ANIMA_ASSERT(_sharedMemory == nullptr && _sharedMemorySize == 0);
+	ANIMA_ASSERT(_localMemory == nullptr && _localMemorySize == 0);
 
-	_sharedMemorySize = _ANIMA_SHARED_MEMORY_SIZE;
-	_sharedMemory = malloc(_sharedMemorySize);
-	_sharedMemoryAllocator = new AnimaFreeListAllocator(_sharedMemorySize, _sharedMemory);
+	_localMemorySize = _ANIMA_LOCAL_MEMORY_SIZE;
+	_localMemory = malloc(_localMemorySize);
+
+	// L'unica new di AnimaEngine.
+	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
+	_localMemoryAllocator = new AnimaFreeListAllocator(_localMemorySize, _localMemory);
+
+	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_MODELS_MEMORY_SIZE, *_localMemoryAllocator);
+	_texturesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_TEXTURES_MEMORY_SIZE, *_localMemoryAllocator);
+	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_shadersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_camerasAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_materialsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_lightsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_dataGeneratorsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_scenesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+
+	ASizeT usedSize = _modelDataAllocator->GetSize() + _modelsAllocator->GetSize() + _genericAllocator->GetSize() + _managersAllocator->GetSize() + _stringAllocator->GetSize() + _shadersAllocator->GetSize() + _camerasAllocator->GetSize() + _texturesAllocator->GetSize() + _materialsAllocator->GetSize() + _lightsAllocator->GetSize() + _dataGeneratorsAllocator->GetSize() + _scenesAllocator->GetSize();
+
+	ANIMA_ASSERT(usedSize < _localMemorySize - 1000);
 }
 
 bool AnimaEngine::InitializeWindowSystem()
@@ -100,7 +150,14 @@ bool AnimaEngine::InitializeWindowSystem()
 
 void AnimaEngine::InitializeManagers()
 {
-	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_sharedMemoryAllocator, _sharedMemoryAllocator);
+	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_scenesAllocator, this);
+	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
+	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
+	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_managersAllocator, this);
+	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_managersAllocator, this);
+	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, this);
+	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_managersAllocator, this);
+	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -112,18 +169,90 @@ void AnimaEngine::Terminate()
 
 void AnimaEngine::TerminateMemorySystem()
 {
-	if(_sharedMemoryAllocator != nullptr)
+	if (_modelDataAllocator != nullptr)
 	{
-		delete _sharedMemoryAllocator;
-		_sharedMemoryAllocator = nullptr;
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelDataAllocator, *_localMemoryAllocator);
+		_modelDataAllocator = nullptr;
 	}
 
-	if(_sharedMemory != nullptr && _sharedMemorySize > 0)
+	if (_modelsAllocator != nullptr)
 	{
-		free(_sharedMemory);
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_localMemoryAllocator);
+		_modelsAllocator = nullptr;
+	}
 
-		_sharedMemory = nullptr;
-		_sharedMemorySize = 0;
+	if (_genericAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_localMemoryAllocator);
+		_genericAllocator = nullptr;
+	}
+
+	if (_managersAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_localMemoryAllocator);
+		_managersAllocator = nullptr;
+	}
+
+	if (_stringAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_localMemoryAllocator);
+		_stringAllocator = nullptr;
+	}
+
+	if (_shadersAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_shadersAllocator, *_localMemoryAllocator);
+		_shadersAllocator = nullptr;
+	}
+
+	if (_camerasAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_camerasAllocator, *_localMemoryAllocator);
+		_camerasAllocator = nullptr;
+	}
+
+	if (_texturesAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_texturesAllocator, *_localMemoryAllocator);
+		_texturesAllocator = nullptr;
+	}
+
+	if (_materialsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_materialsAllocator, *_localMemoryAllocator);
+		_materialsAllocator = nullptr;
+	}
+
+	if (_lightsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_lightsAllocator, *_localMemoryAllocator);
+		_lightsAllocator = nullptr;
+	}
+
+	if (_dataGeneratorsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_dataGeneratorsAllocator, *_localMemoryAllocator);
+		_dataGeneratorsAllocator = nullptr;
+	}
+
+	if (_scenesAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_scenesAllocator, *_localMemoryAllocator);
+		_scenesAllocator = nullptr;
+	}
+
+	if (_localMemoryAllocator != nullptr)
+	{
+		delete _localMemoryAllocator;
+		_localMemoryAllocator = nullptr;
+	}
+
+	if (_localMemory != nullptr && _localMemorySize > 0)
+	{
+		free(_localMemory);
+
+		_localMemory = nullptr;
+		_localMemorySize = 0;
 	}
 }
 
@@ -131,8 +260,50 @@ void AnimaEngine::TerminateManagers()
 {
 	if (_scenesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_sharedMemoryAllocator, _scenesManager);
+		AnimaAllocatorNamespace::DeallocateObject(*_scenesAllocator, _scenesManager);
 		_scenesManager = nullptr;
+	}
+
+	if (_modelsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _modelsManager);
+		_modelsManager = nullptr;
+	}
+
+	if (_shadersManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _shadersManager);
+		_shadersManager = nullptr;
+	}
+
+	if (_camerasManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _camerasManager);
+		_camerasManager = nullptr;
+	}
+
+	if (_texturesManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _texturesManager);
+		_texturesManager = nullptr;
+	}
+
+	if (_dataGeneratorsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _dataGeneratorsManager);
+		_dataGeneratorsManager = nullptr;
+	}
+
+	if (_materialsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _materialsManager);
+		_materialsManager = nullptr;
+	}
+
+	if (_lightsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _lightsManager);
+		_lightsManager = nullptr;
 	}
 }
 

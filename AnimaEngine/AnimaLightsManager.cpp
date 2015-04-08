@@ -10,10 +10,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaLightsManager::AnimaLightsManager(AnimaScene* scene)
-	: _lights(scene->GetLightsAllocator())
+AnimaLightsManager::AnimaLightsManager(AnimaEngine* engine)
+	: _lights(engine->GetLightsAllocator())
 {
-	_scene = scene;
+	_engine = engine;
 }
 
 AnimaLightsManager::~AnimaLightsManager()
@@ -61,7 +61,7 @@ void AnimaLightsManager::ClearLights()
 		for (AInt i = 0; i < count; i++)
 		{
 			AnimaLight* light = (*lightsArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetLightsAllocator()), light);
+			AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetLightsAllocator()), light);
 			light = nullptr;
 		}
 	}
@@ -76,7 +76,7 @@ AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 
 AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetLightFromName(str);
 }
 

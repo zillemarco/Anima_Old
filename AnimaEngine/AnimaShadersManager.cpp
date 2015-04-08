@@ -3,11 +3,11 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaShadersManager::AnimaShadersManager(AnimaScene* scene)
-	: _shaders(scene->GetShadersAllocator())
-	, _programs(scene->GetShadersAllocator())
+AnimaShadersManager::AnimaShadersManager(AnimaEngine* engine)
+	: _shaders(engine->GetShadersAllocator())
+	, _programs(engine->GetShadersAllocator())
 {
-	_scene = scene;
+	_engine = engine;
 
 //	_shaders = nullptr;
 //	_shadersNumber = 0;
@@ -26,7 +26,7 @@ AnimaShadersManager::~AnimaShadersManager()
 
 AnimaShader* AnimaShadersManager::CreateShader(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateShader(str);
 }
 
@@ -36,17 +36,17 @@ AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 	if(index >= 0)
 		return nullptr;
 	
-	AnimaShader* shader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_scene->GetShadersAllocator()), _scene->GetShadersAllocator());
+	AnimaShader* shader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator());
 	_shaders.Add(name, shader);
 	return shader;
 	
 //	if (_shadersMap.find(name) != _shadersMap.end())
 //		return nullptr;
 //
-//	ANIMA_ASSERT(_scene != nullptr);
+//	ANIMA_ASSERT(_engine != nullptr);
 //	if (_shadersNumber > 0)
 //	{
-//		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_scene->GetShadersAllocator()), _shadersNumber);
+//		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
 //
 //		for (int i = 0; i < _shadersNumber; i++)
 //			tmpOldShaders[i] = _shaders[i];
@@ -54,21 +54,21 @@ AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 //		ClearShaders(false, false);
 //
 //		_shadersNumber++;
-//		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_scene->GetShadersAllocator()), _shadersNumber);
+//		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
 //
 //		for (int i = 0; i < _shadersNumber - 1; i++)
 //			_shaders[i] = tmpOldShaders[i];
 //		
-//		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetShadersAllocator()), tmpOldShaders);
+//		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), tmpOldShaders);
 //		tmpOldShaders = nullptr;
 //	}
 //	else
 //	{
 //		_shadersNumber++;
-//		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_scene->GetShadersAllocator()), _shadersNumber);
+//		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shadersNumber);
 //	}
 //
-//	_shaders[_shadersNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_scene->GetShadersAllocator()), _scene->GetShadersAllocator());
+//	_shaders[_shadersNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator());
 //
 //	_shadersMap[name] = (AUint)(_shadersNumber - 1);
 //	
@@ -77,7 +77,7 @@ AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 
 AnimaShaderProgram* AnimaShadersManager::CreateProgram(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return CreateProgram(str);
 }
 
@@ -87,17 +87,17 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 	if(index >= 0)
 		return nullptr;
 	
-	AnimaShaderProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_scene->GetShadersAllocator()), _scene->GetShadersAllocator(), this);
+	AnimaShaderProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator(), this);
 	_programs.Add(name, program);
 	return program;
 	
 //	if (_programsMap.find(name) != _programsMap.end())
 //		return nullptr;
 //
-//	ANIMA_ASSERT(_scene != nullptr);
+//	ANIMA_ASSERT(_engine != nullptr);
 //	if (_programsNumber > 0)
 //	{
-//		AnimaShaderProgram** tmpOldPrograms = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_scene->GetShadersAllocator()), _programsNumber);
+//		AnimaShaderProgram** tmpOldPrograms = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_engine->GetShadersAllocator()), _programsNumber);
 //
 //		for (int i = 0; i < _programsNumber; i++)
 //			tmpOldPrograms[i] = _programs[i];
@@ -105,21 +105,21 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 //		ClearPrograms(false, false);
 //
 //		_programsNumber++;
-//		_programs = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_scene->GetShadersAllocator()), _programsNumber);
+//		_programs = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_engine->GetShadersAllocator()), _programsNumber);
 //
 //		for (int i = 0; i < _programsNumber - 1; i++)
 //			_programs[i] = tmpOldPrograms[i];
 //		
-//		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetShadersAllocator()), tmpOldPrograms);
+//		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetShadersAllocator()), tmpOldPrograms);
 //		tmpOldPrograms = nullptr;
 //	}
 //	else
 //	{
 //		_programsNumber++;
-//		_programs = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_scene->GetShadersAllocator()), _programsNumber);
+//		_programs = AnimaAllocatorNamespace::AllocateArray<AnimaShaderProgram*>(*(_engine->GetShadersAllocator()), _programsNumber);
 //	}
 //
-//	_programs[_programsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_scene->GetShadersAllocator()), _scene->GetShadersAllocator(), this);
+//	_programs[_programsNumber - 1] = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator(), this);
 //
 //	_programsMap[name] = (AUint)(_programsNumber - 1);
 //
@@ -128,7 +128,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 
 AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AnimaString& text, AnimaShader::AnimaShaderType type)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShader(name, text.GetConstBuffer(), type);
 }
 
@@ -139,7 +139,7 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const Anim
 
 AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AChar* text, AnimaShader::AnimaShaderType type)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShader(str, text, type);
 }
 
@@ -153,7 +153,7 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const ACha
 
 AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AnimaString &filePath, AnimaShader::AnimaShaderType type)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShaderFromFile(str, filePath, type);
 }
 
@@ -164,14 +164,14 @@ AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, co
 
 AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShader::AnimaShaderType type)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShaderFromFile(str, filePath, type);
 }
 
 AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShader::AnimaShaderType type)
 {
 	AnimaShader* sh = nullptr;
-	AnimaString str(_scene->GetStringAllocator());
+	AnimaString str(_engine->GetStringAllocator());
 	bool readCompletely = true;
 
 	std::ifstream is(filePath, std::ifstream::binary);
@@ -203,7 +203,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, co
 
 AnimaShader* AnimaShadersManager::LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShader(str, info);
 }
 
@@ -217,7 +217,7 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, AnimaShade
 	}
 	else
 	{
-		AnimaString str(_scene->GetStringAllocator());
+		AnimaString str(_engine->GetStringAllocator());
 		bool readCompletely = true;
 
 		std::ifstream is(info._text, std::ifstream::binary);
@@ -255,7 +255,7 @@ void AnimaShadersManager::ClearShaders(bool bDeleteObjects, bool bResetNumber)
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShader* shader = _shaders[i];
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetShadersAllocator()), shader);
+		AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetShadersAllocator()), shader);
 		shader = nullptr;
 	}
 	
@@ -267,14 +267,14 @@ void AnimaShadersManager::ClearShaders(bool bDeleteObjects, bool bResetNumber)
 //		{
 //			for (int i = 0; i < (int)_shadersNumber; i++)
 //			{
-//				AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetShadersAllocator()), _shaders[i]);
+//				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetShadersAllocator()), _shaders[i]);
 //				_shaders[i] = nullptr;
 //			}
 //
 //			_shadersMap.clear();
 //		}
 //
-//		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*(_scene->GetShadersAllocator()), _shaders);
+//		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*(_engine->GetShadersAllocator()), _shaders);
 //		_shaders = nullptr;
 //	}
 //
@@ -288,7 +288,7 @@ void AnimaShadersManager::ClearPrograms(bool bDeleteObjects, bool bResetNumber)
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderProgram* program = _programs[i];
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetShadersAllocator()), program);
+		AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetShadersAllocator()), program);
 		program = nullptr;
 	}
 	
@@ -299,14 +299,14 @@ void AnimaShadersManager::ClearPrograms(bool bDeleteObjects, bool bResetNumber)
 //		{
 //			for (int i = 0; i < (int)_programsNumber; i++)
 //			{
-//				AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetShadersAllocator()), _programs[i]);
+//				AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetShadersAllocator()), _programs[i]);
 //				_programs[i] = nullptr;
 //			}
 //
 //			_programsMap.clear();
 //		}
 //
-//		AnimaAllocatorNamespace::DeallocateArray<AnimaShaderProgram*>(*(_scene->GetShadersAllocator()), _programs);
+//		AnimaAllocatorNamespace::DeallocateArray<AnimaShaderProgram*>(*(_engine->GetShadersAllocator()), _programs);
 //		_programs = nullptr;
 //	}
 //
@@ -331,7 +331,7 @@ AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const AnimaString& n
 
 AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str(name, _engine->GetStringAllocator());
 	return GetProgramFromName(str);
 }
 

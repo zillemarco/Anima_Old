@@ -667,20 +667,13 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 }
 
-#define TEST
-
 void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
 {
-#if defined TEST
 	if (!forceDraw)
 	{
 		if (frustum != nullptr && !frustum->SphereInFrustum(parentTransformation * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
 			return;
 	}
-#else
-	if (!forceDraw && !mesh->IsVisible())
-		return;
-#endif
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
