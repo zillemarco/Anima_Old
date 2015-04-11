@@ -19,6 +19,8 @@ namespace Anima {
 	class AnimaEngine;
 }
 
+class QOpenGLFunctions;
+
 class AnimaEditorOGLWindowBase : public QWindow, protected QOpenGLFunctions
 {
 	Q_OBJECT

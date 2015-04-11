@@ -9,6 +9,7 @@
 #include "AnimaMappedValues.h"
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaShaderProgram.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -104,7 +105,7 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 	return *this;
 }
 
-AnimaString AnimaMappedValues::GetName() const
+AnimaString AnimaMappedValues::GetAnimaName() const
 {
 	return _name;
 }

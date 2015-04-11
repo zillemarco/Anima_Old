@@ -15,12 +15,24 @@
 #include "AnimaMaterialsManager.h"
 #include "AnimaLightsManager.h"
 #include "AnimaArray.h"
+#include "AnimaMesh.h"
+#include "AnimaLight.h"
+#include "AnimaCamera.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaScene::AnimaScene(AnimaEngine* engine)
 {
 	_engine = engine;
+
+	_modelsManager = nullptr;
+	_camerasManager = nullptr;
+	_texturesManager = nullptr;
+	_dataGeneratorsManager = nullptr;
+	_materialsManager = nullptr;
+	_lightsManager = nullptr;
+
+	Initialize();
 }
 
 AnimaScene::AnimaScene(const AnimaScene& src)
@@ -35,13 +47,22 @@ AnimaScene::AnimaScene(AnimaScene&& src)
 
 AnimaScene::~AnimaScene()
 {
+	Terminate();
 }
 
 AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 {
 	if (this != &src)
 	{
+		Terminate();
+
 		_engine = src._engine;
+		_modelsManager = src._modelsManager;
+		_camerasManager = src._camerasManager;
+		_texturesManager = src._texturesManager;
+		_dataGeneratorsManager = src._dataGeneratorsManager;
+		_materialsManager = src._materialsManager;
+		_lightsManager = src._lightsManager;
 	}
 	
 	return *this;
@@ -51,10 +72,67 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 {
 	if (this != &src)
 	{
+		Terminate();
+
 		_engine = src._engine;
+		_modelsManager = src._modelsManager;
+		_camerasManager = src._camerasManager;
+		_texturesManager = src._texturesManager;
+		_dataGeneratorsManager = src._dataGeneratorsManager;
+		_materialsManager = src._materialsManager;
+		_lightsManager = src._lightsManager;
 	}
 	
 	return *this;
+}
+
+void AnimaScene::Initialize()
+{
+	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_engine->GetManagersAllocator(), this);
+	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_engine->GetManagersAllocator(), this);
+	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_engine->GetManagersAllocator(), this);
+	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_engine->GetManagersAllocator(), this);
+	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_engine->GetManagersAllocator(), this);
+	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_engine->GetManagersAllocator(), this);
+}
+
+void AnimaScene::Terminate()
+{
+	if (_modelsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _modelsManager);
+		_modelsManager = nullptr;
+	}
+
+	if (_camerasManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _camerasManager);
+		_camerasManager = nullptr;
+	}
+
+	if (_texturesManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _texturesManager);
+		_texturesManager = nullptr;
+	}
+
+	if (_dataGeneratorsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _dataGeneratorsManager);
+		_dataGeneratorsManager = nullptr;
+	}
+
+	if (_materialsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _materialsManager);
+		_materialsManager = nullptr;
+	}
+
+	if (_lightsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _lightsManager);
+		_lightsManager = nullptr;
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

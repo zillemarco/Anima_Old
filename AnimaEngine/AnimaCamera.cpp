@@ -39,14 +39,12 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #define INIT_AXIS			INIT_X_AXIS			INIT_Y_AXIS			INIT_Z_AXIS
 #define INIT_WORLD_AXIS		INIT_WORLD_X_AXIS	INIT_WORLD_Y_AXIS	INIT_WORLD_Z_AXIS
 
-AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager)
-	: _active(false)
+AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaSceneObject(name, dataGeneratorManager, allocator)
+	, _active(false)
 	, _projectionType(PERSPECTIVE)
 	, _camerasManager(camerasManager)
 {
-	ANIMA_ASSERT(allocator != nullptr);
-	_allocator = allocator;
-
 	_position.x = 0.0f;
 	_position.y = 0.0f;
 	_position.z = 5.0f;
@@ -59,25 +57,9 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 	INIT_WORLD_AXIS;
 }
 
-AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position)
-	: _position(position)
-	, _active(false)
-	, _projectionType(PERSPECTIVE)
-	, _camerasManager(camerasManager)
-{
-	ANIMA_ASSERT(allocator != nullptr);
-	_allocator = allocator;
-
-	_fov = 0.0f;
-	_zNear = 0.0f;
-	_zFar = 0.0f;
-	
-	INIT_AXIS;
-	INIT_WORLD_AXIS;
-}
-
 AnimaCamera::AnimaCamera(const AnimaCamera& src)
-	: _position(src._position)
+	: AnimaSceneObject(src)
+	, _position(src._position)
 	, _xAxis(src._xAxis)
 	, _yAxis(src._yAxis)
 	, _zAxis(src._zAxis)
@@ -93,13 +75,12 @@ AnimaCamera::AnimaCamera(const AnimaCamera& src)
 	, _projectionMatrix(src._projectionMatrix)
 	, _camerasManager(src._camerasManager)
 {
-	_allocator = src._allocator;
-
 	INIT_WORLD_AXIS;
 }
 
 AnimaCamera::AnimaCamera(AnimaCamera&& src)
-	: _position(src._position)
+	: AnimaSceneObject(src)
+	, _position(src._position)
 	, _xAxis(src._xAxis)
 	, _yAxis(src._yAxis)
 	, _zAxis(src._zAxis)
@@ -113,10 +94,8 @@ AnimaCamera::AnimaCamera(AnimaCamera&& src)
 	, _projectionType(src._projectionType)
 	, _viewMatrix(src._viewMatrix)
 	, _projectionMatrix(src._projectionMatrix)
-	, _allocator(src._allocator)
 	, _camerasManager(src._camerasManager)
 {
-
 	INIT_WORLD_AXIS;
 }
 
@@ -128,7 +107,8 @@ AnimaCamera& AnimaCamera::operator=(const AnimaCamera& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		AnimaSceneObject::operator=(src);
+
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;
@@ -155,7 +135,8 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		AnimaSceneObject::operator=(src);
+
 		_position = src._position;
 		_active = src._active;
 		_camerasManager = src._camerasManager;

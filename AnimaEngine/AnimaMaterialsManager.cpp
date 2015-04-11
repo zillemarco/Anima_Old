@@ -10,10 +10,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMaterialsManager::AnimaMaterialsManager(AnimaEngine* engine)
-	: _materials(engine->GetMaterialsAllocator())
+AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene)
+	: _materials(scene->GetEngine()->GetMaterialsAllocator())
 {
-	_engine = engine;
+	_scene = scene;
 }
 
 AnimaMaterialsManager::~AnimaMaterialsManager()
@@ -28,7 +28,7 @@ AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const AnimaString& n
 
 AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return CreateGenericMaterial(str);
 }
 
@@ -42,7 +42,7 @@ void AnimaMaterialsManager::ClearMaterials()
 		for (AInt i = 0; i < count; i++)
 		{
 			AnimaMaterial* material = (*materialsArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetMaterialsAllocator()), material);
+			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMaterialsAllocator()), material);
 			material = nullptr;
 		}
 	}
@@ -57,7 +57,7 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const AnimaString& nam
 
 AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return GetMaterialFromName(str);
 }
 

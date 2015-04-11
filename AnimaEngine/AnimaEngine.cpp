@@ -1,12 +1,6 @@
 #include "AnimaEngine.h"
 #include "AnimaScenesManager.h"
-#include "AnimaModelsManager.h"
 #include "AnimaShadersManager.h"
-#include "AnimaCamerasManager.h"
-#include "AnimaTexturesManager.h"
-#include "AnimaDataGeneratorsManager.h"
-#include "AnimaMaterialsManager.h"
-#include "AnimaLightsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -59,13 +53,7 @@ AnimaEngine::AnimaEngine()
 	_scenesAllocator = nullptr;
 
 	_scenesManager = nullptr;
-	_modelsManager = nullptr;
 	_shadersManager = nullptr;
-	_camerasManager = nullptr;
-	_texturesManager = nullptr;
-	_dataGeneratorsManager = nullptr;
-	_materialsManager = nullptr;
-	_lightsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -150,14 +138,8 @@ bool AnimaEngine::InitializeWindowSystem()
 
 void AnimaEngine::InitializeManagers()
 {
-	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_scenesAllocator, this);
-	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_managersAllocator, this);
+	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
-	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_managersAllocator, this);
-	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_managersAllocator, this);
-	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, this);
-	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_managersAllocator, this);
-	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -186,13 +168,7 @@ void AnimaEngine::TerminateMemorySystem()
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_localMemoryAllocator);
 		_genericAllocator = nullptr;
 	}
-
-	if (_managersAllocator != nullptr)
-	{
-		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_localMemoryAllocator);
-		_managersAllocator = nullptr;
-	}
-
+	
 	if (_stringAllocator != nullptr)
 	{
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_localMemoryAllocator);
@@ -241,6 +217,12 @@ void AnimaEngine::TerminateMemorySystem()
 		_scenesAllocator = nullptr;
 	}
 
+	if (_managersAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_localMemoryAllocator);
+		_managersAllocator = nullptr;
+	}
+
 	if (_localMemoryAllocator != nullptr)
 	{
 		delete _localMemoryAllocator;
@@ -260,50 +242,14 @@ void AnimaEngine::TerminateManagers()
 {
 	if (_scenesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_scenesAllocator, _scenesManager);
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _scenesManager);
 		_scenesManager = nullptr;
-	}
-
-	if (_modelsManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _modelsManager);
-		_modelsManager = nullptr;
 	}
 
 	if (_shadersManager != nullptr)
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _shadersManager);
 		_shadersManager = nullptr;
-	}
-
-	if (_camerasManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _camerasManager);
-		_camerasManager = nullptr;
-	}
-
-	if (_texturesManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _texturesManager);
-		_texturesManager = nullptr;
-	}
-
-	if (_dataGeneratorsManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _dataGeneratorsManager);
-		_dataGeneratorsManager = nullptr;
-	}
-
-	if (_materialsManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _materialsManager);
-		_materialsManager = nullptr;
-	}
-
-	if (_lightsManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _lightsManager);
-		_lightsManager = nullptr;
 	}
 }
 

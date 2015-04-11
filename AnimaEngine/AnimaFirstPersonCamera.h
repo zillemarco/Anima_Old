@@ -20,9 +20,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaFirstPersonCamera : public AnimaCamera
 {
 public:
-	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager);
-	AnimaFirstPersonCamera(AnimaAllocator* allocator);
-	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
+	AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up);
 	AnimaFirstPersonCamera(const AnimaFirstPersonCamera& src);
 	AnimaFirstPersonCamera(AnimaFirstPersonCamera&& src);
 	~AnimaFirstPersonCamera();

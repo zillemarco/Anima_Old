@@ -302,7 +302,7 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	//
 	// Inizializzazione della camera di supporto
 	//
-	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr);
+	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr, nullptr, AnimaString("$$filterCamera$$", _allocator));
 	_filterCamera->SetProjectionMatrix(AnimaMatrix());
 	_filterCamera->SetViewMatrix(AnimaMatrix());
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);

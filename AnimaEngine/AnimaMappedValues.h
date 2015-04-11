@@ -24,10 +24,13 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShaderProgram;
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaMappedValues
 {
 	friend class AnimaShaderProgram;
+	friend class AnimaScene;
+	friend class AnimaMappedValues;
 
 protected:
 	AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
@@ -40,7 +43,7 @@ public:
 	AnimaMappedValues& operator=(const AnimaMappedValues& src);
 	AnimaMappedValues& operator=(AnimaMappedValues&& src);
 
-	AnimaString GetName() const;
+	AnimaString GetAnimaName() const;
 	
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);

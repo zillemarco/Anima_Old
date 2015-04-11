@@ -20,10 +20,13 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShaderProgram;
+class AnimaScene;
 
-class ANIMA_ENGINE_EXPORT AnimaSceneObject : protected AnimaMappedValues
+class ANIMA_ENGINE_EXPORT AnimaSceneObject : public AnimaMappedValues
 {
 	friend class AnimaShaderProgram;
+	friend class AnimaScene;
+	friend class AnimaMappedValues;
 
 protected:
 	AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);

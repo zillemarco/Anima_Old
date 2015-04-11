@@ -463,13 +463,14 @@ public:
 	bool Remove(const AnimaString& name)
 	{
 		auto pair = _namesMap.find(name);
-		if (name == _namesMap.end())
+		if (pair == _namesMap.end())
 			return false;
 
 		_array.RemoveAt(pair->second);
 		_namesMap.erase(pair);
 
 		RebuildMap();
+		return true;
 	}
 
 	bool Remove(const char* name)

@@ -32,6 +32,7 @@ public:
 	Anima::AnimaFPSTimer _timerFPS;
 	Anima::AnimaBenchmarkTimer _timer;
 	Anima::AnimaDirectionalLight* _directionalLight;
+	Anima::AnimaScene* _scene;
 	
 private:
 	ANIMA_WINDOW_EVENT void PaintCallback(Anima::AnimaWindow* window);

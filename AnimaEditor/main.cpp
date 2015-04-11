@@ -92,8 +92,6 @@ int main(int argc, char** argv)
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 
-	Anima::AnimaScene* scene = engine.GetScenesManager()->CreateScene("test-scene");
-
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MAJOR, 4);
 	engine.SetWindowHint(ANIMA_ENGINE_CONTEXT_VERSION_MINOR, 1);
 	engine.SetWindowHint(ANIMA_ENGINE_OPENGL_FORWARD_COMPAT, true);
@@ -117,15 +115,17 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
 
+	window->_scene = engine.GetScenesManager()->CreateScene("test-scene");
+
 	Anima::AnimaString path(engine.GetStringAllocator());
-	Anima::AnimaModelsManager* manager = engine.GetModelsManager();
-	Anima::AnimaMaterialsManager* matMgr = engine.GetMaterialsManager();
+	Anima::AnimaModelsManager* manager = window->_scene->GetModelsManager();
+	Anima::AnimaMaterialsManager* matMgr = window->_scene->GetMaterialsManager();
 	
 	Anima::AnimaMesh* mesh = nullptr;
 
 #if !defined _DEBUG
 	
-	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
+	Anima::AnimaCamerasManager* camMan = window->_scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateFirstPersonCamera("fp");
 	
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 	mesh->ComputeBoundingBox(true);
 	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
 
-	Anima::AnimaCamerasManager* camMan = scene->GetCamerasManager();
+	Anima::AnimaCamerasManager* camMan = window->_scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateFirstPersonCamera("fp");
 

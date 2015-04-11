@@ -14,12 +14,13 @@
 #include "AnimaTypes.h"
 #include "AnimaMatrix.h"
 #include "AnimaFrustum.h"
+#include "AnimaSceneObject.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaCamerasManager;
 
-class ANIMA_ENGINE_EXPORT AnimaCamera
+class ANIMA_ENGINE_EXPORT AnimaCamera : public AnimaSceneObject
 {
 public:
 	enum AnimaCameraProjectionType {
@@ -28,8 +29,7 @@ public:
 	};
 
 protected:
-	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager);
-	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position);
+	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	
 public:
 	AnimaCamera(const AnimaCamera& src);
@@ -84,6 +84,8 @@ public:
 	AnimaVertex2f GetWindowSize();
 
 	AnimaFrustum* GetFrustum();
+
+	const char* GetShaderPrefix() override { return ""; }
 		
 protected:
 	AnimaVertex3f _position;
@@ -112,7 +114,6 @@ protected:
 	AnimaMatrix _projectionViewMatrix;
 	AnimaMatrix _InverseProjectionViewMatrix;
 
-	AnimaAllocator* _allocator;	
 	AnimaCamerasManager* _camerasManager;
 };
 

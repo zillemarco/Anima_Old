@@ -40,7 +40,7 @@ public:
 	AnimaShaderProgram* CreateProgram(const AnimaString& name);
 	AnimaShaderProgram* CreateProgram(const char* name);
 
-	AnimaShaderProgram* GetProgram(ASizeT index);
+	AnimaShaderProgram* GetProgram(AInt index);
 	AnimaShaderProgram* GetProgramFromName(const AnimaString& name);
 	AnimaShaderProgram* GetProgramFromName(const char* name);
 

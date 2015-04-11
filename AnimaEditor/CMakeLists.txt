@@ -50,6 +50,7 @@ if(APPLE)
 	
 	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${AnimaEditor_ICON} ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources} ${RC_SRC_FILES} ${UI_HDRS} )
 else()
+	add_definitions("/wd4521")
 	add_executable(${PROJECT_NAME} WIN32 ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources} ${RC_SRC_FILES} ${UI_HDRS} AnimaEditor.rc)
 endif()
 

@@ -15,25 +15,26 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager)
-	: AnimaCamera(allocator, camerasManager)
+AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
 	_zAxis.x = 0.0f;
 	_zAxis.y = 0.0f;
 	_zAxis.z = 1.0f;
 }
 
-AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator)
-	: AnimaCamera(allocator, nullptr)
+AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+	: AnimaCamera(allocator, nullptr, dataGeneratorManager, name)
 {
 	_zAxis.x = 0.0f;
 	_zAxis.y = 0.0f;
 	_zAxis.z = 1.0f;
 }
 
-AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up)
-	: AnimaCamera(allocator, camerasManager, position)
+AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up)
+	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
+	_position = position;
 	_yAxis = up;
 	_zAxis = forward;
 

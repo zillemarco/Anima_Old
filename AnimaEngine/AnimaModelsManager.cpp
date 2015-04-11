@@ -13,9 +13,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaModelsManager::AnimaModelsManager(AnimaEngine* engine)
+AnimaModelsManager::AnimaModelsManager(AnimaScene* scene)
 {
-	_engine = engine;
+	_scene = scene;
 	
 	_models = nullptr;
 	_modelsNumber = 0;
@@ -30,19 +30,19 @@ AnimaModelsManager::~AnimaModelsManager()
 
 AnimaMesh* AnimaModelsManager::LoadModel(const char* modelPath, const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return LoadModel(modelPath, str);
 }
 
 AnimaMesh* AnimaModelsManager::LoadModel(const char* modelPath, const AnimaString& name)
 {
-	AnimaString str(modelPath, _engine->GetStringAllocator());
+	AnimaString str(modelPath, _scene->GetStringAllocator());
 	return LoadModel(str, name);
 }
 
 AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return LoadModel(modelPath, str);
 }
 
@@ -55,22 +55,22 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 	timer.Reset();
 	
 	Assimp::Importer importer;
-	const aiScene* engine = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
 	
-	if(engine == nullptr)
+	if (scene == nullptr)
 		return nullptr;
 	
 	timer.PrintElapsed();
 	timer.Reset();
 	
-	AnimaMesh* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_engine->GetModelsAllocator()), _engine->GetModelDataAllocator());
+	AnimaMesh* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetModelsAllocator()), _scene->GetModelDataAllocator());
 	
-	RecursiveLoadMesh(newModel, engine, engine->mRootNode);
+	RecursiveLoadMesh(newModel, scene, scene->mRootNode);
 	
 	timer.PrintElapsed();
 	timer.Reset();
 
-	AnimaString tmpName(_engine->GetStringAllocator());
+	AnimaString tmpName(_scene->GetStringAllocator());
 	tmpName.Format("AnimaModel_%lu", GetNextModelID());
 	newModel->SetName(tmpName);
 
@@ -82,14 +82,14 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 	if(pos != -1)
 		pos++;
 	
-	AnimaString modelFileName(_engine->GetStringAllocator());
+	AnimaString modelFileName(_scene->GetStringAllocator());
 	modelFileName = modelPath.Substring(pos, modelPath.GetBufferLength());
 	
 	newModel->SetMeshFileName(modelFileName);
 	
 	AddModel(*newModel, name);
 	
-	AnimaAllocatorNamespace::DeallocateObject(*(_engine->GetModelsAllocator()), newModel);
+	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetModelsAllocator()), newModel);
 	
 	timer.PrintElapsed();
 	
@@ -100,7 +100,7 @@ AnimaMesh* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const Ani
 	return &_models[_modelsNumber - 1];
 }
 
-void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScene *engine, const aiNode* sceneNode)
+void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScene *scene, const aiNode* sceneNode)
 {
 	if (sceneNode->mName.length > 0)
 		currentModel->SetName(sceneNode->mName.C_Str());
@@ -117,21 +117,21 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 	
 	if(numeroMesh > 0)
 	{
-		AnimaMesh* meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), numeroMesh, _engine->GetModelDataAllocator());
+		AnimaMesh* meshes = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), numeroMesh, _scene->GetModelDataAllocator());
 	
 		for (int n = 0; n < numeroMesh; n++)
 		{
-			const aiMesh* mesh = engine->mMeshes[sceneNode->mMeshes[n]];
+			const aiMesh* mesh = scene->mMeshes[sceneNode->mMeshes[n]];
 		
 			AnimaMesh* currentMesh = &meshes[n];
 
-			LoadMaterial(currentMesh, engine->mMaterials[mesh->mMaterialIndex]);
+			LoadMaterial(currentMesh, scene->mMaterials[mesh->mMaterialIndex]);
 		
 			int numeroFacce = mesh->mNumFaces;
 			int numeroVertici = mesh->mNumVertices;
 
-			AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
-			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_engine->GetGenericAllocator()), numeroFacce);
+			AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
+			AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_scene->GetGenericAllocator()), numeroFacce);
 		
 			int offsetFacce = 0;
 			int offsetVertici = 0;
@@ -155,7 +155,7 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				
 				ANIMA_ASSERT(numeroIndiciFaccia == 3);
 				
-				AUint* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_engine->GetGenericAllocator()), numeroIndiciFaccia);
+				AUint* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_scene->GetGenericAllocator()), numeroIndiciFaccia);
 				
 				int offsetIndiciFaccia = 0;
 				
@@ -163,12 +163,12 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 					indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
 								
 				facce[offsetFacce++].SetIndexes(indiciFaccia);
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), indiciFaccia);
+				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), indiciFaccia);
 			}
 
 			if (mesh->HasNormals())
 			{
-				AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
+				AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
 				int offsetNormali = 0;
 				for (int t = 0; t < numeroVertici; t++)
 				{
@@ -182,13 +182,13 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				}
 
 				currentMesh->SetNormals(normali, offsetNormali);
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), normali);
+				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), normali);
 			}
 
 			if (mesh->HasTangentsAndBitangents())
 			{
-				AnimaVertex3f* tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
-				AnimaVertex3f* bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_engine->GetGenericAllocator()), numeroVertici);
+				AnimaVertex3f* tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
+				AnimaVertex3f* bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
 				
 				int offsetTangents = 0;
 				int offsetBitangents = 0;
@@ -213,13 +213,13 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				currentMesh->SetTangents(tangents, offsetTangents);
 				currentMesh->SetBitangents(bitangents, offsetTangents);
 
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), tangents);
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), bitangents);
+				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), tangents);
+				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), bitangents);
 			}
 
 			if (mesh->HasTextureCoords(0))
 			{
-				AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_engine->GetGenericAllocator()), numeroVertici);
+				AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_scene->GetGenericAllocator()), numeroVertici);
 				int offsetTextCoords = 0;
 				for (int t = 0; t < numeroVertici; t++)
 				{
@@ -230,67 +230,67 @@ void AnimaModelsManager::RecursiveLoadMesh(AnimaMesh* currentModel, const aiScen
 				}
 
 				currentMesh->SetTextureCoords(textCoords, offsetTextCoords);
-				AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), textCoords);
+				AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), textCoords);
 			}
 
 			currentMesh->SetVertices(vertici, offsetVertici);
 			currentMesh->SetFaces(facce, offsetFacce);
 			
-			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), vertici);
-			AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), facce);
+			AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), vertici);
+			AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), facce);
 		}
 	
 		currentModel->SetMeshes(meshes, numeroMesh);
 		
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), meshes);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), meshes);
 	}
 	
 	int numeroFigli = sceneNode->mNumChildren;
 	if(numeroFigli > 0)
 	{
-		AnimaMesh* figli = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetGenericAllocator()), numeroFigli, _engine->GetModelDataAllocator());
+		AnimaMesh* figli = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetGenericAllocator()), numeroFigli, _scene->GetModelDataAllocator());
 	
 		for (int n = 0; n < numeroFigli; n++)
-			RecursiveLoadMesh(&figli[n], engine, sceneNode->mChildren[n]);
+			RecursiveLoadMesh(&figli[n], scene, sceneNode->mChildren[n]);
 	
 		currentModel->SetChildren(figli, numeroFigli);
 		
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetGenericAllocator()), figli);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), figli);
 	}
 }
 
 void AnimaModelsManager::AddModel(AnimaMesh& model, const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	AddModel(model, str);
 }
 
 void AnimaModelsManager::AddModel(AnimaMesh& model, const AnimaString& name)
 {
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_scene != nullptr);
 	if(_modelsNumber > 0)
 	{
-		AnimaMesh* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		AnimaMesh* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 	
 		for (int i = 0; i < _modelsNumber; i++)
 			tmpOldModels[i] = _models[i];
 	
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), _models);
 	
 		_modelsNumber++;
-		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 	
 		for (int i = 0; i < _modelsNumber - 1; i++)
 			_models[i] = tmpOldModels[i];
 	
 		_models[_modelsNumber - 1] = model;
 		
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldModels);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), tmpOldModels);
 	}
 	else
 	{
 		_modelsNumber++;
-		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 		_models[_modelsNumber - 1] = model;
 	}
 }
@@ -300,28 +300,28 @@ AnimaMesh* AnimaModelsManager::CreateModel(const AnimaString& name)
 	if (_modelsMap.find(name) != _modelsMap.end())
 		return nullptr;
 
-	ANIMA_ASSERT(_engine != nullptr);
+	ANIMA_ASSERT(_scene != nullptr);
 	if (_modelsNumber > 0)
 	{
-		AnimaMesh* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		AnimaMesh* tmpOldModels = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 
 		for (int i = 0; i < _modelsNumber; i++)
 			tmpOldModels[i] = _models[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), _models);
 
 		_modelsNumber++;
-		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 
 		for (int i = 0; i < _modelsNumber - 1; i++)
 			_models[i] = tmpOldModels[i];
 
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), tmpOldModels);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), tmpOldModels);
 	}
 	else
 	{
 		_modelsNumber++;
-		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_engine->GetModelsAllocator()), _modelsNumber, _engine->GetModelDataAllocator());
+		_models = AnimaAllocatorNamespace::AllocateArray<AnimaMesh>(*(_scene->GetModelsAllocator()), _modelsNumber, _scene->GetModelDataAllocator());
 	}
 
 	_modelsMap[name] = (AUint)_modelsNumber - 1;
@@ -330,7 +330,7 @@ AnimaMesh* AnimaModelsManager::CreateModel(const AnimaString& name)
 
 AnimaMesh* AnimaModelsManager::CreateModel(const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return CreateModel(str);
 }
 
@@ -345,12 +345,12 @@ AnimaMesh* AnimaModelsManager::CreatePlane(const AnimaString& name)
 
 	int i = 1;
 	AnimaString prefix = name;
-	AnimaString suffix(_engine->GetStringAllocator());
+	AnimaString suffix(_scene->GetStringAllocator());
 	suffix.Format(".material.%d", i);
 
 	while (material == nullptr)
 	{
-		material = _engine->GetMaterialsManager()->CreateGenericMaterial(prefix + suffix);
+		material = _scene->GetMaterialsManager()->CreateGenericMaterial(prefix + suffix);
 
 		i++;
 		suffix.Format(".material.%d", i);
@@ -363,7 +363,7 @@ AnimaMesh* AnimaModelsManager::CreatePlane(const AnimaString& name)
 
 AnimaMesh* AnimaModelsManager::CreatePlane(const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return CreatePlane(str);
 }
 
@@ -387,7 +387,7 @@ void AnimaModelsManager::ClearModels()
 {
 	if(_models != nullptr && _modelsNumber > 0)
 	{
-		AnimaAllocatorNamespace::DeallocateArray(*(_engine->GetModelsAllocator()), _models);
+		AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetModelsAllocator()), _models);
 		_models = nullptr;
 		_modelsNumber = 0;
 	}
@@ -407,7 +407,7 @@ AnimaMesh* AnimaModelsManager::GetModelFromName(const AnimaString& name)
 
 AnimaMesh* AnimaModelsManager::GetModelFromName(const char* name)
 {
-	AnimaString str(name, _engine->GetStringAllocator());
+	AnimaString str(name, _scene->GetStringAllocator());
 	return GetModelFromName(str);
 }
 
@@ -415,9 +415,9 @@ int texturesCaricate = 0;
 
 void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 {
-	AnimaTexturesManager* texturesManager = _engine->GetTexturesManager();
-	AnimaMaterialsManager* materialsManager = _engine->GetMaterialsManager();
-	AnimaAllocator* stringAllocator = _engine->GetStringAllocator();
+	AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+	AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+	AnimaAllocator* stringAllocator = _scene->GetStringAllocator();
 
 	AnimaMaterial* material = mesh->GetMaterial();
 	AnimaString materialName(stringAllocator);
@@ -442,7 +442,7 @@ void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
 		mesh->SetMaterial(material);
 	}
 	else
-		materialName = material->GetName();
+		materialName = material->GetAnimaName();
 
 	int ret1, ret2;
 	aiColor4D diffuse;

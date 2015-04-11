@@ -46,13 +46,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 typedef AnimaEngineWindow_Base AnimaWindow;
 
 class AnimaScenesManager;
-class AnimaModelsManager;
 class AnimaShadersManager;
-class AnimaCamerasManager;
-class AnimaTexturesManager;
-class AnimaDataGeneratorsManager;
-class AnimaMaterialsManager;
-class AnimaLightsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -227,48 +221,23 @@ public:
 	}
 
 	inline AnimaAllocator* GetDataGeneratorsAllocator() {
-		ANIMA_ASSERT(_dataGeneratorsAllocator != nullptr)
-			return _dataGeneratorsAllocator;
+		ANIMA_ASSERT(_dataGeneratorsAllocator != nullptr);
+		return _dataGeneratorsAllocator;
 	}
 
 	inline AnimaAllocator* GetScenesAllocator() {
-		ANIMA_ASSERT(_scenesAllocator != nullptr)
-			return _scenesAllocator;
+		ANIMA_ASSERT(_scenesAllocator != nullptr);
+		return _scenesAllocator;
 	}
 
-	inline AnimaModelsManager* GetModelsManager() {
-		ANIMA_ASSERT(_modelsManager != nullptr);
-		return _modelsManager;
+	inline AnimaAllocator* GetManagersAllocator() {
+		ANIMA_ASSERT(_managersAllocator != nullptr);
+		return _managersAllocator;
 	}
 
 	inline AnimaShadersManager* GetShadersManager() {
 		ANIMA_ASSERT(_shadersManager != nullptr);
 		return _shadersManager;
-	}
-
-	inline AnimaCamerasManager* GetCamerasManager() {
-		ANIMA_ASSERT(_camerasManager != nullptr);
-		return _camerasManager;
-	}
-
-	inline AnimaTexturesManager* GetTexturesManager() {
-		ANIMA_ASSERT(_texturesManager != nullptr);
-		return _texturesManager;
-	}
-
-	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager() {
-		ANIMA_ASSERT(_dataGeneratorsManager != nullptr);
-		return _dataGeneratorsManager;
-	}
-
-	inline AnimaMaterialsManager* GetMaterialsManager() {
-		ANIMA_ASSERT(_materialsManager != nullptr);
-		return _materialsManager;
-	}
-
-	inline AnimaLightsManager* GetLightsManager() {
-		ANIMA_ASSERT(_lightsManager != nullptr);
-		return _lightsManager;
 	}
 
 	inline AnimaScenesManager* GetScenesManager() {
@@ -296,13 +265,7 @@ protected:
 
 private:
 	AnimaScenesManager*			_scenesManager;
-	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
-	AnimaLightsManager*			_lightsManager;
 	AnimaShadersManager*		_shadersManager;				/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
-	AnimaCamerasManager*		_camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
-	AnimaTexturesManager*		_texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
-	AnimaMaterialsManager*		_materialsManager;
-	AnimaDataGeneratorsManager* _dataGeneratorsManager;
 };
 
 template<class T>

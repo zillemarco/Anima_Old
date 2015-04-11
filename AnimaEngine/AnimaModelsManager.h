@@ -27,7 +27,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModelsManager
 {
 public:
-	AnimaModelsManager(AnimaEngine* engine);
+	AnimaModelsManager(AnimaScene* scene);
 	~AnimaModelsManager();
 	
 public:
@@ -61,7 +61,7 @@ private:
 	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
 	
 private:
-	AnimaEngine* _engine;
+	AnimaScene* _scene;
 	
 	AnimaMesh*	_models;
 	ASizeT		_modelsNumber;
