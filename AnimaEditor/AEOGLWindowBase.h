@@ -21,12 +21,12 @@ namespace Anima {
 
 class QOpenGLFunctions;
 
-class AnimaEditorOGLWindowBase : public QWindow, protected QOpenGLFunctions
+class AEOGLWindowBase : public QWindow, protected QOpenGLFunctions
 {
 	Q_OBJECT
 public:
-	explicit AnimaEditorOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent = nullptr);
-	~AnimaEditorOGLWindowBase();
+	explicit AEOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent = nullptr);
+	~AEOGLWindowBase();
 	
 	virtual void Render(QPainter* painter);
 	virtual void Render();

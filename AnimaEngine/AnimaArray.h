@@ -100,7 +100,7 @@ public:
 		{
 			ANIMA_ASSERT(newSize <= SIZE_MAX / sizeof(TYPE));
 
-			_data = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, newSize);
+			_data = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, newSize, args...);
 
 			_size = newSize;
 			_maxSize = newSize;
@@ -127,7 +127,7 @@ public:
 			ANIMA_ASSERT(newMax >= _maxSize);
 			ANIMA_ASSERT(newMax <= SIZE_MAX / sizeof(TYPE));
 
-			TYPE* newData = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, newMax);
+			TYPE* newData = AnimaAllocatorNamespace::AllocateArray<TYPE>(*_allocator, newMax, args...);
 
 			memcpy(newData, _data, _maxSize * sizeof(TYPE));
 

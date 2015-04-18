@@ -1,5 +1,5 @@
 //
-//  AnimaEditorOGLWindowBase.cpp
+//  AEOGLWindowBase.cpp
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
@@ -7,14 +7,14 @@
 //
 
 #include <AnimaEngine.h>
-#include "AnimaEditorOGLWindowBase.h"
+#include "AEOGLWindowBase.h"
 #include <QtCore/QCoreApplication>
 #include <QOpenGLContext>
 #include <QOpenGLPaintDevice>
 #include <QPainter>
 #include <qmessagebox>
 
-AnimaEditorOGLWindowBase::AnimaEditorOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
+AEOGLWindowBase::AEOGLWindowBase(Anima::AnimaEngine* engine, QWindow* parent)
 : QWindow(parent)
 , _animating(true)
 , _updatePending(false)
@@ -25,21 +25,21 @@ AnimaEditorOGLWindowBase::AnimaEditorOGLWindowBase(Anima::AnimaEngine* engine, Q
 	setSurfaceType(QWindow::OpenGLSurface);
 }
 
-AnimaEditorOGLWindowBase::~AnimaEditorOGLWindowBase()
+AEOGLWindowBase::~AEOGLWindowBase()
 {
 	delete _device;
 }
 
-void AnimaEditorOGLWindowBase::Render(QPainter* painter)
+void AEOGLWindowBase::Render(QPainter* painter)
 {
 	Q_UNUSED(painter);
 }
 
-void AnimaEditorOGLWindowBase::Initialize()
+void AEOGLWindowBase::Initialize()
 {
 }
 
-void AnimaEditorOGLWindowBase::Render()
+void AEOGLWindowBase::Render()
 {
 	if(!_device)
 		_device = new QOpenGLPaintDevice;
@@ -53,7 +53,7 @@ void AnimaEditorOGLWindowBase::Render()
 	Render(&painter);
 }
 
-void AnimaEditorOGLWindowBase::RenderLater()
+void AEOGLWindowBase::RenderLater()
 {
 	if(!_updatePending)
 	{
@@ -62,7 +62,7 @@ void AnimaEditorOGLWindowBase::RenderLater()
 	}
 }
 
-bool AnimaEditorOGLWindowBase::event(QEvent* event)
+bool AEOGLWindowBase::event(QEvent* event)
 {
 	switch (event->type()) {
 		case QEvent::UpdateRequest:
@@ -75,7 +75,7 @@ bool AnimaEditorOGLWindowBase::event(QEvent* event)
 	}
 }
 
-void AnimaEditorOGLWindowBase::exposeEvent(QExposeEvent* event)
+void AEOGLWindowBase::exposeEvent(QExposeEvent* event)
 {
 	Q_UNUSED(event);
 	
@@ -83,7 +83,7 @@ void AnimaEditorOGLWindowBase::exposeEvent(QExposeEvent* event)
 		RenderNow();
 }
 
-void AnimaEditorOGLWindowBase::RenderNow()
+void AEOGLWindowBase::RenderNow()
 {
 	if (!isExposed())
 		return;

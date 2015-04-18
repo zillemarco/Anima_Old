@@ -14,19 +14,19 @@
 #include <QCloseEvent>
 #include <QSettings>
 
-class AnimaEditorDocument;
+class AEDocument;
 
 class WorldEditorTab : public QFrame
 {
 	Q_OBJECT
 public:
-	WorldEditorTab(AnimaEditorDocument* doc);
+	WorldEditorTab(AEDocument* doc);
 	
 	void saveSettings(QSettings* settings);
 	void readSettings(QSettings* settings);
 	
 private:
-	AnimaEditorDocument* _document;
+	AEDocument* _document;
 };
 
 #endif /* defined(__Anima__WorldEditorTab__) */

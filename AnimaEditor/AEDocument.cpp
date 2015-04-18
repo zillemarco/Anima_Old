@@ -1,12 +1,12 @@
 //
-//  AnimaEditorDocument.cpp
+//  AEDocument.cpp
 //  Anima
 //
 //  Created by Marco Zille on 04/12/14.
 //
 //
 
-#include "AnimaEditorDocument.h"
+#include "AEDocument.h"
 #include <QDir>
 #include <QString>
 #include <AnimaModelsManager.h>
@@ -22,7 +22,7 @@
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
 
-AnimaEditorDocument::AnimaEditorDocument()
+AEDocument::AEDocument()
 {
 	_projectName = QString("");
 	_projectPath = QString("");
@@ -63,12 +63,12 @@ AnimaEditorDocument::AnimaEditorDocument()
 	_newDocument = false;
 }
 
-AnimaEditorDocument::~AnimaEditorDocument()
+AEDocument::~AEDocument()
 {
 	delete _engine;
 }
 
-bool AnimaEditorDocument::NewDocument(QString name, QString path)
+bool AEDocument::NewDocument(QString name, QString path)
 {
 	_projectName = name;
 	_projectPath = path;
@@ -87,7 +87,7 @@ bool AnimaEditorDocument::NewDocument(QString name, QString path)
 		return false;
 	_engine->GetScenesManager()->CreateScene("AnimaEditor");
 
-	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("test-scene")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 	
@@ -99,7 +99,7 @@ bool AnimaEditorDocument::NewDocument(QString name, QString path)
 	return true;
 }
 
-bool AnimaEditorDocument::OpenDocument(QString path)
+bool AEDocument::OpenDocument(QString path)
 {
 	if(_engine != nullptr)
 	{
@@ -111,8 +111,9 @@ bool AnimaEditorDocument::OpenDocument(QString path)
 	
 	if(!_engine->Initialize())
 		return false;
+	_engine->GetScenesManager()->CreateScene("AnimaEditor");
 
-	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("test-scene")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
+	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
 
@@ -164,7 +165,7 @@ bool AnimaEditorDocument::OpenDocument(QString path)
 	return true;
 }
 
-bool AnimaEditorDocument::SaveDocument()
+bool AEDocument::SaveDocument()
 {
 	QFile file(projectFilePath());
 	
@@ -191,7 +192,7 @@ bool AnimaEditorDocument::SaveDocument()
 	return true;
 }
 
-bool AnimaEditorDocument::CreateProjectFolderStructure()
+bool AEDocument::CreateProjectFolderStructure()
 {
 	_projectRootPath				= _projectPath + QString("/") + _projectName;
 	_projectCodePath				= _projectRootPath + QString("/") + _projectName + QString("_Code");
@@ -288,7 +289,7 @@ bool AnimaEditorDocument::CreateProjectFolderStructure()
 	return true;
 }
 
-void AnimaEditorDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
+void AEDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
 {
 	xmlWriter->writeStartElement("Project");
 	xmlWriter->writeTextElement("Path", _projectPath);
@@ -326,7 +327,7 @@ void AnimaEditorDocument::SaveProjectData(QXmlStreamWriter* xmlWriter)
 	xmlWriter->writeEndElement();
 }
 
-bool AnimaEditorDocument::ReadProjectData(QXmlStreamReader* xmlReader)
+bool AEDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 {
 	int nodeRead = 0;
 	int maxNodesToRead = 32;
@@ -643,48 +644,19 @@ bool AnimaEditorDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 	return true;
 }
 
-bool AnimaEditorDocument::ImportModel()
+bool AEDocument::ImportModel()
 {
 	QString selfilter = QString("3ds Max 3DS (*.3ds)");
 	QString filters = QString("3ds Max 3DS (*.3ds);;3ds Max ASE (*.ase);;Collada (*.dae);;Wavefront Object (*.obj);;Blender 3D (*.blend);;Industry Foundation Classes [IFC/Step] (*.ifc);;XGL (*.xgl);; XGL (*.zgl);;Stanford Polygon Library (*.ply);;All files (*.*)");
 	
-	QString originalFilePath = QFileDialog::getOpenFileName(NULL, QString("AnimaEditor - Import model"), QString(""), filters, &selfilter);
+	QString filePath = QFileDialog::getOpenFileName(NULL, QString("AnimaEditor - Import model"), QString(""), filters, &selfilter);
 	
-	if(originalFilePath.isEmpty())
-		return false;
-	
-	QFileInfo fileInfo(originalFilePath);
-	QString copiedFilePath = _projectDataModelsPath + "/" + fileInfo.fileName();
-
-	QFileInfo fileInfoCopied(copiedFilePath);
-
-	if (fileInfoCopied.exists())
-	{
-		QMessageBox::StandardButton btn = QMessageBox::question(NULL, QString("Warning"), QString("A model with this file name already exists.\nReplace it with this new one?"), QMessageBox::Yes | QMessageBox::No);
-		
-		if (btn == QMessageBox::No)
-			return false;
-		else
-			QFile::remove(copiedFilePath);
-	}
-	
-	if(!QFile::copy(originalFilePath, copiedFilePath))
-	{
-		QMessageBox msg;
-		msg.setWindowTitle(QString("AnimaEditor"));
-		msg.setText(QString("Unable to copy the model file into the project's models folder."));
-		msg.exec();
-		return false;
-	}
-	
-	if (!_engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->LoadModel(copiedFilePath.toLocal8Bit().constData(), "model"))
+	if (!_engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager()->LoadModel(filePath.toLocal8Bit().constData(), "model"))
 	{
 		QMessageBox msg;
 		msg.setWindowTitle(QString("AnimaEditor"));
 		msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
 		msg.exec();
-		
-		QFile::remove(copiedFilePath);
 		return false;
 	}
 	
@@ -693,30 +665,30 @@ bool AnimaEditorDocument::ImportModel()
 	return true;
 }
 
-bool AnimaEditorDocument::ImportTexture()
+bool AEDocument::ImportTexture()
 {
 	return true;
 }
 
-bool AnimaEditorDocument::AddMaterial()
+bool AEDocument::AddMaterial()
 {
 	return true;
 }
 
-void AnimaEditorDocument::SaveModels(QXmlStreamWriter* xmlWriter)
+void AEDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 {
-	Anima::AnimaModelsManager* mgr = _engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager();
-	Anima::ASizeT numeroModelli = mgr->GetModelsNumber();
+	Anima::AnimaModelsManager* mgr = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager();
+	Anima::AInt numeroModelli = mgr->GetModelsNumber();
 	
 	xmlWriter->writeStartElement("Models");
 	xmlWriter->writeAttribute("N", QString("%0").arg(numeroModelli));
 	
-	for(Anima::ASizeT i = 0; i < numeroModelli; i++)
+	for (Anima::AInt i = 0; i < numeroModelli; i++)
 	{
 		xmlWriter->writeStartElement("Model");
 		
 		xmlWriter->writeTextElement("Name", mgr->GetModel(i)->GetName());
-		xmlWriter->writeTextElement("FileName", mgr->GetModel(i)->GetMeshFileName());
+		xmlWriter->writeTextElement("FileName", mgr->GetModel(i)->GetOriginFileName());
 		
 		xmlWriter->writeEndElement();
 	}
@@ -724,7 +696,7 @@ void AnimaEditorDocument::SaveModels(QXmlStreamWriter* xmlWriter)
 	xmlWriter->writeEndElement();
 }
 
-bool AnimaEditorDocument::ReadModels(QXmlStreamReader* xmlReader)
+bool AEDocument::ReadModels(QXmlStreamReader* xmlReader)
 {
 	if(xmlReader->atEnd() || xmlReader->hasError())
 		return false;
@@ -795,22 +767,16 @@ bool AnimaEditorDocument::ReadModels(QXmlStreamReader* xmlReader)
 	return true;
 }
 
-bool AnimaEditorDocument::ImportModelInternal(QString modelName, QString modelFileName)
-{
-	QString modelFilePath = _projectDataModelsPath + "/" + modelFileName;
-	
-	Anima::AnimaMesh* model = _engine->GetScenesManager()->GetScene("test-scene")->GetModelsManager()->LoadModel(modelFilePath.toLocal8Bit().constData(), "model");
+bool AEDocument::ImportModelInternal(QString modelName, QString modelFileName)
+{	
+	Anima::AnimaModel* model = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager()->LoadModel(modelFileName.toLocal8Bit().constData(), modelName.toLocal8Bit().constData());
 	
 	if(!model)
-		return false;
-	
-	model->SetName(modelName.toLocal8Bit().constData());
-	model->SetMeshFileName(modelFileName.toLocal8Bit().constData());
-	
+		return false;	
 	return true;
 }
 
-void AnimaEditorDocument::DeleteProject()
+void AEDocument::DeleteProject()
 {
 	QDir dir(_projectRootPath);
 	dir.removeRecursively();

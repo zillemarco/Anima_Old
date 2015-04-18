@@ -16,6 +16,7 @@
 #include "AnimaMappedValues.h"
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaTransformation.h"
+#include "AnimaMappedArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -38,16 +39,32 @@ public:
 
 	AnimaSceneObject& operator=(const AnimaSceneObject& src);
 	AnimaSceneObject& operator=(AnimaSceneObject&& src);
-
+	
 public:
 	virtual void SetPosition(const AnimaVertex3f& position);
 	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
 	virtual AnimaVertex3f GetPosition();
 
-	virtual const char* GetShaderPrefix() = 0;
+	virtual AInt AddChild(AnimaSceneObject* child);
+	virtual AInt GetChildrenNumber();
+	virtual AnimaSceneObject* GetChild(const AnimaString& name);
+	virtual AnimaSceneObject* GetChild(const char* name);
+	virtual AnimaSceneObject* GetChild(AInt index);
+	virtual bool RemoveChild(AnimaSceneObject* object);
+	virtual bool RemoveChild(const AnimaString& name);
+	virtual bool RemoveChild(const char* name);
+	virtual bool RemoveChild(AInt index);
+	virtual AInt HasChild(AnimaSceneObject* object);
+	virtual AInt HasChild(const AnimaString& name);
+	virtual AInt HasChild(const char* name);
 
+	AnimaTransformation* GetTransformation();
+
+	virtual const char* GetShaderPrefix() = 0;
+	
 protected:
 	AnimaTransformation _transformation;
+	AnimaMappedArray<AnimaSceneObject*> _children;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

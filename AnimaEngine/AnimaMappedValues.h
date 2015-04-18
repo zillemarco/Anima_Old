@@ -44,6 +44,7 @@ public:
 	AnimaMappedValues& operator=(AnimaMappedValues&& src);
 
 	AnimaString GetAnimaName() const;
+	const char* GetName() const;
 	
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
@@ -183,7 +184,9 @@ public:
 protected:
 	AnimaAllocator* _allocator;
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
-	AnimaString _name;
+
+	AnimaString _realName;
+	AnimaString _utilsName;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher> _texturesMap;

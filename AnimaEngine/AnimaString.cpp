@@ -58,9 +58,8 @@ AnimaString& AnimaString::operator=(const AnimaString& src)
 {
 	if(this != &src)
 	{
-		ClearString();
-	
-		_allocator = src._allocator;
+		if (_allocator == nullptr)
+			_allocator = src._allocator;
 		SetString(src._string);
 	}
 	return *this;
@@ -70,14 +69,9 @@ AnimaString& AnimaString::operator=(AnimaString&& src)
 {
 	if(this != &src)
 	{
-		ClearString();
-		
-		_allocator = src._allocator;
-		_string = src._string;
-		_stringLength = src._stringLength;
-		
-		src._string = nullptr;
-		src._stringLength = 0;
+		if (_allocator == nullptr)
+			_allocator = src._allocator;
+		SetString(src._string);
 	}
 	return *this;
 }
@@ -122,8 +116,7 @@ void AnimaString::SetString(const char* str)
 	{
 		_stringLength = strlen(str) + 1;
 		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
-		memset(_string, 0, _stringLength);
-	
+		memset(_string, 0, _stringLength);	
 		strcpy(_string, str);
 	}
 }

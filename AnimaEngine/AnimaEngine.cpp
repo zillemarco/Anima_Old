@@ -26,10 +26,10 @@ bool								AnimaEngine::_glewExtensionsInitialized = false;
 AChar								AnimaEngine::_logFilePath[PATH_MAX] = "";
 
 #define _ANIMA_LOCAL_MEMORY_SIZE			524288000 	// 500 MB
-#define _ANIMA_MODELS_MEMORY_SIZE			52428800	// 50 MB
+#define _ANIMA_MESHES_MEMORY_SIZE			52428800	// 50 MB
 #define _ANIMA_TEXTURES_MEMORY_SIZE			419430400	// 400 MB
-#define _ANIMA_ALLOCATORS_NUMBER			10
-#define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MODELS_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
+#define _ANIMA_ALLOCATORS_NUMBER			11
+#define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MESHES_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
 {
@@ -40,8 +40,9 @@ AnimaEngine::AnimaEngine()
 	_localMemorySize = 0;
 	_localMemoryAllocator = nullptr;
 
-	_modelDataAllocator = nullptr;
+	_meshesAllocator = nullptr;
 	_modelsAllocator = nullptr;
+	_modelInstancesAllocator = nullptr;
 	_genericAllocator = nullptr;
 	_stringAllocator = nullptr;
 	_shadersAllocator = nullptr;
@@ -93,9 +94,11 @@ void AnimaEngine::InitializeMemorySystem()
 	// Tutta la rimanente memoria utilizzata verrà 'allocata' dai custom allocators
 	_localMemoryAllocator = new AnimaFreeListAllocator(_localMemorySize, _localMemory);
 
-	_modelDataAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_MODELS_MEMORY_SIZE, *_localMemoryAllocator);
-	_texturesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_TEXTURES_MEMORY_SIZE, *_localMemoryAllocator);
+	_meshesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_MESHES_MEMORY_SIZE, *_localMemoryAllocator);
 	_modelsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_modelInstancesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+
+	_texturesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_TEXTURES_MEMORY_SIZE, *_localMemoryAllocator);
 	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
@@ -106,7 +109,20 @@ void AnimaEngine::InitializeMemorySystem()
 	_dataGeneratorsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_scenesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 
-	ASizeT usedSize = _modelDataAllocator->GetSize() + _modelsAllocator->GetSize() + _genericAllocator->GetSize() + _managersAllocator->GetSize() + _stringAllocator->GetSize() + _shadersAllocator->GetSize() + _camerasAllocator->GetSize() + _texturesAllocator->GetSize() + _materialsAllocator->GetSize() + _lightsAllocator->GetSize() + _dataGeneratorsAllocator->GetSize() + _scenesAllocator->GetSize();
+	ASizeT usedSize = 0;
+	usedSize += _meshesAllocator->GetSize();
+	usedSize += _modelsAllocator->GetSize();
+	usedSize += _modelInstancesAllocator->GetSize();
+	usedSize += _genericAllocator->GetSize(); 
+	usedSize += _managersAllocator->GetSize(); 
+	usedSize += _stringAllocator->GetSize(); 
+	usedSize += _shadersAllocator->GetSize(); 
+	usedSize += _camerasAllocator->GetSize(); 
+	usedSize += _texturesAllocator->GetSize(); 
+	usedSize += _materialsAllocator->GetSize(); 
+	usedSize += _lightsAllocator->GetSize(); 
+	usedSize += _dataGeneratorsAllocator->GetSize(); 
+	usedSize += _scenesAllocator->GetSize();
 
 	ANIMA_ASSERT(usedSize < _localMemorySize - 1000);
 }
@@ -151,16 +167,22 @@ void AnimaEngine::Terminate()
 
 void AnimaEngine::TerminateMemorySystem()
 {
-	if (_modelDataAllocator != nullptr)
+	if (_meshesAllocator != nullptr)
 	{
-		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelDataAllocator, *_localMemoryAllocator);
-		_modelDataAllocator = nullptr;
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_meshesAllocator, *_localMemoryAllocator);
+		_meshesAllocator = nullptr;
 	}
 
 	if (_modelsAllocator != nullptr)
 	{
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelsAllocator, *_localMemoryAllocator);
 		_modelsAllocator = nullptr;
+	}
+
+	if (_modelInstancesAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_modelInstancesAllocator, *_localMemoryAllocator);
+		_modelInstancesAllocator = nullptr;
 	}
 
 	if (_genericAllocator != nullptr)

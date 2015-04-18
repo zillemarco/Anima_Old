@@ -185,9 +185,14 @@ public:
 		return _genericAllocator;
 	}
 
-	inline AnimaAllocator* GetModelDataAllocator() {
-		ANIMA_ASSERT(_modelDataAllocator != nullptr);
-		return _modelDataAllocator;
+	inline AnimaAllocator* GetMeshesAllocator() {
+		ANIMA_ASSERT(_meshesAllocator != nullptr);
+		return _meshesAllocator;
+	}
+
+	inline AnimaAllocator* GetModelInstancesAllocator() {
+		ANIMA_ASSERT(_modelInstancesAllocator != nullptr);
+		return _modelInstancesAllocator;
 	}
 
 	inline AnimaAllocator* GetStringAllocator() {
@@ -251,8 +256,6 @@ protected:
 	AnimaFreeListAllocator*	_localMemoryAllocator;		/*!< Allocator usato per creare tutti gli altri allocator */
 
 	AnimaFreeListAllocator* _genericAllocator;		/*!< Allocator usato genericamente */
-	AnimaFreeListAllocator* _modelDataAllocator;	/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
-	AnimaFreeListAllocator* _modelsAllocator;		/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 	AnimaFreeListAllocator* _managersAllocator;		/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */
 	AnimaFreeListAllocator* _stringAllocator;		/*!< Allocator usato dalla classe AnimaString */
 	AnimaFreeListAllocator* _shadersAllocator;		/*!< Allocator usato dalla classe AnimaShaderProgram e AnimaShadersManager */
@@ -262,6 +265,10 @@ protected:
 	AnimaFreeListAllocator* _lightsAllocator;
 	AnimaFreeListAllocator* _dataGeneratorsAllocator;
 	AnimaFreeListAllocator* _scenesAllocator;
+
+	AnimaFreeListAllocator* _meshesAllocator;			/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
+	AnimaFreeListAllocator* _modelsAllocator;			/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
+	AnimaFreeListAllocator* _modelInstancesAllocator;	/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 
 private:
 	AnimaScenesManager*			_scenesManager;

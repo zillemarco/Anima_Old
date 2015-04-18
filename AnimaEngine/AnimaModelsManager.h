@@ -13,8 +13,12 @@
 #include "AnimaAllocators.h"
 #include "AnimaTypes.h"
 #include "AnimaMesh.h"
+#include "AnimaModel.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
+#include "AnimaArray.h"
+#include "AnimaMappedArray.h"
+#include "AnimaMeshesManager.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -27,50 +31,39 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModelsManager
 {
 public:
-	AnimaModelsManager(AnimaScene* scene);
+	AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager);
 	~AnimaModelsManager();
 	
 public:
-	AnimaMesh* LoadModel(const char* modelPath, const AnimaString& name);
-	AnimaMesh* LoadModel(const char* modelPath, const char* name);
-	AnimaMesh* LoadModel(const AnimaString& modelPath, const AnimaString& name);
-	AnimaMesh* LoadModel(const AnimaString& modelPath, const char* name);
-	void AddModel(AnimaMesh& model, const AnimaString& name);
-	void AddModel(AnimaMesh& model, const char* name);
+	AnimaModel* LoadModel(const char* modelPath, const AnimaString& name);
+	AnimaModel* LoadModel(const char* modelPath, const char* name);
+	AnimaModel* LoadModel(const AnimaString& modelPath, const AnimaString& name);
+	AnimaModel* LoadModel(const AnimaString& modelPath, const char* name);
 
-	AnimaMesh* CreatePlane(const AnimaString& name);
-	AnimaMesh* CreatePlane(const char* name);
+	AnimaModel* CreateModel(const AnimaString& name);
+	AnimaModel* CreateModel(const char* name);
 
-	AnimaMesh* CreateModel(const AnimaString& name);
-	AnimaMesh* CreateModel(const char* name);
+	AInt GetModelsNumber();
 
-	ASizeT GetModelsNumber();
-
-	AnimaMesh* GetModel(ASizeT index);
-	AnimaMesh* GetModelFromName(const AnimaString& name);
-	AnimaMesh* GetModelFromName(const char* name);
+	AnimaModel* GetModel(AInt index);
+	AnimaModel* GetModelFromName(const AnimaString& name);
+	AnimaModel* GetModelFromName(const char* name);
 	
-	AnimaMesh* GetModels();
-
 	void ClearModels();
 	
-	ASizeT GetNextModelID();
-	
 private:
-	void RecursiveLoadMesh(AnimaMesh* currentModel, const aiScene *scene, const aiNode* sceneNode);
 	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
-	
+
+	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString*>* meshesMap, const AnimaString& modelName);
+
 private:
 	AnimaScene* _scene;
-	
-	AnimaMesh*	_models;
-	ASizeT		_modelsNumber;
-	
-	ASizeT		_nextModelID;
 
-#pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> _modelsMap;
-#pragma warning (default: 4251) 
+	AnimaMeshesManager*		_meshesManager;
+	AnimaMaterialsManager*	_materialsManager;
+
+	AnimaArray<AnimaModel*>			_models;
+	AnimaMappedArray<AnimaModel*>	_topLevelModels;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

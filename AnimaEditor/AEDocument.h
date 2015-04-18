@@ -1,5 +1,5 @@
 //
-//  AnimaEditorDocument.h
+//  AEDocument.h
 //  Anima
 //
 //  Created by Marco Zille on 04/12/14.
@@ -14,11 +14,11 @@
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
-class AnimaEditorDocument
+class AEDocument
 {
 public:
-	AnimaEditorDocument();
-	~AnimaEditorDocument();
+	AEDocument();
+	~AEDocument();
 
 	bool NewDocument(QString name, QString path);
 	bool OpenDocument(QString path);
@@ -28,7 +28,7 @@ public:
 	void DeleteProject();
 
 	QString projectFilePath() {
-		return _projectPath + QString("/") + _projectName + QString("/") + _projectName + QString(".ceproj");
+		return _projectPath + QString("/") + _projectName + QString("/") + _projectName + QString(".aeproj");
 	}
 
 	Anima::AnimaEngine* GetEngine() {
@@ -54,7 +54,7 @@ public:
 	QString projectPath() {
 		return _projectPath;
 	}
-	
+		
 	QString projectRootPath() {
 		return _projectRootPath;
 	}

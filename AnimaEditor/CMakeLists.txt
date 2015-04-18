@@ -1,24 +1,26 @@
 project(AnimaEditor C CXX)
 
-set(${PROJECT_NAME}_headers AnimaEditorMainWindow.h
+set(${PROJECT_NAME}_headers AEMainWindow.h
 							EditWindow.h
-							AnimaEditorOGLWindowBase.h
+							AEOGLWindowBase.h
 							NewProjectWindow.h
-							AnimaEditorDocument.h
-							ResourceManagerTab.h
+							AEDocument.h
+							AEResourcesManagerTab.h
 							WorldEditorTab.h
-							CRModelViewer.h
-							Window.h)
+							AEResourcesManagerModelViewer.h
+							Window.h
+							AELoadedResourcesTreeView.h)
 set(${PROJECT_NAME}_sources main.cpp 
-							AnimaEditorMainWindow.cpp
+							AEMainWindow.cpp
 							EditWindow.cpp
-							AnimaEditorOGLWindowBase.cpp
+							AEOGLWindowBase.cpp
 							NewProjectWindow.cpp
-							AnimaEditorDocument.cpp
-							ResourceManagerTab.cpp
+							AEDocument.cpp
+							AEResourcesManagerTab.cpp
 							WorldEditorTab.cpp
-							CRModelViewer.cpp
-							Window.cpp)
+							AEResourcesManagerModelViewer.cpp
+							Window.cpp
+							AELoadedResourcesTreeView.cpp)
 
 set(UI_FILES "")
 set(RC_FILES AnimaEditor.qrc)

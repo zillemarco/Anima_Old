@@ -2,10 +2,11 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QDateTime>
+#include <qfile>
 #include <AnimaEngine.h>
 #include <AnimaWindow.h>
-#include "AnimaEditorMainWindow.h"
-#include "AnimaEditorDocument.h"
+#include "AEMainWindow.h"
+#include "AEDocument.h"
 #include <AnimaString.h>
 #include <AnimaModelsManager.h>
 #include "Window.h"
@@ -47,48 +48,32 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char** argv)
 {
-	//Anima::AnimaEngine::SetUsedExternal();
-	//
-	//QDateTime dateTime = QDateTime::currentDateTime();
-	//QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
-	//QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
-	//
-	//Anima::AChar tmpFileName[PATH_MAX];
-	//sprintf(tmpFileName, "%s.log", dateTimeByteArray.constData());
-	//Anima::AnimaEngine::SetLogFilePath(tmpFileName);
-	//
-	//FILE* f = fopen(Anima::AnimaEngine::GetLogFilePath(), "w");
-	//fclose(f);
-	//
-	//qInstallMessageHandler(messageOutput);
-	//
-	//QApplication app(argc, argv);
-	//
-	////qApp->setStyle(QStyleFactory::create("fusion"));
-
-	////QPalette palette;
-	////palette.setColor(QPalette::Window, QColor(53, 53, 53));
-	////palette.setColor(QPalette::WindowText, Qt::white);
-	////palette.setColor(QPalette::Base, QColor(15, 15, 15));
-	////palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-	////palette.setColor(QPalette::ToolTipBase, Qt::white);
-	////palette.setColor(QPalette::ToolTipText, Qt::white);
-	////palette.setColor(QPalette::Text, Qt::white);
-	////palette.setColor(QPalette::Disabled, QPalette::Text, QColor(255, 255, 255).darker());
-	////palette.setColor(QPalette::Button, QColor(53, 53, 53));
-	////palette.setColor(QPalette::ButtonText, Qt::white);
-	////palette.setColor(QPalette::BrightText, Qt::red);
-	////palette.setColor(QPalette::Light, QColor(15, 15, 15));
-
-	////palette.setColor(QPalette::Highlight, QColor(0, 152, 217).lighter());
-	////palette.setColor(QPalette::HighlightedText, Qt::black);
-	////qApp->setPalette(palette);
-
-	//AnimaEditorMainWindow mainWindow;
-	//
-	//mainWindow.show();
-	//return app.exec();
+#ifndef _LOCAL_TEST_
+	Anima::AnimaEngine::SetUsedExternal();
 	
+	QDateTime dateTime = QDateTime::currentDateTime();
+	QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
+	QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
+	
+	Anima::AChar tmpFileName[PATH_MAX];
+	sprintf(tmpFileName, "%s.log", dateTimeByteArray.constData());
+	Anima::AnimaEngine::SetLogFilePath(tmpFileName);
+	
+	qInstallMessageHandler(messageOutput);
+	
+	QApplication app(argc, argv);
+
+	QFile File(":/Res/style.qss");
+	File.open(QFile::ReadOnly);
+	QString StyleSheet = QLatin1String(File.readAll());
+	qApp->setStyleSheet(StyleSheet);
+
+	AEMainWindow mainWindow;	
+	mainWindow.show();
+	return app.exec();
+	
+#else
+
 	Anima::AnimaEngine engine;
 	engine.Initialize();
 
@@ -115,24 +100,24 @@ int main(int argc, char** argv)
 	window->MakeCurrentContext();
 	window->FrameBufferResizeCallback(window, (int)(width * window->GetResolutionMutiplier()), (int)(height * window->GetResolutionMutiplier()));
 
-	window->_scene = engine.GetScenesManager()->CreateScene("test-scene");
+	window->_scene = engine.GetScenesManager()->CreateScene("AnimaEditor");
 
 	Anima::AnimaString path(engine.GetStringAllocator());
 	Anima::AnimaModelsManager* manager = window->_scene->GetModelsManager();
 	Anima::AnimaMaterialsManager* matMgr = window->_scene->GetMaterialsManager();
 	
-	Anima::AnimaMesh* mesh = nullptr;
+	Anima::AnimaModel* model = nullptr;
 
-#if !defined _DEBUG
+#if defined _DEBUG
 	
 	Anima::AnimaCamerasManager* camMan = window->_scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
 	window->_fpcamera = camMan->CreateFirstPersonCamera("fp");
 	
 	path = ANIMA_ENGINE_MODELS_PATH "sponza.obj";
-	if ((mesh = manager->LoadModel(path, "sponza")) == nullptr)
+	if ((model = manager->LoadModel(path, "sponza")) == nullptr)
 		return 0;
-	mesh->ComputeBoundingBox(true);
+	//model->ComputeBoundingBox(true);
 
 	Anima::AnimaVertex3f pos(0.0f, 1000.0f, 1.0f);
 	Anima::AnimaVertex3f tar(0.0f, 0.0f, 0.0f);
@@ -145,22 +130,22 @@ int main(int argc, char** argv)
 
 #else
 	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia")) == nullptr)
+	if ((model = manager->LoadModel(path, "scimmia")) == nullptr)
 		return 0;
-	mesh->GetTransformation()->Scale(5.0f, 5.0f, 5.0f);
-	mesh->ComputeBoundingBox(true);
+	model->GetTransformation()->Scale(5.0f, 5.0f, 5.0f);
+	//model->ComputeBoundingBox(true);
 
 	path = ANIMA_ENGINE_MODELS_PATH "scimmia.3ds";
-	if ((mesh = manager->LoadModel(path, "scimmia2")) == nullptr)
+	if ((model = manager->LoadModel(path, "scimmia2")) == nullptr)
 		return 0;
-	mesh->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
-	mesh->ComputeBoundingBox(true);
+	model->GetTransformation()->SetTranslation(0.0f, 0.0f, 20.0f);
+	//model->ComputeBoundingBox(true);
 
 	path = ANIMA_ENGINE_MODELS_PATH "piano.3ds";
-	if ((mesh = manager->LoadModel(path, "piano")) == nullptr)
+	if ((model = manager->LoadModel(path, "piano")) == nullptr)
 		return 0;
-	mesh->ComputeBoundingBox(true);
-	mesh->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
+	//model->ComputeBoundingBox(true);
+	model->GetTransformation()->Scale(100.0f, 100.0f, 100.0f);
 
 	Anima::AnimaCamerasManager* camMan = window->_scene->GetCamerasManager();
 	window->_tpcamera = camMan->CreateThirdPersonCamera("tp");
@@ -187,4 +172,5 @@ int main(int argc, char** argv)
 	}
 		
 	return 0;
+#endif
 }

@@ -1,14 +1,14 @@
 //
-//  AnimaEditorMainWindow.cpp
+//  AEMainWindow.cpp
 //  Anima
 //
 //  Created by Marco Zille on 03/12/14.
 //
 //
 
-#include "AnimaEditorMainWindow.h"
-#include "AnimaEditorDocument.h"
-#include "ResourceManagerTab.h"
+#include "AEMainWindow.h"
+#include "AEDocument.h"
+#include "AEResourcesManagerTab.h"
 #include "WorldEditorTab.h"
 #include <QObject>
 #include <QMdiArea>
@@ -34,16 +34,12 @@
 
 #include "NewProjectWindow.h"
 
-AnimaEditorMainWindow::AnimaEditorMainWindow()
+AEMainWindow::AEMainWindow()
 {
 	_activeDocument = nullptr;
 	_resourceManagerTab = nullptr;
 	_worldEditorTab = nullptr;
-	
-	_recentFiles.clear();
-	_recentFilesAction.clear();
-	_recentFilesMapper = nullptr;
-	
+		
 	_mdiArea = new QMdiArea;
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	_mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -55,7 +51,6 @@ AnimaEditorMainWindow::AnimaEditorMainWindow()
 	connect(_windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
 	
 	readSettings();
-	readRecentFileList();
 	
 	createActions();
 	createMenus();
@@ -66,13 +61,18 @@ AnimaEditorMainWindow::AnimaEditorMainWindow()
 	setUnifiedTitleAndToolBarOnMac(true);
 }
 
-void AnimaEditorMainWindow::closeEvent(QCloseEvent *event)
+void AEMainWindow::closeEvent(QCloseEvent *event)
 {
 	if(!closeProject())
 		event->ignore();
 }
 
-void AnimaEditorMainWindow::newProject()
+void AEMainWindow::openProjectSlot()
+{
+	openProject("");
+}
+
+void AEMainWindow::newProject()
 {
 	NewProjectWindow dlg;
 	if(dlg.exec())
@@ -87,7 +87,7 @@ void AnimaEditorMainWindow::newProject()
 			closeProject();
 		}
 		
-		_activeDocument = new AnimaEditorDocument;
+		_activeDocument = new AEDocument;
 		if(!_activeDocument->NewDocument(dlg.getProjectName(), dlg.getProjectFolderPath()))
 		{
 			QMessageBox msg;
@@ -99,8 +99,10 @@ void AnimaEditorMainWindow::newProject()
 			
 			return;
 		}
+
+		setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
 		
-		_resourceManagerTab = new ResourceManagerTab(_activeDocument);
+		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
 		_worldEditorTab = new WorldEditorTab(_activeDocument);
 		
 		_mdiArea->addSubWindow(_resourceManagerTab);
@@ -122,76 +124,75 @@ void AnimaEditorMainWindow::newProject()
 	}
 }
 
-void AnimaEditorMainWindow::openProject()
+void AEMainWindow::openProject(QString filePath, bool askIfEmpty)
 {
-	QString filePath = tr("");
-	
-	QFileDialog *fd = new QFileDialog;
-	fd->setFileMode(QFileDialog::ExistingFile);
-	fd->setViewMode(QFileDialog::Detail);
-	
-	if (fd->exec())
+	if (filePath.isEmpty() && askIfEmpty)
 	{
-		filePath = fd->selectedFiles()[0];
-		
-		if(filePath.isEmpty())
-		{
-			QMessageBox msg;
-			msg.setText(tr("Not a valid path to the project file was specified."));
-			msg.setStandardButtons(QMessageBox::Ok);
-			msg.exec();
-			
-			return;
-		}
-		
-		if(_activeDocument != nullptr)
-		{
-			if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-			{
-				return;
-			}
-			
-			closeProject();
-		}
-		
-		_activeDocument = new AnimaEditorDocument;
-		if(!_activeDocument->OpenDocument(filePath))
-		{
-			QMessageBox msg;
-			msg.setText(tr("Error during project opening."));
-			msg.setStandardButtons(QMessageBox::Ok);
-			msg.exec();
-			
-			setWindowTitle(tr("AnimaEditor"));
-			
-			return;
-		}
-		
-		saveRecentFileList();
-		
-		_resourceManagerTab = new ResourceManagerTab(_activeDocument);
-		_worldEditorTab = new WorldEditorTab(_activeDocument);
-		
-		_mdiArea->addSubWindow(_resourceManagerTab);
-		_mdiArea->addSubWindow(_worldEditorTab);
-		
-		_worldEditorTab->show();
-		_resourceManagerTab->show();
-		
-		_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
-		
-		QSettings settings("ZEB", "AnimaEditor");
-		if(_resourceManagerTab != nullptr)
-			_resourceManagerTab->readSettings(&settings);
-		
-		if(_worldEditorTab != nullptr)
-			_worldEditorTab->readSettings(&settings);
-		
-		setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
+		QFileDialog *fd = new QFileDialog;
+		fd->setFileMode(QFileDialog::ExistingFile);
+		fd->setViewMode(QFileDialog::Detail);
+
+		if (fd->exec())
+			filePath = fd->selectedFiles()[0];
 	}
+
+	if(filePath.isEmpty())
+	{
+		QMessageBox msg;
+		msg.setText(tr("Not a valid path to the project file was specified."));
+		msg.setStandardButtons(QMessageBox::Ok);
+		msg.exec();
+			
+		return;
+	}
+		
+	if(_activeDocument != nullptr)
+	{
+		if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		{
+			return;
+		}
+			
+		closeProject();
+	}
+		
+	_activeDocument = new AEDocument;
+	if(!_activeDocument->OpenDocument(filePath))
+	{
+		QMessageBox msg;
+		msg.setText(tr("Error during project opening."));
+		msg.setStandardButtons(QMessageBox::Ok);
+		msg.exec();
+			
+		setWindowTitle(tr("AnimaEditor"));
+			
+		return;
+	}
+		
+	setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
+		
+	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
+	_worldEditorTab = new WorldEditorTab(_activeDocument);
+		
+	_mdiArea->addSubWindow(_resourceManagerTab);
+	_mdiArea->addSubWindow(_worldEditorTab);
+		
+	_worldEditorTab->show();
+	_resourceManagerTab->show();
+		
+	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
+		
+	QSettings settings("ZEB", "AnimaEditor");
+	if(_resourceManagerTab != nullptr)
+		_resourceManagerTab->readSettings(&settings);
+		
+	if(_worldEditorTab != nullptr)
+		_worldEditorTab->readSettings(&settings);
+		
+	setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
 }
 
-void AnimaEditorMainWindow::updateMenus()
+void AEMainWindow::updateMenus()
 {
 	if(_activeDocument)
 	{
@@ -203,45 +204,9 @@ void AnimaEditorMainWindow::updateMenus()
 		_resourcesMenu->setEnabled(false);
 		_closeProjectAct->setEnabled(false);
 	}
-	
-	for(int i = 0; i < _recentFilesAction.count(); i++)
-	{
-		if(_recentFilesMapper)
-			_recentFilesMapper->removeMappings(_recentFilesAction[i]);
-		else
-			qDebug() << tr("Null recent files mapper");
-		
-		delete _recentFilesAction[i];
-		_recentFilesAction[i] = nullptr;
-	}
-	
-	_recentFilesAction.clear();
-	
-	if(_recentFilesMapper)
-	{
-		delete _recentFilesMapper;
-		_recentFilesMapper = nullptr;
-	}
-	
-	_recentFilesMapper = new QSignalMapper(this);
-	
-	_recentFilesMenu->clear();
-	for(int i = 0; i < _recentFiles.count(); i++)
-	{
-		QAction* action = new QAction(_recentFiles[i]._fileName, this);
-		action->setStatusTip(_recentFiles[i]._filePath);
-		connect(action, SIGNAL(triggered()), _recentFilesMapper, SLOT(map()));
-		
-		_recentFilesMenu->addAction(action);
-		
-		_recentFilesMapper->setMapping(action, i);
-		_recentFilesAction.append(action);
-	}
-	
-	connect(_recentFilesMapper, SIGNAL(mapped(int)), this, SLOT(loadProjectFromRecentFiles(int)));
 }
 
-void AnimaEditorMainWindow::createActions()
+void AEMainWindow::createActions()
 {
 	_newAct = new QAction(tr("&New project"), this);
 	_newAct->setShortcuts(QKeySequence::New);
@@ -251,12 +216,19 @@ void AnimaEditorMainWindow::createActions()
 	_openAct = new QAction(tr("&Open project"), this);
 	_openAct->setShortcuts(QKeySequence::Open);
 	_openAct->setStatusTip(tr("Open a project"));
-	connect(_openAct, SIGNAL(triggered()), this, SLOT(openProject()));
+	connect(_openAct, SIGNAL(triggered()), this, SLOT(openProjectSlot()));
 	
 	_closeProjectAct = new QAction(tr("&Close project"), this);
 	_closeProjectAct->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_W);
 	_closeProjectAct->setStatusTip(tr("Close the current project"));
 	connect(_closeProjectAct, SIGNAL(triggered()), this, SLOT(closeProject()));
+
+	for (int i = 0; i < MaxRecentFiles; i++) 
+	{
+		recentProjectActs[i] = new QAction(this);
+		recentProjectActs[i]->setVisible(false);
+		connect(recentProjectActs[i], SIGNAL(triggered()), this, SLOT(openRecentProject()));
+	}
 	
 	_exitAct = new QAction(tr("E&xit"), this);
 	_exitAct->setShortcuts(QKeySequence::Quit);
@@ -276,35 +248,64 @@ void AnimaEditorMainWindow::createActions()
 	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewMaterial()));
 }
 
-void AnimaEditorMainWindow::createMenus()
+void AEMainWindow::createMenus()
 {
 	_fileMenu = menuBar()->addMenu(tr("&File"));
 	_fileMenu->addAction(_newAct);
 	_fileMenu->addAction(_openAct);
+	
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_closeProjectAct);
+
+	recentProjectSeparatorAct = _fileMenu->addSeparator();
+	for (int i = 0; i < MaxRecentFiles; i++)
+		_fileMenu->addAction(recentProjectActs[i]);
+	
 	_fileMenu->addSeparator();
 	_fileMenu->addAction(_exitAct);
 
-	_recentFilesMenu = _fileMenu->addMenu(tr("Recent files"));
-	
+	updateRecentProjectActions();
+		
 	_resourcesMenu = menuBar()->addMenu(tr("&Resources"));
 	_resourcesMenu->addAction(_importModelAct);
 	_resourcesMenu->addAction(_importTextureAct);
+	
 	_resourcesMenu->addSeparator();
 	_resourcesMenu->addAction(_addNewMaterialAct);
 }
 
-void AnimaEditorMainWindow::createStatusBar()
+void AEMainWindow::updateRecentProjectActions()
+{
+	QSettings settings("ZEB", "AnimaEditor");
+	QStringList files = settings.value("recentFileList").toStringList();
+
+	int numRecentFiles = qMin(files.size() / 2, (int)MaxRecentFiles);
+	
+	for (int i = 0; i < numRecentFiles; i++) 
+	{
+		QString projectName = files[i];
+		QString filePath = files[i + 1];
+		recentProjectActs[i]->setText(projectName);
+		recentProjectActs[i]->setData(filePath);
+		recentProjectActs[i]->setVisible(true);
+	}
+
+	for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+		recentProjectActs[j]->setVisible(false);
+
+	recentProjectSeparatorAct->setVisible(numRecentFiles > 0);
+}
+
+void AEMainWindow::createStatusBar()
 {
 	statusBar()->showMessage(tr("Ready"));
 }
 
-void AnimaEditorMainWindow::readSettings()
+void AEMainWindow::readSettings()
 {
 	QSettings settings("ZEB", "AnimaEditor");
 	
-	settings.beginGroup("AnimaEditorMainWindow");
+	settings.beginGroup("AEMainWindow");
 	bool fullScreen = settings.value("full", false).toBool();
 	QPoint pos = settings.value("pos", QPoint(0, 0)).toPoint();
 	QSize size = settings.value("size", QSize(600, 500)).toSize();
@@ -331,7 +332,7 @@ void AnimaEditorMainWindow::readSettings()
 		_worldEditorTab->readSettings(&settings);
 }
 
-void AnimaEditorMainWindow::writeSettings()
+void AEMainWindow::writeSettings()
 {
 	QSettings settings("ZEB", "AnimaEditor");
 	
@@ -341,7 +342,7 @@ void AnimaEditorMainWindow::writeSettings()
 	bool bMax = isFullScreen();
 #endif
 
-	settings.beginGroup("AnimaEditorMainWindow");
+	settings.beginGroup("AEMainWindow");
 	settings.setValue("full", bMax);
 
 	if (!bMax)
@@ -359,7 +360,7 @@ void AnimaEditorMainWindow::writeSettings()
 		_worldEditorTab->saveSettings(&settings);
 }
 
-void AnimaEditorMainWindow::setActiveSubWindow(QWidget *window)
+void AEMainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window)
 		return;
@@ -367,7 +368,7 @@ void AnimaEditorMainWindow::setActiveSubWindow(QWidget *window)
 	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
-bool AnimaEditorMainWindow::closeProject()
+bool AEMainWindow::closeProject()
 {
 	if (_activeDocument && _activeDocument->HasModifications())
 	{
@@ -376,26 +377,16 @@ bool AnimaEditorMainWindow::closeProject()
 		if (btn == QMessageBox::Cancel)
 			return false;
 		else if (btn == QMessageBox::Yes)
-		{
 			_activeDocument->SaveDocument();
-			
-			saveRecentFileList();
-		}
 		else if (btn == QMessageBox::No && _activeDocument->IsNewDocument())
 		{
 			if (QMessageBox::question(this, tr("Warning"), tr("The opened project was a new one.\nCompletely remove the create directories?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
 				_activeDocument->DeleteProject();
 		}
 	}
-	
+		
 	writeSettings();
-
-	if (_activeDocument)
-	{
-		delete _activeDocument;
-		_activeDocument = nullptr;
-	}
-
+	
 	_mdiArea->closeAllSubWindows();
 	
 	if (_resourceManagerTab)
@@ -410,149 +401,54 @@ bool AnimaEditorMainWindow::closeProject()
 		_worldEditorTab = nullptr;
 	}
 
+	if (_activeDocument)
+	{
+		delete _activeDocument;
+		_activeDocument = nullptr;
+	}
+
 	setWindowTitle(tr("AnimaEditor"));
 	
 	return true;
 }
 
-void AnimaEditorMainWindow::importModel()
+void AEMainWindow::importModel()
 {
 	if(_activeDocument->ImportModel())
 	{
-		_resourceManagerTab->LoadModelsTree();
+		_resourceManagerTab->LoadResourcesTree();
 	}
 }
 
-void AnimaEditorMainWindow::importTexture()
+void AEMainWindow::importTexture()
 {
 	
 }
 
-void AnimaEditorMainWindow::addNewMaterial()
+void AEMainWindow::addNewMaterial()
 {
 	
 }
 
-void AnimaEditorMainWindow::loadProjectFromRecentFiles(int index)
+void AEMainWindow::openRecentProject()
 {
-	QString filePath = _recentFiles[index]._filePath;
-	
-	if(filePath.isEmpty())
-	{
-		QMessageBox msg;
-		msg.setText(tr("Not a valid path to the project file was specified."));
-		msg.setStandardButtons(QMessageBox::Ok);
-		msg.exec();
-		
-		return;
-	}
-	
-	if(_activeDocument != nullptr)
-	{
-		if(QMessageBox::question(this, tr("Warning"), tr("A project is already open.\nClose it to open the project?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-		{
-			return;
-		}
-		
-		closeProject();
-	}
-	
-	_activeDocument = new AnimaEditorDocument;
-	if(!_activeDocument->OpenDocument(filePath))
-	{
-		QMessageBox msg;
-		msg.setText(tr("Error during project opening."));
-		msg.setStandardButtons(QMessageBox::Ok);
-		msg.exec();
-		
-		setWindowTitle(tr("AnimaEditor"));
-		
-		return;
-	}
-	
-	saveRecentFileList();
-	
-	_resourceManagerTab = new ResourceManagerTab(_activeDocument);
-	_worldEditorTab = new WorldEditorTab(_activeDocument);
-	
-	_mdiArea->addSubWindow(_resourceManagerTab);
-	_mdiArea->addSubWindow(_worldEditorTab);
-	
-	_worldEditorTab->show();
-	_resourceManagerTab->show();
-	
-	_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(_resourceManagerTab));
-	
-	QSettings settings("ZEB", "AnimaEditor");
-	if(_resourceManagerTab != nullptr)
-		_resourceManagerTab->readSettings(&settings);
-	
-	if(_worldEditorTab != nullptr)
-		_worldEditorTab->readSettings(&settings);
-	
-	setWindowTitle(tr("AnimaEditor - ") + _activeDocument->projectName());
+	QAction *action = qobject_cast<QAction *>(sender());
+	if (action)
+		openProject(action->data().toString(), false);
 }
 
-void AnimaEditorMainWindow::saveRecentFileList()
-{
-	int recentFileIndex = -1;
-	for(int i = 0; i < _recentFiles.count() && recentFileIndex == -1; i++)
-	{
-		if(_recentFiles[i]._filePath == _activeDocument->projectFilePath())
-			recentFileIndex = i;
-	}
-	
-	if(recentFileIndex == -1)
-	{
-		QFileInfo info(_activeDocument->projectFilePath());
-		
-		RecentFileElement rfe;
-		rfe._fileName = info.fileName();
-		rfe._filePath = _activeDocument->projectFilePath();
-		
-		_recentFiles.insert(0, rfe);
-	}
-	else
-	{
-		RecentFileElement rfe = _recentFiles[recentFileIndex];
-		_recentFiles.removeAt(recentFileIndex);
-		_recentFiles.insert(0, rfe);
-	}
-	
-	QSettings settings("ZEB", "AnimaEditor");
-	settings.beginGroup("RecentFiles");
-	settings.setValue("n", _recentFiles.count());
-	
-	for (int i = 0; i < _recentFiles.count(); i++)
-	{
-		QString fileName = QString("Name_%0").arg(i);
-		QString filePath = QString("Path_%0").arg(i);
-		settings.setValue(fileName, _recentFiles[i]._fileName);
-		settings.setValue(filePath, _recentFiles[i]._filePath);
-	}
-
-	settings.endGroup();
-}
-
-void AnimaEditorMainWindow::readRecentFileList()
+void AEMainWindow::setCurrentProject(const QString &fileName, const QString& projectName)
 {
 	QSettings settings("ZEB", "AnimaEditor");
-	settings.beginGroup("RecentFiles");
-	
-	int n =	settings.value("n", 0).toInt();
-	
-	for (int i = 0; i < n; i++)
-	{
-		QString fileName = QString("Name_%0").arg(i);
-		QString filePath = QString("Path_%0").arg(i);
-		
-		RecentFileElement rfe;
-		
-		rfe._fileName = settings.value(fileName, QString("")).toString();
-		rfe._filePath = settings.value(filePath, QString("")).toString();
-		
-		_recentFiles.append(rfe);
-	}
-	
-	settings.endGroup();
+	QStringList files = settings.value("recentFileList").toStringList();
+	files.removeAll(fileName);
+	files.removeAll(projectName);
+	files.prepend(fileName);
+	files.prepend(projectName);
+	while (files.size() > MaxRecentFiles * 2)
+		files.removeLast();
+
+	settings.setValue("recentFileList", files);
+
+	updateRecentProjectActions();
 }

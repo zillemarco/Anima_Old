@@ -24,8 +24,11 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaScene::AnimaScene(AnimaEngine* engine)
 {
 	_engine = engine;
-
+	
 	_modelsManager = nullptr;
+	_meshesManager = nullptr;
+	//_modelInstancesManager = nullptr;
+	
 	_camerasManager = nullptr;
 	_texturesManager = nullptr;
 	_dataGeneratorsManager = nullptr;
@@ -38,11 +41,31 @@ AnimaScene::AnimaScene(AnimaEngine* engine)
 AnimaScene::AnimaScene(const AnimaScene& src)
 {
 	_engine = src._engine;
+
+	_modelsManager = src._modelsManager;
+	_meshesManager = src._meshesManager;
+	//_modelInstancesManager = src._modelInstancesManager;
+
+	_camerasManager = src._camerasManager;
+	_texturesManager = src._texturesManager;
+	_dataGeneratorsManager = src._dataGeneratorsManager;
+	_materialsManager = src._materialsManager;
+	_lightsManager = src._lightsManager;
 }
 
 AnimaScene::AnimaScene(AnimaScene&& src)
 {
 	_engine = src._engine;
+
+	_modelsManager = src._modelsManager;
+	_meshesManager = src._meshesManager;
+	//_modelInstancesManager = src._modelInstancesManager;
+
+	_camerasManager = src._camerasManager;
+	_texturesManager = src._texturesManager;
+	_dataGeneratorsManager = src._dataGeneratorsManager;
+	_materialsManager = src._materialsManager;
+	_lightsManager = src._lightsManager;
 }
 
 AnimaScene::~AnimaScene()
@@ -57,7 +80,11 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 		Terminate();
 
 		_engine = src._engine;
+
 		_modelsManager = src._modelsManager;
+		_meshesManager = src._meshesManager;
+		//_modelInstancesManager = src._modelInstancesManager;
+
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
 		_dataGeneratorsManager = src._dataGeneratorsManager;
@@ -75,7 +102,11 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 		Terminate();
 
 		_engine = src._engine;
+
 		_modelsManager = src._modelsManager;
+		_meshesManager = src._meshesManager;
+		//_modelInstancesManager = src._modelInstancesManager;
+
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
 		_dataGeneratorsManager = src._dataGeneratorsManager;
@@ -88,12 +119,15 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 
 void AnimaScene::Initialize()
 {
-	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_engine->GetManagersAllocator(), this);
 	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_engine->GetManagersAllocator(), this);
 	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_engine->GetManagersAllocator(), this);
 	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_engine->GetManagersAllocator(), this);
 	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_engine->GetManagersAllocator(), this);
 	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_engine->GetManagersAllocator(), this);
+	
+	_meshesManager = AnimaAllocatorNamespace::AllocateNew<AnimaMeshesManager>(*_engine->GetManagersAllocator(), this);
+	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_engine->GetManagersAllocator(), this, _meshesManager, _materialsManager);
+	//_modelInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstancesManager>(*_engine->GetManagersAllocator(), this);
 }
 
 void AnimaScene::Terminate()
@@ -103,6 +137,18 @@ void AnimaScene::Terminate()
 		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _modelsManager);
 		_modelsManager = nullptr;
 	}
+
+	if (_meshesManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _meshesManager);
+		_meshesManager = nullptr;
+	}
+
+	//if (_modelInstacensManager != nullptr)
+	//{
+	//	AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _modelInstacensManager);
+	//	_modelInstacensManager = nullptr;
+	//}
 
 	if (_camerasManager != nullptr)
 	{

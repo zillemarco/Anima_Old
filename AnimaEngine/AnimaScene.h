@@ -17,12 +17,15 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class AnimaModelsManager;
 class AnimaCamerasManager;
 class AnimaTexturesManager;
 class AnimaDataGeneratorsManager;
 class AnimaMaterialsManager;
 class AnimaLightsManager;
+
+class AnimaModelsManager;
+class AnimaMeshesManager;
+class AnimaModelInstancesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaScene
 {
@@ -43,6 +46,8 @@ public:
 	inline AnimaEngine* GetEngine() { return _engine; }
 
 	inline AnimaModelsManager* GetModelsManager()					{ return _modelsManager;				}
+	inline AnimaMeshesManager* GetMeshesManager()					{ return _meshesManager;				}
+	//inline AnimaModelInstancesManager* GetModelInstancesManager()	{ return _modelInstancesManager;		}
 	inline AnimaShadersManager* GetShadersManager()					{ return _engine->GetShadersManager();	}
 	inline AnimaCamerasManager* GetCamerasManager()					{ return _camerasManager;				}
 	inline AnimaTexturesManager* GetTexturesManager()				{ return _texturesManager;				}
@@ -50,9 +55,10 @@ public:
 	inline AnimaMaterialsManager* GetMaterialsManager()				{ return _materialsManager;				}
 	inline AnimaLightsManager* GetLightsManager()					{ return _lightsManager;				}
 
+	inline AnimaAllocator* GetMeshesAllocator()			{ return _engine->GetMeshesAllocator();			}
 	inline AnimaAllocator* GetModelsAllocator()			{ return _engine->GetModelsAllocator();			}
+	inline AnimaAllocator* GetModelInstancesAllocator()	{ return _engine->GetModelInstancesAllocator(); }
 	inline AnimaAllocator* GetGenericAllocator()		{ return _engine->GetGenericAllocator();		}
-	inline AnimaAllocator* GetModelDataAllocator()		{ return _engine->GetModelDataAllocator();		}
 	inline AnimaAllocator* GetStringAllocator()			{ return _engine->GetStringAllocator();			}
 	inline AnimaAllocator* GetShadersAllocator()		{ return _engine->GetShadersAllocator();		}
 	inline AnimaAllocator* GetCamerasAllocator()		{ return _engine->GetCamerasAllocator();		}
@@ -64,12 +70,14 @@ public:
 protected:
 	AnimaEngine* _engine;
 
-	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaLightsManager*			_lightsManager;
 	AnimaCamerasManager*		_camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
 	AnimaTexturesManager*		_texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
 	AnimaMaterialsManager*		_materialsManager;
 	AnimaDataGeneratorsManager* _dataGeneratorsManager;
+	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
+	AnimaMeshesManager*			_meshesManager;
+	//AnimaModelInstancesManager*	_modelInstancesManager;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

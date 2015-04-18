@@ -736,20 +736,20 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 	{
 		for (ASizeT j = 0; j < nModels; j++)
 		{
-			AnimaMesh* innerModel = modelsManager->GetModel(j);
-
-			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-			AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
-
-			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
-
-			AInt meshNumber = innerModel->GetMeshesNumber();
-			for (AInt i = 0; i < meshNumber; i++)
-				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
-
-			AInt childrenNumber = innerModel->GetChildrenNumber();
-			for (AInt i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
+			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+			//	
+			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+			//	AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
+			//	
+			//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
+			//	
+			//	AInt meshNumber = innerModel->GetMeshesNumber();
+			//	for (AInt i = 0; i < meshNumber; i++)
+			//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
+			//	
+			//	AInt childrenNumber = innerModel->GetChildrenNumber();
+			//	for (AInt i = 0; i < childrenNumber; i++)
+			//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 		}
 	}
 	else
@@ -894,24 +894,24 @@ void AnimaRenderingManager::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaSha
 
 		for (ASizeT j = 0; j < nModels; j++)
 		{
-			AnimaMesh* innerModel = modelsManager->GetModel(j);
-			AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-
-			glCullFace(GL_FRONT);
-			DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false, true);
-			glCullFace(GL_BACK);
-
-			AInt meshNumber = innerModel->GetMeshesNumber();
-			for (AInt i = 0; i < meshNumber; i++)
-			{
-				glCullFace(GL_FRONT);
-				DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-				glCullFace(GL_BACK);
-			}
-
-			AInt childrenNumber = innerModel->GetChildrenNumber();
-			for (AInt i = 0; i < childrenNumber; i++)
-				DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+			//	
+			//	glCullFace(GL_FRONT);
+			//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false, true);
+			//	glCullFace(GL_BACK);
+			//	
+			//	AInt meshNumber = innerModel->GetMeshesNumber();
+			//	for (AInt i = 0; i < meshNumber; i++)
+			//	{
+			//		glCullFace(GL_FRONT);
+			//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+			//		glCullFace(GL_BACK);
+			//	}
+			//	
+			//	AInt childrenNumber = innerModel->GetChildrenNumber();
+			//	for (AInt i = 0; i < childrenNumber; i++)
+			//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
 		}
 
 		//AFloat blurAmount = 1.0f;
@@ -931,8 +931,8 @@ void AnimaRenderingManager::UpdateModelsVisibility(AnimaScene* scene)
 
 	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
-	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
-		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
+	//	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
+	//		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
 }
 
 void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix)
