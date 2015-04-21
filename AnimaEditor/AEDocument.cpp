@@ -21,6 +21,7 @@
 #include <AnimaCamera.h>
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
+#include "ImportModelWindow.h"
 
 AEDocument::AEDocument()
 {
@@ -646,23 +647,47 @@ bool AEDocument::ReadProjectData(QXmlStreamReader* xmlReader)
 
 bool AEDocument::ImportModel()
 {
-	QString selfilter = QString("3ds Max 3DS (*.3ds)");
-	QString filters = QString("3ds Max 3DS (*.3ds);;3ds Max ASE (*.ase);;Collada (*.dae);;Wavefront Object (*.obj);;Blender 3D (*.blend);;Industry Foundation Classes [IFC/Step] (*.ifc);;XGL (*.xgl);; XGL (*.zgl);;Stanford Polygon Library (*.ply);;All files (*.*)");
-	
-	QString filePath = QFileDialog::getOpenFileName(NULL, QString("AnimaEditor - Import model"), QString(""), filters, &selfilter);
-	
-	if (!_engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager()->LoadModel(filePath.toLocal8Bit().constData(), "model"))
+	QString modelName = QString("");
+	QString modelPath = QString("");
+
+	Anima::AnimaModelsManager* modelsManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager();
+
+	while (true)
 	{
-		QMessageBox msg;
-		msg.setWindowTitle(QString("AnimaEditor"));
-		msg.setText(QString("Unable to the model file.\nMaybe the format isn't supported."));
-		msg.exec();
-		return false;
+		ImportModelWindow dlg(nullptr, modelName, modelPath);
+		if (!dlg.exec())
+			return false;
+		else
+		{
+			modelName = dlg.getModelName();
+			modelPath = dlg.getModelPath();
+			
+			if (modelsManager->GetModelFromName(modelName.toLocal8Bit().constData()) != nullptr)
+			{
+				QMessageBox msg;
+				msg.setWindowTitle(QString("AnimaEditor"));
+				msg.setText(QString("Unable to load the model.\nThe name '%1' is already used").arg(modelName));
+				msg.exec();
+			}
+			else
+			{
+				if (modelsManager->LoadModel(modelPath.toLocal8Bit().constData(), modelName.toLocal8Bit().constData()))
+				{
+					_hasModifications = true;
+					return true;
+				}
+				else
+				{
+					QMessageBox msg;
+					msg.setWindowTitle(QString("AnimaEditor"));
+					msg.setText(QString("Unable to load the model file.\nMaybe the format isn't supported."));
+					msg.exec();
+					return false;
+				}
+			}
+		}
 	}
-	
-	_hasModifications = true;
-	
-	return true;
+	return false;
 }
 
 bool AEDocument::ImportTexture()

@@ -141,10 +141,10 @@ void AELoadedResourcesTreeView::LoadModels()
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetName()));
 		resourceNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
-		resourceNameItem->setEditable(true);
+		resourceNameItem->setEditable(false);
 		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetOriginFileName()));
 		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
-		resourceFileNameItem->setEditable(true);
+		resourceFileNameItem->setEditable(false);
 
 		newItem.append(resourceNameItem);
 		newItem.append(resourceFileNameItem);

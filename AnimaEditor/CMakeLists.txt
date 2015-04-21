@@ -9,7 +9,8 @@ set(${PROJECT_NAME}_headers AEMainWindow.h
 							WorldEditorTab.h
 							AEResourcesManagerModelViewer.h
 							Window.h
-							AELoadedResourcesTreeView.h)
+							AELoadedResourcesTreeView.h
+							ImportModelWindow.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							AEMainWindow.cpp
 							EditWindow.cpp
@@ -20,7 +21,8 @@ set(${PROJECT_NAME}_sources main.cpp
 							WorldEditorTab.cpp
 							AEResourcesManagerModelViewer.cpp
 							Window.cpp
-							AELoadedResourcesTreeView.cpp)
+							AELoadedResourcesTreeView.cpp
+							ImportModelWindow.cpp)
 
 set(UI_FILES "")
 set(RC_FILES AnimaEditor.qrc)

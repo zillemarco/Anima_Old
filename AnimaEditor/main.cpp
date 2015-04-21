@@ -63,10 +63,10 @@ int main(int argc, char** argv)
 	
 	QApplication app(argc, argv);
 
-	QFile File(":/Res/style.qss");
-	File.open(QFile::ReadOnly);
-	QString StyleSheet = QLatin1String(File.readAll());
-	qApp->setStyleSheet(StyleSheet);
+	//QFile File(":/Res/style.qss");
+	//File.open(QFile::ReadOnly);
+	//QString StyleSheet = QLatin1String(File.readAll());
+	//qApp->setStyleSheet(StyleSheet);
 
 	AEMainWindow mainWindow;	
 	mainWindow.show();
