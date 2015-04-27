@@ -9,7 +9,7 @@ set(${PROJECT_NAME}_headers AEMainWindow.h
 							WorldEditorTab.h
 							AEResourcesManagerModelViewer.h
 							Window.h
-							AELoadedResourcesTreeView.h
+							AELoadedResourcesPanel.h
 							ImportModelWindow.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							AEMainWindow.cpp
@@ -21,7 +21,7 @@ set(${PROJECT_NAME}_sources main.cpp
 							WorldEditorTab.cpp
 							AEResourcesManagerModelViewer.cpp
 							Window.cpp
-							AELoadedResourcesTreeView.cpp
+							AELoadedResourcesPanel.cpp
 							ImportModelWindow.cpp)
 
 set(UI_FILES "")

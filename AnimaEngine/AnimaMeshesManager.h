@@ -35,7 +35,11 @@ public:
 	AnimaArray<AnimaString*>* GetLastMeshesIndexMap();
 	void ClearLastMeshesIndexMap();
 
-	AnimaMesh* GetMesh(const AnimaString& name);
+	AnimaMesh* GetMesh(AInt index);
+	AnimaMesh* GetMeshFromName(const AnimaString& name);
+	AnimaMesh* GetMeshFromName(const char* name);
+
+	AInt GetMeshesCount() const;
 
 protected:
 	void ClearMeshes();

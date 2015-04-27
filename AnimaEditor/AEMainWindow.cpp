@@ -9,6 +9,7 @@
 #include "AEMainWindow.h"
 #include "AEDocument.h"
 #include "AEResourcesManagerTab.h"
+#include "AELoadedResourcesPanel.h"
 #include "WorldEditorTab.h"
 #include <QObject>
 #include <QMdiArea>
@@ -29,6 +30,7 @@
 #include <QDebug>
 #include <QShortcut>
 #include <QKeySequence>
+#include <QT>
 
 #include "EditWindow.h"
 
@@ -102,7 +104,11 @@ void AEMainWindow::newProject()
 
 		setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
 		
-		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
+		_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, this);
+		addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
+		_loadedResourcesPanel->setVisible(true);
+
+		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument, _loadedResourcesPanel);
 		_worldEditorTab = new WorldEditorTab(_activeDocument);
 		
 		_mdiArea->addSubWindow(_resourceManagerTab);
@@ -170,8 +176,12 @@ void AEMainWindow::openProject(QString filePath, bool askIfEmpty)
 	}
 		
 	setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
-		
-	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
+
+	_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, this);
+	addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
+	_loadedResourcesPanel->setVisible(true);
+
+	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument, _loadedResourcesPanel);
 	_worldEditorTab = new WorldEditorTab(_activeDocument);
 		
 	_mdiArea->addSubWindow(_resourceManagerTab);
@@ -386,7 +396,7 @@ bool AEMainWindow::closeProject()
 	}
 		
 	writeSettings();
-	
+
 	_mdiArea->closeAllSubWindows();
 	
 	if (_resourceManagerTab)

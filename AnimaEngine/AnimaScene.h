@@ -47,7 +47,7 @@ public:
 
 	inline AnimaModelsManager* GetModelsManager()					{ return _modelsManager;				}
 	inline AnimaMeshesManager* GetMeshesManager()					{ return _meshesManager;				}
-	//inline AnimaModelInstancesManager* GetModelInstancesManager()	{ return _modelInstancesManager;		}
+	inline AnimaModelInstancesManager* GetModelInstancesManager()	{ return _modelInstancesManager;		}
 	inline AnimaShadersManager* GetShadersManager()					{ return _engine->GetShadersManager();	}
 	inline AnimaCamerasManager* GetCamerasManager()					{ return _camerasManager;				}
 	inline AnimaTexturesManager* GetTexturesManager()				{ return _texturesManager;				}
@@ -77,7 +77,7 @@ protected:
 	AnimaDataGeneratorsManager* _dataGeneratorsManager;
 	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaMeshesManager*			_meshesManager;
-	//AnimaModelInstancesManager*	_modelInstancesManager;
+	AnimaModelInstancesManager*	_modelInstancesManager;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -17,13 +17,13 @@
 
 class AEDocument;
 class AEResourcesManagerModelViewer;
-class AELoadedResourcesTreeView;
+class AELoadedResourcesPanel;
 
 class AEResourcesManagerTab : public QFrame
 {
 	Q_OBJECT
 public:
-	AEResourcesManagerTab(AEDocument* doc);
+	AEResourcesManagerTab(AEDocument* doc, AELoadedResourcesPanel* resourcesPanel);
 	
 	void saveSettings(QSettings* settings);
 	void readSettings(QSettings* settings);
@@ -34,8 +34,8 @@ public:
 private:
 	AEDocument* _document;
 	
-	QSplitter* _mainSplitter;
-	AELoadedResourcesTreeView* _resourcesTree;	
+	//QSplitter* _mainSplitter;
+	AELoadedResourcesPanel* _resourcesPanel;
 	AEResourcesManagerModelViewer* _modelViewer;	
 };
 

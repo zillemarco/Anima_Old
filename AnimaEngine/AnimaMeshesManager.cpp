@@ -176,9 +176,25 @@ void AnimaMeshesManager::ClearLastMeshesIndexMap()
 	_lastMeshesIndexMap.RemoveAll();
 }
 
-AnimaMesh* AnimaMeshesManager::GetMesh(const AnimaString& name)
+AnimaMesh* AnimaMeshesManager::GetMesh(AInt index)
+{
+	return _meshes[index];
+}
+
+AnimaMesh* AnimaMeshesManager::GetMeshFromName(const AnimaString& name)
 {
 	return _meshes[name];
+}
+
+AnimaMesh* AnimaMeshesManager::GetMeshFromName(const char* name)
+{
+	AnimaString str(name, _scene->GetStringAllocator());
+	return GetMeshFromName(str);
+}
+
+AInt AnimaMeshesManager::GetMeshesCount() const
+{
+	return _meshes.GetSize();
 }
 
 AnimaArray<AnimaString*>* AnimaMeshesManager::GetLastMeshesIndexMap()

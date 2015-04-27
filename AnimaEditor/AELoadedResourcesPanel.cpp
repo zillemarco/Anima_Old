@@ -1,16 +1,21 @@
-#include "AELoadedResourcesTreeView.h"
+#include "AELoadedResourcesPanel.h"
 #include "AEDocument.h"
 
 #include <qmenu.h>
 #include <qaction.h>
 #include <qpoint.h>
+#include <QHBoxLayout>
 
 #include <AnimaModel.h>
 #include <AnimaScene.h>
 #include <AnimaModelsManager.h>
+#include <AnimaMeshesManager.h>
 #include <AnimaScenesManager.h>
+#include <AnimaModelInstancesManager.h>
 
 Q_DECLARE_METATYPE(Anima::AnimaModel*)
+Q_DECLARE_METATYPE(Anima::AnimaMesh*)
+Q_DECLARE_METATYPE(Anima::AnimaModelInstance*)
 
 AELoadedResourcesTreeViewItemModel::AELoadedResourcesTreeViewItemModel(AEDocument* doc, QObject *parent)
 	: QStandardItemModel(parent)
@@ -105,13 +110,19 @@ AELoadedResourcesTreeView::AELoadedResourcesTreeView(AEDocument* doc)
 	_modelResourcesItem = new QStandardItem(tr("Models"));
 	_materialResourcesItem = new QStandardItem(tr("Materials"));
 	_textureResourcesItem = new QStandardItem(tr("Textures"));
+	_meshResourcesItem = new QStandardItem(tr("Meshes"));
+	_modelInstancesResourcesItem = new QStandardItem(tr("Model instances"));
 
 	_resourcesModel->insertRow(0, _modelResourcesItem);
 	_resourcesModel->insertRow(1, _materialResourcesItem);
 	_resourcesModel->insertRow(2, _textureResourcesItem);
+	_resourcesModel->insertRow(3, _meshResourcesItem);
+	_resourcesModel->insertRow(4, _modelInstancesResourcesItem);	
 
 	_resourcesModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Resource name")));
 	_resourcesModel->setHorizontalHeaderItem(1, new QStandardItem(tr("File name")));
+	setColumnWidth(0, 150);
+	setColumnWidth(1, 100);
 
 	QItemSelectionModel* selectModel = selectionModel();
 	connect(selectModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(resourceModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -128,6 +139,8 @@ void AELoadedResourcesTreeView::LoadResources()
 	LoadModels();
 	LoadMaterials();
 	LoadTextures();
+	LoadMeshes();
+	LoadModelInstances();
 }
 
 void AELoadedResourcesTreeView::LoadModels()
@@ -141,7 +154,7 @@ void AELoadedResourcesTreeView::LoadModels()
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetName()));
 		resourceNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
-		resourceNameItem->setEditable(false);
+		resourceNameItem->setEditable(true);
 		QStandardItem *resourceFileNameItem = new QStandardItem(QString("%0").arg(mgr->GetModel(i)->GetOriginFileName()));
 		resourceFileNameItem->setData(QVariant::fromValue(mgr->GetModel(i)), ModelRole);
 		resourceFileNameItem->setEditable(false);
@@ -150,6 +163,47 @@ void AELoadedResourcesTreeView::LoadModels()
 		newItem.append(resourceFileNameItem);
 
 		_modelResourcesItem->appendRow(newItem);
+	}
+}
+
+void AELoadedResourcesTreeView::LoadMeshes()
+{
+	_meshResourcesItem->removeRows(0, _meshResourcesItem->rowCount());
+
+	Anima::AnimaMeshesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetMeshesManager();
+	for (int i = 0; i < mgr->GetMeshesCount(); i++)
+	{
+		QList<QStandardItem*> newItem;
+
+		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetMesh(i)->GetName()));
+		resourceNameItem->setData(QVariant::fromValue(mgr->GetMesh(i)), ModelRole);
+		resourceNameItem->setEditable(false);
+
+		newItem.append(resourceNameItem);
+		newItem.append(new QStandardItem(tr("")));
+
+		_meshResourcesItem->appendRow(newItem);
+	}
+}
+
+void AELoadedResourcesTreeView::LoadModelInstances()
+{
+	_modelInstancesResourcesItem->removeRows(0, _modelInstancesResourcesItem->rowCount());
+
+	Anima::AnimaModelInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
+	for (int i = 0; i < mgr->GetModelInstancesNumber(); i++)
+	{
+		QList<QStandardItem*> newItem;
+
+		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mgr->GetModelInstance(i)->GetName()));
+		Anima::AnimaModelInstance* instance = mgr->GetModelInstance(i);
+		resourceNameItem->setData(QVariant::fromValue(instance), ModelRole);
+		resourceNameItem->setEditable(false);
+
+		newItem.append(resourceNameItem);
+		newItem.append(new QStandardItem(tr("")));
+
+		_modelInstancesResourcesItem->appendRow(newItem);
 	}
 }
 
@@ -186,12 +240,29 @@ void AELoadedResourcesTreeView::createActions()
 	_addNewMaterialAct = new QAction(tr("Add new m&aterial"), _contextMenu);
 	_addNewMaterialAct->setStatusTip(tr("Add a new material to the resources"));
 	connect(_addNewMaterialAct, SIGNAL(triggered()), this, SLOT(addNewMaterial()));
+
+	_createModelInstaceAct = new QAction(tr("Create instance"), _contextMenu);
+	_createModelInstaceAct->setStatusTip(tr("Creates a new instace of the selected model"));
+	connect(_createModelInstaceAct, SIGNAL(triggered()), this, SLOT(createModelInstace()));
 }
 
 void AELoadedResourcesTreeView::importModel()
 {
 	if (_document->ImportModel())
 		LoadResources();
+}
+
+void AELoadedResourcesTreeView::createModelInstace()
+{
+	QModelIndexList selectedRows = selectedIndexes();
+	//for (int i = 0; i < selectedRows.count(); i++)
+	//{
+		Anima::AnimaModelInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
+		Anima::AnimaModel* model = _resourcesModel->itemFromIndex(selectedRows[0])->data().value<Anima::AnimaModel*>();
+		mgr->CreateInstance("modelInstance", model);
+
+		LoadModelInstances();
+	//}
 }
 
 void AELoadedResourcesTreeView::importTexture()
@@ -212,6 +283,31 @@ void AELoadedResourcesTreeView::createMenus()
 	createActions();
 
 	addAction(_importModelAct);
+	addAction(_createModelInstaceAct);
 	addAction(_importTextureAct);
 	addAction(_addNewMaterialAct);
+}
+
+AELoadedResourcesPanel::AELoadedResourcesPanel(AEDocument* doc, QWidget* parent)
+	: QDockWidget(tr("Loaded resources"), parent)
+{
+	_document = doc;
+
+	setAttribute(Qt::WA_DeleteOnClose);
+	setWindowTitle(tr("Resources manager"));
+
+	_resourcesTree = new AELoadedResourcesTreeView(doc);
+
+	setWidget(_resourcesTree);
+
+	LoadAllResources();
+}
+
+AELoadedResourcesPanel::~AELoadedResourcesPanel()
+{
+}
+
+void AELoadedResourcesPanel::LoadAllResources()
+{
+	_resourcesTree->LoadResources();
 }

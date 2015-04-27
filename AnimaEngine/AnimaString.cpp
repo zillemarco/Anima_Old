@@ -12,6 +12,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+bool AnimaString::s_randInitialized = false;
+char* AnimaString::s_randomCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+AInt AnimaString::s_randomCharsetLenght = 62;
+
 AnimaString::AnimaString(AnimaAllocator* allocator)
 {
 	_allocator = allocator;
@@ -160,9 +164,9 @@ void AnimaString::Format(const char* format, ...)
 	va_end(args);
 }
 
-ASizeT AnimaString::GetFormatStringLength(const char* format, va_list args)
+AUint AnimaString::GetFormatStringLength(const char* format, va_list args)
 {
-	ASizeT retval;
+	AUint retval;
 	va_list argcopy;
 	va_copy(argcopy, args);
 	retval = vsnprintf(NULL, 0, format, argcopy);
@@ -171,7 +175,7 @@ ASizeT AnimaString::GetFormatStringLength(const char* format, va_list args)
 	return retval;
 }
 
-ASizeT AnimaString::GetBufferLength() const
+AUint AnimaString::GetBufferLength() const
 {
 	if(_stringLength == 0)
 		return 0;
@@ -182,7 +186,7 @@ ASizeT AnimaString::GetBufferLength() const
 AnimaString& AnimaString::operator+=(const AnimaString& src)
 {
 	ANIMA_ASSERT(_allocator != nullptr);
-	ASizeT newStringLength = (this->_stringLength - 1) + (src._stringLength - 1) + 1;
+	AUint newStringLength = (this->_stringLength - 1) + (src._stringLength - 1) + 1;
 	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
 	AChar* tmp = newString;
 	
@@ -205,7 +209,7 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 AnimaString& AnimaString::operator+=(const char* src)
 {
 	ANIMA_ASSERT(_allocator != nullptr);
-	ASizeT newStringLength = (this->_stringLength - 1) + strlen(src) + 1;
+	AUint newStringLength = (this->_stringLength - 1) + strlen(src) + 1;
 	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
 	AChar* tmp = newString;
 	
@@ -225,19 +229,19 @@ AnimaString& AnimaString::operator+=(const char* src)
 	return *this;
 }
 
-AChar& AnimaString::operator[](ASizeT index)
+AChar& AnimaString::operator[](AUint index)
 {
 	ANIMA_ASSERT(index >= 0 && index < _stringLength - 1);
 	return _string[index];
 }
 
-const AChar& AnimaString::operator[](ASizeT index) const
+const AChar& AnimaString::operator[](AUint index) const
 {
 	ANIMA_ASSERT(index >= 0 && index < _stringLength - 1);
 	return const_cast<AChar&>(_string[index]);
 }
 
-void AnimaString::Reserve(ASizeT size)
+void AnimaString::Reserve(AUint size)
 {
 	ANIMA_ASSERT(_allocator != nullptr);
 	
@@ -266,7 +270,7 @@ AInt AnimaString::Find(AnimaString str, AInt startPos) const
 
 AInt AnimaString::Find(const char* str, AInt startPos) const
 {
-	ASizeT lunghezzaStr = strlen(str);
+	AUint lunghezzaStr = strlen(str);
 	
 	if(lunghezzaStr == 0)
 		return -1;
@@ -306,7 +310,7 @@ AInt AnimaString::Find(const char* str, AInt startPos) const
 AUint AnimaString::CountOf(AChar c) const
 {
 	AUint res = 0;
-	for (ASizeT i = 0; i < _stringLength; i++)
+	for (AUint i = 0; i < _stringLength; i++)
 	{
 		if (_string[i] == c)
 			res++;
@@ -333,7 +337,7 @@ AInt AnimaString::ReverseFind(AnimaString str, AInt startPos) const
 
 AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 {
-	ASizeT lunghezzaStr = strlen(str);
+	AUint lunghezzaStr = strlen(str);
 	
 	if(lunghezzaStr == 0)
 		return -1;
@@ -370,7 +374,7 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 	return -1;
 }
 
-AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
+AnimaString AnimaString::Substring(AInt startPos, AUint len) const
 {
 	ANIMA_ASSERT(_allocator != nullptr);
 	if(startPos < 0)
@@ -387,7 +391,7 @@ AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
 		
 		resultString.Reserve(len);
 		
-		ASizeT offsetString = 0;
+		AUint offsetString = 0;
 		
 		for(int i = startPos; i < _stringLength && offsetString < len; i++)
 			resultString[offsetString++] = _string[i];
@@ -396,12 +400,12 @@ AnimaString AnimaString::Substring(AInt startPos, ASizeT len) const
 	return resultString;
 }
 
-AnimaString AnimaString::Left(ASizeT len) const
+AnimaString AnimaString::Left(AUint len) const
 {
 	return Substring(0, len);
 }
 
-AnimaString AnimaString::Right(ASizeT len) const
+AnimaString AnimaString::Right(AUint len) const
 {
 	int startPos = (int)_stringLength - (int)len - 1;
 	return Substring(startPos, len);
@@ -465,8 +469,8 @@ void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AI
 	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
-	ASizeT replacementLength = strlen(replacement);
-	ASizeT findLength = 1;
+	AUint replacementLength = strlen(replacement);
+	AUint findLength = 1;
 	
 	while(pos != -1)
 	{
@@ -505,8 +509,8 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
-	ASizeT replacementLength = 1;
-	ASizeT findLength = strlen(find);
+	AUint replacementLength = 1;
+	AUint findLength = strlen(find);
 	
 	while(pos != -1)
 	{
@@ -540,8 +544,8 @@ void AnimaString::Replace(const char* find, const char* replacement, AInt startP
 	ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
-	ASizeT replacementLength = strlen(replacement);
-	ASizeT findLength = strlen(find);
+	AUint replacementLength = strlen(replacement);
+	AUint findLength = strlen(find);
 	
 	while(pos != -1)
 	{
@@ -624,15 +628,15 @@ bool AnimaString::StartsWith(const AnimaString& str) const
 
 bool AnimaString::StartsWith(const char* str) const
 {
-	ASizeT lenThis = strlen(this->_string);
-	ASizeT lenStr = strlen(str);
+	AUint lenThis = strlen(this->_string);
+	AUint lenStr = strlen(str);
 
 	if (lenThis < lenStr)
 		return false;
 	if (lenThis == lenStr)
 		return Compare(str);
 
-	for (ASizeT i = 0; i < lenStr; i++)
+	for (AUint i = 0; i < lenStr; i++)
 	{
 		if (str[i] != _string[i])
 			return false;
@@ -651,10 +655,28 @@ bool AnimaString::IsEmpty() const
 	return false;
 }
 
+AnimaString AnimaString::MakeRandom(AnimaAllocator* allocator, AInt lenght)
+{
+	AnimaString str(allocator);
+	str.MakeRandom(lenght);
+	return str;
+}
+
+void AnimaString::MakeRandom(AInt lenght)
+{
+	ClearString();
+	Reserve((AUint)lenght);
+
+	if (!s_randInitialized)
+	{
+		srand(time(0));
+		s_randInitialized = true;
+	}
+	
+	for (AInt i = 0; i < lenght; i++)
+		_string[i] = s_randomCharset[rand() % s_randomCharsetLenght];
+
+	_string[lenght] = 0;
+}
+
 END_ANIMA_ENGINE_NAMESPACE
-
-
-
-
-
-

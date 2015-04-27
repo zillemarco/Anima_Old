@@ -19,17 +19,15 @@ AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGenerat
 	_allocator = allocator;
 	_dataGeneratorManager = dataGeneratorManager;
 	_realName = name;
-	_utilsName = name;
-
-	if (_utilsName.ReverseFind('.') != _utilsName.GetBufferLength())
-		_utilsName += ".";
+	
+	_uniqueName = AnimaString::MakeRandom(allocator, 15) + ".";
 }
 
 AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 {
 	_allocator = src._allocator;
 	_realName = src._realName;
-	_utilsName = src._utilsName;
+	_uniqueName = src._uniqueName;
 	_dataGeneratorManager = src._dataGeneratorManager;
 
 	_texturesMap = src._texturesMap;
@@ -44,7 +42,7 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 {
 	_allocator = src._allocator;
-	_utilsName = src._utilsName;
+	_uniqueName = src._uniqueName;
 	_realName = src._realName;
 	_dataGeneratorManager = src._dataGeneratorManager;
 
@@ -74,7 +72,7 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 	{
 		_allocator = src._allocator;
 		_realName = src._realName;
-		_utilsName = src._utilsName;
+		_uniqueName = src._uniqueName;
 		_dataGeneratorManager = src._dataGeneratorManager;
 
 		_texturesMap = src._texturesMap;
@@ -95,7 +93,7 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 	{
 		_allocator = src._allocator;
 		_realName = src._realName;
-		_utilsName = src._utilsName;
+		_uniqueName = src._uniqueName;
 		_dataGeneratorManager = src._dataGeneratorManager;
 
 		_texturesMap = src._texturesMap;
@@ -110,6 +108,20 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 	return *this;
 }
 
+void AnimaMappedValues::CopyData(const AnimaMappedValues& src)
+{
+	if (this != &src)
+	{
+		CopyTextures(src);
+		CopyColors(src);
+		CopyVectors(src);
+		CopyMatrices(src);
+		CopyFloats(src);
+		CopyIntegers(src);
+		CopyBooleans(src);
+	}
+}
+
 AnimaString AnimaMappedValues::GetAnimaName() const
 {
 	return _realName;
@@ -122,7 +134,7 @@ const char* AnimaMappedValues::GetName() const
 
 void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_texturesMap.find(pName) != _texturesMap.end())
 		return;
 	_texturesMap[pName] = value;
@@ -136,7 +148,7 @@ void AnimaMappedValues::AddTexture(const char* propertyName, AnimaTexture* value
 
 void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColorGenerator* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_colorsMap.find(pName) != _colorsMap.end())
 		return;
 	_colorsMap[pName] = value;
@@ -174,7 +186,7 @@ void AnimaMappedValues::AddColor(const char* propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColor4f value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	AnimaColorGenerator* generator = _dataGeneratorManager->CreateColorGenerator(pName);
 
 	if (generator == nullptr)
@@ -218,7 +230,7 @@ void AnimaMappedValues::AddColor(const char* propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) != _vectorsMap.end())
 		return;
 	_vectorsMap[pName] = value;
@@ -280,7 +292,7 @@ void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex4f value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(pName);
 
 	if (generator == nullptr)
@@ -324,7 +336,7 @@ void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::AddFloat(const AnimaString& propertyName, AFloat value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_floatsMap.find(pName) != _floatsMap.end())
 		return;
 	_floatsMap[pName] = value;
@@ -338,7 +350,7 @@ void AnimaMappedValues::AddFloat(const char* propertyName, AFloat value)
 
 void AnimaMappedValues::AddBoolean(const AnimaString& propertyName, bool value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_booleansMap.find(pName) != _booleansMap.end())
 		return;
 	_booleansMap[pName] = value;
@@ -352,7 +364,7 @@ void AnimaMappedValues::AddBoolean(const char* propertyName, bool value)
 
 void AnimaMappedValues::AddInteger(const AnimaString& propertyName, AInt value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_integersMap.find(pName) != _integersMap.end())
 		return;
 	_integersMap[pName] = value;
@@ -366,7 +378,7 @@ void AnimaMappedValues::AddInteger(const char* propertyName, AInt value)
 
 void AnimaMappedValues::AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_matricesMap.find(pName) != _matricesMap.end())
 		return;
 	_matricesMap[pName] = value;
@@ -393,7 +405,7 @@ void AnimaMappedValues::AddMatrix(const char* propertyName, AFloat value[16])
 
 void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_texturesMap.find(pName) == _texturesMap.end())
 		AddTexture(propertyName, value);
 	else
@@ -408,7 +420,7 @@ void AnimaMappedValues::SetTexture(const char* propertyName, AnimaTexture* value
 
 void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColorGenerator* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_colorsMap.find(pName) == _colorsMap.end())
 		AddColor(propertyName, value);
 	else
@@ -447,7 +459,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColor4f value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	AnimaColorGenerator* generator = (AnimaColorGenerator*)_dataGeneratorManager->GetGenerator(pName);
 	if (generator == nullptr)
 		AddColor(propertyName, value);
@@ -478,7 +490,7 @@ void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, A
 
 void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) == _vectorsMap.end())
 		AddVector(pName, value);
 	else
@@ -541,7 +553,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVertex4f value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	AnimaVectorGenerator* generator = (AnimaVectorGenerator*)_dataGeneratorManager->GetGenerator(pName);
 	if (generator == nullptr)
 		AddVector(propertyName, value);
@@ -572,7 +584,7 @@ void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, 
 
 void AnimaMappedValues::SetFloat(const AnimaString& propertyName, AFloat value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_floatsMap.find(pName) == _floatsMap.end())
 		AddFloat(propertyName, value);
 	else
@@ -587,7 +599,7 @@ void AnimaMappedValues::SetFloat(const char* propertyName, AFloat value)
 
 void AnimaMappedValues::SetBoolean(const AnimaString& propertyName, bool value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_booleansMap.find(pName) == _booleansMap.end())
 		AddBoolean(propertyName, value);
 	else
@@ -602,7 +614,7 @@ void AnimaMappedValues::SetBoolean(const char* propertyName, bool value)
 
 void AnimaMappedValues::SetInteger(const AnimaString& propertyName, AInt value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_integersMap.find(pName) == _integersMap.end())
 		AddInteger(propertyName, value);
 	else
@@ -617,7 +629,7 @@ void AnimaMappedValues::SetInteger(const char* propertyName, AInt value)
 
 void AnimaMappedValues::SetMatrix(const AnimaString& propertyName, const AnimaMatrix& value)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_matricesMap.find(pName) == _matricesMap.end())
 		AddMatrix(propertyName, value);
 	else
@@ -645,7 +657,7 @@ void AnimaMappedValues::SetMatrix(const char* propertyName, AFloat value[16])
 
 AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_texturesMap.find(pName) != _texturesMap.end())
 		return _texturesMap[pName];
 	return nullptr;
@@ -659,7 +671,7 @@ AnimaTexture* AnimaMappedValues::GetTexture(const char* propertyName)
 
 AnimaColor3f AnimaMappedValues::GetColor3f(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_colorsMap.find(pName) != _colorsMap.end())
 		return _colorsMap[pName]->GetColor3f();
 
@@ -675,7 +687,7 @@ AnimaColor3f AnimaMappedValues::GetColor3f(const char* propertyName)
 
 AnimaColor4f AnimaMappedValues::GetColor4f(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_colorsMap.find(pName) != _colorsMap.end())
 		return _colorsMap[pName]->GetColor4f();
 
@@ -691,7 +703,7 @@ AnimaColor4f AnimaMappedValues::GetColor4f(const char* propertyName)
 
 AnimaVertex2f AnimaMappedValues::GetVector2f(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) != _vectorsMap.end())
 		return _vectorsMap[pName]->GetVector2f();
 
@@ -707,7 +719,7 @@ AnimaVertex2f AnimaMappedValues::GetVector2f(const char* propertyName)
 
 AnimaVertex3f AnimaMappedValues::GetVector3f(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) != _vectorsMap.end())
 		return _vectorsMap[pName]->GetVector3f();
 
@@ -723,7 +735,7 @@ AnimaVertex3f AnimaMappedValues::GetVector3f(const char* propertyName)
 
 AnimaVertex4f AnimaMappedValues::GetVector4f(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) != _vectorsMap.end())
 		return _vectorsMap[pName]->GetVector4f();
 
@@ -739,7 +751,7 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(const char* propertyName)
 
 AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_floatsMap.find(pName) != _floatsMap.end())
 		return _floatsMap[pName];
 	return 0.0;
@@ -753,7 +765,7 @@ AFloat AnimaMappedValues::GetFloat(const char* propertyName)
 
 bool AnimaMappedValues::GetBoolean(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_booleansMap.find(pName) != _booleansMap.end())
 		return _booleansMap[pName];
 	return false;
@@ -767,7 +779,7 @@ bool AnimaMappedValues::GetBoolean(const char* propertyName)
 
 AInt AnimaMappedValues::GetInteger(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_integersMap.find(pName) != _integersMap.end())
 		return _integersMap[pName];
 	return 0;
@@ -781,7 +793,7 @@ AInt AnimaMappedValues::GetInteger(const char* propertyName)
 
 AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	if (_matricesMap.find(pName) != _matricesMap.end())
 		return _matricesMap[pName];
 	return AnimaMatrix();
@@ -795,7 +807,7 @@ AnimaMatrix AnimaMappedValues::GetMatrix(const char* propertyName)
 
 bool AnimaMappedValues::HasTexture(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_texturesMap.find(pName) != _texturesMap.end());
 }
 
@@ -807,7 +819,7 @@ bool AnimaMappedValues::HasTexture(const char* propertyName)
 
 bool AnimaMappedValues::HasColor(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_colorsMap.find(pName) != _colorsMap.end());
 }
 
@@ -819,7 +831,7 @@ bool AnimaMappedValues::HasColor(const char* propertyName)
 
 bool AnimaMappedValues::HasVector(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_vectorsMap.find(pName) != _vectorsMap.end());
 }
 
@@ -831,7 +843,7 @@ bool AnimaMappedValues::HasVector(const char* propertyName)
 
 bool AnimaMappedValues::HasFloat(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_floatsMap.find(pName) != _floatsMap.end());
 }
 
@@ -843,7 +855,7 @@ bool AnimaMappedValues::HasFloat(const char* propertyName)
 
 bool AnimaMappedValues::HasInteger(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_integersMap.find(pName) != _integersMap.end());
 }
 
@@ -855,7 +867,7 @@ bool AnimaMappedValues::HasInteger(const char* propertyName)
 
 bool AnimaMappedValues::HasBoolean(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_booleansMap.find(pName) != _booleansMap.end());
 }
 
@@ -867,7 +879,7 @@ bool AnimaMappedValues::HasBoolean(const char* propertyName)
 
 bool AnimaMappedValues::HasMatrix(const AnimaString& propertyName)
 {
-	AnimaString pName = _utilsName + propertyName;
+	AnimaString pName = _uniqueName + propertyName;
 	return (_matricesMap.find(pName) != _matricesMap.end());
 }
 
@@ -875,6 +887,98 @@ bool AnimaMappedValues::HasMatrix(const char* propertyName)
 {
 	AnimaString str(propertyName, _allocator);
 	return HasMatrix(str);
+}
+
+AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
+{
+	AInt pos = src.Find(".");
+	if (pos == -1)
+		return src;
+	return src.Substring(pos + 1, src.GetBufferLength());
+}
+
+void AnimaMappedValues::CopyTextures(const AnimaMappedValues& src)
+{
+	_texturesMap.clear();
+
+	const boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>* srcTexturesMap = &src._texturesMap;
+	for (auto pair : *srcTexturesMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetTexture(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyColors(const AnimaMappedValues& src)
+{
+	_colorsMap.clear();
+
+	const boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaString::Hasher>* srcColorsMap = &src._colorsMap;
+	for (auto pair : *srcColorsMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetColor(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyVectors(const AnimaMappedValues& src)
+{
+	_vectorsMap.clear();
+
+	const boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaString::Hasher>* srcVectorsMap = &src._vectorsMap;
+	for (auto pair : *srcVectorsMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetVector(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyMatrices(const AnimaMappedValues& src)
+{
+	_matricesMap.clear();
+
+	const boost::unordered_map<AnimaString, AnimaMatrix, AnimaString::Hasher>* srcMatricesMap = &src._matricesMap;
+	for (auto pair : *srcMatricesMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetMatrix(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyFloats(const AnimaMappedValues& src)
+{
+	_floatsMap.clear();
+
+	const boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher>* srcFloatsMap = &src._floatsMap;
+	for (auto pair : *srcFloatsMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetFloat(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyIntegers(const AnimaMappedValues& src)
+{
+	_integersMap.clear();
+
+	const boost::unordered_map<AnimaString, AInt, AnimaString::Hasher>* srcIntegersMap = &src._integersMap;
+	for (auto pair : *srcIntegersMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetInteger(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyBooleans(const AnimaMappedValues& src)
+{
+	_booleansMap.clear();
+
+	const boost::unordered_map<AnimaString, bool, AnimaString::Hasher>* srcBooleansMap = &src._booleansMap;
+	for (auto pair : *srcBooleansMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetBoolean(propertyName, pair.second);
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

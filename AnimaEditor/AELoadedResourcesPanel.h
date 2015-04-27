@@ -3,6 +3,7 @@
 #include <qtreeview.h>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <qdockwidget.h>
 
 class AEDocument;
 class QMenu;
@@ -43,6 +44,8 @@ private:
 	void LoadModels();
 	void LoadMaterials();
 	void LoadTextures();
+	void LoadMeshes();
+	void LoadModelInstances();
 
 protected:
 	void contextMenu(const QPoint& point);
@@ -55,6 +58,7 @@ private slots:
 	void resourceModelSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
 
 	void importModel();
+	void createModelInstace();
 	void importTexture();
 	void addNewMaterial();
 
@@ -65,10 +69,27 @@ protected:
 	QStandardItem* _modelResourcesItem;
 	QStandardItem* _materialResourcesItem;
 	QStandardItem* _textureResourcesItem;
+	QStandardItem* _meshResourcesItem;
+	QStandardItem* _modelInstancesResourcesItem;
 
 	QMenu*	_contextMenu;
 	QAction* _importModelAct;
+	QAction* _createModelInstaceAct;
 	QAction* _importTextureAct;
 	QAction* _addNewMaterialAct;
 };
 
+class AELoadedResourcesPanel : public QDockWidget
+{
+	Q_OBJECT
+public:
+	AELoadedResourcesPanel(AEDocument* doc, QWidget* parent);
+	virtual ~AELoadedResourcesPanel();
+
+public:
+	void LoadAllResources();
+
+protected:
+	AEDocument* _document;
+	AELoadedResourcesTreeView* _resourcesTree;
+};

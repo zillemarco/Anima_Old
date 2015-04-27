@@ -3,6 +3,7 @@
 #include <QStyleFactory>
 #include <QDateTime>
 #include <qfile>
+#include <qtextstream.h>
 #include <AnimaEngine.h>
 #include <AnimaWindow.h>
 #include "AEMainWindow.h"
@@ -51,22 +52,25 @@ int main(int argc, char** argv)
 #ifndef _LOCAL_TEST_
 	Anima::AnimaEngine::SetUsedExternal();
 	
-	QDateTime dateTime = QDateTime::currentDateTime();
-	QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
-	QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
+	//QDateTime dateTime = QDateTime::currentDateTime();
+	//QString dateTimeString = dateTime.toString(QString("yyyyMMdd_HHmmss"));
+	//QByteArray dateTimeByteArray = dateTimeString.toLocal8Bit();
 	
-	Anima::AChar tmpFileName[PATH_MAX];
-	sprintf(tmpFileName, "%s.log", dateTimeByteArray.constData());
-	Anima::AnimaEngine::SetLogFilePath(tmpFileName);
+	//Anima::AChar tmpFileName[PATH_MAX];
+	//sprintf(tmpFileName, "aelog.log", dateTimeByteArray.constData());
+	Anima::AnimaEngine::SetLogFilePath("aelog.log");
 	
 	qInstallMessageHandler(messageOutput);
 	
 	QApplication app(argc, argv);
 
-	//QFile File(":/Res/style.qss");
-	//File.open(QFile::ReadOnly);
-	//QString StyleSheet = QLatin1String(File.readAll());
-	//qApp->setStyleSheet(StyleSheet);
+	QFile File(":/Res/dark_style3.qss");
+	if (File.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		QTextStream stream(&File);
+		qApp->setStyleSheet(stream.readAll());
+		File.close();
+	}
 
 	AEMainWindow mainWindow;	
 	mainWindow.show();

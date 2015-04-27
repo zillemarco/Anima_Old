@@ -21,6 +21,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaModel : public AnimaSceneObject
 {
+	friend class AnimaModelInstancesManager;
+
 public:
 	AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
 	AnimaModel(const AnimaModel& src);

@@ -102,8 +102,8 @@ public:
 	AnimaString& operator+=(const AnimaString& src);
 	AnimaString& operator+=(const char* src);
 	
-	AChar& operator[](ASizeT index);
-	const AChar& operator[](ASizeT index) const;
+	AChar& operator[](AUint index);
+	const AChar& operator[](AUint index) const;
 	
 	bool operator==(const AnimaString& left);
 	bool operator!=(const AnimaString& left);
@@ -140,11 +140,11 @@ public:
 	
 	const AChar* GetConstBuffer() const;
 	AChar* GetBuffer() const;
-	ASizeT GetBufferLength() const;
+	AUint GetBufferLength() const;
 	
 	void Format(const char* format, ...);
 	
-	void Reserve(ASizeT size);
+	void Reserve(AUint size);
 	
 	AInt Find(AChar c, AInt startPos = -1) const;
 	AInt Find(AnimaString str, AInt startPos = -1) const;
@@ -156,9 +156,9 @@ public:
 	AInt ReverseFind(AnimaString str, AInt startPos = -1) const;
 	AInt ReverseFind(const char* str, AInt startPos = -1) const;
 	
-	AnimaString Substring(AInt startPos, ASizeT len) const;
-	AnimaString Left(ASizeT len) const;
-	AnimaString Right(ASizeT len) const;
+	AnimaString Substring(AInt startPos, AUint len) const;
+	AnimaString Left(AUint len) const;
+	AnimaString Right(AUint len) const;
 	
 	AnimaString TrimLeft() const;
 	AnimaString TrimRight() const;
@@ -185,14 +185,21 @@ public:
 
 	bool IsEmpty() const;
 
+	static AnimaString MakeRandom(AnimaAllocator* allocator, AInt lenght);
+	void MakeRandom(AInt lenght);
+
 private:
-	ASizeT GetFormatStringLength(const char* format, va_list args);
+	AUint GetFormatStringLength(const char* format, va_list args);
 	
 private:
 	AChar* _string;
-	ASizeT _stringLength;
+	AUint _stringLength;
 	
 	AnimaAllocator* _allocator;
+
+	static bool s_randInitialized;
+	static char* s_randomCharset;
+	static AInt s_randomCharsetLenght;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

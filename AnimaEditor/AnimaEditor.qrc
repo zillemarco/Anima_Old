@@ -1,6 +1,9 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>Res/icona_new.png</file>
-    <file>Res/style.qss</file>
+    <file>Res/dark_style3.qss</file>
+    <file>Res/_style.qss</file>
+    <file>Res/branch-closed.png</file>
+    <file>Res/branch-open.png</file>
 </qresource>
 </RCC>

@@ -10,9 +10,11 @@
 #define __Anima__AnimaEditorMainWindow__
 
 #include <QMainWindow>
+#include <QList>
 
 class AEDocument;
 class AEResourcesManagerTab;
+class AELoadedResourcesPanel;
 class WorldEditorTab;
 class EditWindow;
 class QAction;
@@ -22,7 +24,6 @@ class QMdiSubWindow;
 class QSignalMapper;
 class QGridLayout;
 class QShortcut;
-#include <QList>
 
 class AEMainWindow : public QMainWindow
 {
@@ -85,6 +86,11 @@ private:
 	
 	AEResourcesManagerTab* _resourceManagerTab;
 	WorldEditorTab*		_worldEditorTab;
+
+	//
+	//	Pannelli
+	//
+	AELoadedResourcesPanel* _loadedResourcesPanel;
 };
 
 #endif /* defined(__Anima__AnimaEditorMainWindow__) */

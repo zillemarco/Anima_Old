@@ -45,6 +45,8 @@ public:
 
 	AnimaString GetAnimaName() const;
 	const char* GetName() const;
+
+	virtual void CopyData(const AnimaMappedValues& src);
 	
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
@@ -180,13 +182,24 @@ public:
 
 	bool HasMatrix(const AnimaString& propertyName);
 	bool HasMatrix(const char* propertyName);
+
+	void CopyTextures(const AnimaMappedValues& src);
+	void CopyColors(const AnimaMappedValues& src);
+	void CopyVectors(const AnimaMappedValues& src);
+	void CopyMatrices(const AnimaMappedValues& src);
+	void CopyFloats(const AnimaMappedValues& src);
+	void CopyIntegers(const AnimaMappedValues& src);
+	void CopyBooleans(const AnimaMappedValues& src);
+
+protected:
+	AnimaString ExtractName(const AnimaString& src) const;
 	
 protected:
 	AnimaAllocator* _allocator;
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
 
 	AnimaString _realName;
-	AnimaString _utilsName;
+	AnimaString _uniqueName;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher> _texturesMap;

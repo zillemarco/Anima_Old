@@ -33,8 +33,8 @@ protected:
 	AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
 	
 public:
-	AnimaSceneObject(const AnimaSceneObject& src);
 	AnimaSceneObject(AnimaSceneObject&& src);
+	AnimaSceneObject(const AnimaSceneObject& src);
 	virtual ~AnimaSceneObject();
 
 	AnimaSceneObject& operator=(const AnimaSceneObject& src);
@@ -42,8 +42,10 @@ public:
 	
 public:
 	virtual void SetPosition(const AnimaVertex3f& position);
-	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
+
+public:
 	virtual AnimaVertex3f GetPosition();
+	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
 
 	virtual AInt AddChild(AnimaSceneObject* child);
 	virtual AInt GetChildrenNumber();

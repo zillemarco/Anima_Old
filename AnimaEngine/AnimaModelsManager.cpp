@@ -71,6 +71,8 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 		_topLevelModels.Add(name, newTopLevelModel);
 	}
 
+	newTopLevelModel->SetBoolean("ProvaProva", true);
+
 	importer.FreeScene();
 	return newTopLevelModel;
 }
@@ -83,7 +85,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	else
 		newModelName = sceneNode->mName.C_Str();
 
-	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
+	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_models.Add(currentModel);
 
 	AnimaMatrix modelMatrix;
@@ -98,7 +100,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	{
 		AInt meshIndex = (AInt)sceneNode->mMeshes[n];
 		AnimaString* meshName = meshesMap->GetAt(meshIndex);
-		AnimaMesh* aMesh = _meshesManager->GetMesh(*meshName);
+		AnimaMesh* aMesh = _meshesManager->GetMeshFromName(*meshName);
 		currentModel->AddMesh(aMesh);
 	}
 
@@ -117,7 +119,7 @@ AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
 	if (index >= 0)
 		return nullptr;
 
-	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
+	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_topLevelModels.Add(name, newModel);
 	return newModel;
 }
