@@ -63,15 +63,17 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 	
 	AnimaModel* newTopLevelModel = nullptr;
 
-	if (_meshesManager->LoadMeshesFromModel(scene, name))
+	_materialsManager->LoadMaterialsFromModel(scene, name);
+	AnimaArray<AnimaString*>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
+
+	if (_meshesManager->LoadMeshesFromModel(scene, name, materialNames))
 	{
-		AnimaArray<AnimaString*>* nomi = _meshesManager->GetLastMeshesIndexMap();
-		newTopLevelModel = LoadModelFromScene(scene, scene->mRootNode, nomi, name);
+		AnimaArray<AnimaString*>* meshesName = _meshesManager->GetLastMeshesIndexMap();		
+		newTopLevelModel = LoadModelFromScene(scene, scene->mRootNode, meshesName, name);
+		
 		newTopLevelModel->SetOriginFileName(modelPath);
 		_topLevelModels.Add(name, newTopLevelModel);
 	}
-
-	newTopLevelModel->SetBoolean("ProvaProva", true);
 
 	importer.FreeScene();
 	return newTopLevelModel;
@@ -95,13 +97,13 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	modelMatrix.m[12] = sceneNode->mTransformation.d1;	modelMatrix.m[13] = sceneNode->mTransformation.d2;	modelMatrix.m[14] = sceneNode->mTransformation.d3;	modelMatrix.m[15] = sceneNode->mTransformation.d4;
 
 	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transposed());
-
+	
 	for (AUint n = 0; n < sceneNode->mNumMeshes; n++)
 	{
 		AInt meshIndex = (AInt)sceneNode->mMeshes[n];
 		AnimaString* meshName = meshesMap->GetAt(meshIndex);
-		AnimaMesh* aMesh = _meshesManager->GetMeshFromName(*meshName);
-		currentModel->AddMesh(aMesh);
+		AnimaMesh* mesh = _meshesManager->GetMeshFromName(*meshName);
+		currentModel->AddMesh(mesh);
 	}
 
 	for (AUint n = 0; n < sceneNode->mNumChildren; n++)
@@ -163,304 +165,6 @@ void AnimaModelsManager::ClearModels()
 
 	_models.RemoveAll();
 	_topLevelModels.RemoveAll();
-}
-
-int texturesCaricate = 0;
-
-void AnimaModelsManager::LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl)
-{
-	AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
-	AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	AnimaAllocator* stringAllocator = _scene->GetStringAllocator();
-
-	AnimaMaterial* material = mesh->GetMaterial();
-	AnimaString materialName(stringAllocator);
-
-	if (material == nullptr)
-	{
-		int i = 1;
-
-		AnimaString prefix = mesh->GetAnimaName();
-		AnimaString suffix(stringAllocator);
-		suffix.Format(".material.%d", i);
-
-		while (material == nullptr)
-		{
-			materialName = prefix + suffix;
-			material = materialsManager->CreateGenericMaterial(materialName);
-
-			i++;
-			suffix.Format(".material.%d", i);
-		}
-
-		mesh->SetMaterial(material);
-	}
-	else
-		materialName = material->GetAnimaName();
-
-	int ret1, ret2;
-	aiColor4D diffuse;
-	aiColor4D specular;
-	aiColor4D ambient;
-	aiColor4D emission;
-	float shininess, strength;
-	unsigned int max;
-	int two_sided;
-	
-	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == AI_SUCCESS)
-		material->AddColor("DiffuseColor", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-	else
-		material->AddColor("DiffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
-
-	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular) == AI_SUCCESS)
-		material->AddColor("SpecularColor", specular.r, specular.g, specular.b, specular.a);
-	else
-		material->AddColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
-
-	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient) == AI_SUCCESS)
-		material->AddColor("AmbientColor", ambient.r, ambient.g, ambient.b, ambient.a);
-	else
-		material->AddColor("AmbientColor", 0.2f, 0.2f, 0.2f, 1.0f);
-
-	if (aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission) == AI_SUCCESS)
-		material->AddColor("EmissionColor", emission.r, emission.g, emission.b, emission.a);
-	else
-		material->AddColor("EmissionColor", 0.0f, 0.0f, 0.0f, 1.0f);
-	
-	max = 1;
-	ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
-	if (ret1 == AI_SUCCESS) 
-	{
-		max = 1;
-		ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
-
-		if (ret2 == AI_SUCCESS)
-			material->AddFloat("Shininess", shininess * strength);
-		else
-			material->AddFloat("Shininess", shininess);
-	}
-	else 
-	{
-		material->AddFloat("Shininess", 0.0f);
-		material->SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
-	}
-
-	max = 1;
-	if ((aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max) == AI_SUCCESS) && two_sided)
-		material->AddBoolean("TwoSided", true);
-	else
-		material->AddBoolean("TwoSided", false);
-	
-	aiString path;
-	if (mtl->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		material->SetTexture("DiffuseTexture", texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
-		texturesCaricate++;
-	}
-
-	if (mtl->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-		
-		if (texture != nullptr)
-		{
-			material->SetTexture("SpecularTexture", texture);
-			material->SetBoolean("HasSpecular", true);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-
-		texturesCaricate++;
-	}
-
-	if (mtl->GetTexture(aiTextureType_AMBIENT, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("AmbientTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("EmissiveTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("BumpTexture", texture);
-			material->SetBoolean("HasBump", true);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("BumpTexture", texture);
-			material->SetBoolean("HasBump", true);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
-	{
-		ANIMA_ASSERT(false);
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("ShininessTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("OpacityTexture", texture);
-			material->SetBoolean("HasOpacity", true);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_DISPLACEMENT, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("DisplacementTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_LIGHTMAP, 0, &path) == AI_SUCCESS)
-	{
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-
-		if (texture != nullptr)
-		{
-			material->SetTexture("LightMapTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-		texturesCaricate++;
-	}
-	if (mtl->GetTexture(aiTextureType_REFLECTION, 0, &path) == AI_SUCCESS)
-	{
-		ANIMA_ASSERT(false);
-		AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringAllocator);
-		AnimaString txtPath(path.C_Str(), stringAllocator);
-		txtCompletePath += txtPath;
-		txtCompletePath.Replace('\\', '/');
-
-		AnimaTexture* texture = texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
-		if (texture != nullptr)
-		{
-			material->SetTexture("ReflectionTexture", texture);
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-
-		texturesCaricate++;
-	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

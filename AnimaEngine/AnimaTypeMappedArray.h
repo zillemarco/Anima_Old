@@ -76,6 +76,21 @@ public:
 		Add(str, newElement);
 	}
 
+	BASE_TYPE GetWithIndex(AInt index) const
+	{
+		AInt base = 0;
+		for (auto mappedArray : _mappedArrays)
+		{
+			AInt top = base + mappedArray.second->GetSize();
+
+			if (index >= base && index < top)
+				return mappedArray.second->Get(index - base);
+
+			base = top;
+		}
+		return nullptr;
+	}
+
 	BASE_TYPE GetWithName(const AnimaString& name) const
 	{
 		auto namesPair = _mappedNames.find(name);
@@ -221,6 +236,21 @@ public:
 	{
 		AnimaString str(name, _allocator);
 		return Contains(str);
+	}
+
+	AInt GetTotalSize() const
+	{
+		return (AInt)_mappedNames.size();
+	}
+
+	template<class TYPE> AInt GetSizeOfType() const
+	{
+		AnimaString type(typeid(TYPE).name(), _allocator);
+		auto pair = _mappedArrays.find(type);
+
+		if (pair != _mappedArrays.end())
+			return pair->second->GetSize();
+		return 0;
 	}
 
 protected:

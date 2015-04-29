@@ -18,16 +18,21 @@
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaTypeMappedArray.h"
+#include "AnimaTexturesManager.h"
 #include "AnimaScene.h"
+
+#include <assimp/scene.h>
+#include <assimp/vector3.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMaterialsManager
 {
 public:
-	AnimaMaterialsManager(AnimaScene* scene);
+	AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesManager* texturesManager);
 	~AnimaMaterialsManager();
 	
+public:
 	template<class T> T* CreateMaterial(const AnimaString& name);
 	template<class T> T* CreateMaterial(const char* name);
 	
@@ -38,19 +43,28 @@ public:
 	AnimaMaterial* CreateGenericMaterial(const AnimaString& name);
 	AnimaMaterial* CreateGenericMaterial(const char* name);
 
+	AnimaMaterial* GetMaterial(AInt index);
 	AnimaMaterial* GetMaterialFromName(const AnimaString& name);
 	AnimaMaterial* GetMaterialFromName(const char* name);
 	
 	AInt GetTotalMaterialsCount();
 	
 	AnimaTypeMappedArray<AnimaMaterial*>* GetMaterials();
+
+public:
+	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);
+	AnimaArray<AnimaString*>* GetLastMaterialsIndexMap();
+	void ClearLastMaterialsIndexMap();
 	
 private:
 	void ClearMaterials();
 	
 private:
 	AnimaScene* _scene;
+	AnimaTexturesManager* _texturesManager;
 	AnimaTypeMappedArray<AnimaMaterial*> _materials;
+
+	AnimaArray<AnimaString*> _lastMaterialsIndexMap;
 };
 
 template<class T>

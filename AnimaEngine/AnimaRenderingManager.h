@@ -6,17 +6,16 @@
 #include <stdio.h>
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
+#include "AnimaArray.h"
 #include "AnimaMesh.h"
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
-#include "AnimaScene.h"
 #include "AnimaString.h"
 #include "AnimaGBuffer.h"
-#include "AnimaVertex.h"
-#include "AnimaArray.h"
 #include "AnimaFrustum.h"
 #include "AnimaMatrix.h"
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -63,7 +62,7 @@ protected:
 class ANIMA_ENGINE_EXPORT AnimaRenderingManager
 {
 public:
-	AnimaRenderingManager(AnimaAllocator* allocator);
+	AnimaRenderingManager(AnimaScene* scene, AnimaAllocator* allocator);
 	AnimaRenderingManager(AnimaRenderingManager& src);
 	AnimaRenderingManager(AnimaRenderingManager&& src);
 	virtual ~AnimaRenderingManager();
@@ -187,6 +186,7 @@ public:
 
 protected:
 	AnimaAllocator* _allocator;
+	AnimaScene*		_scene;
 
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
@@ -222,7 +222,9 @@ AnimaMesh* AnimaRenderingManager::CreateMeshForLightType()
 	if (pair != _lightsMeshMap.end())
 		return pair->second;
 
-	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
+	AnimaString name = type + "_RENMESH";
+
+	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _scene->GetDataGeneratorsManager(), _allocator);
 	_lightsMeshMap[type] = lightMesh;
 
 	return lightMesh;

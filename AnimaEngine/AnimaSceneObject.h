@@ -61,6 +61,7 @@ public:
 	virtual AInt HasChild(const char* name);
 
 	AnimaTransformation* GetTransformation();
+	AnimaTransformation GetTransformationCopy();
 
 	virtual const char* GetShaderPrefix() = 0;
 	

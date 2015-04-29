@@ -26,6 +26,7 @@ class AnimaLightsManager;
 class AnimaModelsManager;
 class AnimaMeshesManager;
 class AnimaModelInstancesManager;
+class AnimaMeshInstancesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaScene
 {
@@ -48,6 +49,7 @@ public:
 	inline AnimaModelsManager* GetModelsManager()					{ return _modelsManager;				}
 	inline AnimaMeshesManager* GetMeshesManager()					{ return _meshesManager;				}
 	inline AnimaModelInstancesManager* GetModelInstancesManager()	{ return _modelInstancesManager;		}
+	inline AnimaMeshInstancesManager* GetMeshInstancesManager()		{ return _meshInstancesManager;			}
 	inline AnimaShadersManager* GetShadersManager()					{ return _engine->GetShadersManager();	}
 	inline AnimaCamerasManager* GetCamerasManager()					{ return _camerasManager;				}
 	inline AnimaTexturesManager* GetTexturesManager()				{ return _texturesManager;				}
@@ -58,6 +60,7 @@ public:
 	inline AnimaAllocator* GetMeshesAllocator()			{ return _engine->GetMeshesAllocator();			}
 	inline AnimaAllocator* GetModelsAllocator()			{ return _engine->GetModelsAllocator();			}
 	inline AnimaAllocator* GetModelInstancesAllocator()	{ return _engine->GetModelInstancesAllocator(); }
+	inline AnimaAllocator* GetMeshInstancesAllocator()	{ return _engine->GetMeshInstancesAllocator();	}
 	inline AnimaAllocator* GetGenericAllocator()		{ return _engine->GetGenericAllocator();		}
 	inline AnimaAllocator* GetStringAllocator()			{ return _engine->GetStringAllocator();			}
 	inline AnimaAllocator* GetShadersAllocator()		{ return _engine->GetShadersAllocator();		}
@@ -78,6 +81,7 @@ protected:
 	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaMeshesManager*			_meshesManager;
 	AnimaModelInstancesManager*	_modelInstancesManager;
+	AnimaMeshInstancesManager*	_meshInstancesManager;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

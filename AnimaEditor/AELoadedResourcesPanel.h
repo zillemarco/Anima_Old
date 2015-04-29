@@ -46,6 +46,7 @@ private:
 	void LoadTextures();
 	void LoadMeshes();
 	void LoadModelInstances();
+	void LoadMeshInstances();
 
 protected:
 	void contextMenu(const QPoint& point);
@@ -58,7 +59,7 @@ private slots:
 	void resourceModelSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
 
 	void importModel();
-	void createModelInstace();
+	void createModelInstance();
 	void importTexture();
 	void addNewMaterial();
 
@@ -71,10 +72,11 @@ protected:
 	QStandardItem* _textureResourcesItem;
 	QStandardItem* _meshResourcesItem;
 	QStandardItem* _modelInstancesResourcesItem;
+	QStandardItem* _meshInstancesResourcesItem;
 
 	QMenu*	_contextMenu;
 	QAction* _importModelAct;
-	QAction* _createModelInstaceAct;
+	QAction* _createModelInstanceAct;
 	QAction* _importTextureAct;
 	QAction* _addNewMaterialAct;
 };

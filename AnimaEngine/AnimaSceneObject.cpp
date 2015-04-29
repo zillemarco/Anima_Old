@@ -140,4 +140,9 @@ AnimaTransformation* AnimaSceneObject::GetTransformation()
 	return &_transformation;
 }
 
+AnimaTransformation AnimaSceneObject::GetTransformationCopy()
+{
+	return _transformation;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

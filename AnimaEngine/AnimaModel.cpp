@@ -87,6 +87,11 @@ AInt AnimaModel::AddMesh(AnimaMesh* mesh)
 	return _meshes.Add(mesh->GetAnimaName(), mesh);
 }
 
+AInt AnimaModel::GetMeshesCount() const
+{
+	return _meshes.GetSize();
+}
+
 AnimaMesh* AnimaModel::GetMesh(AInt index)
 {
 	return _meshes[index];

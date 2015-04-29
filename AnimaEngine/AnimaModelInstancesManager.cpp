@@ -13,17 +13,17 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaModelInstancesManager::AnimaModelInstancesManager(AnimaScene* scene, AnimaModelsManager* modelsManager, AnimaMaterialsManager* materialsManager)
+AnimaModelInstancesManager::AnimaModelInstancesManager(AnimaScene* scene, AnimaModelsManager* modelsManager, AnimaMeshInstancesManager* meshInstancesManager)
 : _modelIntances(scene->GetModelInstancesAllocator())
 , _topLevelModelInstances(scene->GetModelInstancesAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(modelsManager != nullptr);
-	ANIMA_ASSERT(materialsManager != nullptr);
+	ANIMA_ASSERT(meshInstancesManager != nullptr);
 
 	_scene = scene;
 	_modelsManager = modelsManager;
-	_materialsManager = materialsManager;
+	_meshInstancesManager = meshInstancesManager;
 }
 
 AnimaModelInstancesManager::~AnimaModelInstancesManager()
@@ -37,10 +37,10 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString
 	if (index >= 0)
 		return nullptr;
 
-	AnimaModelInstance* modelInstace = CreateInstanceFromModel(instanceName, srcModel);
-	_topLevelModelInstances.Add(instanceName, modelInstace);
+	AnimaModelInstance* modelInstance = CreateInstanceFromModel(instanceName, srcModel);
+	_topLevelModelInstances.Add(instanceName, modelInstance);
 
-	return modelInstace;
+	return modelInstance;
 }
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, AnimaModel* srcModel)
@@ -88,8 +88,7 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 
 	AnimaModelInstance* modelInstance = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstance>(*(_scene->GetModelInstancesAllocator()), completeInstanceName, _scene->GetDataGeneratorsManager(), _scene->GetModelInstancesAllocator());
 	modelInstance->CopyData(*srcModel);
-	modelInstance->SetMeshes(srcModel->_meshes.GetArray());
-	modelInstance->SetMaterial(srcModel->GetMaterial());
+	modelInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
 
 	AInt childrenNumber = srcModel->GetChildrenNumber();
 	for (AInt i = 0; i < childrenNumber; i++)

@@ -64,7 +64,7 @@ void Window::DrawScene()
 	int mul = (int)GetResolutionMutiplier();
 	if (renderingManager == nullptr)
 	{
-		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetGenericAllocator());
+		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetScenesManager()->GetScene("AnimaEditor"), GetEngine()->GetGenericAllocator());
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);

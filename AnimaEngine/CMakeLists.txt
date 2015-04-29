@@ -70,7 +70,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMeshesManager.h
 					AnimaModelInstancesManager.h
 					AnimaModel.h
-					AnimaModelInstance.h)
+					AnimaModelInstance.h
+					AnimaMeshInstance.h
+					AnimaMeshInstancesManager.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -123,14 +125,16 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMeshesManager.cpp
 					AnimaModelInstancesManager.cpp
 					AnimaModel.cpp
-					AnimaModelInstance.cpp)
+					AnimaModelInstance.cpp
+					AnimaMeshInstance.cpp
+					AnimaMeshInstancesManager.cpp)
 
 source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/AnimaEngine_automoc.cpp)
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaBenchmarkTimer.h AnimaBenchmarkTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
 
-source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaRenderingManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaRenderingManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp)
+source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaRenderingManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaRenderingManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp)
 
 source_group(Engine\\DataStructures\\Arrays FILES AnimaArray.h AnimaMappedArray.h AnimaTypeMappedArray.h AnimaArray.cpp AnimaMappedArray.cpp AnimaTypeMappedArray.cpp)
 source_group(Engine\\DataStructures\\MappedValues FILES AnimaMappedValues.h AnimaMappedValues.cpp)
@@ -140,7 +144,7 @@ source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h Ani
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Objects\\Cameras FILES AnimaCamera.h AnimaFirstPersonCamera.h AnimaThirdPersonCamera.h AnimaCamera.cpp AnimaFirstPersonCamera.cpp AnimaThirdPersonCamera.cpp)
-source_group(Engine\\Scene\\Objects\\Graphics FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp AnimaModel.h AnimaModel.cpp AnimaModelInstance.h AnimaModelInstance.cpp)
+source_group(Engine\\Scene\\Objects\\Graphics FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp AnimaModel.h AnimaModel.cpp AnimaModelInstance.h AnimaModelInstance.cpp AnimaMeshInstance.h AnimaMeshInstance.cpp)
 source_group(Engine\\Scene\\Objects\\Lights FILES AnimaLight.h AnimaLight.cpp)
 source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp)
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)

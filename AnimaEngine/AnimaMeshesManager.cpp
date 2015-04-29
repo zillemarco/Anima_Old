@@ -10,11 +10,15 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaMeshesManager::AnimaMeshesManager(AnimaScene* scene)
+AnimaMeshesManager::AnimaMeshesManager(AnimaScene* scene, AnimaMaterialsManager* materialsManager)
 	: _meshes(scene->GetMeshesAllocator())
 	, _lastMeshesIndexMap(scene->GetGenericAllocator())
 {
+	ANIMA_ASSERT(scene != nullptr);
+	ANIMA_ASSERT(materialsManager != nullptr);
+
 	_scene = scene;
+	_materialsManager = materialsManager;
 }
 
 AnimaMeshesManager::~AnimaMeshesManager()
@@ -23,18 +27,18 @@ AnimaMeshesManager::~AnimaMeshesManager()
 	ClearLastMeshesIndexMap();
 }
 
-bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName)
+bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap)
 {
 	ClearLastMeshesIndexMap();
 
 	for (AUint i = 0; i < scene->mNumMeshes; i++)
 	{
-		AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), _scene->GetMeshesAllocator());
 		const aiMesh* mesh = scene->mMeshes[i];
 
 		AnimaString* meshName = AnimaAllocatorNamespace::AllocateNew<AnimaString>(*(_scene->GetStringAllocator()), _scene->GetStringAllocator());
 		meshName->Format("%s.%d", modelName.GetConstBuffer(), i);
-		newMesh->SetName(*meshName);
+		
+		AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), *meshName, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
 
 		int numeroFacce = mesh->mNumFaces;
 		int numeroVertici = mesh->mNumVertices;
@@ -144,6 +148,12 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			newMesh->SetTextureCoords(textCoords, offsetTextCoords);
 			AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), textCoords);
 		}
+		
+		AInt materialIndex = (AInt)mesh->mMaterialIndex;
+		AnimaString* materialName = materialNamesMap->GetAt(materialIndex);
+		AnimaMaterial* material = _materialsManager->GetMaterialFromName(*materialName);
+
+		newMesh->SetMaterial(material);
 
 		_meshes.Add(*meshName, newMesh);
 		_lastMeshesIndexMap.Add(meshName);

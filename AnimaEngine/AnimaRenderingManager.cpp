@@ -14,13 +14,16 @@
 #include "AnimaTypeMappedArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaRenderingManager::AnimaRenderingManager(AnimaAllocator* allocator)
+AnimaRenderingManager::AnimaRenderingManager(AnimaScene* scene, AnimaAllocator* allocator)
 	: _primitives(allocator)
 {
 	_allocator = allocator;
+	_scene = scene;
+
 	_filterCamera = nullptr;
 	_filterMesh = nullptr;
 	
@@ -283,7 +286,8 @@ void AnimaRenderingManager::InitRenderingUtilities(AInt screenWidth, AInt screen
 	//
 	// Inizializzazione delle mesh di supporto
 	//
-	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, _allocator);
+	AnimaString name("filter_RENMESH", _scene->GetStringAllocator());
+	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _scene->GetDataGeneratorsManager(), _allocator);
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
 
@@ -655,16 +659,16 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 	if (scene == nullptr || model == nullptr || program == nullptr)
 		return;
 	
-	AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
-	AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
+	//AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
+	//AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
 
-	AInt meshNumber = model->GetMeshesNumber();
-	for (AInt i = 0; i < meshNumber; i++)
-		DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
+	//AInt meshNumber = model->GetMeshesNumber();
+	//for (AInt i = 0; i < meshNumber; i++)
+	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 
-	AInt childrenNumber = model->GetChildrenNumber();
-	for (AInt i = 0; i < childrenNumber; i++)
-		DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
+	//AInt childrenNumber = model->GetChildrenNumber();
+	//for (AInt i = 0; i < childrenNumber; i++)
+	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
 }
 
 void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
@@ -758,13 +762,13 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 		AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
 		DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
 
-		AInt meshNumber = model->GetMeshesNumber();
-		for (AInt i = 0; i < meshNumber; i++)
-			DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
+		//AInt meshNumber = model->GetMeshesNumber();
+		//for (AInt i = 0; i < meshNumber; i++)
+		//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
 
-		AInt childrenNumber = model->GetChildrenNumber();
-		for (AInt i = 0; i < childrenNumber; i++)
-			DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
+		//AInt childrenNumber = model->GetChildrenNumber();
+		//for (AInt i = 0; i < childrenNumber; i++)
+		//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
 	}
 }
 
@@ -950,16 +954,16 @@ void AnimaRenderingManager::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMe
 		}
 	}
 
-	AInt meshNumber = mesh->GetMeshesNumber();
-	for (AInt i = 0; i < meshNumber; i++)
-	{
-		AnimaMesh* subMesh = mesh->GetMesh(i);
-		subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
-	}
+	//AInt meshNumber = mesh->GetMeshesNumber();
+	//for (AInt i = 0; i < meshNumber; i++)
+	//{
+	//	AnimaMesh* subMesh = mesh->GetMesh(i);
+	//	subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
+	//}
 
-	AInt childrenNumber = mesh->GetChildrenNumber();
-	for (AInt i = 0; i < childrenNumber; i++)
-		UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
+	//AInt childrenNumber = mesh->GetChildrenNumber();
+	//for (AInt i = 0; i < childrenNumber; i++)
+	//	UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
 void AnimaRenderingManager::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)

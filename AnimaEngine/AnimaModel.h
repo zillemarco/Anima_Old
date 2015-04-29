@@ -36,6 +36,7 @@ public:
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();
 
+	AInt GetMeshesCount() const;
 	AInt AddMesh(AnimaMesh* mesh);
 	AnimaMesh* GetMesh(AInt index);
 	AnimaMesh* GetMeshFromName(const AnimaString& name);

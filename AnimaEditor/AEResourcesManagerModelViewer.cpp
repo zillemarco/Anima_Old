@@ -43,7 +43,7 @@ void AEResourcesManagerModelViewer::Initialize()
 
 void AEResourcesManagerModelViewer::InitRender()
 {
-	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetGenericAllocator());
+	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetScenesManager()->GetScene("AnimaEditor"), _engine->GetGenericAllocator());
 }
 
 void AEResourcesManagerModelViewer::DeinitRender()

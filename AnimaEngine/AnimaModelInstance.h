@@ -15,7 +15,7 @@
 #include "AnimaSceneObject.h"
 #include "AnimaMaterial.h"
 #include "AnimaMappedArray.h"
-#include "AnimaMesh.h"
+#include "AnimaMeshInstance.h"
 #include "AnimaModel.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -35,31 +35,25 @@ public:
 	AnimaModelInstance& operator=(const AnimaModelInstance& src);
 	AnimaModelInstance& operator=(AnimaModelInstance&& src);
 	
-public:
-	void SetMaterial(AnimaMaterial* material);
-	AnimaMaterial* GetMaterial();
-
 protected:
-	void SetMeshes(AnimaArray<AnimaMesh*>* meshes);
-	void SetGeneratorModel(AnimaModel* model);
+	void SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes);
+	void SetModel(AnimaModel* model);
 
 public:
 	AInt GetMeshesCount() const;
-	AnimaMesh* GetMesh(AInt index);
+	AnimaMeshInstance* GetMesh(AInt index);
+	AnimaArray<AnimaMeshInstance*>* GetMeshes() const;
 
-	AnimaModel* GetGeneratorModel() const;
+	AnimaModel* GetModel() const;
 
 protected:
 	const char* GetShaderPrefix() { return ""; }
 
 protected:
-	AnimaMaterial*	_material;
-	AnimaString		_materialName;
+	AnimaModel* _model;
+	AnimaString _modelName;
 
-	AnimaModel* _generatorModel;
-	AnimaString _generatorModelName;
-
-	AnimaArray<AnimaMesh*> _meshes;
+	AnimaArray<AnimaMeshInstance*> _meshes;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

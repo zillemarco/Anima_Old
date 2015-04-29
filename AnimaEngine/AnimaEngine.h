@@ -195,6 +195,11 @@ public:
 		return _modelInstancesAllocator;
 	}
 
+	inline AnimaAllocator* GetMeshInstancesAllocator() {
+		ANIMA_ASSERT(_meshInstancesAllocator != nullptr);
+		return _meshInstancesAllocator;
+	}
+
 	inline AnimaAllocator* GetStringAllocator() {
 		ANIMA_ASSERT(_stringAllocator != nullptr);
 		return _stringAllocator;
@@ -269,6 +274,7 @@ protected:
 	AnimaFreeListAllocator* _meshesAllocator;			/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
 	AnimaFreeListAllocator* _modelsAllocator;			/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 	AnimaFreeListAllocator* _modelInstancesAllocator;	/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
+	AnimaFreeListAllocator* _meshInstancesAllocator;	/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */
 
 private:
 	AnimaScenesManager*			_scenesManager;

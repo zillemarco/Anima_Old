@@ -17,6 +17,7 @@
 #include "AnimaString.h"
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
+#include "AnimaMaterialsManager.h"
 
 #include <assimp/scene.h>
 #include <assimp/vector3.h>
@@ -26,11 +27,11 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMeshesManager
 {
 public:
-	AnimaMeshesManager(AnimaScene* scene);
+	AnimaMeshesManager(AnimaScene* scene, AnimaMaterialsManager* materialsManager);
 	~AnimaMeshesManager();
 	
 public:
-	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName);
+	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap);
 
 	AnimaArray<AnimaString*>* GetLastMeshesIndexMap();
 	void ClearLastMeshesIndexMap();
@@ -46,8 +47,9 @@ protected:
 
 private:
 	AnimaScene* _scene;
-	AnimaMappedArray<AnimaMesh*> _meshes;
+	AnimaMaterialsManager* _materialsManager;
 
+	AnimaMappedArray<AnimaMesh*> _meshes;
 	AnimaArray<AnimaString*> _lastMeshesIndexMap;
 };
 

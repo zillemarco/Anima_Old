@@ -52,8 +52,6 @@ public:
 	void ClearModels();
 	
 private:
-	void LoadMaterial(AnimaMesh* mesh, const aiMaterial* mtl);
-
 	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString*>* meshesMap, const AnimaString& modelName);
 
 private:

@@ -306,25 +306,4 @@ void AnimaMeshCreator::AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2,
 	facce.push_back(face);
 }
 
-AnimaMesh* AnimaMeshCreator::CreatePlane(AnimaAllocator* allocator)
-{
-	AnimaMesh* mesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*allocator, allocator);
-	MakePlane(mesh, allocator);	
-	return mesh;
-}
-
-AnimaMesh* AnimaMeshCreator::CreateCylinder(AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator)
-{
-	AnimaMesh* mesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*allocator, allocator);
-	MakeCylinder(mesh, topRadius, bottomRadius, height, radialSegments, heightSegments, openEnded, allocator);
-	return mesh;
-}
-
-AnimaMesh* AnimaMeshCreator::CreateIcosahedralSphere(AUint recursionLevel, AnimaAllocator* allocator)
-{
-	AnimaMesh* mesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*allocator, allocator);
-	MakeIcosahedralSphere(mesh, recursionLevel, allocator);
-	return mesh;
-}
-
 END_ANIMA_ENGINE_NAMESPACE

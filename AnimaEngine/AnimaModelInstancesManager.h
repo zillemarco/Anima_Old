@@ -21,13 +21,14 @@
 #include "AnimaMeshesManager.h"
 #include "AnimaModelsManager.h"
 #include "AnimaModelInstance.h"
+#include "AnimaMeshInstancesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaModelInstancesManager
 {
 public:
-	AnimaModelInstancesManager(AnimaScene* scene, AnimaModelsManager* modelsManager, AnimaMaterialsManager* materialsManager);
+	AnimaModelInstancesManager(AnimaScene* scene, AnimaModelsManager* modelsManager, AnimaMeshInstancesManager* meshInstancesManager);
 	~AnimaModelInstancesManager();
 
 public:
@@ -51,10 +52,9 @@ protected:
 	AnimaModelInstance* CreateInstanceFromModel(const AnimaString& instanceName, AnimaModel* srcModel, bool useSrcModelName = false);
 		
 private:
-	AnimaScene* _scene;
-
-	AnimaModelsManager*		_modelsManager;
-	AnimaMaterialsManager*	_materialsManager;
+	AnimaScene*			_scene;
+	AnimaModelsManager*	_modelsManager;
+	AnimaMeshInstancesManager* _meshInstancesManager;
 
 	AnimaArray<AnimaModelInstance*>			_modelIntances;
 	AnimaMappedArray<AnimaModelInstance*>	_topLevelModelInstances;

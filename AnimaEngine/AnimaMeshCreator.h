@@ -30,11 +30,7 @@ public:
 	static void MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator);
 	static void MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator);
 	static void MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLevel, AnimaAllocator* allocator);
-	
-	static AnimaMesh* CreatePlane(AnimaAllocator* allocator);
-	static AnimaMesh* CreateCylinder(AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator);
-	static AnimaMesh* CreateIcosahedralSphere(AUint recursionLevel, AnimaAllocator* allocator);
-	
+		
 private:
 	static AInt AddVertex(AnimaVertex3f vertex, std::vector<AnimaVertex3f>& vertices, AInt& index);
 	static void AddFace(std::vector<AnimaFace*>& facce, AInt v1, AInt v2, AInt v3, AnimaAllocator* allocator);
