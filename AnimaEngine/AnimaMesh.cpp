@@ -58,13 +58,10 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
-	, _materialName(src._materialName)
 	//, _colorsBufferObject(src._colorsBufferObject)
 {
 	_allocator = src._allocator;
-
-	_parentMesh = src._parentMesh;
-
+	
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	//_colorsBufferObject = src._colorsBufferObject;
@@ -75,6 +72,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	_material = src._material;
+	_materialName = src._materialName;
 	_visible = src._visible;
 
 	_boundingBoxMin = src._boundingBoxMin;
@@ -85,7 +83,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	: AnimaSceneObject(src)
 	, _material(src._material)
-	, _parentMesh(src._parentMesh)
+	, _materialName(src._materialName)
 	, _boundingBoxMin(src._boundingBoxMin)
 	, _boundingBoxMax(src._boundingBoxMax)
 	, _boundingBoxCenter(src._boundingBoxCenter)
@@ -104,7 +102,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _visible(src._visible)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
-	, _materialName(src._materialName)
 {
 }
 
@@ -128,12 +125,13 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_bitangentsBufferObject = src._bitangentsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
-		_material = src._material;
-		_parentMesh = src._parentMesh;
 		_visible = src._visible;
 		_boundingBoxMin = src._boundingBoxMin;
 		_boundingBoxMax = src._boundingBoxMax;
 		_boundingBoxCenter = src._boundingBoxCenter;
+
+		_material = src._material;
+		_materialName = src._materialName;
 		
 		_vertices = src._vertices;
 		_normals = src._normals;
@@ -141,8 +139,6 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_tangents = src._tangents;
 		_bitangents = src._bitangents;
 		_faces = src._faces;
-
-		_materialName = src._materialName;
 	}
 	
 	return *this;
@@ -162,7 +158,7 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_faces = src._faces;
 
 		_material = src._material;
-		_parentMesh = src._parentMesh;
+		_materialName = src._materialName;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -177,8 +173,6 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_boundingBoxMin = src._boundingBoxMin;
 		_boundingBoxMax = src._boundingBoxMax;
 		_boundingBoxCenter = src._boundingBoxCenter;
-
-		_materialName = src._materialName;
 	}
 	
 	return *this;
@@ -987,16 +981,6 @@ AUint AnimaMesh::GetTangentsBufferObject()
 AUint AnimaMesh::GetBitangentsBufferObject()
 {
 	return _bitangentsBufferObject;
-}
-
-void AnimaMesh::SetParent(AnimaMesh* parent)
-{
-	_parentMesh = parent;
-}
-
-AnimaMesh* AnimaMesh::GetParent() const
-{
-	return _parentMesh;
 }
 
 void AnimaMesh::ComputeBoundingBox(bool updateRecursively)

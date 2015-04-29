@@ -48,9 +48,6 @@ public:
 	void MakeIcosahedralSphere(AInt recursionLevel = 0);
 	void MakeCylinder(AFloat topRadius = 1.0f, AFloat bottomRadius = 1.0f, AFloat height = 1.0f, AUint radialSegments = 8, AUint heightSegments = 1, bool openEnded = false);
 	
-	void SetParent(AnimaMesh* parent);
-	AnimaMesh* GetParent() const;
-
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();
 	
@@ -187,7 +184,6 @@ protected:
 	AnimaMaterial*	_material;
 	AnimaString		_materialName;
 	
-	AnimaMesh*		_parentMesh;
 	AnimaVertex3f	_boundingBoxMin;
 	AnimaVertex3f	_boundingBoxMax;
 	AnimaVertex3f	_boundingBoxCenter;

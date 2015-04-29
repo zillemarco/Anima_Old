@@ -108,6 +108,8 @@ protected:
 	AnimaVertex3f _rotation;
 	AnimaVertex3f _scale;
 
+	AnimaSceneObject* _parentObject;
+
 	AnimaMatrix _transformationMatrix;
 	AnimaMatrix _normalMatrix;
 	AnimaMatrix _initialTransformationMatrix;

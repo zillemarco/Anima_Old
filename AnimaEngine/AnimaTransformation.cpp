@@ -8,6 +8,7 @@
 
 #include "AnimaTransformation.h"
 #include "AnimaMath.h"
+#include "AnimaSceneObject.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -20,6 +21,8 @@ AnimaTransformation::AnimaTransformation()
 	_rotation.x = 0.0f;		_rotation.y = 0.0f;		_rotation.z = 0.0f;
 	_scale.x = 1.0f;		_scale.y = 1.0f;		_scale.z = 1.0f;
 
+	_parentObject = nullptr;
+
 	_transformationMatrix.SetIdentity();
 	_initialTransformationMatrix.SetIdentity();
 }
@@ -31,6 +34,8 @@ AnimaTransformation::AnimaTransformation(const AnimaMatrix& initialTransformatio
 	_translation.x = 0.0f;	_translation.y = 0.0f;	_translation.z = 0.0f;
 	_rotation.x = 0.0f;		_rotation.y = 0.0f;		_rotation.z = 0.0f;
 	_scale.x = 1.0f;		_scale.y = 1.0f;		_scale.z = 1.0f;
+
+	_parentObject = nullptr;
 }
 
 AnimaTransformation::AnimaTransformation(const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s)
@@ -38,6 +43,7 @@ AnimaTransformation::AnimaTransformation(const AnimaVertex3f& t, const AnimaVert
 	, _rotation(r)
 	, _scale(s)
 {
+	_parentObject = nullptr;
 	_initialTransformationMatrix.SetIdentity();
 
 	UpdateMatrix();
@@ -48,6 +54,7 @@ AnimaTransformation::AnimaTransformation(AFloat tx, AFloat ty, AFloat tz, AFloat
 	, _rotation(rx, ry, rz)
 	, _scale(sx, sy, sz)
 {
+	_parentObject = nullptr;
 	_initialTransformationMatrix.SetIdentity();
 
 	UpdateMatrix();
@@ -60,6 +67,7 @@ AnimaTransformation::AnimaTransformation(const AnimaTransformation& src)
 	, _transformationMatrix(src._transformationMatrix)
 	, _initialTransformationMatrix(src._initialTransformationMatrix)
 {
+	_parentObject = src._parentObject;
 }
 
 AnimaTransformation::AnimaTransformation(AnimaTransformation&& src)
@@ -69,6 +77,7 @@ AnimaTransformation::AnimaTransformation(AnimaTransformation&& src)
 	, _transformationMatrix(src._transformationMatrix)
 	, _initialTransformationMatrix(src._initialTransformationMatrix)
 {
+	_parentObject = src._parentObject;
 }
 
 AnimaTransformation::~AnimaTransformation()
@@ -84,6 +93,7 @@ AnimaTransformation& AnimaTransformation::operator=(const AnimaTransformation& s
 		_scale = src._scale;
 		_transformationMatrix = src._transformationMatrix;
 		_initialTransformationMatrix = src._initialTransformationMatrix;
+		_parentObject = src._parentObject;
 	}
 	
 	return *this;
@@ -98,6 +108,7 @@ AnimaTransformation& AnimaTransformation::operator=(AnimaTransformation&& src)
 		_scale = src._scale;
 		_transformationMatrix = src._transformationMatrix;
 		_initialTransformationMatrix = src._initialTransformationMatrix;
+		_parentObject = src._parentObject;
 	}
 	
 	return *this;
@@ -424,8 +435,32 @@ void AnimaTransformation::UpdateMatrix()
 	AnimaMatrix rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * (AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x));
 	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
 
-	_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;// *_initialTransformationMatrix;
-	_normalMatrix = rotationMatrix;// *_initialTransformationMatrix;
+	_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	_normalMatrix = rotationMatrix;
+
+	if (_parentObject != nullptr)
+	{
+		AnimaSceneObject* parentObjectParent = _parentObject->GetParentObject();
+
+		if (parentObjectParent != nullptr)
+		{
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+
+			_parentObject->SetMatrix("AModelMatrix", _transformationMatrix);
+			_parentObject->SetMatrix("ANormalMatrix", _normalMatrix);
+		}
+		else
+		{
+			_parentObject->SetMatrix("AModelMatrix", _transformationMatrix);
+			_parentObject->SetMatrix("ANormalMatrix", _normalMatrix);
+		}
+
+		_parentObject->SetMatrix("RModelMatrix", _transformationMatrix);
+		_parentObject->SetMatrix("RNormalMatrix", _normalMatrix);
+
+		_parentObject->UpdateChildrenTransformation();
+	}
 }
 
 void AnimaTransformation::SetTransformationMatrix(const AnimaMatrix& m)

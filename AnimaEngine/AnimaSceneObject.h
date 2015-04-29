@@ -28,6 +28,7 @@ class ANIMA_ENGINE_EXPORT AnimaSceneObject : public AnimaMappedValues
 	friend class AnimaShaderProgram;
 	friend class AnimaScene;
 	friend class AnimaMappedValues;
+	friend class AnimaTransformation;
 
 protected:
 	AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
@@ -47,6 +48,9 @@ public:
 	virtual AnimaVertex3f GetPosition();
 	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
 
+	virtual void SetParentObject(AnimaSceneObject* parentObject);
+	virtual AnimaSceneObject* GetParentObject() const;
+
 	virtual AInt AddChild(AnimaSceneObject* child);
 	virtual AInt GetChildrenNumber();
 	virtual AnimaSceneObject* GetChild(const AnimaString& name);
@@ -64,9 +68,14 @@ public:
 	AnimaTransformation GetTransformationCopy();
 
 	virtual const char* GetShaderPrefix() = 0;
+
+protected:
+	virtual void UpdateChildrenTransformation();
 	
 protected:
 	AnimaTransformation _transformation;
+
+	AnimaSceneObject* _parentObject;
 	AnimaMappedArray<AnimaSceneObject*> _children;
 };
 

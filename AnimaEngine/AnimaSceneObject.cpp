@@ -15,18 +15,21 @@ AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsM
 	: AnimaMappedValues(allocator, dataGeneratorsManager, name)
 	, _children(allocator)
 {
+	_parentObject = nullptr;
 }
 
 AnimaSceneObject::AnimaSceneObject(const AnimaSceneObject& src)
 	: AnimaMappedValues(src)
 	, _children(src._children)
 {
+	_parentObject = src._parentObject;
 }
 
 AnimaSceneObject::AnimaSceneObject(AnimaSceneObject&& src)
 	: AnimaMappedValues(src)
 	, _children(src._children)
 {
+	_parentObject = src._parentObject;
 }
 
 AnimaSceneObject::~AnimaSceneObject()
@@ -40,6 +43,7 @@ AnimaSceneObject& AnimaSceneObject::operator=(const AnimaSceneObject& src)
 	{
 		AnimaMappedValues::operator=(src);
 		_children = src._children;
+		_parentObject = src._parentObject;
 	}
 
 	return *this;
@@ -51,6 +55,7 @@ AnimaSceneObject& AnimaSceneObject::operator=(AnimaSceneObject&& src)
 	{
 		AnimaMappedValues::operator=(src);
 		_children = src._children;
+		_parentObject = src._parentObject;
 	}
 
 	return *this;
@@ -66,6 +71,16 @@ void AnimaSceneObject::SetPosition(AFloat x, AFloat y, AFloat z)
 {
 	AnimaMappedValues::SetVector("Position", x, y, z);
 	_transformation.SetInitialTransformationMatrix(AnimaMatrix::MakeTranslation(x, y, z));
+}
+
+void AnimaSceneObject::SetParentObject(AnimaSceneObject* parentObject)
+{
+	_parentObject = parentObject;
+}
+
+AnimaSceneObject* AnimaSceneObject::GetParentObject() const
+{
+	return _parentObject;
 }
 
 AnimaVertex3f AnimaSceneObject::GetPosition()
@@ -143,6 +158,13 @@ AnimaTransformation* AnimaSceneObject::GetTransformation()
 AnimaTransformation AnimaSceneObject::GetTransformationCopy()
 {
 	return _transformation;
+}
+
+void AnimaSceneObject::UpdateChildrenTransformation()
+{
+	AInt childrenCount = _children.GetSize();
+	for (AInt i = 0; i < childrenCount; i++)
+		_children[i]->GetTransformation()->UpdateMatrix();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

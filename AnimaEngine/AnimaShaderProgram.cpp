@@ -782,6 +782,69 @@ void AnimaShaderProgram::DisableInputs()
 	}
 }
 
+void AnimaShaderProgram::UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderingManager* renderingManager)
+{
+	if (object == nullptr)
+		return;
+
+	const char* prefix = object->GetShaderPrefix();
+
+	for (auto& pair : _uniforms)
+	{
+		AnimaUniformInfo info = pair.second;
+
+		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
+			continue;
+
+		if (info._type == GL_FLOAT_VEC2)
+			SetUniform(info._location, object->GetVector2f(info._nameParts[1]));
+		else if (info._type == GL_FLOAT_VEC3)
+		{
+			if (object->HasColor(info._nameParts[1]))
+				SetUniform(info._location, object->GetColor3f(info._nameParts[1]));
+			else
+				SetUniform(info._location, object->GetVector3f(info._nameParts[1]));
+		}
+		else if (info._type == GL_FLOAT_VEC4)
+		{
+			if (object->HasColor(info._nameParts[1]))
+				SetUniform(info._location, object->GetColor4f(info._nameParts[1]));
+			else
+				SetUniform(info._location, object->GetVector4f(info._nameParts[1]));
+		}
+		else if (info._type == GL_FLOAT)
+			SetUniformf(info._location, object->GetFloat(info._nameParts[1]));
+		else if (info._type == GL_BOOL)
+			SetUniformi(info._location, object->GetBoolean(info._nameParts[1]) ? 1 : 0);
+		else if (info._type == GL_INT)
+			SetUniformi(info._location, object->GetInteger(info._nameParts[1]));
+		else if (info._type == GL_FLOAT_MAT4)
+			SetUniform(info._location, object->GetMatrix(info._nameParts[1]));
+		else if (info._type == GL_SAMPLER_2D)
+		{
+			AnimaTexture* texture = object->GetTexture(info._nameParts[1]);
+
+			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+			SetUniformi(info._location, slot);
+
+			if (texture == nullptr)
+			{
+				glActiveTexture(GL_TEXTURE0 + slot);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			else
+			{
+				texture->Load();
+				texture->Bind(slot);
+			}
+		}
+		else
+		{
+			ANIMA_ASSERT(false);
+		}
+	}
+}
+
 void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix)
 {
 	AnimaString str(_allocator);

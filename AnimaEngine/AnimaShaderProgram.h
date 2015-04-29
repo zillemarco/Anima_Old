@@ -104,6 +104,7 @@ public:
 	void EnableInput(const char* inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();
 
+	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderingManager* renderingManager);
 	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix);
 	void UpdateCameraProperies(AnimaCamera* camera);
 	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager);
