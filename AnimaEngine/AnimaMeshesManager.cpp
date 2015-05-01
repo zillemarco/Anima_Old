@@ -34,11 +34,20 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 	for (AUint i = 0; i < scene->mNumMeshes; i++)
 	{
 		const aiMesh* mesh = scene->mMeshes[i];
-
-		AnimaString* meshName = AnimaAllocatorNamespace::AllocateNew<AnimaString>(*(_scene->GetStringAllocator()), _scene->GetStringAllocator());
-		meshName->Format("%s.%d", modelName.GetConstBuffer(), i);
 		
-		AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), *meshName, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
+		AnimaString* meshName = AnimaAllocatorNamespace::AllocateNew<AnimaString>(*(_scene->GetStringAllocator()), _scene->GetStringAllocator());
+		AnimaMesh* newMesh = nullptr;
+		int nameOffset = 0;
+		while (newMesh == nullptr)
+		{
+			if (nameOffset > 0)
+				meshName->Format("%s.mesh%d", modelName.GetConstBuffer(), i + nameOffset);
+			else
+				meshName->Format("%s.mesh%d", modelName.GetConstBuffer(), i);
+
+			newMesh = CreateEmptyMesh(*meshName);
+			nameOffset++;
+		}
 
 		int numeroFacce = mesh->mNumFaces;
 		int numeroVertici = mesh->mNumVertices;
@@ -210,6 +219,23 @@ AInt AnimaMeshesManager::GetMeshesCount() const
 AnimaArray<AnimaString*>* AnimaMeshesManager::GetLastMeshesIndexMap()
 {
 	return &_lastMeshesIndexMap;
+}
+
+AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
+{
+	AInt index = _meshes.Contains(name);
+	if (index >= 0)
+		return nullptr;
+
+	AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
+	_meshes.Add(name, newMesh);
+	return newMesh;
+}
+
+AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const char* name)
+{
+	AnimaString str(name, _scene->GetStringAllocator());
+	return CreateEmptyMesh(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

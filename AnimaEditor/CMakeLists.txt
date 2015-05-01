@@ -10,7 +10,8 @@ set(${PROJECT_NAME}_headers AEMainWindow.h
 							AEResourcesManagerModelViewer.h
 							Window.h
 							AELoadedResourcesPanel.h
-							ImportModelWindow.h)
+							ImportModelWindow.h
+							NewInstanceWindow.h)
 set(${PROJECT_NAME}_sources main.cpp 
 							AEMainWindow.cpp
 							EditWindow.cpp
@@ -22,7 +23,8 @@ set(${PROJECT_NAME}_sources main.cpp
 							AEResourcesManagerModelViewer.cpp
 							Window.cpp
 							AELoadedResourcesPanel.cpp
-							ImportModelWindow.cpp)
+							ImportModelWindow.cpp
+							NewInstanceWindow.cpp)
 
 set(UI_FILES "")
 set(RC_FILES AnimaEditor.qrc)

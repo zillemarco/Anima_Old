@@ -20,10 +20,7 @@ public:
 	void wheelEvent(QWheelEvent* wEvent);
 
 	void setSelectedModel(Anima::AnimaModel* model);
-
-	void InitRender();
-	void DeinitRender();
-
+	
 private:
 	Anima::AnimaRenderingManager* _renderingManager;
 	Anima::AnimaModel* _selectedModel;

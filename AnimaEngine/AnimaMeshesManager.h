@@ -45,6 +45,10 @@ public:
 protected:
 	void ClearMeshes();
 
+protected:
+	AnimaMesh* CreateEmptyMesh(const AnimaString& name);
+	AnimaMesh* CreateEmptyMesh(const char* name);
+
 private:
 	AnimaScene* _scene;
 	AnimaMaterialsManager* _materialsManager;

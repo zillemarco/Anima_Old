@@ -34,20 +34,6 @@ AEResourcesManagerModelViewer::AEResourcesManagerModelViewer(Anima::AnimaEngine*
 
 AEResourcesManagerModelViewer::~AEResourcesManagerModelViewer()
 {
-	DeinitRender();
-}
-
-void AEResourcesManagerModelViewer::Initialize()
-{
-}
-
-void AEResourcesManagerModelViewer::InitRender()
-{
-	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetScenesManager()->GetScene("AnimaEditor"), _engine->GetGenericAllocator());
-}
-
-void AEResourcesManagerModelViewer::DeinitRender()
-{
 	if (_renderingManager != nullptr)
 	{
 		delete _renderingManager;
@@ -55,18 +41,84 @@ void AEResourcesManagerModelViewer::DeinitRender()
 	}
 }
 
+void AEResourcesManagerModelViewer::Initialize()
+{
+	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetScenesManager()->GetScene("AnimaEditor"), _engine->GetGenericAllocator());
+
+	const qreal retinaScale = devicePixelRatio();
+	int w = width() * retinaScale;
+	int h = height() * retinaScale;
+
+	_renderingManager->InitRenderingUtilities(w, h);
+	_renderingManager->InitRenderingTargets(w, h);
+
+	Anima::AnimaShadersManager* mgr = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetShadersManager();
+
+	mgr->CreateProgram("deferred-prepare");
+	mgr->GetProgramFromName("deferred-prepare")->Create();
+	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-prepare")->Link();
+
+	mgr->CreateProgram("deferred-shadowMap");
+	mgr->GetProgramFromName("deferred-shadowMap")->Create();
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-shadowMap")->AddShader(mgr->LoadShaderFromFile("deferred-shadowMap-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-shadowMap-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-shadowMap")->Link();
+
+	mgr->CreateProgram("deferred-combine");
+	mgr->GetProgramFromName("deferred-combine")->Create();
+	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-combine")->AddShader(mgr->LoadShaderFromFile("deferred-combine-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-combine-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("deferred-combine")->Link();
+
+	mgr->CreateProgram("primitive-draw");
+	mgr->GetProgramFromName("primitive-draw")->Create();
+	mgr->GetProgramFromName("primitive-draw")->AddShader(mgr->LoadShaderFromFile("primitive-draw-vs", ANIMA_ENGINE_SHADERS_PATH "Primitive/primitive-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("primitive-draw")->AddShader(mgr->LoadShaderFromFile("primitive-draw-fs", ANIMA_ENGINE_SHADERS_PATH "Primitive/primitive-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("primitive-draw")->Link();
+
+	mgr->CreateProgram("primitive-combine");
+	mgr->GetProgramFromName("primitive-combine")->Create();
+	mgr->GetProgramFromName("primitive-combine")->AddShader(mgr->LoadShaderFromFile("primitive-combine-vs", ANIMA_ENGINE_SHADERS_PATH "Primitive/combine-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("primitive-combine")->AddShader(mgr->LoadShaderFromFile("primitive-combine-fs", ANIMA_ENGINE_SHADERS_PATH "Primitive/combine-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("primitive-combine")->Link();
+
+	mgr->CreateProgram("fxaaFilter");
+	mgr->GetProgramFromName("fxaaFilter")->Create();
+	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("fxaaFilter")->AddShader(mgr->LoadShaderFromFile("fxaaFilter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/fxaaFilter-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("fxaaFilter")->Link();
+
+	mgr->CreateProgram("gaussBlur7x1Filter");
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->Create();
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-vs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->AddShader(mgr->LoadShaderFromFile("gaussBlur7x1Filter-fs", ANIMA_ENGINE_SHADERS_PATH "Filters/gaussBlur7x1Filter-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("gaussBlur7x1Filter")->Link();
+
+	mgr->CreateProgram("ssao");
+	mgr->GetProgramFromName("ssao")->Create();
+	mgr->GetProgramFromName("ssao")->AddShader(mgr->LoadShaderFromFile("ssao-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/ssao-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("ssao")->AddShader(mgr->LoadShaderFromFile("ssao-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/ssao-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	mgr->GetProgramFromName("ssao")->Link();
+}
+
 void AEResourcesManagerModelViewer::Render()
 {
 	const qreal retinaScale = devicePixelRatio();
 	int w = width() * retinaScale;
 	int h = height() * retinaScale;
-	
+
+	_renderingManager->InitRenderingTargets(w, h);
+
 	glViewport(0, 0, w, h);
 
 	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
 	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetDataGeneratorsManager()->UpdateValues();
 
 	_renderingManager->Start(_engine->GetScenesManager()->GetScene("AnimaEditor"));
+
+	_renderingManager->DeferredDrawAll(_engine->GetScenesManager()->GetScene("AnimaEditor"));
 
 	//if (_selectedModel != nullptr)
 	//	_renderingManager->DeferredDrawModel(_engine->GetScenesManager()->GetScene("AnimaEditor"), _selectedModel);

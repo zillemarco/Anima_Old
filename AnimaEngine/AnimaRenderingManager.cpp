@@ -648,34 +648,13 @@ void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* mode
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+void AnimaRenderingManager::DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
 {
-	AnimaMatrix identityMatrix;
-	DeferredDrawModel(scene, model, program, identityMatrix, identityMatrix, updateMaterial, forceDraw, frustum);
-}
+	AnimaTransformation* meshTransfomation = mesh->GetTransformation();
 
-void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
-{
-	if (scene == nullptr || model == nullptr || program == nullptr)
-		return;
-	
-	//AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
-	//AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
-
-	//AInt meshNumber = model->GetMeshesNumber();
-	//for (AInt i = 0; i < meshNumber; i++)
-	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
-
-	//AInt childrenNumber = model->GetChildrenNumber();
-	//for (AInt i = 0; i < childrenNumber; i++)
-	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
-}
-
-void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
-{
 	if (!forceDraw)
 	{
-		if (frustum != nullptr && !frustum->SphereInFrustum(parentTransformation * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+		if (frustum != nullptr && !frustum->SphereInFrustum(meshTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
 			return;
 	}
 
@@ -685,39 +664,126 @@ void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* 
 	if (mesh->GetVertexArrayObject() <= 0)
 		return;
 
-	if (updateMaterial)
+	if (!useInstances)
 	{
-		AnimaMaterial* material = mesh->GetMaterial();
-		if (material == nullptr)
-			return;
+		if (updateMaterial)
+		{
+			AnimaMaterial* material = mesh->GetMaterial();
+			if (material == nullptr)
+				return;
 
-		program->UpdateMaterialProperies(material, this);
-	}
+			program->UpdateMaterialProperies(material, this);
+		}
 
-	program->UpdateMeshProperies(mesh, parentTransformation, parentNormalMatrix);
-	
+		//program->UpdateMeshProperies(mesh, parentTransformation, parentNormalMatrix);
+		program->UpdateSceneObjectProperties(mesh, this);
+
 #ifdef WIN32
-	glBindVertexArray(mesh->GetVertexArrayObject());
-	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+		glBindVertexArray(mesh->GetVertexArrayObject());
+		glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 #else
-	program->EnableInputs(mesh);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
-	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	program->DisableInputs();
+		program->EnableInputs(mesh);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+		glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+		program->DisableInputs();
 #endif
+	}
+	else
+	{
+		AInt instancesCount = mesh->GetInstancesCount();
+		for (AInt i = 0; i < instancesCount; i++)
+		{
+			AnimaMeshInstance* instance = mesh->GetInstance(i);
+			program->UpdateSceneObjectProperties(instance, this);
+
+#ifdef WIN32
+			glBindVertexArray(mesh->GetVertexArrayObject());
+			glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+#else
+			program->EnableInputs(mesh);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+			glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+			program->DisableInputs();
+#endif
+		}
+	}
 }
+
+//void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+//{
+//	AnimaMatrix identityMatrix;
+//	DeferredDrawModel(scene, model, program, identityMatrix, identityMatrix, updateMaterial, forceDraw, frustum);
+//}
+//
+//void AnimaRenderingManager::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+//{
+//	if (scene == nullptr || model == nullptr || program == nullptr)
+//		return;
+//	
+//	//AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
+//	//AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
+//
+//	//AInt meshNumber = model->GetMeshesNumber();
+//	//for (AInt i = 0; i < meshNumber; i++)
+//	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
+//
+//	//AInt childrenNumber = model->GetChildrenNumber();
+//	//for (AInt i = 0; i < childrenNumber; i++)
+//	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
+//}
+//
+//void AnimaRenderingManager::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+//{
+//	if (!forceDraw)
+//	{
+//		if (frustum != nullptr && !frustum->SphereInFrustum(parentTransformation * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+//			return;
+//	}
+//
+//	if (mesh->NeedsBuffersUpdate())
+//		mesh->UpdateBuffers();
+//
+//	if (mesh->GetVertexArrayObject() <= 0)
+//		return;
+//
+//	if (updateMaterial)
+//	{
+//		AnimaMaterial* material = mesh->GetMaterial();
+//		if (material == nullptr)
+//			return;
+//
+//		program->UpdateMaterialProperies(material, this);
+//	}
+//
+//	program->UpdateMeshProperies(mesh, parentTransformation, parentNormalMatrix);
+//	
+//#ifdef WIN32
+//	glBindVertexArray(mesh->GetVertexArrayObject());
+//	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+//	glBindVertexArray(0);
+//#else
+//	program->EnableInputs(mesh);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+//	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+//	program->DisableInputs();
+//#endif
+//}
 
 void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model)
 {
 	if (model != nullptr)
 		return;
 
-	AnimaModelsManager* modelsManager = scene->GetModelsManager();
+	//AnimaModelsManager* modelsManager = scene->GetModelsManager();
+	//ASizeT nModels = modelsManager->GetModelsNumber();
+	//if (nModels == 0)
+	//	return;
 
-	ASizeT nModels = modelsManager->GetModelsNumber();
-
-	if (nModels == 0)
+	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	AInt meshesCount = meshesManager->GetMeshesCount();
+	if (meshesCount == 0)
 		return;
 
 	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
@@ -736,40 +802,46 @@ void AnimaRenderingManager::DeferredPreparePass(AnimaScene* scene, AnimaShaderPr
 		frustum = camera->GetFrustum();
 	}
 	
-	if (model == nullptr)
+	for (AInt i = 0; i < meshesCount; i++)
 	{
-		for (ASizeT j = 0; j < nModels; j++)
-		{
-			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-			//	
-			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-			//	AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
-			//	
-			//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
-			//	
-			//	AInt meshNumber = innerModel->GetMeshesNumber();
-			//	for (AInt i = 0; i < meshNumber; i++)
-			//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
-			//	
-			//	AInt childrenNumber = innerModel->GetChildrenNumber();
-			//	for (AInt i = 0; i < childrenNumber; i++)
-			//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
-		}
+		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		DeferredDrawMesh(scene, mesh, program, true, false, frustum);
 	}
-	else
-	{
-		AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
-		AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
-		DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
 
-		//AInt meshNumber = model->GetMeshesNumber();
-		//for (AInt i = 0; i < meshNumber; i++)
-		//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
+	//if (model == nullptr)
+	//{
+	//	for (ASizeT j = 0; j < nModels; j++)
+	//	{
+	//		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+	//		//	
+	//		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+	//		//	AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
+	//		//	
+	//		//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
+	//		//	
+	//		//	AInt meshNumber = innerModel->GetMeshesNumber();
+	//		//	for (AInt i = 0; i < meshNumber; i++)
+	//		//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
+	//		//	
+	//		//	AInt childrenNumber = innerModel->GetChildrenNumber();
+	//		//	for (AInt i = 0; i < childrenNumber; i++)
+	//		//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
+	//	}
+	//}
+	//else
+	//{
+	//	//AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
+	//	//AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
+	//	//DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
 
-		//AInt childrenNumber = model->GetChildrenNumber();
-		//for (AInt i = 0; i < childrenNumber; i++)
-		//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
-	}
+	//	//AInt meshNumber = model->GetMeshesNumber();
+	//	//for (AInt i = 0; i < meshNumber; i++)
+	//	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
+
+	//	//AInt childrenNumber = model->GetChildrenNumber();
+	//	//for (AInt i = 0; i < childrenNumber; i++)
+	//	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
+	//}
 }
 
 void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights)

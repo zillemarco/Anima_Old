@@ -41,7 +41,7 @@ public:
 	AnimaMesh* GetMesh() const;
 
 protected:
-	const char* GetShaderPrefix() { return ""; }
+	const char* GetShaderPrefix() { return "MOD"; }
 	
 	void SetMesh(AnimaMesh* mesh);
 

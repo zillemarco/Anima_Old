@@ -50,13 +50,15 @@ public:
 
 protected:
 	AnimaModelInstance* CreateInstanceFromModel(const AnimaString& instanceName, AnimaModel* srcModel, bool useSrcModelName = false);
+	AnimaModelInstance* CreateEmptyInstance(const AnimaString& instanceName);
+	AnimaModelInstance* CreateEmptyInstance(const char* instanceName);
 		
 private:
 	AnimaScene*			_scene;
 	AnimaModelsManager*	_modelsManager;
 	AnimaMeshInstancesManager* _meshInstancesManager;
 
-	AnimaArray<AnimaModelInstance*>			_modelIntances;
+	AnimaMappedArray<AnimaModelInstance*>	_modelIntances;
 	AnimaMappedArray<AnimaModelInstance*>	_topLevelModelInstances;
 };
 

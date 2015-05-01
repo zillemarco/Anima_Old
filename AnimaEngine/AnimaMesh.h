@@ -26,6 +26,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaMeshInstance;
+
 class ANIMA_ENGINE_EXPORT AnimaMesh : public AnimaSceneObject
 {
 public:
@@ -55,6 +57,12 @@ public:
 	AnimaVertex3f GetBoundingBoxMin() const;
 	AnimaVertex3f GetBoundingBoxMax() const;
 	AnimaVertex3f GetBoundingBoxCenter() const;
+
+	void AddInstance(AnimaMeshInstance* instance);
+	AInt GetInstancesCount() const;
+	AnimaMeshInstance* GetInstance(AInt index) const;
+	AnimaMeshInstance* GetInstanceFromName(const AnimaString& name) const;
+	AnimaMeshInstance* GetInstanceFromName(const char* name) const;
 	
 	// Gestione dati grafici
 	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
@@ -177,12 +185,14 @@ public:
 protected:
 	AInt GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const;
 
-	const char* GetShaderPrefix() { return ""; }
+	const char* GetShaderPrefix() { return "MOD"; }
 
 protected:
 	// Dati struttura
 	AnimaMaterial*	_material;
 	AnimaString		_materialName;
+
+	AnimaMappedArray<AnimaMeshInstance*> _meshInstances;
 	
 	AnimaVertex3f	_boundingBoxMin;
 	AnimaVertex3f	_boundingBoxMax;

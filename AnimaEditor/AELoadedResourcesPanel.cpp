@@ -296,21 +296,28 @@ void AELoadedResourcesTreeView::createActions()
 void AELoadedResourcesTreeView::importModel()
 {
 	if (_document->ImportModel())
-		LoadResources();
+		LoadModels();
 }
 
 void AELoadedResourcesTreeView::createModelInstance()
 {
+	bool reloadResources = false;
 	QModelIndexList selectedRows = selectedIndexes();
-	//for (int i = 0; i < selectedRows.count(); i++)
-	//{
-		Anima::AnimaModelInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
-		Anima::AnimaModel* model = _resourcesModel->itemFromIndex(selectedRows[0])->data().value<Anima::AnimaModel*>();
-		mgr->CreateInstance("modelInstance", model);
+	for (int i = 0; i < selectedRows.count() / 2; i++)
+	{
+		Anima::AnimaModel* selectedModel = _resourcesModel->itemFromIndex(selectedRows[i])->data().value<Anima::AnimaModel*>();
+		if (selectedModel != nullptr)
+		{
+			if (_document->CreateModelInstace(selectedModel))
+				reloadResources = true;
+		}
+	}
 
+	if (reloadResources)
+	{
 		LoadModelInstances();
 		LoadMeshInstances();
-	//}
+	}
 }
 
 void AELoadedResourcesTreeView::importTexture()

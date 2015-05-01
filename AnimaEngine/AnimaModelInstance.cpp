@@ -68,10 +68,18 @@ AnimaModelInstance& AnimaModelInstance::operator=(AnimaModelInstance&& src)
 
 void AnimaModelInstance::SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes)
 {
-	if (meshes == nullptr)
-		_meshes.RemoveAll();
-	else
+	_meshes.RemoveAll();
+
+	if (meshes != nullptr)
+	{
 		_meshes.Copy(*meshes);
+
+		AInt meshesCount = _meshes.GetSize();
+		for (AInt i = 0; i < meshesCount; i++)
+		{
+			_meshes[i]->SetParentObject(this);
+		}
+	}
 }
 
 AInt AnimaModelInstance::GetMeshesCount() const
@@ -97,6 +105,15 @@ AnimaArray<AnimaMeshInstance*>* AnimaModelInstance::GetMeshes() const
 AnimaModel* AnimaModelInstance::GetModel() const
 {
 	return _model;
+}
+
+void AnimaModelInstance::UpdateChildrenTransformation()
+{
+	AnimaSceneObject::UpdateChildrenTransformation();
+	
+	AInt meshesCount = _meshes.GetSize();
+	for (AInt i = 0; i < meshesCount; i++)
+		_meshes[i]->GetTransformation()->UpdateMatrix();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

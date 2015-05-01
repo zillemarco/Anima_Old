@@ -39,6 +39,7 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 	meshInstance->CopyData(*srcMesh);
 	meshInstance->SetMaterial(srcMesh->GetMaterial());
 	meshInstance->SetMesh(srcMesh);
+	srcMesh->AddInstance(meshInstance);
 
 	_meshIntances.Add(instanceName, meshInstance);
 
@@ -114,7 +115,11 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 		int nameOffset = 0;
 		while (newInstance == nullptr)
 		{
-			meshInstanceName.Format("%s.instance%d", meshName.GetConstBuffer(), i + nameOffset);
+			if (nameOffset > 0)
+				meshInstanceName.Format("%s.instance%d", meshName.GetConstBuffer(), i + nameOffset);
+			else
+				meshInstanceName.Format("%s.instance%d", meshName.GetConstBuffer(), i);
+
 			newInstance = CreateEmptyInstance(meshInstanceName);
 			nameOffset++;
 		}
@@ -122,6 +127,7 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 		newInstance->CopyData(*mesh);
 		newInstance->SetMaterial(mesh->GetMaterial());
 		newInstance->SetMesh(mesh);
+		mesh->AddInstance(newInstance);
 
 		_lastInstancesFromModel.Add(newInstance);
 	}

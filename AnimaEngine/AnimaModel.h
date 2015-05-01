@@ -22,6 +22,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModel : public AnimaSceneObject
 {
 	friend class AnimaModelInstancesManager;
+	friend class AnimaMeshInstancesManager;
 
 public:
 	AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
@@ -48,7 +49,7 @@ public:
 	const char* GetOriginFileName() const;
 
 protected:
-	const char* GetShaderPrefix() { return ""; }
+	const char* GetShaderPrefix() { return "MOD"; }
 
 protected:
 	AnimaMaterial*	_material;

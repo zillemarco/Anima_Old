@@ -15,6 +15,7 @@
 #include "AnimaGBuffer.h"
 #include "AnimaFrustum.h"
 #include "AnimaMatrix.h"
+#include "AnimaMeshInstance.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -92,9 +93,11 @@ protected:
 	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
 	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights);
 
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	void DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+
+	//void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	//void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	//void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
 		
 	void Clear();
 	void ClearPrimitives();

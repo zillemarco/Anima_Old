@@ -10,6 +10,7 @@
 #define __Anima__AnimaEditorDocument__
 
 #include <QString>
+#include <AnimaModel.h>
 #include <AnimaEngine.h>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
@@ -185,11 +186,13 @@ private:
 	bool ReadModels(QXmlStreamReader* xmlReader);
 	
 	bool ImportModelInternal(QString modelName, QString modelFileName);
+	bool CreateModelInstanceInternal(QString instanceName, Anima:: AnimaModel* srcModel);
 	
 public:
 	bool ImportModel();
 	bool ImportTexture();
 	bool AddMaterial();
+	bool CreateModelInstace(Anima::AnimaModel* srcModel);
 	
 private:
 	QString _projectName;

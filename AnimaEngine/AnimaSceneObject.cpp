@@ -16,6 +16,7 @@ AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsM
 	, _children(allocator)
 {
 	_parentObject = nullptr;
+	_transformation.SetParentObject(this);
 }
 
 AnimaSceneObject::AnimaSceneObject(const AnimaSceneObject& src)

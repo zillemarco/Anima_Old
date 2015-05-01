@@ -64,13 +64,13 @@ int main(int argc, char** argv)
 	
 	QApplication app(argc, argv);
 
-	QFile File(":/Res/dark_style3.qss");
-	if (File.open(QIODevice::ReadOnly | QIODevice::Text))
-	{
-		QTextStream stream(&File);
-		qApp->setStyleSheet(stream.readAll());
-		File.close();
-	}
+	//QFile File(":/Res/dark_style3.qss");
+	//if (File.open(QIODevice::ReadOnly | QIODevice::Text))
+	//{
+	//	QTextStream stream(&File);
+	//	qApp->setStyleSheet(stream.readAll());
+	//	File.close();
+	//}
 
 	AEMainWindow mainWindow;	
 	mainWindow.show();

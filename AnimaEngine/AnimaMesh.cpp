@@ -10,6 +10,7 @@
 #include <string.h>
 #include "AnimaMesh.h"
 #include "AnimaMeshCreator.h"
+#include "AnimaMeshInstance.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -30,6 +31,7 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 , _bitangents(allocator)
 , _faces(allocator)
 , _materialName(allocator)
+, _meshInstances(allocator)
 {
 	_material = nullptr;
 
@@ -58,6 +60,7 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
+	, _meshInstances(src._meshInstances)
 	//, _colorsBufferObject(src._colorsBufferObject)
 {
 	_allocator = src._allocator;
@@ -102,6 +105,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _visible(src._visible)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
+	, _meshInstances(src._meshInstances)
 {
 }
 
@@ -139,6 +143,8 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_tangents = src._tangents;
 		_bitangents = src._bitangents;
 		_faces = src._faces;
+
+		_meshInstances = src._meshInstances;
 	}
 	
 	return *this;
@@ -173,6 +179,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_boundingBoxMin = src._boundingBoxMin;
 		_boundingBoxMax = src._boundingBoxMax;
 		_boundingBoxCenter = src._boundingBoxCenter;
+
+		_meshInstances = src._meshInstances;
 	}
 	
 	return *this;
@@ -1026,6 +1034,32 @@ AnimaVertex3f AnimaMesh::GetBoundingBoxMax() const
 AnimaVertex3f AnimaMesh::GetBoundingBoxCenter() const
 {
 	return _boundingBoxCenter;
+}
+
+void AnimaMesh::AddInstance(AnimaMeshInstance* instance)
+{
+	if (instance != nullptr)
+		_meshInstances.Add(instance->GetAnimaName(), instance);
+}
+
+AInt AnimaMesh::GetInstancesCount() const
+{
+	return _meshInstances.GetSize();
+}
+
+AnimaMeshInstance* AnimaMesh::GetInstance(AInt index) const
+{
+	return _meshInstances[index];
+}
+
+AnimaMeshInstance* AnimaMesh::GetInstanceFromName(const AnimaString& name) const
+{
+	return _meshInstances[name];
+}
+
+AnimaMeshInstance* AnimaMesh::GetInstanceFromName(const char* name) const
+{
+	return _meshInstances[name];
 }
 
 void AnimaMesh::ComputeSmootNormals()

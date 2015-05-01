@@ -21,7 +21,10 @@
 #include <AnimaCamera.h>
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
+#include <AnimaModelInstancesManager.h>
+#include <AnimaModelInstance.h>
 #include "ImportModelWindow.h"
+#include "NewInstanceWindow.h"
 
 AEDocument::AEDocument()
 {
@@ -690,6 +693,49 @@ bool AEDocument::ImportModel()
 	return false;
 }
 
+bool AEDocument::CreateModelInstace(Anima::AnimaModel* srcModel)
+{
+	QString instanceName = QString("");
+
+	Anima::AnimaModelInstancesManager* modelInstancesManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
+
+	while (true)
+	{
+		NewInstanceWindow dlg(nullptr, instanceName);
+		if (!dlg.exec())
+			return false;
+		else
+		{
+			instanceName = dlg.getInstanceName();
+
+			if (modelInstancesManager->GetModelInstanceFromName(instanceName.toLocal8Bit().constData()) != nullptr)
+			{
+				QMessageBox msg;
+				msg.setWindowTitle(QString("AnimaEditor"));
+				msg.setText(QString("Unable to create the new instance.\nThe name '%1' is already used").arg(instanceName));
+				msg.exec();
+			}
+			else
+			{
+				if (modelInstancesManager->CreateInstance(instanceName.toLocal8Bit().constData(), srcModel))
+				{
+					_hasModifications = true;
+					return true;
+				}
+				else
+				{
+					QMessageBox msg;
+					msg.setWindowTitle(QString("AnimaEditor"));
+					msg.setText(QString("Unable to create the new instance.\nUnknown error."));
+					msg.exec();
+					return false;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 bool AEDocument::ImportTexture()
 {
 	return true;
@@ -795,9 +841,16 @@ bool AEDocument::ReadModels(QXmlStreamReader* xmlReader)
 bool AEDocument::ImportModelInternal(QString modelName, QString modelFileName)
 {	
 	Anima::AnimaModel* model = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager()->LoadModel(modelFileName.toLocal8Bit().constData(), modelName.toLocal8Bit().constData());
-	
 	if(!model)
 		return false;	
+	return true;
+}
+
+bool AEDocument::CreateModelInstanceInternal(QString instanceName, Anima::AnimaModel* srcModel)
+{
+	Anima::AnimaModelInstance* modelInstace = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager()->CreateInstance(instanceName.toLocal8Bit().constData(), srcModel);
+	if (!modelInstace)
+		return false;
 	return true;
 }
 

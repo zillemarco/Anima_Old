@@ -99,9 +99,13 @@ public:
 	AnimaMatrix GetNormalMatrix();
 	AnimaMatrix* GetPNormalMatrix();
 
+	AnimaSceneObject* GetParentObject() const;
+
 protected:
 	void SetInitialTransformationMatrix(const AnimaMatrix& m);
 	void SetInitialTransformationMatrix(AFloat m[16]);
+
+	void SetParentObject(AnimaSceneObject* parentObject);
 	
 protected:
 	AnimaVertex3f _translation;

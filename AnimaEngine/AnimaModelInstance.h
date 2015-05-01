@@ -47,7 +47,9 @@ public:
 	AnimaModel* GetModel() const;
 
 protected:
-	const char* GetShaderPrefix() { return ""; }
+	const char* GetShaderPrefix() { return "MOD"; }
+
+	virtual void UpdateChildrenTransformation();
 
 protected:
 	AnimaModel* _model;

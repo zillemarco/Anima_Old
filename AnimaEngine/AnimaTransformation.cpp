@@ -507,4 +507,14 @@ void AnimaTransformation::SetInitialTransformationMatrix(AFloat m[16])
 	UpdateMatrix();
 }
 
+AnimaSceneObject* AnimaTransformation::GetParentObject() const
+{
+	return _parentObject;
+}
+
+void AnimaTransformation::SetParentObject(AnimaSceneObject* parentObject)
+{
+	_parentObject = parentObject;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

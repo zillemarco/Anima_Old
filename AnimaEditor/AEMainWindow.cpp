@@ -289,15 +289,18 @@ void AEMainWindow::updateRecentProjectActions()
 	QSettings settings("ZEB", "AnimaEditor");
 	QStringList files = settings.value("recentFileList").toStringList();
 
-	int numRecentFiles = qMin(files.size() / 2, (int)MaxRecentFiles);
+	int numData = qMin(files.size(), (int)MaxRecentFiles);
+	int numRecentFiles = numData / 2;
 	
-	for (int i = 0; i < numRecentFiles; i++) 
+	int offset = 0;
+	for (int i = 0; i < numData; i += 2)
 	{
 		QString projectName = files[i];
 		QString filePath = files[i + 1];
-		recentProjectActs[i]->setText(projectName);
-		recentProjectActs[i]->setData(filePath);
-		recentProjectActs[i]->setVisible(true);
+		recentProjectActs[offset]->setText(projectName);
+		recentProjectActs[offset]->setData(filePath);
+		recentProjectActs[offset]->setVisible(true);
+		offset++;
 	}
 
 	for (int j = numRecentFiles; j < MaxRecentFiles; ++j)

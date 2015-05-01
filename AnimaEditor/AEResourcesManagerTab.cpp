@@ -32,7 +32,6 @@ AEResourcesManagerTab::AEResourcesManagerTab(AEDocument* doc, AELoadedResourcesP
 
 	_resourcesPanel = resourcesPanel;
 	_modelViewer = new AEResourcesManagerModelViewer(_document->GetEngine());
-	_modelViewer->InitRender();
 	
 	QList<int> dims;
 	dims.push_back(1);

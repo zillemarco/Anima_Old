@@ -82,23 +82,67 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 		return nullptr;
 
 	AnimaString completeInstanceName(_scene->GetStringAllocator());
-	completeInstanceName = instanceName;
 	if (useSrcModelName)
-		completeInstanceName += "." + srcModel->GetAnimaName();
+		completeInstanceName = srcModel->GetAnimaName() + "." + instanceName;
+	else
+		completeInstanceName = instanceName;
 
-	AnimaModelInstance* modelInstance = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstance>(*(_scene->GetModelInstancesAllocator()), completeInstanceName, _scene->GetDataGeneratorsManager(), _scene->GetModelInstancesAllocator());
-	modelInstance->CopyData(*srcModel);
-	modelInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
+	AnimaString modelName = srcModel->GetAnimaName();
+	AnimaString modelInstanceName(_scene->GetStringAllocator());
+	AnimaModelInstance* newInstance = nullptr;
+	int nameOffset = 0;
+	while (newInstance == nullptr)
+	{
+		if (nameOffset > 0)
+		{
+			if (useSrcModelName)
+				modelInstanceName.Format("%s.%s%d", modelName.GetConstBuffer(), instanceName.GetConstBuffer(), nameOffset);
+			else
+				modelInstanceName.Format("%s%d", instanceName.GetConstBuffer(), nameOffset);
+		}
+		else
+		{
+			if (useSrcModelName)
+				modelInstanceName.Format("%s.%s", modelName.GetConstBuffer(), instanceName.GetConstBuffer());
+			else
+				modelInstanceName.Format("%s", instanceName.GetConstBuffer());
+		}
+
+		newInstance = CreateEmptyInstance(modelInstanceName);
+		nameOffset++;
+	}
+
+	newInstance->CopyData(*srcModel);
+	newInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
 
 	AInt childrenNumber = srcModel->GetChildrenNumber();
 	for (AInt i = 0; i < childrenNumber; i++)
 	{
 		AnimaModelInstance* newChild = CreateInstanceFromModel(instanceName, (AnimaModel*)srcModel->GetChild(i), true);
-		modelInstance->AddChild(newChild);
+		newInstance->AddChild(newChild);
 	}
 
-	_modelIntances.Add(modelInstance);
+	newInstance->UpdateChildrenTransformation();
+
+	return newInstance;
+}
+
+AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const AnimaString& instanceName)
+{
+	AInt index = _modelIntances.Contains(instanceName);
+	if (index >= 0)
+		return nullptr;
+
+	AnimaModelInstance* modelInstance = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstance>(*(_scene->GetModelInstancesAllocator()), instanceName, _scene->GetDataGeneratorsManager(), _scene->GetModelInstancesAllocator());
+	_modelIntances.Add(instanceName, modelInstance);
+
 	return modelInstance;
+}
+
+AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const char* instanceName)
+{
+	AnimaString str(instanceName, _scene->GetStringAllocator());
+	return CreateEmptyInstance(str);
 }
 
 AInt AnimaModelInstancesManager::GetModelInstancesNumber()

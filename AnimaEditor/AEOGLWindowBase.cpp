@@ -93,12 +93,11 @@ void AEOGLWindowBase::RenderNow()
 	if(!_context)
 	{
 		QSurfaceFormat format;
-		format.setDepthBufferSize( 24 );
-		format.setMajorVersion( 4 );
-		format.setMinorVersion( 1 );
-		format.setSamples( 4 );
-		format.setProfile( QSurfaceFormat::CoreProfile );
-		setFormat( format );
+		format.setDepthBufferSize(24);
+		format.setMajorVersion(4);
+		format.setMinorVersion(2);
+		format.setProfile(QSurfaceFormat::CompatibilityProfile);
+		setFormat(format);
 		create();
 		
 		_context = new QOpenGLContext(this);
