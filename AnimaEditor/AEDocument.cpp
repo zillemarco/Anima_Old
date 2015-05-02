@@ -94,6 +94,18 @@ bool AEDocument::NewDocument(QString name, QString path)
 	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
+
+	Anima::AnimaLightsManager* lightsManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetLightsManager();
+	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
+	hemL->SetIntensity(0.5f);
+	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
+	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
+	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
+
+	//Anima::AnimaDirectionalLight* directionalLight = lightsManager->CreateDirectionalLight("directional");
+	//directionalLight->SetColor(1.0f, 1.0f, 1.0f);
+	//directionalLight->SetIntensity(1.0f);
+	//directionalLight->SetDirection(-1.0f, 0.0f, -1.0f);
 	
 	_hasModifications = true;
 	_newDocument = true;
@@ -120,6 +132,18 @@ bool AEDocument::OpenDocument(QString path)
 	Anima::AnimaCamera* cam = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->CreateThirdPersonCamera("CRModelViewerCamera");
 	cam->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, 0.0);
 	cam->Activate();
+
+	Anima::AnimaLightsManager* lightsManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetLightsManager();
+	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
+	hemL->SetIntensity(0.5f);
+	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
+	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
+	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
+
+	//Anima::AnimaDirectionalLight* directionalLight = lightsManager->CreateDirectionalLight("directional");
+	//directionalLight->SetColor(1.0f, 1.0f, 1.0f);
+	//directionalLight->SetIntensity(1.0f);
+	//directionalLight->SetDirection(-1.0f, 0.0f, -1.0f);
 
 	_hasModifications = false;
 	_newDocument = false;

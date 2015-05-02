@@ -338,7 +338,7 @@ void AnimaRenderingManager::ApplyEffectFromTextureToTexture(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	filterProgram->UpdateSceneObjectProperties(_filterMesh, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -375,7 +375,8 @@ void AnimaRenderingManager::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	//filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	filterProgram->UpdateSceneObjectProperties(_filterMesh, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -413,7 +414,8 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	//filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	filterProgram->UpdateSceneObjectProperties(_filterMesh, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -449,7 +451,8 @@ void AnimaRenderingManager::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateCameraProperies(_filterCamera);
-	filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	//filterProgram->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	filterProgram->UpdateSceneObjectProperties(_filterMesh, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -520,9 +523,6 @@ void AnimaRenderingManager::DeferredDrawAll(AnimaScene* scene)
 
 	glDepthMask(GL_FALSE);
 
-	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	//for (auto pair : (*lights))
-	//	DeferredLightPass(scene, pair.second->GetLightsArray());
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
@@ -695,6 +695,16 @@ void AnimaRenderingManager::DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh,
 		for (AInt i = 0; i < instancesCount; i++)
 		{
 			AnimaMeshInstance* instance = mesh->GetInstance(i);
+
+			if (updateMaterial)
+			{
+				AnimaMaterial* material = instance->GetMaterial();
+				if (material == nullptr)
+					return;
+
+				program->UpdateMaterialProperies(material, this);
+			}
+
 			program->UpdateSceneObjectProperties(instance, this);
 
 #ifdef WIN32
@@ -882,7 +892,8 @@ void AnimaRenderingManager::DeferredLightPass(AnimaScene* scene, AnimaArray<Anim
 		light->UpdateCullFace(activeCamera);
 
 		program->UpdateLightProperies(light, this);
-		program->UpdateMeshProperies(mesh, mesh->GetTransformation()->GetTransformationMatrix(), mesh->GetTransformation()->GetNormalMatrix());
+		//program->UpdateMeshProperies(mesh, mesh->GetTransformation()->GetTransformationMatrix(), mesh->GetTransformation()->GetNormalMatrix());
+		program->UpdateSceneObjectProperties(mesh, this);
 		program->UpdateRenderingManagerProperies(this);
 
 #ifdef WIN32
@@ -913,7 +924,8 @@ void AnimaRenderingManager::DeferredCombinePass(AnimaScene* scene, AnimaShaderPr
 	if (_filterMesh->NeedsBuffersUpdate())
 		_filterMesh->UpdateBuffers();
 
-	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	//program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	program->UpdateSceneObjectProperties(_filterMesh, this);
 	program->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32
@@ -1138,7 +1150,8 @@ void AnimaRenderingManager::CombinePrimitives(AnimaScene* scene, AnimaShaderProg
 	
 	program->Use();
 	program->UpdateCameraProperies(_filterCamera);
-	program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	//program->UpdateMeshProperies(_filterMesh, _filterMesh->GetTransformation()->GetTransformationMatrix(), _filterMesh->GetTransformation()->GetNormalMatrix());
+	program->UpdateSceneObjectProperties(_filterMesh, this);
 	program->UpdateRenderingManagerProperies(this);
 	
 #ifdef WIN32

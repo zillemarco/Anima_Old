@@ -111,18 +111,13 @@ void AEResourcesManagerModelViewer::Render()
 
 	_renderingManager->InitRenderingTargets(w, h);
 
-	glViewport(0, 0, w, h);
-
-	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, w / h, 0.1f, 1000.0f);
+	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
 	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetDataGeneratorsManager()->UpdateValues();
 
 	_renderingManager->Start(_engine->GetScenesManager()->GetScene("AnimaEditor"));
 
 	_renderingManager->DeferredDrawAll(_engine->GetScenesManager()->GetScene("AnimaEditor"));
-
-	//if (_selectedModel != nullptr)
-	//	_renderingManager->DeferredDrawModel(_engine->GetScenesManager()->GetScene("AnimaEditor"), _selectedModel);
-
+	
 	_renderingManager->Finish(_engine->GetScenesManager()->GetScene("AnimaEditor"));
 
 	++_frame;
