@@ -47,6 +47,7 @@ typedef AnimaEngineWindow_Base AnimaWindow;
 
 class AnimaScenesManager;
 class AnimaShadersManager;
+class AnimaDataGeneratorsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaEngine
 {
@@ -255,6 +256,11 @@ public:
 		return _scenesManager;
 	}
 
+	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager() {
+		ANIMA_ASSERT(_dataGeneratorsManager != nullptr);
+		return _dataGeneratorsManager;
+	}
+
 protected:
 	void*	_localMemory;								/*!< Buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
 	ASizeT	_localMemorySize;							/*!< Dimensione del buffer della memoria principale di AnimaEngine a cui puntano i custom allocator */
@@ -279,6 +285,7 @@ protected:
 private:
 	AnimaScenesManager*			_scenesManager;
 	AnimaShadersManager*		_shadersManager;				/*!< Gestore di tutti gli shader dell'istanza corrente di AnimaEngine */
+	AnimaDataGeneratorsManager* _dataGeneratorsManager;
 };
 
 template<class T>

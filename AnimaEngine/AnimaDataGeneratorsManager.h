@@ -24,10 +24,12 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaEngine;
+
 class ANIMA_ENGINE_EXPORT AnimaDataGeneratorsManager
 {
 public:
-	AnimaDataGeneratorsManager(AnimaScene* scene);
+	AnimaDataGeneratorsManager(AnimaScene* scene, AnimaEngine* engine = nullptr);
 	~AnimaDataGeneratorsManager();
 	
 	template<class T> T* CreateDataGenerator(const AnimaString& name);
@@ -57,6 +59,8 @@ private:
 	
 private:
 	AnimaScene* _scene;
+	AnimaEngine* _engine;
+
 	AnimaTypeMappedArray<AnimaDataGenerator*> _dataGenerators;
 };
 
@@ -66,9 +70,10 @@ T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
 	AnimaDataGenerator* dataGenerator = _dataGenerators.Contains(name);
 	if (dataGenerator != nullptr)
 		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetDataGeneratorsAllocator()), _scene->GetDataGeneratorsAllocator());
+
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+	ANIMA_ASSERT(allocator != nullptr);
+	T* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<T>(*allocator, allocator);
 	_dataGenerators.Add<T*>(name, newDataGenerator);
 	
 	return newDataGenerator;
@@ -77,7 +82,8 @@ T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
 template<class T>
 T* AnimaDataGeneratorsManager::CreateDataGenerator(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
 	return CreateDataGenerator<T>(str);
 }
 
@@ -96,7 +102,8 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(c
 template<class T>
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
 	return GetDataGeneratorOfTypeFromName<T*>(str);
 }
 

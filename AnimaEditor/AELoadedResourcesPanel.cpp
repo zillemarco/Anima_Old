@@ -1,5 +1,6 @@
 #include "AELoadedResourcesPanel.h"
 #include "AEDocument.h"
+#include "AEResourcesManagerModelViewer.h"
 
 #include <qmenu.h>
 #include <qaction.h>
@@ -103,9 +104,10 @@ bool AELoadedResourcesTreeViewItemModel::setData(const QModelIndex & index, cons
 	return QStandardItemModel::setData(index, value, role);
 }
 
-AELoadedResourcesTreeView::AELoadedResourcesTreeView(AEDocument* doc)
+AELoadedResourcesTreeView::AELoadedResourcesTreeView(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer)
 {
 	_document = doc;
+	_resourcesViewer = resourcesViewer;
 
 	_resourcesModel = new AELoadedResourcesTreeViewItemModel(_document, 0, 2);
 	setModel(_resourcesModel);
@@ -130,7 +132,7 @@ AELoadedResourcesTreeView::AELoadedResourcesTreeView(AEDocument* doc)
 	setColumnWidth(1, 100);
 
 	QItemSelectionModel* selectModel = selectionModel();
-	connect(selectModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(resourceModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
+	connect(selectModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(resourceSelectionChanged(const QItemSelection&, const QItemSelection&)));
 	
 	createMenus();
 }
@@ -184,7 +186,7 @@ void AELoadedResourcesTreeView::LoadMeshes()
 		Anima::AnimaMesh* mesh = mgr->GetMesh(i);
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mesh->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(mesh), ModelRole);
+		resourceNameItem->setData(QVariant::fromValue(mesh), MeshRole);
 		resourceNameItem->setEditable(false);
 
 		QList<QStandardItem*> newItem;
@@ -205,7 +207,7 @@ void AELoadedResourcesTreeView::LoadModelInstances()
 		Anima::AnimaModelInstance* instance = mgr->GetModelInstance(i);
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(instance), ModelRole);
+		resourceNameItem->setData(QVariant::fromValue(instance), ModelInstanceRole);
 		resourceNameItem->setEditable(false);
 
 		QList<QStandardItem*> newItem;
@@ -226,7 +228,7 @@ void AELoadedResourcesTreeView::LoadMeshInstances()
 		Anima::AnimaMeshInstance* instance = mgr->GetMeshInstance(i);
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(instance), ModelRole);
+		resourceNameItem->setData(QVariant::fromValue(instance), MeshInstanceRole);
 		resourceNameItem->setEditable(false);
 
 		QList<QStandardItem*> newItem;
@@ -247,7 +249,7 @@ void AELoadedResourcesTreeView::LoadMaterials()
 		Anima::AnimaMaterial* material = mgr->GetMaterial(i);
 
 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(material->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(material), ModelRole);
+		resourceNameItem->setData(QVariant::fromValue(material), MaterialRole);
 		resourceNameItem->setEditable(false);
 
 		QList<QStandardItem*> newItem;
@@ -262,15 +264,36 @@ void AELoadedResourcesTreeView::LoadTextures()
 {
 }
 
-void AELoadedResourcesTreeView::resourceModelSelectionChanged(const QItemSelection& current, const QItemSelection& previous)
+void AELoadedResourcesTreeView::resourceSelectionChanged(const QItemSelection& current, const QItemSelection& previous)
 {
 	const QModelIndex index = selectionModel()->currentIndex();
 	QVariant var = index.data(ModelRole);
-
 	if (var.isValid())
 	{
 		Anima::AnimaModel* model = var.value<Anima::AnimaModel*>();
-		//_modelViewer->setSelectedModel(model);
+		_resourcesViewer->setSelectedObject(model);
+		return;
+	}
+	var = index.data(ModelInstanceRole);
+	if (var.isValid())
+	{
+		Anima::AnimaModelInstance* instance = var.value<Anima::AnimaModelInstance*>();
+		_resourcesViewer->setSelectedObject(instance);
+		return;
+	}
+	var = index.data(MeshRole);
+	if (var.isValid())
+	{
+		Anima::AnimaMesh* mesh = var.value<Anima::AnimaMesh*>();
+		_resourcesViewer->setSelectedObject(mesh);
+		return;
+	}
+	var = index.data(MeshInstanceRole);
+	if (var.isValid())
+	{
+		Anima::AnimaMeshInstance* instance = var.value<Anima::AnimaMeshInstance*>();
+		_resourcesViewer->setSelectedObject(instance);
+		return;
 	}
 }
 
@@ -343,15 +366,16 @@ void AELoadedResourcesTreeView::createMenus()
 	addAction(_addNewMaterialAct);
 }
 
-AELoadedResourcesPanel::AELoadedResourcesPanel(AEDocument* doc, QWidget* parent)
+AELoadedResourcesPanel::AELoadedResourcesPanel(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer, QWidget* parent)
 	: QDockWidget(tr("Loaded resources"), parent)
 {
 	_document = doc;
+	_resourcesViewer = resourcesViewer;
 
 	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle(tr("Resources manager"));
 
-	_resourcesTree = new AELoadedResourcesTreeView(doc);
+	_resourcesTree = new AELoadedResourcesTreeView(doc, resourcesViewer);
 
 	setWidget(_resourcesTree);
 

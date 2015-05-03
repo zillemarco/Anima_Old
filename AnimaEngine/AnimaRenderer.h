@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __Anima__AnimaRenderingManager__
-#define __Anima__AnimaRenderingManager__
+#ifndef __Anima__AnimaRenderer__
+#define __Anima__AnimaRenderer__
 
 #include <stdio.h>
 #include "AnimaEngineCore.h"
@@ -16,6 +16,8 @@
 #include "AnimaFrustum.h"
 #include "AnimaMatrix.h"
 #include "AnimaMeshInstance.h"
+#include "AnimaModel.h"
+#include "AnimaModelInstance.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -60,10 +62,12 @@ protected:
 	AnimaMatrix					_modelMatrix;
 };
 
+class AnimaEngine;
+
 class ANIMA_ENGINE_EXPORT AnimaRenderer
 {
 public:
-	AnimaRenderer(AnimaScene* scene, AnimaAllocator* allocator);
+	AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator);
 	AnimaRenderer(AnimaRenderer& src);
 	AnimaRenderer(AnimaRenderer&& src);
 	virtual ~AnimaRenderer();
@@ -72,15 +76,17 @@ public:
 	AnimaRenderer& operator=(AnimaRenderer&& src);
 	
 public:
-	void Start(AnimaScene* scene);
-	void Finish(AnimaScene* scene);
+	virtual void Start(AnimaScene* scene);
 
-	void DeferredDrawAll(AnimaScene* scene);
-	void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model);
+	virtual void DrawAll();
+	virtual void DrawMesh(AnimaMesh* mesh);
+	virtual void DrawMesh(AnimaMeshInstance* instance);
+	virtual void DrawModel(AnimaModel* model);
+	virtual void DrawModel(AnimaModelInstance* instance);
 	
-	void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
+	virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
 
-	void UpdateModelsVisibility(AnimaScene* scene);
+	virtual void UpdateModelsVisibility();
 	
 public:
 	virtual void InitTextureSlots();
@@ -88,23 +94,37 @@ public:
 	virtual void InitRenderingUtilities(AInt screenWidth, AInt screenHeight);
 
 protected:
-	void DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model = nullptr);
-	void DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* program);
-	void DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program);
-	void DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights);
+	virtual void Start();
+	virtual void Finish();
 
-	void DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+protected:
+	virtual void PreparePass(AnimaShaderProgram* program);
+	virtual void PreparePass(AnimaShaderProgram* program, AnimaMesh* mesh);
+	virtual void PreparePass(AnimaShaderProgram* program, AnimaMeshInstance* instance);
+	virtual void PreparePass(AnimaShaderProgram* program, AnimaModel* model);
+	virtual void PreparePass(AnimaShaderProgram* program, AnimaModelInstance* instance);
 
-	//void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	//void DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	//void DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-		
+	//virtual void UpdateShadowMaps(AnimaShaderProgram* program);
+	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh);
+	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance);
+	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model);
+	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance);
+
+	virtual void LightPass(AnimaArray<AnimaLight*>* lights);
+	virtual void CombinePass(AnimaShaderProgram* program);
+
+	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+	virtual void DrawMesh(AnimaMeshInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	//virtual void DrawModel(AnimaModel* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+	//virtual void DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+
+protected:
 	void Clear();
 	void ClearPrimitives();
 	
-	void DrawPrimitives(AnimaScene* scene, AnimaShaderProgram* program);
+	void DrawPrimitives(AnimaShaderProgram* program);
 	void DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProgram* program);
-	void CombinePrimitives(AnimaScene* scene, AnimaShaderProgram* program);
+	void CombinePrimitives(AnimaShaderProgram* program);
 
 	void ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
 	void ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
@@ -190,6 +210,7 @@ public:
 protected:
 	AnimaAllocator* _allocator;
 	AnimaScene*		_scene;
+	AnimaEngine*	_engine;
 
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
@@ -227,7 +248,7 @@ AnimaMesh* AnimaRenderer::CreateMeshForLightType()
 
 	AnimaString name = type + "_RENMESH";
 
-	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _scene->GetDataGeneratorsManager(), _allocator);
+	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
 	_lightsMeshMap[type] = lightMesh;
 
 	return lightMesh;
@@ -235,4 +256,4 @@ AnimaMesh* AnimaRenderer::CreateMeshForLightType()
 
 END_ANIMA_ENGINE_NAMESPACE
 
-#endif //__Anima__AnimaRenderingManager__
+#endif //__Anima__AnimaRenderer__

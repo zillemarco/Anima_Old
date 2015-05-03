@@ -104,13 +104,15 @@ void AEMainWindow::newProject()
 
 		setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
 		
-		_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, this);
+		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
+		_worldEditorTab = new WorldEditorTab(_activeDocument);
+
+		_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, _resourceManagerTab->GetModelViewer(), this);
 		addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
 		_loadedResourcesPanel->setVisible(true);
-
-		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument, _loadedResourcesPanel);
-		_worldEditorTab = new WorldEditorTab(_activeDocument);
 		
+		_resourceManagerTab->SetResourcesPanel(_loadedResourcesPanel);
+
 		_mdiArea->addSubWindow(_resourceManagerTab);
 		_mdiArea->addSubWindow(_worldEditorTab);
 		
@@ -177,12 +179,14 @@ void AEMainWindow::openProject(QString filePath, bool askIfEmpty)
 		
 	setCurrentProject(_activeDocument->projectFilePath(), _activeDocument->projectName());
 
-	_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, this);
+	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
+	_worldEditorTab = new WorldEditorTab(_activeDocument);
+
+	_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, _resourceManagerTab->GetModelViewer(), this);
 	addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
 	_loadedResourcesPanel->setVisible(true);
 
-	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument, _loadedResourcesPanel);
-	_worldEditorTab = new WorldEditorTab(_activeDocument);
+	_resourceManagerTab->SetResourcesPanel(_loadedResourcesPanel);
 		
 	_mdiArea->addSubWindow(_resourceManagerTab);
 	_mdiArea->addSubWindow(_worldEditorTab);

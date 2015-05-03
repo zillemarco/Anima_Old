@@ -27,6 +27,8 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaMeshInstance;
+class AnimaRenderer;
+class AnimaShaderProgram;
 
 class ANIMA_ENGINE_EXPORT AnimaMesh : public AnimaSceneObject
 {
@@ -42,6 +44,9 @@ public:
 	bool operator==(const AnimaMesh& other);
 	bool operator!=(const AnimaMesh& other);
 	
+public:
+	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial = true);
+
 public:
 	// Gestione dati struttura
 	void ClearAll();

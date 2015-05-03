@@ -7,6 +7,8 @@
 //
 
 #include "AnimaMeshInstance.h"
+#include "AnimaShaderProgram.h"
+#include "AnimaRenderer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -94,6 +96,25 @@ AnimaMesh* AnimaMeshInstance::GetMesh() const
 void AnimaMeshInstance::SetMesh(AnimaMesh* mesh)
 {
 	_mesh = mesh;
+}
+
+void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial)
+{
+	program->UpdateSceneObjectProperties(this, renderer);
+
+	if (updateMaterial)
+		program->UpdateMaterialProperies(_material, renderer);
+
+#ifdef WIN32
+	glBindVertexArray(_mesh->GetVertexArrayObject());
+	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+#else
+	program->EnableInputs(_mesh);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	program->DisableInputs();
+#endif
 }
 
 END_ANIMA_ENGINE_NAMESPACE

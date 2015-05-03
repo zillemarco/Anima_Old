@@ -23,20 +23,23 @@ class AEResourcesManagerTab : public QFrame
 {
 	Q_OBJECT
 public:
-	AEResourcesManagerTab(AEDocument* doc, AELoadedResourcesPanel* resourcesPanel);
+	AEResourcesManagerTab(AEDocument* doc);
 	
 	void saveSettings(QSettings* settings);
 	void readSettings(QSettings* settings);
 	
 public:
 	void LoadResourcesTree();
-			
+	void SetResourcesPanel(AELoadedResourcesPanel* resourcesPanel);
+	
+	AEResourcesManagerModelViewer* GetModelViewer() const { return _modelViewer; }
+
 private:
 	AEDocument* _document;
 	
 	//QSplitter* _mainSplitter;
 	AELoadedResourcesPanel* _resourcesPanel;
-	AEResourcesManagerModelViewer* _modelViewer;	
+	AEResourcesManagerModelViewer* _modelViewer;
 };
 
 #endif /* defined(__Anima__ResourceManagerTab__) */

@@ -1,8 +1,11 @@
 #pragma once
 
 #include "AEOGLWindowBase.h"
-#include <AnimaRenderingManager.h>
+#include <AnimaRenderer.h>
 #include <AnimaModel.h>
+#include <AnimaModelInstance.h>
+#include <AnimaMesh.h>
+#include <AnimaMeshInstance.h>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -19,11 +22,18 @@ public:
 	void mouseMoveEvent(QMouseEvent* mEvent);
 	void wheelEvent(QWheelEvent* wEvent);
 
-	void setSelectedModel(Anima::AnimaModel* model);
+	void setSelectedObject(Anima::AnimaModel* model);
+	void setSelectedObject(Anima::AnimaModelInstance* instance);
+	void setSelectedObject(Anima::AnimaMesh* mesh);
+	void setSelectedObject(Anima::AnimaMeshInstance* instance);
 	
 private:
-	Anima::AnimaRenderingManager* _renderingManager;
+	Anima::AnimaRenderer* _renderingManager;
+
 	Anima::AnimaModel* _selectedModel;
+	Anima::AnimaModelInstance* _selectedModelInstance;
+	Anima::AnimaMesh* _selectedMesh;
+	Anima::AnimaMeshInstance* _selectedMeshInstance;
 
 	int _frame;
 

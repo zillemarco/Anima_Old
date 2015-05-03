@@ -10,9 +10,10 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaDataGeneratorsManager::AnimaDataGeneratorsManager(AnimaScene* scene)
-	: _dataGenerators(scene->GetEngine()->GetDataGeneratorsAllocator())
+AnimaDataGeneratorsManager::AnimaDataGeneratorsManager(AnimaScene* scene, AnimaEngine* engine)
+: _dataGenerators(scene == nullptr ? engine->GetDataGeneratorsAllocator() : scene->GetEngine()->GetDataGeneratorsAllocator())
 {
+	_engine = engine;
 	_scene = scene;
 }
 
@@ -28,7 +29,8 @@ AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const Anim
 
 AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
 	return CreateColorGenerator(str);
 }
 
@@ -39,12 +41,15 @@ AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const An
 
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
 	return CreateVectorGenerator(str);
 }
 
 void AnimaDataGeneratorsManager::ClearGenerators()
 {
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
@@ -53,7 +58,7 @@ void AnimaDataGeneratorsManager::ClearGenerators()
 		for (AInt i = 0; i < count; i++)
 		{
 			AnimaDataGenerator* dataGenerator = (*dataGeneratorsArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetDataGeneratorsAllocator()), dataGenerator);
+			AnimaAllocatorNamespace::DeallocateObject(*allocator, dataGenerator);
 			dataGenerator = nullptr;
 		}
 	}
@@ -68,7 +73,8 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const AnimaString& 
 
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
 	return GetGenerator(str);
 }
 

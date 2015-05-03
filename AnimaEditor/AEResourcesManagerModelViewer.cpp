@@ -30,6 +30,9 @@ AEResourcesManagerModelViewer::AEResourcesManagerModelViewer(Anima::AnimaEngine*
 	_lastMouseXPos = 0;
 	_lastMouseYPos = 0;
 	_selectedModel = nullptr;
+	_selectedModelInstance = nullptr;
+	_selectedMesh = nullptr;
+	_selectedMeshInstance = nullptr;
 }
 
 AEResourcesManagerModelViewer::~AEResourcesManagerModelViewer()
@@ -43,7 +46,7 @@ AEResourcesManagerModelViewer::~AEResourcesManagerModelViewer()
 
 void AEResourcesManagerModelViewer::Initialize()
 {
-	_renderingManager = new Anima::AnimaRenderingManager(_engine->GetScenesManager()->GetScene("AnimaEditor"), _engine->GetGenericAllocator());
+	_renderingManager = new Anima::AnimaRenderer(_engine, _engine->GetGenericAllocator());
 
 	const qreal retinaScale = devicePixelRatio();
 	int w = width() * retinaScale;
@@ -111,14 +114,19 @@ void AEResourcesManagerModelViewer::Render()
 
 	_renderingManager->InitRenderingTargets(w, h);
 
-	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 1000.0f);
+	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->UpdatePerspectiveCameras(60.0f, Anima::AnimaVertex2f((float)w, (float)h), 0.1f, 10000.0f);
 	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetDataGeneratorsManager()->UpdateValues();
 
 	_renderingManager->Start(_engine->GetScenesManager()->GetScene("AnimaEditor"));
 
-	_renderingManager->DeferredDrawAll(_engine->GetScenesManager()->GetScene("AnimaEditor"));
-	
-	_renderingManager->Finish(_engine->GetScenesManager()->GetScene("AnimaEditor"));
+	if (_selectedModel != nullptr)
+		_renderingManager->DrawModel(_selectedModel);
+	else if (_selectedModelInstance != nullptr)
+		_renderingManager->DrawModel(_selectedModelInstance);
+	else if (_selectedMesh != nullptr)
+		_renderingManager->DrawMesh(_selectedMesh);
+	else if (_selectedMeshInstance != nullptr)
+		_renderingManager->DrawMesh(_selectedMeshInstance);
 
 	++_frame;
 }
@@ -197,24 +205,34 @@ void AEResourcesManagerModelViewer::wheelEvent(QWheelEvent* wEvent)
 	_engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->GetActiveCamera()->Zoom(zoomAmount);
 }
 
-void AEResourcesManagerModelViewer::setSelectedModel(Anima::AnimaModel* model)
+void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaModel* model)
 {
 	_selectedModel = model;
+	_selectedModelInstance = nullptr;
+	_selectedMesh = nullptr;
+	_selectedMeshInstance = nullptr;
+}
 
-	if (_selectedModel != nullptr)
-	{
-		// _selectedModel->ComputeBoundingBox(true);
-		// Anima::AnimaVertex3f min = _selectedModel->GetBoundingBoxMin();
-		// Anima::AnimaVertex3f max = _selectedModel->GetBoundingBoxMax();
-		// 
-		// float boxL = fabs(max.x - min.x);
-		// float boxH = fabs(max.y - min.y);
-		// float boxP = fabs(max.z - min.z);
-		// 
-		// Anima::AnimaVertex3f center(max.x - (boxL / 2.0f), max.y - (boxH / 2.0f), max.z - (boxP / 2.0f));
-		// Anima::AnimaVertex3f pos = center;
-		// pos.z += (boxH / 2.0f) / sinf(60.0f * (float)M_PI / 180.0f);
-		// 
-		// _engine->GetScenesManager()->GetScene("AnimaEditor")->GetCamerasManager()->GetActiveCamera()->LookAt(pos, center);
-	}
+void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaModelInstance* instance)
+{
+	_selectedModel = nullptr;
+	_selectedModelInstance = instance;
+	_selectedMesh = nullptr;
+	_selectedMeshInstance = nullptr;
+}
+
+void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMesh* mesh)
+{
+	_selectedModel = nullptr;
+	_selectedModelInstance = nullptr;
+	_selectedMesh = mesh;
+	_selectedMeshInstance = nullptr;
+}
+
+void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMeshInstance* instance)
+{
+	_selectedModel = nullptr;
+	_selectedModelInstance = nullptr;
+	_selectedMesh = nullptr;
+	_selectedMeshInstance = instance;
 }

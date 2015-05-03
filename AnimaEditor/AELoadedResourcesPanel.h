@@ -9,6 +9,7 @@ class AEDocument;
 class QMenu;
 class QAction;
 class QPoint;
+class AEResourcesManagerModelViewer;
 
 class AELoadedResourcesTreeViewItemModel : public QStandardItemModel
 {
@@ -29,12 +30,16 @@ class AELoadedResourcesTreeView : public QTreeView
 {
 	Q_OBJECT
 public:
-	AELoadedResourcesTreeView(AEDocument* doc);
+	AELoadedResourcesTreeView(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer);
 	virtual ~AELoadedResourcesTreeView();
 
 protected:
 	enum AELoadedResourcesTreeViewRoles {
 		ModelRole = Qt::UserRole + 1,
+		ModelInstanceRole,
+		MeshRole,
+		MeshInstanceRole,
+		MaterialRole
 	};
 
 public:
@@ -56,7 +61,7 @@ private:
 	void createMenus();
 
 private slots:
-	void resourceModelSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
+	void resourceSelectionChanged(const QItemSelection& current, const QItemSelection& previous);
 
 	void importModel();
 	void createModelInstance();
@@ -65,6 +70,7 @@ private slots:
 
 protected:
 	AEDocument* _document;
+	AEResourcesManagerModelViewer* _resourcesViewer;
 	AELoadedResourcesTreeViewItemModel* _resourcesModel;
 
 	QStandardItem* _modelResourcesItem;
@@ -85,7 +91,7 @@ class AELoadedResourcesPanel : public QDockWidget
 {
 	Q_OBJECT
 public:
-	AELoadedResourcesPanel(AEDocument* doc, QWidget* parent);
+	AELoadedResourcesPanel(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer, QWidget* parent);
 	virtual ~AELoadedResourcesPanel();
 
 public:
@@ -94,4 +100,5 @@ public:
 protected:
 	AEDocument* _document;
 	AELoadedResourcesTreeView* _resourcesTree;
+	AEResourcesManagerModelViewer* _resourcesViewer;
 };

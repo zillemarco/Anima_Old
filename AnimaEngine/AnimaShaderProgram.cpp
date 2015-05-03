@@ -1,7 +1,7 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaShadersManager.h"
 #include "AnimaLightsManager.h"
-#include "AnimaRenderingManager.h"
+#include "AnimaRenderer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -782,7 +782,7 @@ void AnimaShaderProgram::DisableInputs()
 	}
 }
 
-void AnimaShaderProgram::UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderingManager* renderingManager)
+void AnimaShaderProgram::UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager)
 {
 	if (object == nullptr)
 		return;
@@ -976,7 +976,7 @@ void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
 	}
 }
 
-void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager)
+void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager)
 {
 	if (material == nullptr)
 		return;
@@ -1041,7 +1041,7 @@ void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaR
 	glCullFace(material->GetInteger("CullFace"));
 }
 
-void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager)
+void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager)
 {
 	if (light == nullptr)
 		return;
@@ -1104,7 +1104,7 @@ void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderingM
 	}
 }
 
-void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager)
+void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderingManager)
 {
 	for (auto& pair : _uniforms)
 	{

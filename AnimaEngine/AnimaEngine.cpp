@@ -56,6 +56,7 @@ AnimaEngine::AnimaEngine()
 
 	_scenesManager = nullptr;
 	_shadersManager = nullptr;
+	_dataGeneratorsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -159,6 +160,7 @@ void AnimaEngine::InitializeManagers()
 {
 	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
+	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, nullptr, this);
 }
 
 void AnimaEngine::Terminate()
@@ -281,6 +283,12 @@ void AnimaEngine::TerminateManagers()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _shadersManager);
 		_shadersManager = nullptr;
+	}
+
+	if (_dataGeneratorsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _dataGeneratorsManager);
+		_dataGeneratorsManager = nullptr;
 	}
 }
 

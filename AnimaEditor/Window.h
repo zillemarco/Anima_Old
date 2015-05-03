@@ -8,7 +8,7 @@
 #include <AnimaTexture.h>
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
-#include <AnimaRenderingManager.h>
+#include <AnimaRenderer.h>
 #include <AnimaMesh.h>
 #include <AnimaFPSTimer.h>
 #include <AnimaBenchmarkTimer.h>
@@ -43,7 +43,7 @@ private:
 
 	void BindAsRenderTarget();
 
-	Anima::AnimaRenderingManager* renderingManager;
+	Anima::AnimaRenderer* renderingManager;
 	
 	bool projection;
 	bool type;

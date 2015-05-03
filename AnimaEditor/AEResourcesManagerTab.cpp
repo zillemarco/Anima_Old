@@ -20,7 +20,7 @@
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
 
-AEResourcesManagerTab::AEResourcesManagerTab(AEDocument* doc, AELoadedResourcesPanel* resourcesPanel)
+AEResourcesManagerTab::AEResourcesManagerTab(AEDocument* doc)
 {
 	setProperty("AEMDIFrame", true);
 	style()->unpolish(this);
@@ -30,16 +30,18 @@ AEResourcesManagerTab::AEResourcesManagerTab(AEDocument* doc, AELoadedResourcesP
 	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle(tr("Resources manager"));
 
-	_resourcesPanel = resourcesPanel;
+	_resourcesPanel = nullptr;
 	_modelViewer = new AEResourcesManagerModelViewer(_document->GetEngine());
-	
-	QList<int> dims;
-	dims.push_back(1);
-				
+					
 	QHBoxLayout* mainLayout = new QHBoxLayout;
 	mainLayout->addWidget(QWidget::createWindowContainer(_modelViewer));
 	
 	setLayout(mainLayout);
+}
+
+void AEResourcesManagerTab::SetResourcesPanel(AELoadedResourcesPanel* resourcesPanel)
+{
+	_resourcesPanel = resourcesPanel;
 }
 
 void AEResourcesManagerTab::saveSettings(QSettings* settings)

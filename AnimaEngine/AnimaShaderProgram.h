@@ -17,7 +17,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShadersManager;
-class AnimaRenderingManager;
+class AnimaRenderer;
 
 class ANIMA_ENGINE_EXPORT AnimaShaderProgram
 {
@@ -104,13 +104,13 @@ public:
 	void EnableInput(const char* inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();
 
-	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderingManager* renderingManager);
+	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager);
 	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix);
 	void UpdateCameraProperies(AnimaCamera* camera);
-	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderingManager* renderingManager);
-	void UpdateLightProperies(AnimaLight* light, AnimaRenderingManager* renderingManager);
+	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager);
+	void UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager);
 	void UpdateLightsProperies(AnimaScene* scene);
-	void UpdateRenderingManagerProperies(AnimaRenderingManager* renderingManager);
+	void UpdateRenderingManagerProperies(AnimaRenderer* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);

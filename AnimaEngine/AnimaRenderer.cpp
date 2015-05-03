@@ -18,11 +18,12 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaRenderer::AnimaRenderer(AnimaScene* scene, AnimaAllocator* allocator)
+AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	: _primitives(allocator)
 {
 	_allocator = allocator;
-	_scene = scene;
+	_engine = engine;
+	_scene = nullptr;
 
 	_filterCamera = nullptr;
 	_filterMesh = nullptr;
@@ -56,6 +57,9 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
+
+	_scene = src._scene;
+	_engine = src._engine;
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
@@ -79,6 +83,9 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
+
+	_scene = src._scene;
+	_engine = src._engine;
 }
 
 AnimaRenderer::~AnimaRenderer()
@@ -111,6 +118,9 @@ AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
+
+		_scene = src._scene;
+		_engine = src._engine;
 	}
 
 	return *this;
@@ -141,6 +151,9 @@ AnimaRenderer& AnimaRenderer::operator=(AnimaRenderer&& src)
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
+
+		_scene = src._scene;
+		_engine = src._engine;
 	}
 
 	return *this;
@@ -286,8 +299,8 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	//
 	// Inizializzazione delle mesh di supporto
 	//
-	AnimaString name("filter_RENMESH", _scene->GetStringAllocator());
-	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _scene->GetDataGeneratorsManager(), _allocator);
+	AnimaString name("filter_RENMESH", _engine->GetStringAllocator());
+	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
 
@@ -428,33 +441,41 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 
 void AnimaRenderer::Start(AnimaScene* scene)
 {
-	scene->GetShadersManager()->SetActiveProgram(nullptr);
+	ANIMA_ASSERT(scene != nullptr);
+	_scene = scene;
 }
 
-void AnimaRenderer::Finish(AnimaScene* scene)
+void AnimaRenderer::Start()
 {
-	scene->GetShadersManager()->SetActiveProgram(nullptr);
+	ANIMA_ASSERT(_scene != nullptr);
+	_scene->GetShadersManager()->SetActiveProgram(nullptr);
+}
+
+void AnimaRenderer::Finish()
+{
+	ANIMA_ASSERT(_scene != nullptr);
+	_scene->GetShadersManager()->SetActiveProgram(nullptr);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void AnimaRenderer::DeferredDrawAll(AnimaScene* scene)
+void AnimaRenderer::DrawAll()
 {
-	Anima::AnimaShadersManager* shadersManager = scene->GetShadersManager();
-	AnimaLightsManager* lightsManager = scene->GetLightsManager();
+	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
-	Start(scene);
+	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
-	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"));
+	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"));
 	
-	Finish(scene);
+	Finish();
 
 	////
 	////	Aggiorno il buffer per SSAO
@@ -464,15 +485,15 @@ void AnimaRenderer::DeferredDrawAll(AnimaScene* scene)
 	////
 	////	Aggiorno le mappature per le ombre
 	////
-	//Start(scene);
-	//DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	//Finish(scene);
+	//Start();
+	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish();
 	
 	//
 	//	Preparazione dei buffer della luce
 	//
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
-	Start(scene);
+	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_BLEND);
@@ -483,14 +504,14 @@ void AnimaRenderer::DeferredDrawAll(AnimaScene* scene)
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
-		DeferredLightPass(scene, pair.second->GetArray());
+		LightPass(pair.second->GetArray());
 
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 
 	glBlendFunc(GL_ONE, GL_ZERO);
-	Finish(scene);
+	Finish();
 	
 	//
 	//	Composizione dei buffer nell'immagine finale
@@ -498,38 +519,38 @@ void AnimaRenderer::DeferredDrawAll(AnimaScene* scene)
 	if(_primitives.GetSize() <= 0)
 	{
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
-		Start(scene);
+		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-		Finish(scene);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
 	}
 	else
 	{
 		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
-		Start(scene);
+		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-		Finish(scene);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
 		
 		// Disegno le primitive in PrimitivesBuffer
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
-		Start(scene);
+		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		DrawPrimitives(scene, shadersManager->GetProgramFromName("primitive-draw"));
-		Finish(scene);
+		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
+		Finish();
 		
 		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
 		// ed il colore + profondità da PrimitivesBuffer
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
-		Start(scene);
+		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		CombinePrimitives(scene, shadersManager->GetProgramFromName("primitive-combine"));
-		Finish(scene);
+		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
+		Finish();
 		
 		ClearPrimitives();
 	}
@@ -537,37 +558,42 @@ void AnimaRenderer::DeferredDrawAll(AnimaScene* scene)
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderer::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model)
+void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 {
-	Anima::AnimaShadersManager* shadersManager = scene->GetShadersManager();
-	AnimaLightsManager* lightsManager = scene->GetLightsManager();
+	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
-	Start(scene);
+	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
-	DeferredPreparePass(scene, shadersManager->GetProgramFromName("deferred-prepare"), model);
+	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"), mesh);
 
-	Finish(scene);
+	Finish();
 
-	//
-	//	Aggiorno le mappature per le ombre
-	//
-	Start(scene);
-	DeferredUpdateShadowMaps(scene, shadersManager->GetProgramFromName("deferred-shadowMap"));
-	Finish(scene);
+	////
+	////	Aggiorno il buffer per SSAO
+	////
+	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
+
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start();
+	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish();
 
 	//
 	//	Preparazione dei buffer della luce
 	//
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
-	Start(scene);
+	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glEnable(GL_BLEND);
@@ -575,45 +601,410 @@ void AnimaRenderer::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model)
 
 	glDepthMask(GL_FALSE);
 
-	//boost::unordered_map<AnimaString, AnimaLightsMapData*, AnimaString::Hasher>* lights = lightsManager->GetLightsMap();
-	//for (auto pair : (*lights))
-	//	DeferredLightPass(scene, pair.second->GetLightsArray());
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
-		DeferredLightPass(scene, pair.second->GetArray());
+		LightPass(pair.second->GetArray());
+
 
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 
 	glBlendFunc(GL_ONE, GL_ZERO);
-	Finish(scene);
+	Finish();
 
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	GetTexture("DiffuseMap")->BindAsRenderTarget();
-	Start(scene);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	DeferredCombinePass(scene, shadersManager->GetProgramFromName("deferred-combine"));
-	Finish(scene);
+	if (_primitives.GetSize() <= 0)
+	{
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+	}
+	else
+	{
+		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
+		GetTexture("Diffuse2Map")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
 
-	//
-	//	Applicazione effetti
-	//
+		// Disegno le primitive in PrimitivesBuffer
+		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
+		Finish();
+
+		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
+		// ed il colore + profondità da PrimitivesBuffer
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
+		Finish();
+
+		ClearPrimitives();
+	}
+
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
-void AnimaRenderer::DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
+void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 {
-	AnimaTransformation* meshTransfomation = mesh->GetTransformation();
+	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
-	if (!forceDraw)
+	//
+	//	Preparazione dei buffer iniziali
+	//
+	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+
+	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"), instance);
+
+	Finish();
+
+	////
+	////	Aggiorno il buffer per SSAO
+	////
+	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
+
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start();
+	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish();
+
+	//
+	//	Preparazione dei buffer della luce
+	//
+	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glDepthMask(GL_FALSE);
+
+	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	for (auto pair : (*lightsMap))
+		LightPass(pair.second->GetArray());
+
+
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
+
+	glBlendFunc(GL_ONE, GL_ZERO);
+	Finish();
+
+	//
+	//	Composizione dei buffer nell'immagine finale
+	//
+	if (_primitives.GetSize() <= 0)
 	{
-		if (frustum != nullptr && !frustum->SphereInFrustum(meshTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
-			return;
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
 	}
+	else
+	{
+		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
+		GetTexture("Diffuse2Map")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+
+		// Disegno le primitive in PrimitivesBuffer
+		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
+		Finish();
+
+		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
+		// ed il colore + profondità da PrimitivesBuffer
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
+		Finish();
+
+		ClearPrimitives();
+	}
+
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+}
+
+void AnimaRenderer::DrawModel(AnimaModel* model)
+{
+	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+
+	//
+	//	Preparazione dei buffer iniziali
+	//
+	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+
+	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"), model);
+
+	Finish();
+
+	////
+	////	Aggiorno il buffer per SSAO
+	////
+	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
+
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start();
+	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish();
+
+	//
+	//	Preparazione dei buffer della luce
+	//
+	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glDepthMask(GL_FALSE);
+
+	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	for (auto pair : (*lightsMap))
+		LightPass(pair.second->GetArray());
+
+
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
+
+	glBlendFunc(GL_ONE, GL_ZERO);
+	Finish();
+
+	//
+	//	Composizione dei buffer nell'immagine finale
+	//
+	if (_primitives.GetSize() <= 0)
+	{
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+	}
+	else
+	{
+		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
+		GetTexture("Diffuse2Map")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+
+		// Disegno le primitive in PrimitivesBuffer
+		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
+		Finish();
+
+		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
+		// ed il colore + profondità da PrimitivesBuffer
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
+		Finish();
+
+		ClearPrimitives();
+	}
+
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+}
+
+void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
+{
+	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+
+	//
+	//	Preparazione dei buffer iniziali
+	//
+	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+
+	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"), instance);
+
+	Finish();
+
+	////
+	////	Aggiorno il buffer per SSAO
+	////
+	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
+
+	////
+	////	Aggiorno le mappature per le ombre
+	////
+	//Start();
+	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
+	//Finish();
+
+	//
+	//	Preparazione dei buffer della luce
+	//
+	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	Start();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	glDepthMask(GL_FALSE);
+
+	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	for (auto pair : (*lightsMap))
+		LightPass(pair.second->GetArray());
+
+
+	glDepthMask(GL_TRUE);
+	glCullFace(GL_BACK);
+
+	glBlendFunc(GL_ONE, GL_ZERO);
+	Finish();
+
+	//
+	//	Composizione dei buffer nell'immagine finale
+	//
+	if (_primitives.GetSize() <= 0)
+	{
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+	}
+	else
+	{
+		// Renderizzo l'immagine finale completa di luci in Diffuse2Map
+		GetTexture("Diffuse2Map")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+
+		// Disegno le primitive in PrimitivesBuffer
+		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
+		Finish();
+
+		// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
+		// ed il colore + profondità da PrimitivesBuffer
+		GetTexture("DiffuseMap")->BindAsRenderTarget();
+		Start();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
+		Finish();
+
+		ClearPrimitives();
+	}
+
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+}
+
+void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
+{
+	if (!useInstances)
+	{
+		AnimaTransformation* meshTransfomation = mesh->GetTransformation();
+
+		if (!forceDraw)
+		{
+			if (frustum != nullptr && !frustum->SphereInFrustum(meshTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+				return;
+		}
+
+		if (mesh->NeedsBuffersUpdate())
+			mesh->UpdateBuffers();
+
+		if (mesh->GetVertexArrayObject() <= 0)
+			return;
+
+		mesh->Draw(this, program, updateMaterial);
+	}
+	else
+	{
+		if (mesh->NeedsBuffersUpdate())
+			mesh->UpdateBuffers();
+
+		if (mesh->GetVertexArrayObject() <= 0)
+			return;
+
+		AInt instancesCount = mesh->GetInstancesCount();
+		for (AInt i = 0; i < instancesCount; i++)
+		{
+			AnimaMeshInstance* instance = mesh->GetInstance(i);
+			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
+			if (!forceDraw)
+			{
+				if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+					continue;
+			}
+
+			instance->Draw(this, program, updateMaterial);
+		}
+	}
+}
+
+void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+{
+	AnimaMesh* mesh = instance->GetMesh();
 
 	if (mesh->NeedsBuffersUpdate())
 		mesh->UpdateBuffers();
@@ -621,101 +1012,30 @@ void AnimaRenderer::DeferredDrawMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaSh
 	if (mesh->GetVertexArrayObject() <= 0)
 		return;
 
-	if (!useInstances)
-		mesh->Draw(this, program, updateMaterial);
-	else
+	AnimaTransformation* instanceTransfomation = instance->GetTransformation();
+	if (!forceDraw)
 	{
-		AInt instancesCount = mesh->GetInstancesCount();
-		for (AInt i = 0; i < instancesCount; i++)
-		{
-			AnimaMeshInstance* instance = mesh->GetInstance(i);
-			instance->Draw(this, program, updateMaterial);
-		}
+		if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			return;
 	}
+
+	instance->Draw(this, program, updateMaterial);
 }
 
-//void AnimaRenderer::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
-//{
-//	AnimaMatrix identityMatrix;
-//	DeferredDrawModel(scene, model, program, identityMatrix, identityMatrix, updateMaterial, forceDraw, frustum);
-//}
-//
-//void AnimaRenderer::DeferredDrawModel(AnimaScene* scene, AnimaMesh* model, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
-//{
-//	if (scene == nullptr || model == nullptr || program == nullptr)
-//		return;
-//	
-//	//AnimaMatrix modelMatrix = parentTransformation * model->GetTransformation()->GetTransformationMatrix();
-//	//AnimaMatrix normalMatrix = parentNormalMatrix * model->GetTransformation()->GetNormalMatrix();
-//
-//	//AInt meshNumber = model->GetMeshesNumber();
-//	//for (AInt i = 0; i < meshNumber; i++)
-//	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
-//
-//	//AInt childrenNumber = model->GetChildrenNumber();
-//	//for (AInt i = 0; i < childrenNumber; i++)
-//	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, updateMaterial, forceDraw, frustum);
-//}
-//
-//void AnimaRenderer::DeferredDrawModelMesh(AnimaScene* scene, AnimaMesh* mesh, AnimaShaderProgram* program, const AnimaMatrix& parentTransformation, const AnimaMatrix& parentNormalMatrix, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
-//{
-//	if (!forceDraw)
-//	{
-//		if (frustum != nullptr && !frustum->SphereInFrustum(parentTransformation * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
-//			return;
-//	}
-//
-//	if (mesh->NeedsBuffersUpdate())
-//		mesh->UpdateBuffers();
-//
-//	if (mesh->GetVertexArrayObject() <= 0)
-//		return;
-//
-//	if (updateMaterial)
-//	{
-//		AnimaMaterial* material = mesh->GetMaterial();
-//		if (material == nullptr)
-//			return;
-//
-//		program->UpdateMaterialProperies(material, this);
-//	}
-//
-//	program->UpdateMeshProperies(mesh, parentTransformation, parentNormalMatrix);
-//	
-//#ifdef WIN32
-//	glBindVertexArray(mesh->GetVertexArrayObject());
-//	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-//	glBindVertexArray(0);
-//#else
-//	program->EnableInputs(mesh);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
-//	glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-//	program->DisableInputs();
-//#endif
-//}
-
-void AnimaRenderer::DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* program, AnimaMesh* model)
+void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 {
-	if (model != nullptr)
-		return;
-
-	//AnimaModelsManager* modelsManager = scene->GetModelsManager();
-	//ASizeT nModels = modelsManager->GetModelsNumber();
-	//if (nModels == 0)
-	//	return;
-
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 	AInt meshesCount = meshesManager->GetMeshesCount();
 	if (meshesCount == 0)
 		return;
 
-	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
 
 	AnimaFrustum* frustum = nullptr;
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
-		AnimaCamera* camera = scene->GetCamerasManager()->GetActiveCamera();
+		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
 		if (camera == nullptr)
 			return;
 
@@ -724,58 +1044,115 @@ void AnimaRenderer::DeferredPreparePass(AnimaScene* scene, AnimaShaderProgram* p
 
 		frustum = camera->GetFrustum();
 	}
-	
+
 	for (AInt i = 0; i < meshesCount; i++)
 	{
 		AnimaMesh* mesh = meshesManager->GetMesh(i);
-		DeferredDrawMesh(scene, mesh, program, true, false, frustum);
+		DrawMesh(mesh, program, true, false, frustum);
 	}
-
-	//if (model == nullptr)
-	//{
-	//	for (ASizeT j = 0; j < nModels; j++)
-	//	{
-	//		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-	//		//	
-	//		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-	//		//	AnimaMatrix normalMatrix = innerModel->GetTransformation()->GetNormalMatrix();
-	//		//	
-	//		//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, normalMatrix, true, false, frustum);
-	//		//	
-	//		//	AInt meshNumber = innerModel->GetMeshesNumber();
-	//		//	for (AInt i = 0; i < meshNumber; i++)
-	//		//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
-	//		//	
-	//		//	AInt childrenNumber = innerModel->GetChildrenNumber();
-	//		//	for (AInt i = 0; i < childrenNumber; i++)
-	//		//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
-	//	}
-	//}
-	//else
-	//{
-	//	//AnimaMatrix modelMatrix = model->GetTransformation()->GetTransformationMatrix();
-	//	//AnimaMatrix normalMatrix = model->GetTransformation()->GetNormalMatrix();
-	//	//DeferredDrawModelMesh(scene, model, program, modelMatrix, normalMatrix, true, false, frustum);
-
-	//	//AInt meshNumber = model->GetMeshesNumber();
-	//	//for (AInt i = 0; i < meshNumber; i++)
-	//	//	DeferredDrawModelMesh(scene, model->GetMesh(i), program, modelMatrix, normalMatrix, true, false, frustum);
-
-	//	//AInt childrenNumber = model->GetChildrenNumber();
-	//	//for (AInt i = 0; i < childrenNumber; i++)
-	//	//	DeferredDrawModel(scene, model->GetChild(i), program, modelMatrix, normalMatrix, true, false, frustum);
-	//}
 }
 
-void AnimaRenderer::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>* lights)
+void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaMesh* mesh)
+{
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+
+	AnimaFrustum* frustum = nullptr;
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+		if (camera == nullptr)
+			return;
+
+		program->Use();
+		program->UpdateCameraProperies(camera);
+
+		frustum = camera->GetFrustum();
+	}
+
+	DrawMesh(mesh, program, true, false, frustum, false);
+}
+
+void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaMeshInstance* instance)
+{
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+
+	AnimaFrustum* frustum = nullptr;
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+		if (camera == nullptr)
+			return;
+
+		program->Use();
+		program->UpdateCameraProperies(camera);
+
+		frustum = camera->GetFrustum();
+	}
+
+	DrawMesh(instance, program, true, false, frustum);
+}
+
+void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModel* model)
+{
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+
+	AnimaFrustum* frustum = nullptr;
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+		if (camera == nullptr)
+			return;
+
+		program->Use();
+		program->UpdateCameraProperies(camera);
+
+		frustum = camera->GetFrustum();
+	}
+
+	AInt meshesCount = model->GetMeshesCount();
+	for (AInt i = 0; i < meshesCount; i++)
+		DrawMesh(model->GetMesh(i), program, true, false, frustum, false);
+
+	AInt childrenCount = model->GetChildrenNumber();
+	for (AInt i = 0; i < childrenCount; i++)
+		PreparePass(program, (AnimaModel*)model->GetChild(i));
+}
+
+void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModelInstance* instance)
+{
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+
+	AnimaFrustum* frustum = nullptr;
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+		if (camera == nullptr)
+			return;
+
+		program->Use();
+		program->UpdateCameraProperies(camera);
+
+		frustum = camera->GetFrustum();
+	}
+
+	AInt meshesCount = instance->GetMeshesCount();
+	for (AInt i = 0; i < meshesCount; i++)
+		DrawMesh(instance->GetMesh(i), program, true, false, frustum);
+
+	AInt childrenCount = instance->GetChildrenNumber();
+	for (AInt i = 0; i < childrenCount; i++)
+		PreparePass(program, (AnimaModelInstance*)instance->GetChild(i));
+}
+
+void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 {
 	AInt size = lights->GetSize();
 
 	if (size == 0)
 		return;
 	
-	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
-	AnimaCamera* activeCamera = scene->GetCamerasManager()->GetActiveCamera();
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	AnimaCamera* activeCamera = _scene->GetCamerasManager()->GetActiveCamera();
 
 	if (activeCamera == nullptr)
 		return;
@@ -784,8 +1161,8 @@ void AnimaRenderer::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>
 	auto pair = _lightsMeshMap.find(type);
 
 	ANIMA_ASSERT(pair != _lightsMeshMap.end());
-	ANIMA_ASSERT(lights->ElementAt(0)->CreateShader(scene->GetShadersManager()));
-	AnimaShaderProgram* program = scene->GetShadersManager()->GetProgramFromName(lights->ElementAt(0)->GetShaderName());
+	ANIMA_ASSERT(lights->ElementAt(0)->CreateShader(_scene->GetShadersManager()));
+	AnimaShaderProgram* program = _scene->GetShadersManager()->GetProgramFromName(lights->ElementAt(0)->GetShaderName());
 	AnimaMesh* mesh = pair->second;
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
@@ -814,9 +1191,9 @@ void AnimaRenderer::DeferredLightPass(AnimaScene* scene, AnimaArray<AnimaLight*>
 	}
 }
 
-void AnimaRenderer::DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* program)
+void AnimaRenderer::CombinePass(AnimaShaderProgram* program)
 {
-	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
@@ -832,82 +1209,87 @@ void AnimaRenderer::DeferredCombinePass(AnimaScene* scene, AnimaShaderProgram* p
 	_filterMesh->Draw(this, program, false);
 }
 
-void AnimaRenderer::DeferredUpdateShadowMaps(AnimaScene* scene, AnimaShaderProgram* program)
+//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
+//{
+//	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+//	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+//
+//	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+//
+//	if (lights == nullptr)
+//		return;
+//
+//	AInt nLights = lights->GetSize();
+//	AInt nMeshes = meshesManager->GetMeshesCount();
+//
+//	if (nLights == 0 || nMeshes == 0)
+//		return;
+//
+//	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+//	if (activeProgram == nullptr || (*activeProgram) != (*program))
+//		program->Use();
+//
+//	for (AInt i = 0; i < nLights; i++)
+//	{
+//		AnimaLight* light = lights->ElementAt(i);
+//		AnimaTexture* shadowMap = light->GetShadowTexture();
+//		if (!shadowMap->AreRenderTargetsReady())
+//			shadowMap->LoadRenderTargets();
+//
+//		shadowMap->BindAsRenderTarget();
+//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//		glEnable(GL_DEPTH_TEST);
+//		glDepthMask(GL_TRUE);
+//
+//		program->UpdateLightProperies(light, this);
+//		program->UpdateRenderingManagerProperies(this);
+//
+//		for (AInt j = 0; j < nMeshes; j++)
+//		{
+//			DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
+//			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+//			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+//			//	
+//			//	glCullFace(GL_FRONT);
+//			//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+//			//	glCullFace(GL_BACK);
+//			//	
+//			//	AInt meshNumber = innerModel->GetMeshesNumber();
+//			//	for (AInt i = 0; i < meshNumber; i++)
+//			//	{
+//			//		glCullFace(GL_FRONT);
+//			//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+//			//		glCullFace(GL_BACK);
+//			//	}
+//			//	
+//			//	AInt childrenNumber = innerModel->GetChildrenNumber();
+//			//	for (AInt i = 0; i < childrenNumber; i++)
+//			//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+//		}
+//	}
+//}
+//
+//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh)
+//{
+//}
+//
+//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance)
+//{
+//}
+//
+//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model)
+//{
+//}
+//
+//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance)
+//{
+//}
+
+void AnimaRenderer::UpdateModelsVisibility()
 {
-	AnimaLightsManager* lightsManager = scene->GetLightsManager();
-	AnimaModelsManager* modelsManager = scene->GetModelsManager();
-
-	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
-
-	if (lights == nullptr)
-		return;
-
-	AInt nLights = lights->GetSize();
-	ASizeT nModels = modelsManager->GetModelsNumber();
-
-	if (nLights == 0 || nModels == 0)
-		return;
-
-	AnimaShaderProgram* activeProgram = scene->GetShadersManager()->GetActiveProgram();
-	if (activeProgram == nullptr || (*activeProgram) != (*program))
-		program->Use();
-
-	for (AInt i = 0; i < nLights; i++)
-	{
-		AnimaLight* light = lights->ElementAt(i);
-
-		//AnimaTexture* tmpShadowMap = light->GetTempShadowTexture();
-		AnimaTexture* shadowMap = light->GetShadowTexture();
-		//if (!tmpShadowMap->AreRenderTargetsReady())
-		//	tmpShadowMap->LoadRenderTargets();
-		if (!shadowMap->AreRenderTargetsReady())
-			shadowMap->LoadRenderTargets();
-
-		shadowMap->BindAsRenderTarget();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-
-		program->UpdateLightProperies(light, this);
-		program->UpdateRenderingManagerProperies(this);
-
-		for (ASizeT j = 0; j < nModels; j++)
-		{
-			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-			//	
-			//	glCullFace(GL_FRONT);
-			//	DeferredDrawModelMesh(scene, innerModel, program, modelMatrix, false, true);
-			//	glCullFace(GL_BACK);
-			//	
-			//	AInt meshNumber = innerModel->GetMeshesNumber();
-			//	for (AInt i = 0; i < meshNumber; i++)
-			//	{
-			//		glCullFace(GL_FRONT);
-			//		DeferredDrawModelMesh(scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-			//		glCullFace(GL_BACK);
-			//	}
-			//	
-			//	AInt childrenNumber = innerModel->GetChildrenNumber();
-			//	for (AInt i = 0; i < childrenNumber; i++)
-			//		DeferredDrawModel(scene, innerModel->GetChild(i), program, modelMatrix, false, true);
-		}
-
-		//AFloat blurAmount = 1.0f;
-
-		//SetVector("BlurScale", AnimaVertex3f(1.0f / shadowMap->GetWidth() * blurAmount, 0.0f, 0.0f));
-		//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), shadowMap, tmpShadowMap);
-
-		//SetVector("BlurScale", AnimaVertex3f(0.0f, 1.0f / shadowMap->GetHeight() * blurAmount, 0.0f));
-		//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussBlur7x1Filter"), tmpShadowMap, shadowMap);
-	}
-}
-
-void AnimaRenderer::UpdateModelsVisibility(AnimaScene* scene)
-{
-	Anima::AnimaModelsManager* modelsManager = scene->GetModelsManager();
-	Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+	Anima::AnimaModelsManager* modelsManager = _scene->GetModelsManager();
+	Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
 
 	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
@@ -956,13 +1338,13 @@ void AnimaRenderer::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray
 	_primitives.Add(primitive);
 }
 
-void AnimaRenderer::DrawPrimitives(AnimaScene* scene, AnimaShaderProgram* program)
+void AnimaRenderer::DrawPrimitives( AnimaShaderProgram* program)
 {
 	if(program == nullptr)
 		return;
 	
 	program->Use();
-	program->SetUniform("_projectionViewMatrix", scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
+	program->SetUniform("_projectionViewMatrix", _scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
 	
 	AInt nPrimitives = _primitives.GetSize();
 	for(AInt i = 0; i < nPrimitives; i++)
@@ -1030,7 +1412,7 @@ void AnimaRenderer::DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProg
 	glDisable(GL_BLEND);
 }
 
-void AnimaRenderer::CombinePrimitives(AnimaScene* scene, AnimaShaderProgram* program)
+void AnimaRenderer::CombinePrimitives(AnimaShaderProgram* program)
 {
 	program->Use();
 	program->UpdateRenderingManagerProperies(this);

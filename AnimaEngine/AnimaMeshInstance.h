@@ -34,7 +34,10 @@ public:
 	
 	AnimaMeshInstance& operator=(const AnimaMeshInstance& src);
 	AnimaMeshInstance& operator=(AnimaMeshInstance&& src);
-	
+
+public:
+	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial = true);
+
 public:
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();	

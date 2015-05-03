@@ -8,7 +8,7 @@
 #include <QtGui/QMatrix4x4>
 #include <AnimaCamerasManager.h>
 #include <AnimaTexturesManager.h>
-#include <AnimaRenderingManager.h>
+#include <AnimaRenderer.h>
 #include <AnimaDataGeneratorsManager.h>
 #include <AnimaLight.h>
 #include <AnimaLightsManager.h>
@@ -64,7 +64,7 @@ void Window::DrawScene()
 	int mul = (int)GetResolutionMutiplier();
 	if (renderingManager == nullptr)
 	{
-		renderingManager = new Anima::AnimaRenderingManager(GetEngine()->GetScenesManager()->GetScene("AnimaEditor"), GetEngine()->GetGenericAllocator());
+		renderingManager = new Anima::AnimaRenderer(GetEngine(), GetEngine()->GetGenericAllocator());
 		renderingManager->InitRenderingUtilities(w * mul, h * mul);
 	}
 	renderingManager->InitRenderingTargets(w * mul, h * mul);
@@ -72,7 +72,7 @@ void Window::DrawScene()
 	//DrawCameraFrustum();
 	//DrawLightFrustum();
 
-	renderingManager->DeferredDrawAll(_scene);
+	renderingManager->DrawAll();
 		
 	SwapBuffers();
 
