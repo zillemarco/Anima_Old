@@ -20,6 +20,7 @@ Q_DECLARE_METATYPE(Anima::AnimaMesh*)
 Q_DECLARE_METATYPE(Anima::AnimaModelInstance*)
 Q_DECLARE_METATYPE(Anima::AnimaMeshInstance*)
 Q_DECLARE_METATYPE(Anima::AnimaMaterial*)
+Q_DECLARE_METATYPE(Anima::AnimaTexture*)
 
 AELoadedResourcesTreeViewItemModel::AELoadedResourcesTreeViewItemModel(AEDocument* doc, QObject *parent)
 	: QStandardItemModel(parent)
@@ -262,6 +263,23 @@ void AELoadedResourcesTreeView::LoadMaterials()
 
 void AELoadedResourcesTreeView::LoadTextures()
 {
+	_textureResourcesItem->removeRows(0, _textureResourcesItem->rowCount());
+
+	Anima::AnimaTexturesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetTexturesManager();
+	for (int i = 0; i < mgr->GetTexturesCount(); i++)
+	{
+		Anima::AnimaTexture* texture = mgr->GetTexture(i);
+
+		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(texture->GetName()));
+		resourceNameItem->setData(QVariant::fromValue(texture), TextureRole);
+		resourceNameItem->setEditable(false);
+
+		QList<QStandardItem*> newItem;
+		newItem.append(resourceNameItem);
+		newItem.append(new QStandardItem(tr("")));
+
+		_textureResourcesItem->appendRow(newItem);
+	}
 }
 
 void AELoadedResourcesTreeView::resourceSelectionChanged(const QItemSelection& current, const QItemSelection& previous)
@@ -319,7 +337,7 @@ void AELoadedResourcesTreeView::createActions()
 void AELoadedResourcesTreeView::importModel()
 {
 	if (_document->ImportModel())
-		LoadModels();
+		LoadResources();
 }
 
 void AELoadedResourcesTreeView::createModelInstance()
@@ -337,10 +355,7 @@ void AELoadedResourcesTreeView::createModelInstance()
 	}
 
 	if (reloadResources)
-	{
-		LoadModelInstances();
-		LoadMeshInstances();
-	}
+		LoadResources();
 }
 
 void AELoadedResourcesTreeView::importTexture()

@@ -104,19 +104,19 @@ protected:
 	virtual void PreparePass(AnimaShaderProgram* program, AnimaModel* model);
 	virtual void PreparePass(AnimaShaderProgram* program, AnimaModelInstance* instance);
 
-	//virtual void UpdateShadowMaps(AnimaShaderProgram* program);
-	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh);
-	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance);
-	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model);
-	//virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance);
+	virtual void UpdateShadowMaps(AnimaShaderProgram* program);
+	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh);
+	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance);
+	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model);
+	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance);
 
 	virtual void LightPass(AnimaArray<AnimaLight*>* lights);
 	virtual void CombinePass(AnimaShaderProgram* program);
 
 	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
 	virtual void DrawMesh(AnimaMeshInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	//virtual void DrawModel(AnimaModel* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
-	//virtual void DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	virtual void DrawModel(AnimaModel* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+	virtual void DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
 
 protected:
 	void Clear();

@@ -573,6 +573,11 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const char* textureName,
 	return LoadTextureFromData(str, data, dataSize, width, height, mipMapLevels, textureTarget, filter, internalFormat, format, dataType, clamp);
 }
 
+AInt AnimaTexturesManager::GetTexturesCount() const
+{
+	return _textures.GetSize();
+}
+
 AnimaTexture* AnimaTexturesManager::GetTexture(AUint index)
 {
 	return _textures[index];

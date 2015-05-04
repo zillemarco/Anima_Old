@@ -39,7 +39,8 @@ protected:
 		ModelInstanceRole,
 		MeshRole,
 		MeshInstanceRole,
-		MaterialRole
+		MaterialRole,
+		TextureRole
 	};
 
 public:

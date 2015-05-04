@@ -405,6 +405,13 @@ bool AEMainWindow::closeProject()
 	writeSettings();
 
 	_mdiArea->closeAllSubWindows();
+
+	if (_loadedResourcesPanel)
+	{
+		removeDockWidget(_loadedResourcesPanel);
+		delete _loadedResourcesPanel;
+		_loadedResourcesPanel = nullptr;
+	}
 	
 	if (_resourceManagerTab)
 	{

@@ -1022,6 +1022,92 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance, AnimaShaderProgram* pr
 	instance->Draw(this, program, updateMaterial);
 }
 
+void AnimaRenderer::DrawModel(AnimaModel* model, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
+{
+	if (!useInstances)
+	{
+		AInt meshesCount = model->GetMeshesCount();
+		for (AInt i = 0; i < meshesCount; i++)
+		{
+			AnimaMesh* mesh = model->GetMesh(i);
+			AnimaTransformation* meshTransfomation = mesh->GetTransformation();
+
+			if (!forceDraw)
+			{
+				if (frustum != nullptr && !frustum->SphereInFrustum(meshTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+					continue;
+			}
+
+			if (mesh->NeedsBuffersUpdate())
+				mesh->UpdateBuffers();
+
+			if (mesh->GetVertexArrayObject() <= 0)
+				continue;
+
+			mesh->Draw(this, program, updateMaterial);
+		}
+	}
+	else
+	{
+		AInt meshesCount = model->GetMeshesCount();
+		for (AInt i = 0; i < meshesCount; i++)
+		{
+			AnimaMesh* mesh = model->GetMesh(i);
+			if (mesh->NeedsBuffersUpdate())
+				mesh->UpdateBuffers();
+
+			if (mesh->GetVertexArrayObject() <= 0)
+				continue;
+
+			AInt instancesCount = mesh->GetInstancesCount();
+			for (AInt j = 0; j < instancesCount; j++)
+			{
+				AnimaMeshInstance* instance = mesh->GetInstance(j);
+				AnimaTransformation* instanceTransfomation = instance->GetTransformation();
+				if (!forceDraw)
+				{
+					if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+						continue;
+				}
+
+				instance->Draw(this, program, updateMaterial);
+			}
+		}
+	}
+
+	AInt childrenCount = model->GetChildrenNumber();
+	for (AInt i = 0; i < childrenCount; i++)
+		DrawModel((AnimaModel*)model->GetChild(i), program, updateMaterial, forceDraw, frustum, useInstances);
+}
+
+void AnimaRenderer::DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum)
+{
+	AInt meshesCount = instance->GetMeshesCount();
+	for (AInt i = 0; i < meshesCount; i++)
+	{
+		AnimaMeshInstance* meshInstance = instance->GetMesh(i);
+		AnimaMesh* mesh = meshInstance->GetMesh();
+		if (mesh->NeedsBuffersUpdate())
+			mesh->UpdateBuffers();
+
+		if (mesh->GetVertexArrayObject() <= 0)
+			continue;
+
+		AnimaTransformation* instanceTransfomation = meshInstance->GetTransformation();
+		if (!forceDraw)
+		{
+			if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+				continue;
+		}
+
+		meshInstance->Draw(this, program, updateMaterial);
+	}
+
+	AInt childrenCount = instance->GetChildrenNumber();
+	for (AInt i = 0; i < childrenCount; i++)
+		DrawModel((AnimaModelInstance*)instance->GetChild(i), program, updateMaterial, forceDraw, frustum);
+}
+
 void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 {
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
@@ -1209,82 +1295,210 @@ void AnimaRenderer::CombinePass(AnimaShaderProgram* program)
 	_filterMesh->Draw(this, program, false);
 }
 
-//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
-//{
-//	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
-//	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
-//
-//	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
-//
-//	if (lights == nullptr)
-//		return;
-//
-//	AInt nLights = lights->GetSize();
-//	AInt nMeshes = meshesManager->GetMeshesCount();
-//
-//	if (nLights == 0 || nMeshes == 0)
-//		return;
-//
-//	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
-//	if (activeProgram == nullptr || (*activeProgram) != (*program))
-//		program->Use();
-//
-//	for (AInt i = 0; i < nLights; i++)
-//	{
-//		AnimaLight* light = lights->ElementAt(i);
-//		AnimaTexture* shadowMap = light->GetShadowTexture();
-//		if (!shadowMap->AreRenderTargetsReady())
-//			shadowMap->LoadRenderTargets();
-//
-//		shadowMap->BindAsRenderTarget();
-//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-//		glEnable(GL_DEPTH_TEST);
-//		glDepthMask(GL_TRUE);
-//
-//		program->UpdateLightProperies(light, this);
-//		program->UpdateRenderingManagerProperies(this);
-//
-//		for (AInt j = 0; j < nMeshes; j++)
-//		{
-//			DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
-//			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-//			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-//			//	
-//			//	glCullFace(GL_FRONT);
-//			//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
-//			//	glCullFace(GL_BACK);
-//			//	
-//			//	AInt meshNumber = innerModel->GetMeshesNumber();
-//			//	for (AInt i = 0; i < meshNumber; i++)
-//			//	{
-//			//		glCullFace(GL_FRONT);
-//			//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-//			//		glCullFace(GL_BACK);
-//			//	}
-//			//	
-//			//	AInt childrenNumber = innerModel->GetChildrenNumber();
-//			//	for (AInt i = 0; i < childrenNumber; i++)
-//			//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
-//		}
-//	}
-//}
-//
-//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh)
-//{
-//}
-//
-//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance)
-//{
-//}
-//
-//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model)
-//{
-//}
-//
-//void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance)
-//{
-//}
+void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
+{
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr)
+		return;
+
+	AInt nLights = lights->GetSize();
+	AInt nMeshes = meshesManager->GetMeshesCount();
+
+	if (nLights == 0 || nMeshes == 0)
+		return;
+
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
+
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
+
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		for (AInt j = 0; j < nMeshes; j++)
+		{
+			DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
+			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+			//	
+			//	glCullFace(GL_FRONT);
+			//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+			//	glCullFace(GL_BACK);
+			//	
+			//	AInt meshNumber = innerModel->GetMeshesNumber();
+			//	for (AInt i = 0; i < meshNumber; i++)
+			//	{
+			//		glCullFace(GL_FRONT);
+			//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+			//		glCullFace(GL_BACK);
+			//	}
+			//	
+			//	AInt childrenNumber = innerModel->GetChildrenNumber();
+			//	for (AInt i = 0; i < childrenNumber; i++)
+			//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+		}
+	}
+}
+
+void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh)
+{
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr || mesh == nullptr)
+		return;
+
+	AInt nLights = lights->GetSize();
+	if (nLights == 0)
+		return;
+
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
+
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
+
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		DrawMesh(mesh, program, false, true, nullptr, true);
+	}
+}
+
+void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance)
+{
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr || instance == nullptr)
+		return;
+
+	AInt nLights = lights->GetSize();
+	if (nLights == 0)
+		return;
+
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
+
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
+
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		DrawMesh(instance, program, false, true, nullptr);
+	}
+}
+
+void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model)
+{
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr || model == nullptr)
+		return;
+
+	AInt nLights = lights->GetSize();
+	if (nLights == 0)
+		return;
+
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
+
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
+
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		DrawModel(model, program, false, true, nullptr, true);
+	}
+}
+
+void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance)
+{
+	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+
+	if (lights == nullptr || instance == nullptr)
+		return;
+
+	AInt nLights = lights->GetSize();
+	if (nLights == 0)
+		return;
+
+	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+		program->Use();
+
+	for (AInt i = 0; i < nLights; i++)
+	{
+		AnimaLight* light = lights->ElementAt(i);
+		AnimaTexture* shadowMap = light->GetShadowTexture();
+		if (!shadowMap->AreRenderTargetsReady())
+			shadowMap->LoadRenderTargets();
+
+		shadowMap->BindAsRenderTarget();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		program->UpdateLightProperies(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		DrawModel(instance, program, false, true, nullptr);
+	}
+}
 
 void AnimaRenderer::UpdateModelsVisibility()
 {

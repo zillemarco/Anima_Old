@@ -66,6 +66,7 @@ public:
 	AnimaTexture* LoadTextureFromData(const char* textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 	AnimaTexture* LoadTextureFromData(const char* textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
 
+	AInt GetTexturesCount() const;
 	AnimaTexture* GetTexture(AUint index);
 	AnimaTexture* GetTexture(const AnimaString& textureName);
 	AnimaTexture* GetTexture(const char* textureName);
