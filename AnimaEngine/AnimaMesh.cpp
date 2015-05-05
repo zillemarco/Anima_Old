@@ -24,6 +24,35 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define max(a,b) (a > b ? a : b)
 #endif
 
+
+AnimaMeshBoneInfo::AnimaMeshBoneInfo()
+{
+}
+
+AnimaMeshBoneInfo::~AnimaMeshBoneInfo()
+{
+}
+
+void AnimaMeshBoneInfo::SetBoneOffset(AnimaMatrix boneOffset)
+{
+	_boneOffset = boneOffset;
+}
+
+AnimaMatrix AnimaMeshBoneInfo::GetBoneOffset() const
+{
+	return _boneOffset;
+}
+
+void AnimaMeshBoneInfo::SetFinalTransformation(AnimaMatrix finalTransformation)
+{
+	_finalTransformation = finalTransformation;
+}
+
+AnimaMatrix AnimaMeshBoneInfo::GetFinalTransformation() const
+{
+	return _finalTransformation;
+}
+
 AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 : AnimaSceneObject(name, dataGeneratorsManager, allocator)
 , _vertices(allocator)
@@ -31,6 +60,8 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 , _textureCoords(allocator)
 , _tangents(allocator)
 , _bitangents(allocator)
+, _boneWeights(allocator)
+, _boneIDs(allocator)
 , _faces(allocator)
 , _materialName(allocator)
 , _meshInstances(allocator)
@@ -44,6 +75,8 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 	_textureCoordsBufferObject = 0;
 	_tangentsBufferObject = 0;
 	_bitangentsBufferObject = 0;
+	_boneWeightsBufferObject = 0;
+	_boneIDsBufferObject = 0;
 	_vertexArrayObject = 0;
 	_needsBuffersUpdate = true;
 	_visible = true;
@@ -58,6 +91,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _textureCoords(src._textureCoords)
 	, _tangents(src._tangents)
 	, _bitangents(src._bitangents)
+	, _boneWeights(src._boneWeights)
+	, _boneIDs(src._boneIDs)
 	, _faces(src._faces)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
@@ -74,6 +109,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	_textureCoordsBufferObject = src._textureCoordsBufferObject;
 	_tangentsBufferObject = src._tangentsBufferObject;
 	_bitangentsBufferObject = src._bitangentsBufferObject;
+	_boneWeightsBufferObject = src._boneWeightsBufferObject;
+	_boneIDsBufferObject = src._boneIDsBufferObject;
 	_vertexArrayObject = src._vertexArrayObject;
 	_needsBuffersUpdate = src._needsBuffersUpdate;
 	_material = src._material;
@@ -97,6 +134,8 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _textureCoords(src._textureCoords)
 	, _tangents(src._tangents)
 	, _bitangents(src._bitangents)
+	, _boneWeights(src._boneWeights)
+	, _boneIDs(src._boneIDs)
 	, _faces(src._faces)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
@@ -129,6 +168,8 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
 		_tangentsBufferObject = src._tangentsBufferObject;
 		_bitangentsBufferObject = src._bitangentsBufferObject;
+		_boneWeightsBufferObject = src._boneWeightsBufferObject;
+		_boneIDsBufferObject = src._boneIDsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_visible = src._visible;
@@ -144,6 +185,8 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_textureCoords = src._textureCoords;
 		_tangents = src._tangents;
 		_bitangents = src._bitangents;
+		_boneWeights = src._boneWeights;
+		_boneIDs = src._boneIDs;
 		_faces = src._faces;
 
 		_meshInstances = src._meshInstances;
@@ -163,6 +206,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_textureCoords = src._textureCoords;
 		_tangents = src._tangents;
 		_bitangents = src._bitangents;
+		_boneWeights = src._boneWeights;
+		_boneIDs = src._boneIDs;
 		_faces = src._faces;
 
 		_material = src._material;
@@ -175,6 +220,8 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
 		_tangentsBufferObject = src._tangentsBufferObject;
 		_bitangentsBufferObject = src._bitangentsBufferObject;
+		_boneWeightsBufferObject = src._boneWeightsBufferObject;
+		_boneIDsBufferObject = src._boneIDsBufferObject;
 		_vertexArrayObject = src._vertexArrayObject;
 		_needsBuffersUpdate = src._needsBuffersUpdate;
 		_visible = src._visible;
@@ -328,6 +375,92 @@ void AnimaMesh::SetBitangents(AnimaVertex3f* v, AInt n)
 void AnimaMesh::AddBitangent(const AnimaVertex3f& v)
 {
 	_bitangents.Add(v);
+}
+
+void AnimaMesh::SetBoneWeights(AnimaArray<AnimaVertex4f>* boneWeights)
+{
+	_boneWeights.Copy(*boneWeights);
+}
+
+void AnimaMesh::SetBoneWeights(AnimaVertex4f* v, AInt n)
+{
+	_boneWeights.RemoveAll();
+
+	for (AInt i = 0; i < n; i++)
+		_boneWeights.Add(v[i]);
+}
+
+void AnimaMesh::AddBoneWeight(const AnimaVertex4f& v)
+{
+	_boneWeights.Add(v);
+}
+
+AInt AnimaMesh::GetBoneWeightsNumber()
+{
+	return _boneWeights.GetSize();
+}
+
+AnimaVertex4f AnimaMesh::GetBoneWeight(AInt index)
+{
+	return _boneWeights[index];
+}
+
+AnimaVertex4f* AnimaMesh::GetPBoneWeight(AInt index)
+{
+	return &_boneWeights[index];
+}
+
+AnimaArray<AnimaVertex4f>* AnimaMesh::GetBoneWeights()
+{
+	return &_boneWeights;
+}
+
+void AnimaMesh::ClearBoneWeights()
+{
+	_boneWeights.RemoveAll();
+}
+
+void AnimaMesh::SetBoneIDs(AnimaArray<AnimaVertex4f>* boneIDs)
+{
+	_boneIDs.Copy(*boneIDs);
+}
+
+void AnimaMesh::SetBoneIDs(AnimaVertex4f* v, AInt n)
+{
+	_boneIDs.RemoveAll();
+
+	for (AInt i = 0; i < n; i++)
+		_boneIDs.Add(v[i]);
+}
+
+void AnimaMesh::AddBoneID(const AnimaVertex4f& v)
+{
+	_boneIDs.Add(v);
+}
+
+AInt AnimaMesh::GetBoneIDsNumber()
+{
+	return _boneIDs.GetSize();
+}
+
+AnimaVertex4f AnimaMesh::GetBoneID(AInt index)
+{
+	return _boneIDs[index];
+}
+
+AnimaVertex4f* AnimaMesh::GetPBoneID(AInt index)
+{
+	return &_boneIDs[index];
+}
+
+AnimaArray<AnimaVertex4f>* AnimaMesh::GetBoneIDs()
+{
+	return &_boneIDs;
+}
+
+void AnimaMesh::ClearBoneIDs()
+{
+	_boneIDs.RemoveAll();;
 }
 
 void AnimaMesh::SetFaces(AnimaArray<AnimaFace>* faces)
@@ -498,6 +631,12 @@ bool AnimaMesh::CreateBuffers()
 	if (!CreateBitangentsBuffer())
 		return false;
 
+	if (!CreateBoneWeightsBuffer())
+		return false;
+
+	if (!CreateBoneIDsBuffer())
+		return false;
+	
 	//if (!CreateColorsBuffer())
 	//	return false;
 
@@ -525,6 +664,8 @@ void AnimaMesh::UpdateBuffers()
 		glInvalidateBufferData(_textureCoordsBufferObject);
 		glInvalidateBufferData(_tangentsBufferObject);
 		glInvalidateBufferData(_bitangentsBufferObject);
+		glInvalidateBufferData(_boneWeightsBufferObject);
+		glInvalidateBufferData(_boneIDsBufferObject);
 	}
 	
 	glBindVertexArray(_vertexArrayObject);
@@ -603,6 +744,32 @@ void AnimaMesh::UpdateBuffers()
 		bitangents = nullptr;
 	}
 
+	if (GetFloatBoneWeightsCount() > 0)
+	{
+		AFloat* boneWeights = GetFloatBoneWeights();
+		glBindBuffer(GL_ARRAY_BUFFER, _boneWeightsBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatBoneWeightsCount(), boneWeights, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, boneWeights);
+		boneWeights = nullptr;
+	}
+
+	if (GetFloatBoneIDsCount() > 0)
+	{
+		AFloat* boneIDs = GetFloatBoneIDs();
+		glBindBuffer(GL_ARRAY_BUFFER, _boneIDsBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatBoneIDsCount(), boneIDs, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, boneIDs);
+		boneIDs = nullptr;
+	}
+
 	glBindVertexArray(0);
 
 	_needsBuffersUpdate = false;
@@ -610,7 +777,7 @@ void AnimaMesh::UpdateBuffers()
 
 bool AnimaMesh::AreBuffersCreated()
 {
-	return IsIndicesBufferCreated() && IsVerticesBufferCreated() && IsVertexArrayObjectCreated() && IsTextureCoordsBufferCreated() && IsNormalsBufferCreated() && IsTangentsBufferCreated() && IsBitangentsBufferCreated();// && IsColorsBufferCreated();
+	return IsIndicesBufferCreated() && IsVerticesBufferCreated() && IsVertexArrayObjectCreated() && IsTextureCoordsBufferCreated() && IsNormalsBufferCreated() && IsTangentsBufferCreated() && IsBitangentsBufferCreated() && IsBoneWeightsBufferCreated() && IsBoneIDsBufferCreated();// && IsColorsBufferCreated();
 }
 
 bool AnimaMesh::IsIndicesBufferCreated()
@@ -646,6 +813,16 @@ bool AnimaMesh::IsTangentsBufferCreated()
 bool AnimaMesh::IsBitangentsBufferCreated()
 {
 	return _bitangentsBufferObject > 0;
+}
+
+bool AnimaMesh::IsBoneWeightsBufferCreated()
+{
+	return _boneWeightsBufferObject > 0;
+}
+
+bool AnimaMesh::IsBoneIDsBufferCreated()
+{
+	return _boneIDsBufferObject > 0;
 }
 
 bool AnimaMesh::IsVertexArrayObjectCreated()
@@ -720,6 +897,30 @@ bool AnimaMesh::CreateBitangentsBuffer()
 
 	glGenBuffers(1, &_bitangentsBufferObject);
 	if (_bitangentsBufferObject <= 0)
+		return false;
+
+	return true;
+}
+
+bool AnimaMesh::CreateBoneWeightsBuffer()
+{
+	if (IsBoneWeightsBufferCreated())
+		return true;
+
+	glGenBuffers(1, &_boneWeightsBufferObject);
+	if (_boneWeightsBufferObject <= 0)
+		return false;
+
+	return true;
+}
+
+bool AnimaMesh::CreateBoneIDsBuffer()
+{
+	if (IsBoneIDsBufferCreated())
+		return true;
+
+	glGenBuffers(1, &_boneIDsBufferObject);
+	if (_boneIDsBufferObject <= 0)
 		return false;
 
 	return true;
@@ -928,6 +1129,58 @@ AFloat* AnimaMesh::GetFloatVerticesBitangents()
 	return bitangents;
 }
 
+AUint AnimaMesh::GetFloatBoneWeightsCount()
+{
+	return (AUint)_boneWeights.GetSize() * 4;
+}
+
+float* AnimaMesh::GetFloatBoneWeights()
+{
+	AFloat* boneWeights = nullptr;
+	AInt count = GetFloatBoneWeightsCount();
+	AInt offset = 0;
+
+	if (count > 0)
+	{
+		boneWeights = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
+
+		AInt weightsNumber = _boneWeights.GetSize();
+		for (int i = 0; i < weightsNumber; i++)
+		{
+			memcpy(boneWeights + offset, _boneWeights[i].vec, sizeof(AFloat) * 4);
+			offset += 4;
+		}
+	}
+
+	return boneWeights;
+}
+
+AUint AnimaMesh::GetFloatBoneIDsCount()
+{
+	return (AUint)_boneIDs.GetSize() * 4;
+}
+
+float* AnimaMesh::GetFloatBoneIDs()
+{
+	AFloat* boneIDs = nullptr;
+	AInt count = GetFloatBoneIDsCount();
+	AInt offset = 0;
+
+	if (count > 0)
+	{
+		boneIDs = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
+
+		AInt idsNumber = _boneIDs.GetSize();
+		for (int i = 0; i < idsNumber; i++)
+		{
+			memcpy(boneIDs + offset, _boneIDs[i].vec, sizeof(AFloat) * 4);
+			offset += 4;
+		}
+	}
+
+	return boneIDs;
+}
+
 void AnimaMesh::SetIsVisible(bool visible)
 {
 	_visible = visible;
@@ -991,6 +1244,16 @@ AUint AnimaMesh::GetTangentsBufferObject()
 AUint AnimaMesh::GetBitangentsBufferObject()
 {
 	return _bitangentsBufferObject;
+}
+
+AUint AnimaMesh::GetBoneWeightsBufferObject()
+{
+	return _boneWeightsBufferObject;
+}
+
+AUint AnimaMesh::GetBoneIDsBufferObject()
+{
+	return _boneIDsBufferObject;
 }
 
 void AnimaMesh::ComputeBoundingBox(bool updateRecursively)

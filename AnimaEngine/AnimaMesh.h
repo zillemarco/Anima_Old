@@ -30,6 +30,23 @@ class AnimaMeshInstance;
 class AnimaRenderer;
 class AnimaShaderProgram;
 
+class ANIMA_ENGINE_EXPORT AnimaMeshBoneInfo
+{
+public:
+	AnimaMeshBoneInfo();
+	~AnimaMeshBoneInfo();
+
+	void SetBoneOffset(AnimaMatrix boneOffset);
+	AnimaMatrix GetBoneOffset() const;
+
+	void SetFinalTransformation(AnimaMatrix finalTransformation);
+	AnimaMatrix GetFinalTransformation() const;
+
+protected:
+	AnimaMatrix _boneOffset;
+	AnimaMatrix _finalTransformation;
+};
+
 class ANIMA_ENGINE_EXPORT AnimaMesh : public AnimaSceneObject
 {
 public:
@@ -117,6 +134,24 @@ public:
 	AnimaArray<AnimaVertex3f>* GetBitangents();
 	void ClearBitangents();
 
+	void SetBoneWeights(AnimaArray<AnimaVertex4f>* boneWeights);
+	void SetBoneWeights(AnimaVertex4f* v, AInt n);
+	void AddBoneWeight(const AnimaVertex4f& v);
+	AInt GetBoneWeightsNumber();
+	AnimaVertex4f GetBoneWeight(AInt index);
+	AnimaVertex4f* GetPBoneWeight(AInt index);
+	AnimaArray<AnimaVertex4f>* GetBoneWeights();
+	void ClearBoneWeights();
+
+	void SetBoneIDs(AnimaArray<AnimaVertex4f>* boneIDs);
+	void SetBoneIDs(AnimaVertex4f* v, AInt n);
+	void AddBoneID(const AnimaVertex4f& v);
+	AInt GetBoneIDsNumber();
+	AnimaVertex4f GetBoneID(AInt index);
+	AnimaVertex4f* GetPBoneID(AInt index);
+	AnimaArray<AnimaVertex4f>* GetBoneIDs();
+	void ClearBoneIDs();
+
 	void SetFaces(AnimaArray<AnimaFace>* faces);
 	void SetFaces(AnimaFace* faces, AInt n);
 	void AddFace(const AnimaFace& face);
@@ -143,6 +178,8 @@ public:
 	bool IsTextureCoordsBufferCreated();
 	bool IsTangentsBufferCreated();
 	bool IsBitangentsBufferCreated();
+	bool IsBoneWeightsBufferCreated();
+	bool IsBoneIDsBufferCreated();
 	bool IsVertexArrayObjectCreated();
 
 	bool CreateIndicesBuffer();
@@ -152,6 +189,8 @@ public:
 	bool CreateTextureCoordsBuffer();
 	bool CreateTangentsBuffer();
 	bool CreateBitangentsBuffer();
+	bool CreateBoneWeightsBuffer();
+	bool CreateBoneIDsBuffer();
 	bool CreateVertexArrayObject();
 
 	AUint GetVertexArrayObject();
@@ -162,6 +201,8 @@ public:
 	AUint GetTextureCoordsBufferObject();
 	AUint GetTangentsBufferObject();
 	AUint GetBitangentsBufferObject();
+	AUint GetBoneWeightsBufferObject();
+	AUint GetBoneIDsBufferObject();
 
 	AUint GetFacesIndicesCount();
 	AUint* GetFacesIndices();
@@ -183,6 +224,12 @@ public:
 
 	AUint GetFloatVerticesBitangentsCount();
 	float* GetFloatVerticesBitangents();
+
+	AUint GetFloatBoneWeightsCount();
+	float* GetFloatBoneWeights();
+
+	AUint GetFloatBoneIDsCount();
+	float* GetFloatBoneIDs();
 
 	void SetIsVisible(bool visible);
 	bool IsVisible();
@@ -209,6 +256,8 @@ protected:
 	AnimaArray<AnimaVertex2f>	_textureCoords;
 	AnimaArray<AnimaVertex3f>	_tangents;
 	AnimaArray<AnimaVertex3f>	_bitangents;
+	AnimaArray<AnimaVertex4f>	_boneWeights;
+	AnimaArray<AnimaVertex4f>	_boneIDs;
 	AnimaArray<AnimaFace>		_faces;
 	
 	AUint			_vertexArrayObject;
@@ -219,6 +268,8 @@ protected:
 	AUint			_textureCoordsBufferObject;
 	AUint			_tangentsBufferObject;
 	AUint			_bitangentsBufferObject;
+	AUint			_boneWeightsBufferObject;
+	AUint			_boneIDsBufferObject;
 
 	bool _visible;	
 	bool _needsBuffersUpdate;

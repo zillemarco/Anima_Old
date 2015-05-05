@@ -13,6 +13,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMeshesManager::AnimaMeshesManager(AnimaScene* scene, AnimaMaterialsManager* materialsManager)
 	: _meshes(scene->GetMeshesAllocator())
 	, _lastMeshesIndexMap(scene->GetGenericAllocator())
+	, _lastMeshesBones(scene->GetGenericAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(materialsManager != nullptr);
@@ -25,11 +26,13 @@ AnimaMeshesManager::~AnimaMeshesManager()
 {
 	ClearMeshes();
 	ClearLastMeshesIndexMap();
+	ClearLastMeshesBonesData();
 }
 
 bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap)
 {
 	ClearLastMeshesIndexMap();
+	ClearLastMeshesBonesData();
 
 	for (AUint i = 0; i < scene->mNumMeshes; i++)
 	{
@@ -157,7 +160,51 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			newMesh->SetTextureCoords(textCoords, offsetTextCoords);
 			AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), textCoords);
 		}
-		
+
+		if (mesh->mNumBones > 0)
+		{
+			AnimaArray<AnimaVertex4f> meshBoneWeights(_scene->GetGenericAllocator());
+			AnimaArray<AnimaVertex4f> meshBoneIDs(_scene->GetGenericAllocator());
+
+			meshBoneWeights.SetSize(newMesh->GetVerticesNumber());
+			meshBoneIDs.SetSize(newMesh->GetVerticesNumber());
+
+			for (AUint nb = 0; nb < mesh->mNumBones; nb++)
+			{
+				AUint boneIndex = 0;
+				AnimaString boneName(mesh->mBones[nb]->mName.data, _scene->GetStringAllocator());
+
+				if (_lastMeshesBonesNameMap.find(boneName) == _lastMeshesBonesNameMap.end())
+				{
+					AnimaMatrix boneOffset;
+					boneOffset.m[0] = mesh->mBones[i]->mOffsetMatrix.a1;	boneOffset.m[1] = mesh->mBones[i]->mOffsetMatrix.a2;	boneOffset.m[2] = mesh->mBones[i]->mOffsetMatrix.a3;	boneOffset.m[3] = mesh->mBones[i]->mOffsetMatrix.a4;
+					boneOffset.m[4] = mesh->mBones[i]->mOffsetMatrix.b1;	boneOffset.m[5] = mesh->mBones[i]->mOffsetMatrix.b2;	boneOffset.m[6] = mesh->mBones[i]->mOffsetMatrix.b3;	boneOffset.m[7] = mesh->mBones[i]->mOffsetMatrix.b4;
+					boneOffset.m[8] = mesh->mBones[i]->mOffsetMatrix.c1;	boneOffset.m[9] = mesh->mBones[i]->mOffsetMatrix.c2;	boneOffset.m[10] = mesh->mBones[i]->mOffsetMatrix.c3;	boneOffset.m[11] = mesh->mBones[i]->mOffsetMatrix.c4;
+					boneOffset.m[12] = mesh->mBones[i]->mOffsetMatrix.d1;	boneOffset.m[13] = mesh->mBones[i]->mOffsetMatrix.d2;	boneOffset.m[14] = mesh->mBones[i]->mOffsetMatrix.d3;	boneOffset.m[15] = mesh->mBones[i]->mOffsetMatrix.d4;
+
+					AnimaMeshBoneInfo info;
+					info.SetBoneOffset(boneOffset);
+
+					boneIndex = (AUint)_lastMeshesBones.Add(info);
+					_lastMeshesBonesNameMap[boneName] = boneIndex;
+				}
+				else
+					boneIndex = _lastMeshesBonesNameMap[boneName];
+
+				ANIMA_ASSERT(mesh->mBones[i]->mNumWeights <= 4);
+				for (AInt nw = 0; nw < mesh->mBones[i]->mNumWeights; nw++)
+				{
+					AInt vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+
+					meshBoneIDs[vertexID].vec[nw] = (AFloat)boneIndex;
+					meshBoneIDs[vertexID].vec[nw] = mesh->mBones[i]->mWeights[j].mWeight;
+				}
+			}
+
+			newMesh->SetBoneWeights(&meshBoneWeights);
+			newMesh->SetBoneIDs(&meshBoneIDs);
+		}
+
 		AInt materialIndex = (AInt)mesh->mMaterialIndex;
 		AnimaString* materialName = materialNamesMap->GetAt(materialIndex);
 		AnimaMaterial* material = _materialsManager->GetMaterialFromName(*materialName);
@@ -195,6 +242,12 @@ void AnimaMeshesManager::ClearLastMeshesIndexMap()
 	_lastMeshesIndexMap.RemoveAll();
 }
 
+void AnimaMeshesManager::ClearLastMeshesBonesData()
+{
+	_lastMeshesBones.RemoveAll();
+	_lastMeshesBonesNameMap.clear();
+}
+
 AnimaMesh* AnimaMeshesManager::GetMesh(AInt index)
 {
 	return _meshes[index];
@@ -219,6 +272,16 @@ AInt AnimaMeshesManager::GetMeshesCount() const
 AnimaArray<AnimaString*>* AnimaMeshesManager::GetLastMeshesIndexMap()
 {
 	return &_lastMeshesIndexMap;
+}
+
+AnimaArray<AnimaMeshBoneInfo>* AnimaMeshesManager::GetLastMeshesBones()
+{
+	return &_lastMeshesBones;
+}
+
+BoneNameMap* AnimaMeshesManager::GetLastMeshesBonesNameMap()
+{
+	return &_lastMeshesBonesNameMap;
 }
 
 AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
