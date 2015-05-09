@@ -8,9 +8,8 @@ AFloat Clamp(const AFloat& value, const AFloat& low, const AFloat& high)
 }
 
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
+	: AnimaNamedObject(AnimaString("AnimaTexture", allocator), allocator)
 {
-	_allocator = allocator;
-
 	_mipMapLevels = 0;
 	_width = 0;
 	_height = 0;
@@ -25,18 +24,15 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_clamp = 0;
 	_frameBuffer = 0;
 	_renderBuffer = 0;
-
-	_name = AnimaString("AnimaTexture", _allocator);
-
+	
 	_renderTargetsReady = false;
 	_texturesReady = false;
 	_needsResize = false;
 }
 
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
+	: AnimaNamedObject(name, allocator)
 {
-	_allocator = allocator;
-
 	_data = nullptr;
 	_dataSize = 0;
 
@@ -64,9 +60,8 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 }
 
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
+	: AnimaNamedObject(AnimaString(name, allocator), allocator)
 {
-	_allocator = allocator;
-
 	_data = nullptr;
 	_dataSize = 0;
 
@@ -82,8 +77,6 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint te
 	_frameBuffer = 0;
 	_renderBuffer = 0;
 
-	_name = AnimaString(name, _allocator);
-
 	_mipMapLevels = mipMapLevels;
 	_width = width;
 	_height = height;
@@ -94,10 +87,8 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint te
 }
 
 AnimaTexture::AnimaTexture(const AnimaTexture& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
-
-	_data = nullptr;
 	_dataSize = 0;
 
 	SetData(src._data, src._dataSize);
@@ -122,9 +113,8 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 }
 
 AnimaTexture::AnimaTexture(AnimaTexture&& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
-
 	_data = nullptr;
 	_dataSize = 0;
 
@@ -180,7 +170,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 			_dataSize = 0;
 		}
 
-		_allocator = src._allocator;
+		AnimaNamedObject::operator=(src);
 
 		SetData(src._data, src._dataSize);
 		SetFilter(src._filter);
@@ -193,9 +183,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_textureID = 0;
 		_frameBuffer = 0;
 		_renderBuffer = 0;
-
-		_name = src._name;
-
+		
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
@@ -220,7 +208,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 			_dataSize = 0;
 		}
 
-		_allocator = src._allocator;
+		AnimaNamedObject::operator=(src);
 
 		SetData(src._data, src._dataSize);
 		SetFilter(src._filter);
@@ -233,9 +221,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_textureID = 0;
 		_frameBuffer = 0;
 		_renderBuffer = 0;
-
-		_name = src._name;
-
+		
 		_mipMapLevels = src._mipMapLevels;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
@@ -595,27 +581,6 @@ void AnimaTexture::BindAsRenderTarget() const
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	glViewport(0, 0, _width, _height);
-}
-
-void AnimaTexture::SetName(const AnimaString& name)
-{
-	_name = name;
-}
-
-void AnimaTexture::SetName(const char* name)
-{
-	AnimaString str(name, _allocator);
-	_name = str;
-}
-
-AnimaString AnimaTexture::GetAnimaName() const
-{
-	return _name;
-}
-
-const char* AnimaTexture::GetName() const
-{
-	return _name.GetConstBuffer();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

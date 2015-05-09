@@ -19,6 +19,7 @@
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaMeshesManager.h"
+#include "AnimaAnimationsManager.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -31,7 +32,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaModelsManager
 {
 public:
-	AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager);
+	AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager, AnimaAnimationsManager* animationsManager);
 	~AnimaModelsManager();
 	
 public:
@@ -59,6 +60,7 @@ private:
 
 	AnimaMeshesManager*		_meshesManager;
 	AnimaMaterialsManager*	_materialsManager;
+	AnimaAnimationsManager* _animationsManager;
 
 	AnimaArray<AnimaModel*>			_models;
 	AnimaMappedArray<AnimaModel*>	_topLevelModels;

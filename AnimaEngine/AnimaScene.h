@@ -22,7 +22,7 @@ class AnimaTexturesManager;
 class AnimaDataGeneratorsManager;
 class AnimaMaterialsManager;
 class AnimaLightsManager;
-
+class AnimaAnimationsManager;
 class AnimaModelsManager;
 class AnimaMeshesManager;
 class AnimaModelInstancesManager;
@@ -56,6 +56,7 @@ public:
 	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()	{ return _dataGeneratorsManager;		}
 	inline AnimaMaterialsManager* GetMaterialsManager()				{ return _materialsManager;				}
 	inline AnimaLightsManager* GetLightsManager()					{ return _lightsManager;				}
+	inline AnimaAnimationsManager* GetAnimationsManager()			{ return _animationsManager;			}
 
 	inline AnimaAllocator* GetMeshesAllocator()			{ return _engine->GetMeshesAllocator();			}
 	inline AnimaAllocator* GetModelsAllocator()			{ return _engine->GetModelsAllocator();			}
@@ -69,6 +70,7 @@ public:
 	inline AnimaAllocator* GetMaterialsAllocator()		{ return _engine->GetMaterialsAllocator();		}
 	inline AnimaAllocator* GetLightsAllocator()			{ return _engine->GetLightsAllocator();			}
 	inline AnimaAllocator* GetDataGeneratorsAllocator()	{ return _engine->GetDataGeneratorsAllocator(); }
+	inline AnimaAllocator* GetAnimationsAllocator()		{ return _engine->GetAnimationsAllocator();		}
 
 protected:
 	AnimaEngine* _engine;
@@ -82,6 +84,7 @@ protected:
 	AnimaMeshesManager*			_meshesManager;
 	AnimaModelInstancesManager*	_modelInstancesManager;
 	AnimaMeshInstancesManager*	_meshInstancesManager;
+	AnimaAnimationsManager*		_animationsManager;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

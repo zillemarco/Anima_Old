@@ -38,8 +38,7 @@ public:
 	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap);
 
 	AnimaArray<AnimaString*>* GetLastMeshesIndexMap();
-	AnimaArray<AnimaMeshBoneInfo>* GetLastMeshesBones();
-	BoneNameMap* GetLastMeshesBonesNameMap();
+	AnimaMappedArray<AnimaMeshBoneInfo*>* GetLastMeshesBonesInfo();
 	void ClearLastMeshesIndexMap();
 	void ClearLastMeshesBonesData();
 
@@ -61,12 +60,9 @@ private:
 	AnimaMaterialsManager* _materialsManager;
 
 	AnimaMappedArray<AnimaMesh*> _meshes;
-
-#pragma warning (disable: 4251)
 	AnimaArray<AnimaString*> _lastMeshesIndexMap;
-	AnimaArray<AnimaMeshBoneInfo> _lastMeshesBones;
-	BoneNameMap _lastMeshesBonesNameMap;
-#pragma warning (default: 4251)
+
+	AnimaMappedArray<AnimaMeshBoneInfo*> _lastMeshesBonesInfo;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

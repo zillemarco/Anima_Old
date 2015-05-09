@@ -97,7 +97,7 @@ public:
 		if (namesPair != _mappedNames.end())
 		{
 			AnimaMappedArray<BASE_TYPE>* mappedArray = namesPair->second;
-			return mappedArray->Get(name);
+			return mappedArray->GetWithName(name);
 		}
 
 		return nullptr;
@@ -125,7 +125,7 @@ public:
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
-			return pair->second->Get(name);
+			return pair->second->GetWithName(name);
 		return nullptr;
 	}
 
@@ -228,7 +228,7 @@ public:
 	{
 		auto pair = _mappedNames.find(name);
 		if (pair != _mappedNames.end())
-			return pair->second->Get(name);
+			return pair->second->GetWithName(name);
 		return nullptr;
 	}
 

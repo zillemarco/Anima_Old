@@ -13,17 +13,19 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaModelsManager::AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager)
+AnimaModelsManager::AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager, AnimaAnimationsManager* animationsManager)
 : _models(scene->GetModelsAllocator())
 , _topLevelModels(scene->GetModelsAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(meshesManager != nullptr);
 	ANIMA_ASSERT(materialsManager != nullptr);
+	ANIMA_ASSERT(animationsManager != nullptr);
 
 	_scene = scene;
 	_meshesManager = meshesManager;
 	_materialsManager = materialsManager;
+	_animationsManager = animationsManager;
 }
 
 AnimaModelsManager::~AnimaModelsManager()
@@ -66,12 +68,20 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 	_materialsManager->LoadMaterialsFromModel(scene, name);
 	AnimaArray<AnimaString*>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
 
+	_animationsManager->LoadAnimations(scene);
+	AnimaMappedArray<AnimaAnimation*>* loadedAnimations = _animationsManager->GetLastLoadedAnimations();
+
 	if (_meshesManager->LoadMeshesFromModel(scene, name, materialNames))
 	{
+		AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = _meshesManager->GetLastMeshesBonesInfo();
+
 		AnimaArray<AnimaString*>* meshesName = _meshesManager->GetLastMeshesIndexMap();		
 		newTopLevelModel = LoadModelFromScene(scene, scene->mRootNode, meshesName, name);
-		
+						
 		newTopLevelModel->SetOriginFileName(modelPath);
+		newTopLevelModel->SetMeshesBonesInfo(meshesBonesInfo);
+		newTopLevelModel->SetAnimations(loadedAnimations->GetArray());
+
 		_topLevelModels.Add(name, newTopLevelModel);
 	}
 
@@ -90,13 +100,13 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_models.Add(currentModel);
 
-	AnimaMatrix modelMatrix;
-	modelMatrix.m[0] = sceneNode->mTransformation.a1;	modelMatrix.m[1] = sceneNode->mTransformation.a2;	modelMatrix.m[2] = sceneNode->mTransformation.a3;	modelMatrix.m[3] = sceneNode->mTransformation.a4;
-	modelMatrix.m[4] = sceneNode->mTransformation.b1;	modelMatrix.m[5] = sceneNode->mTransformation.b2;	modelMatrix.m[6] = sceneNode->mTransformation.b3;	modelMatrix.m[7] = sceneNode->mTransformation.b4;
-	modelMatrix.m[8] = sceneNode->mTransformation.c1;	modelMatrix.m[9] = sceneNode->mTransformation.c2;	modelMatrix.m[10] = sceneNode->mTransformation.c3;	modelMatrix.m[11] = sceneNode->mTransformation.c4;
-	modelMatrix.m[12] = sceneNode->mTransformation.d1;	modelMatrix.m[13] = sceneNode->mTransformation.d2;	modelMatrix.m[14] = sceneNode->mTransformation.d3;	modelMatrix.m[15] = sceneNode->mTransformation.d4;
+	AnimaMatrix modelNodeTransformationMatrix;
+	modelNodeTransformationMatrix.m[0] = sceneNode->mTransformation.a1;		modelNodeTransformationMatrix.m[1] = sceneNode->mTransformation.a2;		modelNodeTransformationMatrix.m[2] = sceneNode->mTransformation.a3;		modelNodeTransformationMatrix.m[3] = sceneNode->mTransformation.a4;
+	modelNodeTransformationMatrix.m[4] = sceneNode->mTransformation.b1;		modelNodeTransformationMatrix.m[5] = sceneNode->mTransformation.b2;		modelNodeTransformationMatrix.m[6] = sceneNode->mTransformation.b3;		modelNodeTransformationMatrix.m[7] = sceneNode->mTransformation.b4;
+	modelNodeTransformationMatrix.m[8] = sceneNode->mTransformation.c1;		modelNodeTransformationMatrix.m[9] = sceneNode->mTransformation.c2;		modelNodeTransformationMatrix.m[10] = sceneNode->mTransformation.c3;	modelNodeTransformationMatrix.m[11] = sceneNode->mTransformation.c4;
+	modelNodeTransformationMatrix.m[12] = sceneNode->mTransformation.d1;	modelNodeTransformationMatrix.m[13] = sceneNode->mTransformation.d2;	modelNodeTransformationMatrix.m[14] = sceneNode->mTransformation.d3;	modelNodeTransformationMatrix.m[15] = sceneNode->mTransformation.d4;
 
-	currentModel->GetTransformation()->SetTransformationMatrix(modelMatrix.Transposed());
+	currentModel->GetTransformation()->SetModelNodeTransformationMatrix(modelNodeTransformationMatrix);
 	
 	for (AUint n = 0; n < sceneNode->mNumMeshes; n++)
 	{

@@ -25,8 +25,48 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #endif
 
 
-AnimaMeshBoneInfo::AnimaMeshBoneInfo()
+AnimaMeshBoneInfo::AnimaMeshBoneInfo(const AnimaString& name, AnimaAllocator* allocator)
+	: AnimaNamedObject(name, allocator)
 {
+}
+
+AnimaMeshBoneInfo::AnimaMeshBoneInfo(const AnimaMeshBoneInfo& src)
+	: AnimaNamedObject(src)
+	, _boneOffset(src._boneOffset)
+	, _finalTransformation(src._finalTransformation)
+{
+}
+
+AnimaMeshBoneInfo::AnimaMeshBoneInfo(AnimaMeshBoneInfo&& src)
+	: AnimaNamedObject(src)
+	, _boneOffset(src._boneOffset)
+	, _finalTransformation(src._finalTransformation)
+{
+}
+
+
+AnimaMeshBoneInfo& AnimaMeshBoneInfo::operator=(const AnimaMeshBoneInfo& src)
+{
+	if (this != &src)
+	{
+		AnimaNamedObject::operator=(src);
+		_boneOffset = src._boneOffset;
+		_finalTransformation = src._finalTransformation;
+	}
+
+	return *this;
+}
+
+AnimaMeshBoneInfo& AnimaMeshBoneInfo::operator=(AnimaMeshBoneInfo&& src)
+{
+	if (this != &src)
+	{
+		AnimaNamedObject::operator=(src);
+		_boneOffset = src._boneOffset;
+		_finalTransformation = src._finalTransformation;
+	}
+
+	return *this;
 }
 
 AnimaMeshBoneInfo::~AnimaMeshBoneInfo()

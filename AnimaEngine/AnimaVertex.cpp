@@ -22,24 +22,32 @@ AnimaVertex2f::AnimaVertex2f()
 {
 	vec[0] = 0.0f;
 	vec[1] = 0.0f;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex2f::AnimaVertex2f(AFloat val)
 {
 	vec[0] = val;
 	vec[1] = val;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex2f::AnimaVertex2f(AFloat v[2])
 {
 	vec[0] = v[0];
 	vec[1] = v[1];
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex2f::AnimaVertex2f(AFloat x, AFloat y)
 {
 	vec[0] = x;
 	vec[1] = y;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex2f::AnimaVertex2f(const AnimaVertex2f& src)
@@ -48,6 +56,8 @@ AnimaVertex2f::AnimaVertex2f(const AnimaVertex2f& src)
 	{
 		this->vec[0] = src.vec[0];
 		this->vec[1] = src.vec[1];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -57,6 +67,8 @@ AnimaVertex2f::AnimaVertex2f(AnimaVertex2f&& src)
 	{
 		this->vec[0] = src.vec[0];
 		this->vec[1] = src.vec[1];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -64,12 +76,16 @@ AnimaVertex2f::AnimaVertex2f(const AnimaVertex3f& src)
 {
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex2f::AnimaVertex2f(const AnimaVertex4f& src)
 {
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex2f::~AnimaVertex2f()
@@ -80,6 +96,9 @@ AnimaVertex2f& AnimaVertex2f::operator=(const AnimaVertex2f& src)
 {
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
+
+	_nextValueIndex = src._nextValueIndex;
+
 	return *this;
 }
 
@@ -87,6 +106,9 @@ AnimaVertex2f& AnimaVertex2f::operator=(AnimaVertex2f&& src)
 {
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
+
+	_nextValueIndex = src._nextValueIndex;
+
 	return *this;
 }
 
@@ -232,6 +254,19 @@ AFloat AnimaVertex2f::Length2() const
 	return vec[0] * vec[0] + vec[1] * vec[1];
 }
 
+void AnimaVertex2f::ResetNextIndex()
+{
+	_nextValueIndex = 0;
+}
+
+bool AnimaVertex2f::SetNextValue(AFloat val)
+{
+	if (_nextValueIndex >= 2)
+		return false;
+	vec[_nextValueIndex++] = val;
+	return true;
+}
+
 //---------------------------------------------------------------------------------------
 // AnimaVertex3f
 //---------------------------------------------------------------------------------------
@@ -241,6 +276,8 @@ AnimaVertex3f::AnimaVertex3f()
 	vec[0] = 0.0f;
 	vec[1] = 0.0f;
 	vec[2] = 0.0f;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex3f::AnimaVertex3f(AFloat val)
@@ -248,6 +285,8 @@ AnimaVertex3f::AnimaVertex3f(AFloat val)
 	vec[0] = val;
 	vec[1] = val;
 	vec[2] = val;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex3f::AnimaVertex3f(AFloat v[3])
@@ -255,6 +294,8 @@ AnimaVertex3f::AnimaVertex3f(AFloat v[3])
 	vec[0] = v[0];
 	vec[1] = v[1];
 	vec[2] = v[3];
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex3f::AnimaVertex3f(AFloat x, AFloat y, AFloat z)
@@ -262,6 +303,8 @@ AnimaVertex3f::AnimaVertex3f(AFloat x, AFloat y, AFloat z)
 	vec[0] = x;
 	vec[1] = y;
 	vec[2] = z;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex3f::AnimaVertex3f(const AnimaVertex2f& src, const AFloat z)
@@ -269,6 +312,8 @@ AnimaVertex3f::AnimaVertex3f(const AnimaVertex2f& src, const AFloat z)
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
 	this->vec[2] = z;
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex3f::AnimaVertex3f(const AnimaVertex3f& src)
@@ -278,6 +323,8 @@ AnimaVertex3f::AnimaVertex3f(const AnimaVertex3f& src)
 		this->vec[0] = src.vec[0];
 		this->vec[1] = src.vec[1];
 		this->vec[2] = src.vec[2];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -288,6 +335,8 @@ AnimaVertex3f::AnimaVertex3f(AnimaVertex3f&& src)
 		this->vec[0] = src.vec[0];
 		this->vec[1] = src.vec[1];
 		this->vec[2] = src.vec[2];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -296,6 +345,8 @@ AnimaVertex3f::AnimaVertex3f(const AnimaVertex4f& src)
 	this->vec[0] = src.vec[0];
 	this->vec[1] = src.vec[1];
 	this->vec[2] = src.vec[2];
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex3f::~AnimaVertex3f()
@@ -489,6 +540,19 @@ AFloat AnimaVertex3f::InnerProduct(const AnimaVertex3f& v)
 	return (x * v.x + y * v.y + z * v.z);
 }
 
+void AnimaVertex3f::ResetNextIndex()
+{
+	_nextValueIndex = 0;
+}
+
+bool AnimaVertex3f::SetNextValue(AFloat val)
+{
+	if (_nextValueIndex >= 3)
+		return false;
+	vec[_nextValueIndex++] = val;
+	return true;
+}
+
 //---------------------------------------------------------------------------------------
 // AnimaVertex4f
 //---------------------------------------------------------------------------------------
@@ -499,6 +563,8 @@ AnimaVertex4f::AnimaVertex4f()
 	vec[1] = 0.0f;
 	vec[2] = 0.0f;
 	vec[3] = 0.0f;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex4f::AnimaVertex4f(AFloat val)
@@ -507,6 +573,8 @@ AnimaVertex4f::AnimaVertex4f(AFloat val)
 	vec[1] = val;
 	vec[2] = val;
 	vec[3] = val;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex4f::AnimaVertex4f(AFloat v[3])
@@ -515,6 +583,8 @@ AnimaVertex4f::AnimaVertex4f(AFloat v[3])
 	vec[1] = v[1];
 	vec[2] = v[2];
 	vec[3] = v[3];
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex4f::AnimaVertex4f(AFloat x, AFloat y, AFloat z, AFloat w)
@@ -523,6 +593,8 @@ AnimaVertex4f::AnimaVertex4f(AFloat x, AFloat y, AFloat z, AFloat w)
 	vec[1] = y;
 	vec[2] = z;
 	vec[3] = w;
+
+	_nextValueIndex = 0;
 }
 
 AnimaVertex4f::AnimaVertex4f(const AnimaVertex2f& src, const AFloat z, const AFloat w)
@@ -531,6 +603,8 @@ AnimaVertex4f::AnimaVertex4f(const AnimaVertex2f& src, const AFloat z, const AFl
 	this->vec[1] = src.vec[1];
 	this->vec[2] = z;
 	this->vec[3] = w;
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex4f::AnimaVertex4f(const AnimaVertex3f& src, const AFloat w)
@@ -539,6 +613,8 @@ AnimaVertex4f::AnimaVertex4f(const AnimaVertex3f& src, const AFloat w)
 	this->vec[1] = src.vec[1];
 	this->vec[2] = src.vec[2];
 	this->vec[3] = w;
+
+	_nextValueIndex = src._nextValueIndex;
 }
 
 AnimaVertex4f::AnimaVertex4f(const AnimaVertex4f& src)
@@ -549,6 +625,8 @@ AnimaVertex4f::AnimaVertex4f(const AnimaVertex4f& src)
 		this->vec[1] = src.vec[1];
 		this->vec[2] = src.vec[2];
 		this->vec[3] = src.vec[3];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -560,6 +638,8 @@ AnimaVertex4f::AnimaVertex4f(AnimaVertex4f&& src)
 		this->vec[1] = src.vec[1];
 		this->vec[2] = src.vec[2];
 		this->vec[3] = src.vec[3];
+
+		_nextValueIndex = src._nextValueIndex;
 	}
 }
 
@@ -573,6 +653,9 @@ AnimaVertex4f& AnimaVertex4f::operator=(const AnimaVertex4f& src)
 	this->vec[1] = src.vec[1];
 	this->vec[2] = src.vec[2];
 	this->vec[3] = src.vec[3];
+
+	_nextValueIndex = src._nextValueIndex;
+
 	return *this;
 }
 
@@ -582,6 +665,9 @@ AnimaVertex4f& AnimaVertex4f::operator=(AnimaVertex4f&& src)
 	this->vec[1] = src.vec[1];
 	this->vec[2] = src.vec[2];
 	this->vec[3] = src.vec[3];
+	
+	_nextValueIndex = src._nextValueIndex;
+
 	return *this;
 }
 
@@ -775,6 +861,19 @@ AFloat AnimaVertex4f::Length() const
 AFloat AnimaVertex4f::Length2() const
 {
 	return vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] + vec[3] * vec[3];
+}
+
+void AnimaVertex4f::ResetNextIndex()
+{
+	_nextValueIndex = 0;
+}
+
+bool AnimaVertex4f::SetNextValue(AFloat val)
+{
+	if (_nextValueIndex >= 4)
+		return false;
+	vec[_nextValueIndex++] = val;
+	return true;
 }
 
 AFloat operator * (const AnimaVertex2f &a, const AnimaVertex2f &b)

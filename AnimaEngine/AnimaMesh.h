@@ -20,6 +20,7 @@
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaSceneObject.h"
+#include "AnimaNamedObject.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -30,12 +31,18 @@ class AnimaMeshInstance;
 class AnimaRenderer;
 class AnimaShaderProgram;
 
-class ANIMA_ENGINE_EXPORT AnimaMeshBoneInfo
+class ANIMA_ENGINE_EXPORT AnimaMeshBoneInfo : public AnimaNamedObject
 {
 public:
-	AnimaMeshBoneInfo();
+	AnimaMeshBoneInfo(const AnimaString& name, AnimaAllocator* allocator);
+	AnimaMeshBoneInfo(const AnimaMeshBoneInfo& src);
+	AnimaMeshBoneInfo(AnimaMeshBoneInfo&& src);
 	~AnimaMeshBoneInfo();
 
+	AnimaMeshBoneInfo& operator=(const AnimaMeshBoneInfo& src);
+	AnimaMeshBoneInfo& operator=(AnimaMeshBoneInfo&& src);
+
+public:
 	void SetBoneOffset(AnimaMatrix boneOffset);
 	AnimaMatrix GetBoneOffset() const;
 

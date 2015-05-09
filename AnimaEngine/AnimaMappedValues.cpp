@@ -14,19 +14,15 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
+: AnimaNamedObject(name, allocator)
 {
-	ANIMA_ASSERT(allocator != nullptr);
-	_allocator = allocator;
-	_dataGeneratorManager = dataGeneratorManager;
-	_realName = name;
-	
+	_dataGeneratorManager = dataGeneratorManager;	
 	_uniqueName = AnimaString::MakeRandom(allocator, 15) + ".";
 }
 
 AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
-	_realName = src._realName;
 	_uniqueName = src._uniqueName;
 	_dataGeneratorManager = src._dataGeneratorManager;
 
@@ -40,10 +36,9 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 }
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
 	_uniqueName = src._uniqueName;
-	_realName = src._realName;
 	_dataGeneratorManager = src._dataGeneratorManager;
 
 	_texturesMap = src._texturesMap;
@@ -70,8 +65,8 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
-		_realName = src._realName;
+		AnimaNamedObject::operator=(src);
+
 		_uniqueName = src._uniqueName;
 		_dataGeneratorManager = src._dataGeneratorManager;
 
@@ -91,8 +86,8 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
-		_realName = src._realName;
+		AnimaNamedObject::operator=(src);
+
 		_uniqueName = src._uniqueName;
 		_dataGeneratorManager = src._dataGeneratorManager;
 
@@ -120,16 +115,6 @@ void AnimaMappedValues::CopyData(const AnimaMappedValues& src)
 		CopyIntegers(src);
 		CopyBooleans(src);
 	}
-}
-
-AnimaString AnimaMappedValues::GetAnimaName() const
-{
-	return _realName;
-}
-
-const char* AnimaMappedValues::GetName() const
-{
-	return _realName.GetConstBuffer();
 }
 
 void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture* value)

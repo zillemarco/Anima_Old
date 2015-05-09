@@ -377,7 +377,7 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE Get(const AnimaString& name)
+	inline TYPE GetWithName(const AnimaString& name)
 	{
 		AInt index = Contains(name);
 		if (index >= 0 && index < _array.GetSize())
@@ -386,7 +386,7 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE GetConst(const AnimaString& name) const
+	inline TYPE GetConstWithName(const AnimaString& name) const
 	{
 		AInt index = Contains(name);
 		if (index >= 0 && index < _array.GetSize())
@@ -395,7 +395,7 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE Get(const char* name)
+	inline TYPE GetWithName(const char* name)
 	{
 		AInt index = Contains(name);
 		if (index >= 0 && index < _array.GetSize())
@@ -404,7 +404,7 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE GetConst(const char* name) const
+	inline TYPE GetConstWithName(const char* name) const
 	{
 		AInt index = Contains(name);
 		if (index >= 0 && index < _array.GetSize())

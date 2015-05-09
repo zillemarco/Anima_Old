@@ -65,13 +65,13 @@ AnimaSceneObject& AnimaSceneObject::operator=(AnimaSceneObject&& src)
 void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)
 {
 	AnimaMappedValues::SetVector("Position", position);
-	_transformation.SetInitialTransformationMatrix(AnimaMatrix::MakeTranslation(position));
+	_transformation.Translate(position);
 }
 
 void AnimaSceneObject::SetPosition(AFloat x, AFloat y, AFloat z)
 {
 	AnimaMappedValues::SetVector("Position", x, y, z);
-	_transformation.SetInitialTransformationMatrix(AnimaMatrix::MakeTranslation(x, y, z));
+	_transformation.Translate(x, y, z);
 }
 
 void AnimaSceneObject::SetParentObject(AnimaSceneObject* parentObject)
@@ -101,12 +101,12 @@ AInt AnimaSceneObject::GetChildrenNumber()
 
 AnimaSceneObject* AnimaSceneObject::GetChild(const AnimaString& name)
 {
-	return _children.Get(name);
+	return _children.GetWithName(name);
 }
 
 AnimaSceneObject* AnimaSceneObject::GetChild(const char* name)
 {
-	return _children.Get(name);
+	return _children.GetWithName(name);
 }
 
 AnimaSceneObject* AnimaSceneObject::GetChild(AInt index)

@@ -19,6 +19,7 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaMatrix.h"
+#include "AnimaNamedObject.h"
 #include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -26,7 +27,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class AnimaShaderProgram;
 class AnimaScene;
 
-class ANIMA_ENGINE_EXPORT AnimaMappedValues
+class ANIMA_ENGINE_EXPORT AnimaMappedValues : public AnimaNamedObject
 {
 	friend class AnimaShaderProgram;
 	friend class AnimaScene;
@@ -42,10 +43,7 @@ public:
 	
 	AnimaMappedValues& operator=(const AnimaMappedValues& src);
 	AnimaMappedValues& operator=(AnimaMappedValues&& src);
-
-	AnimaString GetAnimaName() const;
-	const char* GetName() const;
-
+	
 	virtual void CopyData(const AnimaMappedValues& src);
 	
 public:
@@ -195,10 +193,8 @@ protected:
 	AnimaString ExtractName(const AnimaString& src) const;
 	
 protected:
-	AnimaAllocator* _allocator;
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
 
-	AnimaString _realName;
 	AnimaString _uniqueName;
 
 #pragma warning (disable: 4251)

@@ -207,7 +207,7 @@ AnimaShaderProgram* AnimaShadersManager::GetProgram(AInt index)
 
 AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const AnimaString& name)
 {
-	return _programs.Get(name);
+	return _programs.GetWithName(name);
 }
 
 AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const char* name)

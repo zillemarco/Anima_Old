@@ -13,7 +13,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMeshesManager::AnimaMeshesManager(AnimaScene* scene, AnimaMaterialsManager* materialsManager)
 	: _meshes(scene->GetMeshesAllocator())
 	, _lastMeshesIndexMap(scene->GetGenericAllocator())
-	, _lastMeshesBones(scene->GetGenericAllocator())
+	, _lastMeshesBonesInfo(scene->GetGenericAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(materialsManager != nullptr);
@@ -171,33 +171,32 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 
 			for (AUint nb = 0; nb < mesh->mNumBones; nb++)
 			{
-				AUint boneIndex = 0;
-				AnimaString boneName(mesh->mBones[nb]->mName.data, _scene->GetStringAllocator());
+				aiBone* bone = mesh->mBones[nb];
+				AnimaString boneName(bone->mName.data, _scene->GetStringAllocator());
+				AUint boneIndex = _lastMeshesBonesInfo.Contains(boneName);
 
-				if (_lastMeshesBonesNameMap.find(boneName) == _lastMeshesBonesNameMap.end())
+				if (boneIndex < 0)
 				{
 					AnimaMatrix boneOffset;
-					boneOffset.m[0] = mesh->mBones[i]->mOffsetMatrix.a1;	boneOffset.m[1] = mesh->mBones[i]->mOffsetMatrix.a2;	boneOffset.m[2] = mesh->mBones[i]->mOffsetMatrix.a3;	boneOffset.m[3] = mesh->mBones[i]->mOffsetMatrix.a4;
-					boneOffset.m[4] = mesh->mBones[i]->mOffsetMatrix.b1;	boneOffset.m[5] = mesh->mBones[i]->mOffsetMatrix.b2;	boneOffset.m[6] = mesh->mBones[i]->mOffsetMatrix.b3;	boneOffset.m[7] = mesh->mBones[i]->mOffsetMatrix.b4;
-					boneOffset.m[8] = mesh->mBones[i]->mOffsetMatrix.c1;	boneOffset.m[9] = mesh->mBones[i]->mOffsetMatrix.c2;	boneOffset.m[10] = mesh->mBones[i]->mOffsetMatrix.c3;	boneOffset.m[11] = mesh->mBones[i]->mOffsetMatrix.c4;
-					boneOffset.m[12] = mesh->mBones[i]->mOffsetMatrix.d1;	boneOffset.m[13] = mesh->mBones[i]->mOffsetMatrix.d2;	boneOffset.m[14] = mesh->mBones[i]->mOffsetMatrix.d3;	boneOffset.m[15] = mesh->mBones[i]->mOffsetMatrix.d4;
+					boneOffset.m[0] = bone->mOffsetMatrix.a1;	boneOffset.m[1] = bone->mOffsetMatrix.a2;	boneOffset.m[2] = bone->mOffsetMatrix.a3;	boneOffset.m[3] = bone->mOffsetMatrix.a4;
+					boneOffset.m[4] = bone->mOffsetMatrix.b1;	boneOffset.m[5] = bone->mOffsetMatrix.b2;	boneOffset.m[6] = bone->mOffsetMatrix.b3;	boneOffset.m[7] = bone->mOffsetMatrix.b4;
+					boneOffset.m[8] = bone->mOffsetMatrix.c1;	boneOffset.m[9] = bone->mOffsetMatrix.c2;	boneOffset.m[10] = bone->mOffsetMatrix.c3;	boneOffset.m[11] = bone->mOffsetMatrix.c4;
+					boneOffset.m[12] = bone->mOffsetMatrix.d1;	boneOffset.m[13] = bone->mOffsetMatrix.d2;	boneOffset.m[14] = bone->mOffsetMatrix.d3;	boneOffset.m[15] = bone->mOffsetMatrix.d4;
 
-					AnimaMeshBoneInfo info;
-					info.SetBoneOffset(boneOffset);
+					AnimaMeshBoneInfo* info = AnimaAllocatorNamespace::AllocateNew<AnimaMeshBoneInfo>(*(_scene->GetMeshesAllocator()), boneName, _scene->GetMeshesAllocator());
+					info->SetBoneOffset(boneOffset);
 
-					boneIndex = (AUint)_lastMeshesBones.Add(info);
-					_lastMeshesBonesNameMap[boneName] = boneIndex;
+					boneIndex = (AUint)_lastMeshesBonesInfo.Add(boneName, info);
 				}
-				else
-					boneIndex = _lastMeshesBonesNameMap[boneName];
 
-				ANIMA_ASSERT(mesh->mBones[i]->mNumWeights <= 4);
-				for (AInt nw = 0; nw < mesh->mBones[i]->mNumWeights; nw++)
+				AInt numWeights = bone->mNumWeights;
+				for (AInt nw = 0; nw < numWeights; nw++)
 				{
-					AInt vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+					aiVertexWeight* weight = &bone->mWeights[nw];
+					AInt vertexID = weight->mVertexId;
 
-					meshBoneIDs[vertexID].vec[nw] = (AFloat)boneIndex;
-					meshBoneIDs[vertexID].vec[nw] = mesh->mBones[i]->mWeights[j].mWeight;
+					ANIMA_ASSERT(meshBoneIDs[vertexID].SetNextValue((AFloat)boneIndex));
+					ANIMA_ASSERT(meshBoneWeights[vertexID].SetNextValue(weight->mWeight));
 				}
 			}
 
@@ -244,8 +243,15 @@ void AnimaMeshesManager::ClearLastMeshesIndexMap()
 
 void AnimaMeshesManager::ClearLastMeshesBonesData()
 {
-	_lastMeshesBones.RemoveAll();
-	_lastMeshesBonesNameMap.clear();
+	AInt count = _lastMeshesBonesInfo.GetSize();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaMeshBoneInfo* meshBoneInfo = _lastMeshesBonesInfo[i];
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMeshesAllocator()), meshBoneInfo);
+		meshBoneInfo = nullptr;
+	}
+
+	_lastMeshesBonesInfo.RemoveAll();
 }
 
 AnimaMesh* AnimaMeshesManager::GetMesh(AInt index)
@@ -274,14 +280,9 @@ AnimaArray<AnimaString*>* AnimaMeshesManager::GetLastMeshesIndexMap()
 	return &_lastMeshesIndexMap;
 }
 
-AnimaArray<AnimaMeshBoneInfo>* AnimaMeshesManager::GetLastMeshesBones()
+AnimaMappedArray<AnimaMeshBoneInfo*>* AnimaMeshesManager::GetLastMeshesBonesInfo()
 {
-	return &_lastMeshesBones;
-}
-
-BoneNameMap* AnimaMeshesManager::GetLastMeshesBonesNameMap()
-{
-	return &_lastMeshesBonesNameMap;
+	return &_lastMeshesBonesInfo;
 }
 
 AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)

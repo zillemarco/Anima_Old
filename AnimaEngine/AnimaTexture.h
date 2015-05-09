@@ -5,10 +5,11 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
+#include "AnimaNamedObject.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class ANIMA_ENGINE_EXPORT AnimaTexture
+class ANIMA_ENGINE_EXPORT AnimaTexture : public AnimaNamedObject
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator);
@@ -70,17 +71,7 @@ public:
 	void Bind(AUint unit) const;
 	void BindAsRenderTarget() const;
 
-	void SetName(const AnimaString& name);
-	void SetName(const char* name);
-
-	AnimaString GetAnimaName() const;
-	const char* GetName() const;
-
 private:
-	AnimaAllocator* _allocator;
-
-	AnimaString _name;
-	
 	AUint _width;
 	AUint _height;
 

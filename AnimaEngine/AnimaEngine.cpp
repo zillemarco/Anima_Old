@@ -28,7 +28,7 @@ AChar								AnimaEngine::_logFilePath[PATH_MAX] = "";
 #define _ANIMA_LOCAL_MEMORY_SIZE			524288000 	// 500 MB
 #define _ANIMA_MESHES_MEMORY_SIZE			52428800	// 50 MB
 #define _ANIMA_TEXTURES_MEMORY_SIZE			419430400	// 400 MB
-#define _ANIMA_ALLOCATORS_NUMBER			12
+#define _ANIMA_ALLOCATORS_NUMBER			13
 #define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MESHES_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
@@ -53,6 +53,7 @@ AnimaEngine::AnimaEngine()
 	_lightsAllocator = nullptr;
 	_dataGeneratorsAllocator = nullptr;
 	_scenesAllocator = nullptr;
+	_animationsAllocator = nullptr;
 
 	_scenesManager = nullptr;
 	_shadersManager = nullptr;
@@ -111,6 +112,7 @@ void AnimaEngine::InitializeMemorySystem()
 	_lightsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_dataGeneratorsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_scenesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_animationsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 
 	ASizeT usedSize = 0;
 	usedSize += _meshesAllocator->GetSize();
@@ -127,6 +129,7 @@ void AnimaEngine::InitializeMemorySystem()
 	usedSize += _lightsAllocator->GetSize(); 
 	usedSize += _dataGeneratorsAllocator->GetSize(); 
 	usedSize += _scenesAllocator->GetSize();
+	usedSize += _animationsAllocator->GetSize();
 
 	ANIMA_ASSERT(usedSize < _localMemorySize - 1000);
 }
@@ -248,6 +251,12 @@ void AnimaEngine::TerminateMemorySystem()
 	{
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_scenesAllocator, *_localMemoryAllocator);
 		_scenesAllocator = nullptr;
+	}
+
+	if (_animationsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_animationsAllocator, *_localMemoryAllocator);
+		_animationsAllocator = nullptr;
 	}
 
 	if (_managersAllocator != nullptr)

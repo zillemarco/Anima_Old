@@ -27,6 +27,9 @@ typedef AnimaVertex4f AnimaColor4f;
 
 class ANIMA_ENGINE_EXPORT AnimaVertex2f
 {
+	friend class AnimaVertex3f;
+	friend class AnimaVertex4f;
+
 public:
 	union
 	{
@@ -86,10 +89,19 @@ public:
 
 	AFloat Length() const;
 	AFloat Length2() const;
+
+	void ResetNextIndex();
+	bool SetNextValue(AFloat val);
+
+protected:
+	AInt _nextValueIndex;
 };
 
 class ANIMA_ENGINE_EXPORT AnimaVertex3f
 {
+	friend class AnimaVertex2f;
+	friend class AnimaVertex4f;
+
 public:
 	union
 	{
@@ -152,10 +164,19 @@ public:
 
 	AFloat Length() const;
 	AFloat Length2() const;
+
+	void ResetNextIndex();
+	bool SetNextValue(AFloat val);
+
+protected:
+	AInt _nextValueIndex;
 };
 
 class ANIMA_ENGINE_EXPORT AnimaVertex4f
 {
+	friend class AnimaVertex2f;
+	friend class AnimaVertex3f;
+
 public:
 	union
 	{
@@ -217,6 +238,12 @@ public:
 
 	AFloat Length() const;
 	AFloat Length2() const;
+
+	void ResetNextIndex();
+	bool SetNextValue(AFloat val);
+
+protected:
+	AInt _nextValueIndex;
 };
 
 AFloat ANIMA_ENGINE_EXPORT operator * (const AnimaVertex2f &a, const AnimaVertex2f &b);

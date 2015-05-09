@@ -241,6 +241,11 @@ public:
 		return _scenesAllocator;
 	}
 
+	inline AnimaAllocator* GetAnimationsAllocator() {
+		ANIMA_ASSERT(_animationsAllocator != nullptr);
+		return _animationsAllocator;
+	}
+
 	inline AnimaAllocator* GetManagersAllocator() {
 		ANIMA_ASSERT(_managersAllocator != nullptr);
 		return _managersAllocator;
@@ -276,6 +281,8 @@ protected:
 	AnimaFreeListAllocator* _lightsAllocator;
 	AnimaFreeListAllocator* _dataGeneratorsAllocator;
 	AnimaFreeListAllocator* _scenesAllocator;
+
+	AnimaFreeListAllocator* _animationsAllocator;
 
 	AnimaFreeListAllocator* _meshesAllocator;			/*!< Allocator usato dalla classe AnimaVertex, suoi derivati e utilizzatori */
 	AnimaFreeListAllocator* _modelsAllocator;			/*!< Allocator usato dalla classe AnimaModel e suoi derivati per gestire modelli e mesh */

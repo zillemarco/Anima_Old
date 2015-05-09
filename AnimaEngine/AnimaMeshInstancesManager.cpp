@@ -27,6 +27,7 @@ AnimaMeshInstancesManager::AnimaMeshInstancesManager(AnimaScene* scene, AnimaMes
 AnimaMeshInstancesManager::~AnimaMeshInstancesManager()
 {
 	ClearInstances();
+	ClearLastInstancesFromModel();
 }
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& instanceName, AnimaMesh* srcMesh)

@@ -41,6 +41,7 @@ AEMainWindow::AEMainWindow()
 	_activeDocument = nullptr;
 	_resourceManagerTab = nullptr;
 	_worldEditorTab = nullptr;
+	_loadedResourcesPanel = nullptr;
 		
 	_mdiArea = new QMdiArea;
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
