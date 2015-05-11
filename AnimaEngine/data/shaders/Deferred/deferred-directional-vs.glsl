@@ -2,7 +2,6 @@
 
 in vec3 _position;
 
-uniform mat4 CAM_projectionViewMatrix;
 uniform mat4 MOD_AModelMatrix;
 
 void main()

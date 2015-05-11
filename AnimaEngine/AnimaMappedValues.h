@@ -47,6 +47,9 @@ public:
 	virtual void CopyData(const AnimaMappedValues& src);
 	
 public:
+	virtual const char* GetShaderPrefix() = 0;
+	
+public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
 	void AddTexture(const char* propertyName, AnimaTexture* value);
 
@@ -75,6 +78,15 @@ public:
 	void AddVector(const char* propertyName, AnimaVertex4f value);
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
 	void AddVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
+
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
+	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
+	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
+	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
+	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value);
 
 	void AddFloat(const AnimaString& propertyName, AFloat value);
 	void AddFloat(const char* propertyName, AFloat value);
@@ -119,6 +131,15 @@ public:
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
 	void SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
 
+	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
+	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value);
+	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
+	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value);
+	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
+	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value);
+	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
+	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value);
+
 	void SetFloat(const AnimaString& propertyName, AFloat value);
 	void SetFloat(const char* propertyName, AFloat value);
 
@@ -148,6 +169,9 @@ public:
 	AnimaVertex4f GetVector4f(const AnimaString& propertyName);
 	AnimaVertex4f GetVector4f(const char* propertyName);
 
+	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName);
+	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const char* propertyName);
+
 	AFloat GetFloat(const AnimaString& propertyName);
 	AFloat GetFloat(const char* propertyName);
 
@@ -168,6 +192,9 @@ public:
 	
 	bool HasVector(const AnimaString& propertyName);
 	bool HasVector(const char* propertyName);
+
+	bool HasVectorArray(const AnimaString& propertyName);
+	bool HasVectorArray(const char* propertyName);
 	
 	bool HasFloat(const AnimaString& propertyName);
 	bool HasFloat(const char* propertyName);
@@ -184,6 +211,7 @@ public:
 	void CopyTextures(const AnimaMappedValues& src);
 	void CopyColors(const AnimaMappedValues& src);
 	void CopyVectors(const AnimaMappedValues& src);
+	void CopyVectorsArrays(const AnimaMappedValues& src);
 	void CopyMatrices(const AnimaMappedValues& src);
 	void CopyFloats(const AnimaMappedValues& src);
 	void CopyIntegers(const AnimaMappedValues& src);
@@ -191,6 +219,8 @@ public:
 
 protected:
 	AnimaString ExtractName(const AnimaString& src) const;
+	void ClearVectorsArray(AnimaArray<AnimaVectorGenerator*>* vectorArray);
+	void ClearAllVectorsArrays();
 	
 protected:
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
@@ -205,6 +235,7 @@ protected:
 	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher> _floatsMap;
 	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaString::Hasher> _booleansMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaString::Hasher> _vectorsArraysMap;
 #pragma warning (default: 4251) 
 };
 

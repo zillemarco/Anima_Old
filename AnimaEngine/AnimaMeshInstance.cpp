@@ -103,7 +103,7 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 	program->UpdateSceneObjectProperties(this, renderer);
 
 	if (updateMaterial)
-		program->UpdateMaterialProperies(_material, renderer);
+		program->UpdateMappedValuesObjectProperties/*UpdateMaterialProperies*/(_material, renderer);
 
 #ifdef WIN32
 	glBindVertexArray(_mesh->GetVertexArrayObject());

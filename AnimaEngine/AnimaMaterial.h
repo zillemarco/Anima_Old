@@ -25,7 +25,10 @@ public:
 	~AnimaMaterial();
 	
 	AnimaMaterial& operator=(const AnimaMaterial& src);
-	AnimaMaterial& operator=(AnimaMaterial&& src);	
+	AnimaMaterial& operator=(AnimaMaterial&& src);
+
+public:
+	virtual const char* GetShaderPrefix() { return "MAT"; }
 };
 
 END_ANIMA_ENGINE_NAMESPACE

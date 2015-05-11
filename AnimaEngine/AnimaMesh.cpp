@@ -1449,7 +1449,7 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 	program->UpdateSceneObjectProperties(this, renderer);
 
 	if (updateMaterial)
-		program->UpdateMaterialProperies(_material, renderer);
+		program->UpdateMappedValuesObjectProperties/* UpdateMaterialProperies*/(_material, renderer);
 
 #ifdef WIN32
 	glBindVertexArray(GetVertexArrayObject());

@@ -40,18 +40,22 @@ public:
 	};
 
 	struct AnimaUniformInfo {
-		AInt _location;
+		AInt* _locations;
+		AInt _locationsCount;
 		AUint _type;
 		AnimaString _name;
+		AUint _arraySize;
 
 		AnimaString* _nameParts;
 		AUint _namePartsCount;
 
 		AnimaUniformInfo() {
-			_location = -1;
+			_locations = nullptr;
+			_locationsCount = 0;
 			_type = GL_FLOAT;
 			_nameParts = nullptr;
 			_namePartsCount = 0;
+			_arraySize = 1;
 		}
 	};
 
@@ -105,12 +109,11 @@ public:
 	void DisableInputs();
 
 	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager);
-	void UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix);
-	void UpdateCameraProperies(AnimaCamera* camera);
-	void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager);
-	void UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager);
-	void UpdateLightsProperies(AnimaScene* scene);
+	void UpdateMappedValuesObjectProperties(AnimaMappedValues* object, AnimaRenderer* renderingManager);
 	void UpdateRenderingManagerProperies(AnimaRenderer* renderingManager);
+	//void UpdateCameraProperies(AnimaCamera* camera);
+	//void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager);
+	//void UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
@@ -128,6 +131,8 @@ public:
 	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose = false);
 	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
+	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
+	void SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
 
 	void SetUniformi(AInt location, int value);
 	void SetUniformf(AInt location, AFloat value);

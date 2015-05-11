@@ -9,9 +9,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
-const char* ModelPrefix				= "MOD";
-const char* CameraPrefix			= "CAM";
-const char* MaterialPrefix			= "MAT";
 const char* RenderingEnginePrefix	= "REN";
 const char* GBufferPrefix			= "GB";
 
@@ -235,6 +232,13 @@ void AnimaShaderProgram::ClearUniforms()
 			pair.second._nameParts = nullptr;
 			pair.second._namePartsCount = 0;
 		}
+
+		if (pair.second._locations != nullptr)
+		{
+			AnimaAllocatorNamespace::DeallocateArray(*_allocator, pair.second._locations);
+			pair.second._locations = nullptr;
+			pair.second._locationsCount = 0;
+		}
 	}
 	_uniforms.clear();
 }
@@ -355,7 +359,7 @@ void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform1i(pair->second._location, value);
+		glUniform1i(pair->second._locations[0], value);
 }
 
 void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
@@ -368,7 +372,7 @@ void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat valu
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform1f(pair->second._location, value);
+		glUniform1f(pair->second._locations[0], value);
 }
 
 void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
@@ -381,7 +385,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform2f(pair->second._location, value.x, value.y);
+		glUniform2f(pair->second._locations[0], value.x, value.y);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
@@ -394,7 +398,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform3f(pair->second._location, value.x, value.y, value.z);
+		glUniform3f(pair->second._locations[0], value.x, value.y, value.z);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
@@ -407,7 +411,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaC
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform4f(pair->second._location, value.x, value.y, value.z, value.w);
+		glUniform4f(pair->second._locations[0], value.x, value.y, value.z, value.w);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
@@ -420,7 +424,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform3f(pair->second._location, a, b, c);
+		glUniform3f(pair->second._locations[0], a, b, c);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
@@ -433,7 +437,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniform4f(pair->second._location, a, b, c, d);
+		glUniform4f(pair->second._locations[0], a, b, c, d);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
@@ -446,13 +450,43 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaM
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
-		glUniformMatrix4fv(pair->second._location, 1, transpose ? GL_TRUE : GL_FALSE, value.m);
+		glUniformMatrix4fv(pair->second._locations[0], 1, transpose ? GL_TRUE : GL_FALSE, value.m);
 }
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
 {
 	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value, transpose);
+}
+
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
+{
+	auto pair = _uniforms.find(uniformName);
+	if (pair != _uniforms.end())
+	{
+		//AnimaString name(_allocator);
+
+		AInt countValue = value->GetSize();
+		AInt countUniformArray = pair->second._arraySize;
+		AInt countUniformLocations = pair->second._arraySize;
+		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
+		{
+			//name.Format("%s[%d]", uniformName, i);
+
+			if (type == GL_FLOAT_VEC2)
+				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector2f());
+			else if (type == GL_FLOAT_VEC3)
+				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector3f());
+			else if (type == GL_FLOAT_VEC4)
+				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector4f());
+		}
+	}
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
+{
+	AnimaString str(uniformName, _allocator);
+	SetUniform(str, value, type);
 }
 
 void AnimaShaderProgram::SetUniformi(AInt location, int value)
@@ -511,12 +545,13 @@ void AnimaShaderProgram::ScanVariables()
 		glGetProgramInterfaceiv(_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveInputs);
 		glGetProgramInterfaceiv(_id, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &numActiveOutputs);
 
-		const int propertiesSize = 3;
+		const int propertiesSize = 4;
 
 		AnimaString name(_allocator);
 		AnimaString namePart1(_allocator);
 		AnimaString namePart2(_allocator);
-		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, };
+		AnimaString tmpName(_allocator);
+		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
 		GLint values[propertiesSize];
 
 		for (int i = 0; i < numActiveUniforms; i++)
@@ -529,11 +564,53 @@ void AnimaShaderProgram::ScanVariables()
 
 			namePart1 = name;
 
+			AInt arraySize = values[3];
+
+			AInt* locations = nullptr;
+			AInt locationsCount = 0;
+
+			AInt pos = -1;
+
+			if (arraySize > 0)
+			{
+				pos = namePart1.Find('[');
+				if (pos != -1)
+				{
+					name = namePart1.Substring(0, pos);
+
+					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, arraySize);
+					locationsCount = arraySize;
+
+					for (AInt nu = 0; nu < arraySize; nu++)
+					{
+						tmpName.Format("%s[%d]", name.GetConstBuffer(), nu);
+
+						locations[nu] = glGetUniformLocation(_id, tmpName.GetConstBuffer());
+					}
+				}
+				else
+				{
+					arraySize = 0;
+					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
+					locationsCount = 1;
+
+					locations[0] = values[2];
+				}
+			}
+			else
+			{
+				locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
+				locationsCount = 1;
+
+				locations[0] = values[2];
+			}
+
+			namePart1 = name;
 			AUint offset = namePart1.CountOf('_') + 1;
 			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
 
 			offset = 0;
-			int pos = namePart1.Find('_');
+			pos = namePart1.Find('_');
 			while (pos != -1)
 			{
 				namePart2 = namePart1.Substring(0, pos);
@@ -547,8 +624,10 @@ void AnimaShaderProgram::ScanVariables()
 			nameParts[offset++] = namePart1;
 
 			AnimaUniformInfo info;
-			info._location = values[2];
+			info._locations = locations;
+			info._locationsCount = locationsCount;
 			info._type = values[1];
+			info._arraySize = arraySize;
 			info._name = name;
 			info._nameParts = nameParts;
 			info._namePartsCount = offset;
@@ -607,40 +686,40 @@ void AnimaShaderProgram::ScanVariables()
 
 		for (int i = 0; i < numActiveUniforms; i++)
 		{
-			glGetActiveUniform(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
-			name.Reserve(bufLen);
-			name.SetString(tmp.GetBuffer());
-			name.Trim();
-			
-			location = glGetUniformLocation(_id, name.GetConstBuffer());
+			//glGetActiveUniform(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
+			//name.Reserve(bufLen);
+			//name.SetString(tmp.GetBuffer());
+			//name.Trim();
+			//
+			//location = glGetUniformLocation(_id, name.GetConstBuffer());
 
-			namePart1 = name;
+			//namePart1 = name;
 
-			AUint offset = namePart1.CountOf('_') + 1;
-			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
+			//AUint offset = namePart1.CountOf('_') + 1;
+			//AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
 
-			offset = 0;
-			int pos = namePart1.Find('_');
-			while (pos != -1)
-			{
-				namePart2 = namePart1.Substring(0, pos);
-				namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
+			//offset = 0;
+			//int pos = namePart1.Find('_');
+			//while (pos != -1)
+			//{
+			//	namePart2 = namePart1.Substring(0, pos);
+			//	namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
 
-				if (!namePart2.IsEmpty())
-					nameParts[offset++] = namePart2;
-				pos = namePart1.Find('_');
-			}
+			//	if (!namePart2.IsEmpty())
+			//		nameParts[offset++] = namePart2;
+			//	pos = namePart1.Find('_');
+			//}
 
-			nameParts[offset++] = namePart1;
+			//nameParts[offset++] = namePart1;
 
-			AnimaUniformInfo info;
-			info._location = location;
-			info._type = type;
-			info._name = name;
-			info._nameParts = nameParts;
-			info._namePartsCount = offset;
+			//AnimaUniformInfo info;
+			//info._location = location;
+			//info._type = type;
+			//info._name = name;
+			//info._nameParts = nameParts;
+			//info._namePartsCount = offset;
 
-			_uniforms[name] = info;
+			//_uniforms[name] = info;
 		}
 
 		for (int i = 0; i < numActiveInputs; i++)
@@ -784,6 +863,11 @@ void AnimaShaderProgram::DisableInputs()
 
 void AnimaShaderProgram::UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager)
 {
+	UpdateMappedValuesObjectProperties(object, renderingManager);
+}
+
+void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* object, AnimaRenderer* renderingManager)
+{
 	if (object == nullptr)
 		return;
 
@@ -796,313 +880,290 @@ void AnimaShaderProgram::UpdateSceneObjectProperties(AnimaSceneObject* object, A
 		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
 			continue;
 
-		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._location, object->GetVector2f(info._nameParts[1]));
-		else if (info._type == GL_FLOAT_VEC3)
+		if (info._arraySize == 0)
 		{
-			if (object->HasColor(info._nameParts[1]))
-				SetUniform(info._location, object->GetColor3f(info._nameParts[1]));
-			else
-				SetUniform(info._location, object->GetVector3f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT_VEC4)
-		{
-			if (object->HasColor(info._nameParts[1]))
-				SetUniform(info._location, object->GetColor4f(info._nameParts[1]));
-			else
-				SetUniform(info._location, object->GetVector4f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT)
-			SetUniformf(info._location, object->GetFloat(info._nameParts[1]));
-		else if (info._type == GL_BOOL)
-			SetUniformi(info._location, object->GetBoolean(info._nameParts[1]) ? 1 : 0);
-		else if (info._type == GL_INT)
-			SetUniformi(info._location, object->GetInteger(info._nameParts[1]));
-		else if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, object->GetMatrix(info._nameParts[1]));
-		else if (info._type == GL_SAMPLER_2D)
-		{
-			AnimaTexture* texture = object->GetTexture(info._nameParts[1]);
-
-			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-			SetUniformi(info._location, slot);
-
-			if (texture == nullptr)
+			if (info._type == GL_FLOAT_VEC2)
+				SetUniform(info._locations[0], object->GetVector2f(info._nameParts[1]));
+			else if (info._type == GL_FLOAT_VEC3)
 			{
-				glActiveTexture(GL_TEXTURE0 + slot);
-				glBindTexture(GL_TEXTURE_2D, 0);
+				if (object->HasColor(info._nameParts[1]))
+					SetUniform(info._locations[0], object->GetColor3f(info._nameParts[1]));
+				else
+					SetUniform(info._locations[0], object->GetVector3f(info._nameParts[1]));
+			}
+			else if (info._type == GL_FLOAT_VEC4)
+			{
+				if (object->HasColor(info._nameParts[1]))
+					SetUniform(info._locations[0], object->GetColor4f(info._nameParts[1]));
+				else
+					SetUniform(info._locations[0], object->GetVector4f(info._nameParts[1]));
+			}
+			else if (info._type == GL_FLOAT)
+				SetUniformf(info._locations[0], object->GetFloat(info._nameParts[1]));
+			else if (info._type == GL_BOOL)
+				SetUniformi(info._locations[0], object->GetBoolean(info._nameParts[1]) ? 1 : 0);
+			else if (info._type == GL_INT)
+				SetUniformi(info._locations[0], object->GetInteger(info._nameParts[1]));
+			else if (info._type == GL_FLOAT_MAT4)
+				SetUniform(info._locations[0], object->GetMatrix(info._nameParts[1]));
+			else if (info._type == GL_SAMPLER_2D)
+			{
+				AnimaTexture* texture = object->GetTexture(info._nameParts[1]);
+
+				AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+				SetUniformi(info._locations[0], slot);
+
+				if (texture == nullptr)
+				{
+					glActiveTexture(GL_TEXTURE0 + slot);
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				else
+				{
+					texture->Load();
+					texture->Bind(slot);
+				}
 			}
 			else
 			{
-				texture->Load();
-				texture->Bind(slot);
+				ANIMA_ASSERT(false);
 			}
 		}
 		else
 		{
-			ANIMA_ASSERT(false);
+			if (info._type == GL_FLOAT_VEC2 || info._type == GL_FLOAT_VEC3 || info._type == GL_FLOAT_VEC4)
+			{
+				SetUniform(info._name, object->GetVectorArray(info._nameParts[1]), info._type);
+			}
 		}
 	}
 }
 
-void AnimaShaderProgram::UpdateMeshProperies(AnimaMesh* mesh, const AnimaMatrix& modelMatrix, const AnimaMatrix& normalMatrix)
-{
-	AnimaString str(_allocator);
-	AnimaUniformInfo info;
-	auto end = _uniforms.end();
+//void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
+//{
+//	AnimaString str(_allocator);
+//	AnimaUniformInfo info;
+//	auto end = _uniforms.end();
+//
+//	str = "CAM_Position";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_VEC3)
+//			SetUniform(info._locations[0], camera->GetPosition());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_windowSize";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_VEC2)
+//			SetUniform(info._locations[0], camera->GetWindowSize());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_inverseWindowSize";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_VEC2)
+//			SetUniform(info._locations[0], AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_viewMatrix";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_MAT4)
+//			SetUniform(info._locations[0], camera->GetViewMatrix());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_projectionMatrix";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_MAT4)
+//			SetUniform(info._locations[0], camera->GetProjectionMatrix());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_projectionViewMatrix";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//		
+//		if (info._type == GL_FLOAT_MAT4)
+//			SetUniform(info._locations[0], camera->GetProjectionViewMatrix());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//
+//	str = "CAM_ProjectionViewInverseMatrix";
+//	if (_uniforms.find(str) != end)
+//	{
+//		info = _uniforms[str];
+//
+//		if (info._type == GL_FLOAT_MAT4)
+//			SetUniform(info._locations[0], camera->GetInversedProjectionViewMatrix());
+//		else
+//		{
+//			UPD_ERROR;
+//		}
+//	}
+//}
 
-	str = "MOD_modelMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
+//void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager)
+//{
+//	if (material == nullptr)
+//		return;
+//
+//	for (auto& pair : _uniforms)
+//	{
+//		AnimaUniformInfo info = pair.second;
+//
+//		if (info._namePartsCount != 2 || info._nameParts[0] != MaterialPrefix)
+//			continue;
+//
+//		if (info._type == GL_FLOAT_VEC3)
+//		{
+//			if (material->HasColor(info._nameParts[1]))
+//				SetUniform(info._locations[0], material->GetColor3f(info._nameParts[1]));
+//			else
+//				SetUniform(info._locations[0], material->GetVector3f(info._nameParts[1]));
+//		}
+//		else if (info._type == GL_FLOAT_VEC4)
+//		{
+//			if (material->HasColor(info._nameParts[1]))
+//				SetUniform(info._locations[0], material->GetColor4f(info._nameParts[1]));
+//			else
+//				SetUniform(info._locations[0], material->GetVector4f(info._nameParts[1]));
+//		}
+//		else if (info._type == GL_FLOAT)
+//			SetUniformf(info._locations[0], material->GetFloat(info._nameParts[1]));
+//		else if (info._type == GL_BOOL)
+//			SetUniformi(info._locations[0], material->GetBoolean(info._nameParts[1]) ? 1 : 0);
+//		else if (info._type == GL_INT)
+//			SetUniformi(info._locations[0], material->GetInteger(info._nameParts[1]));
+//		else if (info._type == GL_SAMPLER_2D)
+//		{
+//			AnimaTexture* texture = material->GetTexture(info._nameParts[1]);
+//
+//			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+//			SetUniformi(info._locations[0], slot);
+//
+//			if (texture == nullptr)
+//			{
+//				glActiveTexture(GL_TEXTURE0 + slot);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//			}
+//			else
+//			{
+//				texture->Load();
+//				texture->Bind(slot);
+//			}
+//		}
+//		else
+//		{
+//			ANIMA_ASSERT(false);
+//		}
+//	}
+//
+//	if (material->GetBoolean("TwoSided"))
+//		glDisable(GL_CULL_FACE);
+//	else
+//		glEnable(GL_CULL_FACE);
+//
+//	glFrontFace(material->GetInteger("FrontFace"));
+//	glCullFace(material->GetInteger("CullFace"));
+//}
 
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, modelMatrix);
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "MOD_normalMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, normalMatrix);
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-}
-
-void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
-{
-	AnimaString str(_allocator);
-	AnimaUniformInfo info;
-	auto end = _uniforms.end();
-
-	str = "CAM_Position";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._location, camera->GetPosition());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_windowSize";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._location, camera->GetWindowSize());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_inverseWindowSize";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._location, AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_viewMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, camera->GetViewMatrix());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_projectionMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, camera->GetProjectionMatrix());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_projectionViewMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-		
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, camera->GetProjectionViewMatrix());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-
-	str = "CAM_ProjectionViewInverseMatrix";
-	if (_uniforms.find(str) != end)
-	{
-		info = _uniforms[str];
-
-		if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, camera->GetInversedProjectionViewMatrix());
-		else
-		{
-			UPD_ERROR;
-		}
-	}
-}
-
-void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager)
-{
-	if (material == nullptr)
-		return;
-
-	for (auto& pair : _uniforms)
-	{
-		AnimaUniformInfo info = pair.second;
-
-		if (info._namePartsCount != 2 || info._nameParts[0] != MaterialPrefix)
-			continue;
-
-		if (info._type == GL_FLOAT_VEC3)
-		{
-			if (material->HasColor(info._nameParts[1]))
-				SetUniform(info._location, material->GetColor3f(info._nameParts[1]));
-			else
-				SetUniform(info._location, material->GetVector3f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT_VEC4)
-		{
-			if (material->HasColor(info._nameParts[1]))
-				SetUniform(info._location, material->GetColor4f(info._nameParts[1]));
-			else
-				SetUniform(info._location, material->GetVector4f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT)
-			SetUniformf(info._location, material->GetFloat(info._nameParts[1]));
-		else if (info._type == GL_BOOL)
-			SetUniformi(info._location, material->GetBoolean(info._nameParts[1]) ? 1 : 0);
-		else if (info._type == GL_INT)
-			SetUniformi(info._location, material->GetInteger(info._nameParts[1]));
-		else if (info._type == GL_SAMPLER_2D)
-		{
-			AnimaTexture* texture = material->GetTexture(info._nameParts[1]);
-
-			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-			SetUniformi(info._location, slot);
-
-			if (texture == nullptr)
-			{
-				glActiveTexture(GL_TEXTURE0 + slot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			else
-			{
-				texture->Load();
-				texture->Bind(slot);
-			}
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-	}
-
-	if (material->GetBoolean("TwoSided"))
-		glDisable(GL_CULL_FACE);
-	else
-		glEnable(GL_CULL_FACE);
-
-	glFrontFace(material->GetInteger("FrontFace"));
-	glCullFace(material->GetInteger("CullFace"));
-}
-
-void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager)
-{
-	if (light == nullptr)
-		return;
-
-	const char* prefix = light->GetShaderPrefix();
-
-	for (auto& pair : _uniforms)
-	{
-		AnimaUniformInfo info = pair.second;
-
-		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
-			continue;
-
-		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._location, light->GetVector2f(info._nameParts[1]));
-		else if (info._type == GL_FLOAT_VEC3)
-		{
-			if (light->HasColor(info._nameParts[1]))
-				SetUniform(info._location, light->GetColor3f(info._nameParts[1]));
-			else
-				SetUniform(info._location, light->GetVector3f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT_VEC4)
-		{
-			if (light->HasColor(info._nameParts[1]))
-				SetUniform(info._location, light->GetColor4f(info._nameParts[1]));
-			else
-				SetUniform(info._location, light->GetVector4f(info._nameParts[1]));
-		}
-		else if (info._type == GL_FLOAT)
-			SetUniformf(info._location, light->GetFloat(info._nameParts[1]));
-		else if (info._type == GL_BOOL)
-			SetUniformi(info._location, light->GetBoolean(info._nameParts[1]) ? 1 : 0);
-		else if (info._type == GL_INT)
-			SetUniformi(info._location, light->GetInteger(info._nameParts[1]));
-		else if (info._type == GL_FLOAT_MAT4)
-			SetUniform(info._location, light->GetMatrix(info._nameParts[1]));
-		else if (info._type == GL_SAMPLER_2D)
-		{
-			AnimaTexture* texture = light->GetTexture(info._nameParts[1]);
-
-			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-			SetUniformi(info._location, slot);
-
-			if (texture == nullptr)
-			{
-				glActiveTexture(GL_TEXTURE0 + slot);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			else
-			{
-				texture->Load();
-				texture->Bind(slot);
-			}
-		}
-		else
-		{
-			ANIMA_ASSERT(false);
-		}
-	}
-}
+//void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager)
+//{
+//	if (light == nullptr)
+//		return;
+//
+//	const char* prefix = light->GetShaderPrefix();
+//
+//	for (auto& pair : _uniforms)
+//	{
+//		AnimaUniformInfo info = pair.second;
+//
+//		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
+//			continue;
+//
+//		if (info._type == GL_FLOAT_VEC2)
+//			SetUniform(info._locations[0], light->GetVector2f(info._nameParts[1]));
+//		else if (info._type == GL_FLOAT_VEC3)
+//		{
+//			if (light->HasColor(info._nameParts[1]))
+//				SetUniform(info._locations[0], light->GetColor3f(info._nameParts[1]));
+//			else
+//				SetUniform(info._locations[0], light->GetVector3f(info._nameParts[1]));
+//		}
+//		else if (info._type == GL_FLOAT_VEC4)
+//		{
+//			if (light->HasColor(info._nameParts[1]))
+//				SetUniform(info._locations[0], light->GetColor4f(info._nameParts[1]));
+//			else
+//				SetUniform(info._locations[0], light->GetVector4f(info._nameParts[1]));
+//		}
+//		else if (info._type == GL_FLOAT)
+//			SetUniformf(info._locations[0], light->GetFloat(info._nameParts[1]));
+//		else if (info._type == GL_BOOL)
+//			SetUniformi(info._locations[0], light->GetBoolean(info._nameParts[1]) ? 1 : 0);
+//		else if (info._type == GL_INT)
+//			SetUniformi(info._locations[0], light->GetInteger(info._nameParts[1]));
+//		else if (info._type == GL_FLOAT_MAT4)
+//			SetUniform(info._locations[0], light->GetMatrix(info._nameParts[1]));
+//		else if (info._type == GL_SAMPLER_2D)
+//		{
+//			AnimaTexture* texture = light->GetTexture(info._nameParts[1]);
+//
+//			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+//			SetUniformi(info._locations[0], slot);
+//
+//			if (texture == nullptr)
+//			{
+//				glActiveTexture(GL_TEXTURE0 + slot);
+//				glBindTexture(GL_TEXTURE_2D, 0);
+//			}
+//			else
+//			{
+//				texture->Load();
+//				texture->Bind(slot);
+//			}
+//		}
+//		else
+//		{
+//			ANIMA_ASSERT(false);
+//		}
+//	}
+//}
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderingManager)
 {
@@ -1114,17 +1175,17 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 			continue;
 
 		if (info._type == GL_FLOAT_VEC2)
-			SetUniform(info._location, renderingManager->GetVector2f(info._nameParts[1]));
+			SetUniform(info._locations[0], renderingManager->GetVector2f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT_VEC3)
-			SetUniform(info._location, renderingManager->GetVector3f(info._nameParts[1]));
+			SetUniform(info._locations[0], renderingManager->GetVector3f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT_VEC4)
-			SetUniform(info._location, renderingManager->GetVector4f(info._nameParts[1]));
+			SetUniform(info._locations[0], renderingManager->GetVector4f(info._nameParts[1]));
 		else if (info._type == GL_FLOAT)
-			SetUniformf(info._location, renderingManager->GetFloat(info._nameParts[1]));
+			SetUniformf(info._locations[0], renderingManager->GetFloat(info._nameParts[1]));
 		else if (info._type == GL_BOOL)
-			SetUniformi(info._location, renderingManager->GetBoolean(info._nameParts[1]) ? 1 : 0);
+			SetUniformi(info._locations[0], renderingManager->GetBoolean(info._nameParts[1]) ? 1 : 0);
 		else if (info._type == GL_INT)
-			SetUniformi(info._location, renderingManager->GetInteger(info._nameParts[1]));
+			SetUniformi(info._locations[0], renderingManager->GetInteger(info._nameParts[1]));
 		else if (info._type == GL_SAMPLER_2D)
 		{
 			if (info._namePartsCount == 4 && info._nameParts[1] == GBufferPrefix)
@@ -1135,7 +1196,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 
 				AnimaTexture* texture = buffer->GetTexture(info._nameParts[3]);
 				AUint slot = renderingManager->GetTextureSlot(info._nameParts[3]);
-				SetUniformi(info._location, slot);
+				SetUniformi(info._locations[0], slot);
 
 				if (texture == nullptr)
 				{
@@ -1152,7 +1213,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 			{
 				AnimaTexture* texture = renderingManager->GetTexture(info._nameParts[1]);
 				AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-				SetUniformi(info._location, slot);
+				SetUniformi(info._locations[0], slot);
 
 				if (texture == nullptr)
 				{

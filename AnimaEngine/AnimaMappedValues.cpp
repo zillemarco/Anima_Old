@@ -33,6 +33,7 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 	_matricesMap = src._matricesMap;
+	_vectorsArraysMap = src._vectorsArraysMap;
 }
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
@@ -48,6 +49,7 @@ AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 	_matricesMap = src._matricesMap;
+	_vectorsArraysMap = src._vectorsArraysMap;
 }
 
 AnimaMappedValues::~AnimaMappedValues()
@@ -59,6 +61,7 @@ AnimaMappedValues::~AnimaMappedValues()
 	_integersMap.clear();
 	_booleansMap.clear();
 	_matricesMap.clear();
+	ClearAllVectorsArrays();
 }
 
 AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
@@ -67,16 +70,19 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		_uniqueName = src._uniqueName;
-		_dataGeneratorManager = src._dataGeneratorManager;
+		CopyData(src);
 
-		_texturesMap = src._texturesMap;
-		_colorsMap = src._colorsMap;
-		_vectorsMap = src._vectorsMap;
-		_floatsMap = src._floatsMap;
-		_integersMap = src._integersMap;
-		_booleansMap = src._booleansMap;
-		_matricesMap = src._matricesMap;
+		//_uniqueName = src._uniqueName;
+		//_dataGeneratorManager = src._dataGeneratorManager;
+
+		//_texturesMap = src._texturesMap;
+		//_colorsMap = src._colorsMap;
+		//_vectorsMap = src._vectorsMap;
+		//_floatsMap = src._floatsMap;
+		//_integersMap = src._integersMap;
+		//_booleansMap = src._booleansMap;
+		//_matricesMap = src._matricesMap;
+		//_vectorsArraysMap = src._vectorsArraysMap;
 	}
 	
 	return *this;
@@ -88,16 +94,19 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		_uniqueName = src._uniqueName;
-		_dataGeneratorManager = src._dataGeneratorManager;
+		CopyData(src);
 
-		_texturesMap = src._texturesMap;
-		_colorsMap = src._colorsMap;
-		_vectorsMap = src._vectorsMap;
-		_floatsMap = src._floatsMap;
-		_integersMap = src._integersMap;
-		_booleansMap = src._booleansMap;
-		_matricesMap = src._matricesMap;
+		//_uniqueName = src._uniqueName;
+		//_dataGeneratorManager = src._dataGeneratorManager;
+
+		//_texturesMap = src._texturesMap;
+		//_colorsMap = src._colorsMap;
+		//_vectorsMap = src._vectorsMap;
+		//_floatsMap = src._floatsMap;
+		//_integersMap = src._integersMap;
+		//_booleansMap = src._booleansMap;
+		//_matricesMap = src._matricesMap;
+		//_vectorsArraysMap = src._vectorsArraysMap;
 	}
 	
 	return *this;
@@ -114,6 +123,7 @@ void AnimaMappedValues::CopyData(const AnimaMappedValues& src)
 		CopyFloats(src);
 		CopyIntegers(src);
 		CopyBooleans(src);
+		CopyVectorsArrays(src);
 	}
 }
 
@@ -317,6 +327,95 @@ void AnimaMappedValues::AddVector(const char* propertyName, AFloat x, AFloat y, 
 {
 	AnimaVertex4f vector(x, y, z, w);
 	AddVector(propertyName, vector);
+}
+
+void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end())
+		return;
+
+	AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+	newVectorArray->Copy(*value);
+	_vectorsArraysMap[pName] = newVectorArray;
+}
+
+void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddVectorArray(str, value);
+}
+
+void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end())
+		return;
+
+	AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+	AInt valuesCount = value->GetSize();
+	for (AInt i = 0; i < valuesCount; i++)
+	{
+		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		newVectorArray->Add(vectorGenerator);
+	}
+
+	_vectorsArraysMap[pName] = newVectorArray;
+}
+
+void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddVectorArray(str, value);
+}
+
+void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end())
+		return;
+
+	AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+	AInt valuesCount = value->GetSize();
+	for (AInt i = 0; i < valuesCount; i++)
+	{
+		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		newVectorArray->Add(vectorGenerator);
+	}
+
+	_vectorsArraysMap[pName] = newVectorArray;
+}
+
+void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddVectorArray(str, value);
+}
+
+void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end())
+		return;
+
+	AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+	AInt valuesCount = value->GetSize();
+	for (AInt i = 0; i < valuesCount; i++)
+	{
+		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		newVectorArray->Add(vectorGenerator);
+	}
+
+	_vectorsArraysMap[pName] = newVectorArray;
+}
+
+void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddVectorArray(str, value);
 }
 
 void AnimaMappedValues::AddFloat(const AnimaString& propertyName, AFloat value)
@@ -567,6 +666,116 @@ void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, 
 	SetVector(str, x, y, z, w);
 }
 
+void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	auto foundValue = _vectorsArraysMap.find(pName);
+	if (foundValue == _vectorsArraysMap.end())
+		AddVectorArray(pName, value);
+	else
+	{
+		ClearVectorsArray(foundValue->second);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		newVectorArray->Copy(*value);
+		_vectorsArraysMap[pName] = newVectorArray;
+	}
+}
+
+void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetVectorArray(str, value);
+}
+
+void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	auto foundValue = _vectorsArraysMap.find(pName);
+	if (foundValue == _vectorsArraysMap.end())
+		AddVectorArray(pName, value);
+	else
+	{
+		ClearVectorsArray(foundValue->second);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		AInt valuesCount = value->GetSize();
+		for (AInt i = 0; i < valuesCount; i++)
+		{
+			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+			newVectorArray->Add(vectorGenerator);
+		}
+		_vectorsArraysMap[pName] = newVectorArray;
+	}
+}
+
+void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetVectorArray(str, value);
+}
+
+void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	auto foundValue = _vectorsArraysMap.find(pName);
+	if (foundValue == _vectorsArraysMap.end())
+		AddVectorArray(pName, value);
+	else
+	{
+		ClearVectorsArray(foundValue->second);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		AInt valuesCount = value->GetSize();
+		for (AInt i = 0; i < valuesCount; i++)
+		{
+			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+			newVectorArray->Add(vectorGenerator);
+		}
+		_vectorsArraysMap[pName] = newVectorArray;
+	}
+}
+
+void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetVectorArray(str, value);
+}
+
+void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	auto foundValue = _vectorsArraysMap.find(pName);
+	if (foundValue == _vectorsArraysMap.end())
+		AddVectorArray(pName, value);
+	else
+	{
+		ClearVectorsArray(foundValue->second);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		AInt valuesCount = value->GetSize();
+		for (AInt i = 0; i < valuesCount; i++)
+		{
+			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+			newVectorArray->Add(vectorGenerator);
+		}
+		_vectorsArraysMap[pName] = newVectorArray;
+	}
+}
+
+void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetVectorArray(str, value);
+}
+
 void AnimaMappedValues::SetFloat(const AnimaString& propertyName, AFloat value)
 {
 	AnimaString pName = _uniqueName + propertyName;
@@ -734,6 +943,21 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(const char* propertyName)
 	return GetVector4f(str);
 }
 
+AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const AnimaString& propertyName)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end())
+		return _vectorsArraysMap[pName];
+
+	return nullptr;
+}
+
+AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return GetVectorArray(str);
+}
+
 AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName)
 {
 	AnimaString pName = _uniqueName + propertyName;
@@ -826,6 +1050,18 @@ bool AnimaMappedValues::HasVector(const char* propertyName)
 	return HasVector(str);
 }
 
+bool AnimaMappedValues::HasVectorArray(const AnimaString& propertyName)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	return (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end());
+}
+
+bool AnimaMappedValues::HasVectorArray(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return HasVectorArray(str);
+}
+
 bool AnimaMappedValues::HasFloat(const AnimaString& propertyName)
 {
 	AnimaString pName = _uniqueName + propertyName;
@@ -882,6 +1118,27 @@ AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
 	return src.Substring(pos + 1, src.GetBufferLength());
 }
 
+void AnimaMappedValues::ClearVectorsArray(AnimaArray<AnimaVectorGenerator*>* vectorArray)
+{
+	AInt count = vectorArray->GetSize();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaVectorGenerator* generator = vectorArray->GetAt(i);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, generator);
+	}
+	vectorArray->RemoveAll();
+}
+
+void AnimaMappedValues::ClearAllVectorsArrays()
+{
+	for (auto pair : _vectorsArraysMap)
+	{
+		ClearVectorsArray(pair.second);
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
+	}
+	_vectorsArraysMap.clear();
+}
+
 void AnimaMappedValues::CopyTextures(const AnimaMappedValues& src)
 {
 	_texturesMap.clear();
@@ -915,6 +1172,18 @@ void AnimaMappedValues::CopyVectors(const AnimaMappedValues& src)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
 		SetVector(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyVectorsArrays(const AnimaMappedValues& src)
+{
+	ClearAllVectorsArrays();
+
+	const boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaString::Hasher>* srcVectorsArraysMap = &src._vectorsArraysMap;
+	for (auto pair : *srcVectorsArraysMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetVectorArray(propertyName, pair.second);
 	}
 }
 

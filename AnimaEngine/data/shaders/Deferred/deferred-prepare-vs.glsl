@@ -6,7 +6,7 @@ in vec2 _textureCoord;
 in vec3 _tangent;
 in vec3 _bitangent;
 
-uniform mat4 CAM_projectionViewMatrix;
+uniform mat4 CAM_ProjectionViewMatrix;
 uniform mat4 MOD_AModelMatrix;
 uniform mat4 MOD_ANormalMatrix;
 
@@ -17,7 +17,7 @@ out mat3 frag_TBNMatrix;
 
 void main()
 {
-    gl_Position = CAM_projectionViewMatrix *  MOD_AModelMatrix * vec4(_position, 1.0);
+    gl_Position = CAM_ProjectionViewMatrix *  MOD_AModelMatrix * vec4(_position, 1.0);
     
 	frag_normal = normalize((MOD_ANormalMatrix * vec4(_normal, 0.0)).xyz);
     vec3 tangent = normalize((MOD_ANormalMatrix * vec4(_tangent, 0.0)).xyz);

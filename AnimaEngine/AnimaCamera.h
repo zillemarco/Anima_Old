@@ -85,7 +85,7 @@ public:
 
 	AnimaFrustum* GetFrustum();
 
-	const char* GetShaderPrefix() override { return ""; }
+	const char* GetShaderPrefix() override { return "CAM"; }
 		
 protected:
 	AnimaVertex3f _position;
@@ -112,7 +112,7 @@ protected:
 	AnimaMatrix _viewMatrix;
 	AnimaMatrix _projectionMatrix;
 	AnimaMatrix _projectionViewMatrix;
-	AnimaMatrix _InverseProjectionViewMatrix;
+	AnimaMatrix _inverseProjectionViewMatrix;
 
 	AnimaCamerasManager* _camerasManager;
 };

@@ -213,9 +213,13 @@ void AnimaThirdPersonCamera::CalculateViewMatrix()
 	_viewMatrix.LookAt(_position, (_target - _position), _worldYAxis);
 
 	_projectionViewMatrix = _projectionMatrix * _viewMatrix;
-	_InverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
+	_inverseProjectionViewMatrix = _projectionViewMatrix.Inversed();
 
 	_frustum.ComputeFrustum(_projectionViewMatrix);
+
+	SetMatrix("ViewMatrix", _viewMatrix);
+	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
 }
 
 END_ANIMA_ENGINE_NAMESPACE
