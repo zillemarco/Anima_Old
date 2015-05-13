@@ -34,6 +34,7 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 	_booleansMap = src._booleansMap;
 	_matricesMap = src._matricesMap;
 	_vectorsArraysMap = src._vectorsArraysMap;
+	_matricesArraysMap = src._matricesArraysMap;
 }
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
@@ -50,6 +51,7 @@ AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 	_booleansMap = src._booleansMap;
 	_matricesMap = src._matricesMap;
 	_vectorsArraysMap = src._vectorsArraysMap;
+	_matricesArraysMap = src._matricesArraysMap;
 }
 
 AnimaMappedValues::~AnimaMappedValues()
@@ -62,6 +64,7 @@ AnimaMappedValues::~AnimaMappedValues()
 	_booleansMap.clear();
 	_matricesMap.clear();
 	ClearAllVectorsArrays();
+	ClearAllMatricesArrays();
 }
 
 AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
@@ -357,8 +360,26 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		newVectorArray->Add(vectorGenerator);
+		AnimaString generatorName(_allocator);
+		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+
+		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+		if (generator == nullptr)
+		{
+			int kk = 0;
+			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+
+			while (generator == nullptr)
+			{
+				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+				kk++;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			}
+		}
+
+		generator->SetVector(value->GetAt(i));
+		newVectorArray->Add(generator);
 	}
 
 	_vectorsArraysMap[pName] = newVectorArray;
@@ -381,8 +402,26 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		newVectorArray->Add(vectorGenerator);
+		AnimaString generatorName(_allocator);
+		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+
+		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+		if (generator == nullptr)
+		{
+			int kk = 0;
+			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+
+			while (generator == nullptr)
+			{
+				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+				kk++;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			}
+		}
+
+		generator->SetVector(value->GetAt(i));
+		newVectorArray->Add(generator);
 	}
 
 	_vectorsArraysMap[pName] = newVectorArray;
@@ -405,8 +444,26 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		newVectorArray->Add(vectorGenerator);
+		AnimaString generatorName(_allocator);
+		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+
+		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+		if (generator == nullptr)
+		{
+			int kk = 0;
+			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+
+			while (generator == nullptr)
+			{
+				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+				kk++;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			}
+		}
+
+		generator->SetVector(value->GetAt(i));
+		newVectorArray->Add(generator);
 	}
 
 	_vectorsArraysMap[pName] = newVectorArray;
@@ -485,6 +542,23 @@ void AnimaMappedValues::AddMatrix(const char* propertyName, AFloat value[16])
 	AnimaString str(propertyName, _allocator);
 	AnimaMatrix mat(value);
 	AddMatrix(str, mat);
+}
+
+void AnimaMappedValues::AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_matricesArraysMap.find(pName) != _matricesArraysMap.end())
+		return;
+
+	AnimaArray<AnimaMatrix>* newMatricesArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaMatrix> >(*_allocator, _allocator);
+	newMatricesArray->Copy(*value);
+	_matricesArraysMap[pName] = newMatricesArray;
+}
+
+void AnimaMappedValues::AddMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	AddMatrixArray(str, value);
 }
 
 void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture* value)
@@ -671,15 +745,43 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 	AnimaString pName = _uniqueName + propertyName;
 	auto foundValue = _vectorsArraysMap.find(pName);
 	if (foundValue == _vectorsArraysMap.end())
-		AddVectorArray(pName, value);
+		AddVectorArray(propertyName, value);
 	else
 	{
-		ClearVectorsArray(foundValue->second);
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+		AnimaArray<AnimaVectorGenerator*>* currentArray = foundValue->second;
 
-		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-		newVectorArray->Copy(*value);
-		_vectorsArraysMap[pName] = newVectorArray;
+		AInt valueSize = value->GetSize();
+		AInt currentSize = currentArray->GetSize();
+
+		// ciclo sui primi elementi dell'array che ho già in memoria per sostituire i valori
+		AInt offset = 0;
+		for (; offset < valueSize && offset < currentSize; offset++)
+			currentArray->SetAt(offset, value->GetAt(offset));
+
+		// se non sono riuscito a copiare tutti i valori del nuovo array vuol dire che quello che avevo in memoria aveva
+		// una dimensione inferiore quindi devo aggiungere i nuovi valori
+		for (; offset < valueSize; offset++)
+			currentArray->Add(value->GetAt(offset));
+
+		// se il valore di offset è minore della lunghezza che aveva l'array che avevo già in memoria significa
+		// che il nuovo array ha una dimensione inferiore, quindi rimuovo gli elementi di troppo
+		if (offset < currentSize - 1)
+		{
+			for (AInt i = currentSize - 1; i > offset; i--)
+			{
+				_dataGeneratorManager->RemoveGenerator(currentArray->GetAt(i));
+				currentArray->RemoveAt(i);
+			}
+		}
+
+		ANIMA_ASSERT(currentArray->GetSize() == value->GetSize());
+
+		//ClearVectorsArray(currentArray);
+		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, currentArray);
+
+		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		//newVectorArray->Copy(*value);
+		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -694,21 +796,70 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 	AnimaString pName = _uniqueName + propertyName;
 	auto foundValue = _vectorsArraysMap.find(pName);
 	if (foundValue == _vectorsArraysMap.end())
-		AddVectorArray(pName, value);
+		AddVectorArray(propertyName, value);
 	else
 	{
-		ClearVectorsArray(foundValue->second);
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+		AnimaArray<AnimaVectorGenerator*>* currentArray = foundValue->second;
 
-		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		AInt valueSize = value->GetSize();
+		AInt currentSize = currentArray->GetSize();
 
-		AInt valuesCount = value->GetSize();
-		for (AInt i = 0; i < valuesCount; i++)
+		// ciclo sui primi elementi dell'array che ho già in memoria per sostituire i valori
+		AInt offset = 0;
+		for (; offset < valueSize && offset < currentSize; offset++)
+			currentArray->ElementAt(offset)->SetVector(value->GetAt(offset));
+
+		// se non sono riuscito a copiare tutti i valori del nuovo array vuol dire che quello che avevo in memoria aveva
+		// una dimensione inferiore quindi devo aggiungere i nuovi valori
+		for (; offset < valueSize; offset++)
 		{
-			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-			newVectorArray->Add(vectorGenerator);
+			AnimaString generatorName(_allocator);
+			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+
+			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+			if (generator == nullptr)
+			{
+				int kk = 0;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+
+				while (generator == nullptr)
+				{
+					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+					kk++;
+					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				}
+			}
+
+			generator->SetVector(value->GetAt(offset));
+			currentArray->Add(generator);
 		}
-		_vectorsArraysMap[pName] = newVectorArray;
+
+		// se il valore di offset è minore della lunghezza che aveva l'array che avevo già in memoria significa
+		// che il nuovo array ha una dimensione inferiore, quindi rimuovo gli elementi di troppo
+		if (offset < currentSize - 1)
+		{
+			for (AInt i = currentSize - 1; i > offset; i--)
+			{
+				_dataGeneratorManager->RemoveGenerator(currentArray->GetAt(i));
+				currentArray->RemoveAt(i);
+			}
+		}
+
+		ANIMA_ASSERT(currentArray->GetSize() == value->GetSize());
+
+		//ClearVectorsArray(foundValue->second);
+		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		//AInt valuesCount = value->GetSize();
+		//for (AInt i = 0; i < valuesCount; i++)
+		//{
+		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		//	newVectorArray->Add(vectorGenerator);
+		//}
+		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -723,21 +874,70 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 	AnimaString pName = _uniqueName + propertyName;
 	auto foundValue = _vectorsArraysMap.find(pName);
 	if (foundValue == _vectorsArraysMap.end())
-		AddVectorArray(pName, value);
+		AddVectorArray(propertyName, value);
 	else
 	{
-		ClearVectorsArray(foundValue->second);
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+		AnimaArray<AnimaVectorGenerator*>* currentArray = foundValue->second;
 
-		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		AInt valueSize = value->GetSize();
+		AInt currentSize = currentArray->GetSize();
 
-		AInt valuesCount = value->GetSize();
-		for (AInt i = 0; i < valuesCount; i++)
+		// ciclo sui primi elementi dell'array che ho già in memoria per sostituire i valori
+		AInt offset = 0;
+		for (; offset < valueSize && offset < currentSize; offset++)
+			currentArray->ElementAt(offset)->SetVector(value->GetAt(offset));
+
+		// se non sono riuscito a copiare tutti i valori del nuovo array vuol dire che quello che avevo in memoria aveva
+		// una dimensione inferiore quindi devo aggiungere i nuovi valori
+		for (; offset < valueSize; offset++)
 		{
-			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-			newVectorArray->Add(vectorGenerator);
+			AnimaString generatorName(_allocator);
+			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+
+			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+			if (generator == nullptr)
+			{
+				int kk = 0;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+
+				while (generator == nullptr)
+				{
+					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+					kk++;
+					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				}
+			}
+
+			generator->SetVector(value->GetAt(offset));
+			currentArray->Add(generator);
 		}
-		_vectorsArraysMap[pName] = newVectorArray;
+
+		// se il valore di offset è minore della lunghezza che aveva l'array che avevo già in memoria significa
+		// che il nuovo array ha una dimensione inferiore, quindi rimuovo gli elementi di troppo
+		if (offset < currentSize - 1)
+		{
+			for (AInt i = currentSize - 1; i > offset; i--)
+			{
+				_dataGeneratorManager->RemoveGenerator(currentArray->GetAt(i));
+				currentArray->RemoveAt(i);
+			}
+		}
+
+		ANIMA_ASSERT(currentArray->GetSize() == value->GetSize());
+
+		//ClearVectorsArray(foundValue->second);
+		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		//AInt valuesCount = value->GetSize();
+		//for (AInt i = 0; i < valuesCount; i++)
+		//{
+		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		//	newVectorArray->Add(vectorGenerator);
+		//}
+		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -752,21 +952,70 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 	AnimaString pName = _uniqueName + propertyName;
 	auto foundValue = _vectorsArraysMap.find(pName);
 	if (foundValue == _vectorsArraysMap.end())
-		AddVectorArray(pName, value);
+		AddVectorArray(propertyName, value);
 	else
 	{
-		ClearVectorsArray(foundValue->second);
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+		AnimaArray<AnimaVectorGenerator*>* currentArray = foundValue->second;
 
-		AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		AInt valueSize = value->GetSize();
+		AInt currentSize = currentArray->GetSize();
 
-		AInt valuesCount = value->GetSize();
-		for (AInt i = 0; i < valuesCount; i++)
+		// ciclo sui primi elementi dell'array che ho già in memoria per sostituire i valori
+		AInt offset = 0;
+		for (; offset < valueSize && offset < currentSize; offset++)
+			currentArray->ElementAt(offset)->SetVector(value->GetAt(offset));
+
+		// se non sono riuscito a copiare tutti i valori del nuovo array vuol dire che quello che avevo in memoria aveva
+		// una dimensione inferiore quindi devo aggiungere i nuovi valori
+		for (; offset < valueSize; offset++)
 		{
-			AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-			newVectorArray->Add(vectorGenerator);
+			AnimaString generatorName(_allocator);
+			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+
+			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+			if (generator == nullptr)
+			{
+				int kk = 0;
+				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+
+				while (generator == nullptr)
+				{
+					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+
+					kk++;
+					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				}
+			}
+
+			generator->SetVector(value->GetAt(offset));
+			currentArray->Add(generator);
 		}
-		_vectorsArraysMap[pName] = newVectorArray;
+
+		// se il valore di offset è minore della lunghezza che aveva l'array che avevo già in memoria significa
+		// che il nuovo array ha una dimensione inferiore, quindi rimuovo gli elementi di troppo
+		if (offset < currentSize - 1)
+		{
+			for (AInt i = currentSize - 1; i > offset; i--)
+			{
+				_dataGeneratorManager->RemoveGenerator(currentArray->GetAt(i));
+				currentArray->RemoveAt(i);
+			}
+		}
+
+		ANIMA_ASSERT(currentArray->GetSize() == value->GetSize());
+
+		//ClearVectorsArray(foundValue->second);
+		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
+
+		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+
+		//AInt valuesCount = value->GetSize();
+		//for (AInt i = 0; i < valuesCount; i++)
+		//{
+		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
+		//	newVectorArray->Add(vectorGenerator);
+		//}
+		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -847,6 +1096,54 @@ void AnimaMappedValues::SetMatrix(const char* propertyName, AFloat value[16])
 	AnimaString str(propertyName, _allocator);
 	AnimaMatrix mat(value);
 	SetMatrix(str, mat);
+}
+
+void AnimaMappedValues::SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	auto foundValue = _matricesArraysMap.find(pName);
+	if (foundValue == _matricesArraysMap.end())
+		AddMatrixArray(propertyName, value);
+	else
+	{
+		AnimaArray<AnimaMatrix>* currentArray = foundValue->second;
+
+		AInt valueSize = value->GetSize();
+		AInt currentSize = currentArray->GetSize();
+
+		// ciclo sui primi elementi dell'array che ho già in memoria per sostituire i valori
+		AInt offset = 0;
+		for (; offset < valueSize && offset < currentSize; offset++)
+			currentArray->SetAt(offset, value->GetAt(offset));
+
+		// se non sono riuscito a copiare tutti i valori del nuovo array vuol dire che quello che avevo in memoria aveva
+		// una dimensione inferiore quindi devo aggiungere i nuovi valori
+		for (; offset < valueSize; offset++)
+			currentArray->Add(value->GetAt(offset));
+
+		// se il valore di offset è minore della lunghezza che aveva l'array che avevo già in memoria significa
+		// che il nuovo array ha una dimensione inferiore, quindi rimuovo gli elementi di troppo
+		if (offset < currentSize - 1)
+		{
+			for (AInt i = currentSize - 1; i > offset; i--)
+				currentArray->RemoveAt(i);
+		}
+
+		ANIMA_ASSERT(currentArray->GetSize() == value->GetSize());
+
+		//ClearVectorsArray(currentArray);
+		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, currentArray);
+
+		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
+		//newVectorArray->Copy(*value);
+		//_vectorsArraysMap[pName] = newVectorArray;
+	}
+}
+
+void AnimaMappedValues::SetMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value)
+{
+	AnimaString str(propertyName, _allocator);
+	SetMatrixArray(str, value);
 }
 
 AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
@@ -1014,6 +1311,21 @@ AnimaMatrix AnimaMappedValues::GetMatrix(const char* propertyName)
 	return GetMatrix(str);
 }
 
+AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const AnimaString& propertyName)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	if (_matricesArraysMap.find(pName) != _matricesArraysMap.end())
+		return _matricesArraysMap[pName];
+
+	return nullptr;
+}
+
+AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return GetMatrixArray(str);
+}
+
 bool AnimaMappedValues::HasTexture(const AnimaString& propertyName)
 {
 	AnimaString pName = _uniqueName + propertyName;
@@ -1110,6 +1422,19 @@ bool AnimaMappedValues::HasMatrix(const char* propertyName)
 	return HasMatrix(str);
 }
 
+
+bool AnimaMappedValues::HasMatrixArray(const AnimaString& propertyName)
+{
+	AnimaString pName = _uniqueName + propertyName;
+	return (_matricesArraysMap.find(pName) != _matricesArraysMap.end());
+}
+
+bool AnimaMappedValues::HasMatrixArray(const char* propertyName)
+{
+	AnimaString str(propertyName, _allocator);
+	return HasMatrixArray(str);
+}
+
 AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
 {
 	AInt pos = src.Find(".");
@@ -1118,25 +1443,24 @@ AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
 	return src.Substring(pos + 1, src.GetBufferLength());
 }
 
-void AnimaMappedValues::ClearVectorsArray(AnimaArray<AnimaVectorGenerator*>* vectorArray)
-{
-	AInt count = vectorArray->GetSize();
-	for (AInt i = 0; i < count; i++)
-	{
-		AnimaVectorGenerator* generator = vectorArray->GetAt(i);
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, generator);
-	}
-	vectorArray->RemoveAll();
-}
-
 void AnimaMappedValues::ClearAllVectorsArrays()
 {
 	for (auto pair : _vectorsArraysMap)
 	{
-		ClearVectorsArray(pair.second);
+		pair.second->RemoveAll();
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
 	}
 	_vectorsArraysMap.clear();
+}
+
+void AnimaMappedValues::ClearAllMatricesArrays()
+{
+	for (auto pair : _matricesArraysMap)
+	{
+		pair.second->RemoveAll();
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, pair.second);
+	}
+	_matricesArraysMap.clear();
 }
 
 void AnimaMappedValues::CopyTextures(const AnimaMappedValues& src)
@@ -1196,6 +1520,18 @@ void AnimaMappedValues::CopyMatrices(const AnimaMappedValues& src)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
 		SetMatrix(propertyName, pair.second);
+	}
+}
+
+void AnimaMappedValues::CopyMatricesArrays(const AnimaMappedValues& src)
+{
+	ClearAllMatricesArrays();
+
+	const boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaString::Hasher>* srcMatricesArraysMap = &src._matricesArraysMap;
+	for (auto pair : *srcMatricesArraysMap)
+	{
+		AnimaString propertyName = ExtractName(pair.first);
+		SetMatrixArray(propertyName, pair.second);
 	}
 }
 

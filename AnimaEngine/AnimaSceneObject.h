@@ -50,6 +50,7 @@ public:
 
 	virtual void SetParentObject(AnimaSceneObject* parentObject);
 	virtual AnimaSceneObject* GetParentObject() const;
+	virtual AnimaSceneObject* GetAncestorObject();
 
 	virtual AInt AddChild(AnimaSceneObject* child);
 	virtual AInt GetChildrenNumber();

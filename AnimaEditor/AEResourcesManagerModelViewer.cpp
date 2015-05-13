@@ -59,7 +59,7 @@ void AEResourcesManagerModelViewer::Initialize()
 
 	mgr->CreateProgram("deferred-prepare");
 	mgr->GetProgramFromName("deferred-prepare")->Create();
-	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-vs.glsl", Anima::AnimaShader::VERTEX));
+	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-animated-vs.glsl", Anima::AnimaShader::VERTEX));
 	mgr->GetProgramFromName("deferred-prepare")->AddShader(mgr->LoadShaderFromFile("deferred-prepare-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-prepare-fs.glsl", Anima::AnimaShader::FRAGMENT));
 	mgr->GetProgramFromName("deferred-prepare")->Link();
 
@@ -120,7 +120,12 @@ void AEResourcesManagerModelViewer::Render()
 	_renderingManager->Start(_engine->GetScenesManager()->GetScene("AnimaEditor"));
 
 	if (_selectedModel != nullptr)
+	{
+		if (_selectedModel->GetAnimationsCount() > 0)
+			_selectedModel->GetAnimation(0)->UpdateAnimation(_selectedModel, _timer.Elapsed());
+
 		_renderingManager->DrawModel(_selectedModel);
+	}
 	else if (_selectedModelInstance != nullptr)
 		_renderingManager->DrawModel(_selectedModelInstance);
 	else if (_selectedMesh != nullptr)
@@ -211,6 +216,8 @@ void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaModel* model)
 	_selectedModelInstance = nullptr;
 	_selectedMesh = nullptr;
 	_selectedMeshInstance = nullptr;
+
+	_timer.Reset();
 }
 
 void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaModelInstance* instance)
@@ -219,6 +226,8 @@ void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaModelInstance*
 	_selectedModelInstance = instance;
 	_selectedMesh = nullptr;
 	_selectedMeshInstance = nullptr;
+
+	_timer.Reset();
 }
 
 void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMesh* mesh)
@@ -227,6 +236,8 @@ void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMesh* mesh)
 	_selectedModelInstance = nullptr;
 	_selectedMesh = mesh;
 	_selectedMeshInstance = nullptr;
+
+	_timer.Reset();
 }
 
 void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMeshInstance* instance)
@@ -235,4 +246,6 @@ void AEResourcesManagerModelViewer::setSelectedObject(Anima::AnimaMeshInstance* 
 	_selectedModelInstance = nullptr;
 	_selectedMesh = nullptr;
 	_selectedMeshInstance = instance;
+
+	_timer.Reset();
 }

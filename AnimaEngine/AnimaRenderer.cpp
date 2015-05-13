@@ -9,7 +9,7 @@
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaLightsManager.h"
-#include "AnimaBenchmarkTimer.h"
+#include "AnimaTimer.h"
 #include <fstream>
 #include "AnimaTypeMappedArray.h"
 #include "AnimaMappedArray.h"
@@ -31,6 +31,9 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	_indexesBufferObject = 0;
 	_verticesBufferObject = 0;
 	_vertexArrayObject = 0;
+
+	_lastUpdatedModel = nullptr;
+	_lastUpdatedModelInstance = nullptr;
 
 	InitTextureSlots();
 }
@@ -350,7 +353,7 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
-	filterProgram->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
 	_filterMesh->Draw(this, filterProgram, false);
@@ -377,7 +380,7 @@ void AnimaRenderer::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterPr
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
-	filterProgram->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
 	_filterMesh->Draw(this, filterProgram, false);
@@ -405,7 +408,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
-	filterProgram->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
 	_filterMesh->Draw(this, filterProgram, false);
@@ -431,7 +434,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	filterProgram->Use();
-	filterProgram->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
 	_filterMesh->Draw(this, filterProgram, false);
@@ -449,6 +452,9 @@ void AnimaRenderer::Start()
 {
 	ANIMA_ASSERT(_scene != nullptr);
 	_scene->GetShadersManager()->SetActiveProgram(nullptr);
+	
+	_lastUpdatedModel = nullptr;
+	_lastUpdatedModelInstance = nullptr;
 }
 
 void AnimaRenderer::Finish()
@@ -456,6 +462,9 @@ void AnimaRenderer::Finish()
 	ANIMA_ASSERT(_scene != nullptr);
 	_scene->GetShadersManager()->SetActiveProgram(nullptr);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	_lastUpdatedModel = nullptr;
+	_lastUpdatedModelInstance = nullptr;
 }
 
 void AnimaRenderer::DrawAll()
@@ -970,6 +979,13 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 				return;
 		}
 
+		AnimaModel* meshParent = (AnimaModel*)mesh->GetParentObject()->GetAncestorObject();
+		if (meshParent != _lastUpdatedModel)
+		{
+			_lastUpdatedModel = meshParent;
+			program->UpdateSceneObjectProperties(_lastUpdatedModel, this);
+		}
+
 		if (mesh->NeedsBuffersUpdate())
 			mesh->UpdateBuffers();
 
@@ -995,6 +1011,13 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 			{
 				if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
 					continue;
+			}
+
+			AnimaModelInstance* instanceParent = (AnimaModelInstance*)instance->GetParentObject()->GetAncestorObject();
+			if (instanceParent != _lastUpdatedModelInstance)
+			{
+				_lastUpdatedModelInstance = instanceParent;
+				program->UpdateSceneObjectProperties(_lastUpdatedModelInstance, this);
 			}
 
 			instance->Draw(this, program, updateMaterial);
@@ -1126,7 +1149,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 			return;
 
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(camera, this);
+		program->UpdateSceneObjectProperties(camera, this);
 
 		frustum = camera->GetFrustum();
 	}
@@ -1150,7 +1173,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaMesh* mesh)
 			return;
 
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(camera, this);
+		program->UpdateSceneObjectProperties(camera, this);
 
 		frustum = camera->GetFrustum();
 	}
@@ -1170,7 +1193,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaMeshInstance* 
 			return;
 
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(camera, this);
+		program->UpdateSceneObjectProperties(camera, this);
 
 		frustum = camera->GetFrustum();
 	}
@@ -1190,7 +1213,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModel* model)
 			return;
 
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(camera, this);
+		program->UpdateSceneObjectProperties(camera, this);
 
 		frustum = camera->GetFrustum();
 	}
@@ -1216,7 +1239,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModelInstance*
 			return;
 
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(camera, this);
+		program->UpdateSceneObjectProperties(camera, this);
 
 		frustum = camera->GetFrustum();
 	}
@@ -1254,7 +1277,7 @@ void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(activeCamera, this);
+		program->UpdateSceneObjectProperties(activeCamera, this);
 	}
 
 	if (mesh->NeedsBuffersUpdate())
@@ -1267,7 +1290,7 @@ void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 		light->UpdateMeshTransformation(mesh->GetTransformation());
 		light->UpdateCullFace(activeCamera);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		mesh->Draw(this, program, false);
@@ -1284,7 +1307,7 @@ void AnimaRenderer::CombinePass(AnimaShaderProgram* program)
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 	{
 		program->Use();
-		program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+		program->UpdateSceneObjectProperties(_filterCamera, this);
 	}
 
 	if (_filterMesh->NeedsBuffersUpdate())
@@ -1328,7 +1351,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		for (AInt j = 0; j < nMeshes; j++)
@@ -1385,7 +1408,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mes
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		DrawMesh(mesh, program, false, true, nullptr, true);
@@ -1421,7 +1444,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInsta
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		DrawMesh(instance, program, false, true, nullptr);
@@ -1457,7 +1480,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* mo
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		DrawModel(model, program, false, true, nullptr, true);
@@ -1493,7 +1516,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties/* UpdateLightProperies*/(light, this);
+		program->UpdateSceneObjectProperties(light, this);
 		program->UpdateRenderingManagerProperies(this);
 
 		DrawModel(instance, program, false, true, nullptr);
@@ -1637,7 +1660,7 @@ void AnimaRenderer::CombinePrimitives(AnimaShaderProgram* program)
 		_filterMesh->UpdateBuffers();
 	
 	program->Use();
-	program->UpdateSceneObjectProperties/* UpdateCameraProperies*/(_filterCamera, this);
+	program->UpdateSceneObjectProperties(_filterCamera, this);
 	program->UpdateRenderingManagerProperies(this);
 
 	_filterMesh->Draw(this, program, false);

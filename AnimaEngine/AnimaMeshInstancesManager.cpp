@@ -9,7 +9,7 @@
 #include "AnimaMeshInstancesManager.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaTexturesManager.h"
-#include "AnimaBenchmarkTimer.h"
+#include "AnimaTimer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

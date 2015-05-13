@@ -111,9 +111,6 @@ public:
 	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager);
 	void UpdateMappedValuesObjectProperties(AnimaMappedValues* object, AnimaRenderer* renderingManager);
 	void UpdateRenderingManagerProperies(AnimaRenderer* renderingManager);
-	//void UpdateCameraProperies(AnimaCamera* camera);
-	//void UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager);
-	//void UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
 	void SetUniformi(const char* uniformName, int value);
@@ -133,6 +130,8 @@ public:
 	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
 	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
 	void SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
+	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaMatrix>* value);
+	void SetUniform(const char* uniformName, const AnimaArray<AnimaMatrix>* value);
 
 	void SetUniformi(AInt location, int value);
 	void SetUniformf(AInt location, AFloat value);

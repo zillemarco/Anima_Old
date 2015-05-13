@@ -6,8 +6,8 @@
 //
 //
 
-#ifndef __Anima__AnimaBenchmarkTimer__
-#define __Anima__AnimaBenchmarkTimer__
+#ifndef __Anima__AnimaTimer__
+#define __Anima__AnimaTimer__
 
 #include <iostream>
 #include <chrono>
@@ -34,4 +34,4 @@ private:
 
 END_ANIMA_ENGINE_NAMESPACE
 
-#endif /* defined(__Anima__AnimaBenchmarkTimer__) */
+#endif /* defined(__Anima__AnimaTimer__) */

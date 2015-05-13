@@ -13,13 +13,14 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
+#include "AnimaNamedObject.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class ANIMA_ENGINE_EXPORT AnimaDataGenerator
+class ANIMA_ENGINE_EXPORT AnimaDataGenerator : public AnimaNamedObject
 {
 public:
-	AnimaDataGenerator(AnimaAllocator* allocator);
+	AnimaDataGenerator(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaDataGenerator(const AnimaDataGenerator& src);
 	AnimaDataGenerator(AnimaDataGenerator&& src);
 	virtual ~AnimaDataGenerator();
@@ -53,8 +54,6 @@ public:
 	bool CanUpdateValue();
 
 protected:
-	AnimaAllocator* _allocator;
-
 	bool _canUpdateValue;
 };
 

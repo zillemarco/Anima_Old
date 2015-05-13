@@ -102,6 +102,9 @@ public:
 	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
 	void AddMatrix(const char* propertyName, AFloat value[16]);
 
+	void AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
+	void AddMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value);
+
 	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
 	void SetTexture(const char* propertyName, AnimaTexture* value);
 
@@ -154,6 +157,9 @@ public:
 	void SetMatrix(const AnimaString& propertyName, AFloat value[16]);
 	void SetMatrix(const char* propertyName, AFloat value[16]);
 
+	void SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
+	void SetMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value);
+
 	AnimaTexture* GetTexture(const AnimaString& propertyName);
 	AnimaTexture* GetTexture(const char* propertyName);
 
@@ -184,6 +190,9 @@ public:
 	AnimaMatrix GetMatrix(const AnimaString& propertyName);
 	AnimaMatrix GetMatrix(const char* propertyName);
 
+	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName);
+	AnimaArray<AnimaMatrix>* GetMatrixArray(const char* propertyName);
+
 	bool HasTexture(const AnimaString& propertyName);
 	bool HasTexture(const char* propertyName);
 	
@@ -208,19 +217,23 @@ public:
 	bool HasMatrix(const AnimaString& propertyName);
 	bool HasMatrix(const char* propertyName);
 
+	bool HasMatrixArray(const AnimaString& propertyName);
+	bool HasMatrixArray(const char* propertyName);
+
 	void CopyTextures(const AnimaMappedValues& src);
 	void CopyColors(const AnimaMappedValues& src);
 	void CopyVectors(const AnimaMappedValues& src);
 	void CopyVectorsArrays(const AnimaMappedValues& src);
 	void CopyMatrices(const AnimaMappedValues& src);
+	void CopyMatricesArrays(const AnimaMappedValues& src);
 	void CopyFloats(const AnimaMappedValues& src);
 	void CopyIntegers(const AnimaMappedValues& src);
 	void CopyBooleans(const AnimaMappedValues& src);
 
 protected:
 	AnimaString ExtractName(const AnimaString& src) const;
-	void ClearVectorsArray(AnimaArray<AnimaVectorGenerator*>* vectorArray);
 	void ClearAllVectorsArrays();
+	void ClearAllMatricesArrays();
 	
 protected:
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
@@ -236,6 +249,7 @@ protected:
 	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaString::Hasher> _booleansMap;
 	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaString::Hasher> _vectorsArraysMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaString::Hasher> _matricesArraysMap;
 #pragma warning (default: 4251) 
 };
 

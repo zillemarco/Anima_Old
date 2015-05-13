@@ -10,56 +10,56 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(0.0f, 0.0f, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex2f& vector)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex2f& vector)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(vector, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, 0.0f, 0.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex3f& vector)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex3f& vector)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(vector, 1.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, z, 1.0f)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex4f& vector)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex4f& vector)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(vector)
 {
 }
 
-AnimaVectorGenerator::AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w)
-	: AnimaDataGenerator(allocator)
+AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w)
+	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, z, w)
 {
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaVectorGenerator& src)
-	: AnimaDataGenerator(src._allocator)
+	: AnimaDataGenerator(src)
 	, _vector(src._vector)
 {
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(AnimaVectorGenerator&& src)
-	: AnimaDataGenerator(src._allocator)
+	: AnimaDataGenerator(src)
 	, _vector(src._vector)
 {
 }

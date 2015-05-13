@@ -87,19 +87,3 @@ protected:
 	QAction* _importTextureAct;
 	QAction* _addNewMaterialAct;
 };
-
-class AELoadedResourcesPanel : public QDockWidget
-{
-	Q_OBJECT
-public:
-	AELoadedResourcesPanel(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer, QWidget* parent);
-	virtual ~AELoadedResourcesPanel();
-
-public:
-	void LoadAllResources();
-
-protected:
-	AEDocument* _document;
-	AELoadedResourcesTreeView* _resourcesTree;
-	AEResourcesManagerModelViewer* _resourcesViewer;
-};

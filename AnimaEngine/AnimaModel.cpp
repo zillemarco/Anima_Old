@@ -207,7 +207,7 @@ void AnimaModel::SetMeshesBonesInfo(const AnimaMappedArray<AnimaMeshBoneInfo*>* 
 {
 	ClearMeshesBonesInfo();
 	
-	AInt count = _meshesBonesInfo.GetSize();
+	AInt count = meshesBonesInfo->GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaMeshBoneInfo* srcMeshBoneInfo = meshesBonesInfo->GetConst(i);

@@ -84,6 +84,15 @@ AnimaSceneObject* AnimaSceneObject::GetParentObject() const
 	return _parentObject;
 }
 
+AnimaSceneObject* AnimaSceneObject::GetAncestorObject()
+{
+	AnimaSceneObject* ancestor = this;
+	while (ancestor->GetParentObject() != nullptr)
+		ancestor = ancestor->GetParentObject();
+
+	return ancestor;
+}
+
 AnimaVertex3f AnimaSceneObject::GetPosition()
 {
 	return AnimaMappedValues::GetVector3f("Position");
@@ -91,6 +100,7 @@ AnimaVertex3f AnimaSceneObject::GetPosition()
 
 AInt AnimaSceneObject::AddChild(AnimaSceneObject* child)
 {
+	child->SetParentObject(this);
 	return _children.Add(child->GetAnimaName(), child);
 }
 

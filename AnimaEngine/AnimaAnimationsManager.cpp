@@ -7,7 +7,7 @@
 //
 
 #include "AnimaAnimationsManager.h"
-#include "AnimaBenchmarkTimer.h"
+#include "AnimaTimer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -77,6 +77,9 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 				newAnimationNode->AddScalingKey(AnimaAnimationScalingKey((AFloat)key.mTime, AnimaVertex3f(key.mValue.x, key.mValue.y, key.mValue.z)));
 			}
 		}
+
+		newAnimation->SetTicksPerSecond((AFloat)animation->mTicksPerSecond);
+		newAnimation->SetDuration((AFloat)animation->mDuration);
 
 		_lastLoadedAnimations.Add(animationName, newAnimation);
 		_animations.Add(animationName, newAnimation);

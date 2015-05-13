@@ -1,4 +1,4 @@
-#include "AELoadedResourcesPanel.h"
+#include "AELoadedResourcesTreeView.h"
 #include "AEDocument.h"
 #include "AEResourcesManagerModelViewer.h"
 
@@ -379,29 +379,4 @@ void AELoadedResourcesTreeView::createMenus()
 	addAction(_createModelInstanceAct);
 	addAction(_importTextureAct);
 	addAction(_addNewMaterialAct);
-}
-
-AELoadedResourcesPanel::AELoadedResourcesPanel(AEDocument* doc, AEResourcesManagerModelViewer* resourcesViewer, QWidget* parent)
-	: QDockWidget(tr("Loaded resources"), parent)
-{
-	_document = doc;
-	_resourcesViewer = resourcesViewer;
-
-	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle(tr("Resources manager"));
-
-	_resourcesTree = new AELoadedResourcesTreeView(doc, resourcesViewer);
-
-	setWidget(_resourcesTree);
-
-	LoadAllResources();
-}
-
-AELoadedResourcesPanel::~AELoadedResourcesPanel()
-{
-}
-
-void AELoadedResourcesPanel::LoadAllResources()
-{
-	_resourcesTree->LoadResources();
 }

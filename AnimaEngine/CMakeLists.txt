@@ -32,7 +32,7 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaModelsManager.h
                     AnimaMesh.h
                     AnimaFace.h
-                    AnimaBenchmarkTimer.h
+                    AnimaTimer.h
                     AnimaMaterial.h
                     AnimaString.h
 					AnimaMatrix.h
@@ -90,7 +90,7 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaModelsManager.cpp
                     AnimaMesh.cpp
                     AnimaFace.cpp
-                    AnimaBenchmarkTimer.cpp
+                    AnimaTimer.cpp
                     AnimaMaterial.cpp
                     AnimaString.cpp
 					AnimaMatrix.cpp
@@ -137,7 +137,7 @@ set(common_SOURCES	AnimaEngineCore.cpp
 
 source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/AnimaEngine_automoc.cpp)
 
-source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaBenchmarkTimer.h AnimaBenchmarkTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
+source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
 
 source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h)

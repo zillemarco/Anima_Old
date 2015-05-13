@@ -17,7 +17,7 @@
 
 class AEDocument;
 class AEResourcesManagerModelViewer;
-class AELoadedResourcesPanel;
+class AELoadedResourcesTreeView;
 
 class AEResourcesManagerTab : public QFrame
 {
@@ -30,15 +30,14 @@ public:
 	
 public:
 	void LoadResourcesTree();
-	void SetResourcesPanel(AELoadedResourcesPanel* resourcesPanel);
 	
 	AEResourcesManagerModelViewer* GetModelViewer() const { return _modelViewer; }
 
 private:
 	AEDocument* _document;
 	
-	//QSplitter* _mainSplitter;
-	AELoadedResourcesPanel* _resourcesPanel;
+	QSplitter* _mainSplitter;
+	AELoadedResourcesTreeView* _resourcesTreeView;
 	AEResourcesManagerModelViewer* _modelViewer;
 };
 

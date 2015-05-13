@@ -238,6 +238,20 @@ public:
 		return Contains(str);
 	}
 
+	AnimaMappedArray<BASE_TYPE>* GetMappedArrayFromName(const AnimaString& name)
+	{
+		auto pair = _mappedNames.find(name);
+		if (pair != _mappedNames.end())
+			return pair->second;
+		return nullptr;
+	}
+
+	AnimaMappedArray<BASE_TYPE>* GetMappedArrayFromName(const char* name)
+	{
+		AnimaString str(name, _allocator);
+		return GetMappedArrayFromName(str);
+	}
+
 	AInt GetTotalSize() const
 	{
 		return (AInt)_mappedNames.size();

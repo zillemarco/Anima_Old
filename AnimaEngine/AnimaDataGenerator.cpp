@@ -10,22 +10,21 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaDataGenerator::AnimaDataGenerator(AnimaAllocator* allocator)
+AnimaDataGenerator::AnimaDataGenerator(const AnimaString& name, AnimaAllocator* allocator)
+	: AnimaNamedObject(name, allocator)
 {
-	ANIMA_ASSERT(allocator != nullptr);
-	_allocator = allocator;
 	_canUpdateValue = true;
 }
 
 AnimaDataGenerator::AnimaDataGenerator(const AnimaDataGenerator& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
 	_canUpdateValue = src._canUpdateValue;
 }
 
 AnimaDataGenerator::AnimaDataGenerator(AnimaDataGenerator&& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
 	_canUpdateValue = src._canUpdateValue;
 }
 
@@ -37,7 +36,7 @@ AnimaDataGenerator& AnimaDataGenerator::operator=(const AnimaDataGenerator& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		AnimaNamedObject::operator=(src);
 		_canUpdateValue = src._canUpdateValue;
 	}
 
@@ -48,7 +47,7 @@ AnimaDataGenerator& AnimaDataGenerator::operator=(AnimaDataGenerator&& src)
 {
 	if (this != &src)
 	{
-		_allocator = src._allocator;
+		AnimaNamedObject::operator=(src);
 		_canUpdateValue = src._canUpdateValue;
 	}
 

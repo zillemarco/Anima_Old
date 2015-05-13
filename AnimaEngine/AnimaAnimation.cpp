@@ -87,6 +87,8 @@ void AnimaAnimation::UpdateAnimation(AnimaModel* model, AFloat time)
 	AInt count = meshesBonesInfo->GetSize();
 	for (AInt i = 0; i < count; i++)
 		matrices.Add(meshesBonesInfo->Get(i)->GetFinalTransformation());
+
+	model->SetMatrixArray("BonesTransformations", &matrices);
 }
 
 void AnimaAnimation::UpdateModelNodesAnimation(AnimaModel* model, AFloat animationTime, const AnimaMatrix& parentMatrix, const AnimaMatrix& globalInverseMatrix, AnimaMappedArray<AnimaMeshBoneInfo*>* mesheBonesInfo)
@@ -101,7 +103,11 @@ void AnimaAnimation::UpdateModelNodesAnimation(AnimaModel* model, AFloat animati
 		AnimaQuaternion rotation = animationNode->ComputeInterpolatedRotation(animationTime);
 		AnimaVertex3f position = animationNode->ComputeInterpolatedPosition(animationTime);
 
-		nodeMatrix = AnimaMatrix::MakeTranslation(position) * rotation.GetMatrix() * AnimaMatrix::MakeScale(scaling);
+		AnimaMatrix scalingMatrix = AnimaMatrix::MakeScale(scaling);
+		AnimaMatrix rotationMatrix = rotation.GetMatrix();
+		AnimaMatrix translationMatrix = AnimaMatrix::MakeTranslation(position);
+
+		nodeMatrix = translationMatrix * rotationMatrix * scalingMatrix;
 	}
 
 	AnimaMatrix globalTransformation = parentMatrix * nodeMatrix;

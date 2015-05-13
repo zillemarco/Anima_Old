@@ -9,7 +9,6 @@
 #include "AEMainWindow.h"
 #include "AEDocument.h"
 #include "AEResourcesManagerTab.h"
-#include "AELoadedResourcesPanel.h"
 #include "WorldEditorTab.h"
 #include <QObject>
 #include <QMdiArea>
@@ -41,7 +40,6 @@ AEMainWindow::AEMainWindow()
 	_activeDocument = nullptr;
 	_resourceManagerTab = nullptr;
 	_worldEditorTab = nullptr;
-	_loadedResourcesPanel = nullptr;
 		
 	_mdiArea = new QMdiArea;
 	_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -107,13 +105,7 @@ void AEMainWindow::newProject()
 		
 		_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
 		_worldEditorTab = new WorldEditorTab(_activeDocument);
-
-		_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, _resourceManagerTab->GetModelViewer(), this);
-		addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
-		_loadedResourcesPanel->setVisible(true);
 		
-		_resourceManagerTab->SetResourcesPanel(_loadedResourcesPanel);
-
 		_mdiArea->addSubWindow(_resourceManagerTab);
 		_mdiArea->addSubWindow(_worldEditorTab);
 		
@@ -183,12 +175,8 @@ void AEMainWindow::openProject(QString filePath, bool askIfEmpty)
 	_resourceManagerTab = new AEResourcesManagerTab(_activeDocument);
 	_worldEditorTab = new WorldEditorTab(_activeDocument);
 
-	_loadedResourcesPanel = new AELoadedResourcesPanel(_activeDocument, _resourceManagerTab->GetModelViewer(), this);
-	addDockWidget(Qt::LeftDockWidgetArea, _loadedResourcesPanel);
-	_loadedResourcesPanel->setVisible(true);
+	_resourceManagerTab->LoadResourcesTree();
 
-	_resourceManagerTab->SetResourcesPanel(_loadedResourcesPanel);
-		
 	_mdiArea->addSubWindow(_resourceManagerTab);
 	_mdiArea->addSubWindow(_worldEditorTab);
 		
@@ -407,13 +395,6 @@ bool AEMainWindow::closeProject()
 
 	_mdiArea->closeAllSubWindows();
 
-	if (_loadedResourcesPanel)
-	{
-		removeDockWidget(_loadedResourcesPanel);
-		delete _loadedResourcesPanel;
-		_loadedResourcesPanel = nullptr;
-	}
-	
 	if (_resourceManagerTab)
 	{
 		delete _resourceManagerTab;

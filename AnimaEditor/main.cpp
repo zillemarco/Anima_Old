@@ -13,7 +13,7 @@
 #include "Window.h"
 #include <AnimaMath.h>
 #include <AnimaCamerasManager.h>
-#include <AnimaBenchmarkTimer.h>
+#include <AnimaTimer.h>
 #include <AnimaMesh.h>
 #include <AnimaScene.h>
 #include <AnimaScenesManager.h>
@@ -49,6 +49,36 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char** argv)
 {
+	//float f1[16] = 
+	//{ 
+	//	1.0f, 5.0f, 10.0f, 3.0f,
+	//	6.0f, 1.0f, 1.0f, 1.0f, 
+	//	-4.0f, -8.0f, 0.0f, 11.0f, 
+	//	0.0f, 2.0f, 1.0f, -9.0f
+	//};
+
+	//float f2[16] =
+	//{
+	//	6.0f, 0.0f, 5.0f, 4.0f,
+	//	2.0f, -3.0f, -1.0f, 2.0f,
+	//	0.0f, 5.0f, 6.0f, -1.0f,
+	//	5.0f, -6.0f, -2.0f, 9.0f
+	//};
+
+	//Anima::AnimaMatrix m1(f1), m2(f2), m3, m4;
+
+	//m3 = m1;
+	//m4 = m1;
+
+	//Anima::AnimaTimer timer;
+
+	//timer.Reset();
+	//m3.MultiplyMatrix(m2);
+	//timer.PrintElapsed();
+	//timer.Reset();
+	//m4.MultiplyMatrixSSE(m2);
+	//timer.PrintElapsed();
+	
 #ifndef _LOCAL_TEST_
 	Anima::AnimaEngine::SetUsedExternal();
 	

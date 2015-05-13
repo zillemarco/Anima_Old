@@ -20,13 +20,13 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaVectorGenerator : public AnimaDataGenerator
 {
 public:
-	AnimaVectorGenerator(AnimaAllocator* allocator);
-	AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex2f& color);
-	AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y);
-	AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex3f& color);
-	AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z);
-	AnimaVectorGenerator(AnimaAllocator* allocator, const AnimaVertex4f& color);
-	AnimaVectorGenerator(AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex2f& color);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex3f& color);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex4f& color);
+	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w);
 	AnimaVectorGenerator(const AnimaVectorGenerator& src);
 	AnimaVectorGenerator(AnimaVectorGenerator&& src);
 	~AnimaVectorGenerator();

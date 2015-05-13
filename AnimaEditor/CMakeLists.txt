@@ -9,7 +9,7 @@ set(${PROJECT_NAME}_headers AEMainWindow.h
 							WorldEditorTab.h
 							AEResourcesManagerModelViewer.h
 							Window.h
-							AELoadedResourcesPanel.h
+							AELoadedResourcesTreeView.h
 							ImportModelWindow.h
 							NewInstanceWindow.h)
 set(${PROJECT_NAME}_sources main.cpp 
@@ -22,7 +22,7 @@ set(${PROJECT_NAME}_sources main.cpp
 							WorldEditorTab.cpp
 							AEResourcesManagerModelViewer.cpp
 							Window.cpp
-							AELoadedResourcesPanel.cpp
+							AELoadedResourcesTreeView.cpp
 							ImportModelWindow.cpp
 							NewInstanceWindow.cpp)
 

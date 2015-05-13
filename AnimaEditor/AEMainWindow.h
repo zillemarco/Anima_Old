@@ -14,7 +14,6 @@
 
 class AEDocument;
 class AEResourcesManagerTab;
-class AELoadedResourcesPanel;
 class WorldEditorTab;
 class EditWindow;
 class QAction;
@@ -85,12 +84,7 @@ private:
 	AEDocument* _activeDocument;
 	
 	AEResourcesManagerTab* _resourceManagerTab;
-	WorldEditorTab*		_worldEditorTab;
-
-	//
-	//	Pannelli
-	//
-	AELoadedResourcesPanel* _loadedResourcesPanel;
+	WorldEditorTab*	_worldEditorTab;
 };
 
 #endif /* defined(__Anima__AnimaEditorMainWindow__) */

@@ -88,94 +88,26 @@ AnimaVertex4f AnimaMatrix::operator*(const AnimaVertex4f& p) const
 AnimaMatrix AnimaMatrix::operator*(const AnimaMatrix& p) const
 {
 	AnimaMatrix r(this->m);
-	r.MultiplyMatrix(p.m);
-	//r.m[0] = m[0] * p.m[0] + m[4] * p.m[1] + m[8] * p.m[2] + m[12] * p.m[3];
-	//r.m[1] = m[1] * p.m[0] + m[5] * p.m[1] + m[9] * p.m[2] + m[13] * p.m[3];
-	//r.m[2] = m[2] * p.m[0] + m[6] * p.m[1] + m[10] * p.m[2] + m[14] * p.m[3];
-	//r.m[3] = m[3] * p.m[0] + m[7] * p.m[1] + m[11] * p.m[2] + m[15] * p.m[3];
-	//r.m[4] = m[0] * p.m[4] + m[4] * p.m[5] + m[8] * p.m[6] + m[12] * p.m[7];
-	//r.m[5] = m[1] * p.m[4] + m[5] * p.m[5] + m[9] * p.m[6] + m[13] * p.m[7];
-	//r.m[6] = m[2] * p.m[4] + m[6] * p.m[5] + m[10] * p.m[6] + m[14] * p.m[7];
-	//r.m[7] = m[3] * p.m[4] + m[7] * p.m[5] + m[11] * p.m[6] + m[15] * p.m[7];
-	//r.m[8] = m[0] * p.m[8] + m[4] * p.m[9] + m[8] * p.m[10] + m[12] * p.m[11];
-	//r.m[9] = m[1] * p.m[8] + m[5] * p.m[9] + m[9] * p.m[10] + m[13] * p.m[11];
-	//r.m[10] = m[2] * p.m[8] + m[6] * p.m[9] + m[10] * p.m[10] + m[14] * p.m[11];
-	//r.m[11] = m[3] * p.m[8] + m[7] * p.m[9] + m[11] * p.m[10] + m[15] * p.m[11];
-	//r.m[12] = m[0] * p.m[12] + m[4] * p.m[13] + m[8] * p.m[14] + m[12] * p.m[15];
-	//r.m[13] = m[1] * p.m[12] + m[5] * p.m[13] + m[9] * p.m[14] + m[13] * p.m[15];
-	//r.m[14] = m[2] * p.m[12] + m[6] * p.m[13] + m[10] * p.m[14] + m[14] * p.m[15];
-	//r.m[15] = m[3] * p.m[12] + m[7] * p.m[13] + m[11] * p.m[14] + m[15] * p.m[15];
+	r.MultiplyMatrixSSE(p.m);
 	return r;
 }
 
 AnimaMatrix AnimaMatrix::operator*(const AFloat p[16]) const
 {
 	AnimaMatrix r(this->m);
-	r.MultiplyMatrix(p);
-	//r.m[0] = m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12] * p[3];
-	//r.m[1] = m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13] * p[3];
-	//r.m[2] = m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14] * p[3];
-	//r.m[3] = m[3] * p[0] + m[7] * p[1] + m[11] * p[2] + m[15] * p[3];
-	//r.m[4] = m[0] * p[4] + m[4] * p[5] + m[8] * p[6] + m[12] * p[7];
-	//r.m[5] = m[1] * p[4] + m[5] * p[5] + m[9] * p[6] + m[13] * p[7];
-	//r.m[6] = m[2] * p[4] + m[6] * p[5] + m[10] * p[6] + m[14] * p[7];
-	//r.m[7] = m[3] * p[4] + m[7] * p[5] + m[11] * p[6] + m[15] * p[7];
-	//r.m[8] = m[0] * p[8] + m[4] * p[9] + m[8] * p[10] + m[12] * p[11];
-	//r.m[9] = m[1] * p[8] + m[5] * p[9] + m[9] * p[10] + m[13] * p[11];
-	//r.m[10] = m[2] * p[8] + m[6] * p[9] + m[10] * p[10] + m[14] * p[11];
-	//r.m[11] = m[3] * p[8] + m[7] * p[9] + m[11] * p[10] + m[15] * p[11];
-	//r.m[12] = m[0] * p[12] + m[4] * p[13] + m[8] * p[14] + m[12] * p[15];
-	//r.m[13] = m[1] * p[12] + m[5] * p[13] + m[9] * p[14] + m[13] * p[15];
-	//r.m[14] = m[2] * p[12] + m[6] * p[13] + m[10] * p[14] + m[14] * p[15];
-	//r.m[15] = m[3] * p[12] + m[7] * p[13] + m[11] * p[14] + m[15] * p[15];
+	r.MultiplyMatrixSSE(p);
 	return r;
 }
 
 AnimaMatrix& AnimaMatrix::operator*=(const AnimaMatrix& p)
 {
-	MultiplyMatrix(p.m);
-	//AnimaMatrix r;
-	//r.m[0] = m[0] * p.m[0] + m[4] * p.m[1] + m[8] * p.m[2] + m[12] * p.m[3];
-	//r.m[1] = m[1] * p.m[0] + m[5] * p.m[1] + m[9] * p.m[2] + m[13] * p.m[3];
-	//r.m[2] = m[2] * p.m[0] + m[6] * p.m[1] + m[10] * p.m[2] + m[14] * p.m[3];
-	//r.m[3] = m[3] * p.m[0] + m[7] * p.m[1] + m[11] * p.m[2] + m[15] * p.m[3];
-	//r.m[4] = m[0] * p.m[4] + m[4] * p.m[5] + m[8] * p.m[6] + m[12] * p.m[7];
-	//r.m[5] = m[1] * p.m[4] + m[5] * p.m[5] + m[9] * p.m[6] + m[13] * p.m[7];
-	//r.m[6] = m[2] * p.m[4] + m[6] * p.m[5] + m[10] * p.m[6] + m[14] * p.m[7];
-	//r.m[7] = m[3] * p.m[4] + m[7] * p.m[5] + m[11] * p.m[6] + m[15] * p.m[7];
-	//r.m[8] = m[0] * p.m[8] + m[4] * p.m[9] + m[8] * p.m[10] + m[12] * p.m[11];
-	//r.m[9] = m[1] * p.m[8] + m[5] * p.m[9] + m[9] * p.m[10] + m[13] * p.m[11];
-	//r.m[10] = m[2] * p.m[8] + m[6] * p.m[9] + m[10] * p.m[10] + m[14] * p.m[11];
-	//r.m[11] = m[3] * p.m[8] + m[7] * p.m[9] + m[11] * p.m[10] + m[15] * p.m[11];
-	//r.m[12] = m[0] * p.m[12] + m[4] * p.m[13] + m[8] * p.m[14] + m[12] * p.m[15];
-	//r.m[13] = m[1] * p.m[12] + m[5] * p.m[13] + m[9] * p.m[14] + m[13] * p.m[15];
-	//r.m[14] = m[2] * p.m[12] + m[6] * p.m[13] + m[10] * p.m[14] + m[14] * p.m[15];
-	//r.m[15] = m[3] * p.m[12] + m[7] * p.m[13] + m[11] * p.m[14] + m[15] * p.m[15];
-	//memcpy(m, r.m, sizeof(float) * 16);
+	MultiplyMatrixSSE(p.m);
 	return *this;
 }
 
 AnimaMatrix& AnimaMatrix::operator*=(const AFloat p[16])
 {
-	MultiplyMatrix(p);
-	//AnimaMatrix r;
-	//r.m[0] = m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12] * p[3];
-	//r.m[1] = m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13] * p[3];
-	//r.m[2] = m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14] * p[3];
-	//r.m[3] = m[3] * p[0] + m[7] * p[1] + m[11] * p[2] + m[15] * p[3];
-	//r.m[4] = m[0] * p[4] + m[4] * p[5] + m[8] * p[6] + m[12] * p[7];
-	//r.m[5] = m[1] * p[4] + m[5] * p[5] + m[9] * p[6] + m[13] * p[7];
-	//r.m[6] = m[2] * p[4] + m[6] * p[5] + m[10] * p[6] + m[14] * p[7];
-	//r.m[7] = m[3] * p[4] + m[7] * p[5] + m[11] * p[6] + m[15] * p[7];
-	//r.m[8] = m[0] * p[8] + m[4] * p[9] + m[8] * p[10] + m[12] * p[11];
-	//r.m[9] = m[1] * p[8] + m[5] * p[9] + m[9] * p[10] + m[13] * p[11];
-	//r.m[10] = m[2] * p[8] + m[6] * p[9] + m[10] * p[10] + m[14] * p[11];
-	//r.m[11] = m[3] * p[8] + m[7] * p[9] + m[11] * p[10] + m[15] * p[11];
-	//r.m[12] = m[0] * p[12] + m[4] * p[13] + m[8] * p[14] + m[12] * p[15];
-	//r.m[13] = m[1] * p[12] + m[5] * p[13] + m[9] * p[14] + m[13] * p[15];
-	//r.m[14] = m[2] * p[12] + m[6] * p[13] + m[10] * p[14] + m[14] * p[15];
-	//r.m[15] = m[3] * p[12] + m[7] * p[13] + m[11] * p[14] + m[15] * p[15];
-	//memcpy(m, r.m, sizeof(float) * 16);
+	MultiplyMatrixSSE(p);
 	return *this;
 }
 
@@ -573,25 +505,6 @@ AFloat AnimaMatrix::Determinant() const
 void AnimaMatrix::MultiplyMatrix(const AnimaMatrix& p)
 {
 	MultiplyMatrix(p.m);
-
-	//AnimaMatrix r;
-	//r.m[0] = m[0] * p.m[0] + m[4] * p.m[1] + m[8] * p.m[2] + m[12] * p.m[3];
-	//r.m[1] = m[1] * p.m[0] + m[5] * p.m[1] + m[9] * p.m[2] + m[13] * p.m[3];
-	//r.m[2] = m[2] * p.m[0] + m[6] * p.m[1] + m[10] * p.m[2] + m[14] * p.m[3];
-	//r.m[3] = m[3] * p.m[0] + m[7] * p.m[1] + m[11] * p.m[2] + m[15] * p.m[3];
-	//r.m[4] = m[0] * p.m[4] + m[4] * p.m[5] + m[8] * p.m[6] + m[12] * p.m[7];
-	//r.m[5] = m[1] * p.m[4] + m[5] * p.m[5] + m[9] * p.m[6] + m[13] * p.m[7];
-	//r.m[6] = m[2] * p.m[4] + m[6] * p.m[5] + m[10] * p.m[6] + m[14] * p.m[7];
-	//r.m[7] = m[3] * p.m[4] + m[7] * p.m[5] + m[11] * p.m[6] + m[15] * p.m[7];
-	//r.m[8] = m[0] * p.m[8] + m[4] * p.m[9] + m[8] * p.m[10] + m[12] * p.m[11];
-	//r.m[9] = m[1] * p.m[8] + m[5] * p.m[9] + m[9] * p.m[10] + m[13] * p.m[11];
-	//r.m[10] = m[2] * p.m[8] + m[6] * p.m[9] + m[10] * p.m[10] + m[14] * p.m[11];
-	//r.m[11] = m[3] * p.m[8] + m[7] * p.m[9] + m[11] * p.m[10] + m[15] * p.m[11];
-	//r.m[12] = m[0] * p.m[12] + m[4] * p.m[13] + m[8] * p.m[14] + m[12] * p.m[15];
-	//r.m[13] = m[1] * p.m[12] + m[5] * p.m[13] + m[9] * p.m[14] + m[13] * p.m[15];
-	//r.m[14] = m[2] * p.m[12] + m[6] * p.m[13] + m[10] * p.m[14] + m[14] * p.m[15];
-	//r.m[15] = m[3] * p.m[12] + m[7] * p.m[13] + m[11] * p.m[14] + m[15] * p.m[15];
-	//memcpy(m, r.m, sizeof(float) * 16);
 }
 
 void AnimaMatrix::MultiplyMatrix(const AFloat p[16])
@@ -683,53 +596,78 @@ void AnimaMatrix::MultiplyMatrixSSE(const AnimaMatrix& p)
 
 void AnimaMatrix::MultiplyMatrixSSE(const AFloat p[16])
 {
-	__m128 src1 = _mm_set_ps(p[0], p[4], p[8], p[12]);//	_mm_loadu_ps(&p[0]);
-	__m128 src2 = _mm_set_ps(p[1], p[5], p[8], p[13]);//	_mm_loadu_ps(&p[4]);
-	__m128 src3 = _mm_set_ps(p[2], p[6], p[10], p[14]);//	_mm_loadu_ps(&p[8]);
-	__m128 src4 = _mm_set_ps(p[3], p[7], p[11], p[15]);//	_mm_loadu_ps(&p[12]);
+	// a: corrisponde a this->m
+	// b: corrisponde a p
 
-	__m128 r1 = _mm_set_ps(m[0], m[4], m[8], m[12]);//	_mm_loadu_ps(&m[0]);
-	__m128 r2 = _mm_set_ps(m[1], m[5], m[8], m[13]);//	_mm_loadu_ps(&m[4]);
-	__m128 r3 = _mm_set_ps(m[2], m[6], m[10], m[14]);//	_mm_loadu_ps(&m[8]);
-	__m128 r4 = _mm_set_ps(m[3], m[7], m[11], m[15]);//	_mm_loadu_ps(&m[12]);
+	AFloat r[16];
 
-	r1 = _mm_add_ps(_mm_add_ps(
-		_mm_add_ps(_mm_mul_ps(_mm_shufd(r1, 0x00), src1),
-		_mm_mul_ps(_mm_shufd(r1, 0x55), src2)),
-		_mm_mul_ps(_mm_shufd(r1, 0xAA), src3)),
-		_mm_mul_ps(_mm_shufd(r1, 0xFF), src4));
-	r2 = _mm_add_ps(_mm_add_ps(
-		_mm_add_ps(_mm_mul_ps(_mm_shufd(r2, 0x00), src1),
-		_mm_mul_ps(_mm_shufd(r2, 0x55), src2)),
-		_mm_mul_ps(_mm_shufd(r2, 0xAA), src3)),
-		_mm_mul_ps(_mm_shufd(r2, 0xFF), src4));
-	r3 = _mm_add_ps(_mm_add_ps(
-		_mm_add_ps(_mm_mul_ps(_mm_shufd(r3, 0x00), src1),
-		_mm_mul_ps(_mm_shufd(r3, 0x55), src2)),
-		_mm_mul_ps(_mm_shufd(r3, 0xAA), src3)),
-		_mm_mul_ps(_mm_shufd(r3, 0xFF), src4));
-	r4 = _mm_add_ps(_mm_add_ps(
-		_mm_add_ps(_mm_mul_ps(_mm_shufd(r4, 0x00), src1),
-		_mm_mul_ps(_mm_shufd(r4, 0x55), src2)),
-		_mm_mul_ps(_mm_shufd(r4, 0xAA), src3)),
-		_mm_mul_ps(_mm_shufd(r4, 0xFF), src4));
+	__m128 a_line, b_line, r_line;
+	for (AInt i = 0; i < 16; i += 4) 
+	{
+		// unroll the first step of the loop to avoid having to initialize r_line to zero
+		a_line = _mm_load_ps(this->m);									// a_line = vec4(column(a, 0))
+		b_line = _mm_set1_ps(p[i]);										// b_line = vec4(b[i][0])
+		r_line = _mm_mul_ps(a_line, b_line);							// r_line = a_line * b_line
+		for (int j = 1; j < 4; j++) 
+		{
+			a_line = _mm_load_ps(&this->m[j * 4]);						// a_line = vec4(column(a, j))
+			b_line = _mm_set1_ps(p[i + j]);								// b_line = vec4(b[i][j])
+																		// r_line += a_line * b_line
+			r_line = _mm_add_ps(_mm_mul_ps(a_line, b_line), r_line);
+		}
 
-	_mm_storeu_ps(&m[0], r1);
-	_mm_storeu_ps(&m[4], r2);
-	_mm_storeu_ps(&m[8], r3);
-	_mm_storeu_ps(&m[12], r4);
+		_mm_store_ps(&r[i], r_line);									// r[i] = r_line
+	}
 
-	//float fr1[4], fr2[4], fr3[4], fr4[4];
+	memcpy(this->m, r, sizeof(AFloat) * 16);
 
-	//_mm_storeu_ps(fr1, r1);
-	//_mm_storeu_ps(fr2, r2);
-	//_mm_storeu_ps(fr3, r3);
-	//_mm_storeu_ps(fr4, r4);
+	//__m128 src1 = _mm_loadu_ps(&p[0]);	// _mm_set_ps(p[0], p[4], p[8], p[12]);//	
+	//__m128 src2 = _mm_loadu_ps(&p[4]);	// _mm_set_ps(p[1], p[5], p[8], p[13]);//	
+	//__m128 src3 = _mm_loadu_ps(&p[8]);	// _mm_set_ps(p[2], p[6], p[10], p[14]);//	
+	//__m128 src4 = _mm_loadu_ps(&p[12]);	// _mm_set_ps(p[3], p[7], p[11], p[15]);//	
 
-	//m[0] = fr1[0];	m[4] = fr1[1];	m[8] = fr1[2];	m[12] = fr1[3];
-	//m[1] = fr2[0];	m[5] = fr2[1];	m[9] = fr2[2];	m[13] = fr2[3];
-	//m[2] = fr3[0];	m[6] = fr3[1];	m[10] = fr3[2];	m[14] = fr3[3];
-	//m[3] = fr4[0];	m[7] = fr4[1];	m[11] = fr4[2];	m[15] = fr4[3];
+	//__m128 r1 = _mm_loadu_ps(&m[0]);	// _mm_set_ps(m[0], m[4], m[8], m[12]);//	
+	//__m128 r2 = _mm_loadu_ps(&m[4]);	// _mm_set_ps(m[1], m[5], m[8], m[13]);//	
+	//__m128 r3 = _mm_loadu_ps(&m[8]);	// _mm_set_ps(m[2], m[6], m[10], m[14]);//	
+	//__m128 r4 = _mm_loadu_ps(&m[12]);	// _mm_set_ps(m[3], m[7], m[11], m[15]);//	
+
+	//r1 = _mm_add_ps(_mm_add_ps(
+	//	_mm_add_ps(_mm_mul_ps(_mm_shufd(r1, 0x00), src1),
+	//	_mm_mul_ps(_mm_shufd(r1, 0x55), src2)),
+	//	_mm_mul_ps(_mm_shufd(r1, 0xAA), src3)),
+	//	_mm_mul_ps(_mm_shufd(r1, 0xFF), src4));
+	//r2 = _mm_add_ps(_mm_add_ps(
+	//	_mm_add_ps(_mm_mul_ps(_mm_shufd(r2, 0x00), src1),
+	//	_mm_mul_ps(_mm_shufd(r2, 0x55), src2)),
+	//	_mm_mul_ps(_mm_shufd(r2, 0xAA), src3)),
+	//	_mm_mul_ps(_mm_shufd(r2, 0xFF), src4));
+	//r3 = _mm_add_ps(_mm_add_ps(
+	//	_mm_add_ps(_mm_mul_ps(_mm_shufd(r3, 0x00), src1),
+	//	_mm_mul_ps(_mm_shufd(r3, 0x55), src2)),
+	//	_mm_mul_ps(_mm_shufd(r3, 0xAA), src3)),
+	//	_mm_mul_ps(_mm_shufd(r3, 0xFF), src4));
+	//r4 = _mm_add_ps(_mm_add_ps(
+	//	_mm_add_ps(_mm_mul_ps(_mm_shufd(r4, 0x00), src1),
+	//	_mm_mul_ps(_mm_shufd(r4, 0x55), src2)),
+	//	_mm_mul_ps(_mm_shufd(r4, 0xAA), src3)),
+	//	_mm_mul_ps(_mm_shufd(r4, 0xFF), src4));
+
+	//_mm_storeu_ps(&m[0], r1);
+	//_mm_storeu_ps(&m[4], r2);
+	//_mm_storeu_ps(&m[8], r3);
+	//_mm_storeu_ps(&m[12], r4);
+
+	////float fr1[4], fr2[4], fr3[4], fr4[4];
+
+	////_mm_storeu_ps(fr1, r1);
+	////_mm_storeu_ps(fr2, r2);
+	////_mm_storeu_ps(fr3, r3);
+	////_mm_storeu_ps(fr4, r4);
+
+	////m[0] = fr1[0];	m[4] = fr1[1];	m[8] = fr1[2];	m[12] = fr1[3];
+	////m[1] = fr2[0];	m[5] = fr2[1];	m[9] = fr2[2];	m[13] = fr2[3];
+	////m[2] = fr3[0];	m[6] = fr3[1];	m[10] = fr3[2];	m[14] = fr3[3];
+	////m[3] = fr4[0];	m[7] = fr4[1];	m[11] = fr4[2];	m[15] = fr4[3];
 }
 
 void AnimaMatrix::LookAt(const AnimaVertex3f &position, const AnimaVertex3f &forward, const AnimaVertex3f &up)

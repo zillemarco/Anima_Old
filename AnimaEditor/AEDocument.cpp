@@ -97,7 +97,7 @@ bool AEDocument::NewDocument(QString name, QString path)
 
 	Anima::AnimaLightsManager* lightsManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetLightsManager();
 	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
-	hemL->SetIntensity(0.5f);
+	hemL->SetIntensity(0.8f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
@@ -135,7 +135,7 @@ bool AEDocument::OpenDocument(QString path)
 
 	Anima::AnimaLightsManager* lightsManager = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetLightsManager();
 	Anima::AnimaHemisphereLight* hemL = lightsManager->CreateLight<Anima::AnimaHemisphereLight>("hemisphere");
-	hemL->SetIntensity(0.5f);
+	hemL->SetIntensity(0.8f);
 	hemL->SetSkyColor(1.0f, 1.0f, 1.0f);
 	hemL->SetGroundColor(0.0f, 0.0f, 0.0f);
 	hemL->SetPosition(0.0f, 2000.0f, 0.0f);
@@ -866,7 +866,7 @@ bool AEDocument::ImportModelInternal(QString modelName, QString modelFileName)
 {	
 	Anima::AnimaModel* model = _engine->GetScenesManager()->GetScene("AnimaEditor")->GetModelsManager()->LoadModel(modelFileName.toLocal8Bit().constData(), modelName.toLocal8Bit().constData());
 	if(!model)
-		return false;	
+		return false;
 	return true;
 }
 

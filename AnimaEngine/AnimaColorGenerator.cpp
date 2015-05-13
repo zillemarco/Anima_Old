@@ -10,44 +10,44 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaColorGenerator::AnimaColorGenerator(AnimaAllocator* allocator)
-	: AnimaDataGenerator(allocator)
+AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator)
+	: AnimaDataGenerator(name, allocator)
 	, _color(0.0f, 0.0f, 0.0f, 1.0f)
 {
 }
 
-AnimaColorGenerator::AnimaColorGenerator(AnimaAllocator* allocator, const AnimaColor3f& color)
-	: AnimaDataGenerator(allocator)
+AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaColor3f& color)
+	: AnimaDataGenerator(name, allocator)
 	, _color(color.r, color.g, color.b, 1.0f)
 {
 }
 
-AnimaColorGenerator::AnimaColorGenerator(AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b)
-	: AnimaDataGenerator(allocator)
+AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b)
+	: AnimaDataGenerator(name, allocator)
 	, _color(r, g, b, 1.0f)
 {
 }
 
-AnimaColorGenerator::AnimaColorGenerator(AnimaAllocator* allocator, const AnimaColor4f& color)
-	: AnimaDataGenerator(allocator)
+AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaColor4f& color)
+	: AnimaDataGenerator(name, allocator)
 	, _color(color)
 {
 }
 
-AnimaColorGenerator::AnimaColorGenerator(AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b, AFloat a)
-	: AnimaDataGenerator(allocator)
+AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b, AFloat a)
+	: AnimaDataGenerator(name, allocator)
 	, _color(r, g, b, a)
 {
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaColorGenerator& src)
-	: AnimaDataGenerator(src._allocator)
+	: AnimaDataGenerator(src)
 	, _color(src._color)
 {
 }
 
 AnimaColorGenerator::AnimaColorGenerator(AnimaColorGenerator&& src)
-	: AnimaDataGenerator(src._allocator)
+	: AnimaDataGenerator(src)
 	, _color(src._color)
 {
 }

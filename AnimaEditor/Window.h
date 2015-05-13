@@ -11,7 +11,7 @@
 #include <AnimaRenderer.h>
 #include <AnimaMesh.h>
 #include <AnimaFPSTimer.h>
-#include <AnimaBenchmarkTimer.h>
+#include <AnimaTimer.h>
 
 class Window : public Anima::AnimaWindow
 {
@@ -30,7 +30,7 @@ public:
 	Anima::AnimaThirdPersonCamera* _tpcamera;
 	Anima::AnimaFirstPersonCamera* _fpcamera;
 	Anima::AnimaFPSTimer _timerFPS;
-	Anima::AnimaBenchmarkTimer _timer;
+	Anima::AnimaTimer _timer;
 	Anima::AnimaDirectionalLight* _directionalLight;
 	Anima::AnimaScene* _scene;
 	

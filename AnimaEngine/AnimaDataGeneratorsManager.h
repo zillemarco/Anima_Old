@@ -45,6 +45,10 @@ public:
 	AnimaVectorGenerator* CreateVectorGenerator(const AnimaString& name);
 	AnimaVectorGenerator* CreateVectorGenerator(const char* name);
 
+	bool RemoveGenerator(const AnimaString& name);
+	bool RemoveGenerator(const char* name);
+	bool RemoveGenerator(AnimaDataGenerator* generator);
+
 	AnimaDataGenerator* GetGenerator(const AnimaString& name);
 	AnimaDataGenerator* GetGenerator(const char* name);
 	
@@ -73,7 +77,7 @@ T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
 
 	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
 	ANIMA_ASSERT(allocator != nullptr);
-	T* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<T>(*allocator, allocator);
+	T* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<T>(*allocator, name, allocator);
 	_dataGenerators.Add<T*>(name, newDataGenerator);
 	
 	return newDataGenerator;

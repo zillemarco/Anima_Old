@@ -461,6 +461,9 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& 
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
 {
+	if (value == nullptr)
+		return;
+
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 	{
@@ -487,6 +490,29 @@ void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<An
 {
 	AnimaString str(uniformName, _allocator);
 	SetUniform(str, value, type);
+}
+
+void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaMatrix>* value)
+{
+	if (value == nullptr)
+		return;
+
+	auto pair = _uniforms.find(uniformName);
+	if (pair != _uniforms.end())
+	{
+		AInt countValue = value->GetSize();
+		AInt countUniformArray = pair->second._arraySize;
+		AInt countUniformLocations = pair->second._arraySize;
+
+		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
+			SetUniform(pair->second._locations[i], value->GetAt(i));
+	}
+}
+
+void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaMatrix>* value)
+{
+	AnimaString str(uniformName, _allocator);
+	SetUniform(str, value);
 }
 
 void AnimaShaderProgram::SetUniformi(AInt location, int value)
@@ -849,6 +875,24 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
+		else if (info._name == "_boneWeights")
+		{
+			if (mesh->GetBoneWeightsNumber() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneWeightsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 4, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+		else if (info._name == "_boneIDs")
+		{
+			if (mesh->GetBoneIDsNumber() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneIDsBufferObject());
+				glEnableVertexAttribArray(info._location);
+				glVertexAttribPointer(info._location, 4, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
 	}
 }
 
@@ -932,238 +976,16 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 		else
 		{
 			if (info._type == GL_FLOAT_VEC2 || info._type == GL_FLOAT_VEC3 || info._type == GL_FLOAT_VEC4)
-			{
 				SetUniform(info._name, object->GetVectorArray(info._nameParts[1]), info._type);
+			else if (info._type == GL_FLOAT_MAT4)
+				SetUniform(info._name, object->GetMatrixArray(info._nameParts[1]));
+			else
+			{
+				ANIMA_ASSERT(false);
 			}
 		}
 	}
 }
-
-//void AnimaShaderProgram::UpdateCameraProperies(AnimaCamera* camera)
-//{
-//	AnimaString str(_allocator);
-//	AnimaUniformInfo info;
-//	auto end = _uniforms.end();
-//
-//	str = "CAM_Position";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_VEC3)
-//			SetUniform(info._locations[0], camera->GetPosition());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_windowSize";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_VEC2)
-//			SetUniform(info._locations[0], camera->GetWindowSize());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_inverseWindowSize";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_VEC2)
-//			SetUniform(info._locations[0], AnimaVertex2f(1.0f / camera->GetWindowSize().x, 1.0f / camera->GetWindowSize().y));
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_viewMatrix";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_MAT4)
-//			SetUniform(info._locations[0], camera->GetViewMatrix());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_projectionMatrix";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_MAT4)
-//			SetUniform(info._locations[0], camera->GetProjectionMatrix());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_projectionViewMatrix";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//		
-//		if (info._type == GL_FLOAT_MAT4)
-//			SetUniform(info._locations[0], camera->GetProjectionViewMatrix());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//
-//	str = "CAM_ProjectionViewInverseMatrix";
-//	if (_uniforms.find(str) != end)
-//	{
-//		info = _uniforms[str];
-//
-//		if (info._type == GL_FLOAT_MAT4)
-//			SetUniform(info._locations[0], camera->GetInversedProjectionViewMatrix());
-//		else
-//		{
-//			UPD_ERROR;
-//		}
-//	}
-//}
-
-//void AnimaShaderProgram::UpdateMaterialProperies(AnimaMaterial* material, AnimaRenderer* renderingManager)
-//{
-//	if (material == nullptr)
-//		return;
-//
-//	for (auto& pair : _uniforms)
-//	{
-//		AnimaUniformInfo info = pair.second;
-//
-//		if (info._namePartsCount != 2 || info._nameParts[0] != MaterialPrefix)
-//			continue;
-//
-//		if (info._type == GL_FLOAT_VEC3)
-//		{
-//			if (material->HasColor(info._nameParts[1]))
-//				SetUniform(info._locations[0], material->GetColor3f(info._nameParts[1]));
-//			else
-//				SetUniform(info._locations[0], material->GetVector3f(info._nameParts[1]));
-//		}
-//		else if (info._type == GL_FLOAT_VEC4)
-//		{
-//			if (material->HasColor(info._nameParts[1]))
-//				SetUniform(info._locations[0], material->GetColor4f(info._nameParts[1]));
-//			else
-//				SetUniform(info._locations[0], material->GetVector4f(info._nameParts[1]));
-//		}
-//		else if (info._type == GL_FLOAT)
-//			SetUniformf(info._locations[0], material->GetFloat(info._nameParts[1]));
-//		else if (info._type == GL_BOOL)
-//			SetUniformi(info._locations[0], material->GetBoolean(info._nameParts[1]) ? 1 : 0);
-//		else if (info._type == GL_INT)
-//			SetUniformi(info._locations[0], material->GetInteger(info._nameParts[1]));
-//		else if (info._type == GL_SAMPLER_2D)
-//		{
-//			AnimaTexture* texture = material->GetTexture(info._nameParts[1]);
-//
-//			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-//			SetUniformi(info._locations[0], slot);
-//
-//			if (texture == nullptr)
-//			{
-//				glActiveTexture(GL_TEXTURE0 + slot);
-//				glBindTexture(GL_TEXTURE_2D, 0);
-//			}
-//			else
-//			{
-//				texture->Load();
-//				texture->Bind(slot);
-//			}
-//		}
-//		else
-//		{
-//			ANIMA_ASSERT(false);
-//		}
-//	}
-//
-//	if (material->GetBoolean("TwoSided"))
-//		glDisable(GL_CULL_FACE);
-//	else
-//		glEnable(GL_CULL_FACE);
-//
-//	glFrontFace(material->GetInteger("FrontFace"));
-//	glCullFace(material->GetInteger("CullFace"));
-//}
-
-//void AnimaShaderProgram::UpdateLightProperies(AnimaLight* light, AnimaRenderer* renderingManager)
-//{
-//	if (light == nullptr)
-//		return;
-//
-//	const char* prefix = light->GetShaderPrefix();
-//
-//	for (auto& pair : _uniforms)
-//	{
-//		AnimaUniformInfo info = pair.second;
-//
-//		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
-//			continue;
-//
-//		if (info._type == GL_FLOAT_VEC2)
-//			SetUniform(info._locations[0], light->GetVector2f(info._nameParts[1]));
-//		else if (info._type == GL_FLOAT_VEC3)
-//		{
-//			if (light->HasColor(info._nameParts[1]))
-//				SetUniform(info._locations[0], light->GetColor3f(info._nameParts[1]));
-//			else
-//				SetUniform(info._locations[0], light->GetVector3f(info._nameParts[1]));
-//		}
-//		else if (info._type == GL_FLOAT_VEC4)
-//		{
-//			if (light->HasColor(info._nameParts[1]))
-//				SetUniform(info._locations[0], light->GetColor4f(info._nameParts[1]));
-//			else
-//				SetUniform(info._locations[0], light->GetVector4f(info._nameParts[1]));
-//		}
-//		else if (info._type == GL_FLOAT)
-//			SetUniformf(info._locations[0], light->GetFloat(info._nameParts[1]));
-//		else if (info._type == GL_BOOL)
-//			SetUniformi(info._locations[0], light->GetBoolean(info._nameParts[1]) ? 1 : 0);
-//		else if (info._type == GL_INT)
-//			SetUniformi(info._locations[0], light->GetInteger(info._nameParts[1]));
-//		else if (info._type == GL_FLOAT_MAT4)
-//			SetUniform(info._locations[0], light->GetMatrix(info._nameParts[1]));
-//		else if (info._type == GL_SAMPLER_2D)
-//		{
-//			AnimaTexture* texture = light->GetTexture(info._nameParts[1]);
-//
-//			AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-//			SetUniformi(info._locations[0], slot);
-//
-//			if (texture == nullptr)
-//			{
-//				glActiveTexture(GL_TEXTURE0 + slot);
-//				glBindTexture(GL_TEXTURE_2D, 0);
-//			}
-//			else
-//			{
-//				texture->Load();
-//				texture->Bind(slot);
-//			}
-//		}
-//		else
-//		{
-//			ANIMA_ASSERT(false);
-//		}
-//	}
-//}
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderingManager)
 {

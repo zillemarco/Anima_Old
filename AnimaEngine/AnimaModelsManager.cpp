@@ -9,7 +9,7 @@
 #include "AnimaModelsManager.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaTexturesManager.h"
-#include "AnimaBenchmarkTimer.h"
+#include "AnimaTimer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -58,7 +58,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 		return nullptr;
 	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), /*aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs*/aiProcessPreset_TargetRealtime_Quality);
 	
 	if (scene == nullptr)
 		return nullptr;
@@ -81,6 +81,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 		newTopLevelModel->SetOriginFileName(modelPath);
 		newTopLevelModel->SetMeshesBonesInfo(meshesBonesInfo);
 		newTopLevelModel->SetAnimations(loadedAnimations->GetArray());
+		newTopLevelModel->GetTransformation()->SetModelNodeTransformationMatrix(AnimaMatrix());
 
 		_topLevelModels.Add(name, newTopLevelModel);
 	}
@@ -92,13 +93,18 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString*>* meshesMap, const AnimaString& modelName)
 {
 	AnimaString newModelName(_scene->GetStringAllocator());
+	AnimaString animationNodeName(_scene->GetStringAllocator());
 	if (!modelName.IsEmpty())
 		newModelName = modelName;
 	else
 		newModelName = sceneNode->mName.C_Str();
 
+	animationNodeName = sceneNode->mName.C_Str();
+
 	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_models.Add(currentModel);
+
+	currentModel->SetAnimationNodeName(animationNodeName);
 
 	AnimaMatrix modelNodeTransformationMatrix;
 	modelNodeTransformationMatrix.m[0] = sceneNode->mTransformation.a1;		modelNodeTransformationMatrix.m[1] = sceneNode->mTransformation.a2;		modelNodeTransformationMatrix.m[2] = sceneNode->mTransformation.a3;		modelNodeTransformationMatrix.m[3] = sceneNode->mTransformation.a4;
@@ -106,13 +112,17 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	modelNodeTransformationMatrix.m[8] = sceneNode->mTransformation.c1;		modelNodeTransformationMatrix.m[9] = sceneNode->mTransformation.c2;		modelNodeTransformationMatrix.m[10] = sceneNode->mTransformation.c3;	modelNodeTransformationMatrix.m[11] = sceneNode->mTransformation.c4;
 	modelNodeTransformationMatrix.m[12] = sceneNode->mTransformation.d1;	modelNodeTransformationMatrix.m[13] = sceneNode->mTransformation.d2;	modelNodeTransformationMatrix.m[14] = sceneNode->mTransformation.d3;	modelNodeTransformationMatrix.m[15] = sceneNode->mTransformation.d4;
 
-	currentModel->GetTransformation()->SetModelNodeTransformationMatrix(modelNodeTransformationMatrix);
+	currentModel->GetTransformation()->SetModelNodeTransformationMatrix(modelNodeTransformationMatrix.Transposed());
 	
 	for (AUint n = 0; n < sceneNode->mNumMeshes; n++)
 	{
 		AInt meshIndex = (AInt)sceneNode->mMeshes[n];
 		AnimaString* meshName = meshesMap->GetAt(meshIndex);
 		AnimaMesh* mesh = _meshesManager->GetMeshFromName(*meshName);
+		
+		ANIMA_ASSERT(mesh->GetParentObject() == nullptr);
+		mesh->SetParentObject(currentModel);
+
 		currentModel->AddMesh(mesh);
 	}
 

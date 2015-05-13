@@ -78,6 +78,33 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
 	return GetGenerator(str);
 }
 
+bool AnimaDataGeneratorsManager::RemoveGenerator(const AnimaString& name)
+{
+	AnimaMappedArray<AnimaDataGenerator*>* mappedArray = _dataGenerators.GetMappedArrayFromName(name);
+	if (mappedArray == nullptr)
+		return false;
+
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+
+	AnimaDataGenerator* dataGenerator = (*mappedArray)[name];
+	AnimaAllocatorNamespace::DeallocateObject(*allocator, dataGenerator);
+	dataGenerator = nullptr;
+
+	return mappedArray->Remove(name);
+}
+
+bool AnimaDataGeneratorsManager::RemoveGenerator(const char* name)
+{
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
+	AnimaString str(name, allocator);
+	return RemoveGenerator(str);
+}
+
+bool AnimaDataGeneratorsManager::RemoveGenerator(AnimaDataGenerator* generator)
+{
+	return RemoveGenerator(generator->GetAnimaName());
+}
+
 void AnimaDataGeneratorsManager::UpdateValues()
 {
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();

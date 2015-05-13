@@ -31,7 +31,7 @@ void AnimaTimer::PrintElapsed()
 	char szBuff[1024];
 	memset(szBuff, 0, 1024);
 	
-	sprintf(szBuff, "%f seconds\r\n", Elapsed());
+	sprintf(szBuff, "%.20f seconds\r\n", Elapsed());
 	#if defined _MSC_VER
 		OutputDebugStringA(szBuff);
 	#else

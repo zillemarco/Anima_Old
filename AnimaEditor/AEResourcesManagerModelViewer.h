@@ -6,6 +6,7 @@
 #include <AnimaModelInstance.h>
 #include <AnimaMesh.h>
 #include <AnimaMeshInstance.h>
+#include <AnimaTimer.h>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -34,6 +35,8 @@ private:
 	Anima::AnimaModelInstance* _selectedModelInstance;
 	Anima::AnimaMesh* _selectedMesh;
 	Anima::AnimaMeshInstance* _selectedMeshInstance;
+
+	Anima::AnimaTimer _timer;
 
 	int _frame;
 

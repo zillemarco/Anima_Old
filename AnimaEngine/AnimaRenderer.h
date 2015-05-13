@@ -216,9 +216,12 @@ protected:
 	AnimaCamera*	_filterCamera;
 
 	AnimaArray<AnimaPrimitiveData*> _primitives;
-	AUint				_vertexArrayObject;
-	AUint				_verticesBufferObject;
-	AUint				_indexesBufferObject;
+	AUint _vertexArrayObject;
+	AUint _verticesBufferObject;
+	AUint _indexesBufferObject;
+
+	AnimaModel* _lastUpdatedModel;
+	AnimaModelInstance* _lastUpdatedModelInstance;
 	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;

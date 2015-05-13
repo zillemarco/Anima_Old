@@ -173,7 +173,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			{
 				aiBone* bone = mesh->mBones[nb];
 				AnimaString boneName(bone->mName.data, _scene->GetStringAllocator());
-				AUint boneIndex = _lastMeshesBonesInfo.Contains(boneName);
+				AInt boneIndex = _lastMeshesBonesInfo.Contains(boneName);
 
 				if (boneIndex < 0)
 				{
@@ -184,9 +184,9 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 					boneOffset.m[12] = bone->mOffsetMatrix.d1;	boneOffset.m[13] = bone->mOffsetMatrix.d2;	boneOffset.m[14] = bone->mOffsetMatrix.d3;	boneOffset.m[15] = bone->mOffsetMatrix.d4;
 
 					AnimaMeshBoneInfo* info = AnimaAllocatorNamespace::AllocateNew<AnimaMeshBoneInfo>(*(_scene->GetMeshesAllocator()), boneName, _scene->GetMeshesAllocator());
-					info->SetBoneOffset(boneOffset);
+					info->SetBoneOffset(boneOffset.Transposed());
 
-					boneIndex = (AUint)_lastMeshesBonesInfo.Add(boneName, info);
+					boneIndex = _lastMeshesBonesInfo.Add(boneName, info);
 				}
 
 				AInt numWeights = bone->mNumWeights;
