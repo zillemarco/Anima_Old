@@ -37,14 +37,19 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 		aiAnimation* animation = scene->mAnimations[na];
 		
 		AnimaString animationName(_scene->GetStringAllocator());
+		AnimaString originalAnimationName(animation->mName.C_Str(), _scene->GetStringAllocator());
+
+		if (originalAnimationName.IsEmpty())
+			originalAnimationName = "Animation";
+
 		AnimaAnimation* newAnimation = nullptr;
 		int nameOffset = 0;
 		while (newAnimation == nullptr)
 		{
 			if (nameOffset > 0)
-				animationName.Format("%s%d", animation->mName.C_Str(), nameOffset);
+				animationName.Format("%s%d", originalAnimationName.GetConstBuffer(), nameOffset);
 			else
-				animationName.Format("%s", animation->mName.C_Str());
+				animationName.Format("%s", originalAnimationName.GetConstBuffer());
 
 			newAnimation = CreateEmptyAnimation(animationName);
 			nameOffset++;

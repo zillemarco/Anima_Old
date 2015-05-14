@@ -7,13 +7,14 @@
 #include <qpoint.h>
 #include <QHBoxLayout>
 
-#include <AnimaModel.h>
 #include <AnimaScene.h>
 #include <AnimaModelsManager.h>
 #include <AnimaMeshesManager.h>
 #include <AnimaScenesManager.h>
 #include <AnimaModelInstancesManager.h>
 #include <AnimaMeshInstancesManager.h>
+#include <AnimaAnimationsManager.h>
+#include <AnimaAnimation.h>
 
 Q_DECLARE_METATYPE(Anima::AnimaModel*)
 Q_DECLARE_METATYPE(Anima::AnimaMesh*)
@@ -21,6 +22,7 @@ Q_DECLARE_METATYPE(Anima::AnimaModelInstance*)
 Q_DECLARE_METATYPE(Anima::AnimaMeshInstance*)
 Q_DECLARE_METATYPE(Anima::AnimaMaterial*)
 Q_DECLARE_METATYPE(Anima::AnimaTexture*)
+Q_DECLARE_METATYPE(Anima::AnimaAnimation*)
 
 AELoadedResourcesTreeViewItemModel::AELoadedResourcesTreeViewItemModel(AEDocument* doc, QObject *parent)
 	: QStandardItemModel(parent)
@@ -116,16 +118,16 @@ AELoadedResourcesTreeView::AELoadedResourcesTreeView(AEDocument* doc, AEResource
 	_modelResourcesItem = new QStandardItem(tr("Models"));
 	_materialResourcesItem = new QStandardItem(tr("Materials"));
 	_textureResourcesItem = new QStandardItem(tr("Textures"));
-	_meshResourcesItem = new QStandardItem(tr("Meshes"));
-	_modelInstancesResourcesItem = new QStandardItem(tr("Model instances"));
-	_meshInstancesResourcesItem = new QStandardItem(tr("Mesh instances"));
+	// _meshResourcesItem = new QStandardItem(tr("Meshes"));
+	// _modelInstancesResourcesItem = new QStandardItem(tr("Model instances"));
+	// _meshInstancesResourcesItem = new QStandardItem(tr("Mesh instances"));
 
 	_resourcesModel->insertRow(0, _modelResourcesItem);
 	_resourcesModel->insertRow(1, _materialResourcesItem);
 	_resourcesModel->insertRow(2, _textureResourcesItem);
-	_resourcesModel->insertRow(3, _meshResourcesItem);
-	_resourcesModel->insertRow(4, _modelInstancesResourcesItem);
-	_resourcesModel->insertRow(5, _meshInstancesResourcesItem);
+	// _resourcesModel->insertRow(3, _meshResourcesItem);
+	// _resourcesModel->insertRow(4, _modelInstancesResourcesItem);
+	// _resourcesModel->insertRow(5, _meshInstancesResourcesItem);
 
 	_resourcesModel->setHorizontalHeaderItem(0, new QStandardItem(tr("Resource name")));
 	_resourcesModel->setHorizontalHeaderItem(1, new QStandardItem(tr("File name")));
@@ -147,9 +149,9 @@ void AELoadedResourcesTreeView::LoadResources()
 	LoadModels();
 	LoadMaterials();
 	LoadTextures();
-	LoadMeshes();
-	LoadModelInstances();
-	LoadMeshInstances();
+	// LoadMeshes();
+	// LoadModelInstances();
+	// LoadMeshInstances();
 }
 
 void AELoadedResourcesTreeView::LoadModels()
@@ -173,72 +175,150 @@ void AELoadedResourcesTreeView::LoadModels()
 		newItem.append(resourceNameItem);
 		newItem.append(resourceFileNameItem);
 
+		resourceNameItem->removeRows(0, resourceNameItem->rowCount());
+
+		LoadModelMeshes(model, resourceNameItem);
+		LoadModelAnimations(model, resourceNameItem);
+
 		_modelResourcesItem->appendRow(newItem);
 	}
 }
 
-void AELoadedResourcesTreeView::LoadMeshes()
+void AELoadedResourcesTreeView::LoadModelMeshes(Anima::AnimaModel* model, QStandardItem* parentItem)
 {
-	_meshResourcesItem->removeRows(0, _meshResourcesItem->rowCount());
+	QStandardItem *meshItem1 = new QStandardItem(QString("Meshes"));
+	meshItem1->setEditable(false);
+
+	QStandardItem *meshItem2 = new QStandardItem(QString(""));
+	meshItem2->setEditable(false);
+
+	QList<QStandardItem*> newItem;
+	newItem.append(meshItem1);
+	newItem.append(meshItem2);
+
+	parentItem->appendRow(newItem);
 
 	Anima::AnimaMeshesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetMeshesManager();
 	for (int i = 0; i < mgr->GetMeshesCount(); i++)
 	{
-		Anima::AnimaMesh* mesh = mgr->GetMesh(i);
+	 	Anima::AnimaMesh* mesh = mgr->GetMesh(i);
 
-		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mesh->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(mesh), MeshRole);
-		resourceNameItem->setEditable(false);
+		if (mesh->GetParentObject()->GetAncestorObject() == model)
+		{
+			QStandardItem *meshItem3 = new QStandardItem(QString("%0").arg(mesh->GetName()));
+			meshItem3->setData(QVariant::fromValue(mesh), MeshRole);
+			meshItem3->setEditable(false);
 
-		QList<QStandardItem*> newItem;
-		newItem.append(resourceNameItem);
-		newItem.append(new QStandardItem(tr("")));
+			QStandardItem *meshItem4 = new QStandardItem(QString(""));
+			meshItem4->setData(QVariant::fromValue(mesh), MeshRole);
+			meshItem4->setEditable(false);
 
-		_meshResourcesItem->appendRow(newItem);
+			newItem.clear();
+			newItem.append(meshItem3);
+			newItem.append(meshItem4);
+
+			meshItem1->appendRow(newItem);
+		}
 	}
 }
 
-void AELoadedResourcesTreeView::LoadModelInstances()
+void AELoadedResourcesTreeView::LoadModelAnimations(Anima::AnimaModel* model, QStandardItem* parentItem)
 {
-	_modelInstancesResourcesItem->removeRows(0, _modelInstancesResourcesItem->rowCount());
+	QStandardItem *animationItem1 = new QStandardItem(QString("Animations"));
+	animationItem1->setEditable(false);
 
-	Anima::AnimaModelInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
-	for (int i = 0; i < mgr->GetModelInstancesNumber(); i++)
+	QStandardItem *animationItem2 = new QStandardItem(QString(""));
+	animationItem2->setEditable(false);
+
+	QList<QStandardItem*> newItem;
+	newItem.append(animationItem1);
+	newItem.append(animationItem2);
+
+	parentItem->appendRow(newItem);
+
+	int count = model->GetAnimationsCount();
+	for (int i = 0; i < count; i++)
 	{
-		Anima::AnimaModelInstance* instance = mgr->GetModelInstance(i);
+		Anima::AnimaAnimation* animation = model->GetAnimation(i);
 
-		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(instance), ModelInstanceRole);
-		resourceNameItem->setEditable(false);
+		QStandardItem *animationItem3 = new QStandardItem(QString("%0").arg(animation->GetName()));
+		animationItem3->setData(QVariant::fromValue(animation), MeshRole);
+		animationItem3->setEditable(false);
 
-		QList<QStandardItem*> newItem;
-		newItem.append(resourceNameItem);
-		newItem.append(new QStandardItem(tr("")));
+		QStandardItem *animationItem4 = new QStandardItem(QString(""));
+		animationItem4->setData(QVariant::fromValue(animation), MeshRole);
+		animationItem4->setEditable(false);
 
-		_modelInstancesResourcesItem->appendRow(newItem);
+		newItem.clear();
+		newItem.append(animationItem3);
+		newItem.append(animationItem4);
+
+		animationItem1->appendRow(newItem);
 	}
 }
 
-void AELoadedResourcesTreeView::LoadMeshInstances()
-{
-	_meshInstancesResourcesItem->removeRows(0, _meshInstancesResourcesItem->rowCount());
-
-	Anima::AnimaMeshInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetMeshInstancesManager();
-	for (int i = 0; i < mgr->GetMeshInstancesNumber(); i++)
-	{
-		Anima::AnimaMeshInstance* instance = mgr->GetMeshInstance(i);
-
-		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
-		resourceNameItem->setData(QVariant::fromValue(instance), MeshInstanceRole);
-		resourceNameItem->setEditable(false);
-
-		QList<QStandardItem*> newItem;
-		newItem.append(resourceNameItem);
-		newItem.append(new QStandardItem(tr("")));
-
-		_meshInstancesResourcesItem->appendRow(newItem);
-	}
-}
+// void AELoadedResourcesTreeView::LoadMeshes()
+// {
+// 	_meshResourcesItem->removeRows(0, _meshResourcesItem->rowCount());
+// 
+// 	Anima::AnimaMeshesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetMeshesManager();
+// 	for (int i = 0; i < mgr->GetMeshesCount(); i++)
+// 	{
+// 		Anima::AnimaMesh* mesh = mgr->GetMesh(i);
+// 
+// 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(mesh->GetName()));
+// 		resourceNameItem->setData(QVariant::fromValue(mesh), MeshRole);
+// 		resourceNameItem->setEditable(false);
+// 
+// 		QList<QStandardItem*> newItem;
+// 		newItem.append(resourceNameItem);
+// 		newItem.append(new QStandardItem(tr("")));
+// 
+// 		_meshResourcesItem->appendRow(newItem);
+// 	}
+// }
+// 
+// void AELoadedResourcesTreeView::LoadModelInstances()
+// {
+// 	_modelInstancesResourcesItem->removeRows(0, _modelInstancesResourcesItem->rowCount());
+// 
+// 	Anima::AnimaModelInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetModelInstancesManager();
+// 	for (int i = 0; i < mgr->GetModelInstancesNumber(); i++)
+// 	{
+// 		Anima::AnimaModelInstance* instance = mgr->GetModelInstance(i);
+// 
+// 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
+// 		resourceNameItem->setData(QVariant::fromValue(instance), ModelInstanceRole);
+// 		resourceNameItem->setEditable(false);
+// 
+// 		QList<QStandardItem*> newItem;
+// 		newItem.append(resourceNameItem);
+// 		newItem.append(new QStandardItem(tr("")));
+// 
+// 		_modelInstancesResourcesItem->appendRow(newItem);
+// 	}
+// }
+// 
+// void AELoadedResourcesTreeView::LoadMeshInstances()
+// {
+// 	_meshInstancesResourcesItem->removeRows(0, _meshInstancesResourcesItem->rowCount());
+// 
+// 	Anima::AnimaMeshInstancesManager* mgr = _document->GetEngine()->GetScenesManager()->GetScene("AnimaEditor")->GetMeshInstancesManager();
+// 	for (int i = 0; i < mgr->GetMeshInstancesNumber(); i++)
+// 	{
+// 		Anima::AnimaMeshInstance* instance = mgr->GetMeshInstance(i);
+// 
+// 		QStandardItem *resourceNameItem = new QStandardItem(QString("%0").arg(instance->GetName()));
+// 		resourceNameItem->setData(QVariant::fromValue(instance), MeshInstanceRole);
+// 		resourceNameItem->setEditable(false);
+// 
+// 		QList<QStandardItem*> newItem;
+// 		newItem.append(resourceNameItem);
+// 		newItem.append(new QStandardItem(tr("")));
+// 
+// 		_meshInstancesResourcesItem->appendRow(newItem);
+// 	}
+// }
 
 void AELoadedResourcesTreeView::LoadMaterials()
 {

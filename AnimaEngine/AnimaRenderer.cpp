@@ -294,7 +294,8 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
-	SetColor("AmbientLight", 0.1f, 0.1f, 0.1f);
+	SetColor("AmbientLight", 1.0f, 1.0f, 1.0f);
+	SetColor("BackColor", 0.3f, 0.3f, 0.3f);
 
 	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
 	SetFloat("SSAODistanceThreshold", 5.0f);
@@ -472,13 +473,15 @@ void AnimaRenderer::DrawAll()
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
@@ -530,7 +533,7 @@ void AnimaRenderer::DrawAll()
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 	}
@@ -540,7 +543,7 @@ void AnimaRenderer::DrawAll()
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 		
@@ -548,7 +551,7 @@ void AnimaRenderer::DrawAll()
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
 		Finish();
 		
@@ -557,7 +560,7 @@ void AnimaRenderer::DrawAll()
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
 		Finish();
 		
@@ -572,13 +575,15 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
@@ -630,7 +635,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 	}
@@ -640,7 +645,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 
@@ -648,7 +653,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
 		Finish();
 
@@ -657,7 +662,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
 		Finish();
 
@@ -672,13 +677,15 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
@@ -730,7 +737,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 	}
@@ -740,7 +747,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 
@@ -748,7 +755,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
 		Finish();
 
@@ -757,7 +764,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
 		Finish();
 
@@ -772,13 +779,15 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
@@ -830,7 +839,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 	}
@@ -840,7 +849,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 
@@ -848,7 +857,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
 		Finish();
 
@@ -857,7 +866,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
 		Finish();
 
@@ -872,13 +881,15 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	//
 	//	Preparazione dei buffer iniziali
 	//
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
@@ -930,7 +941,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 	}
@@ -940,7 +951,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 		GetTexture("Diffuse2Map")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
 
@@ -948,7 +959,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 		GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
 		Finish();
 
@@ -957,7 +968,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
 		Finish();
 

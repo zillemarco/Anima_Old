@@ -4,6 +4,7 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <qdockwidget.h>
+#include "AnimaModel.h"
 
 class AEDocument;
 class QMenu;
@@ -50,9 +51,12 @@ private:
 	void LoadModels();
 	void LoadMaterials();
 	void LoadTextures();
-	void LoadMeshes();
-	void LoadModelInstances();
-	void LoadMeshInstances();
+	// void LoadMeshes();
+	// void LoadModelInstances();
+	// void LoadMeshInstances();
+
+	void LoadModelMeshes(Anima::AnimaModel* model, QStandardItem* parentItem);
+	void LoadModelAnimations(Anima::AnimaModel* model, QStandardItem* parentItem);
 
 protected:
 	void contextMenu(const QPoint& point);
@@ -77,9 +81,9 @@ protected:
 	QStandardItem* _modelResourcesItem;
 	QStandardItem* _materialResourcesItem;
 	QStandardItem* _textureResourcesItem;
-	QStandardItem* _meshResourcesItem;
-	QStandardItem* _modelInstancesResourcesItem;
-	QStandardItem* _meshInstancesResourcesItem;
+	// QStandardItem* _meshResourcesItem;
+	// QStandardItem* _modelInstancesResourcesItem;
+	// QStandardItem* _meshInstancesResourcesItem;
 
 	QMenu*	_contextMenu;
 	QAction* _importModelAct;
