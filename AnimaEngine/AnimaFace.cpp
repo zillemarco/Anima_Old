@@ -42,6 +42,8 @@ AnimaFace::AnimaFace(AnimaFace&& src)
 
 AnimaFace::~AnimaFace()
 {
+	SetIndexes(0, 0, 0);
+	_normal = AnimaVertex3f(0.0f, 1.0f, 0.0f);
 }
 
 AnimaFace& AnimaFace::operator=(const AnimaFace& src)

@@ -95,6 +95,8 @@ AnimaMatrix AnimaMeshBoneInfo::GetFinalTransformation() const
 
 AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 : AnimaSceneObject(name, dataGeneratorsManager, allocator)
+, _materialName(allocator)
+, _meshInstances(allocator)
 , _vertices(allocator)
 , _normals(allocator)
 , _textureCoords(allocator)
@@ -103,8 +105,6 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 , _boneWeights(allocator)
 , _boneIDs(allocator)
 , _faces(allocator)
-, _materialName(allocator)
-, _meshInstances(allocator)
 {
 	_material = nullptr;
 
@@ -126,6 +126,7 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	: AnimaSceneObject(src)
+	, _meshInstances(src._meshInstances)
 	, _vertices(src._vertices)
 	, _normals(src._normals)
 	, _textureCoords(src._textureCoords)
@@ -137,7 +138,6 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
-	, _meshInstances(src._meshInstances)
 	//, _colorsBufferObject(src._colorsBufferObject)
 {
 	_allocator = src._allocator;
@@ -166,6 +166,7 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	: AnimaSceneObject(src)
 	, _material(src._material)
 	, _materialName(src._materialName)
+	, _meshInstances(src._meshInstances)
 	, _boundingBoxMin(src._boundingBoxMin)
 	, _boundingBoxMax(src._boundingBoxMax)
 	, _boundingBoxCenter(src._boundingBoxCenter)
@@ -186,7 +187,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _visible(src._visible)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
-	, _meshInstances(src._meshInstances)
 {
 }
 

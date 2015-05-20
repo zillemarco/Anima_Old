@@ -19,36 +19,209 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaSceneObject;
 
+/*!
+ *	\brief		Classe che gestisce le trasformazioni di un oggetto
+ *	\details	Classe che gestisce le trasformazioni di un oggetto. Se viene specificato l'oggetto padre della trasformazione, questa classe andrà a valorizzare le seguenti
+				prorpietà, mappate,  di tale oggetto (usate poi per aggiornare il valore dei valori in ingresso dagli shader che hanno lo stesso nome di queste proprietà):
+				- AModelMatrix: matrice di trasformazione totale dell'ggetto (comprende anche le trasformazioni degli 'antenati' dell'oggetto'
+				- ANormalMatrix: matrice di trasfromazione delle normali totale dell'oggetto (comprende anche le trasformazioni degli 'antenati' dell'oggetto)
+				- RModelMatrix: matrice di trasformazione relativa dell'oggetto (NON comprende le trasformazioni degli 'antenati' dell'oggetto)
+				- RNormalMatrix: matrice di trasfromazione delle normali relativa dell'oggetto (NON comprende le trasformazioni degli 'antenati' dell'oggetto)
+ *	\author		Zille Marco
+ */
 class ANIMA_ENGINE_EXPORT AnimaTransformation
 {
 	friend class AnimaSceneObject;
 
 public:
+	/*!
+	 *	\brief		Costruttore della classe
+	 *	\details	Costruttore della classe. Imposta tutte le trasformazioni come traformazioni nulle (matrici identità)
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation();
-	AnimaTransformation(const AnimaMatrix& initialTransformationMatrix);
+
+	/*!
+	 *	\brief		Costruttore della classe
+	 *	\details	Costruttore della classe. Imposta tutte le trasformaioni in base ai parametri passati
+	 *	\param[in]	t	Valore della traslazione della trasformazione
+	 *	\param[in]	r	Valore della rotazione della trasformazione. Ongi componente del vettore corrisponde alla rotazione attorno all'asse corrispondente al componente, 
+						espresso in radianti
+	 *	\param[in]	s	Valore della scala della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation(const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s);
+	
+	/*!
+	 *	\brief		Costruttore della classe
+	 *	\details	Costruttore della classe. Imposta tutte le trasformaioni in base ai parametri passati
+	 *	\param[in]	tx	Valore X della traslazione della trasformazione
+	 *	\param[in]	ty	Valore Y della traslazione della trasformazione
+	 *	\param[in]	tz	Valore Z della traslazione della trasformazione
+	 *	\param[in]	rx	Valore della rotazione secondo l'asse X della trasformazione. Espresso in radianti
+	 *	\param[in]	ry	Valore della rotazione secondo l'asse Y della trasformazione. Espresso in radianti
+	 *	\param[in]	rz	Valore della rotazione secondo l'asse Z della trasformazione. Espresso in radianti
+	 *	\param[in]	sx	Valore X della scala della trasformazione
+	 *	\param[in]	sy	Valore Y della scala della trasformazione
+	 *	\param[in]	sz	Valore Z della scala della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation(AFloat tx, AFloat ty, AFloat tz, AFloat rx, AFloat ry, AFloat rz, AFloat sx, AFloat sy, AFloat sz);
+	
+	/*!
+	 *	\brief		Costruttore di copia della classe
+	 *	\details	Costruttore di copia della classe
+	 *	\param[in]	src	Altra istanza della classe AnimaTransformation da cui vengono copiati tutti i dati: matrici di trasformazione, oggetto padre, ecc...
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation(const AnimaTransformation& src);
+	
+	/*!
+	 *	\brief		Costruttore di copia della classe
+	 *	\details	Costruttore di copia della classe
+	 *	\param[in]	src	Altra istanza della classe AnimaTransformation da cui vengono copiati tutti i dati: matrici di trasformazione, oggetto padre, ecc...
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation(AnimaTransformation&& src);
+	
+	/*!
+	 *	\brief		Distruttore della classe
+	 *	\details	Distruttore della classe
+	 *	\author		Zille Marco
+	 */
 	~AnimaTransformation();
 	
+	/*!
+	 *	\brief		Operatore di copia della classe
+	 *	\details	Operatore di copia della classe
+	 *	\param[in]	src	Altra istanza della classe AnimaTransformation da cui vengono copiati tutti i dati: matrici di trasformazione, oggetto padre, ecc...
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation& operator=(const AnimaTransformation& src);
+	
+	/*!
+	 *	\brief		Operatore di copia della classe
+	 *	\details	Operatore di copia della classe
+	 *	\param[in]	src	Altra istanza della classe AnimaTransformation da cui vengono copiati tutti i dati: matrici di trasformazione, oggetto padre, ecc...
+	 *	\author		Zille Marco
+	 */
 	AnimaTransformation& operator=(AnimaTransformation&& src);
 	
 public:
+	/*!
+	 *	\brief		Applica una traslazione t alla trasformazione
+	 *	\details	Applica una traslazione t alla trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	t	Valore della traslazione da applicare alla trasformazione
+	 *	\author		Zille Marco
+	 */
 	void Translate(const AnimaVertex3f& t);
+	
+	/*!
+	 *	\brief		Applica una traslazione alla trasformazione
+	 *	\details	Applica una traslazione alla trasformazione secondo i parametri passati e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tx	Valore X della traslazione da applicare alla trasformazione
+	 *	\param[in]	ty	Valore Y della traslazione da applicare alla trasformazione
+	 *	\param[in]	tz	Valore Z della traslazione da applicare alla trasformazione
+	 *	\author		Zille Marco
+	 */
 	void Translate(AFloat tx, AFloat ty, AFloat tz);
+	
+	/*!
+	 *	\brief		Applica una traslazione secondo l'asse X alla trasformazione
+	 *	\details	Applica una traslazione secondo l'asse X alla trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tx	Valore della traslazione da applicare alla trasformazione
+	 *	\author		Zille Marco
+	 */
 	void TranslateX(AFloat tx);
+	
+	/*!
+	 *	\brief		Applica una traslazione secondo l'asse Y alla trasformazione
+	 *	\details	Applica una traslazione secondo l'asse Y alla trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	ty	Valore della traslazione da applicare alla trasformazione
+	 *	\author		Zille Marco
+	 */
 	void TranslateY(AFloat ty);
+	
+	/*!
+	 *	\brief		Applica una traslazione secondo l'asse Z alla trasformazione
+	 *	\details	Applica una traslazione secondo l'asse Z alla trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tz	Valore della traslazione da applicare alla trasformazione
+	 *	\author		Zille Marco
+	 */
 	void TranslateZ(AFloat tz);
+	
+	/*!
+	 *	\brief		Imposta il valore della traslazione della trasformazione
+	 *	\details	Imposta il valore della traslazione della trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	t	Nuovo valore della traslazione da impostare per la trasformazione
+	 *	\author		Zille Marco
+	 */
 	void SetTranslation(const AnimaVertex3f& t);
+	
+	/*!
+	 *	\brief		Imposta il valore della traslazione della trasformazione
+	 *	\details	Imposta il valore della traslazione della trasformazione secondo i parametri passati e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tx	Nuovo valore X della traslazione da impostare per la trasformazione
+	 *	\param[in]	ty	Nuovo valore Y della traslazione da impostare per la trasformazione
+	 *	\param[in]	tz	Nuovo valore Z della traslazione da impostare per la trasformazione
+	 *	\author		Zille Marco
+	 */
 	void SetTranslation(AFloat tx, AFloat ty, AFloat tz);
+	
+	/*!
+	 *	\brief		Imposta il valore X della traslazione della trasformazione
+	 *	\details	Imposta il valore X della traslazione della trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tx	Nuovo valore X della traslazione da impostare per la trasformazione
+	 *	\author		Zille Marco
+	 */
 	void SetTranslationX(AFloat tx);
+	
+	/*!
+	 *	\brief		Imposta il valore Y della traslazione della trasformazione
+	 *	\details	Imposta il valore Y della traslazione della trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	ty	Nuovo valore Y della traslazione da impostare per la trasformazione
+	 *	\author		Zille Marco
+	 */
 	void SetTranslationY(AFloat ty);
+	
+	/*!
+	 *	\brief		Imposta il valore Z della traslazione della trasformazione
+	 *	\details	Imposta il valore Z della traslazione della trasformazione e chiama il metodo UpdateMatrix() per aggiornare le matrici di trasformazione
+	 *	\param[in]	tz	Nuovo valore Z della traslazione da impostare per la trasformazione
+	 *	\author		Zille Marco
+	 */
 	void SetTranslationZ(AFloat tz);
+	
+	/*!
+	 *	\brief		Torna il valore della traslazione della trasformazione
+	 *	\details	Torna il valore della traslazione della trasformazione
+	 *	\return		Valore della traslazione della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AnimaVertex3f GetTranslation();
+	
+	/*!
+	 *	\brief		Torna il valore X della traslazione della trasformazione
+	 *	\details	Torna il valore X della traslazione della trasformazione
+	 *	\return		Valore X della traslazione della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AFloat GetTranslationX();
+	
+	/*!
+	 *	\brief		Torna il valore Y della traslazione della trasformazione
+	 *	\details	Torna il valore Y della traslazione della trasformazione
+	 *	\return		Valore Y della traslazione della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AFloat GetTranslationY();
+	
+	/*!
+	 *	\brief		Torna il valore Z della traslazione della trasformazione
+	 *	\details	Torna il valore Z della traslazione della trasformazione
+	 *	\return		Valore Z della traslazione della trasformazione
+	 *	\author		Zille Marco
+	 */
 	AFloat GetTranslationZ();
 
 	void Rotate(const AnimaVertex3f& r);

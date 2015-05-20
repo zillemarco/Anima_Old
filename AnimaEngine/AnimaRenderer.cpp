@@ -1536,10 +1536,10 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 
 void AnimaRenderer::UpdateModelsVisibility()
 {
-	Anima::AnimaModelsManager* modelsManager = _scene->GetModelsManager();
-	Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
-
-	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
+//	Anima::AnimaModelsManager* modelsManager = _scene->GetModelsManager();
+//	Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+//
+//	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
 	//	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
 	//		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
