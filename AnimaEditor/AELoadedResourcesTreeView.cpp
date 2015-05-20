@@ -44,8 +44,8 @@ bool AELoadedResourcesTreeViewItemModel::setData(const QModelIndex & index, cons
 {
 	if (role == Qt::EditRole)
 	{
-		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetStringAllocator());
-		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
+//		Anima::AnimaString newString(value.toString().toLocal8Bit().constData(), _document->GetEngine()->GetStringAllocator());
+//		Anima::AnimaModel* model = itemFromIndex(index)->data().value<Anima::AnimaModel*>();
 
 		if (index.column() == 0)
 		{

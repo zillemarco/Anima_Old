@@ -76,7 +76,7 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 			}
 
 			AInt animationNodeScalingKeysCount = animationNode->mNumScalingKeys;
-			for (AInt nsk = 0; nsk < animationNodePositionKeysCount; nsk++)
+			for (AInt nsk = 0; nsk < animationNodeScalingKeysCount; nsk++)
 			{
 				aiVectorKey key = animationNode->mScalingKeys[nsk];
 				newAnimationNode->AddScalingKey(AnimaAnimationScalingKey((AFloat)key.mTime, AnimaVertex3f(key.mValue.x, key.mValue.y, key.mValue.z)));
