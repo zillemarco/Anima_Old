@@ -747,8 +747,10 @@ protected:
 	AnimaAllocator* _allocator;
 };
 
+#ifndef SWIG
 template<class TYPE>
 using AnimaArray = typename std::conditional<std::is_pointer<TYPE>::value, AnimaObjPtrArray<TYPE>, AnimaObjArray<TYPE> >::type;
+#endif
 
 END_ANIMA_ENGINE_NAMESPACE
 

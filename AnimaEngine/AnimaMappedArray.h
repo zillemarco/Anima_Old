@@ -544,8 +544,10 @@ protected:
 #pragma warning (default: 4251) 
 };
 
+#ifndef SWIG
 template<class TYPE>
 using AnimaMappedArray = typename std::conditional<std::is_pointer<TYPE>::value, AnimaObjPtrMappedArray<TYPE>, AnimaObjMappedArray<TYPE> >::type;
+#endif
 
 END_ANIMA_ENGINE_NAMESPACE
 

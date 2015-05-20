@@ -17,10 +17,12 @@
 #include "AnimaFace.h"
 #include <map>
 
-#ifndef WIN32
-#include <inttypes.h>
-typedef int64_t __int64;
-#endif
+//#ifndef WIN32
+//#include <inttypes.h>
+//typedef int64_t __int64;
+//#endif
+
+#include <stdint.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

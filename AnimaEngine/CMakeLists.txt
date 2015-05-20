@@ -16,10 +16,12 @@ set(ANIMA_ENGINE_TEXTURES_PATH "${PROJECT_SOURCE_DIR}/data/textures/")
 
 configure_file("${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h.in" "${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h")
 
+#AnimaWindow_Data.h 
+#AnimaWindow.h 
+#AnimaWindow.cpp 
+
 set(common_HEADERS	AnimaEngineCore.h
 					AnimaEngine.h
-					AnimaWindow_Data.h 
-					AnimaWindow.h 
 					AnimaAssert.h 
 					AnimaTypes.h 
 					AnimaAllocator.h 
@@ -80,7 +82,6 @@ set(common_HEADERS	AnimaEngineCore.h
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
 					AnimaAssert.cpp 
-					AnimaWindow.cpp 
 					AnimaStackAllocator.cpp
                     AnimaLinearAllocator.cpp
                     AnimaFreeListAllocator.cpp
@@ -162,49 +163,70 @@ source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h Ani
 
 source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h AnimaLinearAllocator.h AnimaFreeListAllocator.h AnimaPoolAllocator.h AnimaProxyAllocator.h AnimaAllocator.cpp AnimaStackAllocator.cpp AnimaLinearAllocator.cpp AnimaFreeListAllocator.cpp AnimaPoolAllocator.cpp AnimaProxyAllocator.cpp)
 
-if (_ANIMA_ENGINE_COCOA)
-    set(AnimaEngineCore_HEADERS	${common_HEADERS}
-                                AnimaWindow_CocoaJoystick.h
-                                AnimaWindow_CocoaPlatform.h
-                                AnimaWindow_CocoaTLS.h)
-    set(AnimaEngineCore_SOURCES	${common_SOURCES}
-                                AnimaWindow_CocoaJoystick.mm
-                                AnimaWindow_CocoaPlatform.mm
-                                AnimaWindow_CocoaTLS.cpp)
+set(AnimaEngineCore_HEADERS	${common_HEADERS})
+set(AnimaEngineCore_SOURCES	${common_SOURCES})
 
-	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_CocoaJoystick.h AnimaWindow_CocoaPlatform.h AnimaWindow_CocoaTLS.h AnimaWindow_CocoaJoystick.mm AnimaWindow_CocoaPlatform.mm AnimaWindow_CocoaTLS.cpp)
+#if (_ANIMA_ENGINE_COCOA)
+#    set(AnimaEngineCore_HEADERS	${common_HEADERS}
+#                                AnimaWindow_CocoaJoystick.h
+#                                AnimaWindow_CocoaPlatform.h
+#                                AnimaWindow_CocoaTLS.h)
+#    set(AnimaEngineCore_SOURCES	${common_SOURCES}
+#                                AnimaWindow_CocoaJoystick.mm
+#                                AnimaWindow_CocoaPlatform.mm
+#                                AnimaWindow_CocoaTLS.cpp)
+#
+#	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_CocoaJoystick.h AnimaWindow_CocoaPlatform.h AnimaWindow_CocoaTLS.h AnimaWindow_CocoaJoystick.mm AnimaWindow_CocoaPlatform.mm AnimaWindow_CocoaTLS.cpp)
+#
+#elseif (_ANIMA_ENGINE_WIN32)
+#    set(AnimaEngineCore_HEADERS	${common_HEADERS} 
+#								AnimaWindow_WindowsJoystick.h 
+#								AnimaWindow_WindowsPlatform.h 
+#								AnimaWindow_WindowsTLS.h)
+#    set(AnimaEngineCore_SOURCES	${common_SOURCES} 
+#								AnimaWindow_WindowsJoystick.cpp 
+#								AnimaWindow_WindowsPlatform.cpp 
+#								AnimaWindow_WindowsTLS.cpp)
+#
+#	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_WindowsJoystick.h AnimaWindow_WindowsPlatform.h AnimaWindow_WindowsTLS.h AnimaWindow.cpp AnimaWindow_WindowsJoystick.cpp AnimaWindow_WindowsPlatform.cpp AnimaWindow_WindowsTLS.cpp)
+#endif()
 
-elseif (_ANIMA_ENGINE_WIN32)
-    set(AnimaEngineCore_HEADERS	${common_HEADERS} 
-								AnimaWindow_WindowsJoystick.h 
-								AnimaWindow_WindowsPlatform.h 
-								AnimaWindow_WindowsTLS.h)
-    set(AnimaEngineCore_SOURCES	${common_SOURCES} 
-								AnimaWindow_WindowsJoystick.cpp 
-								AnimaWindow_WindowsPlatform.cpp 
-								AnimaWindow_WindowsTLS.cpp)
-
-	source_group("Engine\\Window System" FILES AnimaWindow_Data.h AnimaWindow.h AnimaWindow_WindowsJoystick.h AnimaWindow_WindowsPlatform.h AnimaWindow_WindowsTLS.h AnimaWindow.cpp AnimaWindow_WindowsJoystick.cpp AnimaWindow_WindowsPlatform.cpp AnimaWindow_WindowsTLS.cpp)
-endif()
-
-if (_ANIMA_ENGINE_NSGL)
-    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_NSGLContext.h)
-    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_NSGLContext.mm)
-
-	source_group("Engine\\Window System" FILES AnimaWindow_NSGLContext.h AnimaWindow_NSGLContext.mm)
-
-elseif (_ANIMA_ENGINE_WGL)
-    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_WGLContext.h)
-    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_WGLContext.cpp)
-
-	source_group("Engine\\Window System" FILES AnimaWindow_WGLContext.h AnimaWindow_WGLContext.cpp)
-endif()
+#if (_ANIMA_ENGINE_NSGL)
+#    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_NSGLContext.h)
+#    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_NSGLContext.mm)
+#
+#	source_group("Engine\\Window System" FILES AnimaWindow_NSGLContext.h AnimaWindow_NSGLContext.mm)
+#
+#elseif (_ANIMA_ENGINE_WGL)
+#    list(APPEND AnimaEngineCore_HEADERS ${common_HEADERS} AnimaWindow_WGLContext.h)
+#    list(APPEND AnimaEngineCore_SOURCES ${common_SOURCES} AnimaWindow_WGLContext.cpp)
+#
+#	source_group("Engine\\Window System" FILES AnimaWindow_WGLContext.h AnimaWindow_WGLContext.cpp)
+#endif()
 
 if (APPLE)
     # For some reason, CMake doesn't know about .m
     set(CMAKE_CXX_FLAGS "-x objective-c++")
     set_source_files_properties(${AnimaEngineCore_SOURCES} PROPERTIES LANGUAGE CXX)
     set_source_files_properties(${AnimaEngineCore_HEADERS} PROPERTIES LANGUAGE CXX)
+endif()
+
+if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+	
+	add_definitions(-DANIMA_ENGINE_EXPORT_TO_PYTHON)
+	add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
+	find_package(SWIG REQUIRED)
+	include(${SWIG_USE_FILE})
+
+	set(EXT_PYTHON_INSTALL_PATH ${ANIMA_ENGINE_PYTHON_ROOT_PATH})
+	find_package(PythonLibs)
+	include_directories(${PYTHON_INCLUDE_PATH})
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+	set(CMAKE_SWIG_FLAGS "")
+	
+	set_source_files_properties(AnimaEngine.i PROPERTIES CPLUSPLUS ON)
+	swig_add_module(${PROJECT_NAME} python AnimaEngine.i)
+	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${AnimaEngine_DEP_GLEW} ${AnimaEngine_BOOST_LIBS} ${PYTHON_LIBRARIES})
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -243,10 +265,13 @@ target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_GLEW})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
+if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+	target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY})
+endif()
+
 if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 	target_link_libraries(${PROJECT_NAME} ${ANIMA_ENGINE_NVTOOLSEXT_LIB})
 endif()
-
 
 if (WIN32)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD

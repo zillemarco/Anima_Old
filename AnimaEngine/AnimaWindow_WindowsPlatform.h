@@ -91,15 +91,7 @@ typedef HRESULT(WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 
 #include "AnimaWindow_WindowsTLS.h"
 
-#if defined(_ANIMA_ENGINE_WGL)
-#	include "AnimaWindow_WGLContext.h"
-#elif defined(_GLFW_EGL)
-#	define _GLFW_EGL_NATIVE_WINDOW  window->_GET_ANIMA_ENGINE_PLATFORM_WINDOW_STATE->handle
-#	define _GLFW_EGL_NATIVE_DISPLAY EGL_DEFAULT_DISPLAY
-#	include "egl_context.h"
-#else
-#	error "No supported context creation API selected"
-#endif
+#include "AnimaWindow_WGLContext.h"
 
 #include "AnimaWindow_WindowsJoystick.h"
 

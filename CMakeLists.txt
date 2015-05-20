@@ -29,11 +29,13 @@ set(LIB_SUFFIX "" CACHE STRING "Takes an empty string or 64. Directory where lib
 set(ANIMA_ENGINE_BOOST_ROOT_PATH "" CACHE STRING "Path where CMake can find boost")
 set(ANIMA_ENGINE_QT5_ROOT_PATH "" CACHE STRING "Path where CMake can find Qt5")
 set(ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH "" CACHE STRING "Path where CMake can find NVToolsExt")
+set(ANIMA_ENGINE_PYTHON_ROOT_PATH "" CACHE STRING "Path where CMake can find NVToolsExt")
 
 option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" OFF)
 option(ANIMA_ENGINE_INSTALL "Generate installation target" OFF)
 option(BUILD_SHARED_LIBS "Build AnimaEngine as shared library" OFF)
 option(ANIMA_ENGINE_USE_NVTOOLSEXT "Enable NVToolsExt for debugging" OFF)
+option(ANIMA_ENGINE_EXPORT_TO_PYTHON "Enable AnimaEngine export to Python modulde" OFF)
 
 if (MSVC)
     option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON)

@@ -25,9 +25,6 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 
-using boost::multi_index_container;
-using namespace boost::multi_index;
-
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaPrimitiveData

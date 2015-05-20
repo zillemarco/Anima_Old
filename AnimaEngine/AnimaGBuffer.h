@@ -21,9 +21,6 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 
-using boost::multi_index_container;
-using namespace boost::multi_index;
-
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaGBuffer
@@ -87,11 +84,11 @@ protected:
 		AnimaTexture*	_texture;
 	};
 
-	typedef multi_index_container<
+	typedef boost::multi_index_container<
 		AnimaGBufferData*,
-		indexed_by<
-		ordered_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AUint, _index)>,
-		hashed_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AnimaString, _name), AnimaString::Hasher> >
+		boost::multi_index::indexed_by<
+		boost::multi_index::ordered_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AUint, _index)>,
+		boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AnimaString, _name), AnimaString::Hasher> >
 	> AnimaGBufferDataSet;
 
 	typedef AnimaGBufferDataSet::nth_index<0>::type AnimaGBufferDataSetByIndex;

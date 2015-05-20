@@ -25,7 +25,6 @@ public:
 public:
 	void Init();
 	void Update();
-	double GetTime();
 	double GetElapsedSeconds();
 	double GetFPS();
 

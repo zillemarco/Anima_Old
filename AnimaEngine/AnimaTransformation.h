@@ -25,7 +25,6 @@ class ANIMA_ENGINE_EXPORT AnimaTransformation
 
 public:
 	AnimaTransformation();
-	AnimaTransformation(const AnimaMatrix& initialTransformationMatrix);
 	AnimaTransformation(const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s);
 	AnimaTransformation(AFloat tx, AFloat ty, AFloat tz, AFloat rx, AFloat ry, AFloat rz, AFloat sx, AFloat sy, AFloat sz);
 	AnimaTransformation(const AnimaTransformation& src);

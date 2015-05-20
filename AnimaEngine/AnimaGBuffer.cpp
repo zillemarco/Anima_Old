@@ -7,6 +7,7 @@
 //
 
 #include "AnimaGBuffer.h"
+using namespace boost::multi_index;
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
