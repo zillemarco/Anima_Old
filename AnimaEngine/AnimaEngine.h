@@ -10,20 +10,12 @@
 #define __Anima__AnimaEngine__
 
 #include "AnimaEngineCore.h"
+#include "AnimaGC.h"
 #include "AnimaAllocators.h"
 #include "AnimaAssert.h"
 //#include "AnimaWindow.h"
 #include "AnimaString.h"
 #include "AnimaEngineConfig.h"
-
-#if !defined ANIMA_ENGINE_INCLUDED_GLEW
-#	include <GL/glew.h>
-#	define ANIMA_ENGINE_INCLUDED_GLEW
-#endif
-
-#if defined _WIN32
-#include <GL/wglew.h>
-#endif
 
 #if defined _MSC_VER
 #include <Windows.h>

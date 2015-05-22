@@ -77,7 +77,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMeshInstancesManager.h
 					AnimaAnimation.h
 					AnimaAnimationsManager.h
-					AnimaNamedObject.h)
+					AnimaNamedObject.h
+					AnimaGC.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -134,9 +135,12 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMeshInstancesManager.cpp
 					AnimaAnimation.cpp
 					AnimaAnimationsManager.cpp
-					AnimaNamedObject.cpp)
+					AnimaNamedObject.cpp
+					AnimaGC.cpp)
 
 source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/AnimaEngine_automoc.cpp)
+
+source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
