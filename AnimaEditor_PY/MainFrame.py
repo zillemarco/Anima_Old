@@ -2,9 +2,9 @@ __author__ = 'marco'
 
 import tkinter as tk                    # importo il modulo tkinter per gestire l'app ed i widget
 import tkinter.ttk as ttk               # importo il modulo tkinter.ttk per poter utilizzare dei controlli con uno stile visivo migliore
-import tkinter.messagebox as messagebox # importo il modulo tkinter.messagebox per poter utilizzare i messagebox
+#import tkinter.messagebox as messagebox # importo il modulo tkinter.messagebox per poter utilizzare i messagebox
 import AEUtils                          # importo il file AEUtils
-import AENewProject
+#import AENewProject
 
 # creo la class MainFrame derivandola dalla classe ttk.Frame
 class MainFrame(ttk.Frame):
@@ -49,7 +49,8 @@ class MainFrame(ttk.Frame):
         self.quit()
 
     def onNewProject(self):
-        dialog = AENewProject.AENewProject(self, "prova prova")
+        print("prova")
+        #dialog = AENewProject.AENewProject(self, "prova prova")
         #risultato = dialog.result
 
     def onOpenProject(self):

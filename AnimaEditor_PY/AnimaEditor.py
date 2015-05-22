@@ -2,6 +2,7 @@ __author__ = 'marco'
 
 import tkinter as tk    # importo il modulo Tkinter per gestire l'app ed i widget
 import MainFrame        # importo il file MainFrame che contiene la classe MainFrame
+import AnimaEngine as AE
 
 # creo la classe AnimaEditor e la faccio derivare da tk.Tk che è la classe App del modulo Tkinter
 class AnimaEditor(tk.Tk):
