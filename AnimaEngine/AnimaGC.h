@@ -6,7 +6,7 @@
 #	define ANIMA_ENGINE_INCLUDED_GLEW
 #endif
 
-#if defined _WIN32
+#if defined WIN32
 #	include <GL/wglew.h>
 #	include <windows.h>
 #endif
@@ -55,7 +55,7 @@ struct ANIMA_ENGINE_EXPORT AnimaGCFrameBufferConfig
 	bool _sRGB;
 	bool _doublebuffer;
 
-	#if defined _WIN32
+	#if defined WIN32
 		AInt _wgl;
 	#endif
 };
@@ -89,21 +89,26 @@ public:
 	void MakeCurrent();
 	void SwapBuffers();
 
+	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
+
+public:
+
+	static AnimaGC* CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig);
 	static void DestroyContext(AnimaGC* context);
 	static void SetSwapInterval(AInt interval);
+
+	static AnimaGCContextConfig GetDefaultContextConfig();
+	static AnimaGCFrameBufferConfig GetDefaultFrameBufferConfig();
 
 protected:
 	static bool StringInExtensionString(const char* string, const GLubyte* extensions);
 	static const AnimaGCFrameBufferConfig* ChooseFrameBufferConfig(const AnimaGCFrameBufferConfig* desired, const AnimaGCFrameBufferConfig* alternatives, unsigned int count);
 
-#if defined _WIN32
+#ifdef _WIN32
 	public:
 		bool CheckIntegrity(HWND hWnd);
 		HGLRC GetContext();
-
-	public:
-		static AnimaGC* CreateContext(HWND hWnd, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig);
-		
+				
 	public:
 		static bool InitializeGLEWExtensions();
 		static bool IsExtensionSupported(const char* extension, HDC hDC);

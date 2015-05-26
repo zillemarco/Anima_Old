@@ -3,6 +3,7 @@ __author__ = 'marco'
 import tkinter as tk    # importo il modulo Tkinter per gestire l'app ed i widget
 import MainFrame        # importo il file MainFrame che contiene la classe MainFrame
 import AnimaEngine as AE
+import GCControl as GC
 
 # creo la classe AnimaEditor e la faccio derivare da tk.Tk che è la classe App del modulo Tkinter
 class AnimaEditor(tk.Tk):
@@ -15,7 +16,8 @@ class AnimaEditor(tk.Tk):
     # metodo initUI
     def initUI(self):
         self.title("AnimaEditor")               # imposto il titolo della finestra dell'app
-        frame = MainFrame.MainFrame(self)       # creo una nuova istanza della classe MainFrame importata dal file MainFrame.py
+        #frame = MainFrame.MainFrame(self)       # creo una nuova istanza della classe MainFrame importata dal file MainFrame.py
+        frame = GC.GCControl(self)
         frame.tkraise()                         # avvio e mostro la finestra del mainframe
 
 def main():

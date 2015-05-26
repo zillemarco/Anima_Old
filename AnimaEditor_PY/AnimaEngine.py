@@ -91,6 +91,26 @@ except AttributeError:
 
 
 
+def new_intp():
+    return _AnimaEngine.new_intp()
+new_intp = _AnimaEngine.new_intp
+
+def copy_intp(value):
+    return _AnimaEngine.copy_intp(value)
+copy_intp = _AnimaEngine.copy_intp
+
+def delete_intp(obj):
+    return _AnimaEngine.delete_intp(obj)
+delete_intp = _AnimaEngine.delete_intp
+
+def intp_assign(obj, value):
+    return _AnimaEngine.intp_assign(obj, value)
+intp_assign = _AnimaEngine.intp_assign
+
+def intp_value(obj):
+    return _AnimaEngine.intp_value(obj)
+intp_value = _AnimaEngine.intp_value
+
 def __anima_get_working_dir(dest, length):
     return _AnimaEngine.__anima_get_working_dir(dest, length)
 __anima_get_working_dir = _AnimaEngine.__anima_get_working_dir
@@ -442,14 +462,30 @@ class AnimaGC(_object):
 
     def SwapBuffers(self):
         return _AnimaEngine.AnimaGC_SwapBuffers(self)
+
+    def ClearColor(self, r, g, b, a):
+        return _AnimaEngine.AnimaGC_ClearColor(self, r, g, b, a)
+    __swig_getmethods__["CreateContext"] = lambda x: _AnimaEngine.AnimaGC_CreateContext
+    if _newclass:
+        CreateContext = staticmethod(_AnimaEngine.AnimaGC_CreateContext)
     __swig_getmethods__["DestroyContext"] = lambda x: _AnimaEngine.AnimaGC_DestroyContext
     if _newclass:
         DestroyContext = staticmethod(_AnimaEngine.AnimaGC_DestroyContext)
     __swig_getmethods__["SetSwapInterval"] = lambda x: _AnimaEngine.AnimaGC_SetSwapInterval
     if _newclass:
         SetSwapInterval = staticmethod(_AnimaEngine.AnimaGC_SetSwapInterval)
+    __swig_getmethods__["GetDefaultContextConfig"] = lambda x: _AnimaEngine.AnimaGC_GetDefaultContextConfig
+    if _newclass:
+        GetDefaultContextConfig = staticmethod(_AnimaEngine.AnimaGC_GetDefaultContextConfig)
+    __swig_getmethods__["GetDefaultFrameBufferConfig"] = lambda x: _AnimaEngine.AnimaGC_GetDefaultFrameBufferConfig
+    if _newclass:
+        GetDefaultFrameBufferConfig = staticmethod(_AnimaEngine.AnimaGC_GetDefaultFrameBufferConfig)
 AnimaGC_swigregister = _AnimaEngine.AnimaGC_swigregister
 AnimaGC_swigregister(AnimaGC)
+
+def AnimaGC_CreateContext(windowId, ctxconfig, fbconfig):
+    return _AnimaEngine.AnimaGC_CreateContext(windowId, ctxconfig, fbconfig)
+AnimaGC_CreateContext = _AnimaEngine.AnimaGC_CreateContext
 
 def AnimaGC_DestroyContext(context):
     return _AnimaEngine.AnimaGC_DestroyContext(context)
@@ -458,6 +494,14 @@ AnimaGC_DestroyContext = _AnimaEngine.AnimaGC_DestroyContext
 def AnimaGC_SetSwapInterval(interval):
     return _AnimaEngine.AnimaGC_SetSwapInterval(interval)
 AnimaGC_SetSwapInterval = _AnimaEngine.AnimaGC_SetSwapInterval
+
+def AnimaGC_GetDefaultContextConfig():
+    return _AnimaEngine.AnimaGC_GetDefaultContextConfig()
+AnimaGC_GetDefaultContextConfig = _AnimaEngine.AnimaGC_GetDefaultContextConfig
+
+def AnimaGC_GetDefaultFrameBufferConfig():
+    return _AnimaEngine.AnimaGC_GetDefaultFrameBufferConfig()
+AnimaGC_GetDefaultFrameBufferConfig = _AnimaEngine.AnimaGC_GetDefaultFrameBufferConfig
 
 
 def alignForward(*args):

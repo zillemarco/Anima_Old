@@ -13,17 +13,9 @@ set(ANIMA_EDITOR_VERSION_PATCH "0")
 
 set(ANIMA_EDITOR_VERSION "${ANIMA_EDITOR_VERSION_MAJOR}.${ANIMA_EDITOR_VERSION_MINOR}.${ANIMA_EDITOR_VERSION_PATCH}")
 
-if(WIN32)
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/lib)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/lib)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Win/bin)
-elseif(APPLE)
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/lib)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/lib)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/Mac/bin)
-else()
-    message(FATAL_ERROR "No supported platform was detected")
-endif()
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Build/bin)
 
 set(LIB_SUFFIX "" CACHE STRING "Takes an empty string or 64. Directory where lib will be installed: lib or lib64")
 set(ANIMA_ENGINE_BOOST_ROOT_PATH "" CACHE STRING "Path where CMake can find boost")
@@ -137,7 +129,6 @@ endif()
 # Use Win32 for window creation
 #--------------------------------------------------------------------
 if (_ANIMA_ENGINE_WIN32)
-
     set(ANIMA_ENGINE_PKG_LIBS "${ANIMA_ENGINE_PKG_LIBS} -lgdi32")
 
     if (ANIMA_ENGINE_USE_DWM_SWAP_INTERVAL)
@@ -236,7 +227,9 @@ list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(AnimaEngine)
-add_subdirectory(AnimaEditor)
+
+# Tolto temporaneamente per testare Python
+#add_subdirectory(AnimaEditor)
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
     add_subdirectory(docs)

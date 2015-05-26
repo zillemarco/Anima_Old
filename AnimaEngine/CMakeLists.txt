@@ -16,10 +16,6 @@ set(ANIMA_ENGINE_TEXTURES_PATH "${PROJECT_SOURCE_DIR}/data/textures/")
 
 configure_file("${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h.in" "${PROJECT_SOURCE_DIR}/AnimaEngineConfig.h")
 
-#AnimaWindow_Data.h 
-#AnimaWindow.h 
-#AnimaWindow.cpp 
-
 set(common_HEADERS	AnimaEngineCore.h
 					AnimaEngine.h
 					AnimaAssert.h 
@@ -215,8 +211,7 @@ if (APPLE)
     set_source_files_properties(${AnimaEngineCore_HEADERS} PROPERTIES LANGUAGE CXX)
 endif()
 
-if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
-	
+if(ANIMA_ENGINE_EXPORT_TO_PYTHON)	
 	add_definitions(-DANIMA_ENGINE_EXPORT_TO_PYTHON)
 	add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
 	find_package(SWIG REQUIRED)
@@ -230,7 +225,8 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	
 	set_source_files_properties(AnimaEngine.i PROPERTIES CPLUSPLUS ON)
 	swig_add_module(${PROJECT_NAME} python AnimaEngine.i)
-	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${AnimaEngine_DEP_GLEW} ${AnimaEngine_BOOST_LIBS} ${PYTHON_LIBRARIES})
+	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${PYTHON_LIBRARIES})
+		
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -284,6 +280,20 @@ if (WIN32)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/assimp.dll"
 						COMMENT "Copia assimp.dll")
+						
+	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/AnimaEngine.py "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine.py"
+							COMMENT "Copia AnimaEngine.py")
+														
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/_AnimaEngine.pyd "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/_AnimaEngine.pyd"
+							COMMENT "Copia _AnimaEngine.pyd")
+							
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/bin/$<CONFIGURATION>/AnimaEngine.dll "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine.dll"
+							COMMENT "Copia AnimaEngine.dll")
+	endif()
 elseif(APPLE)						
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.0.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.0.dylib"
@@ -313,11 +323,23 @@ endif()
 if (ANIMA_ENGINE_INSTALL)
 	FILE(GLOB install_include "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 	INSTALL(FILES ${install_include} DESTINATION AnimaEngine/include)
-
-		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngine/bin
-										LIBRARY DESTINATION AnimaEngine/lib
-										ARCHIVE DESTINATION AnimaEngine/lib)
-
+	
+	FILE(GLOB install_ogl_include "${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/GL/*.h")
+	INSTALL(FILES ${install_ogl_include} DESTINATION AnimaEngine/include/GL)
+		
+	INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngine/bin
+									LIBRARY DESTINATION AnimaEngine/lib
+									ARCHIVE DESTINATION AnimaEngine/lib)
+	
+	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+		FILE(GLOB install_modules "${CMAKE_CURRENT_BINARY_DIR}/*.py")
+		INSTALL(FILES ${install_modules} DESTINATION AnimaEngine/modules)
+		
+		INSTALL(TARGETS "_${PROJECT_NAME}" 	RUNTIME DESTINATION AnimaEngine/modules
+											LIBRARY DESTINATION AnimaEngine/modules
+											ARCHIVE DESTINATION AnimaEngine/modules)
+	endif()
+	
 	if(WIN32)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll 	DESTINATION AnimaEngine/bin)
 		if(ANIMA_ENGINE_USE_NVTOOLSEXT)

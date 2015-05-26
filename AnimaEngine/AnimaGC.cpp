@@ -69,12 +69,20 @@ void AnimaGC::SwapBuffers()
 	#endif
 }
 
+void AnimaGC::ClearColor(AFloat r, AFloat g, AFloat b, AFloat a)
+{
+	if (!_GLEWExtensionsLoaded)
+		return;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(r, g, b, a);
+}
+
 void AnimaGC::SetSwapInterval(AInt interval)
 {
 	if (_EXT_swap_control)
 		_SwapIntervalEXT(interval);
 }
-
 
 const AnimaGCFrameBufferConfig* AnimaGC::ChooseFrameBufferConfig(const AnimaGCFrameBufferConfig* desired, const AnimaGCFrameBufferConfig* alternatives, unsigned int count)
 {
@@ -253,6 +261,49 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 	return true;
 }
 
+AnimaGCContextConfig AnimaGC::GetDefaultContextConfig()
+{
+	AnimaGCContextConfig ccfg;
+
+	ccfg._api = ANIMAGC_OPENGL_API;
+	ccfg._major = 1;
+	ccfg._minor = 0;
+	ccfg._forward = false;
+	ccfg._debug = false;
+	ccfg._profile = ANIMAGC_OPENGL_ANY_PROFILE;
+	ccfg._robustness = ANIMAGC_NO_ROBUSTNESS;
+	ccfg._release = ANIMAGC_ANY_RELEASE_BEHAVIOR;
+
+	return ccfg;
+}
+
+AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
+{
+	AnimaGCFrameBufferConfig fbcfg;
+
+	fbcfg._redBits = 8;
+	fbcfg._greenBits = 8;
+	fbcfg._blueBits = 8;
+	fbcfg._alphaBits = 8;
+	fbcfg._depthBits = 24;
+	fbcfg._stencilBits = 8;
+	fbcfg._accumRedBits = 0;
+	fbcfg._accumGreenBits = 0;
+	fbcfg._accumBlueBits = 0;
+	fbcfg._accumAlphaBits = 0;
+	fbcfg._auxBuffers = 0;
+	fbcfg._stereo = false;
+	fbcfg._samples = 0;
+	fbcfg._sRGB = false;
+	fbcfg._doublebuffer = true;
+
+	#if defined _WIN32
+		fbcfg._wgl = 0;
+	#endif
+
+	return fbcfg;
+}
+
 #if defined _WIN32
 	WCHAR* WideStringFromUTF8(const char* source)
 	{
@@ -272,6 +323,11 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		}
 
 		return target;
+	}
+
+	static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
 	bool AnimaGC::InitializeWGLExtensions()
@@ -305,18 +361,37 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		HGLRC hGLRC = NULL;
 		PIXELFORMATDESCRIPTOR pixelFormat;
 
+		WNDCLASSW wc;
+		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+		wc.lpfnWndProc = (WNDPROC)windowProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = sizeof(void*) + sizeof(int);
+		wc.hInstance = GetModuleHandleW(NULL);
+		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wc.hbrBackground = NULL;
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = L"AnimaGCTempWindow";
+		wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+
+		if (!RegisterClassW(&wc))
+			return false;
+
 		WCHAR* wideTitle = WideStringFromUTF8("AnimaGCTempWindow");
 		hWnd = CreateWindowExW(dwExStyle, L"AnimaGCTempWindow", wideTitle, dwStyle, 0, 0, 0, 0, NULL, NULL, GetModuleHandleW(NULL), NULL);
 		free(wideTitle);
 
 		if (!hWnd)
+		{
+			UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 			return false;
+		}
 
 		hDC = GetDC(hWnd);
 
 		if (!hDC)
 		{
 			DestroyWindow(hWnd);
+			UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 			return false;
 		}
 
@@ -324,6 +399,7 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		{
 			ReleaseDC(hWnd, hDC);
 			DestroyWindow(hWnd);
+			UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 			return false;
 		}
 
@@ -332,6 +408,7 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		{
 			ReleaseDC(hWnd, hDC);
 			DestroyWindow(hWnd);
+			UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 			return false;
 		}
 
@@ -340,6 +417,7 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 			wglDeleteContext(hGLRC);
 			ReleaseDC(hWnd, hDC);
 			DestroyWindow(hWnd);
+			UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 			return false;
 		}
 
@@ -348,7 +426,13 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		{
 			_GetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)wglGetProcAddress("wglGetExtensionsStringARB");
 			if (!_GetExtensionsStringARB)
+			{
+				wglDeleteContext(hGLRC);
+				ReleaseDC(hWnd, hDC);
+				DestroyWindow(hWnd);
+				UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 				return false;
+			}
 		}
 
 		if (IsExtensionSupported("WGL_ARB_multisample", hDC))
@@ -404,6 +488,7 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		wglDeleteContext(hGLRC);
 		ReleaseDC(hWnd, hDC);
 		DestroyWindow(hWnd);
+		UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 
 		_GLWExtensionsLoaded = true;
 		return true;
@@ -414,14 +499,12 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 		if (_GLEWExtensionsLoaded)
 			return true;
 
-		if (glGetError() != GL_NO_ERROR)
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR)
 			return false;
 
 		glewExperimental = GL_TRUE;
-		GLenum error = glewInit();
-
-		if (glGetError() != GL_NO_ERROR)
-			return false;
+		error = glewInit();
 
 		if (error != GLEW_OK)
 		{
@@ -431,7 +514,13 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 			return false;
 		}
 
+
 		_GLEWExtensionsLoaded = true;
+
+		error = glGetError();
+		if (error != GL_NO_ERROR)
+			return false;
+		
 		return true;
 	}
 
@@ -633,11 +722,24 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 			FreeLibrary(_OpenGL32Instance);
 	}
 
-	AnimaGC* AnimaGC::CreateContext(HWND hWnd, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig)
+	AnimaGC* AnimaGC::CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig)
 	{
-		if (InitializeWGLExtensions())
-			return nullptr;
+		HWND hWnd = *((HWND*)windowId);
 
+		HDC hDC = ::GetDC(hWnd);
+
+		if (!InitializeContextAPIs())
+		{
+			MessageBox(NULL, "No context api", "", MB_OK);
+			return nullptr;
+		}
+
+		if (!InitializeWGLExtensions())
+		{
+			MessageBox(NULL, "No GLW", "", MB_OK);
+			return nullptr;
+		}
+		
 		AnimaGC* newGC = new AnimaGC();
 		newGC->_hWnd = hWnd;
 
@@ -884,6 +986,11 @@ bool AnimaGC::StringInExtensionString(const char* string, const GLubyte* extensi
 	HGLRC AnimaGC::GetContext()
 	{
 		return _hContext;
+	}
+
+	bool AnimaGC::CheckIntegrity(HWND hWnd)
+	{
+		return true;
 	}
 	
 #else

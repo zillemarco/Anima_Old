@@ -79,6 +79,19 @@ using namespace Anima;
 
 %}
 
+
+%include cpointer.i
+%include typemaps.i
+%include pointer.i
+%pointer_functions(int, intp);
+
+%typemap(in) void* windowId
+{
+	int AE_tempVal = static_cast<int>(PyLong_AsLong($input));
+
+	$1 = (void*)&(AE_tempVal);
+}
+
 %include "AnimaEngineCore.h"
 %include "AnimaEngine.h" 
 %include "AnimaAssert.h" 

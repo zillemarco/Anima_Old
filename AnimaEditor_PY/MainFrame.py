@@ -5,6 +5,7 @@ import tkinter.ttk as ttk               # importo il modulo tkinter.ttk per pote
 #import tkinter.messagebox as messagebox # importo il modulo tkinter.messagebox per poter utilizzare i messagebox
 import AEUtils                          # importo il file AEUtils
 #import AENewProject
+import GCControl as GC
 
 # creo la class MainFrame derivandola dalla classe ttk.Frame
 class MainFrame(ttk.Frame):
@@ -44,6 +45,9 @@ class MainFrame(ttk.Frame):
 
         #button = ttk.Button(self, text="Prova", command=qf)
         #button.pack()
+
+        frame = GC.GCControl(self)
+        frame.tkraise()
 
     def onExit(self):
         self.quit()

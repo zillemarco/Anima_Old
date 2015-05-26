@@ -105,7 +105,7 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 	if (updateMaterial)
 		program->UpdateMappedValuesObjectProperties(_material, renderer);
 
-#ifdef WIN32
+#ifdef _WIN32
 	glBindVertexArray(_mesh->GetVertexArrayObject());
 	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
