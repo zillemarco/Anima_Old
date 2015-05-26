@@ -1,10 +1,11 @@
 # Generated files
 Win/
 Mac/
-__pycache__/
+AnimaEditor_PY/__pycache__/
 AnimaEngine/AnimaEngineConfig.h
 *.tga
 *.tif
 AnimaEngine/data/models/textures/Thumbs.db
 AnimaEngine/AnimaEngineConfig.h
 *.pdb
+*.pyc
