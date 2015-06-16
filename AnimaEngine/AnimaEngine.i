@@ -84,7 +84,6 @@ using namespace Anima;
 %include inttypes.i
 %include cpointer.i
 %include typemaps.i
-%include pointer.i
 %pointer_functions(int, intp);
 
 %typemap(in) void* windowId

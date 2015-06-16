@@ -23,7 +23,7 @@ class AnimaEditorApp(wx.App):
 
         return True
 
-    def OnExitApp(self, evt):
+    def OnExitApp(self, event):
         self.frame.Close(True)
 
 def main():

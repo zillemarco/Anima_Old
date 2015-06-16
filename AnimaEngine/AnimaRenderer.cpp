@@ -445,8 +445,11 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 
 void AnimaRenderer::Start(AnimaScene* scene)
 {
-	ANIMA_ASSERT(scene != nullptr);
-	_scene = scene;
+	glClearColor(1.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	//ANIMA_ASSERT(scene != nullptr);
+	//_scene = scene;
 }
 
 void AnimaRenderer::Start()
@@ -507,7 +510,8 @@ void AnimaRenderer::DrawAll()
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
@@ -609,7 +613,8 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
@@ -711,7 +716,8 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
@@ -813,7 +819,8 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
@@ -915,7 +922,8 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
@@ -1349,6 +1357,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	for (AInt i = 0; i < nLights; i++)
 	{
 		AnimaLight* light = lights->ElementAt(i);
@@ -1358,7 +1368,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
@@ -1402,6 +1413,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mes
 	if (nLights == 0)
 		return;
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
@@ -1415,7 +1428,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mes
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
@@ -1442,6 +1456,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInsta
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	for (AInt i = 0; i < nLights; i++)
 	{
 		AnimaLight* light = lights->ElementAt(i);
@@ -1451,7 +1467,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInsta
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
@@ -1478,6 +1495,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* mo
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	for (AInt i = 0; i < nLights; i++)
 	{
 		AnimaLight* light = lights->ElementAt(i);
@@ -1487,7 +1506,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* mo
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
@@ -1514,6 +1534,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
 		program->Use();
 
+	AnimaVertex4f backColor = GetColor4f("BackColor");
+
 	for (AInt i = 0; i < nLights; i++)
 	{
 		AnimaLight* light = lights->ElementAt(i);
@@ -1523,7 +1545,8 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 
 		shadowMap->BindAsRenderTarget();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 

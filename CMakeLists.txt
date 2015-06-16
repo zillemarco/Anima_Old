@@ -22,7 +22,12 @@ set(ANIMA_ENGINE_BOOST_ROOT_PATH "" CACHE STRING "Path where CMake can find boos
 set(ANIMA_ENGINE_QT5_ROOT_PATH "" CACHE STRING "Path where CMake can find Qt5")
 set(ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH "" CACHE STRING "Path where CMake can find NVToolsExt")
 set(ANIMA_ENGINE_PYTHON_ROOT_PATH "" CACHE STRING "Path where CMake can find Python")
-set(ANIMA_ENGINE_PYTHON_LIB_NAME "libpython3.4.dylib" CACHE STRING "Name of Python library")
+
+if(APPLE)
+	set(ANIMA_ENGINE_PYTHON_LIB_NAME "libpython3.4.dylib" CACHE STRING "Name of Python library")
+else()
+	set(ANIMA_ENGINE_PYTHON_LIB_NAME "" CACHE STRING "Name of Python library")
+endif()
 
 option(ANIMA_ENGINE_BUILD_DOCS "Build the ANIMA_ENGINE documentation" OFF)
 option(ANIMA_ENGINE_INSTALL "Generate installation target" OFF)
@@ -212,10 +217,10 @@ set(ANIMA_EDITOR_NAME AnimaEditor)
 # AnimaEngine dependencies
 #--------------------------------------------------------------------
 if (WIN32)	
-	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Win/x64/assimp.lib)
-	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32s.lib)
+	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/assimp.lib)
+	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
 elseif(APPLE)
-	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib)
+	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/libassimp.3.1.1.dylib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.a)
 endif()
 

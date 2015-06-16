@@ -1,11 +1,12 @@
 __author__ = 'marco'
 
 import wx
-import AboutBox
+#import AboutBox
 import AnimaEditor
 import Project
 import NewProjectDlg
 import GraphicsCtrl
+import OpenGLCanvas
 
 class MainFrame(wx.Frame):
     def __init__(self, title):
@@ -31,7 +32,8 @@ class MainFrame(wx.Frame):
         self.SetMenuBar(menuBar)
         self.statusbar = self.CreateStatusBar()
 
-        self.graphicsCtrl = GraphicsCtrl.AnimaEditorCanvas(self)
+        #self.graphicsCtrl = GraphicsCtrl.AnimaEditorCanvas(self)
+        self.graphicsCtrl = OpenGLCanvas.OpenGLCanvas(self)
 
     def OnClose(self, event):
         self.Destroy()
@@ -50,6 +52,7 @@ class MainFrame(wx.Frame):
             print(AnimaEditor.AnimaEditorApp.currentProject.GetName())
 
     def OnAbout(self, event):
-        dlg = AboutBox.AboutBox()
-        dlg.ShowModal()
-        dlg.Destroy()
+        pass
+        #dlg = AboutBox.AboutBox()
+        #dlg.ShowModal()
+        #dlg.Destroy()

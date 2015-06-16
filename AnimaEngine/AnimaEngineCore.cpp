@@ -17,18 +17,18 @@
 bool __anima_get_working_dir(char* dest, int length)
 {
 #if defined _MSC_VER
-	HMODULE hModule = GetModuleHandle(NULL);
-	if(hModule == NULL)
-		return false;
+	//HMODULE hModule = GetModuleHandle(NULL);
+	//if(hModule == NULL)
+	//	return false;
 
-	if(GetModuleFileName(hModule, dest, length) == 0)
-		return false;
+	//if(GetModuleFileName(hModule, dest, length) == 0)
+	//	return false;
 
-	char* pch = strrchr(dest, '\\');	
-	if (pch == NULL)
-		return false;
+	//char* pch = strrchr(dest, '\\');	
+	//if (pch == NULL)
+	//	return false;
 
-	dest[pch - dest + 1] = '\0';
+	//dest[pch - dest + 1] = '\0';
 	return true;
 #else
 	char* cwd;

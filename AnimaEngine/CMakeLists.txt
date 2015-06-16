@@ -218,16 +218,25 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	include(${SWIG_USE_FILE})
 
 	set(EXT_PYTHON_INSTALL_PATH ${ANIMA_ENGINE_PYTHON_ROOT_PATH})
-	set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/Python")
-	set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include/python3.4m")
+	
+	if(APPLE)
+		set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/Python")
+		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include/python3.4m")
+	else()
+		set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/libs/${ANIMA_ENGINE_PYTHON_LIB_NAME}")
+		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include")
+	endif()
+	
 	find_package(PythonLibs)
 	include_directories(${PYTHON_INCLUDE_PATH})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_SWIG_FLAGS "")
-
+	
+	message("Python: ${PYTHON_LIBRARIES}")
+	
 	set_source_files_properties(AnimaEngine.i PROPERTIES CPLUSPLUS ON)
 	swig_add_module(${PROJECT_NAME} python AnimaEngine.i)
-	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${PYTHON_LIBRARIES})
+	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${PYTHON_LIBRARIES} ${AnimaEngine_DEP_GLEW})
 		
 endif()
 
@@ -281,7 +290,7 @@ if (WIN32)
 	#					COMMENT "Copia glew32.dll")
 	
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/assimp.dll"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/assimp.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/assimp.dll"
 						COMMENT "Copia assimp.dll")
 						
 	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
@@ -311,15 +320,15 @@ elseif(APPLE)
 	#					COMMENT "Copia libGLEW.dylib")
 
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.1.1.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.1.1.dylib"
 						COMMENT "Copia libassimp.3.1.1.dylib")
 
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/llibassimp.3.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/llibassimp.3.dylib"
 						COMMENT "Copia libassimp.3.dylib")
 
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
+						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
 						COMMENT "Copia libassimp.dylib")
 
 	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
@@ -362,13 +371,13 @@ if (ANIMA_ENGINE_INSTALL)
 	endif()
 	
 	if(WIN32)
-		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll 	DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/assimp.dll 	DESTINATION AnimaEngine/bin)
 		if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 			INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngine/bin)
 		endif()
 	else()		
-		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib 	DESTINATION AnimaEngine/bin)
-		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.dylib 		DESTINATION AnimaEngine/bin)
-		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib 			DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.1.1.dylib 	DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.dylib 		DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.dylib 			DESTINATION AnimaEngine/bin)
 	endif()
 endif()

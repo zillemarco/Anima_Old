@@ -94,7 +94,14 @@ bool AnimaGC::InitializeGLEWExtensions()
 	if (_GLEWExtensionsLoaded)
 		return true;
 	
-	printf("OpenGL version string: %s\n", glGetString(GL_VERSION));
+	char szBuff[1024];
+	sprintf(szBuff, "OpenGL version string: %s\n", glGetString(GL_VERSION));
+
+	#if defined _MSC_VER
+		OutputDebugStringA(szBuff);
+	#else
+		puts(szBuff);
+	#endif
 	
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -303,8 +310,8 @@ AnimaGCContextConfig AnimaGC::GetDefaultContextConfig()
 	AnimaGCContextConfig ccfg;
 
 	ccfg._api = ANIMAGC_OPENGL_API;
-	ccfg._major = 1;
-	ccfg._minor = 0;
+	ccfg._major = 4;
+	ccfg._minor = 1;
 	ccfg._forward = false;
 	ccfg._debug = false;
 	ccfg._profile = ANIMAGC_OPENGL_ANY_PROFILE;
