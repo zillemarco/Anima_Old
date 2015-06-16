@@ -88,26 +88,26 @@ AnimaVertex4f AnimaMatrix::operator*(const AnimaVertex4f& p) const
 AnimaMatrix AnimaMatrix::operator*(const AnimaMatrix& p) const
 {
 	AnimaMatrix r(this->m);
-	r.MultiplyMatrixSSE(p.m);
+	r.MultiplyMatrix(p.m);
 	return r;
 }
 
 AnimaMatrix AnimaMatrix::operator*(const AFloat p[16]) const
 {
 	AnimaMatrix r(this->m);
-	r.MultiplyMatrixSSE(p);
+	r.MultiplyMatrix(p);
 	return r;
 }
 
 AnimaMatrix& AnimaMatrix::operator*=(const AnimaMatrix& p)
 {
-	MultiplyMatrixSSE(p.m);
+	MultiplyMatrix(p.m);
 	return *this;
 }
 
 AnimaMatrix& AnimaMatrix::operator*=(const AFloat p[16])
 {
-	MultiplyMatrixSSE(p);
+	MultiplyMatrix(p);
 	return *this;
 }
 

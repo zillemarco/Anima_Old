@@ -31,8 +31,8 @@ public:
 	AnimaShader& operator=(const AnimaShader& src);
 	AnimaShader& operator=(AnimaShader&& src);
 
-	inline bool operator==(const AnimaShader& left);
-	inline bool operator!=(const AnimaShader& left);
+	bool operator==(const AnimaShader& left);
+	bool operator!=(const AnimaShader& left);
 
 public:	
 	void SetText(AnimaString text);

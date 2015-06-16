@@ -1,4 +1,4 @@
-#.rst:
+I#.rst:
 # FindPythonLibs
 # --------------
 #

@@ -260,7 +260,7 @@ bool AnimaShaderProgram::Create()
 		return true;
 
 	_id = glCreateProgram();
-
+	
 	if (_id == 0)
 		return false;
 	return true;

@@ -180,7 +180,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 
@@ -199,7 +199,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
@@ -217,7 +217,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
@@ -236,7 +236,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
@@ -255,7 +255,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
@@ -274,7 +274,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
@@ -293,7 +293,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &path) == AI_SUCCESS)
@@ -311,7 +311,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &path) == AI_SUCCESS)
@@ -329,7 +329,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 		if (material->GetTexture(aiTextureType_REFLECTION, 0, &path) == AI_SUCCESS)
@@ -347,7 +347,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 			else
 			{
-				ANIMA_ASSERT(false);
+//				ANIMA_ASSERT(false);
 			}
 		}
 

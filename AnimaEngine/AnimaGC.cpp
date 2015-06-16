@@ -1,7 +1,9 @@
 #include "AnimaGC.h"
 
 #include <stdlib.h>
-#include <malloc.h>
+#ifdef _WIN32
+#	include <malloc.h>
+#endif
 #include <assert.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -25,7 +27,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 	bool AnimaGC::_ARB_create_context_robustness = false;
 	bool AnimaGC::_ARB_context_flush_control = false;
 	bool AnimaGC::_GLWExtensionsLoaded = false;
-	bool AnimaGC::_GLEWExtensionsLoaded = false;
 	bool AnimaGC::_contextAPIsInitialized = false;
 
 
@@ -36,6 +37,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 			assert((size_t) index < sizeof(attribs) / sizeof(attribs[0]));	\
 		}
 #endif
+
+bool AnimaGC::_GLEWExtensionsLoaded = false;
 
 AnimaGC::AnimaGC()
 {
@@ -80,8 +83,42 @@ void AnimaGC::ClearColor(AFloat r, AFloat g, AFloat b, AFloat a)
 
 void AnimaGC::SetSwapInterval(AInt interval)
 {
+#ifdef _WIN32
 	if (_EXT_swap_control)
 		_SwapIntervalEXT(interval);
+#endif
+}
+
+bool AnimaGC::InitializeGLEWExtensions()
+{
+	if (_GLEWExtensionsLoaded)
+		return true;
+	
+	printf("OpenGL version string: %s\n", glGetString(GL_VERSION));
+	
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+		return false;
+	
+	glewExperimental = GL_TRUE;
+	error = glewInit();
+	
+	if (error != GLEW_OK)
+	{
+		char str[4096];
+		sprintf(str, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		fprintf(stderr, "Error initializing GLEW: %s\n", glewGetErrorString(error));
+		return false;
+	}
+	
+	
+	_GLEWExtensionsLoaded = true;
+	
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+		return false;
+	
+	return true;
 }
 
 const AnimaGCFrameBufferConfig* AnimaGC::ChooseFrameBufferConfig(const AnimaGCFrameBufferConfig* desired, const AnimaGCFrameBufferConfig* alternatives, unsigned int count)
@@ -491,36 +528,6 @@ AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
 		UnregisterClassW(L"AnimaGCTempWindow", GetModuleHandleW(NULL));
 
 		_GLWExtensionsLoaded = true;
-		return true;
-	}
-
-	bool AnimaGC::InitializeGLEWExtensions()
-	{
-		if (_GLEWExtensionsLoaded)
-			return true;
-
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR)
-			return false;
-
-		glewExperimental = GL_TRUE;
-		error = glewInit();
-
-		if (error != GLEW_OK)
-		{
-			char str[4096];
-			sprintf(str, "Error initializing GLEW: %s\n", glewGetErrorString(error));
-			fprintf(stderr, "Error initializing GLEW: %s\n", glewGetErrorString(error));
-			return false;
-		}
-
-
-		_GLEWExtensionsLoaded = true;
-
-		error = glGetError();
-		if (error != GL_NO_ERROR)
-			return false;
-		
 		return true;
 	}
 
@@ -994,6 +1001,14 @@ AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
 	}
 	
 #else
+void AnimaGC::DestroyContext(AnimaGC* context)
+{
+}
+
+AnimaGC* AnimaGC::CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig)
+{
+	return nullptr;	
+}
 #endif
 
 END_ANIMA_ENGINE_NAMESPACE

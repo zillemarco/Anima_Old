@@ -1,63 +1,55 @@
 __author__ = 'marco'
 
-import tkinter as tk                    # importo il modulo tkinter per gestire l'app ed i widget
-import tkinter.ttk as ttk               # importo il modulo tkinter.ttk per poter utilizzare dei controlli con uno stile visivo migliore
-#import tkinter.messagebox as messagebox # importo il modulo tkinter.messagebox per poter utilizzare i messagebox
-import AEUtils                          # importo il file AEUtils
-#import AENewProject
-import GCControl as GC
+import wx
+import AboutBox
+import AnimaEditor
+import Project
+import NewProjectDlg
+import GraphicsCtrl
 
-# creo la class MainFrame derivandola dalla classe ttk.Frame
-class MainFrame(ttk.Frame):
+class MainFrame(wx.Frame):
+    def __init__(self, title):
+        wx.Frame.__init__(self, None, title = title, pos = (150, 150), size = (350, 200))
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
-    # costruttore della classe
-    def __init__(self, parent):
-        ttk.Frame.__init__(self, parent)    # chiamo il costruttore della clase base
-        self.parent = parent                # tengo memoria di chè il padre di questa finestra dichiarando la variabile
-                                            # parent all'interno del costruttore. Ora parent è accessibile come
-                                            # attributo
+        menuBar = wx.MenuBar()
 
-        self.initUI()                       # chiamata al metodo di inizializzazione dell'interfaccia
+        fileMenu = wx.Menu()
+        menuNewProject = fileMenu.Append(wx.ID_NEW, "&New project\tCtrl-N", "Creates a new project")
+        menuOpenProject = fileMenu.Append(wx.ID_OPEN, "&Open project\tCtrl-O", "Opens a project")
 
-    def initUI(self):
+        self.Bind(wx.EVT_MENU, self.OnNewProject, menuNewProject)
+        self.Bind(wx.EVT_MENU, self.OnOpenProject, menuOpenProject)
 
-        self.pack(side="top", fill="both", expand=True)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        menuBar.Append(fileMenu, "&File")
 
-        # crazione del menu del mainframe ------------------------------------------------------------------------------
+        helpMenu = wx.Menu()
+        m_about = helpMenu.Append(wx.ID_ABOUT, "&About", "Information about this program")
+        self.Bind(wx.EVT_MENU, self.OnAbout, m_about)
+        menuBar.Append(helpMenu, "&Help")
 
-        menubar = tk.Menu(self.parent)      # dichiaro una variabile menubar dicendo che è figlia del padre di questa finestra
-        self.parent.config(menu=menubar)    # imposto il menù che sto creando come quallo dell'applicazione principale
+        self.SetMenuBar(menuBar)
+        self.statusbar = self.CreateStatusBar()
 
-        # creo il primo menu: File
-        filemenu = tk.Menu(menubar)
-        filemenu.add_command(label="New project...", command=self.onNewProject)
-        filemenu.add_command(label="Open project", command=self.onOpenProject)
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=self.onExit)
+        self.graphicsCtrl = GraphicsCtrl.AnimaEditorCanvas(self)
 
-        # aggiungo i menu alla barra dei menu
-        menubar.add_cascade(label="File", menu=filemenu)
+    def OnClose(self, event):
+        self.Destroy()
 
-        #label = ttk.Label(self, text="Esempio label", font=LARGE_FONT)
-        #label.pack(padx=10, pady=10)
+    def OnNewProject(self, event):
+        dlg = NewProjectDlg.NewProjectDlg(None, title="New project")
+        dlg.ShowModal()
+        dlg.Destroy()
 
-        #button = ttk.Button(self, text="Prova", command=qf)
-        #button.pack()
+    def OnOpenProject(self, event):
 
-        frame = GC.GCControl(self)
-        frame.tkraise()
+        if AnimaEditor.AnimaEditorApp.currentProject is None:
+            print("Non ancora aperto")
+        else:
+            assert isinstance(AnimaEditor.AnimaEditorApp.currentProject, Project.Project)
+            print(AnimaEditor.AnimaEditorApp.currentProject.GetName())
 
-    def onExit(self):
-        self.quit()
-
-    def onNewProject(self):
-        print("prova")
-        #dialog = AENewProject.AENewProject(self, "prova prova")
-        #risultato = dialog.result
-
-    def onOpenProject(self):
-        AEUtils.showMessage("Apri progetto", "Open project")
-
-
+    def OnAbout(self, event):
+        dlg = AboutBox.AboutBox()
+        dlg.ShowModal()
+        dlg.Destroy()

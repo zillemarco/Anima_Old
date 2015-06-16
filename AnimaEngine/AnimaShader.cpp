@@ -87,7 +87,7 @@ AnimaShader& AnimaShader::operator=(AnimaShader&& src)
 	return *this;
 }
 
-inline bool AnimaShader::operator==(const AnimaShader& left)
+bool AnimaShader::operator==(const AnimaShader& left)
 {
 	if (_id != left._id) return false;
 	if (_type != left._type) return false;
@@ -98,7 +98,7 @@ inline bool AnimaShader::operator==(const AnimaShader& left)
 	return true;
 }
 
-inline bool AnimaShader::operator!=(const AnimaShader& left)
+bool AnimaShader::operator!=(const AnimaShader& left)
 {
 	if (_id != left._id) return true;
 	if (_type != left._type) return true;
@@ -167,7 +167,7 @@ bool AnimaShader::Compile()
 	if (IsCompiled())
 		return true;
 
-	const GLchar* source = (const GLchar*)_text.GetConstBuffer();
+	const GLchar* source = (const GLchar*)_text.GetBuffer();
 	glShaderSource(_id, 1, &source, NULL);
 	
 	glCompileShader(_id);
@@ -182,9 +182,9 @@ bool AnimaShader::Compile()
 		char* infoLog = new char[maxLength];
 		glGetShaderInfoLog(_id, maxLength, &maxLength, &infoLog[0]);
 
-		ANIMA_ASSERT(false);// , infoLog);
+		//ANIMA_ASSERT(false);// , infoLog);
 
-		Delete();
+//		Delete();
 
 		_compiled = false;
 	}

@@ -1,5 +1,7 @@
 %module AnimaEngine
 
+#pragma SWIG nowarn=325,362,389,509,312,503
+
 %{
 #include "AnimaEngineCore.h"
 #include "AnimaEngine.h" 
@@ -79,7 +81,7 @@ using namespace Anima;
 
 %}
 
-
+%include inttypes.i
 %include cpointer.i
 %include typemaps.i
 %include pointer.i

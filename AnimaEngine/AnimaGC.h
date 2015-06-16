@@ -92,13 +92,14 @@ public:
 	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
 
 public:
-
 	static AnimaGC* CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig);
 	static void DestroyContext(AnimaGC* context);
 	static void SetSwapInterval(AInt interval);
 
 	static AnimaGCContextConfig GetDefaultContextConfig();
 	static AnimaGCFrameBufferConfig GetDefaultFrameBufferConfig();
+	
+	static bool InitializeGLEWExtensions();
 
 protected:
 	static bool StringInExtensionString(const char* string, const GLubyte* extensions);
@@ -110,7 +111,6 @@ protected:
 		HGLRC GetContext();
 				
 	public:
-		static bool InitializeGLEWExtensions();
 		static bool IsExtensionSupported(const char* extension, HDC hDC);
 
 	protected:
@@ -145,10 +145,10 @@ protected:
 		static bool _ARB_context_flush_control;
 
 		static bool _GLWExtensionsLoaded;
-		static bool _GLEWExtensionsLoaded;
 		static bool _contextAPIsInitialized;
 #else
 #endif
+	static bool _GLEWExtensionsLoaded;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -19,9 +19,9 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
-	: _primitives(allocator)
+: _primitives(allocator != nullptr ? allocator : engine->GetGenericAllocator())
 {
-	_allocator = allocator;
+	_allocator = allocator != nullptr ? allocator : engine->GetGenericAllocator();
 	_engine = engine;
 	_scene = nullptr;
 

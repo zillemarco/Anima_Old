@@ -218,11 +218,13 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	include(${SWIG_USE_FILE})
 
 	set(EXT_PYTHON_INSTALL_PATH ${ANIMA_ENGINE_PYTHON_ROOT_PATH})
+	set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/Python")
+	set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include/python3.4m")
 	find_package(PythonLibs)
 	include_directories(${PYTHON_INCLUDE_PATH})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_SWIG_FLAGS "")
-	
+
 	set_source_files_properties(AnimaEngine.i PROPERTIES CPLUSPLUS ON)
 	swig_add_module(${PROJECT_NAME} python AnimaEngine.i)
 	swig_link_libraries(${PROJECT_NAME} ${PROJECT_NAME} ${AnimaEngine_LIBRARIES} ${PYTHON_LIBRARIES})
@@ -261,7 +263,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} optimized ${AnimaEngine_DEP_ASSIMP_RELEASE} debug ${AnimaEngine_DEP_ASSIMP_DEBUG})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_ASSIMP})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_GLEW})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
@@ -274,38 +276,39 @@ if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 endif()
 
 if (WIN32)
-	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
-						COMMENT "Copia glew32.dll")
+	#add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+	#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/glew32.dll"
+	#					COMMENT "Copia glew32.dll")
+	
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Win/x64/assimp.dll "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/assimp.dll"
 						COMMENT "Copia assimp.dll")
 						
 	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/AnimaEngine.py "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine.py"
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/AnimaEngine.py "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.py"
 							COMMENT "Copia AnimaEngine.py")
 														
 		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/_AnimaEngine.pyd "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/_AnimaEngine.pyd"
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/_AnimaEngine.pyd "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/_AnimaEngine.pyd"
 							COMMENT "Copia _AnimaEngine.pyd")
 							
 		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/bin/$<CONFIGURATION>/AnimaEngine.dll "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine.dll"
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/bin/$<CONFIGURATION>/AnimaEngine.dll "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.dll"
 							COMMENT "Copia AnimaEngine.dll")
 	endif()
 elseif(APPLE)						
-	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.0.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.0.dylib"
-						COMMENT "Copia libGLEW.1.11.0.dylib")
+	#add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+	#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.0.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.0.dylib"
+	#					COMMENT "Copia libGLEW.1.11.0.dylib")
 
-	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.dylib"
-						COMMENT "Copia libGLEW.1.11.dylib")
+	#add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+	#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.11.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.1.11.dylib"
+	#					COMMENT "Copia libGLEW.1.11.dylib")
 						
-	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
-						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.dylib"
-						COMMENT "Copia libGLEW.dylib")
+	#add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
+	#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libGLEW.dylib"
+	#					COMMENT "Copia libGLEW.dylib")
 
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.3.1.1.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.3.1.1.dylib"
@@ -318,6 +321,24 @@ elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Mac/x64/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
 						COMMENT "Copia libassimp.dylib")
+
+	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/AnimaEngine.py "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.py"
+							COMMENT "Copia AnimaEngine.py")
+														
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/_AnimaEngine.so "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/_AnimaEngine.so"
+							COMMENT "Copia _AnimaEngine.so")
+							
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/libAnimaEngine.0.0.0.dylib "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/libAnimaEngine.0.0.0.dylib"
+							COMMENT "Copia libAnimaEngine.0.0.0.dylib")
+
+		add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/libAnimaEngine.dylib "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/libAnimaEngine.dylib"
+							COMMENT "Copia libAnimaEngine.dylib")
+	endif()
 endif()
 
 if (ANIMA_ENGINE_INSTALL)

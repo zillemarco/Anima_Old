@@ -17,10 +17,10 @@
 #include "AnimaFace.h"
 #include <map>
 
-//#ifndef _WIN32
-//#include <inttypes.h>
-//typedef int64_t __int64;
-//#endif
+#ifndef _WIN32
+#include <inttypes.h>
+#define __int64 int64_t
+#endif
 
 #include <stdint.h>
 

@@ -1,29 +1,34 @@
 __author__ = 'marco'
 
-import tkinter as tk    # importo il modulo Tkinter per gestire l'app ed i widget
-import MainFrame        # importo il file MainFrame che contiene la classe MainFrame
-import AnimaEngine as AE
-import GCControl as GC
+import sys, os, inspect
+AnimaEngine_Folder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"AnimaEngine")))
+if AnimaEngine_Folder not in sys.path:
+    sys.path.insert(0, AnimaEngine_Folder)
 
-# creo la classe AnimaEditor e la faccio derivare da tk.Tk che è la classe App del modulo Tkinter
-class AnimaEditor(tk.Tk):
+import wx
+import MainFrame
 
-    # cotruttore della classe
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)   # chiamata al costruttore della classe base
-        self.initUI()                           # chiamata alla funzione di inizializzazione dell'interfaccia
+class AnimaEditorApp(wx.App):
+    currentProject = None
 
-    # metodo initUI
-    def initUI(self):
-        self.title("AnimaEditor")               # imposto il titolo della finestra dell'app
-        #frame = MainFrame.MainFrame(self)       # creo una nuova istanza della classe MainFrame importata dal file MainFrame.py
-        frame = GC.GCControl(self)
-        frame.tkraise()                         # avvio e mostro la finestra del mainframe
+    def __init__(self):
+        wx.App.__init__(self, redirect = False)
+        self.frame = None
+
+    def OnInit(self):
+        mainFrame = MainFrame.MainFrame("Anima Editor")
+        mainFrame.Show(True)
+        self.SetTopWindow(mainFrame)
+        self.frame = mainFrame
+
+        return True
+
+    def OnExitApp(self, evt):
+        self.frame.Close(True)
 
 def main():
-    app = AnimaEditor()
-    app.geometry("500x500")
-    app.mainloop()
+    app = AnimaEditorApp()
+    app.MainLoop()
 
 if __name__ == '__main__':
     main()
