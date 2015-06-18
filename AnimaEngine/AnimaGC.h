@@ -92,7 +92,7 @@ public:
 	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
 
 public:
-	static AnimaGC* CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig);
+	static AnimaGC* CreateContext(void* windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig);
 	static void DestroyContext(AnimaGC* context);
 	static void SetSwapInterval(AInt interval);
 

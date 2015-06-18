@@ -736,7 +736,7 @@ AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
 			FreeLibrary(_OpenGL32Instance);
 	}
 
-	AnimaGC* AnimaGC::CreateContext(void* windowId, const AnimaGCContextConfig* ctxconfig, const AnimaGCFrameBufferConfig* fbconfig)
+	AnimaGC* AnimaGC::CreateContext(void* windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig)
 	{
 		HWND hWnd = *((HWND*)windowId);
 
@@ -769,7 +769,7 @@ AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
 			return nullptr;
 		}
 
-		if (!ChoosePixelFormat(fbconfig, &pixelFormat, newGC))
+		if (!ChoosePixelFormat(&fbconfig, &pixelFormat, newGC))
 		{
 			delete newGC;
 			return nullptr;
@@ -793,61 +793,61 @@ AnimaGCFrameBufferConfig AnimaGC::GetDefaultFrameBufferConfig()
 		{
 			int index = 0, mask = 0, flags = 0, strategy = 0;
 
-			if (ctxconfig->_api == ANIMAGC_OPENGL_API)
+			if (ctxconfig._api == ANIMAGC_OPENGL_API)
 			{
-				if (ctxconfig->_forward)
+				if (ctxconfig._forward)
 					flags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
 
-				if (ctxconfig->_debug)
+				if (ctxconfig._debug)
 					flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 
-				if (ctxconfig->_profile)
+				if (ctxconfig._profile)
 				{
-					if (ctxconfig->_profile == ANIMAGC_OPENGL_CORE_PROFILE)
+					if (ctxconfig._profile == ANIMAGC_OPENGL_CORE_PROFILE)
 						mask |= WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
-					else if (ctxconfig->_profile == ANIMAGC_OPENGL_COMPAT_PROFILE)
+					else if (ctxconfig._profile == ANIMAGC_OPENGL_COMPAT_PROFILE)
 						mask |= WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 				}
 			}
 			else
 				mask |= WGL_CONTEXT_ES2_PROFILE_BIT_EXT;
 
-			if (ctxconfig->_robustness)
+			if (ctxconfig._robustness)
 			{
 				if (_ARB_create_context_robustness)
 				{
-					if (ctxconfig->_robustness == ANIMAGC_NO_RESET_NOTIFICATION)
+					if (ctxconfig._robustness == ANIMAGC_NO_RESET_NOTIFICATION)
 						strategy = WGL_NO_RESET_NOTIFICATION_ARB;
-					else if (ctxconfig->_robustness == ANIMAGC_LOSE_CONTEXT_ON_RESET)
+					else if (ctxconfig._robustness == ANIMAGC_LOSE_CONTEXT_ON_RESET)
 						strategy = WGL_LOSE_CONTEXT_ON_RESET_ARB;
 
 					flags |= WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB;
 				}
 			}
 
-			if (ctxconfig->_release)
+			if (ctxconfig._release)
 			{
 				if (_ARB_context_flush_control)
 				{
-					if (ctxconfig->_release == ANIMAGC_RELEASE_BEHAVIOR_NONE)
+					if (ctxconfig._release == ANIMAGC_RELEASE_BEHAVIOR_NONE)
 					{
 						setWGLattrib(WGL_CONTEXT_RELEASE_BEHAVIOR_ARB, WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB);
 					}
-					else if (ctxconfig->_release == ANIMAGC_RELEASE_BEHAVIOR_FLUSH)
+					else if (ctxconfig._release == ANIMAGC_RELEASE_BEHAVIOR_FLUSH)
 					{
 						setWGLattrib(WGL_CONTEXT_RELEASE_BEHAVIOR_ARB, WGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB);
 					}
 				}
 			}
 
-			if (ctxconfig->_major != 1 || ctxconfig->_minor != 0)
+			if (ctxconfig._major != 1 || ctxconfig._minor != 0)
 			{
 				// NOTE: Only request an explicitly versioned context when
 				//       necessary, as explicitly requesting version 1.0 does not
 				//       always return the highest available version
 
-				setWGLattrib(WGL_CONTEXT_MAJOR_VERSION_ARB, ctxconfig->_major);
-				setWGLattrib(WGL_CONTEXT_MINOR_VERSION_ARB, ctxconfig->_minor);
+				setWGLattrib(WGL_CONTEXT_MAJOR_VERSION_ARB, ctxconfig._major);
+				setWGLattrib(WGL_CONTEXT_MINOR_VERSION_ARB, ctxconfig._minor);
 			}
 
 			if (flags)

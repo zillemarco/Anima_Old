@@ -295,7 +295,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
 	SetColor("AmbientLight", 1.0f, 1.0f, 1.0f);
-	SetColor("BackColor", 0.3f, 0.3f, 0.3f);
+	SetColor("BackColor", 1.0f, 0.3f, 0.3f, 1.0f);
 
 	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
 	SetFloat("SSAODistanceThreshold", 5.0f);
@@ -344,6 +344,7 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 		AnimaVertex2f size = GetVector2f("ScreenSize");
 		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	if (_filterMesh->NeedsBuffersUpdate())
@@ -371,6 +372,7 @@ void AnimaRenderer::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterPr
 		AnimaVertex2f size = GetVector2f("ScreenSize");
 		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	if (_filterMesh->NeedsBuffersUpdate())
@@ -400,6 +402,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 		AnimaVertex2f size = GetVector2f("ScreenSize");
 		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	if (_filterMesh->NeedsBuffersUpdate())
@@ -426,6 +429,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 		AnimaVertex2f size = GetVector2f("ScreenSize");
 		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	if (_filterMesh->NeedsBuffersUpdate())
@@ -445,11 +449,8 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 
 void AnimaRenderer::Start(AnimaScene* scene)
 {
-	glClearColor(1.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	//ANIMA_ASSERT(scene != nullptr);
-	//_scene = scene;
+	ANIMA_ASSERT(scene != nullptr);
+	_scene = scene;
 }
 
 void AnimaRenderer::Start()
@@ -510,7 +511,6 @@ void AnimaRenderer::DrawAll()
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);

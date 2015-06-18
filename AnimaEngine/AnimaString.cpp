@@ -82,7 +82,7 @@ AnimaString& AnimaString::operator=(AnimaString&& src)
 
 AnimaString& AnimaString::operator=(const char* src)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	SetString(src);
@@ -112,14 +112,19 @@ bool AnimaString::operator!=(const char* left)
 
 void AnimaString::SetString(const char* str)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	
 	if(str != nullptr)
 	{
 		_stringLength = (AInt)strlen(str) + 1;
-		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+		
+		if (_allocator != nullptr)
+			_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+		else
+			_string = new AChar[_stringLength];
+		
 		memset(_string, 0, _stringLength);	
 		strcpy(_string, str);
 	}
@@ -127,9 +132,14 @@ void AnimaString::SetString(const char* str)
 
 void AnimaString::ClearString()
 {
-	if(_allocator != nullptr && _string != nullptr && _stringLength > 0)
+	//if(_allocator != nullptr && _string != nullptr && _stringLength > 0)
+	if (_string != nullptr && _stringLength > 0)
 	{
-		AnimaAllocatorNamespace::DeallocateArray<AChar>(*_allocator, _string);
+		if (_allocator != nullptr)
+			AnimaAllocatorNamespace::DeallocateArray(*_allocator, _string);
+		else
+			delete[] _string;
+
 		_string = nullptr;
 		_stringLength = 0;
 	}
@@ -147,7 +157,7 @@ AChar* AnimaString::GetBuffer() const
 
 void AnimaString::Format(const char* format, ...)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	ClearString();
 	
 	va_list args;
@@ -156,7 +166,12 @@ void AnimaString::Format(const char* format, ...)
 	AUint length = GetFormatStringLength(format, args);
 	
 	_stringLength = length + 1;
-	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+	
+	if (_allocator != nullptr)
+		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+	else
+		_string = new AChar[_stringLength];
+
 	memset(_string, 0, _stringLength);
 	
 	vsnprintf(_string, _stringLength, format, args);
@@ -185,9 +200,15 @@ AUint AnimaString::GetBufferLength() const
 
 AnimaString& AnimaString::operator+=(const AnimaString& src)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	AUint newStringLength = (this->_stringLength - 1) + (src._stringLength - 1) + 1;
-	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
+	AChar* newString = nullptr;
+	
+	if (_allocator != nullptr)
+		newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
+	else
+		newString = new AChar[newStringLength];
+
 	AChar* tmp = newString;
 	
 	strcpy(newString, _string);
@@ -197,8 +218,11 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 	strcpy(tmp, src._string);
 	
 	SetString(newString);
-	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
+
+	if (_allocator != nullptr)
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
+	else
+		delete[] newString;
 	
 	newString = nullptr;
 	tmp = nullptr;
@@ -208,9 +232,15 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 
 AnimaString& AnimaString::operator+=(const char* src)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	AUint newStringLength = (this->_stringLength - 1) + (AInt)strlen(src) + 1;
-	AChar* newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
+	AChar* newString = nullptr;
+
+	if (_allocator != nullptr)
+		newString = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, newStringLength);
+	else
+		newString = new AChar[newStringLength];
+
 	AChar* tmp = newString;
 	
 	strcpy(newString, _string);
@@ -220,8 +250,11 @@ AnimaString& AnimaString::operator+=(const char* src)
 	strcpy(tmp, src);
 	
 	SetString(newString);
-	
-	AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
+
+	if (_allocator != nullptr)
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, newString);
+	else
+		delete[] newString;
 	
 	newString = nullptr;
 	tmp = nullptr;
@@ -243,12 +276,17 @@ const AChar& AnimaString::operator[](AUint index) const
 
 void AnimaString::Reserve(AUint size)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	
 	ClearString();
 	
 	_stringLength = size + 1;
-	_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+
+	if (_allocator != nullptr)
+		_string = AnimaAllocatorNamespace::AllocateArray<AChar>(*_allocator, _stringLength);
+	else
+		_string = new AChar[_stringLength];
+	
 	memset(_string, 0, _stringLength);
 }
 
@@ -376,7 +414,7 @@ AInt AnimaString::ReverseFind(const char* str, AInt startPos) const
 
 AnimaString AnimaString::Substring(AInt startPos, AUint len) const
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	if(startPos < 0)
 		startPos = 0;
 	
@@ -466,7 +504,7 @@ void AnimaString::Replace(AChar find, AChar replacement, AInt startPos, AInt cou
 
 void AnimaString::Replace(AChar find, const char* replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	AUint replacementLength = (AUint)strlen(replacement);
@@ -506,7 +544,7 @@ void AnimaString::Replace(AChar find, const AnimaString& replacement, AInt start
 
 void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	AUint replacementLength = 1;
@@ -541,7 +579,7 @@ void AnimaString::Replace(const char* find, AChar replacement, AInt startPos, AI
 
 void AnimaString::Replace(const char* find, const char* replacement, AInt startPos, AInt count)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
+	//ANIMA_ASSERT(_allocator != nullptr);
 	int replacements = 0;
 	int pos = Find(find, startPos);
 	AUint replacementLength = (AUint)strlen(replacement);

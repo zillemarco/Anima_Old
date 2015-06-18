@@ -10,7 +10,7 @@ import OpenGLCanvas
 
 class MainFrame(wx.Frame):
     def __init__(self, title):
-        wx.Frame.__init__(self, None, title = title, pos = (150, 150), size = (350, 200))
+        wx.Frame.__init__(self, None, title = title, pos = (150, 150), size = (500, 500))
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         menuBar = wx.MenuBar()

@@ -54,21 +54,12 @@ endif()
 set(BOOST_ROOT ${ANIMA_ENGINE_BOOST_ROOT_PATH})
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-find_package(Boost 1.57.0 REQUIRED COMPONENTS thread system date_time chrono)
+find_package(Boost 1.57.0 REQUIRED COMPONENTS thread system date_time chrono python)
 
 if(Boost_FOUND)
 	list(APPEND AnimaEngine_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 	set(AnimaEngine_BOOST_LIBS ${Boost_LIBRARIES})
 endif()
-
-#set(CMAKE_AUTOMOC ON)
-#set(CMAKE_PREFIX_PATH ${ANIMA_ENGINE_QT5_ROOT_PATH})
-#find_package(Qt5Widgets)
-#find_package(Qt5Declarative)
-
-#if(NOT Qt5Widgets_FOUND)
-#	message("Qt5 not found but is needed to compile AnimaEditor")
-#endif()
 
 if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 	find_path(NVTEXT_INC NAMES "include/nvToolsExt.h" PATHS ${ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH} NO_DEFAULT_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
@@ -231,9 +222,6 @@ list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(AnimaEngine)
-
-# Tolto temporaneamente per testare Python
-#add_subdirectory(AnimaEditor)
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
     add_subdirectory(docs)
