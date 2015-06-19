@@ -409,11 +409,18 @@ bool AnimaTexture::Load()
 				}
 			}
 			else
+			{
+				glBindTexture(_textureTarget, 0);
 				return false;
+			}
 			
 			if (glGetError() != GL_NO_ERROR)
+			{
+				glBindTexture(_textureTarget, 0);
 				return false;
+			}
 
+			glBindTexture(_textureTarget, 0);
 			_needsResize = false;
 		}
 

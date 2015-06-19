@@ -3,12 +3,15 @@ __author__ = 'Marco'
 import wx
 import details
 import AnimaEngine
+import threading
 
 class OpenGLCanvas(wx.Window):
     def __init__(self, parent):
         wx.Window.__init__(self, parent, style = wx.SIMPLE_BORDER | wx.FULL_REPAINT_ON_RESIZE)
 
-        details.describe(AnimaEngine)
+        #details.describe(AnimaEngine)
+
+        self.ondrawcalls = 0
 
         self.init = False
         self.initRenderer = False
@@ -34,21 +37,33 @@ class OpenGLCanvas(wx.Window):
         modelsManager = self.scene.GetModelsManager()
         assert isinstance(modelsManager, AnimaEngine.AnimaModelsManager)
 
-        model = modelsManager.LoadModel("D:/Git/Anima/AnimaEngine/data/models/cubo.3ds", "cubo")
-        assert isinstance(model, AnimaEngine.AnimaModel)
+        #self.model = modelsManager.LoadModel("D:/Git/Anima/AnimaEngine/data/models/cubo.3ds", "cubo")
+        self.model = modelsManager.LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", "uomo")
+        assert isinstance(self.model, AnimaEngine.AnimaModel)
 
-        camerasManager = self.scene.GetCamerasManager()
-        assert isinstance(camerasManager, AnimaEngine.AnimaCamerasManager)
-        fpc = camerasManager.CreateFirstPersonCamera("camera")
-        assert isinstance(fpc, AnimaEngine.AnimaFirstPersonCamera)
-        self.camera = camerasManager.GetCameraFromName("camera")
+        self.camerasManager = self.scene.GetCamerasManager()
+        assert isinstance(self.camerasManager, AnimaEngine.AnimaCamerasManager)
+        self.camera = self.camerasManager.CreateFirstPersonCamera("camera")
+        assert isinstance(self.camera, AnimaEngine.AnimaFirstPersonCamera)
+        self.camera.LookAt(0.0, 90.0, 200.0, 0.0, 0.0, -1.0)
         self.camera.Activate()
+
+        self.animationsManager = self.scene.GetAnimationsManager()
+        assert isinstance(self.animationsManager, AnimaEngine.AnimaAnimationsManager)
+
+        self.timer = AnimaEngine.AnimaTimer()
+        assert isinstance(self.timer, AnimaEngine.AnimaTimer)
 
         self.renderer = AnimaEngine.AnimaRenderer(self.engine, self.engine.GetGenericAllocator())
 
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseEvent)
+
+    def __del__(self):
+        del self.renderer
+        self.engine.Terminate()
 
     def OnEraseBackground(self, event):
         pass
@@ -56,6 +71,10 @@ class OpenGLCanvas(wx.Window):
     def OnSize(self, event):
         wx.CallAfter(self.SetViewport)
         event.Skip()
+
+    def OnMouseEvent(self, event):
+        if event.LeftUp():
+            self.Refresh()
 
     def OnPaint(self, event):
         self.context.MakeCurrent()
@@ -76,7 +95,7 @@ class OpenGLCanvas(wx.Window):
             prepareProgram = shadersManager.CreateProgram("deferred-prepare")
             assert isinstance(prepareProgram, AnimaEngine.AnimaShaderProgram)
             prepareProgram.Create()
-            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-prepare-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-prepare-animated-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
             prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-prepare-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             prepareProgram.Link()
 
@@ -116,18 +135,30 @@ class OpenGLCanvas(wx.Window):
             fxaaFilterProgram.Link()
 
             #/Users/marco/Documents/Progetti/Repository
+            self.timer.Reset()
 
             self.init = True
 
     def SetViewport(self):
         size = self.GetClientSize()
+        vertex = AnimaEngine.AnimaVertex2f(size.width, size.height)
+        self.camerasManager.UpdatePerspectiveCameras(60.0, vertex, 0.1, 10000.0)
 
         self.renderer.InitRenderingTargets(size.width, size.height)
         self.renderer.InitRenderingUtilities(size.width, size.height)
 
         self.initRenderer = True
 
+    def Redraw(self):
+        self.Refresh()
+        #self.Update()
+
     def OnDraw(self):
         if self.init == True and self.initRenderer == True:
+            if self.model.GetAnimationsCount > 0:
+                animation = self.model.GetAnimation(0)
+                assert isinstance(animation, AnimaEngine.AnimaAnimation)
+                animation.UpdateAnimation(self.model, self.timer.Elapsed())
             self.renderer.Start(self.scene)
-            self.renderer.DrawAll()
+            self.renderer.DrawModel(self.model)
+        threading.Timer(0.0001, self.Redraw).start()
