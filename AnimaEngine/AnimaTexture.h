@@ -69,7 +69,7 @@ public:
 	void Resize(AUint width, AUint height);
 	
 	void Bind(AUint unit) const;
-	void BindAsRenderTarget() const;
+	void BindAsRenderTarget();
 
 private:
 	AUint _width;

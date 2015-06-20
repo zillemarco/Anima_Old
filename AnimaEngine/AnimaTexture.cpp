@@ -486,7 +486,21 @@ bool AnimaTexture::Load()
 bool AnimaTexture::LoadRenderTargets()
 {
 	if (_renderTargetsReady && _texturesReady)
-		return Load();
+	{
+		bool needsResize = _needsResize;
+		bool loadResult = Load();
+
+		if (loadResult && needsResize)
+		{
+			if (_renderBuffer != 0)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+			}
+		}
+
+		return loadResult;
+	}
 	
 	if(_attachment == GL_NONE)
 		return false;
@@ -551,13 +565,18 @@ void AnimaTexture::Unload()
 	if (!IsReady())
 		return;
 
-	if(_textureID != 0) 
+	if (_textureID != 0)
+	{
 		glDeleteTextures(1, &_textureID);
+		_textureID = 0;
+	}
 
 	if (AreRenderTargetsReady())
 	{
 		glDeleteFramebuffers(1, &_frameBuffer);
 		glDeleteRenderbuffers(1, &_renderBuffer);
+		_frameBuffer = 0;
+		_renderBuffer = 0;
 	}
 		
 	_texturesReady = false;
@@ -581,9 +600,9 @@ void AnimaTexture::Bind(AUint unit) const
 	glBindTexture(_textureTarget, _textureID);
 }
 
-void AnimaTexture::BindAsRenderTarget() const
+void AnimaTexture::BindAsRenderTarget()
 {
-	ANIMA_ASSERT(_renderTargetsReady);
+	ANIMA_ASSERT(LoadRenderTargets());
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);

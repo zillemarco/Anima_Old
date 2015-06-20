@@ -163,7 +163,7 @@ public:
 	 *	\sa			Create()
 	 *	\author		Zille Marco
 	 */
-	void BindAsRenderTarget() const;
+	void BindAsRenderTarget();
 	
 	/*!
 	 *	\brief		Torna una delle texture del GBuffer

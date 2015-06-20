@@ -196,14 +196,17 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 	AnimaVertex2f oldSize = GetVector2f("ScreenSize");
 	AnimaVertex2f newSize((AFloat)screenWidth, (AFloat)screenHeight);
 
+	AUint width = (AUint)screenWidth;
+	AUint height = (AUint)screenHeight;
+
 	if (oldSize != newSize)
 	{
 		AnimaGBuffer* prepassBuffer = GetGBuffer("PrepassBuffer");
 		if (prepassBuffer != nullptr)
-			prepassBuffer->Resize(screenWidth, screenHeight);
+			prepassBuffer->Resize(width, height);
 		else
 		{
-			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
 			prepassBuffer->AddTexture("DepthMap", GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("AlbedoMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("NormalMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
@@ -215,10 +218,10 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 
 		AnimaGBuffer* lightsBuffer = GetGBuffer("LightsBuffer");
 		if (lightsBuffer != nullptr)
-			lightsBuffer->Resize(screenWidth, screenHeight);
+			lightsBuffer->Resize(width, height);
 		else
 		{
-			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, screenWidth, screenHeight);
+			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
 			lightsBuffer->AddTexture("EmissiveMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			lightsBuffer->AddTexture("SpecularMap", GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST, GL_CLAMP_TO_EDGE);
 			ANIMA_ASSERT(lightsBuffer->Create());
@@ -241,10 +244,10 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		
 		AnimaTexture* diffuseTexture = GetTexture("DiffuseMap");
 		if(diffuseTexture != nullptr)
-			diffuseTexture->Resize(screenWidth, screenHeight);
+			diffuseTexture->Resize(width, height);
 		else
 		{
-			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
+			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", GL_TEXTURE_2D, width, height, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}

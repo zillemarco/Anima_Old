@@ -150,6 +150,12 @@ bool AnimaGBuffer::Create()
 			for (auto element = indexIterator.begin(), end = indexIterator.end(); element != end; element++)
 				(*element)->_texture->Load();
 
+			if (_renderBuffer != 0)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+			}
+
 			_needsResize = false;
 		}
 
@@ -213,16 +219,23 @@ bool AnimaGBuffer::Create()
 	}
 	
 	_created = true;
+
 	return true;
 }
 
 void AnimaGBuffer::Destroy()
 {
 	if (_frameBuffer != 0)
+	{
 		glDeleteFramebuffers(1, &_frameBuffer);
+		_frameBuffer = 0;
+	}
 
 	if (_renderBuffer != 0)
+	{
 		glDeleteRenderbuffers(1, &_renderBuffer);
+		_renderBuffer = 0;
+	}
 
 	_created = false;
 }
@@ -233,6 +246,10 @@ void AnimaGBuffer::Resize(AUint width, AUint height)
 	{
 		_width = width;
 		_height = height;
+
+		_needsResize = true;
+
+		//Destroy();
 
 		AnimaGBufferDataSetByIndex& indexIterator = get<0>(_texturesSet);
 		for (auto element = indexIterator.begin(), end = indexIterator.end(); element != end; element++)
@@ -256,9 +273,9 @@ AnimaTexture* AnimaGBuffer::GetTexture(const char* name)
 	return GetTexture(str);
 }
 
-void AnimaGBuffer::BindAsRenderTarget() const
+void AnimaGBuffer::BindAsRenderTarget()
 {
-	ANIMA_ASSERT(_created);
+	ANIMA_ASSERT(Create());
 
 	if(glGetError() != GL_NO_ERROR)
 		return;
