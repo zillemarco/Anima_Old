@@ -104,9 +104,6 @@ public:
 protected:
 	static bool StringInExtensionString(const char* string, const GLubyte* extensions);
 	static const AnimaGCFrameBufferConfig* ChooseFrameBufferConfig(const AnimaGCFrameBufferConfig* desired, const AnimaGCFrameBufferConfig* alternatives, unsigned int count);
-	
-protected:
-	static bool _GLEWExtensionsLoaded;
 
 #ifdef _WIN32
 	public:
@@ -151,6 +148,7 @@ protected:
 		static bool _contextAPIsInitialized;
 #else
 #endif
+	static bool _GLEWExtensionsLoaded;
 };
 
 END_ANIMA_ENGINE_NAMESPACE
