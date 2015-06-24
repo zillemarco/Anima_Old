@@ -134,7 +134,7 @@ void AnimaShader::SetType(AnimaShaderType type)
 	_type = type;
 }
 
-AnimaShader::AnimaShaderType AnimaShader::GetType()
+AnimaShaderType AnimaShader::GetType()
 {
 	return _type;
 }

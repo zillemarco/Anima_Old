@@ -9,22 +9,14 @@ class OpenGLCanvas(wx.Window):
     def __init__(self, parent):
         wx.Window.__init__(self, parent, style = wx.SIMPLE_BORDER | wx.FULL_REPAINT_ON_RESIZE)
 
-        #details.describe(AnimaEngine)
-
         self.ondrawcalls = 0
 
         self.init = False
         self.initRenderer = False
 
-        fbConfig = AnimaEngine.AnimaGC.GetDefaultFrameBufferConfig()
-        ctConfig = AnimaEngine.AnimaGC.GetDefaultContextConfig()
+        self.context = None
 
-        windowId = self.GetHandle()
-
-        self.context = AnimaEngine.AnimaGC.CreateContext(windowId, ctConfig, fbConfig)
-        assert isinstance(self.context, AnimaEngine.AnimaGC)
-
-        self.engine = AnimaEngine.AnimaEngine();
+        self.engine = AnimaEngine.AnimaEngine()
         assert isinstance(self.engine, AnimaEngine.AnimaEngine)
         self.engine.Initialize()
 
@@ -37,8 +29,8 @@ class OpenGLCanvas(wx.Window):
         modelsManager = self.scene.GetModelsManager()
         assert isinstance(modelsManager, AnimaEngine.AnimaModelsManager)
 
-        #self.model = modelsManager.LoadModel("D:/Git/Anima/AnimaEngine/data/models/cubo.3ds", "cubo")
-        self.model = modelsManager.LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", "uomo")
+        #self.model = modelsManager.LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", "uomo")
+        self.model = modelsManager.LoadModel("/Users/marco/Documents/Modelli/Model_MR.dae", "uomo")
         assert isinstance(self.model, AnimaEngine.AnimaModel)
 
         self.camerasManager = self.scene.GetCamerasManager()
@@ -77,61 +69,80 @@ class OpenGLCanvas(wx.Window):
             self.Refresh()
 
     def OnPaint(self, event):
-        self.context.MakeCurrent()
 
         if not self.init:
             self.InitGl()
 
+        self.context.MakeCurrent()
         self.OnDraw()
         self.context.SwapBuffers()
 
     def InitGl(self):
+
+        if self.context is None:
+            fbConfig = AnimaEngine.AnimaGC.GetDefaultFrameBufferConfig()
+            ctConfig = AnimaEngine.AnimaGC.GetDefaultContextConfig()
+
+            windowId = self.GetHandle()
+            self.context = AnimaEngine.AnimaGC.CreateContext(windowId, ctConfig, fbConfig)
+            assert isinstance(self.context, AnimaEngine.AnimaGC)
+
+            self.context.MakeCurrent()
+
         result = AnimaEngine.AnimaGC.InitializeGLEWExtensions()
         if result:
             assert isinstance(self.scene, AnimaEngine.AnimaScene)
             shadersManager = self.scene.GetShadersManager()
             assert isinstance(shadersManager, AnimaEngine.AnimaShadersManager)
 
+            #deferredStart = "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/"
+            #primitivesStart = "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/"
+            #filtersStart = "D:/Git/Anima/AnimaEngine/data/shaders/Filters/"
+
+            deferredStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Deferred/"
+            primitivesStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Primitive/"
+            filtersStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Filters/"
+
             prepareProgram = shadersManager.CreateProgram("deferred-prepare")
             assert isinstance(prepareProgram, AnimaEngine.AnimaShaderProgram)
             prepareProgram.Create()
-            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-prepare-animated-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-prepare-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-vs", deferredStart + "deferred-prepare-animated-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            prepareProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-prepare-fs", deferredStart + "deferred-prepare-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             prepareProgram.Link()
 
             shadowProgram = shadersManager.CreateProgram("deferred-shadowMap")
             assert isinstance(shadowProgram, AnimaEngine.AnimaShaderProgram)
             shadowProgram.Create()
-            shadowProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-shadowMap-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-shadowMap-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            shadowProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-shadowMap-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-shadowMap-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            shadowProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-shadowMap-vs", deferredStart + "deferred-shadowMap-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            shadowProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-shadowMap-fs", deferredStart + "deferred-shadowMap-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             shadowProgram.Link()
 
             combineProgram = shadersManager.CreateProgram("deferred-combine")
             assert isinstance(combineProgram, AnimaEngine.AnimaShaderProgram)
             combineProgram.Create()
-            combineProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-combine-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-combine-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            combineProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-combine-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/deferred-combine-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            combineProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-combine-vs", deferredStart + "deferred-combine-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            combineProgram.AddShader(shadersManager.LoadShaderFromFile("deferred-combine-fs", deferredStart + "deferred-combine-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             combineProgram.Link()
 
             primitiveDrawProgram = shadersManager.CreateProgram("primitive-draw")
             assert isinstance(primitiveDrawProgram, AnimaEngine.AnimaShaderProgram)
             primitiveDrawProgram.Create()
-            primitiveDrawProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-draw-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/primitive-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            primitiveDrawProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-draw-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/primitive-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            primitiveDrawProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-draw-vs", primitivesStart + "primitive-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            primitiveDrawProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-draw-fs", primitivesStart + "primitive-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             primitiveDrawProgram.Link()
 
             primitiveCombineProgram = shadersManager.CreateProgram("primitive-combine")
             assert isinstance(primitiveCombineProgram, AnimaEngine.AnimaShaderProgram)
             primitiveCombineProgram.Create()
-            primitiveCombineProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-combine-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/combine-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            primitiveCombineProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-combine-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/combine-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            primitiveCombineProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-combine-vs", primitivesStart + "combine-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            primitiveCombineProgram.AddShader(shadersManager.LoadShaderFromFile("primitive-combine-fs", primitivesStart + "combine-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             primitiveCombineProgram.Link()
 
             fxaaFilterProgram = shadersManager.CreateProgram("fxaaFilter")
             assert isinstance(fxaaFilterProgram, AnimaEngine.AnimaShaderProgram)
             fxaaFilterProgram.Create()
-            fxaaFilterProgram.AddShader(shadersManager.LoadShaderFromFile("fxaaFilter-vs", "D:/Git/Anima/AnimaEngine/data/shaders/Filters/fxaaFilter-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
-            fxaaFilterProgram.AddShader(shadersManager.LoadShaderFromFile("fxaaFilter-fs", "D:/Git/Anima/AnimaEngine/data/shaders/Filters/fxaaFilter-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
+            fxaaFilterProgram.AddShader(shadersManager.LoadShaderFromFile("fxaaFilter-vs", filtersStart + "fxaaFilter-vs.glsl", AnimaEngine.AnimaShaderType.VERTEX))
+            fxaaFilterProgram.AddShader(shadersManager.LoadShaderFromFile("fxaaFilter-fs", filtersStart + "fxaaFilter-fs.glsl", AnimaEngine.AnimaShaderType.FRAGMENT))
             fxaaFilterProgram.Link()
 
             #/Users/marco/Documents/Progetti/Repository
@@ -151,7 +162,6 @@ class OpenGLCanvas(wx.Window):
 
     def Redraw(self):
         self.Refresh()
-        #self.Update()
 
     def OnDraw(self):
         if self.init == True and self.initRenderer == True:

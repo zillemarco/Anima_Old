@@ -19,23 +19,23 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class AnimaShadersManager;
 class AnimaRenderer;
 
+enum AnimaShaderInfoType {
+	SHADER_FILE,
+	SHADER_TEXT
+};
+
 class ANIMA_ENGINE_EXPORT AnimaShaderProgram
 {
 public:
-	enum AnimaShaderInfoType {
-		SHADER_FILE,
-		SHADER_TEXT
-	};
-
 	struct AnimaShaderInfo {
-		const AChar*					_text;
-		AnimaShaderInfoType				_infoType;
-		AnimaShader::AnimaShaderType	_shaderType;
+		const AChar*		_text;
+		AnimaShaderInfoType	_infoType;
+		AnimaShaderType		_shaderType;
 
 		AnimaShaderInfo() {
 			_text = "";
 			_infoType = SHADER_FILE;
-			_shaderType = AnimaShader::VERTEX;
+			_shaderType = VERTEX;
 		}
 	};
 

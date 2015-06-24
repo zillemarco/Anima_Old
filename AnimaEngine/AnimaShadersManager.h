@@ -21,15 +21,15 @@ public:
 	AnimaShadersManager(AnimaEngine* engine);
 	~AnimaShadersManager();
 
-	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShader(const AnimaString& name, const AChar* text, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShader(const char* name, const AnimaString& text, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShader(const char* name, const AChar* text, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShaderType type);
+	AnimaShader* LoadShader(const AnimaString& name, const AChar* text, AnimaShaderType type);
+	AnimaShader* LoadShader(const char* name, const AnimaString& text, AnimaShaderType type);
+	AnimaShader* LoadShader(const char* name, const AChar* text, AnimaShaderType type);
 	
-	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AnimaString& filePath, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const char* name, const AnimaString& filePath, AnimaShader::AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShader::AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AnimaString& filePath, AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const char* name, const AnimaString& filePath, AnimaShaderType type);
+	AnimaShader* LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShaderType type);
 	
 	AnimaShader* LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info);
 	AnimaShader* LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info);

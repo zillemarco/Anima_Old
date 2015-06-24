@@ -51,24 +51,24 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 	return program;
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AnimaString& text, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AnimaString& text, AnimaShaderType type)
 {
 	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShader(name, text.GetConstBuffer(), type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AnimaString& text, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AnimaString& text, AnimaShaderType type)
 {
 	return LoadShader(name, text.GetConstBuffer(), type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AChar* text, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AChar* text, AnimaShaderType type)
 {
 	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShader(str, text, type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AChar* text, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AChar* text, AnimaShaderType type)
 {
 	AnimaShader* sh = CreateShader(name);
 	sh->SetText(text);
@@ -76,24 +76,24 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const ACha
 	return sh;
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AnimaString &filePath, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AnimaString &filePath, AnimaShaderType type)
 {
 	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShaderFromFile(str, filePath, type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AnimaString &filePath, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AnimaString &filePath, AnimaShaderType type)
 {
 	return LoadShaderFromFile(name, filePath.GetConstBuffer(), type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShaderType type)
 {
 	AnimaString str(name, _engine->GetStringAllocator());
 	return LoadShaderFromFile(str, filePath, type);
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShader::AnimaShaderType type)
+AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShaderType type)
 {
 	AnimaShader* sh = nullptr;
 	AnimaString str(_engine->GetStringAllocator());
@@ -136,7 +136,7 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, AnimaShade
 {
 	AnimaShader* sh = nullptr;
 
-	if (info._infoType == AnimaShaderProgram::SHADER_TEXT)
+	if (info._infoType == SHADER_TEXT)
 	{
 		sh = LoadShader(name, info._text, info._shaderType);
 	}

@@ -9,6 +9,7 @@ endif()
 
 add_definitions(-DANIMA_ENGINE_EXPORT_ENABLED)
 add_definitions(-DGL_GLEXT_PROTOTYPES)
+add_definitions(-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0)
 
 set(ANIMA_ENGINE_MODELS_PATH "${PROJECT_SOURCE_DIR}/data/models/")
 set(ANIMA_ENGINE_SHADERS_PATH "${PROJECT_SOURCE_DIR}/data/shaders/")
@@ -131,22 +132,35 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMeshInstancesManager.cpp
 					AnimaAnimation.cpp
 					AnimaAnimationsManager.cpp
-					AnimaNamedObject.cpp
-					AnimaGC.cpp)
+					AnimaNamedObject.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
-	set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp)
+
+	if(APPLE)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm)
+	else()
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp)
+	endif()
 	
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
 else()
 	set(AnimaEngineCore_HEADERS	${common_HEADERS})
-	set(AnimaEngineCore_SOURCES	${common_SOURCES})
+
+	if(APPLE)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm)
+	else()
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp)
+	endif()
 
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
 endif()
 
-source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
+if(APPLE)
+	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.mm)
+else()
+	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
+endif()
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
@@ -185,7 +199,7 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	
 	if(APPLE)
 		set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/Python")
-		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include/python3.4m")
+		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include/${ANIMA_ENGINE_PYTHON_INC_DIR_NAME}")
 	else()
 		set(PYTHON_LIBRARY "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/libs/${ANIMA_ENGINE_PYTHON_LIB_NAME}")
 		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include")
@@ -252,7 +266,7 @@ if (WIN32)
 	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 		add_custom_command(	TARGET "${PROJECT_NAME}" POST_BUILD
 							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/bin/$<CONFIGURATION>/AnimaEngine.dll "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.pyd"
-							COMMENT "Copia _AnimaEngine.pyd")
+							COMMENT "Copia AnimaEngine.pyd")
 	endif()
 elseif(APPLE)
 	add_custom_command(	TARGET ${PROJECT_NAME} POST_BUILD
@@ -267,23 +281,11 @@ elseif(APPLE)
 						COMMAND ${CMAKE_COMMAND} ARGS -E copy ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.dylib "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/libassimp.dylib"
 						COMMENT "Copia libassimp.dylib")
 
-	#if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
-		#add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-		#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/AnimaEngine.py "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.py"
-		#					COMMENT "Copia AnimaEngine.py")
-														
-		#add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-		#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/_AnimaEngine.so "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/_AnimaEngine.so"
-		#					COMMENT "Copia _AnimaEngine.so")
-							
-		#add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-		#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/libAnimaEngine.0.0.0.dylib "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/libAnimaEngine.0.0.0.dylib"
-		#					COMMENT "Copia libAnimaEngine.0.0.0.dylib")
-
-		#add_custom_command(	TARGET "_${PROJECT_NAME}" POST_BUILD
-		#					COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/libAnimaEngine.dylib "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/libAnimaEngine.dylib"
-		#					COMMENT "Copia libAnimaEngine.dylib")
-	#endif()
+	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
+		add_custom_command(	TARGET "${PROJECT_NAME}" POST_BUILD
+							COMMAND ${CMAKE_COMMAND} ARGS -E copy ${CMAKE_BINARY_DIR}/Build/lib/$<CONFIGURATION>/libAnimaEngine.${ANIMA_ENGINE_VERSION}.dylib "${CMAKE_SOURCE_DIR}/AnimaEditor_PY/AnimaEngine/AnimaEngine.so"
+							COMMENT "Copia AnimaEngine.so")
+	endif()
 endif()
 
 if (ANIMA_ENGINE_INSTALL)
@@ -296,12 +298,7 @@ if (ANIMA_ENGINE_INSTALL)
 	INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngine/bin
 									LIBRARY DESTINATION AnimaEngine/lib
 									ARCHIVE DESTINATION AnimaEngine/lib)
-	
-	if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
-		#FILE(GLOB install_modules "${CMAKE_CURRENT_BINARY_DIR}/*.py")
-		#INSTALL(FILES ${install_modules} DESTINATION AnimaEngine/modules)
-	endif()
-	
+		
 	if(WIN32)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/assimp.dll 	DESTINATION AnimaEngine/bin)
 		if(ANIMA_ENGINE_USE_NVTOOLSEXT)

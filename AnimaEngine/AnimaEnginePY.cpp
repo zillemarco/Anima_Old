@@ -78,11 +78,6 @@ struct AnimaString_from_python_str
 	}
 };
 
-Anima::AnimaGC* wrap_CreateContext(int windowId, Anima::AnimaGCContextConfig ctxconfig, Anima::AnimaGCFrameBufferConfig fbconfig)
-{
-	return Anima::AnimaGC::CreateContext((void*)&(windowId), ctxconfig, fbconfig);
-}
-
 Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneChar)(const char*) = &Anima::AnimaScenesManager::CreateScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneInt)(Anima::AUint) = &Anima::AnimaScenesManager::GetScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetScene;
@@ -113,16 +108,16 @@ void (Anima::AnimaRenderer::*RendererDrawMeshInstance)(Anima::AnimaMeshInstance*
 void (Anima::AnimaRenderer::*RendererDrawModel)(Anima::AnimaModel*) = &Anima::AnimaRenderer::DrawModel;
 void (Anima::AnimaRenderer::*RendererDrawModelInstance)(Anima::AnimaModelInstance*) = &Anima::AnimaRenderer::DrawModel;
 
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharChar)(const char*, const char*, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharChar)(const char*, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringInfo)(const Anima::AnimaString&, Anima::AnimaShaderProgram::AnimaShaderInfo) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharInfo)(const char*, Anima::AnimaShaderProgram::AnimaShaderInfo) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharChar)(const char*, const char*, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShader::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharChar)(const char*, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
+Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*CreateShaderString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*CreateShaderChar)(const char*) = &Anima::AnimaShadersManager::CreateShader;
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateProgram;
@@ -317,20 +312,20 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("GetActiveProgram", &Anima::AnimaShadersManager::GetActiveProgram, return_value_policy<reference_existing_object>());
 
 	// AnimaShader
-	enum_<Anima::AnimaShader::AnimaShaderType>("AnimaShaderType")
-		.value("INVALID", Anima::AnimaShader::AnimaShaderType::INVALID)
-		.value("VERTEX", Anima::AnimaShader::AnimaShaderType::VERTEX)
-		.value("TESSELLATION_CONTROL", Anima::AnimaShader::AnimaShaderType::TESSELLATION_CONTROL)
-		.value("TESSELLATION_EVALUATION", Anima::AnimaShader::AnimaShaderType::TESSELLATION_EVALUATION)
-		.value("GEOMETRY", Anima::AnimaShader::AnimaShaderType::GEOMETRY)
-		.value("FRAGMENT", Anima::AnimaShader::AnimaShaderType::FRAGMENT);
+	enum_<Anima::AnimaShaderType>("AnimaShaderType")
+		.value("INVALID", Anima::INVALID)
+		.value("VERTEX", Anima::VERTEX)
+		.value("TESSELLATION_CONTROL", Anima::TESSELLATION_CONTROL)
+		.value("TESSELLATION_EVALUATION", Anima::TESSELLATION_EVALUATION)
+		.value("GEOMETRY", Anima::GEOMETRY)
+		.value("FRAGMENT", Anima::FRAGMENT);
 
 	class_<Anima::AnimaShader>("AnimaShader", no_init);
 
 	// AnimaShaderProgram
-	enum_<Anima::AnimaShaderProgram::AnimaShaderInfoType>("AnimaShaderInfoType")
-		.value("SHADER_FILE", Anima::AnimaShaderProgram::AnimaShaderInfoType::SHADER_FILE)
-		.value("SHADER_TEXT", Anima::AnimaShaderProgram::AnimaShaderInfoType::SHADER_TEXT);
+	enum_<Anima::AnimaShaderInfoType>("AnimaShaderInfoType")
+		.value("SHADER_FILE", Anima::SHADER_FILE)
+		.value("SHADER_TEXT", Anima::SHADER_TEXT);
 
 	class_<Anima::AnimaShaderProgram::AnimaShaderInfo>("AnimaShaderInfo")
 		.def_readwrite("text", &Anima::AnimaShaderProgram::AnimaShaderInfo::_text)
@@ -429,7 +424,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	
 	// AnimaGC
 	class_<Anima::AnimaGC>("AnimaGC", no_init)
-		.def("CreateContext", &wrap_CreateContext, return_value_policy<manage_new_object>())
+		.def("CreateContext", &Anima::AnimaGC::CreateContext, return_value_policy<manage_new_object>())
 		.def("DestroyContext", &Anima::AnimaGC::DestroyContext)
 		.def("GetDefaultContextConfig", &Anima::AnimaGC::GetDefaultContextConfig)
 		.def("GetDefaultFrameBufferConfig", &Anima::AnimaGC::GetDefaultFrameBufferConfig)

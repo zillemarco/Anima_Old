@@ -702,57 +702,102 @@ void AnimaShaderProgram::ScanVariables()
 		AnimaString name(_allocator);
 		AnimaString namePart1(_allocator);
 		AnimaString namePart2(_allocator);
-		AnimaString tmp(_allocator);
+		AnimaString tmpName(_allocator);
+		AnimaString nameGetter(_allocator);
 		GLenum type;
 		GLsizei bufLen;
 		GLsizei elements;
 		GLint location;
-
-		tmp.Reserve(200);
-
+		
+		nameGetter.Reserve(200);
+		
 		for (int i = 0; i < numActiveUniforms; i++)
 		{
-			//glGetActiveUniform(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
-			//name.Reserve(bufLen);
-			//name.SetString(tmp.GetBuffer());
-			//name.Trim();
-			//
-			//location = glGetUniformLocation(_id, name.GetConstBuffer());
-
-			//namePart1 = name;
-
-			//AUint offset = namePart1.CountOf('_') + 1;
-			//AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
-
-			//offset = 0;
-			//int pos = namePart1.Find('_');
-			//while (pos != -1)
-			//{
-			//	namePart2 = namePart1.Substring(0, pos);
-			//	namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
-
-			//	if (!namePart2.IsEmpty())
-			//		nameParts[offset++] = namePart2;
-			//	pos = namePart1.Find('_');
-			//}
-
-			//nameParts[offset++] = namePart1;
-
-			//AnimaUniformInfo info;
-			//info._location = location;
-			//info._type = type;
-			//info._name = name;
-			//info._nameParts = nameParts;
-			//info._namePartsCount = offset;
-
-			//_uniforms[name] = info;
+			glGetActiveUniform(_id, i, (int)nameGetter.GetBufferLength() - 1, &bufLen, &elements, &type, nameGetter.GetBuffer());
+			
+			name.Reserve(bufLen);
+			name.SetString(nameGetter.GetBuffer());
+			name.Trim();
+			
+			namePart1 = name;
+			
+			AInt arraySize = elements;
+			
+			AInt* locations = nullptr;
+			AInt locationsCount = 0;
+			
+			AInt pos = -1;
+			
+			if (arraySize > 0)
+			{
+				pos = namePart1.Find('[');
+				if (pos != -1)
+				{
+					name = namePart1.Substring(0, pos);
+					
+					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, arraySize);
+					locationsCount = arraySize;
+					
+					for (AInt nu = 0; nu < arraySize; nu++)
+					{
+						tmpName.Format("%s[%d]", name.GetConstBuffer(), nu);
+						
+						locations[nu] = glGetUniformLocation(_id, tmpName.GetConstBuffer());
+					}
+				}
+				else
+				{
+					arraySize = 0;
+					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
+					locationsCount = 1;
+					
+					locations[0] = glGetUniformLocation(_id, namePart1.GetConstBuffer());
+				}
+			}
+			else
+			{
+				locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
+				locationsCount = 1;
+				
+				locations[0] = glGetUniformLocation(_id, namePart1.GetConstBuffer());
+			}
+			
+			namePart1 = name;
+			AUint offset = namePart1.CountOf('_') + 1;
+			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
+			
+			offset = 0;
+			pos = namePart1.Find('_');
+			while (pos != -1)
+			{
+				namePart2 = namePart1.Substring(0, pos);
+				namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
+				
+				if (!namePart2.IsEmpty())
+					nameParts[offset++] = namePart2;
+				pos = namePart1.Find('_');
+			}
+			
+			nameParts[offset++] = namePart1;
+			
+			AnimaUniformInfo info;
+			info._locations = locations;
+			info._locationsCount = locationsCount;
+			info._type = type;
+			info._arraySize = arraySize;
+			info._name = name;
+			info._nameParts = nameParts;
+			info._namePartsCount = offset;
+			
+			_uniforms[name] = info;
 		}
 
 		for (int i = 0; i < numActiveInputs; i++)
 		{
-			glGetActiveAttrib(_id, i, (int)tmp.GetBufferLength() - 1, &bufLen, &elements, &type, tmp.GetBuffer());
+			glGetActiveAttrib(_id, i, (int)nameGetter.GetBufferLength() - 1, &bufLen, &elements, &type, nameGetter.GetBuffer());
 			name.Reserve(bufLen);
-			name.SetString(tmp.GetBuffer());
+			name.SetString(nameGetter.GetBuffer());
+			name.Trim();
 			
 			location = glGetAttribLocation(_id, name.GetConstBuffer());
 

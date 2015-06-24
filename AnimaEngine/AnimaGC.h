@@ -9,6 +9,13 @@
 #if defined WIN32
 #	include <GL/wglew.h>
 #	include <windows.h>
+#else
+#	if defined __OBJC__
+#		import <Cocoa/Cocoa.h>
+#	else
+#		include <ApplicationServices/ApplicationServices.h>
+		typedef void* id;
+#	endif
 #endif
 
 #include "AnimaEngineCore.h"
@@ -92,7 +99,7 @@ public:
 	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
 
 public:
-	static AnimaGC* CreateContext(void* windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig);
+	static AnimaGC* CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig);
 	static void DestroyContext(AnimaGC* context);
 	static void SetSwapInterval(AInt interval);
 
@@ -107,6 +114,7 @@ protected:
 	
 protected:
 	static bool _GLEWExtensionsLoaded;
+	static bool _contextAPIsInitialized;
 
 #ifdef _WIN32
 	public:
@@ -148,8 +156,25 @@ protected:
 		static bool _ARB_context_flush_control;
 
 		static bool _GLWExtensionsLoaded;
-		static bool _contextAPIsInitialized;
 #else
+	public:
+		bool CheckIntegrity(NSView* view);
+		NSOpenGLContext* GetContext();
+	
+	protected:
+		static bool InitializeContextAPIs();
+		static void TerminateContextAPIs();
+	
+		static void SurfaceNeedsUpdateHandler(CFNotificationCenterRef center, void* observer, CFStringRef name, const void* object, CFDictionaryRef userInfo);
+	
+	protected:
+		NSView* _view;
+		NSOpenGLContext* _context;
+		NSOpenGLPixelFormat* _pixelFormat;
+	
+	protected:
+		static void* _framework;
+	
 #endif
 };
 

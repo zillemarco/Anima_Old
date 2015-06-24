@@ -328,8 +328,8 @@ bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
 	if (!pgr->Create())
 		return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::AnimaShader::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::FRAGMENT));
 
 	if (!pgr->Link())
 		return false;
@@ -434,8 +434,8 @@ bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
 	if (!pgr->Create())
 		return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::AnimaShader::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::FRAGMENT));
 
 	if (!pgr->Link())
 		return false;
@@ -551,8 +551,8 @@ bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 	if (!pgr->Create())
 		return false;
 	
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::AnimaShader::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::FRAGMENT));
 	
 	if (!pgr->Link())
 		return false;
@@ -639,8 +639,8 @@ bool AnimaHemisphereLight::CreateShader(AnimaShadersManager* shadersManager)
 	if (!pgr->Create())
 		return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::AnimaShader::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::AnimaShader::FRAGMENT));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::VERTEX));
+	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::FRAGMENT));
 
 	if (!pgr->Link())
 		return false;

@@ -24,7 +24,7 @@ set(ANIMA_ENGINE_NVTOOLSEXT_ROOT_PATH "" CACHE STRING "Path where CMake can find
 set(ANIMA_ENGINE_PYTHON_ROOT_PATH "" CACHE STRING "Path where CMake can find Python")
 
 if(APPLE)
-	set(ANIMA_ENGINE_PYTHON_LIB_NAME "libpython3.4.dylib" CACHE STRING "Name of Python library")
+    set(ANIMA_ENGINE_PYTHON_INC_DIR_NAME "python2.7" CACHE STRING "Name of Python include directory")
 else()
 	set(ANIMA_ENGINE_PYTHON_LIB_NAME "" CACHE STRING "Name of Python library")
 endif()
