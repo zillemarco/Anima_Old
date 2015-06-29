@@ -109,9 +109,9 @@ void AnimaModelInstance::UpdateChildrenTransformation()
 {
 	AnimaSceneObject::UpdateChildrenTransformation();
 	
-	//AInt meshesCount = _meshes.GetSize();
-	//for (AInt i = 0; i < meshesCount; i++)
-	//	_meshes[i]->GetTransformation()->UpdateMatrix();
+	AInt meshesCount = _meshes.GetSize();
+	for (AInt i = 0; i < meshesCount; i++)
+		_meshes[i]->GetTransformation()->UpdateMatrix();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

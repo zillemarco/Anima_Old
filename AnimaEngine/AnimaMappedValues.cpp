@@ -1483,7 +1483,7 @@ void AnimaMappedValues::CopyColors(const AnimaMappedValues& src)
 	for (auto pair : *srcColorsMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
-		SetColor(propertyName, pair.second);
+		SetColor(propertyName, pair.second->GetColor4f());
 	}
 }
 
@@ -1495,7 +1495,7 @@ void AnimaMappedValues::CopyVectors(const AnimaMappedValues& src)
 	for (auto pair : *srcVectorsMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
-		SetVector(propertyName, pair.second);
+		SetVector(propertyName, pair.second->GetVector4f());
 	}
 }
 

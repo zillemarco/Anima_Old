@@ -36,9 +36,12 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 	if (index >= 0)
 		return nullptr;
 
+	AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(instanceName + ".material");
+	newMaterial->CopyData(*srcMesh->GetMaterial());
+
 	AnimaMeshInstance* meshInstance = AnimaAllocatorNamespace::AllocateNew<AnimaMeshInstance>(*(_scene->GetMeshInstancesAllocator()), instanceName, _scene->GetDataGeneratorsManager(), _scene->GetMeshInstancesAllocator());
 	meshInstance->CopyData(*srcMesh);
-	meshInstance->SetMaterial(srcMesh->GetMaterial());
+	meshInstance->SetMaterial(newMaterial);
 	meshInstance->SetMesh(srcMesh);
 	srcMesh->AddInstance(meshInstance);
 
@@ -124,9 +127,12 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 			newInstance = CreateEmptyInstance(meshInstanceName);
 			nameOffset++;
 		}
+		
+		AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(meshInstanceName + ".material");
+		newMaterial->CopyData(*mesh->GetMaterial());
 
 		newInstance->CopyData(*mesh);
-		newInstance->SetMaterial(mesh->GetMaterial());
+		newInstance->SetMaterial(newMaterial);
 		newInstance->SetMesh(mesh);
 		mesh->AddInstance(newInstance);
 

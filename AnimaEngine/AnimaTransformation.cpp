@@ -438,8 +438,8 @@ void AnimaTransformation::UpdateMatrix()
 
 		if (parentObjectParent != nullptr)
 		{
-			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
-			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetMatrix("AModelMatrix") * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetMatrix("ANormalMatrix") * _normalMatrix;
 
 			_parentObject->SetMatrix("AModelMatrix", absoluteTransformationMatrix);
 			_parentObject->SetMatrix("ANormalMatrix", absoluteNormalMatrix);
@@ -467,8 +467,8 @@ void AnimaTransformation::SetTransformationMatrix(const AnimaMatrix& m)
 
 		if (parentObjectParent != nullptr)
 		{
-			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
-			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetMatrix("AModelMatrix") * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetMatrix("ANormalMatrix") * _normalMatrix;
 
 			_parentObject->SetMatrix("AModelMatrix", absoluteTransformationMatrix);
 			_parentObject->SetMatrix("ANormalMatrix", absoluteNormalMatrix);
@@ -496,8 +496,8 @@ void AnimaTransformation::SetTransformationMatrix(AFloat m[16])
 
 		if (parentObjectParent != nullptr)
 		{
-			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
-			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetMatrix("AModelMatrix") * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetMatrix("ANormalMatrix") * _normalMatrix;
 
 			_parentObject->SetMatrix("AModelMatrix", absoluteTransformationMatrix);
 			_parentObject->SetMatrix("ANormalMatrix", absoluteNormalMatrix);
@@ -525,8 +525,8 @@ void AnimaTransformation::SetNormalMatrix(const AnimaMatrix& m)
 
 		if (parentObjectParent != nullptr)
 		{
-			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
-			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetMatrix("AModelMatrix") * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetMatrix("ANormalMatrix") * _normalMatrix;
 
 			_parentObject->SetMatrix("AModelMatrix", absoluteTransformationMatrix);
 			_parentObject->SetMatrix("ANormalMatrix", absoluteNormalMatrix);
@@ -554,8 +554,8 @@ void AnimaTransformation::SetNormalMatrix(AFloat m[16])
 
 		if (parentObjectParent != nullptr)
 		{
-			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetTransformation()->GetTransformationMatrix() * _transformationMatrix;
-			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetTransformation()->GetNormalMatrix() * _normalMatrix;
+			AnimaMatrix absoluteTransformationMatrix = parentObjectParent->GetMatrix("AModelMatrix") * _transformationMatrix;
+			AnimaMatrix absoluteNormalMatrix = parentObjectParent->GetMatrix("ANormalMatrix") * _normalMatrix;
 
 			_parentObject->SetMatrix("AModelMatrix", _transformationMatrix);
 			_parentObject->SetMatrix("ANormalMatrix", _normalMatrix);
