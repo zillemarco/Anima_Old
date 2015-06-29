@@ -34,6 +34,7 @@ option(ANIMA_ENGINE_INSTALL "Generate installation target" OFF)
 option(BUILD_SHARED_LIBS "Build AnimaEngine as shared library" OFF)
 option(ANIMA_ENGINE_USE_NVTOOLSEXT "Enable NVToolsExt for debugging" OFF)
 option(ANIMA_ENGINE_EXPORT_TO_PYTHON "Enable AnimaEngine export to Python modulde" OFF)
+option(ANIMA_ENGINE_BUILD_DEMO "Enable AnimaEngine demos build" OFF)
 
 if (MSVC)
     option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON)
@@ -222,6 +223,10 @@ list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/
 # Add subdirectories
 #--------------------------------------------------------------------
 add_subdirectory(AnimaEngine)
+
+if(ANIMA_ENGINE_BUILD_DEMO)
+	add_subdirectory(AnimaEngineDemo)
+endif()
 
 if (DOXYGEN_FOUND AND ANIMA_ENGINE_BUILD_DOCS)
     add_subdirectory(docs)

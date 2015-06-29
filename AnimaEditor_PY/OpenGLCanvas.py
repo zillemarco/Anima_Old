@@ -29,8 +29,8 @@ class OpenGLCanvas(wx.Window):
         modelsManager = self.scene.GetModelsManager()
         assert isinstance(modelsManager, AnimaEngine.AnimaModelsManager)
 
-        #self.model = modelsManager.LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", "uomo")
-        self.model = modelsManager.LoadModel("/Users/marco/Documents/Modelli/Model_MR.dae", "uomo")
+        self.model = modelsManager.LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", "uomo")
+        #self.model = modelsManager.LoadModel("/Users/marco/Documents/Modelli/Model_MR.dae", "uomo")
         assert isinstance(self.model, AnimaEngine.AnimaModel)
 
         self.camerasManager = self.scene.GetCamerasManager()
@@ -95,13 +95,13 @@ class OpenGLCanvas(wx.Window):
             shadersManager = self.scene.GetShadersManager()
             assert isinstance(shadersManager, AnimaEngine.AnimaShadersManager)
 
-            #deferredStart = "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/"
-            #primitivesStart = "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/"
-            #filtersStart = "D:/Git/Anima/AnimaEngine/data/shaders/Filters/"
+            deferredStart = "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/"
+            primitivesStart = "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/"
+            filtersStart = "D:/Git/Anima/AnimaEngine/data/shaders/Filters/"
 
-            deferredStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Deferred/"
-            primitivesStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Primitive/"
-            filtersStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Filters/"
+            #deferredStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Deferred/"
+            #primitivesStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Primitive/"
+            #filtersStart = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Filters/"
 
             prepareProgram = shadersManager.CreateProgram("deferred-prepare")
             assert isinstance(prepareProgram, AnimaEngine.AnimaShaderProgram)
@@ -150,15 +150,18 @@ class OpenGLCanvas(wx.Window):
 
             self.init = True
 
+        self.SetViewport()
+
     def SetViewport(self):
-        size = self.GetClientSize()
-        vertex = AnimaEngine.AnimaVertex2f(size.width, size.height)
-        self.camerasManager.UpdatePerspectiveCameras(60.0, vertex, 0.1, 10000.0)
+        if self.init == True:
+            size = self.GetClientSize()
+            vertex = AnimaEngine.AnimaVertex2f(size.width, size.height)
+            self.camerasManager.UpdatePerspectiveCameras(60.0, vertex, 0.1, 10000.0)
 
-        self.renderer.InitRenderingTargets(size.width, size.height)
-        self.renderer.InitRenderingUtilities(size.width, size.height)
+            self.renderer.InitRenderingTargets(size.width, size.height)
+            self.renderer.InitRenderingUtilities(size.width, size.height)
 
-        self.initRenderer = True
+            self.initRenderer = True
 
     def Redraw(self):
         self.Refresh()

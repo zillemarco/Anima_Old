@@ -710,9 +710,9 @@ void AnimaGC::TerminateContextAPIs(void)
 		FreeLibrary(_OpenGL32Instance);
 }
 
-AnimaGC* AnimaGC::CreateContext(void* windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig)
+AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig)
 {
-	HWND hWnd = *((HWND*)windowId);
+	HWND hWnd = (HWND)windowId;
 
 	HDC hDC = ::GetDC(hWnd);
 
