@@ -95,7 +95,6 @@ AnimaMatrix AnimaMeshBoneInfo::GetFinalTransformation() const
 
 AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 : AnimaSceneObject(name, dataGeneratorsManager, allocator)
-, _materialName(allocator)
 , _meshInstances(allocator)
 , _vertices(allocator)
 , _normals(allocator)
@@ -106,7 +105,6 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 , _boneIDs(allocator)
 , _faces(allocator)
 , _shadersNames(allocator)
-, _shaderProgramName(allocator)
 {
 	_material = nullptr;
 
@@ -1454,7 +1452,7 @@ void AnimaMesh::AddShader(const AnimaString& shaderName)
 
 void AnimaMesh::AddShader(const char* shaderName)
 {
-	_shadersNames.Add(AnimaString(shaderName, nullptr));
+	_shadersNames.Add(AnimaString(shaderName));
 }
 
 AInt AnimaMesh::GetShadersCount() const

@@ -14,10 +14,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
-	, _materialName(allocator)
-	, _meshName(allocator)
 	, _shadersNames(allocator)
-	, _shaderProgramName(allocator)
 {
 	_material = nullptr;
 	_mesh = nullptr;
@@ -143,7 +140,7 @@ void AnimaMeshInstance::AddShader(const AnimaString& shaderName)
 
 void AnimaMeshInstance::AddShader(const char* shaderName)
 {
-	_shadersNames.Add(AnimaString(shaderName, nullptr));
+	_shadersNames.Add(AnimaString(shaderName));
 }
 
 AInt AnimaMeshInstance::GetShadersCount() const

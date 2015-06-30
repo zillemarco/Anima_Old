@@ -49,7 +49,7 @@ public:
 		if (_mappedNames.find(name) != _mappedNames.end())
 			return;
 
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		AnimaMappedArray<BASE_TYPE>* mappedArray = nullptr;
@@ -72,7 +72,7 @@ public:
 
 	template<class TYPE> void Add(const char* name, TYPE newElement)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		Add(str, newElement);
 	}
 
@@ -105,13 +105,13 @@ public:
 
 	BASE_TYPE GetWithName(const char* name) const
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return GetWithName(str);
 	}
 
 	template<class TYPE> TYPE GetWithNameAndType(AInt index) const
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -121,7 +121,7 @@ public:
 
 	template<class TYPE> TYPE GetWithNameAndType(const AnimaString& name) const
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -131,13 +131,13 @@ public:
 
 	template<class TYPE> TYPE GetWithNameAndType(const char* name) const
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return GetWithNameAndType(str);
 	}
 
 	template<class TYPE> void SetElementOfType(AInt index, TYPE newElement)
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -146,7 +146,7 @@ public:
 
 	template<class TYPE> void SetElementOfType(const AnimaString& name, TYPE newElement)
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -155,13 +155,13 @@ public:
 	
 	template<class TYPE> void SetElementOfType(const char* name, TYPE newElement)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return SetElementOfType(str, newElement);
 	}
 
 	template<class TYPE> void RemoveFromType(AInt index)
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -170,7 +170,7 @@ public:
 
 	template<class TYPE> void RemoveFromType(const AnimaString& name)
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -179,7 +179,7 @@ public:
 
 	template<class TYPE> void RemoveFromType(const char* name)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return RemoveFromType(str);
 	}
 
@@ -201,7 +201,7 @@ public:
 
 	template<class TYPE> AnimaMappedArray<TYPE>* GetMappedArrayOfType() const
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -211,7 +211,7 @@ public:
 
 	template<class TYPE> AnimaArray<BASE_TYPE>* GetMappedArrayArrayOfType() const
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -219,7 +219,7 @@ public:
 		return nullptr;
 	}
 
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaString::Hasher>* GetArraysMap()
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*>* GetArraysMap()
 	{
 		return &_mappedArrays;
 	}
@@ -234,7 +234,7 @@ public:
 
 	BASE_TYPE Contains(const char* name)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Contains(str);
 	}
 
@@ -248,7 +248,7 @@ public:
 
 	AnimaMappedArray<BASE_TYPE>* GetMappedArrayFromName(const char* name)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return GetMappedArrayFromName(str);
 	}
 
@@ -259,7 +259,7 @@ public:
 
 	template<class TYPE> AInt GetSizeOfType() const
 	{
-		AnimaString type(typeid(TYPE).name(), _allocator);
+		AnimaString type = typeid(TYPE).name();
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
@@ -271,8 +271,8 @@ protected:
 	AnimaAllocator* _allocator;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaString::Hasher> _mappedArrays;
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaString::Hasher> _mappedNames;
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*> _mappedArrays;
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*> _mappedNames;
 #pragma warning (default: 4251) 
 };
 

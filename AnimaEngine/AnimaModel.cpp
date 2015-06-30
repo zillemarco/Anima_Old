@@ -12,9 +12,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
-	, _materialName(allocator)
-	, _animationNodeName(allocator)
-	, _originFileName(allocator)
 	, _meshes(allocator)
 	, _meshesBonesInfo(allocator)
 	, _animations(allocator)
@@ -133,7 +130,7 @@ AnimaMesh* AnimaModel::GetMeshFromName(const AnimaString& name)
 
 AnimaMesh* AnimaModel::GetMeshFromName(const char* name)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return _meshes[name];
 }
 
@@ -175,7 +172,7 @@ AnimaString AnimaModel::GetAnimaOriginFileName() const
 
 const char* AnimaModel::GetOriginFileName() const
 {
-	return _originFileName.GetConstBuffer();
+	return _originFileName.c_str();
 }
 
 void AnimaModel::SetAnimationNodeName(const AnimaString& animationNodeName)
@@ -195,7 +192,7 @@ AnimaString AnimaModel::GetAnimaAnimationNodeName() const
 
 const char* AnimaModel::GetAnimationNodeName() const
 {
-	return _animationNodeName.GetConstBuffer();
+	return _animationNodeName.c_str();
 }
 
 AnimaMappedArray<AnimaMeshBoneInfo*>* AnimaModel::GetMeshesBonesInfo()

@@ -63,7 +63,7 @@ public:
 	inline AnimaAllocator* GetModelInstancesAllocator()	{ return _engine->GetModelInstancesAllocator(); }
 	inline AnimaAllocator* GetMeshInstancesAllocator()	{ return _engine->GetMeshInstancesAllocator();	}
 	inline AnimaAllocator* GetGenericAllocator()		{ return _engine->GetGenericAllocator();		}
-	inline AnimaAllocator* GetStringAllocator()			{ return _engine->GetStringAllocator();			}
+	// Deprecato	inline AnimaAllocator* GetStringAllocator()			{ return _engine->GetStringAllocator();			}
 	inline AnimaAllocator* GetShadersAllocator()		{ return _engine->GetShadersAllocator();		}
 	inline AnimaAllocator* GetCamerasAllocator()		{ return _engine->GetCamerasAllocator();		}
 	inline AnimaAllocator* GetTexturesAllocator()		{ return _engine->GetTexturesAllocator();		}

@@ -47,7 +47,7 @@ struct AnimaString_to_python_str
 {
 	static PyObject* convert(Anima::AnimaString const& str)
 	{
-		return incref(object(str.GetConstBuffer()).ptr());
+		return incref(object(str.c_str()).ptr());
 	}
 };
 
@@ -72,7 +72,7 @@ struct AnimaString_from_python_str
 
 		void* storage = ((converter::rvalue_from_python_storage<Anima::AnimaString>*)data)->storage.bytes;
 
-		new (storage)Anima::AnimaString(value, nullptr);
+		new (storage)Anima::AnimaString(value);
 
 		data->convertible = storage;
 	}
@@ -168,7 +168,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("GetMeshesAllocator", &Anima::AnimaEngine::GetMeshesAllocator, return_value_policy<reference_existing_object>())
 		.def("GetModelInstancesAllocator", &Anima::AnimaEngine::GetModelInstancesAllocator, return_value_policy<reference_existing_object>())
 		.def("GetMeshInstancesAllocator", &Anima::AnimaEngine::GetMeshInstancesAllocator, return_value_policy<reference_existing_object>())
-		.def("GetStringAllocator", &Anima::AnimaEngine::GetStringAllocator, return_value_policy<reference_existing_object>())
+		//	Deprecato	.def("GetStringAllocator", &Anima::AnimaEngine::GetStringAllocator, return_value_policy<reference_existing_object>())
 		.def("GetShadersAllocator", &Anima::AnimaEngine::GetShadersAllocator, return_value_policy<reference_existing_object>())
 		.def("GetCamerasAllocator", &Anima::AnimaEngine::GetCamerasAllocator, return_value_policy<reference_existing_object>())
 		.def("GetTexturesAllocator", &Anima::AnimaEngine::GetTexturesAllocator, return_value_policy<reference_existing_object>())

@@ -4,7 +4,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
-	, _text(allocator)
 {
 	_id = 0;
 	_compiled = false;
@@ -14,7 +13,6 @@ AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator)
 
 AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type)
 	: AnimaNamedObject(name, allocator)
-	, _text(allocator)
 {
 	_id = 0;
 	_compiled = false;
@@ -25,7 +23,6 @@ AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, Ani
 
 AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type)
 	: AnimaNamedObject(name, allocator)
-	, _text(allocator)
 {
 	_id = 0;
 	_compiled = false;
@@ -128,7 +125,7 @@ AnimaString AnimaShader::GetAnimaText()
 
 const char* AnimaShader::GetText()
 {
-	return _text.GetConstBuffer();
+	return _text.c_str();
 }
 
 void AnimaShader::SetType(AnimaShaderType type)
@@ -169,7 +166,7 @@ bool AnimaShader::Compile()
 	if (IsCompiled())
 		return true;
 
-	const GLchar* source = (const GLchar*)_text.GetBuffer();
+	const GLchar* source = (const GLchar*)_text.c_str();
 	glShaderSource(_id, 1, &source, NULL);
 	
 	glCompileShader(_id);

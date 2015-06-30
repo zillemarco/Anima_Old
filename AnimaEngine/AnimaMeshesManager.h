@@ -25,7 +25,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 #pragma warning (disable: 4251)
-typedef boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> BoneNameMap;
+typedef boost::unordered_map<AnimaString, AUint> BoneNameMap;
 #pragma warning (default: 4251)
 
 class ANIMA_ENGINE_EXPORT AnimaMeshesManager
@@ -35,9 +35,9 @@ public:
 	~AnimaMeshesManager();
 	
 public:
-	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap);
+	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString>* materialNamesMap);
 
-	AnimaArray<AnimaString*>* GetLastMeshesIndexMap();
+	AnimaArray<AnimaString>* GetLastMeshesIndexMap();
 	AnimaMappedArray<AnimaMeshBoneInfo*>* GetLastMeshesBonesInfo();
 	void ClearLastMeshesIndexMap();
 	void ClearLastMeshesBonesData();
@@ -60,7 +60,7 @@ private:
 	AnimaMaterialsManager* _materialsManager;
 
 	AnimaMappedArray<AnimaMesh*> _meshes;
-	AnimaArray<AnimaString*> _lastMeshesIndexMap;
+	AnimaArray<AnimaString> _lastMeshesIndexMap;
 
 	AnimaMappedArray<AnimaMeshBoneInfo*> _lastMeshesBonesInfo;
 };

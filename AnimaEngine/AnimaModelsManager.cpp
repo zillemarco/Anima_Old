@@ -35,19 +35,19 @@ AnimaModelsManager::~AnimaModelsManager()
 
 AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = modelPath;
 	return LoadModel(modelPath, str);
 }
 
 AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const AnimaString& name)
 {
-	AnimaString str(modelPath, _scene->GetStringAllocator());
+	AnimaString str = modelPath;
 	return LoadModel(str, name);
 }
 
 AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return LoadModel(modelPath, str);
 }
 
@@ -58,7 +58,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 		return nullptr;
 	
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(modelPath.GetConstBuffer(), /*aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs*/aiProcessPreset_TargetRealtime_Quality);
+	const aiScene* scene = importer.ReadFile(modelPath.c_str(), /*aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs*/aiProcessPreset_TargetRealtime_Quality);
 	
 	if (scene == nullptr)
 		return nullptr;
@@ -66,7 +66,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 	AnimaModel* newTopLevelModel = nullptr;
 
 	_materialsManager->LoadMaterialsFromModel(scene, name);
-	AnimaArray<AnimaString*>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
+	AnimaArray<AnimaString>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
 
 	_animationsManager->LoadAnimations(scene);
 	AnimaMappedArray<AnimaAnimation*>* loadedAnimations = _animationsManager->GetLastLoadedAnimations();
@@ -75,7 +75,7 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 	{
 		AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = _meshesManager->GetLastMeshesBonesInfo();
 
-		AnimaArray<AnimaString*>* meshesName = _meshesManager->GetLastMeshesIndexMap();		
+		AnimaArray<AnimaString>* meshesName = _meshesManager->GetLastMeshesIndexMap();		
 		newTopLevelModel = LoadModelFromScene(scene, scene->mRootNode, meshesName, name);
 						
 		newTopLevelModel->SetOriginFileName(modelPath);
@@ -90,11 +90,11 @@ AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const An
 	return newTopLevelModel;
 }
 
-AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString*>* meshesMap, const AnimaString& modelName)
+AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* meshesMap, const AnimaString& modelName)
 {
-	AnimaString newModelName(_scene->GetStringAllocator());
-	AnimaString animationNodeName(_scene->GetStringAllocator());
-	if (!modelName.IsEmpty())
+	AnimaString newModelName;
+	AnimaString animationNodeName;
+	if (!modelName.empty())
 		newModelName = modelName;
 	else
 		newModelName = sceneNode->mName.C_Str();
@@ -117,8 +117,8 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	for (AUint n = 0; n < sceneNode->mNumMeshes; n++)
 	{
 		AInt meshIndex = (AInt)sceneNode->mMeshes[n];
-		AnimaString* meshName = meshesMap->GetAt(meshIndex);
-		AnimaMesh* mesh = _meshesManager->GetMeshFromName(*meshName);
+		AnimaString meshName = meshesMap->GetAt(meshIndex);
+		AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
 		
 		ANIMA_ASSERT(mesh->GetParentObject() == nullptr);
 		mesh->SetParentObject(currentModel);
@@ -148,7 +148,7 @@ AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
 
 AnimaModel* AnimaModelsManager::CreateModel(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateModel(str);
 }
 
@@ -169,7 +169,7 @@ AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name)
 
 AnimaModel* AnimaModelsManager::GetModelFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetModelFromName(str);
 }
 

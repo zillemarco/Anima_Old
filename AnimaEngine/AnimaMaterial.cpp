@@ -71,7 +71,7 @@ void AnimaMaterial::AddShader(const AnimaString& shaderName)
 
 void AnimaMaterial::AddShader(const char* shaderName)
 {
-	_shadersNames.Add(AnimaString(shaderName, nullptr));
+	_shadersNames.Add(AnimaString(shaderName));
 }
 
 AInt AnimaMaterial::GetShadersCount() const

@@ -366,7 +366,7 @@ void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 
 void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniformi(str, value);
 }
 
@@ -379,7 +379,7 @@ void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat valu
 
 void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniformf(str, value);
 }
 
@@ -392,7 +392,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value);
 }
 
@@ -405,7 +405,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value);
 }
 
@@ -418,7 +418,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaC
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value);
 }
 
@@ -431,7 +431,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, a, b, c);
 }
 
@@ -444,7 +444,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, a, b, c, d);
 }
 
@@ -457,7 +457,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaM
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value, transpose);
 }
 
@@ -490,7 +490,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value, type);
 }
 
@@ -513,7 +513,7 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 
 void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaMatrix>* value)
 {
-	AnimaString str(uniformName, _allocator);
+	AnimaString str = uniformName;
 	SetUniform(str, value);
 }
 
@@ -575,10 +575,10 @@ void AnimaShaderProgram::ScanVariables()
 
 		const int propertiesSize = 4;
 
-		AnimaString name(_allocator);
-		AnimaString namePart1(_allocator);
-		AnimaString namePart2(_allocator);
-		AnimaString tmpName(_allocator);
+		AnimaString name;
+		AnimaString namePart1;
+		AnimaString namePart2;
+		AnimaString tmpName;
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
 		GLint values[propertiesSize];
 
@@ -586,9 +586,10 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_UNIFORM, i, values[0] + 1, NULL, name.GetBuffer());
-			name.Trim();
+			std::vector<GLchar> nameArray(values[0]);
+			glGetProgramResourceName(_id, GL_UNIFORM, i, nameArray.size(), NULL, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
 
 			namePart1 = name;
 
@@ -601,19 +602,18 @@ void AnimaShaderProgram::ScanVariables()
 
 			if (arraySize > 0)
 			{
-				pos = namePart1.Find('[');
+				pos = namePart1.find('[');
 				if (pos != -1)
 				{
-					name = namePart1.Substring(0, pos);
+					name = namePart1.substr(0, pos);
 
 					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, arraySize);
 					locationsCount = arraySize;
 
 					for (AInt nu = 0; nu < arraySize; nu++)
 					{
-						tmpName.Format("%s[%d]", name.GetConstBuffer(), nu);
-
-						locations[nu] = glGetUniformLocation(_id, tmpName.GetConstBuffer());
+						tmpName = FormatString("%s[%d]", name, nu);
+						locations[nu] = glGetUniformLocation(_id, tmpName.c_str());
 					}
 				}
 				else
@@ -634,19 +634,19 @@ void AnimaShaderProgram::ScanVariables()
 			}
 
 			namePart1 = name;
-			AUint offset = namePart1.CountOf('_') + 1;
-			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
+			AUint offset = std::count(namePart1.begin(), namePart1.end(), ('_')) + 1;
+			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset);
 
 			offset = 0;
-			pos = namePart1.Find('_');
+			pos = namePart1.find('_');
 			while (pos != -1)
 			{
-				namePart2 = namePart1.Substring(0, pos);
-				namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
+				namePart2 = namePart1.substr(0, pos);
+				namePart1 = namePart1.substr(pos + 1, namePart1.length());
 
-				if (!namePart2.IsEmpty())
+				if (!namePart2.empty())
 					nameParts[offset++] = namePart2;
-				pos = namePart1.Find('_');
+				pos = namePart1.find('_');
 			}
 
 			nameParts[offset++] = namePart1;
@@ -667,9 +667,10 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, values[0] + 1, NULL, name.GetBuffer());
-			name.Trim();
+			std::vector<GLchar> nameArray(values[0]);
+			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, nameArray.size(), NULL, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
 
 			AnimaInputInfo info;
 			info._location = values[2];
@@ -683,9 +684,10 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			name.Reserve(values[0]);
-			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, values[0] + 1, NULL, name.GetBuffer());
-			name.Trim();
+			std::vector<GLchar> nameArray(values[0]);
+			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, nameArray.size(), NULL, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
 
 			AnimaOutputInfo info;
 			info._location = values[2];
@@ -701,25 +703,22 @@ void AnimaShaderProgram::ScanVariables()
 		glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveInputs);
 		//glGetProgramiv(_id, GL_ACTIVE_RESOURCES, &numActiveOutputs);
 
-		AnimaString name(_allocator);
-		AnimaString namePart1(_allocator);
-		AnimaString namePart2(_allocator);
-		AnimaString tmpName(_allocator);
-		AnimaString nameGetter(_allocator);
+		AnimaString name;
+		AnimaString namePart1;
+		AnimaString namePart2;
+		AnimaString tmpName;
+		AnimaString nameGetter;
 		GLenum type;
 		GLsizei bufLen;
 		GLsizei elements;
 		GLint location;
 		
-		nameGetter.Reserve(200);
-		
 		for (int i = 0; i < numActiveUniforms; i++)
 		{
-			glGetActiveUniform(_id, i, (int)nameGetter.GetBufferLength() - 1, &bufLen, &elements, &type, nameGetter.GetBuffer());
-			
-			name.Reserve(bufLen);
-			name.SetString(nameGetter.GetBuffer());
-			name.Trim();
+			std::vector<GLchar> nameArray(200);
+			glGetActiveUniform(_id, i, nameArray.size(), &bufLen, &elements, &type, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
 			
 			namePart1 = name;
 			
@@ -732,19 +731,19 @@ void AnimaShaderProgram::ScanVariables()
 			
 			if (arraySize > 0)
 			{
-				pos = namePart1.Find('[');
+				pos = namePart1.find('[');
 				if (pos != -1)
 				{
-					name = namePart1.Substring(0, pos);
+					name = namePart1.substr(0, pos);
 					
 					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, arraySize);
 					locationsCount = arraySize;
 					
 					for (AInt nu = 0; nu < arraySize; nu++)
 					{
-						tmpName.Format("%s[%d]", name.GetConstBuffer(), nu);
+						tmpName = FormatString("%s[%d]", name, nu);
 						
-						locations[nu] = glGetUniformLocation(_id, tmpName.GetConstBuffer());
+						locations[nu] = glGetUniformLocation(_id, tmpName.c_str());
 					}
 				}
 				else
@@ -753,7 +752,7 @@ void AnimaShaderProgram::ScanVariables()
 					locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
 					locationsCount = 1;
 					
-					locations[0] = glGetUniformLocation(_id, namePart1.GetConstBuffer());
+					locations[0] = glGetUniformLocation(_id, namePart1.c_str());
 				}
 			}
 			else
@@ -761,23 +760,23 @@ void AnimaShaderProgram::ScanVariables()
 				locations = AnimaAllocatorNamespace::AllocateArray<AInt>(*_allocator, 1);
 				locationsCount = 1;
 				
-				locations[0] = glGetUniformLocation(_id, namePart1.GetConstBuffer());
+				locations[0] = glGetUniformLocation(_id, namePart1.c_str());
 			}
 			
 			namePart1 = name;
-			AUint offset = namePart1.CountOf('_') + 1;
-			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset, _allocator);
+			AUint offset = std::count(namePart1.begin(), namePart1.end(), ('_')) + 1;
+			AnimaString* nameParts = AnimaAllocatorNamespace::AllocateArray<AnimaString>(*_allocator, offset);
 			
 			offset = 0;
-			pos = namePart1.Find('_');
+			pos = namePart1.find('_');
 			while (pos != -1)
 			{
-				namePart2 = namePart1.Substring(0, pos);
-				namePart1 = namePart1.Substring(pos + 1, namePart1.GetBufferLength());
+				namePart2 = namePart1.substr(0, pos);
+				namePart1 = namePart1.substr(pos + 1, namePart1.length());
 				
-				if (!namePart2.IsEmpty())
+				if (!namePart2.empty())
 					nameParts[offset++] = namePart2;
-				pos = namePart1.Find('_');
+				pos = namePart1.find('_');
 			}
 			
 			nameParts[offset++] = namePart1;
@@ -796,12 +795,12 @@ void AnimaShaderProgram::ScanVariables()
 
 		for (int i = 0; i < numActiveInputs; i++)
 		{
-			glGetActiveAttrib(_id, i, (int)nameGetter.GetBufferLength() - 1, &bufLen, &elements, &type, nameGetter.GetBuffer());
-			name.Reserve(bufLen);
-			name.SetString(nameGetter.GetBuffer());
-			name.Trim();
-			
-			location = glGetAttribLocation(_id, name.GetConstBuffer());
+			std::vector<GLchar> nameArray(200);
+			glGetActiveAttrib(_id, i, nameArray.size(), &bufLen, &elements, &type, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
+
+			location = glGetAttribLocation(_id, name.c_str());
 
 			AnimaInputInfo info;
 			info._location = location;
@@ -815,12 +814,12 @@ void AnimaShaderProgram::ScanVariables()
 	_maxPointLights = 0;
 	_maxSpotLights = 0;
 
-	AnimaString str(_allocator);
+	AnimaString str;
 	bool stop = false;
 
 	while (!stop)
 	{
-		str.Format("_pointLight[%d].position", _maxPointLights);
+		str = FormatString("_pointLight[%d].position", _maxPointLights);
 		if (_uniforms.find(str) != _uniforms.end())
 			_maxPointLights++;
 		else
@@ -830,7 +829,7 @@ void AnimaShaderProgram::ScanVariables()
 	stop = false;
 	while (!stop)
 	{
-		str.Format("_spotLight[%d].direction", _maxSpotLights);
+		str = FormatString("_spotLight[%d].direction", _maxSpotLights);
 		if (_uniforms.find(str) != _uniforms.end())
 			_maxSpotLights++;
 		else

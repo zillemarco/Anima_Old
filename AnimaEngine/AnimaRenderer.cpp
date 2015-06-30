@@ -307,7 +307,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	//
 	// Inizializzazione delle mesh di supporto
 	//
-	AnimaString name("filter_RENMESH", _engine->GetStringAllocator());
+	AnimaString name = "filter_RENMESH";
 	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
@@ -327,7 +327,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	//
 	// Inizializzazione della camera di supporto
 	//
-	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr, _engine->GetDataGeneratorsManager(), AnimaString("$$filterCamera$$", _allocator));
+	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr, _engine->GetDataGeneratorsManager(), AnimaString("$$filterCamera$$"));
 	_filterCamera->SetProjectionMatrix(AnimaMatrix());
 	_filterCamera->SetViewMatrix(AnimaMatrix());
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);
@@ -533,7 +533,7 @@ void AnimaRenderer::DrawAll()
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -635,7 +635,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -737,7 +737,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -839,7 +839,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -941,7 +941,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaString::Hasher>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -1003,7 +1003,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 	if (!useInstances)
 	{
 		AnimaString shaderProgramName = mesh->GetShaderProgramName();
-		if (shaderProgramName.IsEmpty())
+		if (shaderProgramName.empty())
 		{
 			program = _scene->GetShadersManager()->CreateProgram(mesh, mesh->GetMaterial());
 			if (program)
@@ -1062,7 +1062,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 			AnimaMeshInstance* instance = mesh->GetInstance(i);
 
 			AnimaString shaderProgramName = instance->GetShaderProgramName();
-			if (shaderProgramName.IsEmpty())
+			if (shaderProgramName.empty())
 			{
 				program = _scene->GetShadersManager()->CreateProgram(instance, instance->GetMaterial());
 				if (program)
@@ -1346,7 +1346,7 @@ void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 	if (activeCamera == nullptr)
 		return;
 
-	AnimaString type(typeid((*lights->ElementAt(0))).name(), _allocator);
+	AnimaString type = typeid((*lights->ElementAt(0))).name();
 	auto pair = _lightsMeshMap.find(type);
 
 	ANIMA_ASSERT(pair != _lightsMeshMap.end());
@@ -1766,7 +1766,7 @@ void AnimaRenderer::SetTexture(AnimaString propertyName, AnimaTexture* value, bo
 
 void AnimaRenderer::SetTexture(const char* propertyName, AnimaTexture* value, bool deleteExistent)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetTexture(str, value, deleteExistent);
 }
 
@@ -1777,7 +1777,7 @@ void AnimaRenderer::SetTextureSlot(AnimaString propertyName, AUint value)
 
 void AnimaRenderer::SetTextureSlot(const char* propertyName, AUint value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetTextureSlot(str, value);
 }
 
@@ -1801,7 +1801,7 @@ void AnimaRenderer::SetGBuffer(const AnimaString& name, AnimaGBuffer* value, boo
 
 void AnimaRenderer::SetGBuffer(const char* name, AnimaGBuffer* value, bool deleteExistent)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	SetGBuffer(str, value, deleteExistent);
 }
 
@@ -1812,7 +1812,7 @@ void AnimaRenderer::SetColor(AnimaString propertyName, AnimaColor3f value)
 
 void AnimaRenderer::SetColor(const char* propertyName, AnimaColor3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, value);
 }
 
@@ -1824,7 +1824,7 @@ void AnimaRenderer::SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloa
 
 void AnimaRenderer::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, r, g, b);
 }
 
@@ -1835,7 +1835,7 @@ void AnimaRenderer::SetColor(AnimaString propertyName, AnimaColor4f value)
 
 void AnimaRenderer::SetColor(const char* propertyName, AnimaColor4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, value);
 }
 
@@ -1847,7 +1847,7 @@ void AnimaRenderer::SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloa
 
 void AnimaRenderer::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, r, g, b, a);
 }
 
@@ -1858,7 +1858,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AnimaVertex2f value)
 
 void AnimaRenderer::SetVector(const char* propertyName, AnimaVertex2f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -1870,7 +1870,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AFloat x, AFloat y)
 
 void AnimaRenderer::SetVector(const char* propertyName, AFloat x, AFloat y)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y);
 }
 
@@ -1881,7 +1881,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AnimaVertex3f value)
 
 void AnimaRenderer::SetVector(const char* propertyName, AnimaVertex3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -1893,7 +1893,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AFloat x, AFloat y, AFlo
 
 void AnimaRenderer::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y, z);
 }
 
@@ -1904,7 +1904,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AnimaVertex4f value)
 
 void AnimaRenderer::SetVector(const char* propertyName, AnimaVertex4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -1916,7 +1916,7 @@ void AnimaRenderer::SetVector(AnimaString propertyName, AFloat x, AFloat y, AFlo
 
 void AnimaRenderer::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y, z, w);
 }
 
@@ -1927,7 +1927,7 @@ void AnimaRenderer::SetFloat(AnimaString propertyName, AFloat value)
 
 void AnimaRenderer::SetFloat(const char* propertyName, AFloat value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetFloat(str, value);
 }
 
@@ -1938,7 +1938,7 @@ void AnimaRenderer::SetBoolean(AnimaString propertyName, bool value)
 
 void AnimaRenderer::SetBoolean(const char* propertyName, bool value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetBoolean(str, value);
 }
 
@@ -1949,7 +1949,7 @@ void AnimaRenderer::SetInteger(AnimaString propertyName, AInt value)
 
 void AnimaRenderer::SetInteger(const char* propertyName, AInt value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetInteger(str, value);
 }
 
@@ -1962,7 +1962,7 @@ AnimaTexture* AnimaRenderer::GetTexture(AnimaString propertyName)
 
 AnimaTexture* AnimaRenderer::GetTexture(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetTexture(str);
 }
 
@@ -1975,7 +1975,7 @@ AUint AnimaRenderer::GetTextureSlot(const AnimaString& slotName)
 
 AUint AnimaRenderer::GetTextureSlot(const char* slotName)
 {
-	AnimaString str(slotName, _allocator);
+	AnimaString str = slotName;
 	return GetTextureSlot(str);
 }
 
@@ -1988,7 +1988,7 @@ AnimaGBuffer* AnimaRenderer::GetGBuffer(const AnimaString& gBufferName)
 
 AnimaGBuffer* AnimaRenderer::GetGBuffer(const char* gBufferName)
 {
-	AnimaString str(gBufferName, _allocator);
+	AnimaString str = gBufferName;
 	return GetGBuffer(str);
 }
 
@@ -2003,7 +2003,7 @@ AnimaColor3f AnimaRenderer::GetColor3f(AnimaString propertyName)
 
 AnimaColor3f AnimaRenderer::GetColor3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetColor3f(str);
 }
 
@@ -2018,7 +2018,7 @@ AnimaColor4f AnimaRenderer::GetColor4f(AnimaString propertyName)
 
 AnimaColor4f AnimaRenderer::GetColor4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetColor4f(str);
 }
 
@@ -2033,7 +2033,7 @@ AnimaVertex2f AnimaRenderer::GetVector2f(AnimaString propertyName)
 
 AnimaVertex2f AnimaRenderer::GetVector2f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector2f(str);
 }
 
@@ -2048,7 +2048,7 @@ AnimaVertex3f AnimaRenderer::GetVector3f(AnimaString propertyName)
 
 AnimaVertex3f AnimaRenderer::GetVector3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector3f(str);
 }
 
@@ -2063,7 +2063,7 @@ AnimaVertex4f AnimaRenderer::GetVector4f(AnimaString propertyName)
 
 AnimaVertex4f AnimaRenderer::GetVector4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector4f(str);
 }
 
@@ -2077,7 +2077,7 @@ AFloat AnimaRenderer::GetFloat(AnimaString propertyName)
 
 AFloat AnimaRenderer::GetFloat(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetFloat(str);
 }
 
@@ -2091,7 +2091,7 @@ bool AnimaRenderer::GetBoolean(AnimaString propertyName)
 
 bool AnimaRenderer::GetBoolean(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetBoolean(str);
 }
 
@@ -2105,7 +2105,7 @@ AInt AnimaRenderer::GetInteger(AnimaString propertyName)
 
 AInt AnimaRenderer::GetInteger(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetInteger(str);
 }
 

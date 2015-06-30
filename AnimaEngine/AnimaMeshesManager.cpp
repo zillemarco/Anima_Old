@@ -29,7 +29,7 @@ AnimaMeshesManager::~AnimaMeshesManager()
 	ClearLastMeshesBonesData();
 }
 
-bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString*>* materialNamesMap)
+bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString>* materialNamesMap)
 {
 	ClearLastMeshesIndexMap();
 	ClearLastMeshesBonesData();
@@ -38,17 +38,17 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 	{
 		const aiMesh* mesh = scene->mMeshes[i];
 		
-		AnimaString* meshName = AnimaAllocatorNamespace::AllocateNew<AnimaString>(*(_scene->GetStringAllocator()), _scene->GetStringAllocator());
+		AnimaString meshName;
 		AnimaMesh* newMesh = nullptr;
 		int nameOffset = 0;
 		while (newMesh == nullptr)
 		{
 			if (nameOffset > 0)
-				meshName->Format("%s.mesh%d", modelName.GetConstBuffer(), i + nameOffset);
+				meshName = FormatString("%s.mesh%d", modelName, i + nameOffset);
 			else
-				meshName->Format("%s.mesh%d", modelName.GetConstBuffer(), i);
+				meshName = FormatString("%s.mesh%d", modelName, i);
 
-			newMesh = CreateEmptyMesh(*meshName);
+			newMesh = CreateEmptyMesh(meshName);
 			nameOffset++;
 		}
 
@@ -172,7 +172,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			for (AUint nb = 0; nb < mesh->mNumBones; nb++)
 			{
 				aiBone* bone = mesh->mBones[nb];
-				AnimaString boneName(bone->mName.data, _scene->GetStringAllocator());
+				AnimaString boneName(bone->mName.data);
 				AInt boneIndex = _lastMeshesBonesInfo.Contains(boneName);
 
 				if (boneIndex < 0)
@@ -205,12 +205,12 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 		}
 
 		AInt materialIndex = (AInt)mesh->mMaterialIndex;
-		AnimaString* materialName = materialNamesMap->GetAt(materialIndex);
-		AnimaMaterial* material = _materialsManager->GetMaterialFromName(*materialName);
+		AnimaString materialName = materialNamesMap->GetAt(materialIndex);
+		AnimaMaterial* material = _materialsManager->GetMaterialFromName(materialName);
 
 		newMesh->SetMaterial(material);
 
-		_meshes.Add(*meshName, newMesh);
+		_meshes.Add(meshName, newMesh);
 		_lastMeshesIndexMap.Add(meshName);
 	}
 
@@ -231,13 +231,13 @@ void AnimaMeshesManager::ClearMeshes()
 
 void AnimaMeshesManager::ClearLastMeshesIndexMap()
 {
-	AInt meshesIndexCount = _lastMeshesIndexMap.GetSize();
-	for (AInt i = 0; i < meshesIndexCount; i++)
-	{
-		AnimaString* meshIndex = _lastMeshesIndexMap[i];
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), meshIndex);
-		meshIndex = nullptr;
-	}
+	//AInt meshesIndexCount = _lastMeshesIndexMap.GetSize();
+	//for (AInt i = 0; i < meshesIndexCount; i++)
+	//{
+	//	AnimaString* meshIndex = _lastMeshesIndexMap[i];
+	//	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), meshIndex);
+	//	meshIndex = nullptr;
+	//}
 	_lastMeshesIndexMap.RemoveAll();
 }
 
@@ -266,7 +266,7 @@ AnimaMesh* AnimaMeshesManager::GetMeshFromName(const AnimaString& name)
 
 AnimaMesh* AnimaMeshesManager::GetMeshFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetMeshFromName(str);
 }
 
@@ -275,7 +275,7 @@ AInt AnimaMeshesManager::GetMeshesCount() const
 	return _meshes.GetSize();
 }
 
-AnimaArray<AnimaString*>* AnimaMeshesManager::GetLastMeshesIndexMap()
+AnimaArray<AnimaString>* AnimaMeshesManager::GetLastMeshesIndexMap()
 {
 	return &_lastMeshesIndexMap;
 }
@@ -298,7 +298,7 @@ AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
 
 AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateEmptyMesh(str);
 }
 

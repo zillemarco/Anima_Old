@@ -20,10 +20,6 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#pragma warning (disable: 4251)
-typedef boost::unordered_map<AnimaString, AUint, AnimaString::Hasher> BoneNameMap;
-#pragma warning (default: 4251)
-
 class ANIMA_ENGINE_EXPORT AnimaModel : public AnimaSceneObject
 {
 	friend class AnimaModelInstancesManager;

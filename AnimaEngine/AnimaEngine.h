@@ -13,8 +13,6 @@
 #include "AnimaGC.h"
 #include "AnimaAllocators.h"
 #include "AnimaAssert.h"
-//#include "AnimaWindow.h"
-#include "AnimaString.h"
 #include "AnimaEngineConfig.h"
 
 #if defined _MSC_VER
@@ -171,35 +169,35 @@ public:
 	 */
 	static bool IsUsedExteral();
 	
-	/*!
-	 *	\brief		Inizializza le estensioni di GLEW per l'utilizzo di OpenGL
-	 *	\details	Metodo per inizializzare le estensioni di GLEW per l'utilizzo di OpenGL.
-					Se sono giˆ state inizializzate in precedenza torna il metodo termina senza reinizializzarle.
-	 *	\return		Torna true se le estensioni vengono inizializzate correttamente o erano giˆ state
-					inizializzate correttamente, altrimenti false
-	 *	\sa			IsGlewExtensionsInitialized(), SetGlewExtensionsInitialized()
-	 *	\author		Zille Marco
-	 */
-	static bool InitializeGlewExtensions();
+	//	Deprecato	/*!
+	//	Deprecato	 *	\brief		Inizializza le estensioni di GLEW per l'utilizzo di OpenGL
+	//	Deprecato	 *	\details	Metodo per inizializzare le estensioni di GLEW per l'utilizzo di OpenGL.
+	//	Deprecato					Se sono giˆ state inizializzate in precedenza torna il metodo termina senza reinizializzarle.
+	//	Deprecato	 *	\return		Torna true se le estensioni vengono inizializzate correttamente o erano giˆ state
+	//	Deprecato					inizializzate correttamente, altrimenti false
+	//	Deprecato	 *	\sa			IsGlewExtensionsInitialized(), SetGlewExtensionsInitialized()
+	//	Deprecato	 *	\author		Zille Marco
+	//	Deprecato	 */
+	//	Deprecato	static bool InitializeGlewExtensions();
 	
-	/*!
-	 *	\brief		Metodo che serve per sapere se le estensioni GLEW sono state inizializzate
-	 *	\details	Metodo che serve per sapere se le estensioni GLEW sono state inizializzate
-	 *	\return		Torna il valore di _glewExtensionsInitialized
-	 *	\sa			InitializeGlewExtensions(), SetGlewExtensionsInitialized(), _glewExtensionsInitialized
-	 *	\author		Zille Marco
-	 */
-	static bool IsGlewExtensionsInitialized();
+	//	Deprecato	/*!
+	//	Deprecato	 *	\brief		Metodo che serve per sapere se le estensioni GLEW sono state inizializzate
+	//	Deprecato	 *	\details	Metodo che serve per sapere se le estensioni GLEW sono state inizializzate
+	//	Deprecato	 *	\return		Torna il valore di _glewExtensionsInitialized
+	//	Deprecato	 *	\sa			InitializeGlewExtensions(), SetGlewExtensionsInitialized(), _glewExtensionsInitialized
+	//	Deprecato	 *	\author		Zille Marco
+	//	Deprecato	 */
+	//	Deprecato	static bool IsGlewExtensionsInitialized();
 	
-	/*!
-	 *	\brief		Imposta il valore di _glewExtensionsInitialized
-	 *	\details	Imposta il valore di _glewExtensionsInitialized.
-					Pu˜ servire nel caso in cui si volesse reinizializzare le estensioni GLEW per qualche motivo
-	 *	\param[in]	bSet	Valore da assegnare a _glewExtensionsInitialized
-	 *	\sa			InitializeGlewExtensions(), SetGlewExtensionsInitialized()
-	 *	\author		Zille Marco
-	 */
-	static void SetGlewExtensionsInitialized(bool bSet);
+	//	Deprecato	/*!
+	//	Deprecato	 *	\brief		Imposta il valore di _glewExtensionsInitialized
+	//	Deprecato	 *	\details	Imposta il valore di _glewExtensionsInitialized.
+	//	Deprecato					Pu˜ servire nel caso in cui si volesse reinizializzare le estensioni GLEW per qualche motivo
+	//	Deprecato	 *	\param[in]	bSet	Valore da assegnare a _glewExtensionsInitialized
+	//	Deprecato	 *	\sa			InitializeGlewExtensions(), SetGlewExtensionsInitialized()
+	//	Deprecato	 *	\author		Zille Marco
+	//	Deprecato	 */
+	//	Deprecato	static void SetGlewExtensionsInitialized(bool bSet);
 	
 	/*!
 	 *	\brief		Imposta il percorso del file di log di AnimaEngine
@@ -307,7 +305,7 @@ private:
 	//static bool _platformLibraryTimeStateInitialized;
 	//static bool _platformLibraryJoystickStateInitialized;
 	//static bool _platformLibraryTLSStateInitialized;
-	static bool _glewExtensionsInitialized;
+	//	Deprecato	static bool _glewExtensionsInitialized;
 
 	static bool _usedExternal;						/*!< Flag che indica se AnimaEngine  utilizzato all'interno di un altro programma */
 
@@ -375,17 +373,19 @@ public:
 		return _meshInstancesAllocator;
 	}
 	
-	/*!
-	 *	\brief		Torna l'allocator delle stringe usate dalla classe AnimaString ed in generate da tutte le classi
-	 *	\details	Torna l'allocator delle stringe usate dalla classe AnimaString ed in generate da tutte le classi
-	 *	\return		Il valore di _stringAllocator
-	 *	\sa			_stringAllocator, AnimaAllocator
-	 *	\author		Zille Marco
-	 */
-	inline AnimaAllocator* GetStringAllocator() {
-		ANIMA_ASSERT(_stringAllocator != nullptr);
-		return _stringAllocator;
-	}
+	//	Deprecato	
+	//	Deprecato	
+	//	Deprecato	/*!
+	//	Deprecato	 *	\brief		Torna l'allocator delle stringe usate dalla classe AnimaString ed in generate da tutte le classi
+	//	Deprecato	 *	\details	Torna l'allocator delle stringe usate dalla classe AnimaString ed in generate da tutte le classi
+	//	Deprecato	 *	\return		Il valore di _stringAllocator
+	//	Deprecato	 *	\sa			_stringAllocator, AnimaAllocator
+	//	Deprecato	 *	\author		Zille Marco
+	//	Deprecato	 */
+	//	Deprecato	inline AnimaAllocator* GetStringAllocator() {
+	//	Deprecato		ANIMA_ASSERT(_stringAllocator != nullptr);
+	//	Deprecato		return _stringAllocator;
+	//	Deprecato	}
 	
 	/*!
 	 *	\brief		Torna l'allocator degli shader. Usato dalle classi AnimaShadersManager, AnimaShader e AnimaShaderProgram
@@ -540,7 +540,7 @@ protected:
 
 	AnimaFreeListAllocator* _genericAllocator;			/*!< Allocator usato genericamente, senza un utilizzo in particolare */
 	AnimaFreeListAllocator* _managersAllocator;			/*!< Allocator usato all'interno di AnimaEngine per costruire i vari manager */
-	AnimaFreeListAllocator* _stringAllocator;			/*!< Allocator usato dalla classe AnimaString e per le stringhe in generale */
+	//	Deprecato	AnimaFreeListAllocator* _stringAllocator;			/*!< Allocator usato dalla classe AnimaString e per le stringhe in generale */
 	AnimaFreeListAllocator* _shadersAllocator;			/*!< Allocator usato dalla classe AnimaShader, AnimaShaderProgram e AnimaShadersManager */
 	AnimaFreeListAllocator* _camerasAllocator;			/*!< Allocator usato dalla classe AnimaCamerasManager, AnimaCamera e derivate */
 	AnimaFreeListAllocator* _texturesAllocator;			/*!< Allocator usato dalla classe AnimaTexturesManager, AnimaTexture e derivate */

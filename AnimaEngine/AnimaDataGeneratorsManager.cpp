@@ -29,8 +29,7 @@ AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const Anim
 
 AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return CreateColorGenerator(str);
 }
 
@@ -41,8 +40,7 @@ AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const An
 
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return CreateVectorGenerator(str);
 }
 
@@ -50,7 +48,7 @@ void AnimaDataGeneratorsManager::ClearGenerators()
 {
 	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
 
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
 		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
@@ -73,8 +71,7 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const AnimaString& 
 
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return GetGenerator(str);
 }
 
@@ -95,8 +92,7 @@ bool AnimaDataGeneratorsManager::RemoveGenerator(const AnimaString& name)
 
 bool AnimaDataGeneratorsManager::RemoveGenerator(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return RemoveGenerator(str);
 }
 
@@ -107,7 +103,7 @@ bool AnimaDataGeneratorsManager::RemoveGenerator(AnimaDataGenerator* generator)
 
 void AnimaDataGeneratorsManager::UpdateValues()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
 		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
@@ -121,7 +117,7 @@ AInt AnimaDataGeneratorsManager::GetTotalDataGeneratorsCount()
 {
 	AInt count = 0;
 	
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaString::Hasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 		count += dataGeneratorsPair.second->GetSize();
 	

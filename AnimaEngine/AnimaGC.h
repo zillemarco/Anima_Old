@@ -6,7 +6,7 @@
 #	define ANIMA_ENGINE_INCLUDED_GLEW
 #endif
 
-#if defined WIN32
+#if defined _WIN32
 #	include <GL/wglew.h>
 #	include <windows.h>
 #else

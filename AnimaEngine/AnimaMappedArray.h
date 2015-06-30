@@ -12,6 +12,8 @@
 #include "AnimaEngine.h"
 #include "AnimaTypes.h"
 #include "AnimaArray.h"
+#include "AnimaString.h"
+#include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -170,14 +172,14 @@ public:
 	template<typename... Args>
 	AInt Add(const char* name, TYPE newElement, bool returnExisting, Args... args)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Add(str, newElement, returnExisting, args...);
 	}
 
 	template<typename... Args>
 	AInt Add(const char* name, TYPE newElement, Args... args)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Add(str, newElement, false, args...);
 	}
 
@@ -205,7 +207,7 @@ public:
 	template<typename... Args>
 	bool Remove(const char* name, Args...args)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Remove(str, args...);
 	}
 	
@@ -227,7 +229,7 @@ public:
 
 	inline void Set(const char* name, TYPE newElement)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		Set(str, newElement);
 	}
 
@@ -246,7 +248,7 @@ public:
 
 	AInt Contains(const char* name) const
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Contains(str);
 	}
 
@@ -270,7 +272,7 @@ protected:
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _namesMap;
+	boost::unordered_map<AnimaString, AInt> _namesMap;
 #pragma warning (default: 4251) 
 };
 
@@ -443,13 +445,13 @@ public:
 
 	AInt Add(const char* name, TYPE newElement)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Add(str, newElement, false);
 	}
 
 	AInt Add(const char* name, TYPE newElement, bool returnExisting)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Add(str, newElement, returnExisting);
 	}
 
@@ -475,7 +477,7 @@ public:
 
 	bool Remove(const char* name)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Remove(str);
 	}
 
@@ -497,7 +499,7 @@ public:
 
 	inline void Set(const char* name, TYPE newElement)
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		Set(str, newElement);
 	}
 
@@ -516,7 +518,7 @@ public:
 
 	AInt Contains(const char* name) const
 	{
-		AnimaString str(name, _allocator);
+		AnimaString str = name;
 		return Contains(str);
 	}
 
@@ -540,7 +542,7 @@ protected:
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _namesMap;
+	boost::unordered_map<AnimaString, AInt> _namesMap;
 #pragma warning (default: 4251) 
 };
 

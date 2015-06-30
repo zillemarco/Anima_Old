@@ -221,26 +221,26 @@ protected:
 	AnimaModelInstance* _lastUpdatedModelInstance;
 	
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AUint, AnimaString::Hasher>			_textureSlotsMap;
-	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>	_texturesMap;
-	boost::unordered_map<AnimaString, AnimaGBuffer*, AnimaString::Hasher>	_gBuffersMap;
+	boost::unordered_map<AnimaString, AUint>			_textureSlotsMap;
+	boost::unordered_map<AnimaString, AnimaTexture*>	_texturesMap;
+	boost::unordered_map<AnimaString, AnimaGBuffer*>	_gBuffersMap;
 		
-	boost::unordered_map<AnimaString, AnimaVertex2f, AnimaString::Hasher> _vectors2fMap;
-	boost::unordered_map<AnimaString, AnimaVertex3f, AnimaString::Hasher> _vectors3fMap;
-	boost::unordered_map<AnimaString, AnimaVertex4f, AnimaString::Hasher> _vectors4fMap;
+	boost::unordered_map<AnimaString, AnimaVertex2f> _vectors2fMap;
+	boost::unordered_map<AnimaString, AnimaVertex3f> _vectors3fMap;
+	boost::unordered_map<AnimaString, AnimaVertex4f> _vectors4fMap;
 
-	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher>	_floatsMap;
-	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher>	_integersMap;
-	boost::unordered_map<AnimaString, bool, AnimaString::Hasher>	_booleansMap;
+	boost::unordered_map<AnimaString, AFloat>	_floatsMap;
+	boost::unordered_map<AnimaString, AInt>	_integersMap;
+	boost::unordered_map<AnimaString, bool>	_booleansMap;
 
-	boost::unordered_map<AnimaString, AnimaMesh*, AnimaString::Hasher>	_lightsMeshMap;
+	boost::unordered_map<AnimaString, AnimaMesh*>	_lightsMeshMap;
 #pragma warning (default: 4251)
 };
 
 template<class T> 
 AnimaMesh* AnimaRenderer::CreateMeshForLightType()
 {
-	AnimaString type(typeid(T).name(), _allocator);
+	AnimaString type = typeid(T).name();
 
 	auto pair = _lightsMeshMap.find(type);
 	if (pair != _lightsMeshMap.end())

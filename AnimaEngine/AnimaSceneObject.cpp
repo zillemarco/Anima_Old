@@ -136,7 +136,7 @@ bool AnimaSceneObject::RemoveChild(const AnimaString& name)
 
 bool AnimaSceneObject::RemoveChild(const char* name)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return RemoveChild(str);
 }
 
@@ -157,7 +157,7 @@ AInt AnimaSceneObject::HasChild(const AnimaString& name)
 
 AInt AnimaSceneObject::HasChild(const char* name)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return HasChild(str);
 }
 

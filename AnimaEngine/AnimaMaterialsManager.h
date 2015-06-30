@@ -58,7 +58,7 @@ public:
 
 public:
 	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);
-	AnimaArray<AnimaString*>* GetLastMaterialsIndexMap();
+	AnimaArray<AnimaString>* GetLastMaterialsIndexMap();
 	void ClearLastMaterialsIndexMap();
 	
 private:
@@ -69,7 +69,7 @@ private:
 	AnimaTexturesManager* _texturesManager;
 	AnimaTypeMappedArray<AnimaMaterial*> _materials;
 
-	AnimaArray<AnimaString*> _lastMaterialsIndexMap;
+	AnimaArray<AnimaString> _lastMaterialsIndexMap;
 };
 
 template<class T>
@@ -89,7 +89,7 @@ T* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 template<class T>
 T* AnimaMaterialsManager::CreateMaterial(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateMaterial<T>(str);
 }
 
@@ -108,7 +108,7 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const AnimaStrin
 template<class T>
 AnimaMaterial* AnimaMaterialsManager::GetMaterialOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetMaterialOfTypeFromName<T*>(str);
 }
 

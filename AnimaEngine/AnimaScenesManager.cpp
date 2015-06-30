@@ -34,7 +34,7 @@ AnimaScene* AnimaScenesManager::CreateScene(const AnimaString& name)
 
 AnimaScene* AnimaScenesManager::CreateScene(const char* name)
 {
-	AnimaString str(name, (_engine->GetScenesAllocator()));
+	AnimaString str = name;
 	return CreateScene(str);
 }
 
@@ -63,7 +63,7 @@ AnimaScene* AnimaScenesManager::GetScene(const AnimaString& name)
 
 AnimaScene* AnimaScenesManager::GetScene(const char* name)
 {
-	AnimaString str(name, (_engine->GetScenesAllocator()));
+	AnimaString str = name;
 	return GetScene(str);
 }
 

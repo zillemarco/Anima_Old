@@ -45,7 +45,7 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, AnimaModel* srcModel)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateInstance(str, srcModel);
 }
 
@@ -59,20 +59,20 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, const AnimaString& srcModelName)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateInstance(str, srcModelName);
 }
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString& instanceName, const char* srcModelName)
 {
-	AnimaString str(srcModelName, _scene->GetStringAllocator());
+	AnimaString str = srcModelName;
 	return CreateInstance(instanceName, str);
 }
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, const char* srcModelName)
 {
-	AnimaString strInstanceName(instanceName, _scene->GetStringAllocator());
-	AnimaString strModelName(srcModelName, _scene->GetStringAllocator());
+	AnimaString strInstanceName = instanceName;
+	AnimaString strModelName = srcModelName;
 	return CreateInstance(strInstanceName, strModelName);
 }
 
@@ -81,13 +81,13 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 	if (srcModel == nullptr)
 		return nullptr;
 
-	AnimaString completeInstanceName(_scene->GetStringAllocator());
+	AnimaString completeInstanceName;
 	if (useSrcModelName)
 		completeInstanceName = srcModel->GetAnimaName() + "." + instanceName;
 	else
 		completeInstanceName = instanceName;
 	AnimaString modelName = srcModel->GetAnimaName();
-	AnimaString modelInstanceName(_scene->GetStringAllocator());
+	AnimaString modelInstanceName;
 	AnimaModelInstance* newInstance = nullptr;
 	int nameOffset = 0;
 	while (newInstance == nullptr)
@@ -95,16 +95,16 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 		if (nameOffset > 0)
 		{
 			if (useSrcModelName)
-				modelInstanceName.Format("%s.%s%d", modelName.GetConstBuffer(), instanceName.GetConstBuffer(), nameOffset);
+				modelInstanceName = FormatString("%s.%s%d", modelName, instanceName, nameOffset);
 			else
-				modelInstanceName.Format("%s%d", instanceName.GetConstBuffer(), nameOffset);
+				modelInstanceName = FormatString("%s%d", instanceName, nameOffset);
 		}
 		else
 		{
 			if (useSrcModelName)
-				modelInstanceName.Format("%s.%s", modelName.GetConstBuffer(), instanceName.GetConstBuffer());
+				modelInstanceName = FormatString("%s.%s", modelName, instanceName);
 			else
-				modelInstanceName.Format("%s", instanceName.GetConstBuffer());
+				modelInstanceName = FormatString("%s", instanceName);
 		}
 
 		newInstance = CreateEmptyInstance(modelInstanceName);
@@ -142,7 +142,7 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const AnimaS
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const char* instanceName)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateEmptyInstance(str);
 }
 
@@ -163,7 +163,7 @@ AnimaModelInstance* AnimaModelInstancesManager::GetModelInstanceFromName(const A
 
 AnimaModelInstance* AnimaModelInstancesManager::GetModelInstanceFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetModelInstanceFromName(str);
 }
 

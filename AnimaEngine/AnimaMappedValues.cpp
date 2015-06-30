@@ -17,7 +17,7 @@ AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGenerat
 : AnimaNamedObject(name, allocator)
 {
 	_dataGeneratorManager = dataGeneratorManager;	
-	_uniqueName = AnimaString::MakeRandom(allocator, 15) + ".";
+	_uniqueName = MakeRandonString(15) + ".";
 }
 
 AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
@@ -140,7 +140,7 @@ void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture
 
 void AnimaMappedValues::AddTexture(const char* propertyName, AnimaTexture* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddTexture(str, value);
 }
 
@@ -154,7 +154,7 @@ void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColorGene
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColorGenerator* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddColor(str, value);
 }
 
@@ -166,7 +166,7 @@ void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColor3f v
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddColor(str, value);
 }
 
@@ -191,15 +191,13 @@ void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColor4f v
 	{
 		int i = 1;
 
-		AnimaString suffix(_allocator);
-		suffix.Format(".valueGenerator.%d", i);
-
+		AnimaString suffix = FormatString(".valueGenerator.%d", i);
 		while (generator == nullptr)
 		{
 			generator = _dataGeneratorManager->CreateColorGenerator(pName + suffix);
 
 			i++;
-			suffix.Format(".valueGenerator.%d", i);
+			suffix = FormatString(".valueGenerator.%d", i);
 		}
 	}
 
@@ -210,7 +208,7 @@ void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColor4f v
 
 void AnimaMappedValues::AddColor(const char* propertyName, AnimaColor4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddColor(str, value);
 }
 
@@ -236,7 +234,7 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVectorGe
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVector(str, value);
 }
 
@@ -248,7 +246,7 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex2f
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex2f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVector(str, value);
 }
 
@@ -272,7 +270,7 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex3f
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVector(str, value);
 }
 
@@ -297,15 +295,14 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex4f
 	{
 		int i = 1;
 
-		AnimaString suffix(_allocator);
-		suffix.Format(".valueGenerator.%d", i);
+		AnimaString suffix = FormatString(".valueGenerator.%d", i);
 
 		while (generator == nullptr)
 		{
 			generator = _dataGeneratorManager->CreateVectorGenerator(pName + suffix);
 
 			i++;
-			suffix.Format(".valueGenerator.%d", i);
+			suffix = FormatString(".valueGenerator.%d", i);
 		}
 	}
 
@@ -316,7 +313,7 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex4f
 
 void AnimaMappedValues::AddVector(const char* propertyName, AnimaVertex4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVector(str, value);
 }
 
@@ -345,7 +342,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVectorArray(str, value);
 }
 
@@ -360,21 +357,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName(_allocator);
-		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+		AnimaString generatorName = FormatString("%s[%d]", pName, i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 			}
 		}
 
@@ -387,7 +383,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVectorArray(str, value);
 }
 
@@ -402,21 +398,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName(_allocator);
-		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+		AnimaString generatorName = FormatString("%s[%d]", pName, i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 			}
 		}
 
@@ -429,7 +424,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVectorArray(str, value);
 }
 
@@ -444,21 +439,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName(_allocator);
-		generatorName.Format("%s[%d]", pName.GetConstBuffer(), i);
+		AnimaString generatorName = FormatString("%s[%d]", pName, i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
 			}
 		}
 
@@ -471,7 +465,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddVectorArray(str, value);
 }
 
@@ -485,7 +479,7 @@ void AnimaMappedValues::AddFloat(const AnimaString& propertyName, AFloat value)
 
 void AnimaMappedValues::AddFloat(const char* propertyName, AFloat value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddFloat(str, value);
 }
 
@@ -499,7 +493,7 @@ void AnimaMappedValues::AddBoolean(const AnimaString& propertyName, bool value)
 
 void AnimaMappedValues::AddBoolean(const char* propertyName, bool value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddBoolean(str, value);
 }
 
@@ -513,7 +507,7 @@ void AnimaMappedValues::AddInteger(const AnimaString& propertyName, AInt value)
 
 void AnimaMappedValues::AddInteger(const char* propertyName, AInt value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddInteger(str, value);
 }
 
@@ -527,7 +521,7 @@ void AnimaMappedValues::AddMatrix(const AnimaString& propertyName, const AnimaMa
 
 void AnimaMappedValues::AddMatrix(const char* propertyName, const AnimaMatrix& value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddMatrix(str, value);
 }
 
@@ -539,7 +533,7 @@ void AnimaMappedValues::AddMatrix(const AnimaString& propertyName, AFloat value[
 
 void AnimaMappedValues::AddMatrix(const char* propertyName, AFloat value[16])
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AnimaMatrix mat(value);
 	AddMatrix(str, mat);
 }
@@ -557,7 +551,7 @@ void AnimaMappedValues::AddMatrixArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::AddMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AddMatrixArray(str, value);
 }
 
@@ -572,7 +566,7 @@ void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture
 
 void AnimaMappedValues::SetTexture(const char* propertyName, AnimaTexture* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetTexture(str, value);
 }
 
@@ -587,7 +581,7 @@ void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColorGene
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColorGenerator* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, value);
 }
 
@@ -599,7 +593,7 @@ void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColor3f v
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, value);
 }
 
@@ -611,7 +605,7 @@ void AnimaMappedValues::SetColor(const AnimaString& propertyName, AFloat r, AFlo
 
 void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, r, g, b);
 }
 
@@ -630,7 +624,7 @@ void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColor4f v
 
 void AnimaMappedValues::SetColor(const char* propertyName, AnimaColor4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, value);
 }
 
@@ -642,7 +636,7 @@ void AnimaMappedValues::SetColor(const AnimaString& propertyName, AFloat r, AFlo
 
 void AnimaMappedValues::SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetColor(str, r, g, b, a);
 }
 
@@ -657,7 +651,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVectorGe
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVectorGenerator* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -669,7 +663,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVertex2f
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex2f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -681,7 +675,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AFloat x, AFl
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y);
 }
 
@@ -693,7 +687,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVertex3f
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex3f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -705,7 +699,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AFloat x, AFl
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y, z);
 }
 
@@ -724,7 +718,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVertex4f
 
 void AnimaMappedValues::SetVector(const char* propertyName, AnimaVertex4f value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, value);
 }
 
@@ -736,7 +730,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AFloat x, AFl
 
 void AnimaMappedValues::SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVector(str, x, y, z, w);
 }
 
@@ -787,7 +781,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVectorArray(str, value);
 }
 
@@ -813,21 +807,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName(_allocator);
-			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 				}
 			}
 
@@ -865,7 +858,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVectorArray(str, value);
 }
 
@@ -891,21 +884,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName(_allocator);
-			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 				}
 			}
 
@@ -943,7 +935,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVectorArray(str, value);
 }
 
@@ -969,21 +961,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName(_allocator);
-			generatorName.Format("%s[%d]", pName.GetConstBuffer(), offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName.Format("%s[%d]_%d", pName.GetConstBuffer(), offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
 				}
 			}
 
@@ -1021,7 +1012,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetVectorArray(str, value);
 }
 
@@ -1036,7 +1027,7 @@ void AnimaMappedValues::SetFloat(const AnimaString& propertyName, AFloat value)
 
 void AnimaMappedValues::SetFloat(const char* propertyName, AFloat value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetFloat(str, value);
 }
 
@@ -1051,7 +1042,7 @@ void AnimaMappedValues::SetBoolean(const AnimaString& propertyName, bool value)
 
 void AnimaMappedValues::SetBoolean(const char* propertyName, bool value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetBoolean(str, value);
 }
 
@@ -1066,7 +1057,7 @@ void AnimaMappedValues::SetInteger(const AnimaString& propertyName, AInt value)
 
 void AnimaMappedValues::SetInteger(const char* propertyName, AInt value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetInteger(str, value);
 }
 
@@ -1081,7 +1072,7 @@ void AnimaMappedValues::SetMatrix(const AnimaString& propertyName, const AnimaMa
 
 void AnimaMappedValues::SetMatrix(const char* propertyName, const AnimaMatrix& value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetMatrix(str, value);
 }
 
@@ -1093,7 +1084,7 @@ void AnimaMappedValues::SetMatrix(const AnimaString& propertyName, AFloat value[
 
 void AnimaMappedValues::SetMatrix(const char* propertyName, AFloat value[16])
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	AnimaMatrix mat(value);
 	SetMatrix(str, mat);
 }
@@ -1142,7 +1133,7 @@ void AnimaMappedValues::SetMatrixArray(const AnimaString& propertyName, AnimaArr
 
 void AnimaMappedValues::SetMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	SetMatrixArray(str, value);
 }
 
@@ -1156,7 +1147,7 @@ AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
 
 AnimaTexture* AnimaMappedValues::GetTexture(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetTexture(str);
 }
 
@@ -1172,7 +1163,7 @@ AnimaColor3f AnimaMappedValues::GetColor3f(const AnimaString& propertyName)
 
 AnimaColor3f AnimaMappedValues::GetColor3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetColor3f(str);
 }
 
@@ -1188,7 +1179,7 @@ AnimaColor4f AnimaMappedValues::GetColor4f(const AnimaString& propertyName)
 
 AnimaColor4f AnimaMappedValues::GetColor4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetColor4f(str);
 }
 
@@ -1204,7 +1195,7 @@ AnimaVertex2f AnimaMappedValues::GetVector2f(const AnimaString& propertyName)
 
 AnimaVertex2f AnimaMappedValues::GetVector2f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector2f(str);
 }
 
@@ -1220,7 +1211,7 @@ AnimaVertex3f AnimaMappedValues::GetVector3f(const AnimaString& propertyName)
 
 AnimaVertex3f AnimaMappedValues::GetVector3f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector3f(str);
 }
 
@@ -1236,7 +1227,7 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(const AnimaString& propertyName)
 
 AnimaVertex4f AnimaMappedValues::GetVector4f(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVector4f(str);
 }
 
@@ -1251,7 +1242,7 @@ AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const Anima
 
 AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetVectorArray(str);
 }
 
@@ -1265,7 +1256,7 @@ AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName)
 
 AFloat AnimaMappedValues::GetFloat(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetFloat(str);
 }
 
@@ -1279,7 +1270,7 @@ bool AnimaMappedValues::GetBoolean(const AnimaString& propertyName)
 
 bool AnimaMappedValues::GetBoolean(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetBoolean(str);
 }
 
@@ -1293,7 +1284,7 @@ AInt AnimaMappedValues::GetInteger(const AnimaString& propertyName)
 
 AInt AnimaMappedValues::GetInteger(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetInteger(str);
 }
 
@@ -1307,7 +1298,7 @@ AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName)
 
 AnimaMatrix AnimaMappedValues::GetMatrix(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetMatrix(str);
 }
 
@@ -1322,7 +1313,7 @@ AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const AnimaString& pr
 
 AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return GetMatrixArray(str);
 }
 
@@ -1334,7 +1325,7 @@ bool AnimaMappedValues::HasTexture(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasTexture(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasTexture(str);
 }
 
@@ -1346,7 +1337,7 @@ bool AnimaMappedValues::HasColor(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasColor(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasColor(str);
 }
 
@@ -1358,7 +1349,7 @@ bool AnimaMappedValues::HasVector(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasVector(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasVector(str);
 }
 
@@ -1370,7 +1361,7 @@ bool AnimaMappedValues::HasVectorArray(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasVectorArray(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasVectorArray(str);
 }
 
@@ -1382,7 +1373,7 @@ bool AnimaMappedValues::HasFloat(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasFloat(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasFloat(str);
 }
 
@@ -1394,7 +1385,7 @@ bool AnimaMappedValues::HasInteger(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasInteger(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasInteger(str);
 }
 
@@ -1406,7 +1397,7 @@ bool AnimaMappedValues::HasBoolean(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasBoolean(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasBoolean(str);
 }
 
@@ -1418,7 +1409,7 @@ bool AnimaMappedValues::HasMatrix(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasMatrix(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasMatrix(str);
 }
 
@@ -1431,16 +1422,16 @@ bool AnimaMappedValues::HasMatrixArray(const AnimaString& propertyName)
 
 bool AnimaMappedValues::HasMatrixArray(const char* propertyName)
 {
-	AnimaString str(propertyName, _allocator);
+	AnimaString str = propertyName;
 	return HasMatrixArray(str);
 }
 
 AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
 {
-	AInt pos = src.Find(".");
+	AInt pos = src.find(".");
 	if (pos == -1)
 		return src;
-	return src.Substring(pos + 1, src.GetBufferLength());
+	return src.substr(pos + 1, src.length());
 }
 
 void AnimaMappedValues::ClearAllVectorsArrays()
@@ -1467,7 +1458,7 @@ void AnimaMappedValues::CopyTextures(const AnimaMappedValues& src)
 {
 	_texturesMap.clear();
 
-	const boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher>* srcTexturesMap = &src._texturesMap;
+	const boost::unordered_map<AnimaString, AnimaTexture*>* srcTexturesMap = &src._texturesMap;
 	for (auto pair : *srcTexturesMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1479,7 +1470,7 @@ void AnimaMappedValues::CopyColors(const AnimaMappedValues& src)
 {
 	_colorsMap.clear();
 
-	const boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaString::Hasher>* srcColorsMap = &src._colorsMap;
+	const boost::unordered_map<AnimaString, AnimaColorGenerator*>* srcColorsMap = &src._colorsMap;
 	for (auto pair : *srcColorsMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1491,7 +1482,7 @@ void AnimaMappedValues::CopyVectors(const AnimaMappedValues& src)
 {
 	_vectorsMap.clear();
 
-	const boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaString::Hasher>* srcVectorsMap = &src._vectorsMap;
+	const boost::unordered_map<AnimaString, AnimaVectorGenerator*>* srcVectorsMap = &src._vectorsMap;
 	for (auto pair : *srcVectorsMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1503,7 +1494,7 @@ void AnimaMappedValues::CopyVectorsArrays(const AnimaMappedValues& src)
 {
 	ClearAllVectorsArrays();
 
-	const boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaString::Hasher>* srcVectorsArraysMap = &src._vectorsArraysMap;
+	const boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*>* srcVectorsArraysMap = &src._vectorsArraysMap;
 	for (auto pair : *srcVectorsArraysMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1515,7 +1506,7 @@ void AnimaMappedValues::CopyMatrices(const AnimaMappedValues& src)
 {
 	_matricesMap.clear();
 
-	const boost::unordered_map<AnimaString, AnimaMatrix, AnimaString::Hasher>* srcMatricesMap = &src._matricesMap;
+	const boost::unordered_map<AnimaString, AnimaMatrix>* srcMatricesMap = &src._matricesMap;
 	for (auto pair : *srcMatricesMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1527,7 +1518,7 @@ void AnimaMappedValues::CopyMatricesArrays(const AnimaMappedValues& src)
 {
 	ClearAllMatricesArrays();
 
-	const boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaString::Hasher>* srcMatricesArraysMap = &src._matricesArraysMap;
+	const boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*>* srcMatricesArraysMap = &src._matricesArraysMap;
 	for (auto pair : *srcMatricesArraysMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1539,7 +1530,7 @@ void AnimaMappedValues::CopyFloats(const AnimaMappedValues& src)
 {
 	_floatsMap.clear();
 
-	const boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher>* srcFloatsMap = &src._floatsMap;
+	const boost::unordered_map<AnimaString, AFloat>* srcFloatsMap = &src._floatsMap;
 	for (auto pair : *srcFloatsMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1551,7 +1542,7 @@ void AnimaMappedValues::CopyIntegers(const AnimaMappedValues& src)
 {
 	_integersMap.clear();
 
-	const boost::unordered_map<AnimaString, AInt, AnimaString::Hasher>* srcIntegersMap = &src._integersMap;
+	const boost::unordered_map<AnimaString, AInt>* srcIntegersMap = &src._integersMap;
 	for (auto pair : *srcIntegersMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);
@@ -1563,7 +1554,7 @@ void AnimaMappedValues::CopyBooleans(const AnimaMappedValues& src)
 {
 	_booleansMap.clear();
 
-	const boost::unordered_map<AnimaString, bool, AnimaString::Hasher>* srcBooleansMap = &src._booleansMap;
+	const boost::unordered_map<AnimaString, bool>* srcBooleansMap = &src._booleansMap;
 	for (auto pair : *srcBooleansMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);

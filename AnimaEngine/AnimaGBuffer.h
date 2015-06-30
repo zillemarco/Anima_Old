@@ -260,7 +260,7 @@ protected:
 		AnimaGBufferData*,
 		boost::multi_index::indexed_by<
 		boost::multi_index::ordered_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AUint, _index)>,
-		boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AnimaString, _name), AnimaString::Hasher> >
+		boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_MEMBER(AnimaGBufferData, AnimaString, _name)> >
 	> AnimaGBufferDataSet;
 
 	/*!

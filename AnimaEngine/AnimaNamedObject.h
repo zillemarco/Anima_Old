@@ -10,6 +10,7 @@
 #define __Anima__AnimaNamedObject__
 
 #include "AnimaEngine.h"
+#include "AnimaString.h"
 #include "AnimaAllocator.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE

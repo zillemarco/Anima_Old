@@ -14,6 +14,7 @@
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
 #include "AnimaDataGenerator.h"
+#include "AnimaString.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

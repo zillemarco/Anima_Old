@@ -18,7 +18,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesManager* texturesManager)
-	: _materials(scene->GetEngine()->GetMaterialsAllocator())
+	: _materials(scene->GetMaterialsAllocator())
 	, _lastMaterialsIndexMap(scene->GetGenericAllocator())
 {
 	ANIMA_ASSERT(texturesManager != nullptr);
@@ -39,13 +39,13 @@ AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const AnimaString& n
 
 AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateGenericMaterial(str);
 }
 
 void AnimaMaterialsManager::ClearMaterials()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaMaterial*>*, AnimaString::Hasher>* materialsMap = _materials.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaMaterial*>*>* materialsMap = _materials.GetArraysMap();
 	for (auto materialsPair : (*materialsMap))
 	{
 		AnimaMappedArray<AnimaMaterial*>* materialsArray = materialsPair.second;
@@ -73,7 +73,7 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const AnimaString& nam
 
 AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetMaterialFromName(str);
 }
 
@@ -91,19 +91,17 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 {
 	ClearLastMaterialsIndexMap();
 
-	AnimaAllocator* stringsAllocator = _scene->GetStringAllocator();
-
 	for (AUint i = 0; i < scene->mNumMaterials; i++)
 	{
 		const aiMaterial* material = scene->mMaterials[i];
 		AnimaMaterial* newMaterial = nullptr;
 
-		AnimaString* materialName = AnimaAllocatorNamespace::AllocateNew<AnimaString>(*(_scene->GetStringAllocator()), stringsAllocator);
+		AnimaString materialName;
 		int nameOffset = 0;
 		while (newMaterial == nullptr)
 		{
-			materialName->Format("%s.material%d", modelName.GetConstBuffer(), i + nameOffset);
-			newMaterial = CreateGenericMaterial(*materialName);
+			materialName = FormatString("%s.material%d", modelName, i + nameOffset);
+			newMaterial = CreateGenericMaterial(materialName);
 			nameOffset++;
 		}
 		
@@ -163,20 +161,20 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		aiString path;
 		if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			newMaterial->SetTexture("DiffuseTexture", _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath));
 		}
 
 		if (material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -193,10 +191,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 
 		if (material->GetTexture(aiTextureType_AMBIENT, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -211,10 +209,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -229,10 +227,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -248,10 +246,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -268,10 +266,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		if (material->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
 		{
 			ANIMA_ASSERT(false);
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -286,10 +284,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -305,10 +303,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_DISPLACEMENT, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -323,10 +321,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		}
 		if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &path) == AI_SUCCESS)
 		{
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 
@@ -342,10 +340,10 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		if (material->GetTexture(aiTextureType_REFLECTION, 0, &path) == AI_SUCCESS)
 		{
 			ANIMA_ASSERT(false);
-			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH, stringsAllocator);
-			AnimaString txtPath(path.C_Str(), stringsAllocator);
+			AnimaString txtCompletePath(ANIMA_ENGINE_MODELS_PATH);
+			AnimaString txtPath(path.C_Str());
 			txtCompletePath += txtPath;
-			txtCompletePath.Replace('\\', '/');
+			std::replace(txtCompletePath.begin(), txtCompletePath.end(), ' ', '~');
 
 			AnimaTexture* texture = _texturesManager->LoadTextureFromFile(txtCompletePath, txtPath);
 			if (texture != nullptr)
@@ -364,26 +362,26 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 	return true;
 }
 
-AnimaArray<AnimaString*>* AnimaMaterialsManager::GetLastMaterialsIndexMap()
+AnimaArray<AnimaString>* AnimaMaterialsManager::GetLastMaterialsIndexMap()
 {
 	return &_lastMaterialsIndexMap;
 }
 
 void AnimaMaterialsManager::ClearLastMaterialsIndexMap()
 {
-	AInt materialsIndexCount = _lastMaterialsIndexMap.GetSize();
-	for (AInt i = 0; i < materialsIndexCount; i++)
-	{
-		AnimaString* materialIndex = _lastMaterialsIndexMap[i];
-		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), materialIndex);
-		materialIndex = nullptr;
-	}
+	//AInt materialsIndexCount = _lastMaterialsIndexMap.GetSize();
+	//for (AInt i = 0; i < materialsIndexCount; i++)
+	//{
+	//	AnimaString* materialIndex = _lastMaterialsIndexMap[i];
+	//	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), materialIndex);
+	//	materialIndex = nullptr;
+	//}
 	_lastMaterialsIndexMap.RemoveAll();
 }
 
 bool AnimaMaterialsManager::LoadMaterials(const AnimaString& materialsPath)
 {
-	return LoadMaterials(materialsPath.GetConstBuffer());
+	return LoadMaterials(materialsPath.c_str());
 }
 
 bool AnimaMaterialsManager::LoadMaterials(const char* materialsPath)
@@ -406,7 +404,7 @@ bool AnimaMaterialsManager::LoadMaterials(const char* materialsPath)
 
 AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const AnimaString& materialFilePath)
 {
-	return LoadMaterialFromFile(materialFilePath.GetConstBuffer());
+	return LoadMaterialFromFile(materialFilePath.c_str());
 }
 
 AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const char* materialFilePath)

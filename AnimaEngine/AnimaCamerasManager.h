@@ -86,7 +86,7 @@ T* AnimaCamerasManager::CreateCamera(const AnimaString& name)
 template<class T>
 T* AnimaCamerasManager::CreateCamera(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateCamera<T>(str);
 }
 
@@ -105,7 +105,7 @@ AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const AnimaString& nam
 template<class T>
 AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetCameraOfTypeFromName<T*>(str);
 }
 

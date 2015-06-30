@@ -12,7 +12,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaNamedObject::AnimaNamedObject(const AnimaString& name, AnimaAllocator* allocator)
 	: _allocator(allocator)
-	, _name(allocator)
 {
 	_name = name;
 }
@@ -72,7 +71,7 @@ AnimaString AnimaNamedObject::GetAnimaName() const
 
 const char* AnimaNamedObject::GetName() const
 {
-	return _name.GetConstBuffer();
+	return _name.c_str();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -53,7 +53,7 @@ public:
 	void ClearModels();
 	
 private:
-	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString*>* meshesMap, const AnimaString& modelName);
+	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* meshesMap, const AnimaString& modelName);
 
 private:
 	AnimaScene* _scene;

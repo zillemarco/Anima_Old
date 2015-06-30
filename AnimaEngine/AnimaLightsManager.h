@@ -79,7 +79,7 @@ T* AnimaLightsManager::CreateLight(const AnimaString& name)
 template<class T> 
 T* AnimaLightsManager::CreateLight(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return CreateLight<T>(str);
 }
 
@@ -98,7 +98,7 @@ AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const AnimaString& name)
 template<class T> 
 AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetLightOfTypeFromName<T*>(str);
 }
 

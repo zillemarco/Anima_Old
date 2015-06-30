@@ -241,15 +241,15 @@ protected:
 	AnimaString _uniqueName;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaTexture*, AnimaString::Hasher> _texturesMap;
-	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaString::Hasher> _colorsMap;
-	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaString::Hasher> _vectorsMap;
-	boost::unordered_map<AnimaString, AnimaMatrix, AnimaString::Hasher> _matricesMap;
-	boost::unordered_map<AnimaString, AFloat, AnimaString::Hasher> _floatsMap;
-	boost::unordered_map<AnimaString, AInt, AnimaString::Hasher> _integersMap;
-	boost::unordered_map<AnimaString, bool, AnimaString::Hasher> _booleansMap;
-	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaString::Hasher> _vectorsArraysMap;
-	boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaString::Hasher> _matricesArraysMap;
+	boost::unordered_map<AnimaString, AnimaTexture*> _texturesMap;
+	boost::unordered_map<AnimaString, AnimaColorGenerator*> _colorsMap;
+	boost::unordered_map<AnimaString, AnimaVectorGenerator*> _vectorsMap;
+	boost::unordered_map<AnimaString, AnimaMatrix> _matricesMap;
+	boost::unordered_map<AnimaString, AFloat> _floatsMap;
+	boost::unordered_map<AnimaString, AInt> _integersMap;
+	boost::unordered_map<AnimaString, bool> _booleansMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*> _vectorsArraysMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*> _matricesArraysMap;
 #pragma warning (default: 4251) 
 };
 

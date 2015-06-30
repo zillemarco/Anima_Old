@@ -86,8 +86,7 @@ T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
 template<class T>
 T* AnimaDataGeneratorsManager::CreateDataGenerator(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return CreateDataGenerator<T>(str);
 }
 
@@ -106,8 +105,7 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(c
 template<class T>
 AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(const char* name)
 {
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetStringAllocator() : _scene->GetStringAllocator();
-	AnimaString str(name, allocator);
+	AnimaString str = name;
 	return GetDataGeneratorOfTypeFromName<T*>(str);
 }
 

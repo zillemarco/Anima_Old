@@ -135,7 +135,7 @@ AnimaAnimationNode* AnimaAnimation::CreateAnimationNode(const AnimaString& name)
 
 AnimaAnimationNode* AnimaAnimation::CreateAnimationNode(const char* name)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return CreateAnimationNode(str);
 }
 

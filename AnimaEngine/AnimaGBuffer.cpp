@@ -136,7 +136,7 @@ bool AnimaGBuffer::AddTexture(const AnimaString& name, AUint target, AUint attac
 
 bool AnimaGBuffer::AddTexture(const char* name, AUint target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter, AUint clamp)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return AddTexture(str, target, attachment, internalFormat, format, dataType, filter, clamp);
 }
 
@@ -269,7 +269,7 @@ AnimaTexture* AnimaGBuffer::GetTexture(const AnimaString& name)
 
 AnimaTexture* AnimaGBuffer::GetTexture(const char* name)
 {
-	AnimaString str(name, _allocator);
+	AnimaString str = name;
 	return GetTexture(str);
 }
 

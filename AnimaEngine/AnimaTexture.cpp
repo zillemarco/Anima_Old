@@ -8,7 +8,7 @@ AFloat Clamp(const AFloat& value, const AFloat& low, const AFloat& high)
 }
 
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
-	: AnimaNamedObject(AnimaString("AnimaTexture", allocator), allocator)
+	: AnimaNamedObject(AnimaString("AnimaTexture"), allocator)
 {
 	_mipMapLevels = 0;
 	_width = 0;
@@ -60,7 +60,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 }
 
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
-	: AnimaNamedObject(AnimaString(name, allocator), allocator)
+	: AnimaNamedObject(AnimaString(name), allocator)
 {
 	_data = nullptr;
 	_dataSize = 0;

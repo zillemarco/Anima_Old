@@ -22,13 +22,13 @@ int									Anima::AnimaEngine::_animaEngineCount = 0;
 //bool								Anima::AnimaEngine::_platformLibraryJoystickStateInitialized = false;
 //bool								Anima::AnimaEngine::_platformLibraryTLSStateInitialized = false;
 bool								Anima::AnimaEngine::_usedExternal = false;
-bool								Anima::AnimaEngine::_glewExtensionsInitialized = false;
+//	Deprecato	bool								Anima::AnimaEngine::_glewExtensionsInitialized = false;
 AChar								Anima::AnimaEngine::_logFilePath[PATH_MAX] = "";
 
 #define _ANIMA_LOCAL_MEMORY_SIZE			524288000 	// 500 MB
 #define _ANIMA_MESHES_MEMORY_SIZE			52428800	// 50 MB
 #define _ANIMA_TEXTURES_MEMORY_SIZE			104857600	// 100 MB
-#define _ANIMA_ALLOCATORS_NUMBER			13
+#define _ANIMA_ALLOCATORS_NUMBER			12
 #define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MESHES_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
@@ -45,7 +45,7 @@ AnimaEngine::AnimaEngine()
 	_modelInstancesAllocator = nullptr;
 	_meshInstancesAllocator = nullptr;
 	_genericAllocator = nullptr;
-	_stringAllocator = nullptr;
+	//	Deprecato	_stringAllocator = nullptr;
 	_shadersAllocator = nullptr;
 	_camerasAllocator = nullptr;
 	_texturesAllocator = nullptr;
@@ -105,7 +105,7 @@ void AnimaEngine::InitializeMemorySystem()
 	_texturesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_TEXTURES_MEMORY_SIZE, *_localMemoryAllocator);
 	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
-	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	//	Deprecato	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_shadersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_camerasAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_materialsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
@@ -121,7 +121,7 @@ void AnimaEngine::InitializeMemorySystem()
 	usedSize += _meshInstancesAllocator->GetSize();
 	usedSize += _genericAllocator->GetSize(); 
 	usedSize += _managersAllocator->GetSize(); 
-	usedSize += _stringAllocator->GetSize(); 
+	//	Deprecato	usedSize += _stringAllocator->GetSize(); 
 	usedSize += _shadersAllocator->GetSize(); 
 	usedSize += _camerasAllocator->GetSize(); 
 	usedSize += _texturesAllocator->GetSize(); 
@@ -205,11 +205,11 @@ void AnimaEngine::TerminateMemorySystem()
 		_genericAllocator = nullptr;
 	}
 	
-	if (_stringAllocator != nullptr)
-	{
-		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_localMemoryAllocator);
-		_stringAllocator = nullptr;
-	}
+	//	Deprecato	if (_stringAllocator != nullptr)
+	//	Deprecato	{
+	//	Deprecato		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_localMemoryAllocator);
+	//	Deprecato		_stringAllocator = nullptr;
+	//	Deprecato	}
 
 	if (_shadersAllocator != nullptr)
 	{
@@ -655,35 +655,7 @@ void AnimaEngine::TerminateWindowSystem()
 //{
 //	_AnimaEngineWindowPlatformSetTime(time);
 //}
-
-bool AnimaEngine::InitializeGlewExtensions()
-{
-	//return _AnimaEngineWindowInitializeGlewExtensions();
-
-	if (IsGlewExtensionsInitialized())
-		return true;
-
-	if (glGetError() != GL_NO_ERROR)
-		return false;
-
-	glewExperimental = GL_TRUE;
-	GLenum error = glewInit();
-
-	if (glGetError() != GL_NO_ERROR)
-		return false;
-
-	if (error != GLEW_OK)
-	{
-		char str[4096];
-		sprintf(str, "Error initializing GLEW: %s\n", glewGetErrorString(error));
-		fprintf(stderr, "Error initializing GLEW: %s\n", glewGetErrorString(error));
-		return false;
-	}
-
-	SetGlewExtensionsInitialized(true);
-	return true;
-}
-
+//
 //void AnimaEngine::MakeContextCurrent(AnimaWindow* window)
 //{
 //	_AnimaEngineWindowPlatformMakeContextCurrent(window);
@@ -733,15 +705,15 @@ bool AnimaEngine::IsUsedExteral()
 	return _usedExternal; 
 }
 
-bool AnimaEngine::IsGlewExtensionsInitialized()
-{ 
-	return _glewExtensionsInitialized; 
-}
-
-void AnimaEngine::SetGlewExtensionsInitialized(bool bSet) 
-{ 
-	_glewExtensionsInitialized = bSet; 
-}
+//	Deprecato	bool AnimaEngine::IsGlewExtensionsInitialized()
+//	Deprecato	{ 
+//	Deprecato		return _glewExtensionsInitialized; 
+//	Deprecato	}
+//	Deprecato	
+//	Deprecato	void AnimaEngine::SetGlewExtensionsInitialized(bool bSet) 
+//	Deprecato	{ 
+//	Deprecato		_glewExtensionsInitialized = bSet; 
+//	Deprecato	}
 
 bool AnimaEngine::IsInitialized()
 { 

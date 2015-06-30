@@ -36,10 +36,10 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 	{
 		aiAnimation* animation = scene->mAnimations[na];
 		
-		AnimaString animationName(_scene->GetStringAllocator());
-		AnimaString originalAnimationName(animation->mName.C_Str(), _scene->GetStringAllocator());
+		AnimaString animationName;
+		AnimaString originalAnimationName(animation->mName.C_Str());
 
-		if (originalAnimationName.IsEmpty())
+		if (originalAnimationName.empty())
 			originalAnimationName = "Animation";
 
 		AnimaAnimation* newAnimation = nullptr;
@@ -47,9 +47,9 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 		while (newAnimation == nullptr)
 		{
 			if (nameOffset > 0)
-				animationName.Format("%s%d", originalAnimationName.GetConstBuffer(), nameOffset);
+				animationName = FormatString("%s%d", originalAnimationName, nameOffset);
 			else
-				animationName.Format("%s", originalAnimationName.GetConstBuffer());
+				animationName = FormatString("%s", originalAnimationName);
 
 			newAnimation = CreateEmptyAnimation(animationName);
 			nameOffset++;
@@ -107,7 +107,7 @@ AnimaAnimation* AnimaAnimationsManager::CreateEmptyAnimation(const AnimaString& 
 
 AnimaAnimation* AnimaAnimationsManager::CreateEmptyAnimation(const char* animationName)
 {
-	AnimaString str(animationName, _scene->GetStringAllocator());
+	AnimaString str = animationName;
 	return CreateEmptyAnimation(str);
 }
 
@@ -128,7 +128,7 @@ AnimaAnimation* AnimaAnimationsManager::GetAnimationFromName(const AnimaString& 
 
 AnimaAnimation* AnimaAnimationsManager::GetAnimationFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetAnimationFromName(str);
 }
 

@@ -60,7 +60,7 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, AnimaMesh* srcMesh)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateInstance(str, srcMesh);
 }
 
@@ -74,20 +74,20 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, const AnimaString& srcMeshName)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateInstance(str, srcMeshName);
 }
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& instanceName, const char* srcMeshName)
 {
-	AnimaString str(srcMeshName, _scene->GetStringAllocator());
+	AnimaString str = srcMeshName;
 	return CreateInstance(instanceName, str);
 }
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, const char* srcMeshName)
 {
-	AnimaString strInstanceName(instanceName, _scene->GetStringAllocator());
-	AnimaString strModelName(srcMeshName, _scene->GetStringAllocator());
+	AnimaString strInstanceName = instanceName;
+	AnimaString strModelName = srcMeshName;
 	return CreateInstance(strInstanceName, strModelName);
 }
 
@@ -105,7 +105,7 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateEmptyInstance(const AnimaStr
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateEmptyInstance(const char* instanceName)
 {
-	AnimaString str(instanceName, _scene->GetStringAllocator());
+	AnimaString str = instanceName;
 	return CreateEmptyInstance(str);
 }
 
@@ -122,15 +122,15 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 		AnimaMesh* mesh = srcModel->GetMesh(i);
 
 		AnimaString meshName = mesh->GetAnimaName();
-		AnimaString meshInstanceName(_scene->GetStringAllocator());
+		AnimaString meshInstanceName;
 		AnimaMeshInstance* newInstance = nullptr;
 		int nameOffset = 0;
 		while (newInstance == nullptr)
 		{
 			if (nameOffset > 0)
-				meshInstanceName.Format("%s.instance%d", meshName.GetConstBuffer(), i + nameOffset);
+				meshInstanceName = FormatString("%s.instance%d", meshName, i + nameOffset);
 			else
-				meshInstanceName.Format("%s.instance%d", meshName.GetConstBuffer(), i);
+				meshInstanceName = FormatString("%s.instance%d", meshName, i);
 
 			newInstance = CreateEmptyInstance(meshInstanceName);
 			nameOffset++;
@@ -174,7 +174,7 @@ AnimaMeshInstance* AnimaMeshInstancesManager::GetMeshInstanceFromName(const Anim
 
 AnimaMeshInstance* AnimaMeshInstancesManager::GetMeshInstanceFromName(const char* name)
 {
-	AnimaString str(name, _scene->GetStringAllocator());
+	AnimaString str = name;
 	return GetMeshInstanceFromName(str);
 }
 
