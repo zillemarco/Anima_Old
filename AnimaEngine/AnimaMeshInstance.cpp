@@ -16,23 +16,31 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGenerator
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
 	, _materialName(allocator)
 	, _meshName(allocator)
+	, _shadersNames(allocator)
+	, _shaderProgramName(allocator)
 {
 	_material = nullptr;
 	_mesh = nullptr;
+	_shaderProgramName = "";
 }
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
 	: AnimaSceneObject(src)
 	, _materialName(src._materialName)
 	, _meshName(src._meshName)
+	, _shadersNames(src._shadersNames)
+	, _shaderProgramName(src._shaderProgramName)
 {
 	_material = src._material;
+	_mesh = src._mesh;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
 	: AnimaSceneObject(src)
 	, _materialName(src._materialName)
 	, _meshName(src._meshName)
+	, _shadersNames(src._shadersNames)
+	, _shaderProgramName(src._shaderProgramName)
 {
 	_material = src._material;
 	_mesh = src._mesh;
@@ -53,6 +61,9 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(const AnimaMeshInstance& src)
 		
 		_mesh = src._mesh;
 		_meshName = src._meshName;
+
+		_shadersNames.Copy(src._shadersNames);
+		_shaderProgramName = src._shaderProgramName;
 	}
 	
 	return *this;
@@ -69,6 +80,9 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(AnimaMeshInstance&& src)
 
 		_mesh = src._mesh;
 		_meshName = src._meshName;
+
+		_shadersNames.Copy(src._shadersNames);
+		_shaderProgramName = src._shaderProgramName;
 	}
 	
 	return *this;
@@ -115,6 +129,46 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	program->DisableInputs();
 #endif
+}
+
+void AnimaMeshInstance::AddShader(AnimaShader* shader)
+{
+	_shadersNames.Add(shader->GetAnimaName());
+}
+
+void AnimaMeshInstance::AddShader(const AnimaString& shaderName)
+{
+	_shadersNames.Add(shaderName);
+}
+
+void AnimaMeshInstance::AddShader(const char* shaderName)
+{
+	_shadersNames.Add(AnimaString(shaderName, nullptr));
+}
+
+AInt AnimaMeshInstance::GetShadersCount() const
+{
+	return _shadersNames.GetSize();
+}
+
+AnimaString AnimaMeshInstance::GetShaderName(AInt index) const
+{
+	return _shadersNames[index];
+}
+
+void AnimaMeshInstance::SetShaderProgram(const AnimaString& shaderProgramName)
+{
+	_shaderProgramName = shaderProgramName;
+}
+
+void AnimaMeshInstance::SetShaderProgram(const char* shaderProgramName)
+{
+	_shaderProgramName = shaderProgramName;
+}
+
+AnimaString AnimaMeshInstance::GetShaderProgramName() const
+{
+	return _shaderProgramName;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -43,6 +43,17 @@ public:
 	AnimaMaterial* GetMaterial();	
 	AnimaMesh* GetMesh() const;
 
+	// Gestione dati necessari al disegno
+	void AddShader(AnimaShader* shader);
+	void AddShader(const AnimaString& shaderName);
+	void AddShader(const char* shaderName);
+	AInt GetShadersCount() const;
+	AnimaString GetShaderName(AInt index) const;
+
+	void SetShaderProgram(const AnimaString& shaderProgramName);
+	void SetShaderProgram(const char* shaderProgramName);
+	AnimaString GetShaderProgramName() const;
+
 protected:
 	const char* GetShaderPrefix() { return "MOD"; }
 	
@@ -54,6 +65,10 @@ protected:
 
 	AnimaMesh* _mesh;
 	AnimaString _meshName;
+
+	// Dati necessari al disegno
+	AnimaArray<AnimaString> _shadersNames;
+	AnimaString _shaderProgramName;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

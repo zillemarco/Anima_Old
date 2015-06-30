@@ -13,6 +13,8 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaMappedValues.h"
+#include "AnimaArray.h"
+#include "AnimaShader.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -27,8 +29,17 @@ public:
 	AnimaMaterial& operator=(const AnimaMaterial& src);
 	AnimaMaterial& operator=(AnimaMaterial&& src);
 
+	void AddShader(AnimaShader* shader);
+	void AddShader(const AnimaString& shaderName);
+	void AddShader(const char* shaderName);
+	AInt GetShadersCount() const;
+	AnimaString GetShaderName(AInt index) const;
+
 public:
 	virtual const char* GetShaderPrefix() { return "MAT"; }
+
+protected:
+	AnimaArray<AnimaString> _shadersNames;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

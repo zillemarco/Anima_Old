@@ -999,8 +999,32 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
 {
+	AnimaShaderProgram* originalProgram = program;
 	if (!useInstances)
 	{
+		AnimaString shaderProgramName = mesh->GetShaderProgramName();
+		if (shaderProgramName.IsEmpty())
+		{
+			program = _scene->GetShadersManager()->CreateProgram(mesh, mesh->GetMaterial());
+			if (program)
+				program->Link();
+		}
+		else
+			program = _scene->GetShadersManager()->GetProgramFromName(mesh->GetShaderProgramName());
+
+		AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+		if (activeProgram == nullptr || (*activeProgram) != (*program))
+		{
+			AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+			if (camera == nullptr)
+				return;
+
+			program->Use();
+			program->UpdateSceneObjectProperties(camera, this);
+
+			frustum = camera->GetFrustum();
+		}
+
 		AnimaTransformation* meshTransfomation = mesh->GetTransformation();
 
 		if (!forceDraw)
@@ -1036,6 +1060,33 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 		for (AInt i = 0; i < instancesCount; i++)
 		{
 			AnimaMeshInstance* instance = mesh->GetInstance(i);
+
+			AnimaString shaderProgramName = instance->GetShaderProgramName();
+			if (shaderProgramName.IsEmpty())
+			{
+				program = _scene->GetShadersManager()->CreateProgram(instance, instance->GetMaterial());
+				if (program)
+					program->Link();
+			}
+			else
+				program = _scene->GetShadersManager()->GetProgramFromName(instance->GetShaderProgramName());
+
+			if (program == nullptr)
+				program = originalProgram;
+
+			AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+			if (activeProgram == nullptr || (*activeProgram) != (*program))
+			{
+				AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+				if (camera == nullptr)
+					return;
+
+				program->Use();
+				program->UpdateSceneObjectProperties(camera, this);
+
+				frustum = camera->GetFrustum();
+			}
+
 			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
 			if (!forceDraw)
 			{
@@ -1168,25 +1219,24 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 	if (meshesCount == 0)
 		return;
 
-	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
-
+	//AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
 	AnimaFrustum* frustum = nullptr;
-
-	if (activeProgram == nullptr || (*activeProgram) != (*program))
-	{
-		AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
-		if (camera == nullptr)
-			return;
-
-		program->Use();
-		program->UpdateSceneObjectProperties(camera, this);
-
-		frustum = camera->GetFrustum();
-	}
-
+	
 	for (AInt i = 0; i < meshesCount; i++)
 	{
 		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		//if (activeProgram == nullptr || (*activeProgram) != (*program))
+		//{
+		//	AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+		//	if (camera == nullptr)
+		//		return;
+
+		//	program->Use();
+		//	program->UpdateSceneObjectProperties(camera, this);
+
+		//	frustum = camera->GetFrustum();
+		//}
+
 		DrawMesh(mesh, program, true, false, frustum);
 	}
 }

@@ -36,13 +36,21 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 	if (index >= 0)
 		return nullptr;
 
+	AnimaMaterial* oldMaterial = srcMesh->GetMaterial();
 	AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(instanceName + ".material");
-	newMaterial->CopyData(*srcMesh->GetMaterial());
+	newMaterial->CopyData(*oldMaterial);
+
+	for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
+		newMaterial->AddShader(oldMaterial->GetShaderName(ns));
 
 	AnimaMeshInstance* meshInstance = AnimaAllocatorNamespace::AllocateNew<AnimaMeshInstance>(*(_scene->GetMeshInstancesAllocator()), instanceName, _scene->GetDataGeneratorsManager(), _scene->GetMeshInstancesAllocator());
 	meshInstance->CopyData(*srcMesh);
 	meshInstance->SetMaterial(newMaterial);
 	meshInstance->SetMesh(srcMesh);
+
+	for (AInt ns = 0; ns < srcMesh->GetShadersCount(); ns++)
+		meshInstance->AddShader(srcMesh->GetShaderName(ns));
+
 	srcMesh->AddInstance(meshInstance);
 
 	_meshIntances.Add(instanceName, meshInstance);
@@ -128,12 +136,19 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 			nameOffset++;
 		}
 		
+		AnimaMaterial* oldMaterial = mesh->GetMaterial();
 		AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(meshInstanceName + ".material");
-		newMaterial->CopyData(*mesh->GetMaterial());
+		newMaterial->CopyData(*oldMaterial);
+		for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
+			newMaterial->AddShader(oldMaterial->GetShaderName(ns));
 
 		newInstance->CopyData(*mesh);
 		newInstance->SetMaterial(newMaterial);
 		newInstance->SetMesh(mesh);
+
+		for (AInt ns = 0; ns < mesh->GetShadersCount(); ns++)
+			newInstance->AddShader(mesh->GetShaderName(ns));
+
 		mesh->AddInstance(newInstance);
 
 		_lastInstancesFromModel.Add(newInstance);

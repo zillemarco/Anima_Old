@@ -3,7 +3,6 @@
 #include "AnimaEngineCore.h"
 #include "AnimaAllocators.h"
 #include "AnimaTypes.h"
-#include "AnimaMesh.h"
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaShader.h"
@@ -12,6 +11,10 @@
 #include "AnimaArray.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaMaterial;
+class AnimaMesh;
+class AnimaMeshInstance;
 
 class ANIMA_ENGINE_EXPORT AnimaShadersManager
 {
@@ -33,12 +36,23 @@ public:
 	
 	AnimaShader* LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info);
 	AnimaShader* LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info);
+
+	bool LoadShadersParts(const AnimaString& partsPath);
+	bool LoadShadersParts(const char* partsPath);
+	AnimaShader* LoadShaderFromPartFile(const AnimaString& partFilePath);
+	AnimaShader* LoadShaderFromPartFile(const char* partFilePath);
 	
 	AnimaShader* CreateShader(const AnimaString& name);
 	AnimaShader* CreateShader(const char* name);
 
+	AnimaShader* GetShader(AInt index);
+	AnimaShader* GetShaderFromName(const AnimaString& name);
+	AnimaShader* GetShaderFromName(const char* name);
+
 	AnimaShaderProgram* CreateProgram(const AnimaString& name);
 	AnimaShaderProgram* CreateProgram(const char* name);
+	AnimaShaderProgram* CreateProgram(AnimaMesh* mesh, const AnimaMaterial* material);
+	AnimaShaderProgram* CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material);
 
 	AnimaShaderProgram* GetProgram(AInt index);
 	AnimaShaderProgram* GetProgramFromName(const AnimaString& name);

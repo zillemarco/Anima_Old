@@ -194,7 +194,7 @@ public:
 public:
 	AnimaVertex4f();
 	AnimaVertex4f(AFloat val);
-	AnimaVertex4f(AFloat v[3]);
+	AnimaVertex4f(AFloat v[4]);
 	AnimaVertex4f(AFloat x, AFloat y, AFloat z, const AFloat w);
 	AnimaVertex4f(const AnimaVertex2f& src, const AFloat z, const AFloat w);
 	AnimaVertex4f(const AnimaVertex3f& src, const AFloat w);

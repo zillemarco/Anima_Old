@@ -21,6 +21,7 @@
 #include "AnimaMappedArray.h"
 #include "AnimaSceneObject.h"
 #include "AnimaNamedObject.h"
+#include "AnimaShader.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -173,7 +174,18 @@ public:
 
 	void SetUpdateBuffers(bool bUpdate = true);
 	bool NeedsBuffersUpdate();
-		
+
+	// Gestione dati necessari al disegno
+	void AddShader(AnimaShader* shader);
+	void AddShader(const AnimaString& shaderName);
+	void AddShader(const char* shaderName);
+	AInt GetShadersCount() const;
+	AnimaString GetShaderName(AInt index) const;
+
+	void SetShaderProgram(const AnimaString& shaderProgramName);
+	void SetShaderProgram(const char* shaderProgramName);
+	AnimaString GetShaderProgramName() const;
+			
 public:
 	bool AreBuffersCreated();
 	bool CanCreateBuffers();
@@ -280,6 +292,10 @@ protected:
 
 	bool _visible;	
 	bool _needsBuffersUpdate;
+
+	// Dati necessari al disegno
+	AnimaArray<AnimaString> _shadersNames;
+	AnimaString _shaderProgramName;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

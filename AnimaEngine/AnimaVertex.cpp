@@ -577,7 +577,7 @@ AnimaVertex4f::AnimaVertex4f(AFloat val)
 	_nextValueIndex = 0;
 }
 
-AnimaVertex4f::AnimaVertex4f(AFloat v[3])
+AnimaVertex4f::AnimaVertex4f(AFloat v[4])
 {
 	vec[0] = v[0];
 	vec[1] = v[1];

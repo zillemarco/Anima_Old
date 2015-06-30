@@ -2,20 +2,20 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaShader::AnimaShader(AnimaAllocator* allocator)
-	: _text(allocator)
+AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator)
+	: AnimaNamedObject(name, allocator)
+	, _text(allocator)
 {
-	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
 	_type = INVALID;
 }
 
-AnimaShader::AnimaShader(AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type)
-	: _text(allocator)
+AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type)
+	: AnimaNamedObject(name, allocator)
+	, _text(allocator)
 {
-	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
@@ -23,10 +23,10 @@ AnimaShader::AnimaShader(AnimaAllocator* allocator, AnimaString shaderText, Anim
 	_text = shaderText;
 }
 
-AnimaShader::AnimaShader(AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type)
-	: _text(allocator)
+AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type)
+	: AnimaNamedObject(name, allocator)
+	, _text(allocator)
 {
-	_allocator = allocator;
 	_id = 0;
 	_compiled = false;
 
@@ -35,16 +35,16 @@ AnimaShader::AnimaShader(AnimaAllocator* allocator, const char* shaderText, Anim
 }
 
 AnimaShader::AnimaShader(const AnimaShader& src)
-	: _text(src._text)
+	: AnimaNamedObject(src)
+	, _text(src._text)
 {
-	_allocator = src._allocator;
 	_id = src._id;
 	_type = src._type;
 	_compiled = src._compiled;
 }
 
 AnimaShader::AnimaShader(AnimaShader&& src)
-	: _allocator(src._allocator)
+	: AnimaNamedObject(src)
 	, _type(src._type)
 	, _text(src._text)
 	, _id(src._id)
@@ -63,6 +63,7 @@ AnimaShader& AnimaShader::operator=(const AnimaShader& src)
 {
 	if (this != &src)
 	{
+		AnimaNamedObject::operator=(src);
 		_text = src._text;
 		_id = src._id;
 		_type = src._type;
@@ -76,6 +77,7 @@ AnimaShader& AnimaShader::operator=(AnimaShader&& src)
 {
 	if (this != &src)
 	{
+		AnimaNamedObject::operator=(src);
 		_text = src._text;
 		_id = src._id;
 		_type = src._type;

@@ -13,6 +13,7 @@
 #include <AnimaCamerasManager.h>
 #include <AnimaAnimationsManager.h>
 #include <AnimaModelInstancesManager.h>
+#include <AnimaMaterialsManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -179,6 +180,7 @@ bool InitEngine()
 
 	// Caricamento degli shader
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	shadersManager->LoadShadersParts("D:/Git/Anima/AnimaEngine/data/shaders/Parts");
 
 	Anima::AnimaShaderProgram* prepareProgram = shadersManager->CreateProgram("deferred-prepare");
 	prepareProgram->Create();
@@ -222,27 +224,36 @@ bool InitEngine()
 	if (!fxaa->Link())
 		return false;
 
+	// Caricamento dei materiali
+	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+	materialsManager->LoadMaterials("D:/Git/Anima/AnimaEngine/data/materials");
+
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
 	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
 
-	_camera->LookAt(0.0, 90.0, 200.0, 0.0, 0.0, -1.0);
+	//_camera->LookAt(0.0, 90.0, 200.0, 0.0, 0.0, -1.0);
+	_camera->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, -1.0);
 	_camera->Activate();
 
 	// Caricamento di un modello
-	_model = _scene->GetModelsManager()->LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", ANIMA_ENGINE_DEMO_MODEL_NAME);
-	//_model = _scene->GetModelsManager()->LoadModel("D:\\Git\\Anima\\AnimaEngine\\data\\models\\cubo.3ds", ANIMA_ENGINE_DEMO_MODEL_NAME);
+	//_model = _scene->GetModelsManager()->LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", ANIMA_ENGINE_DEMO_MODEL_NAME);
+	_model = _scene->GetModelsManager()->LoadModel("D:\\Git\\Anima\\AnimaEngine\\data\\models\\cubo.3ds", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
+
+	((Anima::AnimaModel*)_model->GetChild(0))->GetMesh(0)->SetMaterial(materialsManager->GetMaterialFromName("default-material"));
+	((Anima::AnimaModel*)_model->GetChild(0))->GetMesh(0)->AddShader(shadersManager->GetShaderFromName("mesh-default-vs"));
+
 
 	// Creazione di due istanze del modello
 	Anima::AnimaModelInstance* firstInstance = _scene->GetModelInstancesManager()->CreateInstance("first-instance", _model);
 	Anima::AnimaModelInstance* secondInstance = _scene->GetModelInstancesManager()->CreateInstance("second-instance", _model);
 
-	firstInstance->GetTransformation()->TranslateX(20.0f);
-	secondInstance->GetTransformation()->TranslateX(-20.0f);
+	firstInstance->GetTransformation()->TranslateX(5.0f);
+	secondInstance->GetTransformation()->TranslateX(-5.0f);
 
 	ChangeColor(firstInstance);
 
@@ -273,12 +284,6 @@ void UpdateFrame()
 {
 	if (_gc)
 	{
-		//if (_model)
-		//{
-		//	if (_model->GetAnimationsCount() > 0)
-		//		_model->GetAnimation(0)->UpdateAnimation(_model, _timer.Elapsed());
-		//}
-
 		_gc->MakeCurrent();
 
 		_renderer->Start(_scene);

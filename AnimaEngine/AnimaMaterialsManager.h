@@ -46,6 +46,11 @@ public:
 	AnimaMaterial* GetMaterial(AInt index);
 	AnimaMaterial* GetMaterialFromName(const AnimaString& name);
 	AnimaMaterial* GetMaterialFromName(const char* name);
+
+	bool LoadMaterials(const AnimaString& materialsPath);
+	bool LoadMaterials(const char* materialsPath);
+	AnimaMaterial* LoadMaterialFromFile(const AnimaString& materialFilePath);
+	AnimaMaterial* LoadMaterialFromFile(const char* materialFilePath);
 	
 	AInt GetTotalMaterialsCount();
 	

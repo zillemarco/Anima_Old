@@ -105,6 +105,8 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 , _boneWeights(allocator)
 , _boneIDs(allocator)
 , _faces(allocator)
+, _shadersNames(allocator)
+, _shaderProgramName(allocator)
 {
 	_material = nullptr;
 
@@ -122,6 +124,7 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 	_visible = true;
 
 	_materialName = "";
+	_shaderProgramName = "";
 }
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)
@@ -138,6 +141,8 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
+	, _shadersNames(src._shadersNames)
+	, _shaderProgramName(src._shaderProgramName)
 	//, _colorsBufferObject(src._colorsBufferObject)
 {
 	_allocator = src._allocator;
@@ -187,6 +192,8 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _tangentsBufferObject(src._tangentsBufferObject)
 	, _visible(src._visible)
 	, _needsBuffersUpdate(src._needsBuffersUpdate)
+	, _shadersNames(src._shadersNames)
+	, _shaderProgramName(src._shaderProgramName)
 {
 }
 
@@ -230,6 +237,9 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 		_faces = src._faces;
 
 		_meshInstances = src._meshInstances;
+
+		_shadersNames.Copy(src._shadersNames);
+		_shaderProgramName = src._shaderProgramName;
 	}
 	
 	return *this;
@@ -270,6 +280,9 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 		_boundingBoxCenter = src._boundingBoxCenter;
 
 		_meshInstances = src._meshInstances;
+
+		_shadersNames.Copy(src._shadersNames);
+		_shaderProgramName = src._shaderProgramName;
 	}
 	
 	return *this;
@@ -1427,6 +1440,46 @@ AInt AnimaMesh::GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const
 	}
 
 	return -1;
+}
+
+void AnimaMesh::AddShader(AnimaShader* shader)
+{
+	_shadersNames.Add(shader->GetAnimaName());
+}
+
+void AnimaMesh::AddShader(const AnimaString& shaderName)
+{
+	_shadersNames.Add(shaderName);
+}
+
+void AnimaMesh::AddShader(const char* shaderName)
+{
+	_shadersNames.Add(AnimaString(shaderName, nullptr));
+}
+
+AInt AnimaMesh::GetShadersCount() const
+{
+	return _shadersNames.GetSize();
+}
+
+AnimaString AnimaMesh::GetShaderName(AInt index) const
+{
+	return _shadersNames[index];
+}
+
+void AnimaMesh::SetShaderProgram(const AnimaString& shaderProgramName)
+{
+	_shaderProgramName = shaderProgramName;
+}
+
+void AnimaMesh::SetShaderProgram(const char* shaderProgramName)
+{
+	_shaderProgramName = shaderProgramName;
+}
+
+AnimaString AnimaMesh::GetShaderProgramName() const
+{
+	return _shaderProgramName;
 }
 
 void AnimaMesh::MakePlane()

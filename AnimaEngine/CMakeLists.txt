@@ -75,7 +75,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaAnimation.h
 					AnimaAnimationsManager.h
 					AnimaNamedObject.h
-					AnimaGC.h)
+					AnimaGC.h
+					AnimaXmlTranslators.h
+					AnimaMD5.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -132,7 +134,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMeshInstancesManager.cpp
 					AnimaAnimation.cpp
 					AnimaAnimationsManager.cpp
-					AnimaNamedObject.cpp)
+					AnimaNamedObject.cpp
+					AnimaXmlTranslators.cpp
+					AnimaMD5.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -162,7 +166,7 @@ else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
 endif()
 
-source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp)
+source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
 
 source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h)

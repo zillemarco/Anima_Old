@@ -12,6 +12,8 @@
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
 #include "AnimaScene.h"
+#include "AnimaNamedObject.h"
+
 #include <boost/unordered_map.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -24,7 +26,7 @@ enum AnimaShaderInfoType {
 	SHADER_TEXT
 };
 
-class ANIMA_ENGINE_EXPORT AnimaShaderProgram
+class ANIMA_ENGINE_EXPORT AnimaShaderProgram : public AnimaNamedObject
 {
 public:
 	struct AnimaShaderInfo {
@@ -72,7 +74,7 @@ public:
 	};
 
 public:
-	AnimaShaderProgram(AnimaAllocator* allocator, AnimaShadersManager* shadersManager);
+	AnimaShaderProgram(const AnimaString& name, AnimaAllocator* allocator, AnimaShadersManager* shadersManager);
 	AnimaShaderProgram(const AnimaShaderProgram& src);
 	AnimaShaderProgram(AnimaShaderProgram&& src);
 	~AnimaShaderProgram();
@@ -146,8 +148,6 @@ private:
 	void ClearUniforms();
 	
 private:
-	AnimaAllocator*	_allocator;
-	
 	AnimaShader**	_shaders;
 	ASizeT			_shadersNumber;
 

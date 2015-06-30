@@ -7,6 +7,13 @@
 //
 
 #include "AnimaMaterialsManager.h"
+#include "AnimaXmlTranslators.h"
+#include "AnimaShadersManager.h"
+
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -372,6 +379,82 @@ void AnimaMaterialsManager::ClearLastMaterialsIndexMap()
 		materialIndex = nullptr;
 	}
 	_lastMaterialsIndexMap.RemoveAll();
+}
+
+bool AnimaMaterialsManager::LoadMaterials(const AnimaString& materialsPath)
+{
+	return LoadMaterials(materialsPath.GetConstBuffer());
+}
+
+bool AnimaMaterialsManager::LoadMaterials(const char* materialsPath)
+{
+	namespace fs = boost::filesystem;
+	fs::path directory(materialsPath);
+
+	if (fs::exists(directory) && fs::is_directory(directory))
+	{
+		fs::directory_iterator endIterator;
+		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
+		{
+			if (LoadMaterialFromFile(directoryIterator->path().string().c_str()) == nullptr)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const AnimaString& materialFilePath)
+{
+	return LoadMaterialFromFile(materialFilePath.GetConstBuffer());
+}
+
+AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const char* materialFilePath)
+{
+	AnimaMaterial* material = nullptr;
+	
+	std::ifstream fileStream(materialFilePath);
+
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	boost::property_tree::read_xml(fileStream, pt);
+
+	std::string name = (pt.get<std::string>("AnimaMaterial.<xmlattr>.name")).c_str();
+
+	material = CreateMaterial<AnimaMaterial>(name.c_str());
+
+	if (material)
+	{
+		AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+
+		for (auto& prop : pt.get_child("AnimaMaterial.Properties"))
+		{
+			if (prop.first == "Property")
+			{
+				std::string propName = prop.second.get<std::string>("<xmlattr>.name");
+				std::string propType = prop.second.get<std::string>("<xmlattr>.type");
+
+				if (propType.compare("color") == 0 || propType.compare("vector") == 0)
+					material->SetColor(propName.c_str(), prop.second.get<AnimaVertex4f>("<xmlattr>.value"));
+				else if (propType.compare("float") == 0)
+					material->SetFloat(propName.c_str(), prop.second.get<AFloat>("<xmlattr>.value"));
+				else if (propType.compare("bool") == 0)
+					material->SetBoolean(propName.c_str(), prop.second.get<bool>("<xmlattr>.value"));
+			}
+		}
+
+		for (auto& shader : pt.get_child("AnimaMaterial.Shaders"))
+		{
+			if (shader.first == "Shader")
+			{
+				std::string shaderName = shader.second.get<std::string>("<xmlattr>.name");
+				material->AddShader(shaderName.c_str());
+			}
+		}
+	}
+
+	return material;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

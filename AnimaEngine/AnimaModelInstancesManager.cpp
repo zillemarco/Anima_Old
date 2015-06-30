@@ -86,7 +86,6 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 		completeInstanceName = srcModel->GetAnimaName() + "." + instanceName;
 	else
 		completeInstanceName = instanceName;
-
 	AnimaString modelName = srcModel->GetAnimaName();
 	AnimaString modelInstanceName(_scene->GetStringAllocator());
 	AnimaModelInstance* newInstance = nullptr;
@@ -115,12 +114,14 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 	newInstance->CopyData(*srcModel);
 	newInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
 
+	AnimaTimer timer;
 	AInt childrenNumber = srcModel->GetChildrenNumber();
 	for (AInt i = 0; i < childrenNumber; i++)
 	{
 		AnimaModelInstance* newChild = CreateInstanceFromModel(instanceName, (AnimaModel*)srcModel->GetChild(i), true);
 		newInstance->AddChild(newChild);
 	}
+	timer.PrintElapsed();
 
 	newInstance->UpdateChildrenTransformation();
 

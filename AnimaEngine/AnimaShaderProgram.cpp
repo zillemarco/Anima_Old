@@ -12,9 +12,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 const char* RenderingEnginePrefix	= "REN";
 const char* GBufferPrefix			= "GB";
 
-AnimaShaderProgram::AnimaShaderProgram(AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
+AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
+	: AnimaNamedObject(name, allocator)
 {
-	_allocator = allocator;
 	_shaders = nullptr;
 	_shadersNumber = 0;
 	_id = 0;
@@ -27,8 +27,8 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaAllocator* allocator, AnimaShadersMa
 }
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
+	: AnimaNamedObject(src)
 {
-	_allocator = src._allocator;
 	_id = src._id;
 	_linked = src._linked;
 
@@ -47,7 +47,7 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
-	: _allocator(src._allocator)
+	: AnimaNamedObject(src)
 	, _shaders(src._shaders)
 	, _shadersNumber(src._shadersNumber)
 	, _id(src._id)
@@ -85,6 +85,8 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 {
 	if (this != &src)
 	{
+		AnimaNamedObject::operator=(src);
+
 		SetShaders(src._shaders, src._shadersNumber);
 
 		ClearUniforms();
@@ -94,7 +96,6 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 		_maxPointLights = src._maxPointLights;
 		_maxSpotLights = src._maxSpotLights;
 
-		_allocator = src._allocator;
 		_id = src._id;
 		_linked = src._linked;
 	}
@@ -106,6 +107,8 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 {
 	if (this != &src)
 	{
+		AnimaNamedObject::operator=(src);
+
 		SetShaders(src._shaders, src._shadersNumber);
 
 		ClearUniforms();
@@ -115,7 +118,6 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_maxPointLights = src._maxPointLights;
 		_maxSpotLights = src._maxSpotLights;
 
-		_allocator = src._allocator;
 		_id = src._id;
 		_linked = src._linked;
 

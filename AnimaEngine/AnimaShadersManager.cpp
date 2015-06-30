@@ -1,5 +1,14 @@
 #include "AnimaShadersManager.h"
+#include "AnimaMesh.h"
+#include "AnimaMeshInstance.h"
+#include "AnimaMaterial.h"
+#include "AnimaMD5.h"
+
 #include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -29,7 +38,7 @@ AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 	if(index >= 0)
 		return nullptr;
 	
-	AnimaShader* shader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator());
+	AnimaShader* shader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_engine->GetShadersAllocator()), name, _engine->GetShadersAllocator());
 	_shaders.Add(name, shader);
 	return shader;
 }
@@ -46,7 +55,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 	if(index >= 0)
 		return nullptr;
 	
-	AnimaShaderProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), _engine->GetShadersAllocator(), this);
+	AnimaShaderProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaShaderProgram>(*(_engine->GetShadersAllocator()), name, _engine->GetShadersAllocator(), this);
 	_programs.Add(name, program);
 	return program;
 }
@@ -216,6 +225,22 @@ AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const char* name)
 	return GetProgramFromName(str);
 }
 
+AnimaShader* AnimaShadersManager::GetShader(AInt index)
+{
+	return _shaders[index];
+}
+
+AnimaShader* AnimaShadersManager::GetShaderFromName(const AnimaString& name)
+{
+	return _shaders.GetWithName(name);
+}
+
+AnimaShader* AnimaShadersManager::GetShaderFromName(const char* name)
+{
+	AnimaString str(name, _engine->GetStringAllocator());
+	return GetShaderFromName(str);
+}
+
 void AnimaShadersManager::NotifyProgramActivation(AnimaShaderProgram* program)
 {
 	_activeProgram = program;
@@ -244,6 +269,134 @@ void AnimaShadersManager::SetActiveProgramFromName(const char* name)
 AnimaShaderProgram* AnimaShadersManager::GetActiveProgram()
 {
 	return _activeProgram;
+}
+
+AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const AnimaMaterial* material)
+{
+	AnimaString str(_engine->GetStringAllocator());
+
+	AInt meshShadersCount = mesh->GetShadersCount();
+	for (AInt ms = 0; ms < meshShadersCount; ms++)
+		str += mesh->GetShaderName(ms);
+
+	AInt materialShadersCount = material->GetShadersCount();
+	for (AInt ms = 0; ms < materialShadersCount; ms++)
+		str += material->GetShaderName(ms);
+
+	AnimaString programName(AnimaMD5::MD5(str.GetConstBuffer()).c_str(), _engine->GetStringAllocator());
+	
+	AnimaShaderProgram* program = CreateProgram(programName);
+	if (program)
+	{
+		for (AInt ms = 0; ms < meshShadersCount; ms++)
+			program->AddShader(GetShaderFromName(mesh->GetShaderName(ms)));
+
+		for (AInt ms = 0; ms < materialShadersCount; ms++)
+			program->AddShader(GetShaderFromName(material->GetShaderName(ms)));
+	}
+
+	mesh->SetShaderProgram(programName);
+
+	return program;
+}
+
+AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material)
+{
+	AnimaString str(_engine->GetStringAllocator());
+
+	AInt meshShadersCount = meshInstance->GetShadersCount();
+	for (AInt ms = 0; ms < meshShadersCount; ms++)
+		str += meshInstance->GetShaderName(ms);
+
+	AInt materialShadersCount = material->GetShadersCount();
+	for (AInt ms = 0; ms < materialShadersCount; ms++)
+		str += material->GetShaderName(ms);
+
+	AnimaString programName(AnimaMD5::MD5(str.GetConstBuffer()).c_str(), _engine->GetStringAllocator());
+
+	AnimaShaderProgram* program = _programs[programName];
+
+	if (program == nullptr)
+	{
+		program = CreateProgram(programName);
+		if (program)
+		{
+			for (AInt ms = 0; ms < meshShadersCount; ms++)
+				program->AddShader(GetShaderFromName(meshInstance->GetShaderName(ms)));
+
+			for (AInt ms = 0; ms < materialShadersCount; ms++)
+				program->AddShader(GetShaderFromName(material->GetShaderName(ms)));
+		}
+	}
+
+	meshInstance->SetShaderProgram(programName);
+	return program;
+}
+
+bool AnimaShadersManager::LoadShadersParts(const AnimaString& partsPath)
+{
+	return LoadShadersParts(partsPath.GetConstBuffer());
+}
+
+bool AnimaShadersManager::LoadShadersParts(const char* partsPath)
+{
+	namespace fs = boost::filesystem;
+	fs::path directory(partsPath);
+
+	if (fs::exists(directory) && fs::is_directory(directory))
+	{
+		fs::directory_iterator endIterator;
+		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
+		{
+			if (LoadShaderFromPartFile(directoryIterator->path().string().c_str()) == nullptr)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const AnimaString& partFilePath)
+{
+	return LoadShaderFromPartFile(partFilePath.GetConstBuffer());
+}
+
+AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const char* partFilePath)
+{
+	AnimaShader* shader = nullptr;
+
+	std::ifstream fileStream(partFilePath);
+
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	boost::property_tree::read_xml(fileStream, pt);
+
+	std::string name = pt.get<std::string>("AnimaShaderPart.<xmlattr>.name");
+	std::string type = pt.get<std::string>("AnimaShaderPart.<xmlattr>.type");
+	std::string code = pt.get<std::string>("AnimaShaderPart.Part.ShaderCode");
+
+	shader = CreateShader(name.c_str());
+
+	if (shader)
+	{
+		shader->SetText(code.c_str());
+
+		if (type.compare("FS") == 0)
+			shader->SetType(FRAGMENT);
+		else if (type.compare("VS") == 0)
+			shader->SetType(VERTEX);
+		else if (type.compare("TCS") == 0)
+			shader->SetType(TESSELLATION_CONTROL);
+		else if (type.compare("TES") == 0)
+			shader->SetType(TESSELLATION_EVALUATION);
+		else if (type.compare("GS") == 0)
+			shader->SetType(GEOMETRY);
+		else
+			shader->SetType(INVALID);
+	}
+
+	return shader;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

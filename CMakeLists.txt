@@ -55,7 +55,7 @@ endif()
 set(BOOST_ROOT ${ANIMA_ENGINE_BOOST_ROOT_PATH})
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-find_package(Boost 1.57.0 REQUIRED COMPONENTS thread system date_time chrono python)
+find_package(Boost 1.57.0 REQUIRED COMPONENTS thread system date_time chrono python filesystem)
 
 if(Boost_FOUND)
 	list(APPEND AnimaEngine_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})

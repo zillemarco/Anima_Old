@@ -210,10 +210,14 @@ AnimaString& AnimaString::operator+=(const AnimaString& src)
 		newString = new AChar[newStringLength];
 
 	AChar* tmp = newString;
+
+	if (_string != nullptr)
+		strcpy(newString, _string);
+	else
+		memset(newString, 0, newStringLength);
 	
-	strcpy(newString, _string);
-	
-	tmp = tmp + this->_stringLength - 1;
+	if (this->_stringLength > 0)
+		tmp = tmp + this->_stringLength - 1;
 	
 	strcpy(tmp, src._string);
 	
@@ -242,10 +246,14 @@ AnimaString& AnimaString::operator+=(const char* src)
 		newString = new AChar[newStringLength];
 
 	AChar* tmp = newString;
-	
-	strcpy(newString, _string);
-	
-	tmp = tmp + this->_stringLength - 1;
+
+	if (_string != nullptr)
+		strcpy(newString, _string);
+	else
+		memset(newString, 0, newStringLength);
+
+	if (this->_stringLength > 0)
+		tmp = tmp + this->_stringLength - 1;
 	
 	strcpy(tmp, src);
 	
