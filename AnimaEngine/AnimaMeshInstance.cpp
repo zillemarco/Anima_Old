@@ -111,15 +111,29 @@ void AnimaMeshInstance::SetMesh(AnimaMesh* mesh)
 
 void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial)
 {
+	ANIMA_FRAME_PUSH("MeshInstanceUpdateProp");
 	program->UpdateSceneObjectProperties(this, renderer);
+	ANIMA_FRAME_POP();
 
 	if (updateMaterial)
+	{
+		ANIMA_FRAME_PUSH("MeshInstanceMaterialUpdateProp");
 		program->UpdateMappedValuesObjectProperties(_material, renderer);
+		ANIMA_FRAME_POP();
+	}
 
 #ifdef _WIN32
+	ANIMA_FRAME_PUSH("BindVAO");
 	glBindVertexArray(_mesh->GetVertexArrayObject());
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_PUSH("DrawElements");
 	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_PUSH("Bind0");
 	glBindVertexArray(0);
+	ANIMA_FRAME_POP();
 #else
 	program->EnableInputs(_mesh);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->GetIndexesBufferObject());

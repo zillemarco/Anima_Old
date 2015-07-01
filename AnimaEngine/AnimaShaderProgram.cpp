@@ -2,6 +2,7 @@
 #include "AnimaShadersManager.h"
 #include "AnimaLightsManager.h"
 #include "AnimaRenderer.h"
+#include <thread>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -966,52 +967,111 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
-
 		if (info._namePartsCount != 2 || info._nameParts[0] != prefix)
 			continue;
 
 		if (info._arraySize == 0)
 		{
 			if (info._type == GL_FLOAT_VEC2)
+			{
+				ANIMA_FRAME_PUSH("SetVec2");
 				SetUniform(info._locations[0], object->GetVector2f(info._nameParts[1]));
+				ANIMA_FRAME_POP();
+			}
 			else if (info._type == GL_FLOAT_VEC3)
 			{
+				ANIMA_FRAME_PUSH("CheckColo3");
 				if (object->HasColor(info._nameParts[1]))
-					SetUniform(info._locations[0], object->GetColor3f(info._nameParts[1]));
-				else
-					SetUniform(info._locations[0], object->GetVector3f(info._nameParts[1]));
-			}
-			else if (info._type == GL_FLOAT_VEC4)
-			{
-				if (object->HasColor(info._nameParts[1]))
-					SetUniform(info._locations[0], object->GetColor4f(info._nameParts[1]));
-				else
-					SetUniform(info._locations[0], object->GetVector4f(info._nameParts[1]));
-			}
-			else if (info._type == GL_FLOAT)
-				SetUniformf(info._locations[0], object->GetFloat(info._nameParts[1]));
-			else if (info._type == GL_BOOL)
-				SetUniformi(info._locations[0], object->GetBoolean(info._nameParts[1]) ? 1 : 0);
-			else if (info._type == GL_INT)
-				SetUniformi(info._locations[0], object->GetInteger(info._nameParts[1]));
-			else if (info._type == GL_FLOAT_MAT4)
-				SetUniform(info._locations[0], object->GetMatrix(info._nameParts[1]));
-			else if (info._type == GL_SAMPLER_2D)
-			{
-				AnimaTexture* texture = object->GetTexture(info._nameParts[1]);
-
-				AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
-				SetUniformi(info._locations[0], slot);
-
-				if (texture == nullptr)
 				{
-					glActiveTexture(GL_TEXTURE0 + slot);
-					glBindTexture(GL_TEXTURE_2D, 0);
+					ANIMA_FRAME_POP();
+
+					ANIMA_FRAME_PUSH("SetColor3");
+					SetUniform(info._locations[0], object->GetColor3f(info._nameParts[1]));
+					ANIMA_FRAME_POP();
 				}
 				else
 				{
+					ANIMA_FRAME_POP();
+
+					ANIMA_FRAME_PUSH("SetVector3");
+					SetUniform(info._locations[0], object->GetVector3f(info._nameParts[1]));
+					ANIMA_FRAME_POP();
+				}
+			}
+			else if (info._type == GL_FLOAT_VEC4)
+			{
+				ANIMA_FRAME_PUSH("CheckColor4");
+				if (object->HasColor(info._nameParts[1]))
+				{
+					ANIMA_FRAME_POP();
+
+					ANIMA_FRAME_PUSH("SetColor4");
+					SetUniform(info._locations[0], object->GetColor4f(info._nameParts[1]));
+					ANIMA_FRAME_POP();
+				}
+				else
+				{
+					ANIMA_FRAME_POP();
+
+					ANIMA_FRAME_PUSH("SetVector4");
+					SetUniform(info._locations[0], object->GetVector4f(info._nameParts[1]));
+					ANIMA_FRAME_POP();
+				}
+			}
+			else if (info._type == GL_FLOAT)
+			{
+				ANIMA_FRAME_PUSH("SetFloat");
+				SetUniformf(info._locations[0], object->GetFloat(info._nameParts[1]));
+				ANIMA_FRAME_POP();
+			}
+			else if (info._type == GL_BOOL)
+			{
+				ANIMA_FRAME_PUSH("SetBool");
+				SetUniformi(info._locations[0], object->GetBoolean(info._nameParts[1]) ? 1 : 0);
+				ANIMA_FRAME_POP();
+			}
+			else if (info._type == GL_INT)
+			{
+				ANIMA_FRAME_PUSH("Setint");
+				SetUniformi(info._locations[0], object->GetInteger(info._nameParts[1]));
+				ANIMA_FRAME_POP();
+			}
+			else if (info._type == GL_FLOAT_MAT4)
+			{
+				ANIMA_FRAME_PUSH("SetMatrix");
+				SetUniform(info._locations[0], object->GetMatrix(info._nameParts[1]));
+				ANIMA_FRAME_POP();
+			}
+			else if (info._type == GL_SAMPLER_2D)
+			{
+				ANIMA_FRAME_PUSH("GetTexture");
+				AnimaTexture* texture = object->GetTexture(info._nameParts[1]);
+				ANIMA_FRAME_POP();
+
+				ANIMA_FRAME_PUSH("GetTextureSlot");
+				AUint slot = renderingManager->GetTextureSlot(info._nameParts[1]);
+				ANIMA_FRAME_POP();
+
+				ANIMA_FRAME_PUSH("SetTextureSlot");
+				SetUniformi(info._locations[0], slot);
+				ANIMA_FRAME_POP();
+
+				if (texture == nullptr)
+				{
+					ANIMA_FRAME_PUSH("DeactiveTextureSlot");
+					glActiveTexture(GL_TEXTURE0 + slot);
+					glBindTexture(GL_TEXTURE_2D, 0);
+					ANIMA_FRAME_POP();
+				}
+				else
+				{
+					ANIMA_FRAME_PUSH("LoadTexture");
 					texture->Load();
+					ANIMA_FRAME_POP();
+
+					ANIMA_FRAME_PUSH("BindTexture");
 					texture->Bind(slot);
+					ANIMA_FRAME_POP();
 				}
 			}
 			else

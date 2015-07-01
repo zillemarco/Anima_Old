@@ -282,13 +282,17 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const An
 
 AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material)
 {
+	AInt meshShadersCount = meshInstance->GetShadersCount();
+	AInt materialShadersCount = material->GetShadersCount();
+
+	if (meshShadersCount <= 0 || materialShadersCount <= 0)
+		return nullptr;
+	
 	AnimaString str;
 
-	AInt meshShadersCount = meshInstance->GetShadersCount();
 	for (AInt ms = 0; ms < meshShadersCount; ms++)
 		str += meshInstance->GetShaderName(ms);
 
-	AInt materialShadersCount = material->GetShadersCount();
 	for (AInt ms = 0; ms < materialShadersCount; ms++)
 		str += material->GetShaderName(ms);
 

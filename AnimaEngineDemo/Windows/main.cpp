@@ -31,9 +31,10 @@
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
-#define DEFERRED_SHADERS_START "D:/Git/Anima/AnimaEngine/data/shaders/Deferred/"
-#define PRIMITIVE_SHADERS_START "D:/Git/Anima/AnimaEngine/data/shaders/Primitive/"
-#define FILTERS_SHADERS_START "D:/Git/Anima/AnimaEngine/data/shaders/Filters/"
+#define SHADERS_PATH			"D:/Git/Anima/AnimaEngine/data/shaders/"
+#define DEFERRED_SHADERS_START	"Deferred/"
+#define PRIMITIVE_SHADERS_START "Primitive/"
+#define FILTERS_SHADERS_START	"Filters/"
 
 #define ANIMA_ENGINE_DEMO_NAME "AnimaEngineDemo"
 const char* szWindowClass = ANIMA_ENGINE_DEMO_NAME;
@@ -47,6 +48,7 @@ Anima::AnimaAnimationsManager* _animationsManager = nullptr;
 Anima::AnimaRenderer* _renderer = nullptr;
 Anima::AnimaEngine _engine;
 Anima::AnimaTimer _timer;
+Anima::AnimaTimer _fpsTimer;
 bool _shouldClose = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -96,6 +98,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	RedirectIOToConsole();
+
 	// Inizializzazione della finestra
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -119,7 +123,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1000, 1000, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -128,9 +132,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-
+	
 	MSG msg;
+	_fpsTimer.Reset();
+	int FPS = 0;
+	double elapsed = 0.0;
 
+	_fpsTimer.Reset();
 	while (!_shouldClose)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -139,6 +147,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DispatchMessage(&msg);
 		}
 		UpdateFrame();
+		
+		FPS++;
+
+		elapsed += _fpsTimer.Elapsed();
+		if (elapsed >= 100.0)
+		{
+			printf("FPS: %d\n", FPS);
+			FPS = 0;
+			elapsed = 0.0;
+			_fpsTimer.Reset();
+		}
 	}
 
 	if (_renderer)
@@ -178,55 +197,109 @@ bool InitEngine()
 	if (!_scene)
 		return false;
 
+	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
+	Anima::AnimaString shadersPath = SHADERS_PATH;
+	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/cubo.3ds";
+
+#if !defined _DEBUG
+	Anima::AnimaString inputString;
+	while (inputString.empty() || (inputString != "y" && inputString != "n"))
+	{
+		std::cout << "Use defaults? [y/n]: ";
+		std::cin >> inputString;
+	}
+
+	if (inputString == "n")
+	{
+		inputString = "";
+		while (inputString.empty() || (inputString != "y" && inputString != "n"))
+		{
+			std::cout << "Use locals? [y/n]: ";
+			std::cin >> inputString;
+		}
+		
+		if (inputString == "n")
+		{
+			std::cout << "\nInsert shaders parts path: ";
+			std::cin >> inputString;
+			if (!inputString.empty())
+				shadersPartsPath = inputString;
+
+			std::cout << "\nInsert shaders path: ";
+			std::cin >> inputString;
+			if (!inputString.empty())
+				shadersPath = inputString;
+
+			std::cout << "\nInsert materials path: ";
+			std::cin >> inputString;
+			if (!inputString.empty())
+				materialsPath = inputString;
+
+			std::cout << "\nInsert model path: ";
+			std::cin >> inputString;
+			if (!inputString.empty())
+				modelPath = inputString;
+		}
+		else
+		{
+			shadersPartsPath = "data/shaders/Parts";
+			shadersPath = "data/shaders/";
+			materialsPath = "data/materials";
+			modelPath = "data/models/cubo.3ds";
+		}
+	}
+#endif
+
 	// Caricamento degli shader
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
-	shadersManager->LoadShadersParts("D:/Git/Anima/AnimaEngine/data/shaders/Parts");
+	shadersManager->LoadShadersParts(shadersPartsPath);
 
 	Anima::AnimaShaderProgram* prepareProgram = shadersManager->CreateProgram("deferred-prepare");
 	prepareProgram->Create();
-	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-vs", DEFERRED_SHADERS_START "deferred-prepare-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-fs", DEFERRED_SHADERS_START "deferred-prepare-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-prepare-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-prepare-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!prepareProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* shadowMapProgram = shadersManager->CreateProgram("deferred-shadowMap");
 	shadowMapProgram->Create();
-	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-vs", DEFERRED_SHADERS_START "deferred-shadowMap-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-fs", DEFERRED_SHADERS_START "deferred-shadowMap-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-shadowMap-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-shadowMap-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!shadowMapProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* combineProgram = shadersManager->CreateProgram("deferred-combine");
 	combineProgram->Create();
-	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-vs", DEFERRED_SHADERS_START "deferred-combine-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-fs", DEFERRED_SHADERS_START "deferred-combine-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-combine-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-combine-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!combineProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* primitiveDrawProgram = shadersManager->CreateProgram("primitive-draw");
 	primitiveDrawProgram->Create();
-	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-vs", PRIMITIVE_SHADERS_START "primitive-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-fs", PRIMITIVE_SHADERS_START "primitive-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-vs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "primitive-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-fs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "primitive-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!primitiveDrawProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* primitiveCombineProgram = shadersManager->CreateProgram("primitive-combine");
 	primitiveCombineProgram->Create();
-	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-vs", PRIMITIVE_SHADERS_START "combine-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-fs", PRIMITIVE_SHADERS_START "combine-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-vs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "combine-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-fs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "combine-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!primitiveCombineProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* fxaa = shadersManager->CreateProgram("fxaaFilter");
 	fxaa->Create();
-	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-vs", FILTERS_SHADERS_START "fxaaFilter-vs.glsl", Anima::AnimaShaderType::VERTEX));
-	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-fs", FILTERS_SHADERS_START "fxaaFilter-fs.glsl", Anima::AnimaShaderType::FRAGMENT));
+	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-vs", shadersPath + Anima::AnimaString(FILTERS_SHADERS_START "fxaaFilter-vs.glsl"), Anima::AnimaShaderType::VERTEX));
+	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-fs", shadersPath + Anima::AnimaString(FILTERS_SHADERS_START "fxaaFilter-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
 	if (!fxaa->Link())
 		return false;
 
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	materialsManager->LoadMaterials("D:/Git/Anima/AnimaEngine/data/materials");
+	materialsManager->LoadMaterials(materialsPath);
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
@@ -240,13 +313,9 @@ bool InitEngine()
 
 	// Caricamento di un modello
 	//_model = _scene->GetModelsManager()->LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", ANIMA_ENGINE_DEMO_MODEL_NAME);
-	_model = _scene->GetModelsManager()->LoadModel("D:\\Git\\Anima\\AnimaEngine\\data\\models\\cubo.3ds", ANIMA_ENGINE_DEMO_MODEL_NAME);
+	_model = _scene->GetModelsManager()->LoadModel(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
-
-	((Anima::AnimaModel*)_model->GetChild(0))->GetMesh(0)->SetMaterial(materialsManager->GetMaterialFromName("default-material"));
-	((Anima::AnimaModel*)_model->GetChild(0))->GetMesh(0)->AddShader(shadersManager->GetShaderFromName("mesh-default-vs"));
-
 
 	// Creazione di due istanze del modello
 	Anima::AnimaModelInstance* firstInstance = _scene->GetModelInstancesManager()->CreateInstance("first-instance", _model);
@@ -292,3 +361,69 @@ void UpdateFrame()
 		_gc->SwapBuffers();
 	}
 }
+
+#ifdef _WIN32
+
+#include <windows.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <io.h>
+#include <iostream>
+#include <fstream>
+
+#ifndef _USE_OLD_IOSTREAMS
+using namespace std;
+#endif
+
+// maximum mumber of lines the output console should have
+
+static const WORD MAX_CONSOLE_LINES = 500;
+
+void RedirectIOToConsole()
+{
+	int hConHandle;
+	long lStdHandle;
+
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	FILE *fp;
+
+	// allocate a console for this app
+	AllocConsole();
+
+	// set the screen buffer to be big enough to let us scroll text
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+
+	coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+
+	// redirect unbuffered STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "w");
+	*stdout = *fp;
+	setvbuf(stdout, NULL, _IONBF, 0);
+
+	// redirect unbuffered STDIN to the console
+	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "r");
+	*stdin = *fp;
+	setvbuf(stdin, NULL, _IONBF, 0);
+
+	// redirect unbuffered STDERR to the console
+	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen(hConHandle, "w");
+	*stderr = *fp;
+	setvbuf(stderr, NULL, _IONBF, 0);
+	
+	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog 
+	// point to console as well
+	ios::sync_with_stdio();
+}
+
+#endif

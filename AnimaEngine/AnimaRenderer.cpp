@@ -489,14 +489,15 @@ void AnimaRenderer::Finish()
 
 void AnimaRenderer::DrawAll()
 {
+	ANIMA_FRAME_PUSH("DrawAll");
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
-
 	AnimaVertex4f backColor = GetColor4f("BackColor");
 
 	//
 	//	Preparazione dei buffer iniziali
 	//
+	ANIMA_FRAME_PUSH("PreparePass");
 	GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -507,6 +508,7 @@ void AnimaRenderer::DrawAll()
 	PreparePass(shadersManager->GetProgramFromName("deferred-prepare"));
 	
 	Finish();
+	ANIMA_FRAME_POP();
 
 	////
 	////	Aggiorno il buffer per SSAO
@@ -523,38 +525,61 @@ void AnimaRenderer::DrawAll()
 	//
 	//	Preparazione dei buffer della luce
 	//
+	ANIMA_FRAME_PUSH("LightPass");
+
+	ANIMA_FRAME_PUSH("BindTarget");
 	GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_PUSH("Setup");
 	Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-
 	glDepthMask(GL_FALSE);
+	ANIMA_FRAME_POP();
 
+	ANIMA_FRAME_PUSH("Lightning");
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
+	ANIMA_FRAME_POP();
 
-
+	ANIMA_FRAME_PUSH("Finish");
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
-
 	glBlendFunc(GL_ONE, GL_ZERO);
 	Finish();
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_POP();
 	
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
 	if(_primitives.GetSize() <= 0)
 	{
+		ANIMA_FRAME_PUSH("DeferredCombine");
+#if FXAA_ENABLED
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
 		Finish();
+#else
+		Start();
+		AnimaVertex2f size = GetVector2f("ScreenSize");
+		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
+		CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
+		Finish();
+#endif
+		ANIMA_FRAME_POP();
 	}
 	else
 	{
@@ -585,8 +610,14 @@ void AnimaRenderer::DrawAll()
 		
 		ClearPrimitives();
 	}
-	
+
+#if FXAA_ENABLED
+	ANIMA_FRAME_PUSH("Fxaa");
 	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	ANIMA_FRAME_POP();
+#endif
+
+	ANIMA_FRAME_POP();
 }
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
@@ -688,7 +719,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 		ClearPrimitives();
 	}
 
-	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
+	//ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("fxaaFilter"), GetTexture("DiffuseMap"), nullptr);
 }
 
 void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
@@ -1050,8 +1081,10 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 	}
 	else
 	{
+		ANIMA_FRAME_PUSH("BuffersUpdate");
 		if (mesh->NeedsBuffersUpdate())
 			mesh->UpdateBuffers();
+		ANIMA_FRAME_POP();
 
 		if (mesh->GetVertexArrayObject() <= 0)
 			return;
@@ -1059,8 +1092,11 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 		AInt instancesCount = mesh->GetInstancesCount();
 		for (AInt i = 0; i < instancesCount; i++)
 		{
+			ANIMA_FRAME_PUSH("InstanceGet");
 			AnimaMeshInstance* instance = mesh->GetInstance(i);
+			ANIMA_FRAME_POP();
 
+			ANIMA_FRAME_PUSH("ProgramGet");
 			AnimaString shaderProgramName = instance->GetShaderProgramName();
 			if (shaderProgramName.empty())
 			{
@@ -1073,35 +1109,68 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 
 			if (program == nullptr)
 				program = originalProgram;
+			ANIMA_FRAME_POP();
 
+			ANIMA_FRAME_PUSH("ActiveProgramGet");
 			AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+			ANIMA_FRAME_POP();
+
+			ANIMA_FRAME_PUSH("ActiveProgramCheck");
 			if (activeProgram == nullptr || (*activeProgram) != (*program))
 			{
+				ANIMA_FRAME_PUSH("ActiveCameraGet");
 				AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
+				ANIMA_FRAME_POP();
 				if (camera == nullptr)
 					return;
 
+				ANIMA_FRAME_PUSH("ProgramAtivation");
 				program->Use();
-				program->UpdateSceneObjectProperties(camera, this);
+				ANIMA_FRAME_POP();
 
+				ANIMA_FRAME_PUSH("ProgramUpdateCamera");
+				program->UpdateSceneObjectProperties(camera, this);
+				ANIMA_FRAME_POP();
+
+				ANIMA_FRAME_PUSH("CameraGetFrustum");
 				frustum = camera->GetFrustum();
+				ANIMA_FRAME_POP();
+
+				ANIMA_FRAME_POP();
+			}
+			else
+			{
+				ANIMA_FRAME_POP();
 			}
 
+			ANIMA_FRAME_PUSH("InstanceTransformationGet");
 			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
+			ANIMA_FRAME_POP();
 			if (!forceDraw)
 			{
+				ANIMA_FRAME_PUSH("FrustumCheck");
 				if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+				{
+					ANIMA_FRAME_POP();
 					continue;
+				}
+				ANIMA_FRAME_POP();
 			}
 
+			ANIMA_FRAME_PUSH("InstanceModelGet");
 			AnimaModelInstance* instanceParent = (AnimaModelInstance*)instance->GetParentObject()->GetAncestorObject();
+			ANIMA_FRAME_POP();
 			if (instanceParent != _lastUpdatedModelInstance)
 			{
 				_lastUpdatedModelInstance = instanceParent;
+				ANIMA_FRAME_PUSH("InstanceModelGetUpdate");
 				program->UpdateSceneObjectProperties(_lastUpdatedModelInstance, this);
+				ANIMA_FRAME_POP();
 			}
 
+			ANIMA_FRAME_PUSH("InstanceDraw");
 			instance->Draw(this, program, updateMaterial);
+			ANIMA_FRAME_POP();
 		}
 	}
 }
@@ -1220,11 +1289,12 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 		return;
 
 	//AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
-	AnimaFrustum* frustum = nullptr;
-	
+	AnimaFrustum* frustum = nullptr;	
 	for (AInt i = 0; i < meshesCount; i++)
 	{
+		ANIMA_FRAME_PUSH("MeshGet");
 		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		ANIMA_FRAME_POP();
 		//if (activeProgram == nullptr || (*activeProgram) != (*program))
 		//{
 		//	AnimaCamera* camera = _scene->GetCamerasManager()->GetActiveCamera();
@@ -1237,7 +1307,9 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program)
 		//	frustum = camera->GetFrustum();
 		//}
 
+		ANIMA_FRAME_PUSH("MeshDraw");
 		DrawMesh(mesh, program, true, false, frustum);
+		ANIMA_FRAME_POP();
 	}
 }
 
@@ -1955,8 +2027,9 @@ void AnimaRenderer::SetInteger(const char* propertyName, AInt value)
 
 AnimaTexture* AnimaRenderer::GetTexture(AnimaString propertyName)
 {
-	if (_texturesMap.find(propertyName) != _texturesMap.end())
-		return _texturesMap[propertyName];
+	auto pair = _texturesMap.find(propertyName);
+	if (pair != _texturesMap.end())
+		return pair->second;
 	return nullptr;
 }
 
@@ -1968,8 +2041,9 @@ AnimaTexture* AnimaRenderer::GetTexture(const char* propertyName)
 
 AUint AnimaRenderer::GetTextureSlot(const AnimaString& slotName)
 {
-	if (_textureSlotsMap.find(slotName) != _textureSlotsMap.end())
-		return _textureSlotsMap[slotName];
+	auto pair = _textureSlotsMap.find(slotName);
+	if (pair != _textureSlotsMap.end())
+		return pair->second;
 	return 0;
 }
 
@@ -1981,8 +2055,9 @@ AUint AnimaRenderer::GetTextureSlot(const char* slotName)
 
 AnimaGBuffer* AnimaRenderer::GetGBuffer(const AnimaString& gBufferName)
 {
-	if (_gBuffersMap.find(gBufferName) != _gBuffersMap.end())
-		return _gBuffersMap[gBufferName];
+	auto pair = _gBuffersMap.find(gBufferName);
+	if (pair != _gBuffersMap.end())
+		return pair->second;
 	return nullptr;
 }
 
@@ -1994,8 +2069,9 @@ AnimaGBuffer* AnimaRenderer::GetGBuffer(const char* gBufferName)
 
 AnimaColor3f AnimaRenderer::GetColor3f(AnimaString propertyName)
 {
-	if (_vectors3fMap.find(propertyName) != _vectors3fMap.end())
-		return _vectors3fMap[propertyName];
+	auto pair = _vectors3fMap.find(propertyName);
+	if (pair != _vectors3fMap.end())
+		return pair->second;
 
 	AnimaColor3f color(0.0f, 0.0f, 0.0f);
 	return color;
@@ -2009,8 +2085,9 @@ AnimaColor3f AnimaRenderer::GetColor3f(const char* propertyName)
 
 AnimaColor4f AnimaRenderer::GetColor4f(AnimaString propertyName)
 {
-	if (_vectors4fMap.find(propertyName) != _vectors4fMap.end())
-		return _vectors4fMap[propertyName];
+	auto pair = _vectors4fMap.find(propertyName);
+	if (pair != _vectors4fMap.end())
+		return pair->second;
 
 	AnimaColor4f color(0.0f, 0.0f, 0.0f, 1.0f);
 	return color;
@@ -2024,8 +2101,9 @@ AnimaColor4f AnimaRenderer::GetColor4f(const char* propertyName)
 
 AnimaVertex2f AnimaRenderer::GetVector2f(AnimaString propertyName)
 {
-	if (_vectors2fMap.find(propertyName) != _vectors2fMap.end())
-		return _vectors2fMap[propertyName];
+	auto pair = _vectors2fMap.find(propertyName);
+	if (pair != _vectors2fMap.end())
+		return pair->second;
 
 	AnimaVertex2f vector(0.0f, 0.0f);
 	return vector;
@@ -2039,8 +2117,9 @@ AnimaVertex2f AnimaRenderer::GetVector2f(const char* propertyName)
 
 AnimaVertex3f AnimaRenderer::GetVector3f(AnimaString propertyName)
 {
-	if (_vectors3fMap.find(propertyName) != _vectors3fMap.end())
-		return _vectors3fMap[propertyName];
+	auto pair = _vectors3fMap.find(propertyName);
+	if (pair != _vectors3fMap.end())
+		return pair->second;
 
 	AnimaVertex3f vector(0.0f, 0.0f, 0.0f);
 	return vector;
@@ -2054,8 +2133,9 @@ AnimaVertex3f AnimaRenderer::GetVector3f(const char* propertyName)
 
 AnimaVertex4f AnimaRenderer::GetVector4f(AnimaString propertyName)
 {
-	if (_vectors4fMap.find(propertyName) != _vectors4fMap.end())
-		return _vectors4fMap[propertyName];
+	auto pair = _vectors4fMap.find(propertyName);
+	if (pair != _vectors4fMap.end())
+		return pair->second;
 
 	AnimaVertex4f vector(0.0f, 0.0f, 0.0f, 0.0f);
 	return vector;
@@ -2069,9 +2149,9 @@ AnimaVertex4f AnimaRenderer::GetVector4f(const char* propertyName)
 
 AFloat AnimaRenderer::GetFloat(AnimaString propertyName)
 {
-	propertyName = propertyName;
-	if (_floatsMap.find(propertyName) != _floatsMap.end())
-		return _floatsMap[propertyName];
+	auto pair = _floatsMap.find(propertyName);
+	if (pair != _floatsMap.end())
+		return pair->second;
 	return 0.0;
 }
 
@@ -2083,9 +2163,9 @@ AFloat AnimaRenderer::GetFloat(const char* propertyName)
 
 bool AnimaRenderer::GetBoolean(AnimaString propertyName)
 {
-	propertyName = propertyName;
-	if (_booleansMap.find(propertyName) != _booleansMap.end())
-		return _booleansMap[propertyName];
+	auto pair = _booleansMap.find(propertyName);
+	if (pair != _booleansMap.end())
+		return pair->second;
 	return false;
 }
 
@@ -2097,9 +2177,9 @@ bool AnimaRenderer::GetBoolean(const char* propertyName)
 
 AInt AnimaRenderer::GetInteger(AnimaString propertyName)
 {
-	propertyName = propertyName;
-	if (_integersMap.find(propertyName) != _integersMap.end())
-		return _integersMap[propertyName];
+	auto pair = _integersMap.find(propertyName);
+	if (pair != _integersMap.end())
+		return pair->second;
 	return 0;
 }
 
