@@ -1247,7 +1247,7 @@ void AnimaMesh::SetMaterial(AnimaMaterial* material)
 	_material = material;
 
 	if (_material)
-		_materialName = _material->GetAnimaName();
+		_materialName = _material->GetName();
 	else
 		_materialName = "";
 }
@@ -1355,7 +1355,7 @@ AnimaVertex3f AnimaMesh::GetBoundingBoxCenter() const
 void AnimaMesh::AddInstance(AnimaMeshInstance* instance)
 {
 	if (instance != nullptr)
-		_meshInstances.Add(instance->GetAnimaName(), instance);
+		_meshInstances.Add(instance->GetName(), instance);
 }
 
 AInt AnimaMesh::GetInstancesCount() const
@@ -1442,7 +1442,7 @@ AInt AnimaMesh::GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const
 
 void AnimaMesh::AddShader(AnimaShader* shader)
 {
-	_shadersNames.Add(shader->GetAnimaName());
+	_shadersNames.Add(shader->GetName());
 }
 
 void AnimaMesh::AddShader(const AnimaString& shaderName)

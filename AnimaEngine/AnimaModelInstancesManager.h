@@ -33,17 +33,12 @@ public:
 
 public:
 	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, AnimaModel* srcModel);
-	AnimaModelInstance* CreateInstance(const char* instanceName, AnimaModel* srcModel);
 	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcModelName);
-	AnimaModelInstance* CreateInstance(const char* instanceName, const AnimaString& srcModelName);
-	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, const char* srcModelName);
-	AnimaModelInstance* CreateInstance(const char* instanceName, const char* srcModelName);
 
 	AInt GetModelInstancesNumber();
 
 	AnimaModelInstance* GetModelInstance(AInt index);
 	AnimaModelInstance* GetModelInstanceFromName(const AnimaString& name);
-	AnimaModelInstance* GetModelInstanceFromName(const char* name);
 
 public:
 	void ClearInstances();
@@ -51,7 +46,6 @@ public:
 protected:
 	AnimaModelInstance* CreateInstanceFromModel(const AnimaString& instanceName, AnimaModel* srcModel, bool useSrcModelName = false);
 	AnimaModelInstance* CreateEmptyInstance(const AnimaString& instanceName);
-	AnimaModelInstance* CreateEmptyInstance(const char* instanceName);
 		
 private:
 	AnimaScene*			_scene;

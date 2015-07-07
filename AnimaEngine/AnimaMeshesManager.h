@@ -44,7 +44,6 @@ public:
 
 	AnimaMesh* GetMesh(AInt index);
 	AnimaMesh* GetMeshFromName(const AnimaString& name);
-	AnimaMesh* GetMeshFromName(const char* name);
 
 	AInt GetMeshesCount() const;
 
@@ -53,7 +52,6 @@ protected:
 
 protected:
 	AnimaMesh* CreateEmptyMesh(const AnimaString& name);
-	AnimaMesh* CreateEmptyMesh(const char* name);
 
 private:
 	AnimaScene* _scene;

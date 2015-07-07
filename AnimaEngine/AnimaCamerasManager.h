@@ -35,20 +35,15 @@ public:
 	~AnimaCamerasManager();
 	
 	template<class T> T* CreateCamera(const AnimaString& name);
-	template<class T> T* CreateCamera(const char* name);
 	
 	template<class T> AnimaArray<AnimaCamera*>* GetCamerasArrayOfType();
 	template<class T> AnimaCamera* GetCameraOfTypeFromName(const AnimaString& name);
-	template<class T> AnimaCamera* GetCameraOfTypeFromName(const char* name);
 	
 	AnimaFirstPersonCamera* CreateFirstPersonCamera(const AnimaString& name);
-	AnimaFirstPersonCamera* CreateFirstPersonCamera(const char* name);
 	AnimaThirdPersonCamera* CreateThirdPersonCamera(const AnimaString& name);
-	AnimaThirdPersonCamera* CreateThirdPersonCamera(const char* name);
 	
 	AnimaCamera* GetActiveCamera();
 	AnimaCamera* GetCameraFromName(const AnimaString& name);
-	AnimaCamera* GetCameraFromName(const char* name);
 	
 	AInt GetTotalCamerasCount();
 	AnimaTypeMappedArray<AnimaCamera*>* GetCameras();
@@ -84,13 +79,6 @@ T* AnimaCamerasManager::CreateCamera(const AnimaString& name)
 }
 
 template<class T>
-T* AnimaCamerasManager::CreateCamera(const char* name)
-{
-	AnimaString str = name;
-	return CreateCamera<T>(str);
-}
-
-template<class T>
 AnimaArray<AnimaCamera*>* AnimaCamerasManager::GetCamerasArrayOfType()
 {
 	return _cameras.GetMappedArrayArrayOfType<T*>();
@@ -100,13 +88,6 @@ template<class T>
 AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const AnimaString& name)
 {
 	return _cameras.GetWithNameAndType<T*>(name);
-}
-
-template<class T>
-AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetCameraOfTypeFromName<T*>(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -27,11 +27,9 @@ public:
 	~AnimaScenesManager();
 	
 	AnimaScene* CreateScene(const AnimaString& name);
-	AnimaScene* CreateScene(const char* name);
 
 	AnimaScene* GetScene(AUint index);
 	AnimaScene* GetScene(const AnimaString& name);
-	AnimaScene* GetScene(const char* name);
 
 private:
 	void ClearScenes();

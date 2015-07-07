@@ -32,11 +32,7 @@ public:
 
 public:
 	AnimaMeshInstance* CreateInstance(const AnimaString& instanceName, AnimaMesh* srcMesh);
-	AnimaMeshInstance* CreateInstance(const char* instanceName, AnimaMesh* srcMesh);
 	AnimaMeshInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcMeshName);
-	AnimaMeshInstance* CreateInstance(const char* instanceName, const AnimaString& srcMeshName);
-	AnimaMeshInstance* CreateInstance(const AnimaString& instanceName, const char* srcMeshName);
-	AnimaMeshInstance* CreateInstance(const char* instanceName, const char* srcMeshName);
 
 	AnimaArray<AnimaMeshInstance*>* CreateInstances(AnimaModel* srcModel);
 
@@ -44,11 +40,9 @@ public:
 
 	AnimaMeshInstance* GetMeshInstance(AInt index);
 	AnimaMeshInstance* GetMeshInstanceFromName(const AnimaString& name);
-	AnimaMeshInstance* GetMeshInstanceFromName(const char* name);
 
 protected:
 	AnimaMeshInstance* CreateEmptyInstance(const AnimaString& instanceName);
-	AnimaMeshInstance* CreateEmptyInstance(const char* instanceName);
 
 public:
 	void ClearInstances();

@@ -25,42 +25,26 @@ public:
 	~AnimaShadersManager();
 
 	AnimaShader* LoadShader(const AnimaString& name, const AnimaString& text, AnimaShaderType type);
-	AnimaShader* LoadShader(const AnimaString& name, const AChar* text, AnimaShaderType type);
-	AnimaShader* LoadShader(const char* name, const AnimaString& text, AnimaShaderType type);
-	AnimaShader* LoadShader(const char* name, const AChar* text, AnimaShaderType type);
-	
-	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AnimaString& filePath, AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const char* name, const AnimaString& filePath, AnimaShaderType type);
-	AnimaShader* LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShaderType type);
-	
 	AnimaShader* LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info);
-	AnimaShader* LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info);
-
+	AnimaShader* LoadShaderFromFile(const AnimaString& name, const AnimaString& filePath, AnimaShaderType type);
+	
 	bool LoadShadersParts(const AnimaString& partsPath);
-	bool LoadShadersParts(const char* partsPath);
 	AnimaShader* LoadShaderFromPartFile(const AnimaString& partFilePath);
-	AnimaShader* LoadShaderFromPartFile(const char* partFilePath);
 	
 	AnimaShader* CreateShader(const AnimaString& name);
-	AnimaShader* CreateShader(const char* name);
 
 	AnimaShader* GetShader(AInt index);
 	AnimaShader* GetShaderFromName(const AnimaString& name);
-	AnimaShader* GetShaderFromName(const char* name);
 
 	AnimaShaderProgram* CreateProgram(const AnimaString& name);
-	AnimaShaderProgram* CreateProgram(const char* name);
 	AnimaShaderProgram* CreateProgram(AnimaMesh* mesh, const AnimaMaterial* material);
 	AnimaShaderProgram* CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material);
 
 	AnimaShaderProgram* GetProgram(AInt index);
 	AnimaShaderProgram* GetProgramFromName(const AnimaString& name);
-	AnimaShaderProgram* GetProgramFromName(const char* name);
 
 	void SetActiveProgram(AnimaShaderProgram* program);
 	void SetActiveProgramFromName(const AnimaString& name);
-	void SetActiveProgramFromName(const char* name);
 
 	AnimaShaderProgram* GetActiveProgram();
 

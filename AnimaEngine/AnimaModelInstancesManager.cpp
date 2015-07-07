@@ -43,37 +43,12 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString
 	return modelInstance;
 }
 
-AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, AnimaModel* srcModel)
-{
-	AnimaString str = instanceName;
-	return CreateInstance(str, srcModel);
-}
-
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcModelName)
 {
 	AnimaModel* srcModel = _modelsManager->GetModelFromName(srcModelName);
 	if (srcModel == nullptr)
 		return nullptr;
 	return CreateInstance(instanceName, srcModel);
-}
-
-AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, const AnimaString& srcModelName)
-{
-	AnimaString str = instanceName;
-	return CreateInstance(str, srcModelName);
-}
-
-AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const AnimaString& instanceName, const char* srcModelName)
-{
-	AnimaString str = srcModelName;
-	return CreateInstance(instanceName, str);
-}
-
-AnimaModelInstance* AnimaModelInstancesManager::CreateInstance(const char* instanceName, const char* srcModelName)
-{
-	AnimaString strInstanceName = instanceName;
-	AnimaString strModelName = srcModelName;
-	return CreateInstance(strInstanceName, strModelName);
 }
 
 AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const AnimaString& instanceName, AnimaModel* srcModel, bool useSrcModelName)
@@ -83,10 +58,10 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 
 	AnimaString completeInstanceName;
 	if (useSrcModelName)
-		completeInstanceName = srcModel->GetAnimaName() + "." + instanceName;
+		completeInstanceName = srcModel->GetName() + "." + instanceName;
 	else
 		completeInstanceName = instanceName;
-	AnimaString modelName = srcModel->GetAnimaName();
+	AnimaString modelName = srcModel->GetName();
 	AnimaString modelInstanceName;
 	AnimaModelInstance* newInstance = nullptr;
 	int nameOffset = 0;
@@ -140,12 +115,6 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const AnimaS
 	return modelInstance;
 }
 
-AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const char* instanceName)
-{
-	AnimaString str = instanceName;
-	return CreateEmptyInstance(str);
-}
-
 AInt AnimaModelInstancesManager::GetModelInstancesNumber()
 {
 	return _topLevelModelInstances.GetSize();
@@ -159,12 +128,6 @@ AnimaModelInstance* AnimaModelInstancesManager::GetModelInstance(AInt index)
 AnimaModelInstance* AnimaModelInstancesManager::GetModelInstanceFromName(const AnimaString& name)
 {
 	return _topLevelModelInstances[name];
-}
-
-AnimaModelInstance* AnimaModelInstancesManager::GetModelInstanceFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetModelInstanceFromName(str);
 }
 
 void AnimaModelInstancesManager::ClearInstances()

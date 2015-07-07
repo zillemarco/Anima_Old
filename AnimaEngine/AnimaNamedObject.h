@@ -28,10 +28,7 @@ public:
 
 public:
 	void SetName(const AnimaString& name);
-	void SetName(const char* name);
-
-	AnimaString GetAnimaName() const;
-	const char* GetName() const;
+	AnimaString GetName() const;
 
 protected:
 	AnimaAllocator* _allocator;

@@ -36,19 +36,14 @@ public:
 	~AnimaModelsManager();
 	
 public:
-	AnimaModel* LoadModel(const char* modelPath, const AnimaString& name);
-	AnimaModel* LoadModel(const char* modelPath, const char* name);
 	AnimaModel* LoadModel(const AnimaString& modelPath, const AnimaString& name);
-	AnimaModel* LoadModel(const AnimaString& modelPath, const char* name);
 
 	AnimaModel* CreateModel(const AnimaString& name);
-	AnimaModel* CreateModel(const char* name);
 
 	AInt GetModelsNumber();
 
 	AnimaModel* GetModel(AInt index);
 	AnimaModel* GetModelFromName(const AnimaString& name);
-	AnimaModel* GetModelFromName(const char* name);
 	
 	void ClearModels();
 	

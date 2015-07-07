@@ -33,24 +33,6 @@ AnimaModelsManager::~AnimaModelsManager()
 	ClearModels();
 }
 
-AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const char* name)
-{
-	AnimaString str = modelPath;
-	return LoadModel(modelPath, str);
-}
-
-AnimaModel* AnimaModelsManager::LoadModel(const char* modelPath, const AnimaString& name)
-{
-	AnimaString str = modelPath;
-	return LoadModel(str, name);
-}
-
-AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const char* name)
-{
-	AnimaString str = name;
-	return LoadModel(modelPath, str);
-}
-
 AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const AnimaString& name)
 {
 	AInt index = _topLevelModels.Contains(name);
@@ -146,12 +128,6 @@ AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
 	return newModel;
 }
 
-AnimaModel* AnimaModelsManager::CreateModel(const char* name)
-{
-	AnimaString str = name;
-	return CreateModel(str);
-}
-
 AInt AnimaModelsManager::GetModelsNumber()
 {
 	return _topLevelModels.GetSize();
@@ -165,12 +141,6 @@ AnimaModel* AnimaModelsManager::GetModel(AInt index)
 AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name)
 {
 	return _topLevelModels[name];
-}
-
-AnimaModel* AnimaModelsManager::GetModelFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetModelFromName(str);
 }
 
 void AnimaModelsManager::ClearModels()

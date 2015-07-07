@@ -33,24 +33,18 @@ public:
 	~AnimaDataGeneratorsManager();
 	
 	template<class T> T* CreateDataGenerator(const AnimaString& name);
-	template<class T> T* CreateDataGenerator(const char* name);
 	
 	template<class T> AnimaArray<AnimaDataGenerator*>* GetDataGeneratorsArrayOfType();
 	template<class T> AnimaDataGenerator* GetDataGeneratorOfTypeFromName(const AnimaString& name);
-	template<class T> AnimaDataGenerator* GetDataGeneratorOfTypeFromName(const char* name);
 	
 	AnimaColorGenerator* CreateColorGenerator(const AnimaString& name);
-	AnimaColorGenerator* CreateColorGenerator(const char* name);
 
 	AnimaVectorGenerator* CreateVectorGenerator(const AnimaString& name);
-	AnimaVectorGenerator* CreateVectorGenerator(const char* name);
 
 	bool RemoveGenerator(const AnimaString& name);
-	bool RemoveGenerator(const char* name);
 	bool RemoveGenerator(AnimaDataGenerator* generator);
 
 	AnimaDataGenerator* GetGenerator(const AnimaString& name);
-	AnimaDataGenerator* GetGenerator(const char* name);
 	
 	AInt GetTotalDataGeneratorsCount();
 	
@@ -84,13 +78,6 @@ T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
 }
 
 template<class T>
-T* AnimaDataGeneratorsManager::CreateDataGenerator(const char* name)
-{
-	AnimaString str = name;
-	return CreateDataGenerator<T>(str);
-}
-
-template<class T>
 AnimaArray<AnimaDataGenerator*>* AnimaDataGeneratorsManager::GetDataGeneratorsArrayOfType()
 {
 	return _dataGenerators.GetMappedArrayArrayOfType<T*>();
@@ -101,14 +88,6 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(c
 {
 	return _dataGenerators.GetWithNameAndType<T*>(name);
 }
-
-template<class T>
-AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetDataGeneratorOfTypeFromName<T*>(str);
-}
-
 
 END_ANIMA_ENGINE_NAMESPACE
 

@@ -105,12 +105,6 @@ AnimaAnimation* AnimaAnimationsManager::CreateEmptyAnimation(const AnimaString& 
 	return newAnimation;
 }
 
-AnimaAnimation* AnimaAnimationsManager::CreateEmptyAnimation(const char* animationName)
-{
-	AnimaString str = animationName;
-	return CreateEmptyAnimation(str);
-}
-
 AInt AnimaAnimationsManager::GetAnimationsNumber()
 {
 	return _animations.GetSize();
@@ -124,12 +118,6 @@ AnimaAnimation* AnimaAnimationsManager::GetAnimation(AInt index)
 AnimaAnimation* AnimaAnimationsManager::GetAnimationFromName(const AnimaString& name)
 {
 	return _animations[name];
-}
-
-AnimaAnimation* AnimaAnimationsManager::GetAnimationFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetAnimationFromName(str);
 }
 
 void AnimaAnimationsManager::ClearAnimations()

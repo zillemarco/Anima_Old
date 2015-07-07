@@ -36,9 +36,7 @@ public:
 
 public:	
 	void SetText(AnimaString text);
-	void SetText(const char* text);
-	AnimaString GetAnimaText();
-	const char* GetText();
+	AnimaString GetText();
 
 	void SetType(AnimaShaderType type);
 	AnimaShaderType GetType();

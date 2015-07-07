@@ -32,12 +32,6 @@ AnimaScene* AnimaScenesManager::CreateScene(const AnimaString& name)
 	return scene;
 }
 
-AnimaScene* AnimaScenesManager::CreateScene(const char* name)
-{
-	AnimaString str = name;
-	return CreateScene(str);
-}
-
 void AnimaScenesManager::ClearScenes()
 {
 	AInt count = _scenes.GetSize();
@@ -59,12 +53,6 @@ AnimaScene* AnimaScenesManager::GetScene(AUint index)
 AnimaScene* AnimaScenesManager::GetScene(const AnimaString& name)
 {
 	return _scenes[name];
-}
-
-AnimaScene* AnimaScenesManager::GetScene(const char* name)
-{
-	AnimaString str = name;
-	return GetScene(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

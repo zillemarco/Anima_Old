@@ -53,17 +53,7 @@ public:
 	{
 		return Get(index);
 	}
-
-	inline TYPE operator[](const char* name) const
-	{
-		return GetConst(Contains(name));
-	}
-
-	inline TYPE& operator[](const char* name)
-	{
-		return Get(Contains(name));
-	}
-
+	
 	inline TYPE operator[](const AnimaString& name) const
 	{
 		return GetConst(Contains(name));
@@ -120,24 +110,6 @@ public:
 		else
 			return TYPE();
 	}
-	
-	inline TYPE& Get(const char* name)
-	{
-		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
-			return _array[index];
-		else
-			return TYPE();
-	}
-
-	inline TYPE GetConst(const char* name) const
-	{
-		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
-			return _array[index];
-		else
-			return TYPE();
-	}
 
 	inline AnimaArray<TYPE>* GetArray()
 	{
@@ -170,24 +142,10 @@ public:
 	}
 
 	template<typename... Args>
-	AInt Add(const char* name, TYPE newElement, bool returnExisting, Args... args)
-	{
-		AnimaString str = name;
-		return Add(str, newElement, returnExisting, args...);
-	}
-
-	template<typename... Args>
-	AInt Add(const char* name, TYPE newElement, Args... args)
-	{
-		AnimaString str = name;
-		return Add(str, newElement, false, args...);
-	}
-
-	template<typename... Args>
 	bool Remove(AInt index, Args...args)
 	{
 		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
-		AnimaString elementToRemoveName = GetName(_array[index]);
+		AnimaString elementToRemoveName = GetObjectName(_array[index]);
 		return Remove(elementToRemoveName, args...);
 	}
 
@@ -203,19 +161,12 @@ public:
 
 		RebuildMap();
 	}
-
-	template<typename... Args>
-	bool Remove(const char* name, Args...args)
-	{
-		AnimaString str = name;
-		return Remove(str, args...);
-	}
-	
+		
 	inline void Set(AInt index, TYPE newElement)
 	{
 		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
-		AnimaString newElementName = GetName(newElement);
-		AnimaString oldElementName = GetName(_array[index]);
+		AnimaString newElementName = GetObjectName(newElement);
+		AnimaString oldElementName = GetObjectName(_array[index]);
 
 		ANIMA_ASSERT(newElementName == oldElementName);
 		_array[index] = newElement;
@@ -225,12 +176,6 @@ public:
 	{
 		AInt index = Contains(name);
 		Set(index, newElement);
-	}
-
-	inline void Set(const char* name, TYPE newElement)
-	{
-		AnimaString str = name;
-		Set(str, newElement);
 	}
 
 	AInt Contains(TYPE element)
@@ -246,25 +191,19 @@ public:
 		return pair->second;
 	}
 
-	AInt Contains(const char* name) const
-	{
-		AnimaString str = name;
-		return Contains(str);
-	}
-
 	void RebuildMap()
 	{
 		_namesMap.clear();
 
 		AInt arraySize = _array.GetSize();
 		for (AInt i = 0; i < arraySize; i++)
-			_namesMap[GetName(_array[i])] = i;
+			_namesMap[GetObjectName(_array[i])] = i;
 	}
 	
 protected:
-	AnimaString GetName(TYPE obj)
+	AnimaString GetObjectName(TYPE obj)
 	{
-		return obj.GetAnimaName();
+		return obj.GetName();
 	}
 
 protected:
@@ -311,22 +250,6 @@ public:
 	inline TYPE operator[](AInt index)
 	{
 		return Get(index);
-	}
-
-	inline TYPE operator[](const char* name) const
-	{
-		AInt index = Contains(name);
-		if(index >= 0)
-			return GetConst(index);
-		return nullptr;
-	}
-
-	inline TYPE operator[](const char* name)
-	{
-		AInt index = Contains(name);
-		if(index >= 0)
-			return Get(index);
-		return nullptr;
 	}
 
 	inline TYPE operator[](const AnimaString& name) const
@@ -397,24 +320,6 @@ public:
 			return nullptr;
 	}
 
-	inline TYPE GetWithName(const char* name)
-	{
-		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
-			return _array[index];
-		else
-			return nullptr;
-	}
-
-	inline TYPE GetConstWithName(const char* name) const
-	{
-		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
-			return _array[index];
-		else
-			return nullptr;
-	}
-
 	inline AnimaArray<TYPE>* GetArray()
 	{
 		return &_array;
@@ -443,22 +348,10 @@ public:
 		return newIndex;
 	}
 
-	AInt Add(const char* name, TYPE newElement)
-	{
-		AnimaString str = name;
-		return Add(str, newElement, false);
-	}
-
-	AInt Add(const char* name, TYPE newElement, bool returnExisting)
-	{
-		AnimaString str = name;
-		return Add(str, newElement, returnExisting);
-	}
-
 	bool Remove(AInt index)
 	{
 		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
-		AnimaString elementToRemoveName = GetName(_array[index]);
+		AnimaString elementToRemoveName = GetObjectName(_array[index]);
 		return Remove(elementToRemoveName);
 	}
 
@@ -475,17 +368,11 @@ public:
 		return true;
 	}
 
-	bool Remove(const char* name)
-	{
-		AnimaString str = name;
-		return Remove(str);
-	}
-
 	inline void Set(AInt index, TYPE newElement)
 	{
 		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
-		AnimaString newElementName = GetName(newElement);
-		AnimaString oldElementName = GetName(_array[index]);
+		AnimaString newElementName = GetObjectName(newElement);
+		AnimaString oldElementName = GetObjectName(_array[index]);
 
 		ANIMA_ASSERT(newElementName == oldElementName);
 		_array[index] = newElement;
@@ -495,12 +382,6 @@ public:
 	{
 		AInt index = Contains(name);
 		Set(index, newElement);
-	}
-
-	inline void Set(const char* name, TYPE newElement)
-	{
-		AnimaString str = name;
-		Set(str, newElement);
 	}
 
 	AInt Contains(TYPE element)
@@ -516,25 +397,19 @@ public:
 		return pair->second;
 	}
 
-	AInt Contains(const char* name) const
-	{
-		AnimaString str = name;
-		return Contains(str);
-	}
-
 	void RebuildMap()
 	{
 		_namesMap.clear();
 
 		AInt arraySize = _array.GetSize();
 		for (AInt i = 0; i < arraySize; i++)
-			_namesMap[GetName(_array[i])] = i;
+			_namesMap[GetObjectName(_array[i])] = i;
 	}
 
 protected:
-	AnimaString GetName(TYPE obj)
+	AnimaString GetObjectName(TYPE obj)
 	{
-		return obj->GetAnimaName();
+		return obj->GetName();
 	}
 
 protected:

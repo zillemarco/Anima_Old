@@ -89,7 +89,7 @@ void AnimaMeshInstance::SetMaterial(AnimaMaterial* material)
 {
 	_material = material;
 	if (_material)
-		_materialName = material->GetAnimaName();
+		_materialName = material->GetName();
 	else
 		_materialName = "";
 }
@@ -144,7 +144,7 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 
 void AnimaMeshInstance::AddShader(AnimaShader* shader)
 {
-	_shadersNames.Add(shader->GetAnimaName());
+	_shadersNames.Add(shader->GetName());
 }
 
 void AnimaMeshInstance::AddShader(const AnimaString& shaderName)

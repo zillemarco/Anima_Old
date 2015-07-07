@@ -27,21 +27,9 @@ AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const Anima
 	return CreateCamera<AnimaFirstPersonCamera>(name);
 }
 
-AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const char* name)
-{
-	AnimaString str = name;
-	return CreateFirstPersonCamera(str);
-}
-
 AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const AnimaString& name)
 {
 	return CreateCamera<AnimaThirdPersonCamera>(name);
-}
-
-AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const char* name)
-{
-	AnimaString str = name;
-	return CreateThirdPersonCamera(str);
 }
 
 void AnimaCamerasManager::ClearCameras()
@@ -155,12 +143,6 @@ void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bott
 AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)
 {
 	return _cameras.GetWithName(name);
-}
-
-AnimaCamera* AnimaCamerasManager::GetCameraFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetCameraFromName(str);
 }
 
 AInt AnimaCamerasManager::GetTotalCamerasCount()

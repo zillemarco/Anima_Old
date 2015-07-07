@@ -26,27 +26,12 @@ AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaStr
 	return CreateLight<AnimaDirectionalLight>(name);
 }
 
-AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const char* name)
-{
-	return CreateLight<AnimaDirectionalLight>(name);
-}
-
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 {
 	return CreateLight<AnimaPointLight>(name);
 }
 
-AnimaPointLight* AnimaLightsManager::CreatePointLight(const char* name)
-{
-	return CreateLight<AnimaPointLight>(name);
-}
-
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
-{
-	return CreateLight<AnimaSpotLight>(name);
-}
-
-AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const char* name)
 {
 	return CreateLight<AnimaSpotLight>(name);
 }
@@ -72,12 +57,6 @@ void AnimaLightsManager::ClearLights()
 AnimaLight* AnimaLightsManager::GetLightFromName(const AnimaString& name)
 {
 	return _lights.GetWithName(name);
-}
-
-AnimaLight* AnimaLightsManager::GetLightFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetLightFromName(str);
 }
 
 AInt AnimaLightsManager::GetTotalLightsCount()

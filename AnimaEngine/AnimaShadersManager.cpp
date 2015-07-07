@@ -26,12 +26,6 @@ AnimaShadersManager::~AnimaShadersManager()
 	ClearPrograms();
 }
 
-AnimaShader* AnimaShadersManager::CreateShader(const char* name)
-{
-	AnimaString str = name;
-	return CreateShader(str);
-}
-
 AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 {
 	AInt index = _shaders.Contains(name);
@@ -41,12 +35,6 @@ AnimaShader* AnimaShadersManager::CreateShader(const AnimaString& name)
 	AnimaShader* shader = AnimaAllocatorNamespace::AllocateNew<AnimaShader>(*(_engine->GetShadersAllocator()), name, _engine->GetShadersAllocator());
 	_shaders.Add(name, shader);
 	return shader;
-}
-
-AnimaShaderProgram* AnimaShadersManager::CreateProgram(const char* name)
-{
-	AnimaString str = name;
-	return CreateProgram(str);
 }
 
 AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
@@ -60,24 +48,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(const AnimaString& name)
 	return program;
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AnimaString& text, AnimaShaderType type)
-{
-	AnimaString str = name;
-	return LoadShader(name, text.c_str(), type);
-}
-
 AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AnimaString& text, AnimaShaderType type)
-{
-	return LoadShader(name, text.c_str(), type);
-}
-
-AnimaShader* AnimaShadersManager::LoadShader(const char* name, const AChar* text, AnimaShaderType type)
-{
-	AnimaString str = name;
-	return LoadShader(str, text, type);
-}
-
-AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const AChar* text, AnimaShaderType type)
 {
 	AnimaShader* sh = CreateShader(name);
 	sh->SetText(text);
@@ -85,24 +56,7 @@ AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, const ACha
 	return sh;
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AnimaString &filePath, AnimaShaderType type)
-{
-	AnimaString str = name;
-	return LoadShaderFromFile(str, filePath, type);
-}
-
 AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AnimaString &filePath, AnimaShaderType type)
-{
-	return LoadShaderFromFile(name, filePath.c_str(), type);
-}
-
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const char* name, const AChar* filePath, AnimaShaderType type)
-{
-	AnimaString str = name;
-	return LoadShaderFromFile(str, filePath, type);
-}
-
-AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, const AChar* filePath, AnimaShaderType type)
 {
 	AnimaShader* sh = nullptr;
 	AnimaString str;
@@ -123,12 +77,6 @@ AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, co
 
 	sh = LoadShader(name, str, type);
 	return sh;
-}
-
-AnimaShader* AnimaShadersManager::LoadShader(const char* name, AnimaShaderProgram::AnimaShaderInfo info)
-{
-	AnimaString str = name;
-	return LoadShader(str, info);
 }
 
 AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info)
@@ -199,12 +147,6 @@ AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const AnimaString& n
 	return _programs.GetWithName(name);
 }
 
-AnimaShaderProgram* AnimaShadersManager::GetProgramFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetProgramFromName(str);
-}
-
 AnimaShader* AnimaShadersManager::GetShader(AInt index)
 {
 	return _shaders[index];
@@ -213,12 +155,6 @@ AnimaShader* AnimaShadersManager::GetShader(AInt index)
 AnimaShader* AnimaShadersManager::GetShaderFromName(const AnimaString& name)
 {
 	return _shaders.GetWithName(name);
-}
-
-AnimaShader* AnimaShadersManager::GetShaderFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetShaderFromName(str);
 }
 
 void AnimaShadersManager::NotifyProgramActivation(AnimaShaderProgram* program)
@@ -237,11 +173,6 @@ void AnimaShadersManager::SetActiveProgram(AnimaShaderProgram* program)
 }
 
 void AnimaShadersManager::SetActiveProgramFromName(const AnimaString& name)
-{
-	_activeProgram = GetProgramFromName(name);
-}
-
-void AnimaShadersManager::SetActiveProgramFromName(const char* name)
 {
 	_activeProgram = GetProgramFromName(name);
 }
@@ -319,11 +250,6 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 
 bool AnimaShadersManager::LoadShadersParts(const AnimaString& partsPath)
 {
-	return LoadShadersParts(partsPath.c_str());
-}
-
-bool AnimaShadersManager::LoadShadersParts(const char* partsPath)
-{
 	namespace fs = boost::filesystem;
 	fs::path directory(partsPath);
 
@@ -342,11 +268,6 @@ bool AnimaShadersManager::LoadShadersParts(const char* partsPath)
 
 AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const AnimaString& partFilePath)
 {
-	return LoadShaderFromPartFile(partFilePath.c_str());
-}
-
-AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const char* partFilePath)
-{
 	AnimaShader* shader = nullptr;
 
 	std::ifstream fileStream(partFilePath);
@@ -356,9 +277,9 @@ AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const char* partFilePat
 
 	boost::property_tree::read_xml(fileStream, pt);
 
-	std::string name = pt.get<std::string>("AnimaShaderPart.<xmlattr>.name");
-	std::string type = pt.get<std::string>("AnimaShaderPart.<xmlattr>.type");
-	std::string code = pt.get<std::string>("AnimaShaderPart.Part.ShaderCode");
+	AnimaString name = pt.get<AnimaString>("AnimaShaderPart.<xmlattr>.name");
+	AnimaString type = pt.get<AnimaString>("AnimaShaderPart.<xmlattr>.type");
+	AnimaString code = pt.get<AnimaString>("AnimaShaderPart.Part.ShaderCode");
 
 	shader = CreateShader(name.c_str());
 

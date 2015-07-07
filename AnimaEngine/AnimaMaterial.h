@@ -31,7 +31,6 @@ public:
 
 	void AddShader(AnimaShader* shader);
 	void AddShader(const AnimaString& shaderName);
-	void AddShader(const char* shaderName);
 	AInt GetShadersCount() const;
 	AnimaString GetShaderName(AInt index) const;
 

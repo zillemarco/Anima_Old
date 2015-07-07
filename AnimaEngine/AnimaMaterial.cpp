@@ -17,10 +17,14 @@ AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManag
 {
 	SetInteger("FrontFace", GL_CCW);
 	SetInteger("CullFace", GL_BACK);
-	SetBoolean("Wireframe", false);
-	SetColor("WireframeColor", 0.0f, 0.0f, 0.0f);
-	SetFloat("MaxTessellationLevel", 1.0f);
-	SetFloat("TessellationAlpha", 0.0f);
+
+	//SetColor("DiffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
+	//SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Deprecato	SetBoolean("Wireframe", false);
+	// Deprecato	SetColor("WireframeColor", 0.0f, 0.0f, 0.0f);
+	// Deprecato	SetFloat("MaxTessellationLevel", 1.0f);
+	// Deprecato	SetFloat("TessellationAlpha", 0.0f);
 }
 
 AnimaMaterial::AnimaMaterial(const AnimaMaterial& src)
@@ -61,17 +65,12 @@ AnimaMaterial& AnimaMaterial::operator=(AnimaMaterial&& src)
 
 void AnimaMaterial::AddShader(AnimaShader* shader)
 {
-	_shadersNames.Add(shader->GetAnimaName());
+	_shadersNames.Add(shader->GetName());
 }
 
 void AnimaMaterial::AddShader(const AnimaString& shaderName)
 {
 	_shadersNames.Add(shaderName);
-}
-
-void AnimaMaterial::AddShader(const char* shaderName)
-{
-	_shadersNames.Add(AnimaString(shaderName));
 }
 
 AInt AnimaMaterial::GetShadersCount() const

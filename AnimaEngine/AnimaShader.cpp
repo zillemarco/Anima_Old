@@ -113,19 +113,9 @@ void AnimaShader::SetText(AnimaString text)
 	_text = text;
 }
 
-void AnimaShader::SetText(const char* text)
-{
-	_text = text;
-}
-
-AnimaString AnimaShader::GetAnimaText()
+AnimaString AnimaShader::GetText()
 {
 	return _text;
-}
-
-const char* AnimaShader::GetText()
-{
-	return _text.c_str();
 }
 
 void AnimaShader::SetType(AnimaShaderType type)

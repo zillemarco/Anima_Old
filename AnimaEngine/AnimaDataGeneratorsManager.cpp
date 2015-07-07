@@ -27,21 +27,9 @@ AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const Anim
 	return CreateDataGenerator<AnimaColorGenerator>(name);
 }
 
-AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const char* name)
-{
-	AnimaString str = name;
-	return CreateColorGenerator(str);
-}
-
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const AnimaString& name)
 {
 	return CreateDataGenerator<AnimaVectorGenerator>(name);
-}
-
-AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const char* name)
-{
-	AnimaString str = name;
-	return CreateVectorGenerator(str);
 }
 
 void AnimaDataGeneratorsManager::ClearGenerators()
@@ -69,12 +57,6 @@ AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const AnimaString& 
 	return _dataGenerators.GetWithName(name);
 }
 
-AnimaDataGenerator* AnimaDataGeneratorsManager::GetGenerator(const char* name)
-{
-	AnimaString str = name;
-	return GetGenerator(str);
-}
-
 bool AnimaDataGeneratorsManager::RemoveGenerator(const AnimaString& name)
 {
 	AnimaMappedArray<AnimaDataGenerator*>* mappedArray = _dataGenerators.GetMappedArrayFromName(name);
@@ -90,15 +72,9 @@ bool AnimaDataGeneratorsManager::RemoveGenerator(const AnimaString& name)
 	return mappedArray->Remove(name);
 }
 
-bool AnimaDataGeneratorsManager::RemoveGenerator(const char* name)
-{
-	AnimaString str = name;
-	return RemoveGenerator(str);
-}
-
 bool AnimaDataGeneratorsManager::RemoveGenerator(AnimaDataGenerator* generator)
 {
-	return RemoveGenerator(generator->GetAnimaName());
+	return RemoveGenerator(generator->GetName());
 }
 
 void AnimaDataGeneratorsManager::UpdateValues()

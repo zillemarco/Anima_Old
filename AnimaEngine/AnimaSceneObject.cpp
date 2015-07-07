@@ -101,7 +101,7 @@ AnimaVertex3f AnimaSceneObject::GetPosition()
 AInt AnimaSceneObject::AddChild(AnimaSceneObject* child)
 {
 	child->SetParentObject(this);
-	return _children.Add(child->GetAnimaName(), child);
+	return _children.Add(child->GetName(), child);
 }
 
 AInt AnimaSceneObject::GetChildrenNumber()
@@ -126,7 +126,7 @@ AnimaSceneObject* AnimaSceneObject::GetChild(AInt index)
 
 bool AnimaSceneObject::RemoveChild(AnimaSceneObject* object)
 {
-	return RemoveChild(object->GetAnimaName());
+	return RemoveChild(object->GetName());
 }
 
 bool AnimaSceneObject::RemoveChild(const AnimaString& name)
@@ -147,7 +147,7 @@ bool AnimaSceneObject::RemoveChild(AInt index)
 
 AInt AnimaSceneObject::HasChild(AnimaSceneObject* object)
 {
-	return _children.Contains(object->GetAnimaName());
+	return _children.Contains(object->GetName());
 }
 
 AInt AnimaSceneObject::HasChild(const AnimaString& name)

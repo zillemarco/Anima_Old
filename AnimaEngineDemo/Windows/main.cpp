@@ -51,6 +51,11 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 bool _shouldClose = false;
 
+void test(std::string str)
+{
+	printf("%s", str);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -99,6 +104,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	RedirectIOToConsole();
+
+	test("ciao mondo");
 
 	// Inizializzazione della finestra
 	WNDCLASSEX wcex;
@@ -168,7 +175,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void ChangeColor(Anima::AnimaModelInstance* instance)
 {
-	if (instance->GetAnimaName() == "Alpha_HighJointsGeo.first-instance")
+	if (instance->GetName() == "Alpha_HighJointsGeo.first-instance")
 	{
 		for (int i = 0; i < instance->GetMeshesCount(); i++)
 		{

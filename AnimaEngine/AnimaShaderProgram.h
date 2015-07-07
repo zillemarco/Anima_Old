@@ -30,7 +30,7 @@ class ANIMA_ENGINE_EXPORT AnimaShaderProgram : public AnimaNamedObject
 {
 public:
 	struct AnimaShaderInfo {
-		const AChar*		_text;
+		AnimaString			_text;
 		AnimaShaderInfoType	_infoType;
 		AnimaShaderType		_shaderType;
 
@@ -115,25 +115,15 @@ public:
 	void UpdateRenderingManagerProperies(AnimaRenderer* renderingManager);
 
 	void SetUniformi(const AnimaString& uniformName, int value);
-	void SetUniformi(const char* uniformName, int value);
 	void SetUniformf(const AnimaString& uniformName, AFloat value);
-	void SetUniformf(const char* uniformName, AFloat value);
 	void SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value);
-	void SetUniform(const char* uniformName, const AnimaVertex2f& value);
 	void SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value);
-	void SetUniform(const char* uniformName, const AnimaVertex3f& value);
 	void SetUniform(const AnimaString& uniformName, const AnimaColor4f& value);
-	void SetUniform(const char* uniformName, const AnimaColor4f& value);
 	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c);
-	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c);
 	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
-	void SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose = false);
-	void SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose = false);
 	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
-	void SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
 	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaMatrix>* value);
-	void SetUniform(const char* uniformName, const AnimaArray<AnimaMatrix>* value);
 
 	void SetUniformi(AInt location, int value);
 	void SetUniformf(AInt location, AFloat value);

@@ -100,7 +100,7 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 void AnimaModel::SetMaterial(AnimaMaterial* material)
 {
 	_material = material;
-	_materialName = material->GetAnimaName();
+	_materialName = material->GetName();
 }
 
 AnimaMaterial* AnimaModel::GetMaterial()
@@ -110,7 +110,7 @@ AnimaMaterial* AnimaModel::GetMaterial()
 
 AInt AnimaModel::AddMesh(AnimaMesh* mesh)
 {
-	return _meshes.Add(mesh->GetAnimaName(), mesh);
+	return _meshes.Add(mesh->GetName(), mesh);
 }
 
 AInt AnimaModel::GetMeshesCount() const
@@ -208,9 +208,9 @@ void AnimaModel::SetMeshesBonesInfo(const AnimaMappedArray<AnimaMeshBoneInfo*>* 
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaMeshBoneInfo* srcMeshBoneInfo = meshesBonesInfo->GetConst(i);
-		AnimaMeshBoneInfo* newMeshBoneInfo = AnimaAllocatorNamespace::AllocateNew<AnimaMeshBoneInfo>(*_allocator, srcMeshBoneInfo->GetAnimaName(), _allocator);
+		AnimaMeshBoneInfo* newMeshBoneInfo = AnimaAllocatorNamespace::AllocateNew<AnimaMeshBoneInfo>(*_allocator, srcMeshBoneInfo->GetName(), _allocator);
 		*newMeshBoneInfo = *srcMeshBoneInfo;
-		_meshesBonesInfo.Add(srcMeshBoneInfo->GetAnimaName(), newMeshBoneInfo);
+		_meshesBonesInfo.Add(srcMeshBoneInfo->GetName(), newMeshBoneInfo);
 	}
 }
 

@@ -365,23 +365,11 @@ void AnimaShaderProgram::SetUniformi(const AnimaString& uniformName, int value)
 		glUniform1i(pair->second._locations[0], value);
 }
 
-void AnimaShaderProgram::SetUniformi(const char* uniformName, int value)
-{
-	AnimaString str = uniformName;
-	SetUniformi(str, value);
-}
-
 void AnimaShaderProgram::SetUniformf(const AnimaString& uniformName, AFloat value)
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform1f(pair->second._locations[0], value);
-}
-
-void AnimaShaderProgram::SetUniformf(const char* uniformName, AFloat value)
-{
-	AnimaString str = uniformName;
-	SetUniformf(str, value);
 }
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value)
@@ -391,23 +379,11 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaV
 		glUniform2f(pair->second._locations[0], value.x, value.y);
 }
 
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex2f& value)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value);
-}
-
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value)
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform3f(pair->second._locations[0], value.x, value.y, value.z);
-}
-
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaVertex3f& value)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value);
 }
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaColor4f& value)
@@ -417,23 +393,11 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaC
 		glUniform4f(pair->second._locations[0], value.x, value.y, value.z, value.w);
 }
 
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaColor4f& value)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value);
-}
-
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c)
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniform3f(pair->second._locations[0], a, b, c);
-}
-
-void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, a, b, c);
 }
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
@@ -443,23 +407,11 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, AFloat a, AF
 		glUniform4f(pair->second._locations[0], a, b, c, d);
 }
 
-void AnimaShaderProgram::SetUniform(const char* uniformName, AFloat a, AFloat b, AFloat c, AFloat d)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, a, b, c, d);
-}
-
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose)
 {
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 		glUniformMatrix4fv(pair->second._locations[0], 1, transpose ? GL_TRUE : GL_FALSE, value.m);
-}
-
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaMatrix& value, bool transpose)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value, transpose);
 }
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
@@ -470,15 +422,11 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 	{
-		//AnimaString name(_allocator);
-
 		AInt countValue = value->GetSize();
 		AInt countUniformArray = pair->second._arraySize;
 		AInt countUniformLocations = pair->second._arraySize;
 		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
 		{
-			//name.Format("%s[%d]", uniformName, i);
-
 			if (type == GL_FLOAT_VEC2)
 				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector2f());
 			else if (type == GL_FLOAT_VEC3)
@@ -487,12 +435,6 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector4f());
 		}
 	}
-}
-
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value, type);
 }
 
 void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaMatrix>* value)
@@ -510,12 +452,6 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
 			SetUniform(pair->second._locations[i], value->GetAt(i));
 	}
-}
-
-void AnimaShaderProgram::SetUniform(const char* uniformName, const AnimaArray<AnimaMatrix>* value)
-{
-	AnimaString str = uniformName;
-	SetUniform(str, value);
 }
 
 void AnimaShaderProgram::SetUniformi(AInt location, int value)

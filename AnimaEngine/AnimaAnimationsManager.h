@@ -37,13 +37,11 @@ public:
 
 	AnimaAnimation* GetAnimation(AInt index);
 	AnimaAnimation* GetAnimationFromName(const AnimaString& name);
-	AnimaAnimation* GetAnimationFromName(const char* name);
-
+	
 	AnimaMappedArray<AnimaAnimation*>* GetLastLoadedAnimations();
 
 protected:
 	AnimaAnimation* CreateEmptyAnimation(const AnimaString& animationName);
-	AnimaAnimation* CreateEmptyAnimation(const char* animationName);
 
 public:
 	void ClearAnimations();

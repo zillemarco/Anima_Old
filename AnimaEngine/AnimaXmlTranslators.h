@@ -11,6 +11,7 @@
 
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
+#include "AnimaString.h"
 
 #include <iostream>
 #include <boost/property_tree/ptree.hpp>
@@ -22,14 +23,14 @@
 
 struct AnimaXmlVertexTranslator
 {
-	typedef std::string internal_type;
+	typedef Anima::AnimaString internal_type;
 	typedef Anima::AnimaVertex4f external_type;
 
 	boost::optional<external_type> get_value(const internal_type& str)
 	{
 		if (!str.empty())
 		{
-			std::vector<std::string> elements;
+			std::vector<Anima::AnimaString> elements;
 			boost::split(elements, str, boost::is_any_of(";,"));
 
 			Anima::AnimaVertex4f vertex;
@@ -70,7 +71,7 @@ struct AnimaXmlVertexTranslator
 
 struct AnimaXmlBoolTranslator
 {
-	typedef std::string internal_type;
+	typedef Anima::AnimaString internal_type;
 	typedef bool external_type;
 
 	boost::optional<external_type> get_value(const internal_type& str)
@@ -98,12 +99,12 @@ namespace boost
 {
 	namespace property_tree
 	{
-		template<> struct translator_between < std::string, Anima::AnimaVertex4f >
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaVertex4f >
 		{
 			typedef AnimaXmlVertexTranslator type;
 		};
 
-		template<> struct translator_between < std::string, bool >
+		template<> struct translator_between < Anima::AnimaString, bool >
 		{
 			typedef AnimaXmlBoolTranslator type;
 		};

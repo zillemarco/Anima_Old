@@ -59,19 +59,9 @@ void AnimaNamedObject::SetName(const AnimaString& name)
 	_name = name;
 }
 
-void AnimaNamedObject::SetName(const char* name)
-{
-	_name = name;
-}
-
-AnimaString AnimaNamedObject::GetAnimaName() const
+AnimaString AnimaNamedObject::GetName() const
 {
 	return _name;
-}
-
-const char* AnimaNamedObject::GetName() const
-{
-	return _name.c_str();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

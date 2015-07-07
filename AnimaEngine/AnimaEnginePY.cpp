@@ -78,29 +78,19 @@ struct AnimaString_from_python_str
 	}
 };
 
-Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneChar)(const char*) = &Anima::AnimaScenesManager::CreateScene;
+Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::CreateScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneInt)(Anima::AUint) = &Anima::AnimaScenesManager::GetScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetScene;
-Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneChar)(const char*) = &Anima::AnimaScenesManager::GetScene;
 
-Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelCharString)(const char*, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModel;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelCharChar)(const char*, const char*) = &Anima::AnimaModelsManager::LoadModel;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelStringChar)(const Anima::AnimaString&, const char*) = &Anima::AnimaModelsManager::LoadModel;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModel;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*CreateModelString)(const Anima::AnimaString&) = &Anima::AnimaModelsManager::CreateModel;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*CreateModelChar)(const char*) = &Anima::AnimaModelsManager::CreateModel;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*GetModelFromNameString)(const Anima::AnimaString&) = &Anima::AnimaModelsManager::GetModelFromName;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*GetModelFromNameChar)(const char*) = &Anima::AnimaModelsManager::GetModelFromName;
 
 Anima::AnimaAnimation* (Anima::AnimaAnimationsManager::*GetAnimationFromNameString)(const Anima::AnimaString&) = &Anima::AnimaAnimationsManager::GetAnimationFromName;
-Anima::AnimaAnimation* (Anima::AnimaAnimationsManager::*GetAnimationFromNameChar)(const char*) = &Anima::AnimaAnimationsManager::GetAnimationFromName;
 
 Anima::AnimaMesh* (Anima::AnimaModel::*GetMeshFromNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::GetMeshFromName;
-Anima::AnimaMesh* (Anima::AnimaModel::*GetMeshFromNameChar)(const char*) = &Anima::AnimaModel::GetMeshFromName;
 void (Anima::AnimaModel::*SetOriginFileNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::SetOriginFileName;
-void (Anima::AnimaModel::*SetOriginFileNameChar)(const char*) = &Anima::AnimaModel::SetOriginFileName;
 void (Anima::AnimaModel::*SetAnimationNodeNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::SetAnimationNodeName;
-void (Anima::AnimaModel::*SetAnimationNodeNameChar)(const char*) = &Anima::AnimaModel::SetAnimationNodeName;
 
 void (Anima::AnimaRenderer::*RendererStart)(Anima::AnimaScene*) = &Anima::AnimaRenderer::Start;
 void (Anima::AnimaRenderer::*RendererDrawMesh)(Anima::AnimaMesh*) = &Anima::AnimaRenderer::DrawMesh;
@@ -108,31 +98,17 @@ void (Anima::AnimaRenderer::*RendererDrawMeshInstance)(Anima::AnimaMeshInstance*
 void (Anima::AnimaRenderer::*RendererDrawModel)(Anima::AnimaModel*) = &Anima::AnimaRenderer::DrawModel;
 void (Anima::AnimaRenderer::*RendererDrawModelInstance)(Anima::AnimaModelInstance*) = &Anima::AnimaRenderer::DrawModel;
 
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharChar)(const char*, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringInfo)(const Anima::AnimaString&, Anima::AnimaShaderProgram::AnimaShaderInfo) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderCharInfo)(const char*, Anima::AnimaShaderProgram::AnimaShaderInfo) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharString)(const char*, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileCharChar)(const char*, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringChar)(const Anima::AnimaString&, const char*, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*CreateShaderString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*CreateShaderChar)(const char*) = &Anima::AnimaShadersManager::CreateShader;
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateProgram;
-Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramChar)(const char*) = &Anima::AnimaShadersManager::CreateProgram;
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*GetProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::GetProgramFromName;
-Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*GetProgramFromNameChar)(const char*) = &Anima::AnimaShadersManager::GetProgramFromName;
 void (Anima::AnimaShadersManager::*SetActiveProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::SetActiveProgramFromName;
-void (Anima::AnimaShadersManager::*SetActiveProgramFromNameChar)(const char*) = &Anima::AnimaShadersManager::SetActiveProgramFromName;
 
 Anima::AnimaFirstPersonCamera* (Anima::AnimaCamerasManager::*CreateFirstPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaFirstPersonCamera>;
-Anima::AnimaFirstPersonCamera* (Anima::AnimaCamerasManager::*CreateFirstPersonCameraChar)(const char*) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaFirstPersonCamera>;
 Anima::AnimaThirdPersonCamera* (Anima::AnimaCamerasManager::*CreateThirdPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaThirdPersonCamera>;
-Anima::AnimaThirdPersonCamera* (Anima::AnimaCamerasManager::*CreateThirdPersonCameraChar)(const char*) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaThirdPersonCamera>;
 Anima::AnimaCamera* (Anima::AnimaCamerasManager::*GetCameraFromNameString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::GetCameraFromName;
-Anima::AnimaCamera* (Anima::AnimaCamerasManager::*GetCameraFromNameChar)(const char*) = &Anima::AnimaCamerasManager::GetCameraFromName;
 
 void (Anima::AnimaCamera::*AnimaCameraSetPositionVector)(const Anima::AnimaVertex3f&) = &Anima::AnimaCamera::SetPosition;
 void (Anima::AnimaCamera::*AnimaCameraSetPositionFloat)(const Anima::AFloat&, const Anima::AFloat&, const Anima::AFloat&) = &Anima::AnimaCamera::SetPosition;
@@ -185,10 +161,9 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	
 	// AnimaScenesManager
 	class_<Anima::AnimaScenesManager>("AnimaScenesManager", no_init)
-		.def("CreateScene", CreateSceneChar, return_value_policy<reference_existing_object>())
+		.def("CreateScene", CreateSceneString, return_value_policy<reference_existing_object>())
 		.def("GetScene", GetSceneInt, return_value_policy<reference_existing_object>())
-		.def("GetScene", GetSceneString, return_value_policy<reference_existing_object>())
-		.def("GetScene", GetSceneChar, return_value_policy<reference_existing_object>());
+		.def("GetScene", GetSceneString, return_value_policy<reference_existing_object>());
 	
 	// AnimaScene
 	class_<Anima::AnimaScene>("AnimaScene", no_init)
@@ -223,7 +198,6 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("GetAnimationsNumber", &Anima::AnimaAnimationsManager::GetAnimationsNumber)
 		.def("GetAnimation", &Anima::AnimaAnimationsManager::GetAnimation, return_value_policy<reference_existing_object>())
 		.def("GetAnimationFromName", GetAnimationFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetAnimationFromName", GetAnimationFromNameChar, return_value_policy<reference_existing_object>())
 		.def("GetLastLoadedAnimations", &Anima::AnimaAnimationsManager::GetLastLoadedAnimations, return_value_policy<reference_existing_object>())
 		.def("ClearAnimations", &Anima::AnimaAnimationsManager::ClearAnimations)
 		.def("ClearLastLoadedAnimations", &Anima::AnimaAnimationsManager::ClearLastLoadedAnimations);
@@ -234,14 +208,9 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	
 	// AnimaModelsManager
 	class_<Anima::AnimaModelsManager>("AnimaModelsManager", no_init)
-		.def("LoadModel", LoadModelCharString, return_value_policy<reference_existing_object>())
-		.def("LoadModel", LoadModelCharChar, return_value_policy<reference_existing_object>())
-		.def("LoadModel", LoadModelStringChar, return_value_policy<reference_existing_object>())
 		.def("LoadModel", LoadModelStringString, return_value_policy<reference_existing_object>())
 		.def("CreateModel", CreateModelString, return_value_policy<reference_existing_object>())
-		.def("CreateModel", CreateModelChar, return_value_policy<reference_existing_object>())
 		.def("GetModelFromName", GetModelFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetModelFromName", GetModelFromNameChar, return_value_policy<reference_existing_object>())
 		.def("GetModel", &Anima::AnimaModelsManager::GetModel, return_value_policy<reference_existing_object>())
 		.def("ClearModels", &Anima::AnimaModelsManager::ClearModels);
 
@@ -253,17 +222,14 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("AddMesh", &Anima::AnimaModel::AddMesh)
 		.def("GetMesh", &Anima::AnimaModel::GetMesh, return_value_policy<reference_existing_object>())
 		.def("GetMeshFromName", GetMeshFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetMeshFromName", GetMeshFromNameChar, return_value_policy<reference_existing_object>())
 		.def("GetAnimationsCount", &Anima::AnimaModel::GetAnimationsCount)
 		.def("SetAnimations", &Anima::AnimaModel::SetAnimations)
 		.def("AddAnimation", &Anima::AnimaModel::AddAnimation)
 		.def("GetAnimation", &Anima::AnimaModel::GetAnimation, return_value_policy<reference_existing_object>())
 		.def("SetOriginFileName", SetOriginFileNameString)
-		.def("SetOriginFileName", SetOriginFileNameChar)
 		.def("GetAnimaOriginFileName", &Anima::AnimaModel::GetAnimaOriginFileName)
 		.def("GetOriginFileName", &Anima::AnimaModel::GetOriginFileName)
 		.def("SetAnimationNodeName", SetAnimationNodeNameString)
-		.def("SetAnimationNodeName", SetAnimationNodeNameChar)
 		.def("GetAnimaAnimationNodeName", &Anima::AnimaModel::GetAnimaAnimationNodeName)
 		.def("GetAnimationNodeName", &Anima::AnimaModel::GetAnimationNodeName)
 		.def("GetMeshesBonesInfo", &Anima::AnimaModel::GetMeshesBonesInfo, return_value_policy<reference_existing_object>())
@@ -289,26 +255,15 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 
 	// AnimaShadersManager
 	class_<Anima::AnimaShadersManager>("AnimaShadersManager", no_init)
-		.def("LoadShader", LoadShaderCharString, return_value_policy<reference_existing_object>())
-		.def("LoadShader", LoadShaderCharChar, return_value_policy<reference_existing_object>())
-		.def("LoadShader", LoadShaderStringChar, return_value_policy<reference_existing_object>())
 		.def("LoadShader", LoadShaderStringString, return_value_policy<reference_existing_object>())
-		.def("LoadShaderFromFile", LoadShaderFromFileCharString, return_value_policy<reference_existing_object>())
-		.def("LoadShaderFromFile", LoadShaderFromFileCharChar, return_value_policy<reference_existing_object>())
-		.def("LoadShaderFromFile", LoadShaderFromFileStringChar, return_value_policy<reference_existing_object>())
 		.def("LoadShaderFromFile", LoadShaderFromFileStringString, return_value_policy<reference_existing_object>())
 		.def("LoadShader", LoadShaderStringInfo, return_value_policy<reference_existing_object>())
-		.def("LoadShader", LoadShaderCharInfo, return_value_policy<reference_existing_object>())
 		.def("CreateShader", CreateShaderString, return_value_policy<reference_existing_object>())
-		.def("CreateShader", CreateShaderChar, return_value_policy<reference_existing_object>())
 		.def("CreateProgram", CreateProgramString, return_value_policy<reference_existing_object>())
-		.def("CreateProgram", CreateProgramChar, return_value_policy<reference_existing_object>())
 		.def("GetProgram", &Anima::AnimaShadersManager::GetProgram, return_value_policy<reference_existing_object>())
 		.def("GetProgramFromName", GetProgramFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetProgramFromName", GetProgramFromNameChar, return_value_policy<reference_existing_object>())
 		.def("SetActiveProgram", &Anima::AnimaShadersManager::SetActiveProgram, return_value_policy<reference_existing_object>())
 		.def("SetActiveProgramFromName", SetActiveProgramFromNameString, return_value_policy<reference_existing_object>())
-		.def("SetActiveProgramFromName", SetActiveProgramFromNameChar, return_value_policy<reference_existing_object>())
 		.def("GetActiveProgram", &Anima::AnimaShadersManager::GetActiveProgram, return_value_policy<reference_existing_object>());
 
 	// AnimaShader
@@ -348,12 +303,9 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	// AnimaCamerasManager
 	class_<Anima::AnimaCamerasManager>("AnimaCamerasManager", no_init)
 		.def("CreateFirstPersonCamera", CreateFirstPersonCameraString, return_value_policy<reference_existing_object>())
-		.def("CreateFirstPersonCamera", CreateFirstPersonCameraChar, return_value_policy<reference_existing_object>())
 		.def("CreateThirdPersonCamera", CreateThirdPersonCameraString, return_value_policy<reference_existing_object>())
-		.def("CreateThirdPersonCamera", CreateThirdPersonCameraChar, return_value_policy<reference_existing_object>())
 		.def("GetActiveCamera", &Anima::AnimaCamerasManager::GetActiveCamera, return_value_policy<reference_existing_object>())
 		.def("GetCameraFromName", GetCameraFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetCameraFromName", GetCameraFromNameChar, return_value_policy<reference_existing_object>())
 		.def("GetTotalCamerasCount", &Anima::AnimaCamerasManager::GetTotalCamerasCount)
 		.def("GetCameras", &Anima::AnimaCamerasManager::GetCameras, return_value_policy<reference_existing_object>())
 		.def("UpdatePerspectiveCameras", &Anima::AnimaCamerasManager::UpdatePerspectiveCameras)

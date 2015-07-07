@@ -37,7 +37,7 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 		return nullptr;
 
 	AnimaMaterial* oldMaterial = srcMesh->GetMaterial();
-	AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(instanceName + ".material");
+	AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(instanceName + ".material");
 	newMaterial->CopyData(*oldMaterial);
 
 	for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
@@ -58,37 +58,12 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 	return meshInstance;
 }
 
-AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, AnimaMesh* srcMesh)
-{
-	AnimaString str = instanceName;
-	return CreateInstance(str, srcMesh);
-}
-
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcMeshName)
 {
 	AnimaMesh* srcMesh = _meshesManager->GetMeshFromName(srcMeshName);
 	if (srcMesh == nullptr)
 		return nullptr;
 	return CreateInstance(instanceName, srcMesh);
-}
-
-AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, const AnimaString& srcMeshName)
-{
-	AnimaString str = instanceName;
-	return CreateInstance(str, srcMeshName);
-}
-
-AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& instanceName, const char* srcMeshName)
-{
-	AnimaString str = srcMeshName;
-	return CreateInstance(instanceName, str);
-}
-
-AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const char* instanceName, const char* srcMeshName)
-{
-	AnimaString strInstanceName = instanceName;
-	AnimaString strModelName = srcMeshName;
-	return CreateInstance(strInstanceName, strModelName);
 }
 
 AnimaMeshInstance* AnimaMeshInstancesManager::CreateEmptyInstance(const AnimaString& instanceName)
@@ -103,12 +78,6 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateEmptyInstance(const AnimaStr
 	return meshInstance;
 }
 
-AnimaMeshInstance* AnimaMeshInstancesManager::CreateEmptyInstance(const char* instanceName)
-{
-	AnimaString str = instanceName;
-	return CreateEmptyInstance(str);
-}
-
 AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(AnimaModel* srcModel)
 {
 	ClearLastInstancesFromModel();
@@ -121,7 +90,7 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 	{
 		AnimaMesh* mesh = srcModel->GetMesh(i);
 
-		AnimaString meshName = mesh->GetAnimaName();
+		AnimaString meshName = mesh->GetName();
 		AnimaString meshInstanceName;
 		AnimaMeshInstance* newInstance = nullptr;
 		int nameOffset = 0;
@@ -137,7 +106,7 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 		}
 		
 		AnimaMaterial* oldMaterial = mesh->GetMaterial();
-		AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateGenericMaterial(meshInstanceName + ".material");
+		AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(meshInstanceName + ".material");
 		newMaterial->CopyData(*oldMaterial);
 		for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
 			newMaterial->AddShader(oldMaterial->GetShaderName(ns));
@@ -170,12 +139,6 @@ AnimaMeshInstance* AnimaMeshInstancesManager::GetMeshInstance(AInt index)
 AnimaMeshInstance* AnimaMeshInstancesManager::GetMeshInstanceFromName(const AnimaString& name)
 {
 	return _meshIntances[name];
-}
-
-AnimaMeshInstance* AnimaMeshInstancesManager::GetMeshInstanceFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetMeshInstanceFromName(str);
 }
 
 void AnimaMeshInstancesManager::ClearInstances()

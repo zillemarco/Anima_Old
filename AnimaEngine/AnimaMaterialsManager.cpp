@@ -32,30 +32,27 @@ AnimaMaterialsManager::~AnimaMaterialsManager()
 	ClearLastMaterialsIndexMap();
 }
 
-AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const AnimaString& name)
+AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)
 {
-	return CreateMaterial<AnimaMaterial>(name);
-}
+	AInt materialIndex = _materials.Contains(name);
+	if (materialIndex >= 0)
+		return nullptr;
 
-AnimaMaterial* AnimaMaterialsManager::CreateGenericMaterial(const char* name)
-{
-	AnimaString str = name;
-	return CreateGenericMaterial(str);
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaMaterial* newMaterial = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_materials.Add(name, newMaterial);
+
+	return newMaterial;
 }
 
 void AnimaMaterialsManager::ClearMaterials()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaMaterial*>*>* materialsMap = _materials.GetArraysMap();
-	for (auto materialsPair : (*materialsMap))
+	AInt count = _materials.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		AnimaMappedArray<AnimaMaterial*>* materialsArray = materialsPair.second;
-		AInt count = materialsArray->GetSize();
-		for (AInt i = 0; i < count; i++)
-		{
-			AnimaMaterial* material = (*materialsArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMaterialsAllocator()), material);
-			material = nullptr;
-		}
+		AnimaMaterial* material = _materials[i];
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMaterialsAllocator()), material);
+		material = nullptr;
 	}
 	
 	_materials.RemoveAll();
@@ -63,7 +60,7 @@ void AnimaMaterialsManager::ClearMaterials()
 
 AnimaMaterial* AnimaMaterialsManager::GetMaterial(AInt index)
 {
-	return _materials.GetWithIndex(index);
+	return _materials.Get(index);
 }
 
 AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const AnimaString& name)
@@ -71,18 +68,12 @@ AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const AnimaString& nam
 	return _materials.GetWithName(name);
 }
 
-AnimaMaterial* AnimaMaterialsManager::GetMaterialFromName(const char* name)
+AInt AnimaMaterialsManager::GetMaterialsCount()
 {
-	AnimaString str = name;
-	return GetMaterialFromName(str);
+	return _materials.GetSize();
 }
 
-AInt AnimaMaterialsManager::GetTotalMaterialsCount()
-{
-	return _materials.GetTotalSize();
-}
-
-AnimaTypeMappedArray<AnimaMaterial*>* AnimaMaterialsManager::GetMaterials()
+AnimaMappedArray<AnimaMaterial*>* AnimaMaterialsManager::GetMaterials()
 {
 	return &_materials;
 }
@@ -101,7 +92,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		while (newMaterial == nullptr)
 		{
 			materialName = FormatString("%s.material%d", modelName, i + nameOffset);
-			newMaterial = CreateGenericMaterial(materialName);
+			newMaterial = CreateMaterial(materialName);
 			nameOffset++;
 		}
 		
@@ -369,22 +360,10 @@ AnimaArray<AnimaString>* AnimaMaterialsManager::GetLastMaterialsIndexMap()
 
 void AnimaMaterialsManager::ClearLastMaterialsIndexMap()
 {
-	//AInt materialsIndexCount = _lastMaterialsIndexMap.GetSize();
-	//for (AInt i = 0; i < materialsIndexCount; i++)
-	//{
-	//	AnimaString* materialIndex = _lastMaterialsIndexMap[i];
-	//	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), materialIndex);
-	//	materialIndex = nullptr;
-	//}
 	_lastMaterialsIndexMap.RemoveAll();
 }
 
 bool AnimaMaterialsManager::LoadMaterials(const AnimaString& materialsPath)
-{
-	return LoadMaterials(materialsPath.c_str());
-}
-
-bool AnimaMaterialsManager::LoadMaterials(const char* materialsPath)
 {
 	namespace fs = boost::filesystem;
 	fs::path directory(materialsPath);
@@ -404,23 +383,25 @@ bool AnimaMaterialsManager::LoadMaterials(const char* materialsPath)
 
 AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const AnimaString& materialFilePath)
 {
-	return LoadMaterialFromFile(materialFilePath.c_str());
+	std::ifstream fileStream(materialFilePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+
+	return LoadMaterialFromXml(xml);
 }
 
-AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const char* materialFilePath)
+AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& materialXmlDefinition)
 {
 	AnimaMaterial* material = nullptr;
-	
-	std::ifstream fileStream(materialFilePath);
 
 	using boost::property_tree::ptree;
 	ptree pt;
 
-	boost::property_tree::read_xml(fileStream, pt);
+	boost::property_tree::read_xml(std::istringstream(materialXmlDefinition), pt);
 
-	std::string name = (pt.get<std::string>("AnimaMaterial.<xmlattr>.name")).c_str();
+	AnimaString name = pt.get<AnimaString>("AnimaMaterial.<xmlattr>.name");
 
-	material = CreateMaterial<AnimaMaterial>(name.c_str());
+	material = CreateMaterial(name);
 
 	if (material)
 	{
@@ -430,8 +411,8 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const char* materialF
 		{
 			if (prop.first == "Property")
 			{
-				std::string propName = prop.second.get<std::string>("<xmlattr>.name");
-				std::string propType = prop.second.get<std::string>("<xmlattr>.type");
+				AnimaString propName = prop.second.get<AnimaString>("<xmlattr>.name");
+				AnimaString propType = prop.second.get<AnimaString>("<xmlattr>.type");
 
 				if (propType.compare("color") == 0 || propType.compare("vector") == 0)
 					material->SetColor(propName.c_str(), prop.second.get<AnimaVertex4f>("<xmlattr>.value"));
@@ -446,8 +427,8 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromFile(const char* materialF
 		{
 			if (shader.first == "Shader")
 			{
-				std::string shaderName = shader.second.get<std::string>("<xmlattr>.name");
-				material->AddShader(shaderName.c_str());
+				AnimaString shaderName = shader.second.get<AnimaString>("<xmlattr>.name");
+				material->AddShader(shaderName);
 			}
 		}
 	}

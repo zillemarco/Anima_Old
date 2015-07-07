@@ -231,13 +231,6 @@ void AnimaMeshesManager::ClearMeshes()
 
 void AnimaMeshesManager::ClearLastMeshesIndexMap()
 {
-	//AInt meshesIndexCount = _lastMeshesIndexMap.GetSize();
-	//for (AInt i = 0; i < meshesIndexCount; i++)
-	//{
-	//	AnimaString* meshIndex = _lastMeshesIndexMap[i];
-	//	AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetStringAllocator()), meshIndex);
-	//	meshIndex = nullptr;
-	//}
 	_lastMeshesIndexMap.RemoveAll();
 }
 
@@ -264,12 +257,6 @@ AnimaMesh* AnimaMeshesManager::GetMeshFromName(const AnimaString& name)
 	return _meshes[name];
 }
 
-AnimaMesh* AnimaMeshesManager::GetMeshFromName(const char* name)
-{
-	AnimaString str = name;
-	return GetMeshFromName(str);
-}
-
 AInt AnimaMeshesManager::GetMeshesCount() const
 {
 	return _meshes.GetSize();
@@ -294,12 +281,6 @@ AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
 	AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
 	_meshes.Add(name, newMesh);
 	return newMesh;
-}
-
-AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const char* name)
-{
-	AnimaString str = name;
-	return CreateEmptyMesh(str);
 }
 
 END_ANIMA_ENGINE_NAMESPACE
