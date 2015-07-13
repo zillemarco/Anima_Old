@@ -44,9 +44,9 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 		while (newMesh == nullptr)
 		{
 			if (nameOffset > 0)
-				meshName = FormatString("%s.mesh%d", modelName, i + nameOffset);
+				meshName = FormatString("%s.mesh%d", modelName.c_str(), i + nameOffset);
 			else
-				meshName = FormatString("%s.mesh%d", modelName, i);
+				meshName = FormatString("%s.mesh%d", modelName.c_str(), i);
 
 			newMesh = CreateEmptyMesh(meshName);
 			nameOffset++;

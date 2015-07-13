@@ -193,7 +193,7 @@ source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h Ani
 
 if (APPLE)
     # For some reason, CMake doesn't know about .m
-    set(CMAKE_CXX_FLAGS "-x objective-c++ -wd4251")
+    set(CMAKE_CXX_FLAGS "-x objective-c++")
     set_source_files_properties(${AnimaEngineCore_SOURCES} PROPERTIES LANGUAGE CXX)
     set_source_files_properties(${AnimaEngineCore_HEADERS} PROPERTIES LANGUAGE CXX)
 else()

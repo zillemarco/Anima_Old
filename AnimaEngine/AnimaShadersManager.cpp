@@ -194,7 +194,8 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const An
 	for (AInt ms = 0; ms < materialShadersCount; ms++)
 		str += material->GetShaderName(ms);
 
-	AnimaString programName = AnimaMD5::MD5(str.c_str());
+	AnimaMD5 md5;
+	AnimaString programName = md5(str.c_str());
 	
 	AnimaShaderProgram* program = CreateProgram(programName);
 	if (program)
@@ -226,8 +227,9 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 
 	for (AInt ms = 0; ms < materialShadersCount; ms++)
 		str += material->GetShaderName(ms);
-
-	AnimaString programName = AnimaMD5::MD5(str.c_str());
+	
+	AnimaMD5 md5;
+	AnimaString programName = md5(str.c_str());
 
 	AnimaShaderProgram* program = _programs[programName];
 

@@ -47,9 +47,9 @@ bool AnimaAnimationsManager::LoadAnimations(const aiScene* scene)
 		while (newAnimation == nullptr)
 		{
 			if (nameOffset > 0)
-				animationName = FormatString("%s%d", originalAnimationName, nameOffset);
+				animationName = FormatString("%s%d", originalAnimationName.c_str(), nameOffset);
 			else
-				animationName = FormatString("%s", originalAnimationName);
+				animationName = FormatString("%s", originalAnimationName.c_str());
 
 			newAnimation = CreateEmptyAnimation(animationName);
 			nameOffset++;

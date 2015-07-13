@@ -549,7 +549,7 @@ void AnimaShaderProgram::ScanVariables()
 
 					for (AInt nu = 0; nu < arraySize; nu++)
 					{
-						tmpName = FormatString("%s[%d]", name, nu);
+						tmpName = FormatString("%s[%d]", name.c_str(), nu);
 						locations[nu] = glGetUniformLocation(_id, tmpName.c_str());
 					}
 				}
@@ -678,7 +678,7 @@ void AnimaShaderProgram::ScanVariables()
 					
 					for (AInt nu = 0; nu < arraySize; nu++)
 					{
-						tmpName = FormatString("%s[%d]", name, nu);
+						tmpName = FormatString("%s[%d]", name.c_str(), nu);
 						
 						locations[nu] = glGetUniformLocation(_id, tmpName.c_str());
 					}

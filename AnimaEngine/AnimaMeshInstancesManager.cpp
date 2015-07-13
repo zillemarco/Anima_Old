@@ -97,9 +97,9 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 		while (newInstance == nullptr)
 		{
 			if (nameOffset > 0)
-				meshInstanceName = FormatString("%s.instance%d", meshName, i + nameOffset);
+				meshInstanceName = FormatString("%s.instance%d", meshName.c_str(), i + nameOffset);
 			else
-				meshInstanceName = FormatString("%s.instance%d", meshName, i);
+				meshInstanceName = FormatString("%s.instance%d", meshName.c_str(), i);
 
 			newInstance = CreateEmptyInstance(meshInstanceName);
 			nameOffset++;

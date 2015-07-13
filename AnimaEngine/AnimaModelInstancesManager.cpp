@@ -70,16 +70,16 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 		if (nameOffset > 0)
 		{
 			if (useSrcModelName)
-				modelInstanceName = FormatString("%s.%s%d", modelName, instanceName, nameOffset);
+				modelInstanceName = FormatString("%s.%s%d", modelName.c_str(), instanceName.c_str(), nameOffset);
 			else
-				modelInstanceName = FormatString("%s%d", instanceName, nameOffset);
+				modelInstanceName = FormatString("%s%d", instanceName.c_str(), nameOffset);
 		}
 		else
 		{
 			if (useSrcModelName)
-				modelInstanceName = FormatString("%s.%s", modelName, instanceName);
+				modelInstanceName = FormatString("%s.%s", modelName.c_str(), instanceName.c_str());
 			else
-				modelInstanceName = FormatString("%s", instanceName);
+				modelInstanceName = FormatString("%s", instanceName.c_str());
 		}
 
 		newInstance = CreateEmptyInstance(modelInstanceName);

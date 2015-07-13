@@ -357,20 +357,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName = FormatString("%s[%d]", pName, i);
+		AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 			}
 		}
 
@@ -398,20 +398,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName = FormatString("%s[%d]", pName, i);
+		AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 			}
 		}
 
@@ -439,20 +439,20 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 	AInt valuesCount = value->GetSize();
 	for (AInt i = 0; i < valuesCount; i++)
 	{
-		AnimaString generatorName = FormatString("%s[%d]", pName, i);
+		AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), i);
 
 		AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 		if (generator == nullptr)
 		{
 			int kk = 0;
-			generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+			generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 
 			while (generator == nullptr)
 			{
 				generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 				kk++;
-				generatorName = FormatString("%s[%d]_%d", pName, i, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), i, kk);
 			}
 		}
 
@@ -807,20 +807,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 				}
 			}
 
@@ -884,20 +884,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 				}
 			}
 
@@ -961,20 +961,20 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		// una dimensione inferiore quindi devo aggiungere i nuovi valori
 		for (; offset < valueSize; offset++)
 		{
-			AnimaString generatorName = FormatString("%s[%d]", pName, offset);
+			AnimaString generatorName = FormatString("%s[%d]", pName.c_str(), offset);
 
 			AnimaVectorGenerator* generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 			if (generator == nullptr)
 			{
 				int kk = 0;
-				generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+				generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 
 				while (generator == nullptr)
 				{
 					generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
 
 					kk++;
-					generatorName = FormatString("%s[%d]_%d", pName, offset, kk);
+					generatorName = FormatString("%s[%d]_%d", pName.c_str(), offset, kk);
 				}
 			}
 

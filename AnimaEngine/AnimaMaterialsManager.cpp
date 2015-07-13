@@ -91,7 +91,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 		int nameOffset = 0;
 		while (newMaterial == nullptr)
 		{
-			materialName = FormatString("%s.material%d", modelName, i + nameOffset);
+			materialName = FormatString("%s.material%d", modelName.c_str(), i + nameOffset);
 			newMaterial = CreateMaterial(materialName);
 			nameOffset++;
 		}
@@ -396,8 +396,9 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 
 	using boost::property_tree::ptree;
 	ptree pt;
-
-	boost::property_tree::read_xml(std::istringstream(materialXmlDefinition), pt);
+	
+	std::stringstream ss(materialXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
 
 	AnimaString name = pt.get<AnimaString>("AnimaMaterial.<xmlattr>.name");
 
@@ -405,8 +406,6 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 
 	if (material)
 	{
-		AnimaShadersManager* shadersManager = _scene->GetShadersManager();
-
 		for (auto& prop : pt.get_child("AnimaMaterial.Properties"))
 		{
 			if (prop.first == "Property")

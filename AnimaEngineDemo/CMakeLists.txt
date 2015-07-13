@@ -1,5 +1,5 @@
-
 if(APPLE)
+	add_subdirectory(Mac)
 else()
 	add_subdirectory(Windows)
 endif()
