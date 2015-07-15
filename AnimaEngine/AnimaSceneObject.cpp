@@ -13,7 +13,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaMappedValues(allocator, dataGeneratorsManager, name)
-	, _children(allocator)
 {
 	_parentObject = nullptr;
 	_transformation.SetParentObject(this);
@@ -104,7 +103,7 @@ AInt AnimaSceneObject::AddChild(AnimaSceneObject* child)
 	return _children.Add(child->GetName(), child);
 }
 
-AInt AnimaSceneObject::GetChildrenNumber()
+AInt AnimaSceneObject::GetChildrenCount()
 {
 	return _children.GetSize();
 }

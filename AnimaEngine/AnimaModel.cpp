@@ -12,9 +12,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
-	, _meshes(allocator)
-	, _meshesBonesInfo(allocator)
-	, _animations(allocator)
 {
 	_material = nullptr;
 	_activeAnimation = -1;
@@ -136,18 +133,20 @@ AnimaMesh* AnimaModel::GetMeshFromName(const char* name)
 
 AInt AnimaModel::GetAnimationsCount() const
 {
-	return _animations.GetSize();
+	return _animations.size();
 }
 
 void AnimaModel::SetAnimations(AnimaArray<AnimaAnimation*>* animations)
 {
-	_animations.RemoveAll();
+	_animations.clear();
 	_animations = *animations;
 }
 
 AInt AnimaModel::AddAnimation(AnimaAnimation* animation)
 {
-	return _animations.Add(animation);
+	AInt index = _animations.size();
+	_animations.push_back(animation);
+	return index;
 }
 
 AnimaAnimation* AnimaModel::GetAnimation(AInt index)
@@ -235,7 +234,7 @@ void AnimaModel::UpdateAnimation(AFloat animationTime)
 
 void AnimaModel::SetActiveAnimation(AInt animationIndex)
 {
-	ANIMA_ASSERT(animationIndex < _animations.GetSize());
+	ANIMA_ASSERT(animationIndex < _animations.size());
 	_activeAnimation = animationIndex;
 }
 

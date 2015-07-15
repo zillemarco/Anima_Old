@@ -186,7 +186,7 @@ void ChangeColor(Anima::AnimaModelInstance* instance)
 		}
 	}
 
-	for (int i = 0; i < instance->GetChildrenNumber(); i++)
+	for (int i = 0; i < instance->GetChildrenCount(); i++)
 		ChangeColor((Anima::AnimaModelInstance*)instance->GetChild(i));
 }
 
@@ -320,7 +320,7 @@ bool InitEngine()
 
 	// Caricamento di un modello
 	//_model = _scene->GetModelsManager()->LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", ANIMA_ENGINE_DEMO_MODEL_NAME);
-	_model = _scene->GetModelsManager()->LoadModel(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
 

@@ -11,11 +11,15 @@
 #include "AnimaTexturesManager.h"
 #include "AnimaTimer.h"
 
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModelsManager::AnimaModelsManager(AnimaScene* scene, AnimaMeshesManager* meshesManager, AnimaMaterialsManager* materialsManager, AnimaAnimationsManager* animationsManager)
-: _models(scene->GetModelsAllocator())
-, _topLevelModels(scene->GetModelsAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(meshesManager != nullptr);
@@ -33,7 +37,7 @@ AnimaModelsManager::~AnimaModelsManager()
 	ClearModels();
 }
 
-AnimaModel* AnimaModelsManager::LoadModel(const AnimaString& modelPath, const AnimaString& name)
+AnimaModel* AnimaModelsManager::LoadModelFromExternalFile(const AnimaString& modelPath, const AnimaString& name)
 {
 	AInt index = _topLevelModels.Contains(name);
 	if (index >= 0)
@@ -84,7 +88,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	animationNodeName = sceneNode->mName.C_Str();
 
 	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
-	_models.Add(currentModel);
+	_models.push_back(currentModel);
 
 	currentModel->SetAnimationNodeName(animationNodeName);
 
@@ -99,7 +103,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	for (AUint n = 0; n < sceneNode->mNumMeshes; n++)
 	{
 		AInt meshIndex = (AInt)sceneNode->mMeshes[n];
-		AnimaString meshName = meshesMap->GetAt(meshIndex);
+		AnimaString meshName = meshesMap->at(meshIndex);
 		AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
 		
 		ANIMA_ASSERT(mesh->GetParentObject() == nullptr);
@@ -128,7 +132,7 @@ AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
 	return newModel;
 }
 
-AInt AnimaModelsManager::GetModelsNumber()
+AInt AnimaModelsManager::GetModelsCount()
 {
 	return _topLevelModels.GetSize();
 }
@@ -145,7 +149,7 @@ AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name)
 
 void AnimaModelsManager::ClearModels()
 {
-	AInt count = _models.GetSize();
+	AInt count = _models.size();
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaModel* model = _models[i];
@@ -153,8 +157,24 @@ void AnimaModelsManager::ClearModels()
 		model = nullptr;
 	}
 
-	_models.RemoveAll();
+	_models.clear();
 	_topLevelModels.RemoveAll();
+}
+
+AnimaModel* AnimaModelsManager::LoadModelFromFile(const AnimaString& filePath)
+{
+	std::ifstream fileStream(filePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+
+	return LoadModelFromXml(xml);
+}
+
+AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefinition)
+{
+	AnimaModel* model = nullptr;
+
+	return model;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

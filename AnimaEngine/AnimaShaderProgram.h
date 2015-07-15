@@ -139,7 +139,7 @@ private:
 	
 private:
 	AnimaShader**	_shaders;
-	ASizeT			_shadersNumber;
+	ASizeT			_shadersCount;
 
 	AnimaShadersManager* _shadersManager;
 

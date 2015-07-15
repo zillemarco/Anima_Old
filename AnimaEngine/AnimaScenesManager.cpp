@@ -11,7 +11,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaScenesManager::AnimaScenesManager(AnimaEngine* engine)
-	: _scenes(engine->GetScenesAllocator())
 {
 	_engine = engine;
 }

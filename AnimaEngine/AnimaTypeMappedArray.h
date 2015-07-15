@@ -58,7 +58,7 @@ public:
 			mappedArray = pair->second;
 		else
 		{
-			mappedArray = AnimaAllocatorNamespace::AllocateNew<AnimaMappedArray<BASE_TYPE> >(*_allocator, _allocator);
+			mappedArray = AnimaAllocatorNamespace::AllocateNew<AnimaMappedArray<BASE_TYPE> >(*_allocator);
 			_mappedArrays[type] = mappedArray;
 		}
 

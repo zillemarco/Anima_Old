@@ -10,7 +10,8 @@ if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 	include_directories(${ANIMA_ENGINE_NVTOOLSEXT_INCLUDE})
 endif()
 
-add_definitions("/wd4521")
+set(CMAKE_CXX_FLAGS "/wd4251 /wd4996 /EHsc")
+
 add_executable(${PROJECT_NAME} WIN32 ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
 
 target_link_libraries(${PROJECT_NAME} AnimaEngine)

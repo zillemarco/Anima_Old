@@ -35,7 +35,7 @@ public:
 	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, AnimaModel* srcModel);
 	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcModelName);
 
-	AInt GetModelInstancesNumber();
+	AInt GetModelInstancesCount();
 
 	AnimaModelInstance* GetModelInstance(AInt index);
 	AnimaModelInstance* GetModelInstanceFromName(const AnimaString& name);

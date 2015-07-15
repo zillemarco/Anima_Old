@@ -13,7 +13,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
-	, _shadersNames(allocator)
 {
 	SetInteger("FrontFace", GL_CCW);
 	SetInteger("CullFace", GL_BACK);
@@ -48,7 +47,7 @@ AnimaMaterial& AnimaMaterial::operator=(const AnimaMaterial& src)
 	if (this != &src)
 	{
 		AnimaMappedValues::operator=(src);
-		_shadersNames.Copy(src._shadersNames);
+		_shadersNames = src._shadersNames;
 	}
 	return *this;
 }
@@ -58,24 +57,24 @@ AnimaMaterial& AnimaMaterial::operator=(AnimaMaterial&& src)
 	if (this != &src)
 	{
 		AnimaMappedValues::operator=(src);
-		_shadersNames.Copy(src._shadersNames);
+		_shadersNames = src._shadersNames;
 	}
 	return *this;
 }
 
 void AnimaMaterial::AddShader(AnimaShader* shader)
 {
-	_shadersNames.Add(shader->GetName());
+	_shadersNames.push_back(shader->GetName());
 }
 
 void AnimaMaterial::AddShader(const AnimaString& shaderName)
 {
-	_shadersNames.Add(shaderName);
+	_shadersNames.push_back(shaderName);
 }
 
 AInt AnimaMaterial::GetShadersCount() const
 {
-	return _shadersNames.GetSize();
+	return _shadersNames.size();
 }
 
 AnimaString AnimaMaterial::GetShaderName(AInt index) const

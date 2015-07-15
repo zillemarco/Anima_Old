@@ -13,8 +13,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaShadersManager::AnimaShadersManager(AnimaEngine* engine)
-	: _shaders(engine->GetShadersAllocator())
-	, _programs(engine->GetShadersAllocator())
 {
 	_engine = engine;
 	_activeProgram = nullptr;
@@ -79,39 +77,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& name, co
 	return sh;
 }
 
-AnimaShader* AnimaShadersManager::LoadShader(const AnimaString& name, AnimaShaderProgram::AnimaShaderInfo info)
-{
-	AnimaShader* sh = nullptr;
-
-	if (info._infoType == SHADER_TEXT)
-	{
-		sh = LoadShader(name, info._text, info._shaderType);
-	}
-	else
-	{
-		AnimaString str;
-		std::ifstream is(info._text, std::ifstream::binary);
-		if (is) 
-		{
-			is.seekg(0, is.end);
-			int length = (int)is.tellg();
-			is.seekg(0, is.beg);
-
-			str.reserve(length);
-			str.assign((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-
-			is.close();
-		}
-		else
-			return nullptr;
-
-		sh = LoadShader(name, str, info._shaderType);
-	}
-
-	return sh;
-}
-
-void AnimaShadersManager::ClearShaders(bool bDeleteObjects, bool bResetNumber)
+void AnimaShadersManager::ClearShaders()
 {
 	AInt count = _shaders.GetSize();
 	for (AInt i = 0; i < count; i++)
@@ -124,7 +90,7 @@ void AnimaShadersManager::ClearShaders(bool bDeleteObjects, bool bResetNumber)
 	_shaders.RemoveAll();
 }
 
-void AnimaShadersManager::ClearPrograms(bool bDeleteObjects, bool bResetNumber)
+void AnimaShadersManager::ClearPrograms()
 {
 	AInt count = _programs.GetSize();
 	for (AInt i = 0; i < count; i++)
@@ -260,7 +226,7 @@ bool AnimaShadersManager::LoadShadersParts(const AnimaString& partsPath)
 		fs::directory_iterator endIterator;
 		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
 		{
-			if (LoadShaderFromPartFile(directoryIterator->path().string().c_str()) == nullptr)
+			if (LoadShaderFromFile(directoryIterator->path().string().c_str()) == nullptr)
 				return false;
 		}
 	}
@@ -268,20 +234,28 @@ bool AnimaShadersManager::LoadShadersParts(const AnimaString& partsPath)
 	return true;
 }
 
-AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const AnimaString& partFilePath)
+AnimaShader* AnimaShadersManager::LoadShaderFromFile(const AnimaString& partFilePath)
 {
-	AnimaShader* shader = nullptr;
-
 	std::ifstream fileStream(partFilePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
 
+	return LoadShaderFromXml(xml);
+}
+
+AnimaShader* AnimaShadersManager::LoadShaderFromXml(const AnimaString& shaderXmlDefinition)
+{
 	using boost::property_tree::ptree;
+
+	AnimaShader* shader = nullptr;
 	ptree pt;
 
-	boost::property_tree::read_xml(fileStream, pt);
+	std::stringstream ss(shaderXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
 
-	AnimaString name = pt.get<AnimaString>("AnimaShaderPart.<xmlattr>.name");
-	AnimaString type = pt.get<AnimaString>("AnimaShaderPart.<xmlattr>.type");
-	AnimaString code = pt.get<AnimaString>("AnimaShaderPart.Part.ShaderCode");
+	AnimaString name = pt.get<AnimaString>("AnimaShader.<xmlattr>.name");
+	AnimaString type = pt.get<AnimaString>("AnimaShader.<xmlattr>.type");
+	AnimaString code = pt.get<AnimaString>("AnimaShader.Part.ShaderCode");
 
 	shader = CreateShader(name.c_str());
 
@@ -304,6 +278,47 @@ AnimaShader* AnimaShadersManager::LoadShaderFromPartFile(const AnimaString& part
 	}
 
 	return shader;
+}
+
+
+AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromFile(const AnimaString& filePath)
+{
+	std::ifstream fileStream(filePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+
+	return LoadShaderProgramFromXml(xml);
+}
+
+AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromXml(const AnimaString& shaderProgramXmlDefinition)
+{
+	using boost::property_tree::ptree;
+
+	AnimaShaderProgram* shaderProgram = nullptr;
+	ptree pt;
+
+	std::stringstream ss(shaderProgramXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
+
+	AnimaString name = pt.get<AnimaString>("AnimaShaderProgram.<xmlattr>.name");
+
+	shaderProgram = CreateProgram(name.c_str());
+
+	if (shaderProgram)
+	{
+		for (auto& prop : pt.get_child("AnimaShaderProgram.Shaders"))
+		{
+			if (prop.first == "Shader")
+			{
+				AnimaString shaderName = prop.second.get<AnimaString>("<xmlattr>.name");
+				AnimaShader* shader = GetShaderFromName(shaderName);
+				if (shader)
+					shaderProgram->AddShader(shader);
+			}
+		}
+	}
+
+	return shaderProgram;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

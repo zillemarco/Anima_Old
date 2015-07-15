@@ -18,8 +18,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesManager* texturesManager)
-	: _materials(scene->GetMaterialsAllocator())
-	, _lastMaterialsIndexMap(scene->GetGenericAllocator())
 {
 	ANIMA_ASSERT(texturesManager != nullptr);
 	_scene = scene;
@@ -347,7 +345,7 @@ bool AnimaMaterialsManager::LoadMaterialsFromModel(const aiScene* scene, const A
 			}
 		}
 
-		_lastMaterialsIndexMap.Add(materialName);
+		_lastMaterialsIndexMap.push_back(materialName);
 	}
 
 	return true;
@@ -360,7 +358,7 @@ AnimaArray<AnimaString>* AnimaMaterialsManager::GetLastMaterialsIndexMap()
 
 void AnimaMaterialsManager::ClearLastMaterialsIndexMap()
 {
-	_lastMaterialsIndexMap.RemoveAll();
+	_lastMaterialsIndexMap.clear();
 }
 
 bool AnimaMaterialsManager::LoadMaterials(const AnimaString& materialsPath)

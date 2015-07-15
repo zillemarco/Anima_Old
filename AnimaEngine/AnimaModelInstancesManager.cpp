@@ -14,8 +14,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModelInstancesManager::AnimaModelInstancesManager(AnimaScene* scene, AnimaModelsManager* modelsManager, AnimaMeshInstancesManager* meshInstancesManager)
-: _modelIntances(scene->GetModelInstancesAllocator())
-, _topLevelModelInstances(scene->GetModelInstancesAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(modelsManager != nullptr);
@@ -90,8 +88,8 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 	newInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
 
 	AnimaTimer timer;
-	AInt childrenNumber = srcModel->GetChildrenNumber();
-	for (AInt i = 0; i < childrenNumber; i++)
+	AInt childrenCount = srcModel->GetChildrenCount();
+	for (AInt i = 0; i < childrenCount; i++)
 	{
 		AnimaModelInstance* newChild = CreateInstanceFromModel(instanceName, (AnimaModel*)srcModel->GetChild(i), true);
 		newInstance->AddChild(newChild);
@@ -115,7 +113,7 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateEmptyInstance(const AnimaS
 	return modelInstance;
 }
 
-AInt AnimaModelInstancesManager::GetModelInstancesNumber()
+AInt AnimaModelInstancesManager::GetModelInstancesCount()
 {
 	return _topLevelModelInstances.GetSize();
 }

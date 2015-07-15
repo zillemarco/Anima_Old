@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<AnimaShaderPart name="mat-default-fs" type="FS">
+<AnimaShader name="mat-default-fs" type="FS">
 	<Part api="OGL" minVersion="3.3">
 		<ShaderCode>
 			<![CDATA[
@@ -84,4 +84,4 @@
 			]]>
 		</ShaderCode>
 	</Part>
-</AnimaShaderPart>
+</AnimaShader>

@@ -21,17 +21,14 @@ template<class TYPE>
 class ANIMA_ENGINE_EXPORT AnimaObjMappedArray
 {
 public:
-	AnimaObjMappedArray(AnimaAllocator* allocator)
-		: _array(allocator)
+	AnimaObjMappedArray()
 	{
-		_allocator = allocator;
 	}
 
 	template<typename... Args>
 	AnimaObjMappedArray(const AnimaObjMappedArray& src, Args... args)
 		: _array(src._array, args...)
 	{
-		_allocator = src._allocator;
 	}
 
 	virtual ~AnimaObjMappedArray()
@@ -67,20 +64,20 @@ public:
 	template<typename... Args>
 	void Copy(const AnimaObjMappedArray& src, Args... args)
 	{
-		_array.Copy(src._array, args...);
+		_array = src._array;
 		_namesMap = src._namesMap;
 	}
 
 public:
 	inline AInt GetSize() const
 	{
-		return _array.GetSize();
+		return _array.size();
 	}
 
 	template<typename... Args>
 	void RemoveAll(Args... args)
 	{
-		_array.RemoveAll(1, args...);
+		_array.clear();
 	}
 
 	inline TYPE& Get(AInt index)
@@ -96,7 +93,7 @@ public:
 	inline TYPE& Get(const AnimaString& name)
 	{
 		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return TYPE();
@@ -105,7 +102,7 @@ public:
 	inline TYPE GetConst(const AnimaString& name) const
 	{
 		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return TYPE();
@@ -133,7 +130,8 @@ public:
 			return -1;
 		}
 
-		AInt newIndex = _array.Add(newElement, args...);
+		AInt newIndex = _array.size();
+		_array.push_back(newElement/*, args...*/);
 
 		ANIMA_ASSERT(newIndex >= 0);
 		_namesMap[name] = newIndex;
@@ -144,7 +142,7 @@ public:
 	template<typename... Args>
 	bool Remove(AInt index, Args...args)
 	{
-		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
+		ANIMA_ASSERT(index >= 0 && index < _array.size());
 		AnimaString elementToRemoveName = GetObjectName(_array[index]);
 		return Remove(elementToRemoveName, args...);
 	}
@@ -156,7 +154,7 @@ public:
 		if (name == _namesMap.end())
 			return false;
 
-		_array.RemoveAt(pair->second, args...);
+		_array.erase(_array.begin() + pair->second);
 		_namesMap.erase(pair);
 
 		RebuildMap();
@@ -164,7 +162,7 @@ public:
 		
 	inline void Set(AInt index, TYPE newElement)
 	{
-		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
+		ANIMA_ASSERT(index >= 0 && index < _array.size());
 		AnimaString newElementName = GetObjectName(newElement);
 		AnimaString oldElementName = GetObjectName(_array[index]);
 
@@ -195,7 +193,7 @@ public:
 	{
 		_namesMap.clear();
 
-		AInt arraySize = _array.GetSize();
+		AInt arraySize = _array.size();
 		for (AInt i = 0; i < arraySize; i++)
 			_namesMap[GetObjectName(_array[i])] = i;
 	}
@@ -207,7 +205,6 @@ protected:
 	}
 
 protected:
-	AnimaAllocator*		_allocator;
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)
@@ -220,16 +217,13 @@ template<class TYPE>
 class ANIMA_ENGINE_EXPORT AnimaObjPtrMappedArray
 {
 public:
-	AnimaObjPtrMappedArray(AnimaAllocator* allocator)
-		: _array(allocator)
+	AnimaObjPtrMappedArray()
 	{
-		_allocator = allocator;
 	}
 
 	AnimaObjPtrMappedArray(const AnimaObjPtrMappedArray& src)
 		: _array(src._array)
 	{
-		_allocator = src._allocator;
 	}
 
 	virtual ~AnimaObjPtrMappedArray()
@@ -270,25 +264,25 @@ public:
 
 	void Copy(const AnimaObjPtrMappedArray& src)
 	{
-		_array.Copy(src._array);
+		_array = src._array;
 		_namesMap = src._namesMap;
 	}
 
 public:
 	inline AInt GetSize() const
 	{
-		return _array.GetSize();
+		return _array.size();
 	}
 
 	void RemoveAll()
 	{
-		_array.RemoveAll(1);
+		_array.clear();
 		_namesMap.clear();
 	}
 
 	inline TYPE Get(AInt index)
 	{
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return nullptr;
@@ -296,7 +290,7 @@ public:
 
 	inline TYPE GetConst(AInt index) const
 	{
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return nullptr;
@@ -305,7 +299,7 @@ public:
 	inline TYPE GetWithName(const AnimaString& name)
 	{
 		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return nullptr;
@@ -314,7 +308,7 @@ public:
 	inline TYPE GetConstWithName(const AnimaString& name) const
 	{
 		AInt index = Contains(name);
-		if (index >= 0 && index < _array.GetSize())
+		if (index >= 0 && index < _array.size())
 			return _array[index];
 		else
 			return nullptr;
@@ -340,7 +334,8 @@ public:
 			return -1;
 		}
 
-		AInt newIndex = _array.Add(newElement);
+		AInt newIndex = _array.size();
+		_array.push_back(newElement);
 
 		ANIMA_ASSERT(newIndex >= 0);
 		_namesMap[name] = newIndex;
@@ -350,7 +345,7 @@ public:
 
 	bool Remove(AInt index)
 	{
-		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
+		ANIMA_ASSERT(index >= 0 && index < _array.size());
 		AnimaString elementToRemoveName = GetObjectName(_array[index]);
 		return Remove(elementToRemoveName);
 	}
@@ -361,7 +356,7 @@ public:
 		if (pair == _namesMap.end())
 			return false;
 
-		_array.RemoveAt(pair->second);
+		_array.erase(_array.begin() + pair->second);
 		_namesMap.erase(pair);
 
 		RebuildMap();
@@ -370,7 +365,7 @@ public:
 
 	inline void Set(AInt index, TYPE newElement)
 	{
-		ANIMA_ASSERT(index >= 0 && index < _array.GetSize());
+		ANIMA_ASSERT(index >= 0 && index < _array.size());
 		AnimaString newElementName = GetObjectName(newElement);
 		AnimaString oldElementName = GetObjectName(_array[index]);
 
@@ -401,7 +396,7 @@ public:
 	{
 		_namesMap.clear();
 
-		AInt arraySize = _array.GetSize();
+		AInt arraySize = _array.size();
 		for (AInt i = 0; i < arraySize; i++)
 			_namesMap[GetObjectName(_array[i])] = i;
 	}
@@ -413,7 +408,6 @@ protected:
 	}
 
 protected:
-	AnimaAllocator*		_allocator;
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)

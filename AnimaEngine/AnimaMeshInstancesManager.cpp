@@ -14,8 +14,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMeshInstancesManager::AnimaMeshInstancesManager(AnimaScene* scene, AnimaMeshesManager* meshesManager)
-: _meshIntances(scene->GetMeshInstancesAllocator())
-, _lastInstancesFromModel(scene->GetMeshInstancesAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(meshesManager != nullptr);
@@ -85,8 +83,8 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 	if (srcModel == nullptr)
 		return nullptr;
 	
-	AInt modelMeshesNumber = srcModel->GetMeshesCount();
-	for (AInt i = 0; i < modelMeshesNumber; i++)
+	AInt modelMeshesCount = srcModel->GetMeshesCount();
+	for (AInt i = 0; i < modelMeshesCount; i++)
 	{
 		AnimaMesh* mesh = srcModel->GetMesh(i);
 
@@ -120,13 +118,13 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 
 		mesh->AddInstance(newInstance);
 
-		_lastInstancesFromModel.Add(newInstance);
+		_lastInstancesFromModel.push_back(newInstance);
 	}
 
 	return &_lastInstancesFromModel;
 }
 
-AInt AnimaMeshInstancesManager::GetMeshInstancesNumber()
+AInt AnimaMeshInstancesManager::GetMeshInstancesCount()
 {
 	return _meshIntances.GetSize();
 }
@@ -156,7 +154,7 @@ void AnimaMeshInstancesManager::ClearInstances()
 
 void AnimaMeshInstancesManager::ClearLastInstancesFromModel()
 {
-	_lastInstancesFromModel.RemoveAll();
+	_lastInstancesFromModel.clear();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

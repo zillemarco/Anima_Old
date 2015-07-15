@@ -53,7 +53,7 @@ public:
 	virtual AnimaSceneObject* GetAncestorObject();
 
 	virtual AInt AddChild(AnimaSceneObject* child);
-	virtual AInt GetChildrenNumber();
+	virtual AInt GetChildrenCount();
 	virtual AnimaSceneObject* GetChild(const AnimaString& name);
 	virtual AnimaSceneObject* GetChild(const char* name);
 	virtual AnimaSceneObject* GetChild(AInt index);

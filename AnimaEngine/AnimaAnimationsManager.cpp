@@ -12,8 +12,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaAnimationsManager::AnimaAnimationsManager(AnimaScene* scene)
-	: _animations(scene->GetAnimationsAllocator())
-	, _lastLoadedAnimations(scene->GetAnimationsAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	_scene = scene;
@@ -105,7 +103,7 @@ AnimaAnimation* AnimaAnimationsManager::CreateEmptyAnimation(const AnimaString& 
 	return newAnimation;
 }
 
-AInt AnimaAnimationsManager::GetAnimationsNumber()
+AInt AnimaAnimationsManager::GetAnimationsCount()
 {
 	return _animations.GetSize();
 }

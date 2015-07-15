@@ -17,7 +17,7 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* 
 	: AnimaNamedObject(name, allocator)
 {
 	_shaders = nullptr;
-	_shadersNumber = 0;
+	_shadersCount = 0;
 	_id = 0;
 	_linked = false;
 
@@ -34,7 +34,7 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_linked = src._linked;
 
 	_shaders = nullptr;
-	_shadersNumber = 0;
+	_shadersCount = 0;
 
 	ClearUniforms();
 	_uniforms = src._uniforms;
@@ -44,13 +44,13 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_maxPointLights = src._maxPointLights;
 	_maxSpotLights = src._maxSpotLights;
 
-	SetShaders(src._shaders, src._shadersNumber);
+	SetShaders(src._shaders, src._shadersCount);
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	: AnimaNamedObject(src)
 	, _shaders(src._shaders)
-	, _shadersNumber(src._shadersNumber)
+	, _shadersCount(src._shadersCount)
 	, _id(src._id)
 	, _linked(src._linked)
 {
@@ -62,7 +62,7 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	_maxSpotLights = src._maxSpotLights;
 
 	src._shaders = nullptr;
-	src._shadersNumber = 0;
+	src._shadersCount = 0;
 	src._id = 0;
 }
 
@@ -72,11 +72,11 @@ AnimaShaderProgram::~AnimaShaderProgram()
 
 	ClearUniforms();
 
-	if (_shadersNumber > 0 && _shaders != nullptr)
+	if (_shadersCount > 0 && _shaders != nullptr)
 	{
 		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*_allocator, _shaders);
 		_shaders = nullptr;
-		_shadersNumber = 0;
+		_shadersCount = 0;
 	}
 
 	Delete();
@@ -88,7 +88,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		SetShaders(src._shaders, src._shadersNumber);
+		SetShaders(src._shaders, src._shadersCount);
 
 		ClearUniforms();
 		_uniforms = src._uniforms;
@@ -110,7 +110,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		SetShaders(src._shaders, src._shadersNumber);
+		SetShaders(src._shaders, src._shadersCount);
 
 		ClearUniforms();
 		_uniforms = src._uniforms;
@@ -124,7 +124,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 
 		src._id = 0;
 		src._shaders = nullptr;
-		src._shadersNumber = 0;
+		src._shadersCount = 0;
 		src._linked = false;
 	}
 
@@ -136,12 +136,12 @@ bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
 	if (_allocator != left._allocator) return false;
-	if (_shadersNumber != left._shadersNumber) return false; 
+	if (_shadersCount != left._shadersCount) return false; 
 	if (_linked != left._linked) return false;
 	if(_maxPointLights != left._maxPointLights) return false;
 	if(_maxSpotLights != left._maxSpotLights) return false;
 
-	for (int i = 0; i < _shadersNumber; i++)
+	for (int i = 0; i < _shadersCount; i++)
 	{
 		if (_shaders[i] != left._shaders[i])
 			return false;
@@ -155,12 +155,12 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
 	if (_allocator != left._allocator) return true;
-	if (_shadersNumber != left._shadersNumber) return true;
+	if (_shadersCount != left._shadersCount) return true;
 	if (_linked != left._linked) return true;
 	if (_maxPointLights != left._maxPointLights) return true;
 	if (_maxSpotLights != left._maxSpotLights) return true;
 
-	for (int i = 0; i < _shadersNumber; i++)
+	for (int i = 0; i < _shadersCount; i++)
 	{
 		if (_shaders[i] != left._shaders[i])
 			return true;
@@ -172,31 +172,31 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 void AnimaShaderProgram::AddShader(AnimaShader* shader)
 {
 	ANIMA_ASSERT(_allocator != nullptr);
-	if (_shadersNumber > 0)
+	if (_shadersCount > 0)
 	{
-		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
+		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
 
-		for (int i = 0; i < _shadersNumber; i++)
+		for (int i = 0; i < _shadersCount; i++)
 			tmpOldShaders[i] = _shaders[i];
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
 
-		_shadersNumber++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
+		_shadersCount++;
+		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
 
-		for (int i = 0; i < _shadersNumber - 1; i++)
+		for (int i = 0; i < _shadersCount - 1; i++)
 			_shaders[i] = tmpOldShaders[i];
 
-		_shaders[_shadersNumber - 1] = shader;
+		_shaders[_shadersCount - 1] = shader;
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldShaders);
 	}
 	else
 	{
-		_shadersNumber++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersNumber);
+		_shadersCount++;
+		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
 
-		_shaders[_shadersNumber - 1] = shader;
+		_shaders[_shadersCount - 1] = shader;
 	}
 }
 
@@ -207,21 +207,21 @@ void AnimaShaderProgram::SetShaders(AnimaShader** shaders, ASizeT count)
 
 	if (shaders != nullptr && count > 0)
 	{
-		_shadersNumber = count;
+		_shadersCount = count;
 		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, count);
 
-		for (int i = 0; i < _shadersNumber; i++)
+		for (int i = 0; i < _shadersCount; i++)
 			_shaders[i] = shaders[i];
 	}
 }
 
 void AnimaShaderProgram::ClearShaders()
 {
-	if (_shaders != nullptr && _shadersNumber > 0)
+	if (_shaders != nullptr && _shadersCount > 0)
 	{
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
 		_shaders = nullptr;
-		_shadersNumber = 0;
+		_shadersCount = 0;
 	}
 }
 
@@ -248,7 +248,7 @@ void AnimaShaderProgram::ClearUniforms()
 
 bool AnimaShaderProgram::CompileShaders()
 {
-	for (int i = 0; i < _shadersNumber; i++)
+	for (int i = 0; i < _shadersCount; i++)
 	{
 		if (!_shaders[i]->Compile())
 			return false;
@@ -286,7 +286,7 @@ bool AnimaShaderProgram::Link()
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
-	for (int i = 0; i < _shadersNumber; i++)
+	for (int i = 0; i < _shadersCount; i++)
 		glAttachShader(_id, _shaders[i]->GetID());
 	
 	glLinkProgram(_id);
@@ -422,17 +422,17 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 	{
-		AInt countValue = value->GetSize();
+		AInt countValue = value->size();
 		AInt countUniformArray = pair->second._arraySize;
 		AInt countUniformLocations = pair->second._arraySize;
 		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
 		{
 			if (type == GL_FLOAT_VEC2)
-				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector2f());
+				SetUniform(pair->second._locations[i], value->at(i)->GetVector2f());
 			else if (type == GL_FLOAT_VEC3)
-				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector3f());
+				SetUniform(pair->second._locations[i], value->at(i)->GetVector3f());
 			else if (type == GL_FLOAT_VEC4)
-				SetUniform(pair->second._locations[i], value->GetAt(i)->GetVector4f());
+				SetUniform(pair->second._locations[i], value->at(i)->GetVector4f());
 		}
 	}
 }
@@ -445,12 +445,12 @@ void AnimaShaderProgram::SetUniform(const AnimaString& uniformName, const AnimaA
 	auto pair = _uniforms.find(uniformName);
 	if (pair != _uniforms.end())
 	{
-		AInt countValue = value->GetSize();
+		AInt countValue = value->size();
 		AInt countUniformArray = pair->second._arraySize;
 		AInt countUniformLocations = pair->second._arraySize;
 
 		for (AInt i = 0; i < countValue && i < countUniformArray && i < countUniformLocations; i++)
-			SetUniform(pair->second._locations[i], value->GetAt(i));
+			SetUniform(pair->second._locations[i], value->at(i));
 	}
 }
 
@@ -860,7 +860,7 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 		}
 		else if (info._name == "_boneWeights")
 		{
-			if (mesh->GetBoneWeightsNumber() > 0)
+			if (mesh->GetBoneWeightsCount() > 0)
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneWeightsBufferObject());
 				glEnableVertexAttribArray(info._location);
@@ -869,7 +869,7 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 		}
 		else if (info._name == "_boneIDs")
 		{
-			if (mesh->GetBoneIDsNumber() > 0)
+			if (mesh->GetBoneIDsCount() > 0)
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneIDsBufferObject());
 				glEnableVertexAttribArray(info._location);

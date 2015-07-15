@@ -13,7 +13,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaAnimation::AnimaAnimation(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
-	, _animationNodes(allocator)
 {
 	_duration = 0.0f;
 	_ticksPerSecond = 0.0f;
@@ -83,10 +82,10 @@ void AnimaAnimation::UpdateAnimation(AnimaModel* model, AFloat time)
 	AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = model->GetMeshesBonesInfo();
 	UpdateModelNodesAnimation(model, animationTime, AnimaMatrix(), globalInverseMatrix, meshesBonesInfo);
 
-	AnimaArray<AnimaMatrix> matrices(_allocator);
+	AnimaArray<AnimaMatrix> matrices;
 	AInt count = meshesBonesInfo->GetSize();
 	for (AInt i = 0; i < count; i++)
-		matrices.Add(meshesBonesInfo->Get(i)->GetFinalTransformation());
+		matrices.push_back(meshesBonesInfo->Get(i)->GetFinalTransformation());
 
 	model->SetMatrixArray("BonesTransformations", &matrices);
 }
@@ -116,7 +115,7 @@ void AnimaAnimation::UpdateModelNodesAnimation(AnimaModel* model, AFloat animati
 	if (info != nullptr)
 		info->SetFinalTransformation(globalInverseMatrix * globalTransformation * info->GetBoneOffset());
 
-	AInt childrenCount = model->GetChildrenNumber();
+	AInt childrenCount = model->GetChildrenCount();
 	for (AInt nc = 0; nc < childrenCount; nc++)
 		UpdateModelNodesAnimation((AnimaModel*)model->GetChild(nc), animationTime, globalTransformation, globalInverseMatrix, mesheBonesInfo);
 }
@@ -183,29 +182,26 @@ AFloat AnimaAnimation::GetTicksPerSecond() const
 
 AnimaAnimationNode::AnimaAnimationNode(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
-	, _positionKeys(allocator)
-	, _rotationKeys(allocator)
-	, _scalingKeys(allocator)
 {
 	SetName(name);
 }
 
 AnimaAnimationNode::~AnimaAnimationNode()
 {
-	_positionKeys.RemoveAll();
-	_rotationKeys.RemoveAll();
-	_scalingKeys.RemoveAll();
+	_positionKeys.clear();
+	_rotationKeys.clear();
+	_scalingKeys.clear();
 }
 
 AnimaVertex3f AnimaAnimationNode::ComputeInterpolatedScaling(AFloat animationTime) const
 {
-	if (_scalingKeys.GetSize() <= 1)
+	if (_scalingKeys.size() <= 1)
 		return _scalingKeys[0].GetValue();
 
 	AInt scalingIndex = FindScaling(animationTime);
 	AInt nextScalingIndex = scalingIndex + 1;
 
-	ANIMA_ASSERT(nextScalingIndex < _scalingKeys.GetSize());
+	ANIMA_ASSERT(nextScalingIndex < _scalingKeys.size());
 
 	AnimaAnimationScalingKey scalingKey = _scalingKeys[scalingIndex];
 	AnimaAnimationScalingKey nextScalingKey = _scalingKeys[nextScalingIndex];
@@ -224,13 +220,13 @@ AnimaVertex3f AnimaAnimationNode::ComputeInterpolatedScaling(AFloat animationTim
 
 AnimaQuaternion AnimaAnimationNode::ComputeInterpolatedRotation(AFloat animationTime) const
 {
-	if (_rotationKeys.GetSize() <= 1)
+	if (_rotationKeys.size() <= 1)
 		return _rotationKeys[0].GetValue();
 
 	AInt rotationIndex = FindRotation(animationTime);
 	AInt nextRotationIndex = rotationIndex + 1;
 
-	ANIMA_ASSERT(nextRotationIndex < _rotationKeys.GetSize());
+	ANIMA_ASSERT(nextRotationIndex < _rotationKeys.size());
 
 	AnimaAnimationRotationKey rotationKey = _rotationKeys[rotationIndex];
 	AnimaAnimationRotationKey nextRotationKey = _rotationKeys[nextRotationIndex];
@@ -248,13 +244,13 @@ AnimaQuaternion AnimaAnimationNode::ComputeInterpolatedRotation(AFloat animation
 
 AnimaVertex3f AnimaAnimationNode::ComputeInterpolatedPosition(AFloat animationTime) const
 {
-	if (_positionKeys.GetSize() <= 1)
+	if (_positionKeys.size() <= 1)
 		return _positionKeys[0].GetValue();
 
 	AInt positionIndex = FindPosition(animationTime);
 	AInt nextPositionIndex = positionIndex + 1;
 
-	ANIMA_ASSERT(nextPositionIndex < _positionKeys.GetSize());
+	ANIMA_ASSERT(nextPositionIndex < _positionKeys.size());
 
 	AnimaAnimationPositionKey positionKey = _positionKeys[positionIndex];
 	AnimaAnimationPositionKey nextPositionKey = _positionKeys[nextPositionIndex];
@@ -273,7 +269,7 @@ AnimaVertex3f AnimaAnimationNode::ComputeInterpolatedPosition(AFloat animationTi
 
 AInt AnimaAnimationNode::FindScaling(AFloat animationTime) const
 {
-	AInt scalingKeysCount = _scalingKeys.GetSize();
+	AInt scalingKeysCount = _scalingKeys.size();
 	for (AInt nsk = 0; nsk < scalingKeysCount - 1; nsk++)
 	{
 		if (animationTime < _scalingKeys[nsk + 1].GetTime())
@@ -286,7 +282,7 @@ AInt AnimaAnimationNode::FindScaling(AFloat animationTime) const
 
 AInt AnimaAnimationNode::FindRotation(AFloat animationTime) const
 {
-	AInt rotationKeysCount = _rotationKeys.GetSize();
+	AInt rotationKeysCount = _rotationKeys.size();
 	for (AInt nrk = 0; nrk < rotationKeysCount - 1; nrk++)
 	{
 		if (animationTime < _rotationKeys[nrk + 1].GetTime())
@@ -299,7 +295,7 @@ AInt AnimaAnimationNode::FindRotation(AFloat animationTime) const
 
 AInt AnimaAnimationNode::FindPosition(AFloat animationTime) const
 {
-	AInt positionKeysCount = _positionKeys.GetSize();
+	AInt positionKeysCount = _positionKeys.size();
 	for (AInt npk = 0; npk < positionKeysCount - 1; npk++)
 	{
 		if (animationTime < _rotationKeys[npk + 1].GetTime())
@@ -312,12 +308,12 @@ AInt AnimaAnimationNode::FindPosition(AFloat animationTime) const
 
 AInt AnimaAnimationNode::GetPositionKeysCount() const
 {
-	return _positionKeys.GetSize();
+	return _positionKeys.size();
 }
 
 void AnimaAnimationNode::AddPositionKey(AnimaAnimationPositionKey key)
 {
-	_positionKeys.Add(key);
+	_positionKeys.push_back(key);
 }
 
 AnimaAnimationPositionKey AnimaAnimationNode::GetPositionKey(AInt index) const
@@ -332,17 +328,17 @@ AnimaArray<AnimaAnimationPositionKey>* AnimaAnimationNode::GetPositionKeys()
 
 void AnimaAnimationNode::ClearPositionKeys()
 {
-	_positionKeys.RemoveAll();
+	_positionKeys.clear();
 }
 
 AInt AnimaAnimationNode::GetRotationKeysCount() const
 {
-	return _rotationKeys.GetSize();
+	return _rotationKeys.size();
 }
 
 void AnimaAnimationNode::AddRotationKey(AnimaAnimationRotationKey key)
 {
-	_rotationKeys.Add(key);
+	_rotationKeys.push_back(key);
 }
 
 AnimaAnimationRotationKey AnimaAnimationNode::GetRotationKey(AInt index) const
@@ -357,17 +353,17 @@ AnimaArray<AnimaAnimationRotationKey>* AnimaAnimationNode::GetRotationKeys()
 
 void AnimaAnimationNode::ClearRotationKeys()
 {
-	_rotationKeys.RemoveAll();
+	_rotationKeys.clear();
 }
 
 AInt AnimaAnimationNode::GetScalingKeysCount() const
 {
-	return _scalingKeys.GetSize();
+	return _scalingKeys.size();
 }
 
 void AnimaAnimationNode::AddScalingKey(AnimaAnimationScalingKey key)
 {
-	_scalingKeys.Add(key);
+	_scalingKeys.push_back(key);
 }
 
 AnimaAnimationScalingKey AnimaAnimationNode::GetScalingKey(AInt index) const
@@ -382,7 +378,7 @@ AnimaArray<AnimaAnimationScalingKey>* AnimaAnimationNode::GetScalingKeys()
 
 void AnimaAnimationNode::ClearScalingKeys()
 {
-	_scalingKeys.RemoveAll();
+	_scalingKeys.clear();
 }
 
 AnimaAnimationPositionKey::AnimaAnimationPositionKey()

@@ -12,7 +12,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModelInstance::AnimaModelInstance(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
-	, _meshes(allocator)
 {
 	_model = nullptr;
 }
@@ -67,13 +66,13 @@ AnimaModelInstance& AnimaModelInstance::operator=(AnimaModelInstance&& src)
 
 void AnimaModelInstance::SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes)
 {
-	_meshes.RemoveAll();
+	_meshes.clear();
 
 	if (meshes != nullptr)
 	{
-		_meshes.Copy(*meshes);
+		_meshes = *meshes;
 
-		AInt meshesCount = _meshes.GetSize();
+		AInt meshesCount = _meshes.size();
 		for (AInt i = 0; i < meshesCount; i++)
 			_meshes[i]->SetParentObject(this);
 	}
@@ -81,7 +80,7 @@ void AnimaModelInstance::SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes)
 
 AInt AnimaModelInstance::GetMeshesCount() const
 {
-	return _meshes.GetSize();
+	return _meshes.size();
 }
 
 AnimaMeshInstance* AnimaModelInstance::GetMesh(AInt index)
@@ -108,7 +107,7 @@ void AnimaModelInstance::UpdateChildrenTransformation()
 {
 	AnimaSceneObject::UpdateChildrenTransformation();
 	
-	AInt meshesCount = _meshes.GetSize();
+	AInt meshesCount = _meshes.size();
 	for (AInt i = 0; i < meshesCount; i++)
 		_meshes[i]->GetTransformation()->UpdateMatrix();
 }

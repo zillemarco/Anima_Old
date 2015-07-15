@@ -11,9 +11,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMeshesManager::AnimaMeshesManager(AnimaScene* scene, AnimaMaterialsManager* materialsManager)
-	: _meshes(scene->GetMeshesAllocator())
-	, _lastMeshesIndexMap(scene->GetGenericAllocator())
-	, _lastMeshesBonesInfo(scene->GetGenericAllocator())
 {
 	ANIMA_ASSERT(scene != nullptr);
 	ANIMA_ASSERT(materialsManager != nullptr);
@@ -163,11 +160,11 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 
 		if (mesh->mNumBones > 0)
 		{
-			AnimaArray<AnimaVertex4f> meshBoneWeights(_scene->GetGenericAllocator());
-			AnimaArray<AnimaVertex4f> meshBoneIDs(_scene->GetGenericAllocator());
+			AnimaArray<AnimaVertex4f> meshBoneWeights;
+			AnimaArray<AnimaVertex4f> meshBoneIDs;
 
-			meshBoneWeights.SetSize(newMesh->GetVerticesNumber());
-			meshBoneIDs.SetSize(newMesh->GetVerticesNumber());
+			meshBoneWeights.reserve(newMesh->GetVerticesCount());
+			meshBoneIDs.reserve(newMesh->GetVerticesCount());
 
 			for (AUint nb = 0; nb < mesh->mNumBones; nb++)
 			{
@@ -205,13 +202,12 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 		}
 
 		AInt materialIndex = (AInt)mesh->mMaterialIndex;
-		AnimaString materialName = materialNamesMap->GetAt(materialIndex);
+		AnimaString materialName = materialNamesMap->at(materialIndex);
 		AnimaMaterial* material = _materialsManager->GetMaterialFromName(materialName);
-
 		newMesh->SetMaterial(material);
 
 		_meshes.Add(meshName, newMesh);
-		_lastMeshesIndexMap.Add(meshName);
+		_lastMeshesIndexMap.push_back(meshName);
 	}
 
 	return true;
@@ -231,7 +227,7 @@ void AnimaMeshesManager::ClearMeshes()
 
 void AnimaMeshesManager::ClearLastMeshesIndexMap()
 {
-	_lastMeshesIndexMap.RemoveAll();
+	_lastMeshesIndexMap.clear();
 }
 
 void AnimaMeshesManager::ClearLastMeshesBonesData()

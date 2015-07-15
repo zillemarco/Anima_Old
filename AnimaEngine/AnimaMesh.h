@@ -98,7 +98,7 @@ public:
 	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
 	void SetVertices(AnimaVertex3f* v, AInt n);
 	void AddVertex(const AnimaVertex3f& v);
-	AInt GetVerticesNumber();
+	AInt GetVerticesCount();
 	AnimaVertex3f GetVertex(AInt index);
 	AnimaVertex3f* GetPVertex(AInt index);
 	AnimaArray<AnimaVertex3f>* GetVertices();
@@ -107,7 +107,7 @@ public:
 	void SetNormals(AnimaArray<AnimaVertex3f>* normals);
 	void SetNormals(AnimaVertex3f* v, AInt n);
 	void AddNormal(const AnimaVertex3f& v);
-	AInt GetNormalsNumber();
+	AInt GetNormalsCount();
 	AnimaVertex3f GetNormal(AInt index);
 	AnimaVertex3f* GetPNormal(AInt index);
 	AnimaArray<AnimaVertex3f>* GetNormals();
@@ -118,7 +118,7 @@ public:
 	void SetTextureCoords(AnimaArray<AnimaVertex2f>* textureCoords);
 	void SetTextureCoords(AnimaVertex2f* v, AInt n);
 	void AddTextureCoord(const AnimaVertex2f& v);
-	AInt GetTextureCoordsNumber();
+	AInt GetTextureCoordsCount();
 	AnimaVertex2f GetTextureCoord(AInt index);
 	AnimaVertex2f* GetPTextureCoord(AInt index);
 	AnimaArray<AnimaVertex2f>* GetTextureCoords();
@@ -127,7 +127,7 @@ public:
 	void SetTangents(AnimaArray<AnimaVertex3f>* tangents);
 	void SetTangents(AnimaVertex3f* v, AInt n);
 	void AddTangent(const AnimaVertex3f& v);
-	AInt GetTangentsNumber();
+	AInt GetTangentsCount();
 	AnimaVertex3f GetTangent(AInt index);
 	AnimaVertex3f* GetPTangent(AInt index);
 	AnimaArray<AnimaVertex3f>* GetTangents();
@@ -136,7 +136,7 @@ public:
 	void SetBitangents(AnimaArray<AnimaVertex3f>* bitangents);
 	void SetBitangents(AnimaVertex3f* v, AInt n);
 	void AddBitangent(const AnimaVertex3f& v);
-	AInt GetBitangentsNumber();
+	AInt GetBitangentsCount();
 	AnimaVertex3f GetBitangent(AInt index);
 	AnimaVertex3f* GetPBitangent(AInt index);
 	AnimaArray<AnimaVertex3f>* GetBitangents();
@@ -145,7 +145,7 @@ public:
 	void SetBoneWeights(AnimaArray<AnimaVertex4f>* boneWeights);
 	void SetBoneWeights(AnimaVertex4f* v, AInt n);
 	void AddBoneWeight(const AnimaVertex4f& v);
-	AInt GetBoneWeightsNumber();
+	AInt GetBoneWeightsCount();
 	AnimaVertex4f GetBoneWeight(AInt index);
 	AnimaVertex4f* GetPBoneWeight(AInt index);
 	AnimaArray<AnimaVertex4f>* GetBoneWeights();
@@ -154,7 +154,7 @@ public:
 	void SetBoneIDs(AnimaArray<AnimaVertex4f>* boneIDs);
 	void SetBoneIDs(AnimaVertex4f* v, AInt n);
 	void AddBoneID(const AnimaVertex4f& v);
-	AInt GetBoneIDsNumber();
+	AInt GetBoneIDsCount();
 	AnimaVertex4f GetBoneID(AInt index);
 	AnimaVertex4f* GetPBoneID(AInt index);
 	AnimaArray<AnimaVertex4f>* GetBoneIDs();
@@ -163,7 +163,7 @@ public:
 	void SetFaces(AnimaArray<AnimaFace>* faces);
 	void SetFaces(AnimaFace* faces, AInt n);
 	void AddFace(const AnimaFace& face);
-	AInt GetFacesNumber();
+	AInt GetFacesCount();
 	AnimaFace GetFace(AInt index);
 	AnimaFace* GetPFace(AInt index);
 	AnimaArray<AnimaFace>* GetFaces();

@@ -36,7 +36,7 @@ public:
 
 	AnimaArray<AnimaMeshInstance*>* CreateInstances(AnimaModel* srcModel);
 
-	AInt GetMeshInstancesNumber();
+	AInt GetMeshInstancesCount();
 
 	AnimaMeshInstance* GetMeshInstance(AInt index);
 	AnimaMeshInstance* GetMeshInstanceFromName(const AnimaString& name);

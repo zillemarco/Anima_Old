@@ -33,7 +33,7 @@ public:
 public:
 	bool LoadAnimations(const aiScene* scene);
 
-	AInt GetAnimationsNumber();
+	AInt GetAnimationsCount();
 
 	AnimaAnimation* GetAnimation(AInt index);
 	AnimaAnimation* GetAnimationFromName(const AnimaString& name);

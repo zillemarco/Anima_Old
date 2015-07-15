@@ -19,7 +19,6 @@ GLubyte animaUTGAcompareBW[12] = { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Unco
 GLubyte animaCTGAcompare[12] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };		// Compressed TGA Header
 
 AnimaTexturesManager::AnimaTexturesManager(AnimaScene* scene)
-	: _textures(scene->GetEngine()->GetTexturesAllocator())
 {
 	_scene = scene;
 }

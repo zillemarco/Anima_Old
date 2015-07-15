@@ -82,7 +82,7 @@ Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneString)(const Anima::
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneInt)(Anima::AUint) = &Anima::AnimaScenesManager::GetScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetScene;
 
-Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModel;
+Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelFromExternalFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModelFromExternalFile;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*CreateModelString)(const Anima::AnimaString&) = &Anima::AnimaModelsManager::CreateModel;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*GetModelFromNameString)(const Anima::AnimaString&) = &Anima::AnimaModelsManager::GetModelFromName;
 
@@ -99,7 +99,6 @@ void (Anima::AnimaRenderer::*RendererDrawModel)(Anima::AnimaModel*) = &Anima::An
 void (Anima::AnimaRenderer::*RendererDrawModelInstance)(Anima::AnimaModelInstance*) = &Anima::AnimaRenderer::DrawModel;
 
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
-Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringInfo)(const Anima::AnimaString&, Anima::AnimaShaderProgram::AnimaShaderInfo) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*CreateShaderString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateShader;
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::CreateProgram;
@@ -195,7 +194,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	// AnimaAnimationsManager
 	class_<Anima::AnimaAnimationsManager>("AnimaAnimationsManager", no_init)
 		.def("LoadAnimations", &Anima::AnimaAnimationsManager::LoadAnimations)
-		.def("GetAnimationsNumber", &Anima::AnimaAnimationsManager::GetAnimationsNumber)
+		.def("GetAnimationsCount", &Anima::AnimaAnimationsManager::GetAnimationsCount)
 		.def("GetAnimation", &Anima::AnimaAnimationsManager::GetAnimation, return_value_policy<reference_existing_object>())
 		.def("GetAnimationFromName", GetAnimationFromNameString, return_value_policy<reference_existing_object>())
 		.def("GetLastLoadedAnimations", &Anima::AnimaAnimationsManager::GetLastLoadedAnimations, return_value_policy<reference_existing_object>())
@@ -208,7 +207,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	
 	// AnimaModelsManager
 	class_<Anima::AnimaModelsManager>("AnimaModelsManager", no_init)
-		.def("LoadModel", LoadModelStringString, return_value_policy<reference_existing_object>())
+		.def("LoadModelFromExternalFile", LoadModelFromExternalFileStringString, return_value_policy<reference_existing_object>())
 		.def("CreateModel", CreateModelString, return_value_policy<reference_existing_object>())
 		.def("GetModelFromName", GetModelFromNameString, return_value_policy<reference_existing_object>())
 		.def("GetModel", &Anima::AnimaModelsManager::GetModel, return_value_policy<reference_existing_object>())
@@ -257,7 +256,6 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	class_<Anima::AnimaShadersManager>("AnimaShadersManager", no_init)
 		.def("LoadShader", LoadShaderStringString, return_value_policy<reference_existing_object>())
 		.def("LoadShaderFromFile", LoadShaderFromFileStringString, return_value_policy<reference_existing_object>())
-		.def("LoadShader", LoadShaderStringInfo, return_value_policy<reference_existing_object>())
 		.def("CreateShader", CreateShaderString, return_value_policy<reference_existing_object>())
 		.def("CreateProgram", CreateProgramString, return_value_policy<reference_existing_object>())
 		.def("GetProgram", &Anima::AnimaShadersManager::GetProgram, return_value_policy<reference_existing_object>())

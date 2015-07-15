@@ -14,7 +14,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
-	, _shadersNames(allocator)
 {
 	_material = nullptr;
 	_mesh = nullptr;
@@ -59,7 +58,7 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(const AnimaMeshInstance& src)
 		_mesh = src._mesh;
 		_meshName = src._meshName;
 
-		_shadersNames.Copy(src._shadersNames);
+		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
 	}
 	
@@ -78,7 +77,7 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(AnimaMeshInstance&& src)
 		_mesh = src._mesh;
 		_meshName = src._meshName;
 
-		_shadersNames.Copy(src._shadersNames);
+		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
 	}
 	
@@ -144,22 +143,22 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 
 void AnimaMeshInstance::AddShader(AnimaShader* shader)
 {
-	_shadersNames.Add(shader->GetName());
+	_shadersNames.push_back(shader->GetName());
 }
 
 void AnimaMeshInstance::AddShader(const AnimaString& shaderName)
 {
-	_shadersNames.Add(shaderName);
+	_shadersNames.push_back(shaderName);
 }
 
 void AnimaMeshInstance::AddShader(const char* shaderName)
 {
-	_shadersNames.Add(AnimaString(shaderName));
+	_shadersNames.push_back(AnimaString(shaderName));
 }
 
 AInt AnimaMeshInstance::GetShadersCount() const
 {
-	return _shadersNames.GetSize();
+	return _shadersNames.size();
 }
 
 AnimaString AnimaMeshInstance::GetShaderName(AInt index) const

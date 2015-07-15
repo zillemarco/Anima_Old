@@ -19,7 +19,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
-: _primitives(allocator != nullptr ? allocator : engine->GetGenericAllocator())
 {
 	_allocator = allocator != nullptr ? allocator : engine->GetGenericAllocator();
 	_engine = engine;
@@ -559,7 +558,7 @@ void AnimaRenderer::DrawAll()
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	if(_primitives.GetSize() <= 0)
+	if(_primitives.size() <= 0)
 	{
 		ANIMA_FRAME_PUSH("DeferredCombine");
 #if FXAA_ENABLED
@@ -680,7 +679,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	if (_primitives.GetSize() <= 0)
+	if (_primitives.size() <= 0)
 	{
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
@@ -782,7 +781,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	if (_primitives.GetSize() <= 0)
+	if (_primitives.size() <= 0)
 	{
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
@@ -884,7 +883,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	if (_primitives.GetSize() <= 0)
+	if (_primitives.size() <= 0)
 	{
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
@@ -986,7 +985,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 	//
 	//	Composizione dei buffer nell'immagine finale
 	//
-	if (_primitives.GetSize() <= 0)
+	if (_primitives.size() <= 0)
 	{
 		GetTexture("DiffuseMap")->BindAsRenderTarget();
 		Start();
@@ -1248,7 +1247,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model, AnimaShaderProgram* program, bo
 		}
 	}
 
-	AInt childrenCount = model->GetChildrenNumber();
+	AInt childrenCount = model->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
 		DrawModel((AnimaModel*)model->GetChild(i), program, updateMaterial, forceDraw, frustum, useInstances);
 }
@@ -1276,7 +1275,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* 
 		meshInstance->Draw(this, program, updateMaterial);
 	}
 
-	AInt childrenCount = instance->GetChildrenNumber();
+	AInt childrenCount = instance->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
 		DrawModel((AnimaModelInstance*)instance->GetChild(i), program, updateMaterial, forceDraw, frustum);
 }
@@ -1374,7 +1373,7 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModel* model)
 	for (AInt i = 0; i < meshesCount; i++)
 		DrawMesh(model->GetMesh(i), program, true, false, frustum, false);
 
-	AInt childrenCount = model->GetChildrenNumber();
+	AInt childrenCount = model->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
 		PreparePass(program, (AnimaModel*)model->GetChild(i));
 }
@@ -1400,14 +1399,14 @@ void AnimaRenderer::PreparePass(AnimaShaderProgram* program, AnimaModelInstance*
 	for (AInt i = 0; i < meshesCount; i++)
 		DrawMesh(instance->GetMesh(i), program, true, false, frustum);
 
-	AInt childrenCount = instance->GetChildrenNumber();
+	AInt childrenCount = instance->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
 		PreparePass(program, (AnimaModelInstance*)instance->GetChild(i));
 }
 
 void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 {
-	AInt size = lights->GetSize();
+	AInt size = lights->size();
 
 	if (size == 0)
 		return;
@@ -1418,12 +1417,12 @@ void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 	if (activeCamera == nullptr)
 		return;
 
-	AnimaString type = typeid((*lights->ElementAt(0))).name();
+	AnimaString type = typeid((*lights->at(0))).name();
 	auto pair = _lightsMeshMap.find(type);
 
 	ANIMA_ASSERT(pair != _lightsMeshMap.end());
-	ANIMA_ASSERT(lights->ElementAt(0)->CreateShader(_scene->GetShadersManager()));
-	AnimaShaderProgram* program = _scene->GetShadersManager()->GetProgramFromName(lights->ElementAt(0)->GetShaderName());
+	ANIMA_ASSERT(lights->at(0)->CreateShader(_scene->GetShadersManager()));
+	AnimaShaderProgram* program = _scene->GetShadersManager()->GetProgramFromName(lights->at(0)->GetShaderName());
 	AnimaMesh* mesh = pair->second;
 
 	if (activeProgram == nullptr || (*activeProgram) != (*program))
@@ -1437,7 +1436,7 @@ void AnimaRenderer::LightPass(AnimaArray<AnimaLight*>* lights)
 
 	for (AInt i = 0; i < size; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 
 		light->UpdateMeshTransformation(mesh->GetTransformation());
 		light->UpdateCullFace(activeCamera);
@@ -1480,7 +1479,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 	if (lights == nullptr)
 		return;
 
-	AInt nLights = lights->GetSize();
+	AInt nLights = lights->size();
 	AInt nMeshes = meshesManager->GetMeshesCount();
 
 	if (nLights == 0 || nMeshes == 0)
@@ -1492,7 +1491,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 	
 	for (AInt i = 0; i < nLights; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 		AnimaTexture* shadowMap = light->GetShadowTexture();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
@@ -1516,16 +1515,16 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 			//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
 			//	glCullFace(GL_BACK);
 			//	
-			//	AInt meshNumber = innerModel->GetMeshesNumber();
-			//	for (AInt i = 0; i < meshNumber; i++)
+			//	AInt meshCount = innerModel->GetMeshesCount();
+			//	for (AInt i = 0; i < meshCount; i++)
 			//	{
 			//		glCullFace(GL_FRONT);
 			//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
 			//		glCullFace(GL_BACK);
 			//	}
 			//	
-			//	AInt childrenNumber = innerModel->GetChildrenNumber();
-			//	for (AInt i = 0; i < childrenNumber; i++)
+			//	AInt childrenCount = innerModel->GetChildrenCount();
+			//	for (AInt i = 0; i < childrenCount; i++)
 			//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
 		}
 	}
@@ -1539,7 +1538,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mes
 	if (lights == nullptr || mesh == nullptr)
 		return;
 
-	AInt nLights = lights->GetSize();
+	AInt nLights = lights->size();
 	if (nLights == 0)
 		return;
 	
@@ -1549,7 +1548,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mes
 
 	for (AInt i = 0; i < nLights; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 		AnimaTexture* shadowMap = light->GetShadowTexture();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
@@ -1575,7 +1574,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInsta
 	if (lights == nullptr || instance == nullptr)
 		return;
 
-	AInt nLights = lights->GetSize();
+	AInt nLights = lights->size();
 	if (nLights == 0)
 		return;
 
@@ -1585,7 +1584,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInsta
 
 	for (AInt i = 0; i < nLights; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 		AnimaTexture* shadowMap = light->GetShadowTexture();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
@@ -1611,7 +1610,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* mo
 	if (lights == nullptr || model == nullptr)
 		return;
 
-	AInt nLights = lights->GetSize();
+	AInt nLights = lights->size();
 	if (nLights == 0)
 		return;
 
@@ -1621,7 +1620,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* mo
 
 	for (AInt i = 0; i < nLights; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 		AnimaTexture* shadowMap = light->GetShadowTexture();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
@@ -1647,7 +1646,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 	if (lights == nullptr || instance == nullptr)
 		return;
 
-	AInt nLights = lights->GetSize();
+	AInt nLights = lights->size();
 	if (nLights == 0)
 		return;
 
@@ -1657,7 +1656,7 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInst
 	
 	for (AInt i = 0; i < nLights; i++)
 	{
-		AnimaLight* light = lights->ElementAt(i);
+		AnimaLight* light = lights->at(i);
 		AnimaTexture* shadowMap = light->GetShadowTexture();
 		if (!shadowMap->AreRenderTargetsReady())
 			shadowMap->LoadRenderTargets();
@@ -1682,7 +1681,7 @@ void AnimaRenderer::UpdateModelsVisibility()
 //
 //	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
-	//	for (int i = 0; i < modelsManager->GetModelsNumber(); i++)
+	//	for (int i = 0; i < modelsManager->GetModelsCount(); i++)
 	//		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
 }
 
@@ -1690,7 +1689,7 @@ void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh
 {
 	AnimaMatrix modelMatrix = parentMeshMatrix * mesh->GetTransformation()->GetTransformationMatrix();
 
-	if (mesh->GetVerticesNumber() > 0)
+	if (mesh->GetVerticesCount() > 0)
 	{
 		if (frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
 			mesh->SetIsVisible(true);
@@ -1701,15 +1700,15 @@ void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh
 		}
 	}
 
-	//AInt meshNumber = mesh->GetMeshesNumber();
-	//for (AInt i = 0; i < meshNumber; i++)
+	//AInt meshCount = mesh->GetMeshesCount();
+	//for (AInt i = 0; i < meshCount; i++)
 	//{
 	//	AnimaMesh* subMesh = mesh->GetMesh(i);
 	//	subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
 	//}
 
-	//AInt childrenNumber = mesh->GetChildrenNumber();
-	//for (AInt i = 0; i < childrenNumber; i++)
+	//AInt childrenCount = mesh->GetChildrenCount();
+	//for (AInt i = 0; i < childrenCount; i++)
 	//	UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
 }
 
@@ -1724,7 +1723,7 @@ void AnimaRenderer::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray
 	primitive->SetType(primitiveType);
 	primitive->SetModelMatrix(modelMatrix);
 	
-	_primitives.Add(primitive);
+	_primitives.push_back(primitive);
 }
 
 void AnimaRenderer::DrawPrimitives( AnimaShaderProgram* program)
@@ -1735,7 +1734,7 @@ void AnimaRenderer::DrawPrimitives( AnimaShaderProgram* program)
 	program->Use();
 	program->SetUniform("_projectionViewMatrix", _scene->GetCamerasManager()->GetActiveCamera()->GetProjectionViewMatrix());
 	
-	AInt nPrimitives = _primitives.GetSize();
+	AInt nPrimitives = _primitives.size();
 	for(AInt i = 0; i < nPrimitives; i++)
 		DrawPrimitive(_primitives[i], program);
 }
@@ -1757,7 +1756,7 @@ void AnimaRenderer::DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProg
 	program->SetUniform("_color", color);
 	program->SetUniform("_modelMatrix", modelMatrix);
 	
-	AInt nVertices = vertices->GetSize();
+	AInt nVertices = vertices->size();
 	AInt nCoordinate = nVertices * 3;
 	AFloat* coordinate = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, (ASizeT)nCoordinate);
 	
@@ -1774,9 +1773,9 @@ void AnimaRenderer::DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProg
 	AnimaAllocatorNamespace::DeallocateArray(*_allocator, coordinate);
 	coordinate = nullptr;
 	
-	if (indices->GetSize() > 0)
+	if (indices->size() > 0)
 	{
-		AInt nIndici = indices->GetSize();
+		AInt nIndici = indices->size();
 		AUint* indici = AnimaAllocatorNamespace::AllocateArray<AUint>(*_allocator, (ASizeT)nIndici);
 		
 		for (AInt i = 0; i < nIndici; i++)
@@ -2253,19 +2252,17 @@ void AnimaRenderer::Clear()
 
 void AnimaRenderer::ClearPrimitives()
 {
-	AInt nPrimitives = _primitives.GetSize();
+	AInt nPrimitives = _primitives.size();
 	for(AInt i = 0; i < nPrimitives; i++)
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _primitives[i]);
 		_primitives[i] = nullptr;
 	}
 	
-	_primitives.RemoveAll();
+	_primitives.clear();
 }
 
 AnimaPrimitiveData::AnimaPrimitiveData(AnimaAllocator* allocator)
-	: _vertices(allocator)
-	, _indices(allocator)
 {
 }
 
@@ -2283,19 +2280,19 @@ AnimaPrimitiveData::AnimaPrimitiveData(AnimaPrimitiveData&& src)
 
 AnimaPrimitiveData::~AnimaPrimitiveData()
 {
-	_vertices.RemoveAll();
-	_indices.RemoveAll();
+	_vertices.clear();
+	_indices.clear();
 }
 
 void AnimaPrimitiveData::SetVertices(AnimaArray<AnimaVertex3f>* vertices)
 {
-	_vertices.RemoveAll();
+	_vertices.clear();
 	
 	if(vertices != nullptr)
 	{
-		AInt vSize = vertices->GetSize();
+		AInt vSize = vertices->size();
 		for(AInt i = 0; i < vSize; i++)
-			_vertices.Add(vertices->ElementAt(i));
+			_vertices.push_back(vertices->at(i));
 	}
 }
 
@@ -2306,13 +2303,13 @@ AnimaArray<AnimaVertex3f>* AnimaPrimitiveData::GetVertices()
 
 void AnimaPrimitiveData::SetIndices(AnimaArray<AUint>* indices)
 {
-	_indices.RemoveAll();
+	_indices.clear();
 	
 	if(indices != nullptr)
 	{
-		AInt vSize = indices->GetSize();
+		AInt vSize = indices->size();
 		for(AInt i = 0; i < vSize; i++)
-			_indices.Add(indices->ElementAt(i));
+			_indices.push_back(indices->at(i));
 	}
 }
 
