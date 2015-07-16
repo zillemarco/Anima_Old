@@ -9,6 +9,8 @@
 #include "AnimaMeshInstance.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaRenderer.h"
+#include "AnimaScene.h"
+#include "AnimaMaterialsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -116,8 +118,12 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 
 	if (updateMaterial)
 	{
+		AnimaMaterial* material = _material;
+		if (material == nullptr)
+			material = renderer->GetActiveScene()->GetMaterialsManager()->GetDefaultMaterial();
+
 		ANIMA_FRAME_PUSH("MeshInstanceMaterialUpdateProp");
-		program->UpdateMappedValuesObjectProperties(_material, renderer);
+		program->UpdateMappedValuesObjectProperties(material, renderer);
 		ANIMA_FRAME_POP();
 	}
 

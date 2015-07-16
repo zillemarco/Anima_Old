@@ -24,6 +24,7 @@
 #include <AnimaAnimation.h>
 #include <AnimaTimer.h>
 #include <AnimaModelInstance.h>
+#include <AnimaMaterial.h>
 
 #include "main.h"
 
@@ -173,21 +174,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	return (int)msg.wParam;
 }
 
-void ChangeColor(Anima::AnimaModelInstance* instance)
+void ChangeColor(Anima::AnimaModelInstance* instance, Anima::AnimaMaterial* material)
 {
-	if (instance->GetName() == "Alpha_HighJointsGeo.first-instance")
+	for (int i = 0; i < instance->GetMeshesCount(); i++)
 	{
-		for (int i = 0; i < instance->GetMeshesCount(); i++)
-		{
-			instance->GetMesh(i)->GetMaterial()->SetColor("DiffuseColor", Anima::AnimaVertex4f(0.0, 1.0, 0.0, 1.0));
-			instance->GetMesh(i)->GetMaterial()->SetColor("SpecularColor", Anima::AnimaVertex4f(0.0, 1.0, 0.0, 1.0));
-			instance->GetMesh(i)->GetMaterial()->SetColor("AmbientColor", Anima::AnimaVertex4f(0.0, 1.0, 0.0, 1.0));
-			instance->GetMesh(i)->GetMaterial()->SetColor("EmissionColor", Anima::AnimaVertex4f(0.0, 1.0, 0.0, 1.0));
-		}
+		instance->GetMesh(i)->SetMaterial(material);
 	}
 
 	for (int i = 0; i < instance->GetChildrenCount(); i++)
-		ChangeColor((Anima::AnimaModelInstance*)instance->GetChild(i));
+		ChangeColor((Anima::AnimaModelInstance*)instance->GetChild(i), material);
 }
 
 bool InitEngine()
@@ -331,7 +326,7 @@ bool InitEngine()
 	firstInstance->GetTransformation()->TranslateX(5.0f);
 	secondInstance->GetTransformation()->TranslateX(-5.0f);
 
-	ChangeColor(firstInstance);
+	ChangeColor(firstInstance, materialsManager->GetMaterialFromName("material-1"));
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());

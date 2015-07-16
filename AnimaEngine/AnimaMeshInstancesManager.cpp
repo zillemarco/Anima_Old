@@ -34,16 +34,20 @@ AnimaMeshInstance* AnimaMeshInstancesManager::CreateInstance(const AnimaString& 
 	if (index >= 0)
 		return nullptr;
 
-	AnimaMaterial* oldMaterial = srcMesh->GetMaterial();
-	AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(instanceName + ".material");
-	newMaterial->CopyData(*oldMaterial);
+	//AnimaMaterial* oldMaterial = srcMesh->GetMaterial();
+	//AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(instanceName + ".material");
 
-	for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
-		newMaterial->AddShader(oldMaterial->GetShaderName(ns));
+	//if (oldMaterial)
+	//{
+	//	newMaterial->CopyData(*oldMaterial);
+
+	//	for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
+	//		newMaterial->AddShader(oldMaterial->GetShaderName(ns));
+	//}
 
 	AnimaMeshInstance* meshInstance = AnimaAllocatorNamespace::AllocateNew<AnimaMeshInstance>(*(_scene->GetMeshInstancesAllocator()), instanceName, _scene->GetDataGeneratorsManager(), _scene->GetMeshInstancesAllocator());
 	meshInstance->CopyData(*srcMesh);
-	meshInstance->SetMaterial(newMaterial);
+	//meshInstance->SetMaterial(newMaterial);
 	meshInstance->SetMesh(srcMesh);
 
 	for (AInt ns = 0; ns < srcMesh->GetShadersCount(); ns++)
@@ -103,14 +107,19 @@ AnimaArray<AnimaMeshInstance*>* AnimaMeshInstancesManager::CreateInstances(Anima
 			nameOffset++;
 		}
 		
-		AnimaMaterial* oldMaterial = mesh->GetMaterial();
-		AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(meshInstanceName + ".material");
-		newMaterial->CopyData(*oldMaterial);
-		for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
-			newMaterial->AddShader(oldMaterial->GetShaderName(ns));
+		//AnimaMaterial* oldMaterial = mesh->GetMaterial();
+		//AnimaMaterial* newMaterial = _scene->GetMaterialsManager()->CreateMaterial(meshInstanceName + ".material");
+
+		//if (oldMaterial)
+		//{
+		//	newMaterial->CopyData(*oldMaterial);
+
+		//	for (AInt ns = 0; ns < oldMaterial->GetShadersCount(); ns++)
+		//		newMaterial->AddShader(oldMaterial->GetShaderName(ns));
+		//}
 
 		newInstance->CopyData(*mesh);
-		newInstance->SetMaterial(newMaterial);
+		//newInstance->SetMaterial(newMaterial);
 		newInstance->SetMesh(mesh);
 
 		for (AInt ns = 0; ns < mesh->GetShadersCount(); ns++)

@@ -35,7 +35,7 @@ public:
 	~AnimaMeshesManager();
 	
 public:
-	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString>* materialNamesMap);
+	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName/*, AnimaArray<AnimaString>* materialNamesMap*/);
 
 	AnimaArray<AnimaString>* GetLastMeshesIndexMap();
 	AnimaMappedArray<AnimaMeshBoneInfo*>* GetLastMeshesBonesInfo();

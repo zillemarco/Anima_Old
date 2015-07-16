@@ -51,13 +51,13 @@ AnimaModel* AnimaModelsManager::LoadModelFromExternalFile(const AnimaString& mod
 	
 	AnimaModel* newTopLevelModel = nullptr;
 
-	_materialsManager->LoadMaterialsFromModel(scene, name);
-	AnimaArray<AnimaString>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
+	//_materialsManager->LoadMaterialsFromModel(scene, name);
+	//AnimaArray<AnimaString>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
 
 	_animationsManager->LoadAnimations(scene);
 	AnimaMappedArray<AnimaAnimation*>* loadedAnimations = _animationsManager->GetLastLoadedAnimations();
 
-	if (_meshesManager->LoadMeshesFromModel(scene, name, materialNames))
+	if (_meshesManager->LoadMeshesFromModel(scene, name/*, materialNames*/))
 	{
 		AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = _meshesManager->GetLastMeshesBonesInfo();
 

@@ -17,8 +17,8 @@ AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManag
 	SetInteger("FrontFace", GL_CCW);
 	SetInteger("CullFace", GL_BACK);
 
-	//SetColor("DiffuseColor", 0.8f, 0.8f, 0.8f, 1.0f);
-	//SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
+	SetColor("DiffuseColor", 0.3f, 0.3f, 0.3f, 1.0f);
+	SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Deprecato	SetBoolean("Wireframe", false);
 	// Deprecato	SetColor("WireframeColor", 0.0f, 0.0f, 0.0f);

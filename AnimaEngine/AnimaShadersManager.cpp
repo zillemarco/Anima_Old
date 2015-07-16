@@ -180,8 +180,8 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const An
 
 AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material)
 {
-	AInt meshShadersCount = meshInstance->GetShadersCount();
-	AInt materialShadersCount = material->GetShadersCount();
+	AInt meshShadersCount = meshInstance != nullptr ? meshInstance->GetShadersCount() : 0;
+	AInt materialShadersCount = material != nullptr ? material->GetShadersCount() : 0;
 
 	if (meshShadersCount <= 0 || materialShadersCount <= 0)
 		return nullptr;

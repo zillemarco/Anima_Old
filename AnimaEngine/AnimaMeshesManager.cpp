@@ -26,7 +26,7 @@ AnimaMeshesManager::~AnimaMeshesManager()
 	ClearLastMeshesBonesData();
 }
 
-bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName, AnimaArray<AnimaString>* materialNamesMap)
+bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName/*, AnimaArray<AnimaString>* materialNamesMap*/)
 {
 	ClearLastMeshesIndexMap();
 	ClearLastMeshesBonesData();
@@ -201,10 +201,10 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			newMesh->SetBoneIDs(&meshBoneIDs);
 		}
 
-		AInt materialIndex = (AInt)mesh->mMaterialIndex;
-		AnimaString materialName = materialNamesMap->at(materialIndex);
-		AnimaMaterial* material = _materialsManager->GetMaterialFromName(materialName);
-		newMesh->SetMaterial(material);
+		//AInt materialIndex = (AInt)mesh->mMaterialIndex;
+		//AnimaString materialName = materialNamesMap->at(materialIndex);
+		//AnimaMaterial* material = _materialsManager->GetMaterialFromName(materialName);
+		//newMesh->SetMaterial(material);
 
 		_meshes.Add(meshName, newMesh);
 		_lastMeshesIndexMap.push_back(meshName);

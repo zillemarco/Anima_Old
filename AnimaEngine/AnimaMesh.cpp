@@ -13,6 +13,8 @@
 #include "AnimaMeshInstance.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaRenderer.h"
+#include "AnimaMaterialsManager.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -1498,7 +1500,13 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 	program->UpdateSceneObjectProperties(this, renderer);
 
 	if (updateMaterial)
-		program->UpdateMappedValuesObjectProperties(_material, renderer);
+	{
+		AnimaMaterial* material = _material;
+		if (material == nullptr)
+			material = renderer->GetActiveScene()->GetMaterialsManager()->GetDefaultMaterial();
+
+		program->UpdateMappedValuesObjectProperties(material, renderer);
+	}
 
 #ifdef _WIN32
 	glBindVertexArray(GetVertexArrayObject());

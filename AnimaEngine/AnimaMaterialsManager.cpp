@@ -22,10 +22,18 @@ AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesMan
 	ANIMA_ASSERT(texturesManager != nullptr);
 	_scene = scene;
 	_texturesManager = texturesManager;
+
+	_defaultMaterial = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), "defaultMaterial");
 }
 
 AnimaMaterialsManager::~AnimaMaterialsManager()
 {
+	if (_defaultMaterial)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMaterialsAllocator()), _defaultMaterial);
+		_defaultMaterial = nullptr;
+	}
+
 	ClearMaterials();
 	ClearLastMaterialsIndexMap();
 }

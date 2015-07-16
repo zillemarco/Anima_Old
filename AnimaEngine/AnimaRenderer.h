@@ -75,6 +75,8 @@ public:
 public:
 	virtual void Start(AnimaScene* scene);
 
+	AnimaScene* GetActiveScene() { return _scene; }
+
 	virtual void DrawAll();
 	virtual void DrawMesh(AnimaMesh* mesh);
 	virtual void DrawMesh(AnimaMeshInstance* instance);

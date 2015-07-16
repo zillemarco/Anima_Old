@@ -43,6 +43,8 @@ public:
 	AnimaMaterial* GetMaterial(AInt index);
 	AnimaMaterial* GetMaterialFromName(const AnimaString& name);
 
+	inline AnimaMaterial* GetDefaultMaterial() { return _defaultMaterial; }
+
 	AnimaMappedArray<AnimaMaterial*>* GetMaterials();
 
 public:
@@ -57,6 +59,8 @@ private:
 	AnimaScene* _scene;
 	AnimaTexturesManager* _texturesManager;
 	AnimaMappedArray<AnimaMaterial*> _materials;
+
+	AnimaMaterial* _defaultMaterial;
 
 	AnimaArray<AnimaString> _lastMaterialsIndexMap;
 };
