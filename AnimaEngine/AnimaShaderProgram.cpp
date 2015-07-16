@@ -523,7 +523,7 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_UNIFORM, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			std::vector<GLchar> nameArray(values[0]);
+			std::vector<GLchar> nameArray(values[0] + 1);
 			glGetProgramResourceName(_id, GL_UNIFORM, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
@@ -604,7 +604,7 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_INPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			std::vector<GLchar> nameArray(values[0]);
+			std::vector<GLchar> nameArray(values[0] + 1);
 			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
@@ -621,7 +621,7 @@ void AnimaShaderProgram::ScanVariables()
 		{
 			glGetProgramResourceiv(_id, GL_PROGRAM_OUTPUT, i, propertiesSize, &properties[0], propertiesSize, NULL, &values[0]);
 
-			std::vector<GLchar> nameArray(values[0]);
+			std::vector<GLchar> nameArray(values[0] + 1);
 			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
