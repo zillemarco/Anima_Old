@@ -46,7 +46,6 @@ protected:
 public:
 	AInt GetAnimationNodesCount() const;
 	AnimaAnimationNode* CreateAnimationNode(const AnimaString& name);
-	AnimaAnimationNode* CreateAnimationNode(const char* name);
 	AnimaAnimationNode* GetAnimationNode(AInt index);
 	AnimaMappedArray<AnimaAnimationNode*>* GetAnimationNodes();
 	void ClearAnimationNodes();

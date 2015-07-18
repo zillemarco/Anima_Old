@@ -107,7 +107,6 @@ public:
 
 	void EnableInputs(AnimaMesh* mesh);
 	void EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer);
-	void EnableInput(const char* inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();
 
 	void UpdateSceneObjectProperties(AnimaSceneObject* object, AnimaRenderer* renderingManager);

@@ -93,10 +93,6 @@ void (Anima::AnimaModel::*SetOriginFileNameString)(const Anima::AnimaString&) = 
 void (Anima::AnimaModel::*SetAnimationNodeNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::SetAnimationNodeName;
 
 void (Anima::AnimaRenderer::*RendererStart)(Anima::AnimaScene*) = &Anima::AnimaRenderer::Start;
-void (Anima::AnimaRenderer::*RendererDrawMesh)(Anima::AnimaMesh*) = &Anima::AnimaRenderer::DrawMesh;
-void (Anima::AnimaRenderer::*RendererDrawMeshInstance)(Anima::AnimaMeshInstance*) = &Anima::AnimaRenderer::DrawMesh;
-void (Anima::AnimaRenderer::*RendererDrawModel)(Anima::AnimaModel*) = &Anima::AnimaRenderer::DrawModel;
-void (Anima::AnimaRenderer::*RendererDrawModelInstance)(Anima::AnimaModelInstance*) = &Anima::AnimaRenderer::DrawModel;
 
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
@@ -227,10 +223,8 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("GetAnimation", &Anima::AnimaModel::GetAnimation, return_value_policy<reference_existing_object>())
 		.def("SetOriginFileName", SetOriginFileNameString)
 		.def("GetAnimaOriginFileName", &Anima::AnimaModel::GetAnimaOriginFileName)
-		.def("GetOriginFileName", &Anima::AnimaModel::GetOriginFileName)
 		.def("SetAnimationNodeName", SetAnimationNodeNameString)
 		.def("GetAnimaAnimationNodeName", &Anima::AnimaModel::GetAnimaAnimationNodeName)
-		.def("GetAnimationNodeName", &Anima::AnimaModel::GetAnimationNodeName)
 		.def("GetMeshesBonesInfo", &Anima::AnimaModel::GetMeshesBonesInfo, return_value_policy<reference_existing_object>())
 		.def("SetMeshesBonesInfo", &Anima::AnimaModel::SetMeshesBonesInfo)
 		.def("ClearMeshesBonesInfo", &Anima::AnimaModel::ClearMeshesBonesInfo)
@@ -241,11 +235,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	// AnimaRenderer
 	class_<Anima::AnimaRenderer, boost::noncopyable>("AnimaRenderer", init<Anima::AnimaEngine*, Anima::AnimaAllocator*>())
 		.def("Start", RendererStart)
-		.def("DrawAll", &Anima::AnimaRenderer::DrawAll)
-		.def("DrawMesh", RendererDrawMesh)
-		.def("DrawMesh", RendererDrawMeshInstance)
-		.def("DrawModel", RendererDrawModel)
-		.def("DrawModel", RendererDrawModelInstance)
+		.def("DrawAll", &Anima::AnimaRenderer::Render)
 		.def("AddPrimitive", &Anima::AnimaRenderer::AddPrimitive)
 		.def("UpdateModelsVisibility", &Anima::AnimaRenderer::UpdateModelsVisibility)
 		.def("InitTextureSlots", &Anima::AnimaRenderer::InitTextureSlots)

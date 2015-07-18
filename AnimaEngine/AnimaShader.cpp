@@ -21,16 +21,6 @@ AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, Ani
 	_text = shaderText;
 }
 
-AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type)
-	: AnimaNamedObject(name, allocator)
-{
-	_id = 0;
-	_compiled = false;
-
-	_type = type;
-	_text = shaderText;
-}
-
 AnimaShader::AnimaShader(const AnimaShader& src)
 	: AnimaNamedObject(src)
 	, _text(src._text)

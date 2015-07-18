@@ -46,12 +46,10 @@ public:
 	// Gestione dati necessari al disegno
 	void AddShader(AnimaShader* shader);
 	void AddShader(const AnimaString& shaderName);
-	void AddShader(const char* shaderName);
 	AInt GetShadersCount() const;
 	AnimaString GetShaderName(AInt index) const;
 
 	void SetShaderProgram(const AnimaString& shaderProgramName);
-	void SetShaderProgram(const char* shaderProgramName);
 	AnimaString GetShaderProgramName() const;
 
 protected:

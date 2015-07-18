@@ -132,12 +132,6 @@ AnimaAnimationNode* AnimaAnimation::CreateAnimationNode(const AnimaString& name)
 	return newNode;
 }
 
-AnimaAnimationNode* AnimaAnimation::CreateAnimationNode(const char* name)
-{
-	AnimaString str = name;
-	return CreateAnimationNode(str);
-}
-
 AnimaAnimationNode* AnimaAnimation::GetAnimationNode(AInt index)
 {
 	return _animationNodes[index];

@@ -13,36 +13,39 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_mipMapLevels = 0;
 	_width = 0;
 	_height = 0;
-	_textureTarget = 0;	
+	_textureTarget = GL_TEXTURE_2D;
 	_textureID = 0;
 	_data = nullptr;
 	_dataSize = 0;
-	_filter = 0;
-	_internalFormat = 0;
-	_format = 0;
-	_dataType = 0;
-	_clamp = 0;
+	_filter = GL_LINEAR;
+	_internalFormat = GL_RGB;
+	_format = GL_RGB;
+	_dataType = GL_UNSIGNED_BYTE;
+	_clamp = GL_REPEAT;
 	_frameBuffer = 0;
 	_renderBuffer = 0;
+	_attachment = GL_NONE;
 	
 	_renderTargetsReady = false;
 	_texturesReady = false;
 	_needsResize = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, ASizeT dataSize)
 	: AnimaNamedObject(name, allocator)
 {
 	_data = nullptr;
 	_dataSize = 0;
 
 	SetData(data, dataSize);
-	SetFilter(filter);
-	SetFormat(format);
-	SetInternalFormat(internalFormat);
-	SetDataType(dataType);
-	SetClamp(clamp);
-	SetAttachment(attachment);
+
+	_textureTarget = GL_TEXTURE_2D;
+	_filter = GL_LINEAR;
+	_internalFormat = GL_RGB;
+	_format = GL_RGB;
+	_dataType = GL_UNSIGNED_BYTE;
+	_clamp = GL_REPEAT;
+	_attachment = GL_NONE;
 
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -50,37 +53,9 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 
 	_name = name;
 		
-	_mipMapLevels = mipMapLevels;
+	_mipMapLevels = 0;
 	_width = width;
 	_height = height;
-	_textureTarget = textureTarget;
-	_texturesReady = false;
-	_needsResize = false;
-	_renderTargetsReady = false;
-}
-
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const char* name, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp, AUint attachment)
-	: AnimaNamedObject(AnimaString(name), allocator)
-{
-	_data = nullptr;
-	_dataSize = 0;
-
-	SetData(data, dataSize);
-	SetFilter(filter);
-	SetFormat(format);
-	SetInternalFormat(internalFormat);
-	SetDataType(dataType);
-	SetClamp(clamp);
-	SetAttachment(attachment);
-
-	_textureID = 0;
-	_frameBuffer = 0;
-	_renderBuffer = 0;
-
-	_mipMapLevels = mipMapLevels;
-	_width = width;
-	_height = height;
-	_textureTarget = textureTarget;
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;

@@ -70,12 +70,6 @@ public:
 		_mappedNames[name] = mappedArray;
 	}
 
-	template<class TYPE> void Add(const char* name, TYPE newElement)
-	{
-		AnimaString str = name;
-		Add(str, newElement);
-	}
-
 	BASE_TYPE GetWithIndex(AInt index) const
 	{
 		AInt base = 0;
@@ -103,12 +97,6 @@ public:
 		return nullptr;
 	}
 
-	BASE_TYPE GetWithName(const char* name) const
-	{
-		AnimaString str = name;
-		return GetWithName(str);
-	}
-
 	template<class TYPE> TYPE GetWithNameAndType(AInt index) const
 	{
 		AnimaString type = typeid(TYPE).name();
@@ -129,12 +117,6 @@ public:
 		return nullptr;
 	}
 
-	template<class TYPE> TYPE GetWithNameAndType(const char* name) const
-	{
-		AnimaString str = name;
-		return GetWithNameAndType(str);
-	}
-
 	template<class TYPE> void SetElementOfType(AInt index, TYPE newElement)
 	{
 		AnimaString type = typeid(TYPE).name();
@@ -151,12 +133,6 @@ public:
 
 		if (pair != _mappedArrays.end())
 			pair->second->Set(name, newElement);
-	}
-	
-	template<class TYPE> void SetElementOfType(const char* name, TYPE newElement)
-	{
-		AnimaString str = name;
-		return SetElementOfType(str, newElement);
 	}
 
 	template<class TYPE> void RemoveFromType(AInt index)
@@ -175,12 +151,6 @@ public:
 
 		if (pair != _mappedArrays.end())
 			pair->second->Remove(name);
-	}
-
-	template<class TYPE> void RemoveFromType(const char* name)
-	{
-		AnimaString str = name;
-		return RemoveFromType(str);
 	}
 
 	void RemoveAll()
@@ -232,24 +202,12 @@ public:
 		return nullptr;
 	}
 
-	BASE_TYPE Contains(const char* name)
-	{
-		AnimaString str = name;
-		return Contains(str);
-	}
-
 	AnimaMappedArray<BASE_TYPE>* GetMappedArrayFromName(const AnimaString& name)
 	{
 		auto pair = _mappedNames.find(name);
 		if (pair != _mappedNames.end())
 			return pair->second;
 		return nullptr;
-	}
-
-	AnimaMappedArray<BASE_TYPE>* GetMappedArrayFromName(const char* name)
-	{
-		AnimaString str = name;
-		return GetMappedArrayFromName(str);
 	}
 
 	AInt GetTotalSize() const

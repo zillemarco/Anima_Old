@@ -92,7 +92,6 @@ public:
 	AInt GetInstancesCount() const;
 	AnimaMeshInstance* GetInstance(AInt index) const;
 	AnimaMeshInstance* GetInstanceFromName(const AnimaString& name) const;
-	AnimaMeshInstance* GetInstanceFromName(const char* name) const;
 	
 	// Gestione dati grafici
 	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
@@ -178,12 +177,10 @@ public:
 	// Gestione dati necessari al disegno
 	void AddShader(AnimaShader* shader);
 	void AddShader(const AnimaString& shaderName);
-	void AddShader(const char* shaderName);
 	AInt GetShadersCount() const;
 	AnimaString GetShaderName(AInt index) const;
 
 	void SetShaderProgram(const AnimaString& shaderProgramName);
-	void SetShaderProgram(const char* shaderProgramName);
 	AnimaString GetShaderProgramName() const;
 			
 public:

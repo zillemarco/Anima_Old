@@ -127,17 +127,19 @@ bool AnimaGBuffer::AddTexture(const AnimaString& name, AUint target, AUint attac
 
 	AUint index = (AUint)_texturesSet.size();
 
-	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, name, target, _width, _height, nullptr, 0, 0, filter, internalFormat, format, dataType, clamp/*, attachment*/);
+	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, name, _width, _height, nullptr, 0);
+	texture->SetTextureTarget(target);
+	texture->SetFilter(filter);
+	texture->SetInternalFormat(internalFormat);
+	texture->SetFormat(format);
+	texture->SetDataType(dataType);
+	texture->SetClamp(clamp);
+	texture->SetAttachment(attachment);
+
 	AnimaGBufferData* data = AnimaAllocatorNamespace::AllocateNew<AnimaGBufferData>(*_allocator, name, texture, index, attachment);
 	_texturesSet.insert(data);
 	
 	return true;
-}
-
-bool AnimaGBuffer::AddTexture(const char* name, AUint target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter, AUint clamp)
-{
-	AnimaString str = name;
-	return AddTexture(str, target, attachment, internalFormat, format, dataType, filter, clamp);
 }
 
 bool AnimaGBuffer::Create()
@@ -265,12 +267,6 @@ AnimaTexture* AnimaGBuffer::GetTexture(const AnimaString& name)
 		return (*element)->_texture;
 	
 	return nullptr;
-}
-
-AnimaTexture* AnimaGBuffer::GetTexture(const char* name)
-{
-	AnimaString str = name;
-	return GetTexture(str);
 }
 
 void AnimaGBuffer::BindAsRenderTarget()

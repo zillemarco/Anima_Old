@@ -61,6 +61,8 @@ protected:
 
 class AnimaEngine;
 
+typedef void(*AnimaRenderPassFunc)(AnimaRenderer* renderer);
+
 class ANIMA_ENGINE_EXPORT AnimaRenderer
 {
 public:
@@ -77,14 +79,8 @@ public:
 
 	AnimaScene* GetActiveScene() { return _scene; }
 
-	virtual void DrawAll();
-	virtual void DrawMesh(AnimaMesh* mesh);
-	virtual void DrawMesh(AnimaMeshInstance* instance);
-	virtual void DrawModel(AnimaModel* model);
-	virtual void DrawModel(AnimaModelInstance* instance);
-	
+	virtual void Render();
 	virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
-
 	virtual void UpdateModelsVisibility();
 	
 public:
@@ -97,25 +93,14 @@ protected:
 	virtual void Finish();
 
 protected:
-	virtual void PreparePass(AnimaShaderProgram* program);
-	virtual void PreparePass(AnimaShaderProgram* program, AnimaMesh* mesh);
-	virtual void PreparePass(AnimaShaderProgram* program, AnimaMeshInstance* instance);
-	virtual void PreparePass(AnimaShaderProgram* program, AnimaModel* model);
-	virtual void PreparePass(AnimaShaderProgram* program, AnimaModelInstance* instance);
-
 	virtual void UpdateShadowMaps(AnimaShaderProgram* program);
-	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMesh* mesh);
-	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaMeshInstance* instance);
-	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModel* model);
-	virtual void UpdateShadowMaps(AnimaShaderProgram* program, AnimaModelInstance* instance);
-
-	virtual void LightPass(AnimaArray<AnimaLight*>* lights);
-	virtual void CombinePass(AnimaShaderProgram* program);
-
+	
 	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
-	virtual void DrawMesh(AnimaMeshInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
-	virtual void DrawModel(AnimaModel* model, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
-	virtual void DrawModel(AnimaModelInstance* instance, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr);
+	
+protected:
+	static void PreparePass(AnimaRenderer* renderer);
+	static void LightPass(AnimaRenderer* renderer);
+	static void CombinePass(AnimaRenderer* renderer);
 
 protected:
 	void Clear();
@@ -135,76 +120,45 @@ protected:
 protected:
 	template<class T> AnimaMesh* CreateMeshForLightType();
 
-	void SetTextureSlot(AnimaString slotName, AUint value);
-	void SetTextureSlot(const char* slotName, AUint value);
-	
-	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);
-	void SetTexture(const char* propertyName, AnimaTexture* value, bool deleteExistent = true);
-	
+	void SetTextureSlot(AnimaString slotName, AUint value);	
+	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);	
 	void SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent = true);
-	void SetGBuffer(const char* name, AnimaGBuffer* value, bool deleteExistent = true);
 
 	void SetColor(AnimaString propertyName, AnimaColor3f value);
-	void SetColor(const char* propertyName, AnimaColor3f value);
 	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b);
-	void SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b);
 	void SetColor(AnimaString propertyName, AnimaColor4f value);
-	void SetColor(const char* propertyName, AnimaColor4f value);
 	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-	void SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
 
 	void SetVector(AnimaString propertyName, AnimaVertex2f value);
-	void SetVector(const char* propertyName, AnimaVertex2f value);
 	void SetVector(AnimaString propertyName, AFloat x, AFloat y);
-	void SetVector(const char* propertyName, AFloat x, AFloat y);
 	void SetVector(AnimaString propertyName, AnimaVertex3f value);
-	void SetVector(const char* propertyName, AnimaVertex3f value);
 	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z);
-	void SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z);
 	void SetVector(AnimaString propertyName, AnimaVertex4f value);
-	void SetVector(const char* propertyName, AnimaVertex4f value);
 	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-	void SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
 
 	void SetFloat(AnimaString propertyName, AFloat value);
-	void SetFloat(const char* propertyName, AFloat value);
-
 	void SetBoolean(AnimaString propertyName, bool value);
-	void SetBoolean(const char* propertyName, bool value);
-
 	void SetInteger(AnimaString propertyName, AInt value);
-	void SetInteger(const char* propertyName, AInt value);
 
 public:
-	AUint GetTextureSlot(const AnimaString& slotName);
-	AUint GetTextureSlot(const char* slotName);
-	
+	AUint GetTextureSlot(const AnimaString& slotName);	
 	AnimaTexture* GetTexture(AnimaString propertyName);
-	AnimaTexture* GetTexture(const char* propertyName);
-
 	AnimaGBuffer* GetGBuffer(const AnimaString& gBufferName);
-	AnimaGBuffer* GetGBuffer(const char* gBufferName);
 
 	AnimaColor3f GetColor3f(AnimaString propertyName);
-	AnimaColor3f GetColor3f(const char* propertyName);
 	AnimaColor4f GetColor4f(AnimaString propertyName);
-	AnimaColor4f GetColor4f(const char* propertyName);
 
 	AnimaVertex2f GetVector2f(AnimaString propertyName);
-	AnimaVertex2f GetVector2f(const char* propertyName);
 	AnimaVertex3f GetVector3f(AnimaString propertyName);
-	AnimaVertex3f GetVector3f(const char* propertyName);
 	AnimaVertex4f GetVector4f(AnimaString propertyName);
-	AnimaVertex4f GetVector4f(const char* propertyName);
 
 	AFloat GetFloat(AnimaString propertyName);
-	AFloat GetFloat(const char* propertyName);
-
 	AInt GetInteger(AnimaString propertyName);
-	AInt GetInteger(const char* propertyName);
-
 	bool GetBoolean(AnimaString propertyName);
-	bool GetBoolean(const char* propertyName);
+
+	void AddRenderPassFunction(AnimaRenderPassFunc function) { _renderPassesFunction.push_back(function); }
+	void InsertRenderPassFunction(AnimaRenderPassFunc function, AInt index) { _renderPassesFunction.insert(_renderPassesFunction.begin() + index, function); }
+	void RemoveRenderPassFunction(AInt index) { _renderPassesFunction.erase(_renderPassesFunction.begin() + index); }
 
 protected:
 	AnimaAllocator* _allocator;
@@ -221,6 +175,8 @@ protected:
 
 	AnimaModel* _lastUpdatedModel;
 	AnimaModelInstance* _lastUpdatedModelInstance;
+
+	AnimaArray<AnimaRenderPassFunc> _renderPassesFunction;
 	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaStringHasher>			_textureSlotsMap;

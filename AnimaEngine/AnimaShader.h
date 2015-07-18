@@ -23,7 +23,6 @@ class ANIMA_ENGINE_EXPORT AnimaShader : public AnimaNamedObject
 public:
 	AnimaShader(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type);
-	AnimaShader(const AnimaString& name, AnimaAllocator* allocator, const char* shaderText, AnimaShaderType type);
 	AnimaShader(const AnimaShader& src);
 	AnimaShader(AnimaShader&& src);
 	~AnimaShader();

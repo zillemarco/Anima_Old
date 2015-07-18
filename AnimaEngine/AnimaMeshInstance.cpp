@@ -157,11 +157,6 @@ void AnimaMeshInstance::AddShader(const AnimaString& shaderName)
 	_shadersNames.push_back(shaderName);
 }
 
-void AnimaMeshInstance::AddShader(const char* shaderName)
-{
-	_shadersNames.push_back(AnimaString(shaderName));
-}
-
 AInt AnimaMeshInstance::GetShadersCount() const
 {
 	return _shadersNames.size();
@@ -173,11 +168,6 @@ AnimaString AnimaMeshInstance::GetShaderName(AInt index) const
 }
 
 void AnimaMeshInstance::SetShaderProgram(const AnimaString& shaderProgramName)
-{
-	_shaderProgramName = shaderProgramName;
-}
-
-void AnimaMeshInstance::SetShaderProgram(const char* shaderProgramName)
 {
 	_shaderProgramName = shaderProgramName;
 }

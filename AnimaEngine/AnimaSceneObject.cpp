@@ -113,11 +113,6 @@ AnimaSceneObject* AnimaSceneObject::GetChild(const AnimaString& name)
 	return _children.GetWithName(name);
 }
 
-AnimaSceneObject* AnimaSceneObject::GetChild(const char* name)
-{
-	return _children.GetWithName(name);
-}
-
 AnimaSceneObject* AnimaSceneObject::GetChild(AInt index)
 {
 	return _children.Get(index);
@@ -133,12 +128,6 @@ bool AnimaSceneObject::RemoveChild(const AnimaString& name)
 	return _children.Remove(name);
 }
 
-bool AnimaSceneObject::RemoveChild(const char* name)
-{
-	AnimaString str = name;
-	return RemoveChild(str);
-}
-
 bool AnimaSceneObject::RemoveChild(AInt index)
 {
 	return _children.Remove(index);
@@ -152,12 +141,6 @@ AInt AnimaSceneObject::HasChild(AnimaSceneObject* object)
 AInt AnimaSceneObject::HasChild(const AnimaString& name)
 {
 	return _children.Contains(name);
-}
-
-AInt AnimaSceneObject::HasChild(const char* name)
-{
-	AnimaString str = name;
-	return HasChild(str);
 }
 
 AnimaTransformation* AnimaSceneObject::GetTransformation()

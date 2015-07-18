@@ -125,12 +125,6 @@ AnimaMesh* AnimaModel::GetMeshFromName(const AnimaString& name)
 	return _meshes[name];
 }
 
-AnimaMesh* AnimaModel::GetMeshFromName(const char* name)
-{
-	AnimaString str = name;
-	return _meshes[name];
-}
-
 AInt AnimaModel::GetAnimationsCount() const
 {
 	return _animations.size();
@@ -159,19 +153,9 @@ void AnimaModel::SetOriginFileName(const AnimaString& fileName)
 	_originFileName = fileName;
 }
 
-void AnimaModel::SetOriginFileName(const char* fileName)
-{
-	_originFileName = fileName;
-}
-
 AnimaString AnimaModel::GetAnimaOriginFileName() const
 {
 	return _originFileName;
-}
-
-const char* AnimaModel::GetOriginFileName() const
-{
-	return _originFileName.c_str();
 }
 
 void AnimaModel::SetAnimationNodeName(const AnimaString& animationNodeName)
@@ -179,19 +163,9 @@ void AnimaModel::SetAnimationNodeName(const AnimaString& animationNodeName)
 	_animationNodeName = animationNodeName;
 }
 
-void AnimaModel::SetAnimationNodeName(const char* animationNodeName)
-{
-	_animationNodeName = animationNodeName;
-}
-
 AnimaString AnimaModel::GetAnimaAnimationNodeName() const
 {
 	return _animationNodeName;
-}
-
-const char* AnimaModel::GetAnimationNodeName() const
-{
-	return _animationNodeName.c_str();
 }
 
 AnimaMappedArray<AnimaMeshBoneInfo*>* AnimaModel::GetMeshesBonesInfo()
@@ -259,7 +233,7 @@ void AnimaModel::ComputeBoundingBox()
 		{
 			AnimaVertex3f bbmin = _meshes[nm]->GetBoundingBoxMin();
 			AnimaVertex3f bbmax = _meshes[nm]->GetBoundingBoxMax();
-
+			
 			_boundingBoxMin.x = min(_boundingBoxMin.x, bbmin.x);
 			_boundingBoxMin.y = min(_boundingBoxMin.y, bbmin.y);
 			_boundingBoxMin.z = min(_boundingBoxMin.z, bbmin.z);
@@ -300,6 +274,27 @@ AnimaVertex3f AnimaModel::GetBoundingBoxMax() const
 AnimaVertex3f AnimaModel::GetBoundingBoxCenter() const
 {
 	return _boundingBoxCenter;
+}
+
+void AnimaModel::UpdateChildrenTransformation()
+{
+	AnimaSceneObject::UpdateChildrenTransformation();
+
+	AInt meshesCount = _meshes.GetSize();
+	for (AInt i = 0; i < meshesCount; i++)
+		_meshes[i]->GetTransformation()->UpdateMatrix();
+}
+
+void AnimaModel::GetAllMeshes(AnimaArray<AnimaMesh*> *meshes)
+{
+	if (meshes == nullptr)
+		return;
+
+	for (AInt nm = 0; nm < _meshes.GetSize(); nm++)
+		meshes->push_back(_meshes[nm]);
+	
+	for (AInt nc = 0; nc < _children.GetSize(); nc++)
+		((AnimaModel*)_children[nc])->GetAllMeshes(meshes);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

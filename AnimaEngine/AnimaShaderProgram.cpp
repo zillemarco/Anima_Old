@@ -826,23 +826,6 @@ void AnimaShaderProgram::EnableInput(const AnimaString& inputName, AInt size, AU
 	}
 }
 
-void AnimaShaderProgram::EnableInput(const char* inputName, AInt size, AUint type, AUint buffer)
-{
-	for (auto key : _inputs)
-	{
-		AnimaInputInfo info = key.second;
-
-		if (info._name == inputName)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, buffer);
-			glEnableVertexAttribArray(info._location);
-			glVertexAttribPointer(info._location, size, type, GL_FALSE, 0, 0);
-
-			break;
-		}
-	}
-}
-
 void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 {
 	glBindVertexArray(mesh->GetVertexArrayObject());

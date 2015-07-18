@@ -55,15 +55,12 @@ public:
 	virtual AInt AddChild(AnimaSceneObject* child);
 	virtual AInt GetChildrenCount();
 	virtual AnimaSceneObject* GetChild(const AnimaString& name);
-	virtual AnimaSceneObject* GetChild(const char* name);
 	virtual AnimaSceneObject* GetChild(AInt index);
 	virtual bool RemoveChild(AnimaSceneObject* object);
 	virtual bool RemoveChild(const AnimaString& name);
-	virtual bool RemoveChild(const char* name);
 	virtual bool RemoveChild(AInt index);
 	virtual AInt HasChild(AnimaSceneObject* object);
 	virtual AInt HasChild(const AnimaString& name);
-	virtual AInt HasChild(const char* name);
 
 	AnimaTransformation* GetTransformation();
 	AnimaTransformation GetTransformationCopy();

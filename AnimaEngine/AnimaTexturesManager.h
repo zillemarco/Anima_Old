@@ -41,25 +41,24 @@ public:
 	AnimaTexturesManager(AnimaScene* scene);
 	~AnimaTexturesManager();
 
-	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AInt mipMapLevels, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
+	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromBMPFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromTGAFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromDDSFile(const AnimaString& filePath, const AnimaString& textureName);
+	AnimaTexture* LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height);
 
 	AInt GetTexturesCount() const;
 	AnimaTexture* GetTexture(AUint index);
 	AnimaTexture* GetTexture(const AnimaString& textureName);
 
-	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp);
-	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint textureTarget, AUint width, AUint height, AUchar* data, ASizeT dataSize, AUint mipMapLevels, AUint filter, AUint internalFormat, AUint format, AUint dataType, AUint clamp);
+	AnimaTexture* CreateTexture(const AnimaString& textureName);
+	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUchar* data, ASizeT dataSize);
 	
 private:
 	void ClearTextures();
 
-	AnimaTexture* LoadUncompressedTGA(FILE* file, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
-	AnimaTexture* LoadCompressedTGA(FILE* file, const AnimaString& textureName, AUint textureTarget = GL_TEXTURE_2D, AUint filter = GL_LINEAR, AUint internalFormat = GL_RGB, AUint format = GL_RGB, AUint dataType = GL_UNSIGNED_BYTE, AUint clamp = GL_REPEAT);
+	AnimaTexture* LoadUncompressedTGA(FILE* file, const AnimaString& textureName);
+	AnimaTexture* LoadCompressedTGA(FILE* file, const AnimaString& textureName);
 	
 private:
 	AnimaScene* _scene;

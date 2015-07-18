@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
+#include <Windowsx.h>
 
 // AnimaEngine includes
 #include <AnimaGC.h>
@@ -14,6 +15,7 @@
 #include <AnimaAnimationsManager.h>
 #include <AnimaModelInstancesManager.h>
 #include <AnimaMaterialsManager.h>
+#include <AnimaMeshesManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -52,6 +54,9 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 bool _shouldClose = false;
 
+int lastXPos = 0;
+int lastYPos = 0;
+
 void test(std::string str)
 {
 	printf("%s", str);
@@ -73,6 +78,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		int nHeight = HIWORD(lParam);
 
 		SetViewport(nWidth, nHeight);
+
+		return result;
+		break;
+	}
+	case WM_MOUSEMOVE:
+	{
+		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
+
+		int xPos = GET_X_LPARAM(lParam);
+		int yPos = GET_Y_LPARAM(lParam);
+
+		int xDelta = lastXPos - xPos;
+		int yDelta = lastYPos - yPos;
+
+		if (_camera != nullptr)
+		{
+			if (wParam == MK_MBUTTON)
+			{
+				_camera->RotateXDeg((float)yDelta);
+				_camera->RotateYDeg((float)xDelta);
+			}
+			else if (wParam == MK_LBUTTON)
+			{
+				_camera->Move(1.0, 0.0, 0.0, ((float)xDelta) / 100.0f);
+				_camera->Move(0.0, 1.0, 0.0, ((float)-yDelta) / 100.0f);
+			}
+			else if (wParam == MK_RBUTTON)
+			{
+				_camera->Zoom((float)xDelta);
+			}
+		}
+
+		lastXPos = xPos;
+		lastYPos = yPos;
 
 		return result;
 		break;
@@ -131,7 +170,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 720, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -172,17 +211,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		delete _renderer;
 
 	return (int)msg.wParam;
-}
-
-void ChangeColor(Anima::AnimaModelInstance* instance, Anima::AnimaMaterial* material)
-{
-	for (int i = 0; i < instance->GetMeshesCount(); i++)
-	{
-		instance->GetMesh(i)->SetMaterial(material);
-	}
-
-	for (int i = 0; i < instance->GetChildrenCount(); i++)
-		ChangeColor((Anima::AnimaModelInstance*)instance->GetChild(i), material);
 }
 
 bool InitEngine()
@@ -257,10 +285,7 @@ bool InitEngine()
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	Anima::AnimaShaderProgram* prepareProgram = shadersManager->CreateProgram("deferred-prepare");
-	prepareProgram->Create();
-	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-prepare-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	prepareProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-prepare-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-prepare-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
+	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-base.asp");
 	if (!prepareProgram->Link())
 		return false;
 
@@ -305,36 +330,29 @@ bool InitEngine()
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
-	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	_camera = _camerasManager->CreateThirdPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
-
-	//_camera->LookAt(0.0, 90.0, 200.0, 0.0, 0.0, -1.0);
-	_camera->LookAt(0.0, 1.0, 5.0, 0.0, 0.0, -1.0);
-	_camera->Activate();
-
+	
 	// Caricamento di un modello
 	//_model = _scene->GetModelsManager()->LoadModel("C:/Users/Marco/Desktop/Model/Model_MR.dae", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
 
-	// Creazione di due istanze del modello
-	Anima::AnimaModelInstance* firstInstance = _scene->GetModelInstancesManager()->CreateInstance("first-instance", _model);
-	//Anima::AnimaModelInstance* secondInstance = _scene->GetModelInstancesManager()->CreateInstance("second-instance", _model);
+	_model->GetTransformation()->RotateXDeg(-90.0);
+	
+	_model->ComputeBoundingBox();
 
-	//firstInstance->GetTransformation()->TranslateX(5.0f);
-	firstInstance->GetTransformation()->RotateXDeg(-90.0);
-	//secondInstance->GetTransformation()->TranslateX(-5.0f);
+	_camera->LookAt(0.0, 1.0, 5.0, 0.0, 1.0, 0.0);
+	_camera->Activate();
 
-	Anima::AnimaMaterial* defaultMtl = materialsManager->GetDefaultMaterial();
-	bool b1 = defaultMtl->HasColor("DiffuseColor");
+	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
+	_model->GetAllMeshes(&modelMeshes);
 
-	//Anima::AnimaMaterial* mtl = materialsManager->CreateMaterial("testmat");
-	//mtl->CopyData(*materialsManager->GetDefaultMaterial());
-
-	//ChangeColor(firstInstance, materialsManager->GetMaterialFromName("material-1"));
-	//ChangeColor(secondInstance, materialsManager->GetMaterialFromName("material-1"));
+	modelMeshes[0]->SetMaterial(materialsManager->GetMaterialFromName("material-1"));
+	modelMeshes[1]->SetMaterial(materialsManager->GetMaterialFromName("material-2"));
+	modelMeshes[2]->SetMaterial(materialsManager->GetMaterialFromName("material-3"));
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
@@ -349,11 +367,12 @@ void SetViewport(int w, int h)
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(60.0f, size, 0.1f, 10000.0f);
+		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 10000.0f);
 	}
 
 	if (_renderer)
 	{
+		std::cout << "Resize: " << w << " x " << h << std::endl;
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
 	}
@@ -370,7 +389,7 @@ void UpdateFrame()
 		bool b1 = defaultMtl->HasColor("DiffuseColor");
 
 		_renderer->Start(_scene);
-		_renderer->DrawAll();
+		_renderer->Render();
 
 		_gc->SwapBuffers();
 	}

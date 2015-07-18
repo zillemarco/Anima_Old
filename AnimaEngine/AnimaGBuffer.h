@@ -112,23 +112,7 @@ public:
 	 *	\author		Zille Marco
 	 */
 	bool AddTexture(const AnimaString& name, AUint target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter, AUint clamp);
-	
-	/*!
-	 *	\brief		Aggiunge una texture al GBuffer
-	 *	\details	Aggiunge una texture al GBuffer. Se esiste già una texture con il nome passato tra quelle già presenti nel GBuffer la funzione non va a buon fine e torna false
-	 *	\param[in]	name			Nome della texture che si vuole aggiungere
-	 *	\param[in]	target			Target della texture (ad esempio GL_TEXTURE_2D, GL_TEXTURE_3D, ecc...)
-	 *	\param[in]	attachment		Parametro a cui si deve legare la texture per l'output (ad esempio GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, ecc...)
-	 +	\param[in]	internalFormat	Formato interno della texture (ad esempio GL_RGB, GL_RGBA, GL_BGR, ecc...)
-	 *	\param[in]	format			Formato della texture (ad esempio GL_RGB, GL_RGBA, ecc...)
-	 *	\param[in]	dataType		Tipo di dati memorizzati nella texture (ad esempio GL_FLOAT, GL_BYTE, ecc...)
-	 *	\param[in]	filter			Filtro da applicare alla texture (ad esempio GL_LINEAR, ecc...)
-	 *	\param[in]	clamp			Metodo di clamping della texture (ad esempio GL_REPEAT, GL_BORDER, ecc...)
-	 *	\return		True se il nome della texture non è già presente all'interno della lista delle texture del GBuffer, false altrimenti.
-	 *	\author		Zille Marco
-	 */
-	bool AddTexture(const char* name, AUint target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter, AUint clamp);
-	
+		
 	/*!
 	 *	\brief		Ridimensione le texture del GBuffer
 	 *	\details	Ridimensione le texture del GBuffer. Le texture non vengono subito ridimensionate, ma vengono modificati i valori _width e _heigth ed impostato il flag
@@ -174,15 +158,6 @@ public:
 	 */
 	AnimaTexture* GetTexture(const AnimaString& name);
 	
-	/*!
-	 *	\brief		Torna una delle texture del GBuffer
-	 *	\details	Torna una delle texture del GBuffer
-	 *	\param[in]	name	Nome della texture che si vuole recuperare
-	 *	\return		Puntatore alla texture contenuta dal GBuffer che ha il nome specificato. NULL se la texture col nome specificato non è presente nel GBuffer
-	 *	\author		Zille Marco
-	 */
-	AnimaTexture* GetTexture(const char* name);
-
 protected:
 	/*!
 	 *	\brief		Elimina completamente le texture del GBuffer deallocandone anche la memoria

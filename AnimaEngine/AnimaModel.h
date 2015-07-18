@@ -42,7 +42,6 @@ public:
 	AInt AddMesh(AnimaMesh* mesh);
 	AnimaMesh* GetMesh(AInt index);
 	AnimaMesh* GetMeshFromName(const AnimaString& name);
-	AnimaMesh* GetMeshFromName(const char* name);
 
 	AInt GetAnimationsCount() const;
 	void SetAnimations(AnimaArray<AnimaAnimation*>* animations);
@@ -50,14 +49,10 @@ public:
 	AnimaAnimation* GetAnimation(AInt index);
 
 	void SetOriginFileName(const AnimaString& fileName);
-	void SetOriginFileName(const char* fileName);
 	AnimaString GetAnimaOriginFileName() const;
-	const char* GetOriginFileName() const;
 
 	void SetAnimationNodeName(const AnimaString& animationNodeName);
-	void SetAnimationNodeName(const char* animationNodeName);
 	AnimaString GetAnimaAnimationNodeName() const;
-	const char* GetAnimationNodeName() const;
 
 	AnimaMappedArray<AnimaMeshBoneInfo*>* GetMeshesBonesInfo();
 	void SetMeshesBonesInfo(const AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo);
@@ -72,8 +67,12 @@ public:
 	AnimaVertex3f GetBoundingBoxMax() const;
 	AnimaVertex3f GetBoundingBoxCenter() const;
 
+	void GetAllMeshes(AnimaArray<AnimaMesh*> *meshes);
+
 protected:
 	const char* GetShaderPrefix() { return "MOD"; }
+	
+	virtual void UpdateChildrenTransformation();
 
 protected:
 	AnimaMaterial*	_material;

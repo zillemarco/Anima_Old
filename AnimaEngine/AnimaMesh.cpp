@@ -1373,11 +1373,6 @@ AnimaMeshInstance* AnimaMesh::GetInstanceFromName(const AnimaString& name) const
 	return _meshInstances[name];
 }
 
-AnimaMeshInstance* AnimaMesh::GetInstanceFromName(const char* name) const
-{
-	return _meshInstances[name];
-}
-
 void AnimaMesh::ComputeSmootNormals()
 {
 	AInt facesCount = _faces.size();
@@ -1450,11 +1445,6 @@ void AnimaMesh::AddShader(const AnimaString& shaderName)
 	_shadersNames.push_back(shaderName);
 }
 
-void AnimaMesh::AddShader(const char* shaderName)
-{
-	_shadersNames.push_back(AnimaString(shaderName));
-}
-
 AInt AnimaMesh::GetShadersCount() const
 {
 	return _shadersNames.size();
@@ -1466,11 +1456,6 @@ AnimaString AnimaMesh::GetShaderName(AInt index) const
 }
 
 void AnimaMesh::SetShaderProgram(const AnimaString& shaderProgramName)
-{
-	_shaderProgramName = shaderProgramName;
-}
-
-void AnimaMesh::SetShaderProgram(const char* shaderProgramName)
 {
 	_shaderProgramName = shaderProgramName;
 }
