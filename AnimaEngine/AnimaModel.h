@@ -67,6 +67,11 @@ public:
 	void SetActiveAnimation(AInt animationIndex);
 	void StopAnimation();
 
+	void ComputeBoundingBox();
+	AnimaVertex3f GetBoundingBoxMin() const;
+	AnimaVertex3f GetBoundingBoxMax() const;
+	AnimaVertex3f GetBoundingBoxCenter() const;
+
 protected:
 	const char* GetShaderPrefix() { return "MOD"; }
 
@@ -75,6 +80,10 @@ protected:
 	AnimaString		_materialName;
 	AnimaString		_animationNodeName;
 	AnimaString		_originFileName;
+
+	AnimaVertex3f	_boundingBoxMin;
+	AnimaVertex3f	_boundingBoxMax;
+	AnimaVertex3f	_boundingBoxCenter;
 
 	AnimaMappedArray<AnimaMesh*> _meshes;
 	AnimaMappedArray<AnimaMeshBoneInfo*> _meshesBonesInfo;

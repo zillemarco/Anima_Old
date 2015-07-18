@@ -527,6 +527,13 @@ void AnimaShaderProgram::ScanVariables()
 			glGetProgramResourceName(_id, GL_UNIFORM, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
 
 			namePart1 = name;
 
@@ -608,6 +615,13 @@ void AnimaShaderProgram::ScanVariables()
 			glGetProgramResourceName(_id, GL_PROGRAM_INPUT, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
 
 			AnimaInputInfo info;
 			info._location = values[2];
@@ -625,6 +639,13 @@ void AnimaShaderProgram::ScanVariables()
 			glGetProgramResourceName(_id, GL_PROGRAM_OUTPUT, i, nameArray.size(), NULL, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
 
 			AnimaOutputInfo info;
 			info._location = values[2];
@@ -656,6 +677,13 @@ void AnimaShaderProgram::ScanVariables()
 			glGetActiveUniform(_id, i, nameArray.size(), &bufLen, &elements, &type, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
 			
 			namePart1 = name;
 			
@@ -736,6 +764,13 @@ void AnimaShaderProgram::ScanVariables()
 			glGetActiveAttrib(_id, i, nameArray.size(), &bufLen, &elements, &type, &nameArray[0]);
 			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
 			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
 
 			location = glGetAttribLocation(_id, name.c_str());
 

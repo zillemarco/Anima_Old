@@ -51,175 +51,108 @@ public:
 	
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
-	void AddTexture(const char* propertyName, AnimaTexture* value);
-
+	
 	void AddColor(const AnimaString& propertyName, AnimaColorGenerator* value);
-	void AddColor(const char* propertyName, AnimaColorGenerator* value);
 	void AddColor(const AnimaString& propertyName, AnimaColor3f value);
-	void AddColor(const char* propertyName, AnimaColor3f value);
 	void AddColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b);
-	void AddColor(const char* propertyName, AFloat r, AFloat g, AFloat b);
 	void AddColor(const AnimaString& propertyName, AnimaColor4f value);
-	void AddColor(const char* propertyName, AnimaColor4f value);
 	void AddColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-	void AddColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-
+	
 	void AddVector(const AnimaString& propertyName, AnimaVectorGenerator* value);
-	void AddVector(const char* propertyName, AnimaVectorGenerator* value);
 	void AddVector(const AnimaString& propertyName, AnimaVertex2f value);
-	void AddVector(const char* propertyName, AnimaVertex2f value);
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y);
-	void AddVector(const char* propertyName, AFloat x, AFloat y);
 	void AddVector(const AnimaString& propertyName, AnimaVertex3f value);
-	void AddVector(const char* propertyName, AnimaVertex3f value);
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z);
-	void AddVector(const char* propertyName, AFloat x, AFloat y, AFloat z);
 	void AddVector(const AnimaString& propertyName, AnimaVertex4f value);
-	void AddVector(const char* propertyName, AnimaVertex4f value);
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-	void AddVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-
+	
 	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
-	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value);
 	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
-	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value);
 	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
-	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value);
 	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
-	void AddVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value);
-
+	
 	void AddFloat(const AnimaString& propertyName, AFloat value);
-	void AddFloat(const char* propertyName, AFloat value);
-
+	
 	void AddBoolean(const AnimaString& propertyName, bool value);
-	void AddBoolean(const char* propertyName, bool value);
-
+	
 	void AddInteger(const AnimaString& propertyName, AInt value);
-	void AddInteger(const char* propertyName, AInt value);
-
+	
 	void AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
-	void AddMatrix(const char* propertyName, const AnimaMatrix& value);
 	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
-	void AddMatrix(const char* propertyName, AFloat value[16]);
-
+	
 	void AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
-	void AddMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value);
-
+	
 	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
-	void SetTexture(const char* propertyName, AnimaTexture* value);
-
+	
 	void SetColor(const AnimaString& propertyName, AnimaColorGenerator* value);
-	void SetColor(const char* propertyName, AnimaColorGenerator* value);
 	void SetColor(const AnimaString& propertyName, AnimaColor3f value);
-	void SetColor(const char* propertyName, AnimaColor3f value);
 	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b);
-	void SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b);
 	void SetColor(const AnimaString& propertyName, AnimaColor4f value);
-	void SetColor(const char* propertyName, AnimaColor4f value);
 	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-	void SetColor(const char* propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-
+	
 	void SetVector(const AnimaString& propertyName, AnimaVectorGenerator* value);
-	void SetVector(const char* propertyName, AnimaVectorGenerator* value);
 	void SetVector(const AnimaString& propertyName, AnimaVertex2f value);
-	void SetVector(const char* propertyName, AnimaVertex2f value);
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y);
-	void SetVector(const char* propertyName, AFloat x, AFloat y);
 	void SetVector(const AnimaString& propertyName, AnimaVertex3f value);
-	void SetVector(const char* propertyName, AnimaVertex3f value);
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z);
-	void SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z);
 	void SetVector(const AnimaString& propertyName, AnimaVertex4f value);
-	void SetVector(const char* propertyName, AnimaVertex4f value);
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-	void SetVector(const char* propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-
+	
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
-	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVectorGenerator*>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
-	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex2f>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
-	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex3f>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
-	void SetVectorArray(const char* propertyName, AnimaArray<AnimaVertex4f>* value);
-
+	
 	void SetFloat(const AnimaString& propertyName, AFloat value);
-	void SetFloat(const char* propertyName, AFloat value);
-
+	
 	void SetBoolean(const AnimaString& propertyName, bool value);
-	void SetBoolean(const char* propertyName, bool value);
-
+	
 	void SetInteger(const AnimaString& propertyName, AInt value);
-	void SetInteger(const char* propertyName, AInt value);
-
+	
 	void SetMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
-	void SetMatrix(const char* propertyName, const AnimaMatrix& value);
 	void SetMatrix(const AnimaString& propertyName, AFloat value[16]);
-	void SetMatrix(const char* propertyName, AFloat value[16]);
-
+	
 	void SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
-	void SetMatrixArray(const char* propertyName, AnimaArray<AnimaMatrix>* value);
-
+	
 	AnimaTexture* GetTexture(const AnimaString& propertyName);
-	AnimaTexture* GetTexture(const char* propertyName);
-
+	
 	AnimaColor3f GetColor3f(const AnimaString& propertyName);
-	AnimaColor3f GetColor3f(const char* propertyName);
 	AnimaColor4f GetColor4f(const AnimaString& propertyName);
-	AnimaColor4f GetColor4f(const char* propertyName);
-
+	
 	AnimaVertex2f GetVector2f(const AnimaString& propertyName);
-	AnimaVertex2f GetVector2f(const char* propertyName);
 	AnimaVertex3f GetVector3f(const AnimaString& propertyName);
-	AnimaVertex3f GetVector3f(const char* propertyName);
 	AnimaVertex4f GetVector4f(const AnimaString& propertyName);
-	AnimaVertex4f GetVector4f(const char* propertyName);
-
+	
 	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName);
-	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const char* propertyName);
-
+	
 	AFloat GetFloat(const AnimaString& propertyName);
-	AFloat GetFloat(const char* propertyName);
-
+	
 	AInt GetInteger(const AnimaString& propertyName);
-	AInt GetInteger(const char* propertyName);
-
+	
 	bool GetBoolean(const AnimaString& propertyName);
-	bool GetBoolean(const char* propertyName);
-
+	
 	AnimaMatrix GetMatrix(const AnimaString& propertyName);
-	AnimaMatrix GetMatrix(const char* propertyName);
-
+	
 	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName);
-	AnimaArray<AnimaMatrix>* GetMatrixArray(const char* propertyName);
-
+	
 	bool HasTexture(const AnimaString& propertyName);
-	bool HasTexture(const char* propertyName);
 	
 	bool HasColor(const AnimaString& propertyName);
-	bool HasColor(const char* propertyName);
 	
 	bool HasVector(const AnimaString& propertyName);
-	bool HasVector(const char* propertyName);
-
+	
 	bool HasVectorArray(const AnimaString& propertyName);
-	bool HasVectorArray(const char* propertyName);
 	
 	bool HasFloat(const AnimaString& propertyName);
-	bool HasFloat(const char* propertyName);
 	
 	bool HasInteger(const AnimaString& propertyName);
-	bool HasInteger(const char* propertyName);
 	
 	bool HasBoolean(const AnimaString& propertyName);
-	bool HasBoolean(const char* propertyName);
-
+	
 	bool HasMatrix(const AnimaString& propertyName);
-	bool HasMatrix(const char* propertyName);
-
+	
 	bool HasMatrixArray(const AnimaString& propertyName);
-	bool HasMatrixArray(const char* propertyName);
-
+	
 	void CopyTextures(const AnimaMappedValues& src);
 	void CopyColors(const AnimaMappedValues& src);
 	void CopyVectors(const AnimaMappedValues& src);
@@ -241,15 +174,15 @@ protected:
 	AnimaString _uniqueName;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaTexture*> _texturesMap;
-	boost::unordered_map<AnimaString, AnimaColorGenerator*> _colorsMap;
-	boost::unordered_map<AnimaString, AnimaVectorGenerator*> _vectorsMap;
-	boost::unordered_map<AnimaString, AnimaMatrix> _matricesMap;
-	boost::unordered_map<AnimaString, AFloat> _floatsMap;
-	boost::unordered_map<AnimaString, AInt> _integersMap;
-	boost::unordered_map<AnimaString, bool> _booleansMap;
-	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*> _vectorsArraysMap;
-	boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*> _matricesArraysMap;
+	boost::unordered_map<AnimaString, AnimaTexture*, AnimaStringHasher> _texturesMap;
+	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaStringHasher> _colorsMap;
+	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaStringHasher> _vectorsMap;
+	boost::unordered_map<AnimaString, AnimaMatrix, AnimaStringHasher> _matricesMap;
+	boost::unordered_map<AnimaString, AFloat, AnimaStringHasher> _floatsMap;
+	boost::unordered_map<AnimaString, AInt, AnimaStringHasher> _integersMap;
+	boost::unordered_map<AnimaString, bool, AnimaStringHasher> _booleansMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaStringHasher> _vectorsArraysMap;
+	boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaStringHasher> _matricesArraysMap;
 #pragma warning (default: 4251) 
 };
 

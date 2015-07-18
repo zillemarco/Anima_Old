@@ -147,9 +147,9 @@ private:
 	AUint _maxSpotLights;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaUniformInfo> _uniforms;
-	boost::unordered_map<AnimaString, AnimaInputInfo> _inputs;
-	boost::unordered_map<AnimaString, AnimaOutputInfo> _outputs;
+	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaStringHasher> _uniforms;
+	boost::unordered_map<AnimaString, AnimaInputInfo, AnimaStringHasher> _inputs;
+	boost::unordered_map<AnimaString, AnimaOutputInfo, AnimaStringHasher> _outputs;
 #pragma warning (default: 4251) 
 
 	AInt			_id;

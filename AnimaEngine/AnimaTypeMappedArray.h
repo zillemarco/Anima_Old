@@ -219,7 +219,7 @@ public:
 		return nullptr;
 	}
 
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*>* GetArraysMap()
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaStringHasher>* GetArraysMap()
 	{
 		return &_mappedArrays;
 	}
@@ -271,8 +271,8 @@ protected:
 	AnimaAllocator* _allocator;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*> _mappedArrays;
-	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*> _mappedNames;
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaStringHasher> _mappedArrays;
+	boost::unordered_map<AnimaString, AnimaMappedArray<BASE_TYPE>*, AnimaStringHasher> _mappedNames;
 #pragma warning (default: 4251) 
 };
 

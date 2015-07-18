@@ -541,7 +541,7 @@ void AnimaRenderer::DrawAll()
 
 	ANIMA_FRAME_PUSH("Lightning");
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 	ANIMA_FRAME_POP();
@@ -665,7 +665,7 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -767,7 +767,7 @@ void AnimaRenderer::DrawMesh(AnimaMeshInstance* instance)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -869,7 +869,7 @@ void AnimaRenderer::DrawModel(AnimaModel* model)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 
@@ -971,7 +971,7 @@ void AnimaRenderer::DrawModel(AnimaModelInstance* instance)
 	glDepthMask(GL_FALSE);
 
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = lights->GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	for (auto pair : (*lightsMap))
 		LightPass(pair.second->GetArray());
 

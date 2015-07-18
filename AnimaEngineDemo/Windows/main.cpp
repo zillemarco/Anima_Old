@@ -202,7 +202,7 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/cubo.3ds";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 
 #if !defined _DEBUG
 	Anima::AnimaString inputString;
@@ -310,7 +310,7 @@ bool InitEngine()
 		return false;
 
 	//_camera->LookAt(0.0, 90.0, 200.0, 0.0, 0.0, -1.0);
-	_camera->LookAt(0.0, 0.0, 20.0, 0.0, 0.0, -1.0);
+	_camera->LookAt(0.0, 1.0, 5.0, 0.0, 0.0, -1.0);
 	_camera->Activate();
 
 	// Caricamento di un modello
@@ -321,12 +321,20 @@ bool InitEngine()
 
 	// Creazione di due istanze del modello
 	Anima::AnimaModelInstance* firstInstance = _scene->GetModelInstancesManager()->CreateInstance("first-instance", _model);
-	Anima::AnimaModelInstance* secondInstance = _scene->GetModelInstancesManager()->CreateInstance("second-instance", _model);
+	//Anima::AnimaModelInstance* secondInstance = _scene->GetModelInstancesManager()->CreateInstance("second-instance", _model);
 
-	firstInstance->GetTransformation()->TranslateX(5.0f);
-	secondInstance->GetTransformation()->TranslateX(-5.0f);
+	//firstInstance->GetTransformation()->TranslateX(5.0f);
+	firstInstance->GetTransformation()->RotateXDeg(-90.0);
+	//secondInstance->GetTransformation()->TranslateX(-5.0f);
 
-	ChangeColor(firstInstance, materialsManager->GetMaterialFromName("material-1"));
+	Anima::AnimaMaterial* defaultMtl = materialsManager->GetDefaultMaterial();
+	bool b1 = defaultMtl->HasColor("DiffuseColor");
+
+	//Anima::AnimaMaterial* mtl = materialsManager->CreateMaterial("testmat");
+	//mtl->CopyData(*materialsManager->GetDefaultMaterial());
+
+	//ChangeColor(firstInstance, materialsManager->GetMaterialFromName("material-1"));
+	//ChangeColor(secondInstance, materialsManager->GetMaterialFromName("material-1"));
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
@@ -356,6 +364,10 @@ void UpdateFrame()
 	if (_gc)
 	{
 		_gc->MakeCurrent();
+
+		Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+		Anima::AnimaMaterial* defaultMtl = materialsManager->GetDefaultMaterial();
+		bool b1 = defaultMtl->HasColor("DiffuseColor");
 
 		_renderer->Start(_scene);
 		_renderer->DrawAll();

@@ -243,4 +243,63 @@ void AnimaModel::StopAnimation()
 	_activeAnimation = -1;
 }
 
+void AnimaModel::ComputeBoundingBox()
+{
+	_boundingBoxMin.x = _boundingBoxMax.x = 0.0f;
+	_boundingBoxMin.y = _boundingBoxMax.y = 0.0f;
+	_boundingBoxMin.z = _boundingBoxMax.z = 0.0f;
+
+	AInt meshesCount = _meshes.GetSize();
+	if (meshesCount > 0)
+	{
+		_boundingBoxMin = _meshes[0]->GetBoundingBoxMin();
+		_boundingBoxMax = _meshes[0]->GetBoundingBoxMax();
+
+		for (AInt nm = 1; nm < meshesCount; nm++)
+		{
+			AnimaVertex3f bbmin = _meshes[nm]->GetBoundingBoxMin();
+			AnimaVertex3f bbmax = _meshes[nm]->GetBoundingBoxMax();
+
+			_boundingBoxMin.x = min(_boundingBoxMin.x, bbmin.x);
+			_boundingBoxMin.y = min(_boundingBoxMin.y, bbmin.y);
+			_boundingBoxMin.z = min(_boundingBoxMin.z, bbmin.z);
+
+			_boundingBoxMax.x = max(_boundingBoxMax.x, bbmax.x);
+			_boundingBoxMax.y = max(_boundingBoxMax.y, bbmax.y);
+			_boundingBoxMax.z = max(_boundingBoxMax.z, bbmax.z);
+		}
+	}
+
+	for (AInt nc = 0; nc < _children.GetSize(); nc++)
+	{
+		AnimaVertex3f bbmin = ((AnimaModel*)_children[nc])->GetBoundingBoxMin();
+		AnimaVertex3f bbmax = ((AnimaModel*)_children[nc])->GetBoundingBoxMax();
+
+		_boundingBoxMin.x = min(_boundingBoxMin.x, bbmin.x);
+		_boundingBoxMin.y = min(_boundingBoxMin.y, bbmin.y);
+		_boundingBoxMin.z = min(_boundingBoxMin.z, bbmin.z);
+
+		_boundingBoxMax.x = max(_boundingBoxMax.x, bbmax.x);
+		_boundingBoxMax.y = max(_boundingBoxMax.y, bbmax.y);
+		_boundingBoxMax.z = max(_boundingBoxMax.z, bbmax.z);
+	}
+
+	_boundingBoxCenter = AnimaVertex3f((_boundingBoxMin.x + _boundingBoxMax.x) / 2.0f, (_boundingBoxMin.y + _boundingBoxMax.y) / 2.0f, (_boundingBoxMin.z + _boundingBoxMax.z) / 2.0f);
+}
+
+AnimaVertex3f AnimaModel::GetBoundingBoxMin() const
+{
+	return _boundingBoxMin;
+}
+
+AnimaVertex3f AnimaModel::GetBoundingBoxMax() const
+{
+	return _boundingBoxMax;
+}
+
+AnimaVertex3f AnimaModel::GetBoundingBoxCenter() const
+{
+	return _boundingBoxCenter;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

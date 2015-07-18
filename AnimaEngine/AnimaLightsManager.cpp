@@ -38,7 +38,7 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 
 void AnimaLightsManager::ClearLights()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = _lights.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = _lights.GetArraysMap();
 	for (auto lightsPair : (*lightsMap))
 	{
 		AnimaMappedArray<AnimaLight*>* lightsArray = lightsPair.second;
@@ -63,7 +63,7 @@ AInt AnimaLightsManager::GetTotalLightsCount()
 {
 	AInt count = 0;
 	
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = _lights.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = _lights.GetArraysMap();
 	for (auto lightsPair : (*lightsMap))
 		count += lightsPair.second->GetSize();
 
@@ -77,7 +77,7 @@ AnimaTypeMappedArray<AnimaLight*>* AnimaLightsManager::GetLights()
 
 void AnimaLightsManager::UpdateLightsMatrix(AnimaCamera* activeCamera)
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*>* lightsMap = _lights.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = _lights.GetArraysMap();
 	for (auto lightsPair : (*lightsMap))
 	{
 		AnimaMappedArray<AnimaLight*>* lightsArray = lightsPair.second;

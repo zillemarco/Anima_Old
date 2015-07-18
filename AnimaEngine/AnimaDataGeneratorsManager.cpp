@@ -36,7 +36,7 @@ void AnimaDataGeneratorsManager::ClearGenerators()
 {
 	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
 
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaStringHasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
 		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
@@ -79,7 +79,7 @@ bool AnimaDataGeneratorsManager::RemoveGenerator(AnimaDataGenerator* generator)
 
 void AnimaDataGeneratorsManager::UpdateValues()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaStringHasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 	{
 		AnimaMappedArray<AnimaDataGenerator*>* dataGeneratorsArray = dataGeneratorsPair.second;
@@ -93,7 +93,7 @@ AInt AnimaDataGeneratorsManager::GetTotalDataGeneratorsCount()
 {
 	AInt count = 0;
 	
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaStringHasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))
 		count += dataGeneratorsPair.second->GetSize();
 	

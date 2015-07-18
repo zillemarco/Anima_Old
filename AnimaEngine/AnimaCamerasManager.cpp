@@ -34,7 +34,7 @@ AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const Anima
 
 void AnimaCamerasManager::ClearCameras()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*>* camerasMap = _cameras.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
 	for (auto camerasPair : (*camerasMap))
 	{
 		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
@@ -69,7 +69,7 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 	AnimaCamera* firstCamera = nullptr;
 	if(_activeCamera == nullptr)
 	{
-		boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*>* camerasMap = _cameras.GetArraysMap();
+		boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
 		for (auto camerasPair : (*camerasMap))
 		{
 			AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
@@ -108,7 +108,7 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 
 void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar)
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*>* camerasMap = _cameras.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
 	for (auto camerasPair : (*camerasMap))
 	{
 		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
@@ -125,7 +125,7 @@ void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2
 
 void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar)
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*>* camerasMap = _cameras.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
 	for (auto camerasPair : (*camerasMap))
 	{
 		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
@@ -149,7 +149,7 @@ AInt AnimaCamerasManager::GetTotalCamerasCount()
 {
 	AInt count = 0;
 	
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*>* camerasMap = _cameras.GetArraysMap();
+	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
 	for (auto camerasPair : (*camerasMap))
 		count += camerasPair.second->GetSize();
 	

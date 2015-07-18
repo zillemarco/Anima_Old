@@ -208,7 +208,7 @@ protected:
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AInt> _namesMap;
+	boost::unordered_map<AnimaString, AInt, AnimaStringHasher> _namesMap;
 #pragma warning (default: 4251) 
 };
 
@@ -411,7 +411,7 @@ protected:
 	AnimaArray<TYPE>	_array;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AInt> _namesMap;
+	boost::unordered_map<AnimaString, AInt, AnimaStringHasher> _namesMap;
 #pragma warning (default: 4251) 
 };
 
