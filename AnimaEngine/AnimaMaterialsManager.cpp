@@ -17,25 +17,33 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+AnimaMaterial* AnimaMaterialsManager::_defaultMaterial = nullptr;
+AInt AnimaMaterialsManager::_instancesCount = 0;
+
 AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesManager* texturesManager)
 {
 	ANIMA_ASSERT(texturesManager != nullptr);
 	_scene = scene;
 	_texturesManager = texturesManager;
 
-	_defaultMaterial = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), "defaultMaterial");
+	if (_defaultMaterial == nullptr)
+		_defaultMaterial = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), "defaultMaterial");
+
+	_instancesCount++;
 }
 
 AnimaMaterialsManager::~AnimaMaterialsManager()
 {
-	if (_defaultMaterial)
+	ClearMaterials();
+	ClearLastMaterialsIndexMap();
+
+	_instancesCount--;
+
+	if (_instancesCount == 0 && _defaultMaterial != nullptr)
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetMaterialsAllocator()), _defaultMaterial);
 		_defaultMaterial = nullptr;
 	}
-
-	ClearMaterials();
-	ClearLastMaterialsIndexMap();
 }
 
 AnimaMaterial* AnimaMaterialsManager::CreateMaterial(const AnimaString& name)

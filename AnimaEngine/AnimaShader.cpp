@@ -5,6 +5,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaShader);
+
 	_id = 0;
 	_compiled = false;
 
@@ -14,6 +16,8 @@ AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator)
 AnimaShader::AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaShader);
+
 	_id = 0;
 	_compiled = false;
 

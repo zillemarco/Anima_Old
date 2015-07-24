@@ -17,6 +17,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaMeshInstance);
 	_material = nullptr;
 	_mesh = nullptr;
 	_shaderProgramName = "";
@@ -120,7 +121,7 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 	{
 		AnimaMaterial* material = _material;
 		if (material == nullptr)
-			material = renderer->GetActiveScene()->GetMaterialsManager()->GetDefaultMaterial();
+			material = AnimaMaterialsManager::GetDefaultMaterial();
 
 		ANIMA_FRAME_PUSH("MeshInstanceMaterialUpdateProp");
 		program->UpdateMappedValuesObjectProperties(material, renderer);

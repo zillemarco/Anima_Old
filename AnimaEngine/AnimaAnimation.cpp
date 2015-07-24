@@ -14,6 +14,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaAnimation::AnimaAnimation(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaAnimation);
+
 	_duration = 0.0f;
 	_ticksPerSecond = 0.0f;
 }

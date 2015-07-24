@@ -13,6 +13,7 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
+#include "AnimaTexture.h"
 #include "AnimaNamedObject.h"
 #include "AnimaString.h"
 
@@ -48,6 +49,9 @@ public:
 	virtual AnimaVertex2f GetVector2f();
 	virtual AnimaVertex3f GetVector3f();
 	virtual AnimaVertex4f GetVector4f();
+	
+	virtual void SetTexture(AnimaTexture* texture);
+	virtual AnimaTexture* GetTexture();
 
 	virtual void StopValueUpdate();
 	virtual void StartValueUpdate();

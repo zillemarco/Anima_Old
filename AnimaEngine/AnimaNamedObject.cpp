@@ -14,17 +14,23 @@ AnimaNamedObject::AnimaNamedObject(const AnimaString& name, AnimaAllocator* allo
 	: _allocator(allocator)
 {
 	_name = name;
+
+	IMPLEMENT_ANIMA_CLASS(AnimaNamedObject);
 }
 
 AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
 	: _allocator(src._allocator)
 	, _name(src._name)
+	, _className(src._className)
+	, _derivedClassNames(src._derivedClassNames)
 {
 }
 
 AnimaNamedObject::AnimaNamedObject(AnimaNamedObject&& src)
 	: _allocator(src._allocator)
 	, _name(src._name)
+	, _className(src._className)
+	, _derivedClassNames(src._derivedClassNames)
 {
 }
 
@@ -38,6 +44,8 @@ AnimaNamedObject& AnimaNamedObject::operator=(const AnimaNamedObject& src)
 	{
 		_allocator = src._allocator;
 		_name = src._name;
+		_className = src._className;
+		_derivedClassNames = src._derivedClassNames;
 	}
 
 	return *this;
@@ -49,6 +57,8 @@ AnimaNamedObject& AnimaNamedObject::operator=(AnimaNamedObject&& src)
 	{
 		_allocator = src._allocator;
 		_name = src._name;
+		_className = src._className;
+		_derivedClassNames = src._derivedClassNames;
 	}
 
 	return *this;
@@ -62,6 +72,30 @@ void AnimaNamedObject::SetName(const AnimaString& name)
 AnimaString AnimaNamedObject::GetName() const
 {
 	return _name;
+}
+
+void AnimaNamedObject::AddDerivedClassName(AnimaString derivedClassName)
+{
+	_derivedClassNames.push_back(derivedClassName);
+}
+
+void AnimaNamedObject::SetClassName(AnimaString className)
+{
+	_className = className;
+}
+
+bool AnimaNamedObject::IsOfClass(AnimaString className)
+{
+	if (_className == className)
+		return true;
+
+	for (auto val : _derivedClassNames)
+	{
+		if (val == className)
+			return true;
+	}
+
+	return false;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

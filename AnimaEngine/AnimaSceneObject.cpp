@@ -14,6 +14,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaMappedValues(allocator, dataGeneratorsManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaSceneObject);
+
 	_parentObject = nullptr;
 	_transformation.SetParentObject(this);
 }

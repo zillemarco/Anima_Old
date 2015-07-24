@@ -13,6 +13,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaDataGenerator::AnimaDataGenerator(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaDataGenerator);
 	_canUpdateValue = true;
 }
 
@@ -132,6 +133,17 @@ AnimaVertex4f AnimaDataGenerator::GetVector4f()
 {
 	ANIMA_ASSERT(false);
 	return AnimaVertex4f();
+}
+
+void AnimaDataGenerator::SetTexture(AnimaTexture* texture)
+{
+	ANIMA_ASSERT(false);
+}
+
+AnimaTexture* AnimaDataGenerator::GetTexture()
+{
+	ANIMA_ASSERT(false);
+	return nullptr;
 }
 
 void AnimaDataGenerator::StopValueUpdate()

@@ -13,6 +13,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaModelInstance::AnimaModelInstance(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaModelInstance);
 	_model = nullptr;
 }
 

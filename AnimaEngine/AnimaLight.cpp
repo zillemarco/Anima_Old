@@ -29,6 +29,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaSceneObject(name, dataGeneratorManager, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaLight);
+
 	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", 1024, 1024, nullptr, 0);
 	texture->SetTextureTarget(GL_TEXTURE_2D);
 	texture->SetFilter(GL_LINEAR);
@@ -226,6 +228,7 @@ AnimaFrustum* AnimaLight::GetFrustum()
 AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaLight(allocator, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaDirectionalLight);
 	AnimaLight::SetVector("Direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	AnimaLight::SetVector("ShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
@@ -350,6 +353,7 @@ bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
 AnimaPointLight::AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaLight(allocator, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaPointLight);
 	AnimaSceneObject::SetFloat("ConstantAttenuation", 0.0f);
 	AnimaSceneObject::SetFloat("LinearAttenuation", 0.0f);
 	AnimaSceneObject::SetFloat("ExponentAttenuation", 1.0f);
@@ -456,6 +460,8 @@ bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
 AnimaSpotLight::AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager,  const AnimaString& name)
 	: AnimaPointLight(allocator, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaSpotLight);
+
 	AnimaSceneObject::SetVector("Direction", AnimaVertex3f(0.0f, -1.0f, 0.0f).Normalized());
 	AnimaSceneObject::SetFloat("Cutoff", 0.7f);
 }
@@ -574,6 +580,8 @@ bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 AnimaHemisphereLight::AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaLight(allocator, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaHemisphereLight);
+
 	AnimaSceneObject::SetColor("SkyColor", AnimaColor3f(1.0f, 1.0f, 1.0f));
 	AnimaSceneObject::SetColor("GroundColor", AnimaColor3f(0.0f, 0.0f, 0.0f));
 }

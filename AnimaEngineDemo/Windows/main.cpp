@@ -230,7 +230,7 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/MatTester.obj";
 
 #if !defined _DEBUG
 	Anima::AnimaString inputString;
@@ -340,19 +340,34 @@ bool InitEngine()
 	if (!_model)
 		return false;
 
-	_model->GetTransformation()->RotateXDeg(-90.0);
+	//_model->GetTransformation()->RotateXDeg(-90.0);
 	
 	_model->ComputeBoundingBox();
 
-	_camera->LookAt(0.0, 1.0, 5.0, 0.0, 1.0, 0.0);
+	_camera->LookAt(0.0, 5.0, 10.0, 0.0, 1.0, 0.0);
 	_camera->Activate();
 
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
 
-	modelMeshes[0]->SetMaterial(materialsManager->GetMaterialFromName("material-1"));
-	modelMeshes[1]->SetMaterial(materialsManager->GetMaterialFromName("material-2"));
-	modelMeshes[2]->SetMaterial(materialsManager->GetMaterialFromName("material-3"));
+	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
+
+	//for (int i = -2; i < 4; i++)
+	//{
+	//	for (int j = -2; j < 4; j++)
+	//	{
+	//		Anima::AnimaString str = Anima::FormatString("%d-%d", i, j);
+	//		Anima::AnimaModelInstance* instance = modelInstancesManager->CreateInstance(str, _model);
+
+	//		instance->GetTransformation()->RotateXDeg(-90);
+	//		instance->GetTransformation()->TranslateX((float)i * 4);
+	//		instance->GetTransformation()->TranslateZ((float)j * 4);
+	//	}
+	//}
+
+	//modelMeshes[0]->SetMaterial(materialsManager->GetMaterialFromName("material-1"));
+	//modelMeshes[1]->SetMaterial(materialsManager->GetMaterialFromName("material-2"));
+	//modelMeshes[2]->SetMaterial(materialsManager->GetMaterialFromName("material-3"));
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());

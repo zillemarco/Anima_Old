@@ -74,18 +74,6 @@ AnimaMappedValues& AnimaMappedValues::operator=(const AnimaMappedValues& src)
 		AnimaNamedObject::operator=(src);
 
 		CopyData(src);
-
-		//_uniqueName = src._uniqueName;
-		//_dataGeneratorManager = src._dataGeneratorManager;
-
-		//_texturesMap = src._texturesMap;
-		//_colorsMap = src._colorsMap;
-		//_vectorsMap = src._vectorsMap;
-		//_floatsMap = src._floatsMap;
-		//_integersMap = src._integersMap;
-		//_booleansMap = src._booleansMap;
-		//_matricesMap = src._matricesMap;
-		//_vectorsArraysMap = src._vectorsArraysMap;
 	}
 	
 	return *this;
@@ -98,18 +86,6 @@ AnimaMappedValues& AnimaMappedValues::operator=(AnimaMappedValues&& src)
 		AnimaNamedObject::operator=(src);
 
 		CopyData(src);
-
-		//_uniqueName = src._uniqueName;
-		//_dataGeneratorManager = src._dataGeneratorManager;
-
-		//_texturesMap = src._texturesMap;
-		//_colorsMap = src._colorsMap;
-		//_vectorsMap = src._vectorsMap;
-		//_floatsMap = src._floatsMap;
-		//_integersMap = src._integersMap;
-		//_booleansMap = src._booleansMap;
-		//_matricesMap = src._matricesMap;
-		//_vectorsArraysMap = src._vectorsArraysMap;
 	}
 	
 	return *this;
@@ -130,12 +106,36 @@ void AnimaMappedValues::CopyData(const AnimaMappedValues& src)
 	}
 }
 
-void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture* value)
+void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTextureGenerator* value)
 {
 	AnimaString pName = _uniqueName + propertyName;
 	if (_texturesMap.find(pName) != _texturesMap.end())
 		return;
 	_texturesMap[pName] = value;
+}
+
+void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture* value)
+{
+	AnimaString pName = _uniqueName + propertyName + ".valueGenerator";
+	AnimaTextureGenerator* generator = _dataGeneratorManager->CreateTextureGenerator(pName);
+
+	if (generator == nullptr)
+	{
+		int i = 1;
+
+		AnimaString suffix = FormatString(".valueGenerator.%d", i);
+		while (generator == nullptr)
+		{
+			generator = _dataGeneratorManager->CreateTextureGenerator(pName + suffix);
+
+			i++;
+			suffix = FormatString(".valueGenerator.%d", i);
+		}
+	}
+
+	generator->SetTexture(value);
+
+	AddTexture(propertyName, generator);
 }
 
 void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColorGenerator* value)
@@ -414,13 +414,25 @@ void AnimaMappedValues::AddMatrixArray(const AnimaString& propertyName, AnimaArr
 	_matricesArraysMap[pName] = newMatricesArray;
 }
 
-void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture* value)
+void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTextureGenerator* value)
 {
 	AnimaString pName = _uniqueName + propertyName;
 	if (_texturesMap.find(pName) == _texturesMap.end())
 		AddTexture(propertyName, value);
 	else
 		_texturesMap[pName] = value;
+}
+
+void AnimaMappedValues::SetTexture(const AnimaString& propertyName, AnimaTexture* value)
+{
+	AnimaString pName = _uniqueName + propertyName + ".valueGenerator";
+	AnimaTextureGenerator* generator = (AnimaTextureGenerator*)_dataGeneratorManager->GetGenerator(pName);
+	if (generator == nullptr)
+		AddTexture(propertyName, value);
+	else
+	{
+		generator->SetTexture(value);
+	}
 }
 
 void AnimaMappedValues::SetColor(const AnimaString& propertyName, AnimaColorGenerator* value)
@@ -505,7 +517,6 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVertex4f
 	else
 	{
 		generator->SetVector(value);
-		//SetVector(propertyName, generator);
 	}
 }
 
@@ -550,13 +561,6 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		}
 
 		ANIMA_ASSERT(currentArray->size() == value->size());
-
-		//ClearVectorsArray(currentArray);
-		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, currentArray);
-
-		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-		//newVectorArray->Copy(*value);
-		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -615,19 +619,6 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		}
 
 		ANIMA_ASSERT(currentArray->size() == value->size());
-
-		//ClearVectorsArray(foundValue->second);
-		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
-
-		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-
-		//AInt valuesCount = value->GetSize();
-		//for (AInt i = 0; i < valuesCount; i++)
-		//{
-		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		//	newVectorArray->Add(vectorGenerator);
-		//}
-		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -686,19 +677,6 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		}
 
 		ANIMA_ASSERT(currentArray->size() == value->size());
-
-		//ClearVectorsArray(foundValue->second);
-		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
-
-		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-
-		//AInt valuesCount = value->GetSize();
-		//for (AInt i = 0; i < valuesCount; i++)
-		//{
-		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		//	newVectorArray->Add(vectorGenerator);
-		//}
-		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -757,19 +735,6 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 		}
 
 		ANIMA_ASSERT(currentArray->size() == value->size());
-
-		//ClearVectorsArray(foundValue->second);
-		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, foundValue->second);
-
-		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-
-		//AInt valuesCount = value->GetSize();
-		//for (AInt i = 0; i < valuesCount; i++)
-		//{
-		//	AnimaVectorGenerator* vectorGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*_allocator, _allocator, value->GetAt(i));
-		//	newVectorArray->Add(vectorGenerator);
-		//}
-		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -847,13 +812,6 @@ void AnimaMappedValues::SetMatrixArray(const AnimaString& propertyName, AnimaArr
 		}
 
 		ANIMA_ASSERT(currentArray->size() == value->size());
-
-		//ClearVectorsArray(currentArray);
-		//AnimaAllocatorNamespace::DeallocateObject(*_allocator, currentArray);
-
-		//AnimaArray<AnimaVectorGenerator*>* newVectorArray = AnimaAllocatorNamespace::AllocateNew<AnimaArray<AnimaVectorGenerator*> >(*_allocator, _allocator);
-		//newVectorArray->Copy(*value);
-		//_vectorsArraysMap[pName] = newVectorArray;
 	}
 }
 
@@ -862,7 +820,7 @@ AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _texturesMap.find(pName);
 	if (pair != _texturesMap.end())
-		return pair->second;
+		return pair->second->GetTexture();
 	return nullptr;
 }
 
@@ -1063,7 +1021,7 @@ void AnimaMappedValues::CopyTextures(const AnimaMappedValues& src)
 {
 	_texturesMap.clear();
 
-	const boost::unordered_map<AnimaString, AnimaTexture*, AnimaStringHasher>* srcTexturesMap = &src._texturesMap;
+	const boost::unordered_map<AnimaString, AnimaTextureGenerator*, AnimaStringHasher>* srcTexturesMap = &src._texturesMap;
 	for (auto pair : *srcTexturesMap)
 	{
 		AnimaString propertyName = ExtractName(pair.first);

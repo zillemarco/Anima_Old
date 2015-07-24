@@ -45,6 +45,8 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 	, _projectionType(PERSPECTIVE)
 	, _camerasManager(camerasManager)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaCamera);
+
 	_position.x = 0.0f;
 	_position.y = 0.0f;
 	_position.z = 5.0f;

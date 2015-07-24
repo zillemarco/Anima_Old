@@ -14,42 +14,49 @@ AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocat
 	: AnimaDataGenerator(name, allocator)
 	, _vector(0.0f, 0.0f, 0.0f, 0.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex2f& vector)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(vector, 0.0f, 0.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, 0.0f, 0.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex3f& vector)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(vector, 1.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, z, 1.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex4f& vector)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(vector)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat x, AFloat y, AFloat z, AFloat w)
 	: AnimaDataGenerator(name, allocator)
 	, _vector(x, y, z, w)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaVectorGenerator);
 }
 
 AnimaVectorGenerator::AnimaVectorGenerator(const AnimaVectorGenerator& src)

@@ -16,6 +16,8 @@ const char* GBufferPrefix			= "GB";
 AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaShaderProgram);
+
 	_shaders = nullptr;
 	_shadersCount = 0;
 	_id = 0;

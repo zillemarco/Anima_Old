@@ -15,6 +15,7 @@
 #include "AnimaString.h"
 #include "AnimaColorGenerator.h"
 #include "AnimaVectorGenerator.h"
+#include "AnimaTextureGenerator.h"
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
@@ -50,6 +51,7 @@ public:
 	virtual const char* GetShaderPrefix() = 0;
 	
 public:
+	void AddTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
 	
 	void AddColor(const AnimaString& propertyName, AnimaColorGenerator* value);
@@ -81,7 +83,8 @@ public:
 	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
 	
 	void AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
-	
+
+	void SetTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
 	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
 	
 	void SetColor(const AnimaString& propertyName, AnimaColorGenerator* value);
@@ -174,7 +177,7 @@ protected:
 	AnimaString _uniqueName;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaTexture*, AnimaStringHasher> _texturesMap;
+	boost::unordered_map<AnimaString, AnimaTextureGenerator*, AnimaStringHasher> _texturesMap;
 	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaStringHasher> _colorsMap;
 	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaStringHasher> _vectorsMap;
 	boost::unordered_map<AnimaString, AnimaMatrix, AnimaStringHasher> _matricesMap;

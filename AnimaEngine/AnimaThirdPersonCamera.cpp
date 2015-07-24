@@ -18,18 +18,21 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaThirdPersonCamera);
 	LookAt(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaCamera(allocator, nullptr, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaThirdPersonCamera);
 	LookAt(0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 AnimaThirdPersonCamera::AnimaThirdPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name, const AnimaVertex3f& position, const AnimaVertex3f& target)
 	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaThirdPersonCamera);
 	LookAt(position, target);
 }
 

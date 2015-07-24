@@ -77,7 +77,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaNamedObject.h
 					AnimaGC.h
 					AnimaXmlTranslators.h
-					AnimaMD5.h)
+					AnimaMD5.h
+					AnimaTextureGenerator.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -136,7 +137,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaAnimationsManager.cpp
 					AnimaNamedObject.cpp
 					AnimaXmlTranslators.cpp
-					AnimaMD5.cpp)
+					AnimaMD5.cpp
+					AnimaTextureGenerator.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -187,7 +189,7 @@ source_group(Engine\\Scene\\Data\\Objects\\Lights FILES AnimaLight.h AnimaLight.
 source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp)
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)
 source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
-source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp)
+source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp AnimaTextureGenerator.h AnimaTextureGenerator.cpp)
 
 source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h AnimaLinearAllocator.h AnimaFreeListAllocator.h AnimaPoolAllocator.h AnimaProxyAllocator.h AnimaAllocator.cpp AnimaStackAllocator.cpp AnimaLinearAllocator.cpp AnimaFreeListAllocator.cpp AnimaPoolAllocator.cpp AnimaProxyAllocator.cpp)
 

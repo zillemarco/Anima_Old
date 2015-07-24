@@ -14,30 +14,35 @@ AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator
 	: AnimaDataGenerator(name, allocator)
 	, _color(0.0f, 0.0f, 0.0f, 1.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaColorGenerator);
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaColor3f& color)
 	: AnimaDataGenerator(name, allocator)
 	, _color(color.r, color.g, color.b, 1.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaColorGenerator);
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b)
 	: AnimaDataGenerator(name, allocator)
 	, _color(r, g, b, 1.0f)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaColorGenerator);
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaColor4f& color)
 	: AnimaDataGenerator(name, allocator)
 	, _color(color)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaColorGenerator);
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaString& name, AnimaAllocator* allocator, AFloat r, AFloat g, AFloat b, AFloat a)
 	: AnimaDataGenerator(name, allocator)
 	, _color(r, g, b, a)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaColorGenerator);
 }
 
 AnimaColorGenerator::AnimaColorGenerator(const AnimaColorGenerator& src)

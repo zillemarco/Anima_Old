@@ -189,7 +189,6 @@ public:
 	
 	bool IsIndicesBufferCreated();
 	bool IsVerticesBufferCreated();
-	//bool IsColorsBufferCreated();
 	bool IsNormalsBufferCreated();
 	bool IsTextureCoordsBufferCreated();
 	bool IsTangentsBufferCreated();
@@ -200,7 +199,6 @@ public:
 
 	bool CreateIndicesBuffer();
 	bool CreateVerticesBuffer();
-	//bool CreateColorsBuffer();
 	bool CreateNormalsBuffer();
 	bool CreateTextureCoordsBuffer();
 	bool CreateTangentsBuffer();
@@ -213,7 +211,6 @@ public:
 	AUint GetIndexesBufferObject();
 	AUint GetVerticesBufferObject();
 	AUint GetNormalsBufferObject();
-	//AUint GetColorsBufferObject();
 	AUint GetTextureCoordsBufferObject();
 	AUint GetTangentsBufferObject();
 	AUint GetBitangentsBufferObject();
@@ -228,9 +225,6 @@ public:
 
 	AUint GetFloatVerticesNormalCount();
 	float* GetFloatVerticesNormal();
-
-	//AUint GetFloatVerticesColorCount();
-	//float* GetFloatVerticesColor();
 
 	AUint GetFloatVerticesTextureCoordCount();
 	float* GetFloatVerticesTextureCoord();
@@ -275,17 +269,16 @@ protected:
 	AnimaArray<AnimaVertex4f>	_boneWeights;
 	AnimaArray<AnimaVertex4f>	_boneIDs;
 	AnimaArray<AnimaFace>		_faces;
-	
-	AUint			_vertexArrayObject;
-	AUint			_indexesBufferObject;
-	AUint			_verticesBufferObject;
-	AUint			_normalsBufferObject;
-	//AUint			_colorsBufferObject;
-	AUint			_textureCoordsBufferObject;
-	AUint			_tangentsBufferObject;
-	AUint			_bitangentsBufferObject;
-	AUint			_boneWeightsBufferObject;
-	AUint			_boneIDsBufferObject;
+
+	AUint _vertexArrayObject;
+	AUint _indexesBufferObject;
+	AUint _verticesBufferObject;
+	AUint _normalsBufferObject;
+	AUint _textureCoordsBufferObject;
+	AUint _tangentsBufferObject;
+	AUint _bitangentsBufferObject;
+	AUint _boneWeightsBufferObject;
+	AUint _boneIDsBufferObject;
 
 	bool _visible;	
 	bool _needsBuffersUpdate;

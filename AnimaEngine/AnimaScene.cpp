@@ -179,6 +179,12 @@ void AnimaScene::Terminate()
 		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _texturesManager);
 		_texturesManager = nullptr;
 	}
+	
+	if (_lightsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _lightsManager);
+		_lightsManager = nullptr;
+	}
 
 	if (_dataGeneratorsManager != nullptr)
 	{
@@ -190,12 +196,6 @@ void AnimaScene::Terminate()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _materialsManager);
 		_materialsManager = nullptr;
-	}
-
-	if (_lightsManager != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _lightsManager);
-		_lightsManager = nullptr;
 	}
 
 	if (_animationsManager != nullptr)

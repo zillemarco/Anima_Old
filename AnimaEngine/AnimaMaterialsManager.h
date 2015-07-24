@@ -43,9 +43,9 @@ public:
 	AnimaMaterial* GetMaterial(AInt index);
 	AnimaMaterial* GetMaterialFromName(const AnimaString& name);
 
-	inline AnimaMaterial* GetDefaultMaterial() { return _defaultMaterial; }
-
 	AnimaMappedArray<AnimaMaterial*>* GetMaterials();
+
+	static AnimaMaterial* GetDefaultMaterial() { ANIMA_ASSERT(_defaultMaterial != nullptr);  return _defaultMaterial; }
 
 public:
 	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);
@@ -59,10 +59,11 @@ private:
 	AnimaScene* _scene;
 	AnimaTexturesManager* _texturesManager;
 	AnimaMappedArray<AnimaMaterial*> _materials;
-
-	AnimaMaterial* _defaultMaterial;
-
+	
 	AnimaArray<AnimaString> _lastMaterialsIndexMap;
+
+	static AnimaMaterial* _defaultMaterial;
+	static AInt _instancesCount;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

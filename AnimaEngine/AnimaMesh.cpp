@@ -30,6 +30,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMeshBoneInfo::AnimaMeshBoneInfo(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaMeshBoneInfo);
 }
 
 AnimaMeshBoneInfo::AnimaMeshBoneInfo(const AnimaMeshBoneInfo& src)
@@ -98,11 +99,11 @@ AnimaMatrix AnimaMeshBoneInfo::GetFinalTransformation() const
 AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaMesh);
 	_material = nullptr;
 
 	_indexesBufferObject = 0;
 	_verticesBufferObject = 0;
-	//_colorsBufferObject = 0;
 	_normalsBufferObject = 0;
 	_textureCoordsBufferObject = 0;
 	_tangentsBufferObject = 0;
@@ -133,13 +134,11 @@ AnimaMesh::AnimaMesh(const AnimaMesh& src)
 	, _verticesBufferObject(src._verticesBufferObject)
 	, _shadersNames(src._shadersNames)
 	, _shaderProgramName(src._shaderProgramName)
-	//, _colorsBufferObject(src._colorsBufferObject)
 {
 	_allocator = src._allocator;
 	
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
-	//_colorsBufferObject = src._colorsBufferObject;
 	_normalsBufferObject = src._normalsBufferObject;
 	_textureCoordsBufferObject = src._textureCoordsBufferObject;
 	_tangentsBufferObject = src._tangentsBufferObject;
@@ -176,7 +175,6 @@ AnimaMesh::AnimaMesh(AnimaMesh&& src)
 	, _vertexArrayObject(src._vertexArrayObject)
 	, _indexesBufferObject(src._indexesBufferObject)
 	, _verticesBufferObject(src._verticesBufferObject)
-	//, _colorsBufferObject(src._colorsBufferObject)
 	, _normalsBufferObject(src._normalsBufferObject)
 	, _textureCoordsBufferObject(src._textureCoordsBufferObject)
 	, _tangentsBufferObject(src._tangentsBufferObject)
@@ -200,7 +198,6 @@ AnimaMesh& AnimaMesh::operator=(const AnimaMesh& src)
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
-		//_colorsBufferObject = src._colorsBufferObject;
 		_normalsBufferObject = src._normalsBufferObject;
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
 		_tangentsBufferObject = src._tangentsBufferObject;
@@ -255,7 +252,6 @@ AnimaMesh& AnimaMesh::operator=(AnimaMesh&& src)
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
-		//_colorsBufferObject = src._colorsBufferObject;
 		_normalsBufferObject = src._normalsBufferObject;
 		_textureCoordsBufferObject = src._textureCoordsBufferObject;
 		_tangentsBufferObject = src._tangentsBufferObject;
@@ -708,15 +704,29 @@ void AnimaMesh::UpdateBuffers()
 	}
 	else
 	{
-		glInvalidateBufferData(_verticesBufferObject);
-		glInvalidateBufferData(_indexesBufferObject);
-		//glInvalidateBufferData(_colorsBufferObject);
-		glInvalidateBufferData(_normalsBufferObject);
-		glInvalidateBufferData(_textureCoordsBufferObject);
-		glInvalidateBufferData(_tangentsBufferObject);
-		glInvalidateBufferData(_bitangentsBufferObject);
-		glInvalidateBufferData(_boneWeightsBufferObject);
-		glInvalidateBufferData(_boneIDsBufferObject);
+		if (_verticesBufferObject > 0)
+			glInvalidateBufferData(_verticesBufferObject);
+
+		if (_indexesBufferObject > 0)
+			glInvalidateBufferData(_indexesBufferObject);
+
+		if (_normalsBufferObject > 0)
+			glInvalidateBufferData(_normalsBufferObject);
+		
+		if (_textureCoordsBufferObject > 0)
+			glInvalidateBufferData(_textureCoordsBufferObject);
+		
+		if (_tangentsBufferObject > 0)
+			glInvalidateBufferData(_tangentsBufferObject);
+		
+		if (_bitangentsBufferObject > 0)
+			glInvalidateBufferData(_bitangentsBufferObject);
+		
+		if (_boneWeightsBufferObject > 0)
+			glInvalidateBufferData(_boneWeightsBufferObject);
+		
+		if (_boneIDsBufferObject > 0)
+			glInvalidateBufferData(_boneIDsBufferObject);
 	}
 	
 	glBindVertexArray(_vertexArrayObject);
@@ -841,11 +851,6 @@ bool AnimaMesh::IsVerticesBufferCreated()
 	return _verticesBufferObject > 0;
 }
 
-//bool AnimaMesh::IsColorsBufferCreated()
-//{
-//	return _colorsBufferObject > 0;
-//}
-
 bool AnimaMesh::IsNormalsBufferCreated()
 {
 	return _normalsBufferObject > 0;
@@ -905,26 +910,17 @@ bool AnimaMesh::CreateNormalsBuffer()
 	return true;
 }
 
-//bool AnimaMesh::CreateColorsBuffer()
-//{
-//	if (IsColorsBufferCreated())
-//		return true;
-//
-//	glGenBuffers(1, &_colorsBufferObject);
-//	if (_colorsBufferObject <= 0)
-//		return false;
-//
-//	return true;
-//}
-
 bool AnimaMesh::CreateTextureCoordsBuffer()
 {
 	if (IsTextureCoordsBufferCreated())
 		return true;
 
-	glGenBuffers(1, &_textureCoordsBufferObject);
-	if (_textureCoordsBufferObject <= 0)
-		return false;
+	if (GetFloatVerticesTextureCoordCount() > 0)
+	{
+		glGenBuffers(1, &_textureCoordsBufferObject);
+		if (_textureCoordsBufferObject <= 0)
+			return false;
+	}
 
 	return true;
 }
@@ -934,9 +930,12 @@ bool AnimaMesh::CreateTangentsBuffer()
 	if (IsTangentsBufferCreated())
 		return true;
 
-	glGenBuffers(1, &_tangentsBufferObject);
-	if (_tangentsBufferObject <= 0)
-		return false;
+	if (GetFloatVerticesTangentsCount() > 0)
+	{
+		glGenBuffers(1, &_tangentsBufferObject);
+		if (_tangentsBufferObject <= 0)
+			return false;
+	}
 
 	return true;
 }
@@ -946,9 +945,12 @@ bool AnimaMesh::CreateBitangentsBuffer()
 	if (IsBitangentsBufferCreated())
 		return true;
 
-	glGenBuffers(1, &_bitangentsBufferObject);
-	if (_bitangentsBufferObject <= 0)
-		return false;
+	if (GetFloatVerticesBitangentsCount() > 0)
+	{
+		glGenBuffers(1, &_bitangentsBufferObject);
+		if (_bitangentsBufferObject <= 0)
+			return false;
+	}
 
 	return true;
 }
@@ -958,9 +960,12 @@ bool AnimaMesh::CreateBoneWeightsBuffer()
 	if (IsBoneWeightsBufferCreated())
 		return true;
 
-	glGenBuffers(1, &_boneWeightsBufferObject);
-	if (_boneWeightsBufferObject <= 0)
-		return false;
+	if (GetFloatBoneWeightsCount() > 0)
+	{
+		glGenBuffers(1, &_boneWeightsBufferObject);
+		if (_boneWeightsBufferObject <= 0)
+			return false;
+	}
 
 	return true;
 }
@@ -970,9 +975,12 @@ bool AnimaMesh::CreateBoneIDsBuffer()
 	if (IsBoneIDsBufferCreated())
 		return true;
 
-	glGenBuffers(1, &_boneIDsBufferObject);
-	if (_boneIDsBufferObject <= 0)
-		return false;
+	if (GetFloatBoneIDsCount() > 0)
+	{
+		glGenBuffers(1, &_boneIDsBufferObject);
+		if (_boneIDsBufferObject <= 0)
+			return false;
+	}
 
 	return true;
 }
@@ -1091,16 +1099,6 @@ AFloat* AnimaMesh::GetFloatVerticesNormal()
 
 	return normals;
 }
-
-//AUint AnimaMesh::GetFloatVerticesColorCount()
-//{
-//	return 0;
-//}
-//
-//AFloat* AnimaMesh::GetFloatVerticesColor()
-//{
-//	return nullptr;
-//}
 
 AUint AnimaMesh::GetFloatVerticesTextureCoordCount()
 {
@@ -1276,11 +1274,6 @@ AUint AnimaMesh::GetNormalsBufferObject()
 {
 	return _normalsBufferObject;
 }
-
-//AUint AnimaMesh::GetColorsBufferObject()
-//{
-//	return _colorsBufferObject;
-//}
 
 AUint AnimaMesh::GetTextureCoordsBufferObject()
 {
@@ -1488,7 +1481,7 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 	{
 		AnimaMaterial* material = _material;
 		if (material == nullptr)
-			material = renderer->GetActiveScene()->GetMaterialsManager()->GetDefaultMaterial();
+			material = AnimaMaterialsManager::GetDefaultMaterial();
 
 		program->UpdateMappedValuesObjectProperties(material, renderer);
 	}

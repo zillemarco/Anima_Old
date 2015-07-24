@@ -13,6 +13,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
 	: AnimaSceneObject(name, dataGeneratorsManager, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaModel);
 	_material = nullptr;
 	_activeAnimation = -1;
 }

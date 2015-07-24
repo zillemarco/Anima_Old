@@ -18,6 +18,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaFirstPersonCamera);
 	_zAxis.x = 0.0f;
 	_zAxis.y = 0.0f;
 	_zAxis.z = 1.0f;
@@ -26,6 +27,7 @@ AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaC
 AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaCamera(allocator, nullptr, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaFirstPersonCamera);
 	_zAxis.x = 0.0f;
 	_zAxis.y = 0.0f;
 	_zAxis.z = 1.0f;
@@ -34,6 +36,7 @@ AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaD
 AnimaFirstPersonCamera::AnimaFirstPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name, const AnimaVertex3f& position, const AnimaVertex3f& forward, const AnimaVertex3f& up)
 	: AnimaCamera(allocator, camerasManager, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaFirstPersonCamera);
 	_position = position;
 	_yAxis = up;
 	_zAxis = forward;

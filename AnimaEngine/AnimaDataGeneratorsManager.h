@@ -16,6 +16,7 @@
 #include "AnimaString.h"
 #include "AnimaColorGenerator.h"
 #include "AnimaVectorGenerator.h"
+#include "AnimaTextureGenerator.h"
 #include "AnimaDataGenerator.h"
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
@@ -38,8 +39,8 @@ public:
 	template<class T> AnimaDataGenerator* GetDataGeneratorOfTypeFromName(const AnimaString& name);
 	
 	AnimaColorGenerator* CreateColorGenerator(const AnimaString& name);
-
 	AnimaVectorGenerator* CreateVectorGenerator(const AnimaString& name);
+	AnimaTextureGenerator* CreateTextureGenerator(const AnimaString& name);
 
 	bool RemoveGenerator(const AnimaString& name);
 	bool RemoveGenerator(AnimaDataGenerator* generator);

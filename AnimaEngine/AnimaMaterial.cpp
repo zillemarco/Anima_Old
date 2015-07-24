@@ -14,6 +14,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaMaterial);
 	//AddShader("base-material-fs");
 
 	SetInteger("FrontFace", GL_CCW);
