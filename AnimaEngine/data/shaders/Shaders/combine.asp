@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnimaShaderProgram name="deferred-combine">
+	<Shaders>
+		<Shader name="generic-filter-vs" />
+		<Shader name="combine-fs" />
+	</Shaders>
+</AnimaShaderProgram>

@@ -815,7 +815,7 @@ void AnimaMappedValues::SetMatrixArray(const AnimaString& propertyName, AnimaArr
 	}
 }
 
-AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
+AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _texturesMap.find(pName);
@@ -824,7 +824,7 @@ AnimaTexture* AnimaMappedValues::GetTexture(const AnimaString& propertyName)
 	return nullptr;
 }
 
-AnimaColor3f AnimaMappedValues::GetColor3f(const AnimaString& propertyName)
+AnimaColor3f AnimaMappedValues::GetColor3f(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _colorsMap.find(pName);
@@ -835,7 +835,7 @@ AnimaColor3f AnimaMappedValues::GetColor3f(const AnimaString& propertyName)
 	return color;
 }
 
-AnimaColor4f AnimaMappedValues::GetColor4f(const AnimaString& propertyName)
+AnimaColor4f AnimaMappedValues::GetColor4f(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _colorsMap.find(pName);
@@ -846,7 +846,7 @@ AnimaColor4f AnimaMappedValues::GetColor4f(const AnimaString& propertyName)
 	return color;
 }
 
-AnimaVertex2f AnimaMappedValues::GetVector2f(const AnimaString& propertyName)
+AnimaVertex2f AnimaMappedValues::GetVector2f(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _vectorsMap.find(pName);
@@ -857,7 +857,7 @@ AnimaVertex2f AnimaMappedValues::GetVector2f(const AnimaString& propertyName)
 	return vector;
 }
 
-AnimaVertex3f AnimaMappedValues::GetVector3f(const AnimaString& propertyName)
+AnimaVertex3f AnimaMappedValues::GetVector3f(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _vectorsMap.find(pName);
@@ -868,7 +868,7 @@ AnimaVertex3f AnimaMappedValues::GetVector3f(const AnimaString& propertyName)
 	return vector;
 }
 
-AnimaVertex4f AnimaMappedValues::GetVector4f(const AnimaString& propertyName)
+AnimaVertex4f AnimaMappedValues::GetVector4f(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _vectorsMap.find(pName);
@@ -879,7 +879,7 @@ AnimaVertex4f AnimaMappedValues::GetVector4f(const AnimaString& propertyName)
 	return vector;
 }
 
-AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const AnimaString& propertyName)
+AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _vectorsArraysMap.find(pName);
@@ -889,7 +889,7 @@ AnimaArray<AnimaVectorGenerator*>* AnimaMappedValues::GetVectorArray(const Anima
 	return nullptr;
 }
 
-AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName)
+AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _floatsMap.find(pName);
@@ -898,7 +898,7 @@ AFloat AnimaMappedValues::GetFloat(const AnimaString& propertyName)
 	return 0.0f;
 }
 
-bool AnimaMappedValues::GetBoolean(const AnimaString& propertyName)
+bool AnimaMappedValues::GetBoolean(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _booleansMap.find(pName);
@@ -907,7 +907,7 @@ bool AnimaMappedValues::GetBoolean(const AnimaString& propertyName)
 	return false;
 }
 
-AInt AnimaMappedValues::GetInteger(const AnimaString& propertyName)
+AInt AnimaMappedValues::GetInteger(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _integersMap.find(pName);
@@ -916,7 +916,7 @@ AInt AnimaMappedValues::GetInteger(const AnimaString& propertyName)
 	return 0;
 }
 
-AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName)
+AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _matricesMap.find(pName);
@@ -925,7 +925,7 @@ AnimaMatrix AnimaMappedValues::GetMatrix(const AnimaString& propertyName)
 	return AnimaMatrix();
 }
 
-AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const AnimaString& propertyName)
+AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	auto pair = _matricesArraysMap.find(pName);
@@ -935,55 +935,55 @@ AnimaArray<AnimaMatrix>* AnimaMappedValues::GetMatrixArray(const AnimaString& pr
 	return nullptr;
 }
 
-bool AnimaMappedValues::HasTexture(const AnimaString& propertyName)
+bool AnimaMappedValues::HasTexture(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_texturesMap.find(pName) != _texturesMap.end());
 }
 
-bool AnimaMappedValues::HasColor(const AnimaString& propertyName)
+bool AnimaMappedValues::HasColor(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_colorsMap.find(pName) != _colorsMap.end());
 }
 
-bool AnimaMappedValues::HasVector(const AnimaString& propertyName)
+bool AnimaMappedValues::HasVector(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_vectorsMap.find(pName) != _vectorsMap.end());
 }
 
-bool AnimaMappedValues::HasVectorArray(const AnimaString& propertyName)
+bool AnimaMappedValues::HasVectorArray(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_vectorsArraysMap.find(pName) != _vectorsArraysMap.end());
 }
 
-bool AnimaMappedValues::HasFloat(const AnimaString& propertyName)
+bool AnimaMappedValues::HasFloat(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_floatsMap.find(pName) != _floatsMap.end());
 }
 
-bool AnimaMappedValues::HasInteger(const AnimaString& propertyName)
+bool AnimaMappedValues::HasInteger(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_integersMap.find(pName) != _integersMap.end());
 }
 
-bool AnimaMappedValues::HasBoolean(const AnimaString& propertyName)
+bool AnimaMappedValues::HasBoolean(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_booleansMap.find(pName) != _booleansMap.end());
 }
 
-bool AnimaMappedValues::HasMatrix(const AnimaString& propertyName)
+bool AnimaMappedValues::HasMatrix(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_matricesMap.find(pName) != _matricesMap.end());
 }
 
-bool AnimaMappedValues::HasMatrixArray(const AnimaString& propertyName)
+bool AnimaMappedValues::HasMatrixArray(const AnimaString& propertyName) const
 {
 	AnimaString pName = _uniqueName + propertyName;
 	return (_matricesArraysMap.find(pName) != _matricesArraysMap.end());

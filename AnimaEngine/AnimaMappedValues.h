@@ -117,44 +117,44 @@ public:
 	
 	void SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
 	
-	AnimaTexture* GetTexture(const AnimaString& propertyName);
+	AnimaTexture* GetTexture(const AnimaString& propertyName) const;
 	
-	AnimaColor3f GetColor3f(const AnimaString& propertyName);
-	AnimaColor4f GetColor4f(const AnimaString& propertyName);
+	AnimaColor3f GetColor3f(const AnimaString& propertyName) const;
+	AnimaColor4f GetColor4f(const AnimaString& propertyName) const;
 	
-	AnimaVertex2f GetVector2f(const AnimaString& propertyName);
-	AnimaVertex3f GetVector3f(const AnimaString& propertyName);
-	AnimaVertex4f GetVector4f(const AnimaString& propertyName);
+	AnimaVertex2f GetVector2f(const AnimaString& propertyName) const;
+	AnimaVertex3f GetVector3f(const AnimaString& propertyName) const;
+	AnimaVertex4f GetVector4f(const AnimaString& propertyName) const;
 	
-	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName);
+	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName) const;
 	
-	AFloat GetFloat(const AnimaString& propertyName);
+	AFloat GetFloat(const AnimaString& propertyName) const;
 	
-	AInt GetInteger(const AnimaString& propertyName);
+	AInt GetInteger(const AnimaString& propertyName) const;
 	
-	bool GetBoolean(const AnimaString& propertyName);
+	bool GetBoolean(const AnimaString& propertyName) const;
 	
-	AnimaMatrix GetMatrix(const AnimaString& propertyName);
+	AnimaMatrix GetMatrix(const AnimaString& propertyName) const;
 	
-	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName);
+	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName) const;
 	
-	bool HasTexture(const AnimaString& propertyName);
+	bool HasTexture(const AnimaString& propertyName) const;
 	
-	bool HasColor(const AnimaString& propertyName);
+	bool HasColor(const AnimaString& propertyName) const;
 	
-	bool HasVector(const AnimaString& propertyName);
+	bool HasVector(const AnimaString& propertyName) const;
 	
-	bool HasVectorArray(const AnimaString& propertyName);
+	bool HasVectorArray(const AnimaString& propertyName) const;
 	
-	bool HasFloat(const AnimaString& propertyName);
+	bool HasFloat(const AnimaString& propertyName) const;
 	
-	bool HasInteger(const AnimaString& propertyName);
+	bool HasInteger(const AnimaString& propertyName) const;
 	
-	bool HasBoolean(const AnimaString& propertyName);
+	bool HasBoolean(const AnimaString& propertyName) const;
 	
-	bool HasMatrix(const AnimaString& propertyName);
+	bool HasMatrix(const AnimaString& propertyName) const;
 	
-	bool HasMatrixArray(const AnimaString& propertyName);
+	bool HasMatrixArray(const AnimaString& propertyName) const;
 	
 	void CopyTextures(const AnimaMappedValues& src);
 	void CopyColors(const AnimaMappedValues& src);

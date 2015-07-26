@@ -230,7 +230,7 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/MatTester.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 
 #if !defined _DEBUG
 	Anima::AnimaString inputString;
@@ -285,43 +285,28 @@ bool InitEngine()
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-base.asp");
+	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material.asp");
 	if (!prepareProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* shadowMapProgram = shadersManager->CreateProgram("deferred-shadowMap");
-	shadowMapProgram->Create();
-	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-shadowMap-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	shadowMapProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-shadowMap-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-shadowMap-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
-	if (!shadowMapProgram->Link())
+	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light.asp");
+	if (!directionalLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* combineProgram = shadersManager->CreateProgram("deferred-combine");
-	combineProgram->Create();
-	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-vs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-combine-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	combineProgram->AddShader(shadersManager->LoadShaderFromFile("deferred-combine-fs", shadersPath + Anima::AnimaString(DEFERRED_SHADERS_START "deferred-combine-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
+	Anima::AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
+	if (!hemisphereLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light.asp");
+	if (!pointLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
+	if (!spotLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine.asp");
 	if (!combineProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* primitiveDrawProgram = shadersManager->CreateProgram("primitive-draw");
-	primitiveDrawProgram->Create();
-	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-vs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "primitive-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	primitiveDrawProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-draw-fs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "primitive-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
-	if (!primitiveDrawProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* primitiveCombineProgram = shadersManager->CreateProgram("primitive-combine");
-	primitiveCombineProgram->Create();
-	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-vs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "combine-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	primitiveCombineProgram->AddShader(shadersManager->LoadShaderFromFile("primitive-combine-fs", shadersPath + Anima::AnimaString(PRIMITIVE_SHADERS_START "combine-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
-	if (!primitiveCombineProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* fxaa = shadersManager->CreateProgram("fxaaFilter");
-	fxaa->Create();
-	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-vs", shadersPath + Anima::AnimaString(FILTERS_SHADERS_START "fxaaFilter-vs.glsl"), Anima::AnimaShaderType::VERTEX));
-	fxaa->AddShader(shadersManager->LoadShaderFromFile("fxaaFilter-fs", shadersPath + Anima::AnimaString(FILTERS_SHADERS_START "fxaaFilter-fs.glsl"), Anima::AnimaShaderType::FRAGMENT));
-	if (!fxaa->Link())
 		return false;
 
 	// Caricamento dei materiali

@@ -784,31 +784,6 @@ void AnimaShaderProgram::ScanVariables()
 			_inputs[name] = info;
 		}
 	}
-		
-	_maxPointLights = 0;
-	_maxSpotLights = 0;
-
-	AnimaString str;
-	bool stop = false;
-
-	while (!stop)
-	{
-		str = FormatString("_pointLight[%d].position", _maxPointLights);
-		if (_uniforms.find(str) != _uniforms.end())
-			_maxPointLights++;
-		else
-			stop = true;
-	}
-
-	stop = false;
-	while (!stop)
-	{
-		str = FormatString("_spotLight[%d].direction", _maxSpotLights);
-		if (_uniforms.find(str) != _uniforms.end())
-			_maxSpotLights++;
-		else
-			stop = true;
-	}
 }
 
 void AnimaShaderProgram::EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer)

@@ -322,29 +322,32 @@ const char* AnimaDirectionalLight::GetShaderPrefix()
 
 const char* AnimaDirectionalLight::GetShaderName()
 {
-	return "deferred-directional";
+	return "directional-light";
 }
 
 bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
 {
-	if (shadersManager->GetProgramFromName("deferred-directional"))
+	if (shadersManager->GetProgramFromName("directional-light"))
 		return true;
 
-	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-directional");
+	ANIMA_ASSERT(false);
+	return false;
 
-	if (pgr == nullptr)
-		return false;
+	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-directional");
 
-	if (!pgr->Create())
-		return false;
+	//if (pgr == nullptr)
+	//	return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::FRAGMENT));
+	//if (!pgr->Create())
+	//	return false;
 
-	if (!pgr->Link())
-		return false;
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::VERTEX));
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::FRAGMENT));
 
-	return true;
+	//if (!pgr->Link())
+	//	return false;
+
+	//return true;
 }
 
 //----------------------------------------------------------------
@@ -429,29 +432,32 @@ const char* AnimaPointLight::GetShaderPrefix()
 
 const char* AnimaPointLight::GetShaderName()
 {
-	return "deferred-point";
+	return "point-light";
 }
 
 bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
 {
-	if (shadersManager->GetProgramFromName("deferred-point"))
+	if (shadersManager->GetProgramFromName("point-light"))
 		return true;
 
-	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-point");
+	ANIMA_ASSERT(false);
+	return false;
 
-	if (pgr == nullptr)
-		return false;
+	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-point");
 
-	if (!pgr->Create())
-		return false;
+	//if (pgr == nullptr)
+	//	return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::FRAGMENT));
+	//if (!pgr->Create())
+	//	return false;
 
-	if (!pgr->Link())
-		return false;
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::VERTEX));
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::FRAGMENT));
 
-	return true;
+	//if (!pgr->Link())
+	//	return false;
+
+	//return true;
 }
 
 //----------------------------------------------------------------
@@ -548,29 +554,32 @@ const char* AnimaSpotLight::GetShaderPrefix()
 
 const char* AnimaSpotLight::GetShaderName()
 {
-	return "deferred-spot";
+	return "spot-light";
 }
 
 bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 {
-	if (shadersManager->GetProgramFromName("deferred-spot"))
+	if (shadersManager->GetProgramFromName("spot-light"))
 		return true;
 	
-	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-spot");
-	
-	if (pgr == nullptr)
-		return false;
-	
-	if (!pgr->Create())
-		return false;
-	
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::FRAGMENT));
-	
-	if (!pgr->Link())
-		return false;
-	
-	return true;
+	ANIMA_ASSERT(false);
+	return false;
+
+	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-spot");
+	//
+	//if (pgr == nullptr)
+	//	return false;
+	//
+	//if (!pgr->Create())
+	//	return false;
+	//
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::VERTEX));
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::FRAGMENT));
+	//
+	//if (!pgr->Link())
+	//	return false;
+	//
+	//return true;
 }
 
 
@@ -638,29 +647,32 @@ const char* AnimaHemisphereLight::GetShaderPrefix()
 
 const char* AnimaHemisphereLight::GetShaderName()
 {
-	return "deferred-hemisphere";
+	return "hemisphere-light";
 }
 
 bool AnimaHemisphereLight::CreateShader(AnimaShadersManager* shadersManager)
 {
-	if (shadersManager->GetProgramFromName("deferred-hemisphere"))
+	if (shadersManager->GetProgramFromName("hemisphere-light"))
 		return true;
 
-	AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-hemisphere");
+	ANIMA_ASSERT(false);
+	return false;
 
-	if (pgr == nullptr)
-		return false;
+	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-hemisphere");
 
-	if (!pgr->Create())
-		return false;
+	//if (pgr == nullptr)
+	//	return false;
 
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::VERTEX));
-	pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::FRAGMENT));
+	//if (!pgr->Create())
+	//	return false;
 
-	if (!pgr->Link())
-		return false;
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::VERTEX));
+	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::FRAGMENT));
 
-	return true;
+	//if (!pgr->Link())
+	//	return false;
+
+	//return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
