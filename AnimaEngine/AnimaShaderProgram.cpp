@@ -10,8 +10,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
-const char* RenderingEnginePrefix	= "REN";
-const char* GBufferPrefix			= "GB";
+//#define NEW_DATA_MODE
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
 	: AnimaNamedObject(name, allocator)
@@ -22,9 +21,6 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* 
 	_shadersCount = 0;
 	_id = 0;
 	_linked = false;
-
-	_maxPointLights = 0;
-	_maxSpotLights = 0;
 
 	_shadersManager = shadersManager;
 }
@@ -42,9 +38,7 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_uniforms = src._uniforms;
 
 	_shadersManager = src._shadersManager;
-
-	_maxPointLights = src._maxPointLights;
-	_maxSpotLights = src._maxSpotLights;
+	_data = src._data;
 
 	SetShaders(src._shaders, src._shadersCount);
 }
@@ -60,8 +54,7 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	_uniforms = src._uniforms;
 
 	_shadersManager = src._shadersManager;
-	_maxPointLights = src._maxPointLights;
-	_maxSpotLights = src._maxSpotLights;
+	_data = src._data;
 
 	src._shaders = nullptr;
 	src._shadersCount = 0;
@@ -96,8 +89,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 		_uniforms = src._uniforms;
 
 		_shadersManager = src._shadersManager;
-		_maxPointLights = src._maxPointLights;
-		_maxSpotLights = src._maxSpotLights;
+		_data = src._data;
 
 		_id = src._id;
 		_linked = src._linked;
@@ -118,8 +110,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_uniforms = src._uniforms;
 
 		_shadersManager = src._shadersManager;
-		_maxPointLights = src._maxPointLights;
-		_maxSpotLights = src._maxSpotLights;
+		_data = src._data;
 
 		_id = src._id;
 		_linked = src._linked;
@@ -140,8 +131,6 @@ bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	if (_allocator != left._allocator) return false;
 	if (_shadersCount != left._shadersCount) return false; 
 	if (_linked != left._linked) return false;
-	if(_maxPointLights != left._maxPointLights) return false;
-	if(_maxSpotLights != left._maxSpotLights) return false;
 
 	for (int i = 0; i < _shadersCount; i++)
 	{
@@ -159,8 +148,6 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 	if (_allocator != left._allocator) return true;
 	if (_shadersCount != left._shadersCount) return true;
 	if (_linked != left._linked) return true;
-	if (_maxPointLights != left._maxPointLights) return true;
-	if (_maxSpotLights != left._maxSpotLights) return true;
 
 	for (int i = 0; i < _shadersCount; i++)
 	{
@@ -314,6 +301,7 @@ bool AnimaShaderProgram::Link()
 		_linked = true;
 
 		ScanVariables();
+		UpdateDataLookup();
 	}
 
 	return _linked;
@@ -498,6 +486,9 @@ void AnimaShaderProgram::SetUniform(AInt location, const AnimaMatrix& value, boo
 
 void AnimaShaderProgram::ScanVariables()
 {
+#if defined NEW_DATA_MODE
+	return;
+#else
 	ClearUniforms();
 	_inputs.clear(); 
 	_outputs.clear();
@@ -784,6 +775,7 @@ void AnimaShaderProgram::ScanVariables()
 			_inputs[name] = info;
 		}
 	}
+#endif
 }
 
 void AnimaShaderProgram::EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer)
@@ -895,6 +887,15 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 
 	const char* prefix = object->GetShaderPrefix();
 
+#if defined NEW_DATA_MODE
+
+	for(auto& data : _data)
+	{
+		if(data.GetPrefix() == prefix)
+			data.UpdateValue(object, renderingManager);
+	}
+
+#else
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
@@ -1022,15 +1023,29 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 			}
 		}
 	}
+#endif
 }
 
 void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderingManager)
 {
+	if (renderingManager == nullptr)
+		return;
+
+	const char* prefix = RENDERER_PREFIX;
+
+#if defined NEW_DATA_MODE
+
+	for(auto& data : _data)
+	{
+		if(data.GetPrefix() == prefix)
+			data.UpdateValue(renderingManager);
+	}
+#else
 	for (auto& pair : _uniforms)
 	{
 		AnimaUniformInfo info = pair.second;
 
-		if (info._namePartsCount < 2 || info._nameParts[0] != RenderingEnginePrefix)
+		if (info._namePartsCount < 2 || info._nameParts[0] != RENDERER_PREFIX)
 			continue;
 
 		if (info._type == GL_FLOAT_VEC2)
@@ -1047,7 +1062,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 			SetUniformi(info._locations[0], renderingManager->GetInteger(info._nameParts[1]));
 		else if (info._type == GL_SAMPLER_2D)
 		{
-			if (info._namePartsCount == 4 && info._nameParts[1] == GBufferPrefix)
+			if (info._namePartsCount == 4 && info._nameParts[1] == GBUFFER_PREFIX)
 			{
 				AnimaGBuffer* buffer = renderingManager->GetGBuffer(info._nameParts[2]);
 				if (!buffer)
@@ -1091,6 +1106,21 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 			ANIMA_ASSERT(false);
 		}
 	}
+#endif
+}
+
+void AnimaShaderProgram::UpdateDataLookup()
+{
+	AInt count = _data.size();
+	for (AInt i = 0; i < count; i++)
+	{
+		_data[i].FindLocation(this);
+	}
+}
+
+void AnimaShaderProgram::AddShaderData(AnimaShaderData& data)
+{
+	_data.push_back(data);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -13,6 +13,7 @@
 #include "AnimaCamera.h"
 #include "AnimaScene.h"
 #include "AnimaNamedObject.h"
+#include "AnimaShaderData.h"
 
 #include <boost/unordered_map.hpp>
 
@@ -133,8 +134,11 @@ public:
 	void SetUniform(AInt location, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(AInt location, const AnimaMatrix& value, bool transpose = false);
 
+	void AddShaderData(AnimaShaderData& data);
+
 private:
 	void ClearUniforms();
+	void UpdateDataLookup();
 	
 private:
 	AnimaShader**	_shaders;
@@ -142,17 +146,16 @@ private:
 
 	AnimaShadersManager* _shadersManager;
 
-	AUint _maxPointLights;
-	AUint _maxSpotLights;
+	AnimaArray<AnimaShaderData> _data;
+
+	AInt			_id;
+	bool			_linked;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaStringHasher> _uniforms;
 	boost::unordered_map<AnimaString, AnimaInputInfo, AnimaStringHasher> _inputs;
 	boost::unordered_map<AnimaString, AnimaOutputInfo, AnimaStringHasher> _outputs;
 #pragma warning (default: 4251) 
-
-	AInt			_id;
-	bool			_linked;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

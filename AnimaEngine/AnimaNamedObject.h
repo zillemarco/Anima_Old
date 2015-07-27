@@ -32,7 +32,7 @@ public:
 	AnimaNamedObject& operator=(AnimaNamedObject&& src);
 
 public:
-	void SetName(const AnimaString& name);
+	virtual void SetName(const AnimaString& name);
 	AnimaString GetName() const;
 	
 protected:

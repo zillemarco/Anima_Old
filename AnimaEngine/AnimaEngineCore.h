@@ -67,6 +67,9 @@ extern "C" ANIMA_ENGINE_EXPORT bool __anima_get_working_dir(char* dest, int leng
 #define _ANIMA_ENGINE_VERSION_REVISION		0
 #define _ANIMA_ENGINE_VERSION_NUMBER		"0.0.0"
 
+#define RENDERER_PREFIX	"REN"
+#define GBUFFER_PREFIX	"GB"
+
 #include <vector>
 
 #endif //_ANIMA_ENGINE_LIB_H

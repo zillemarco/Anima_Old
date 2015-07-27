@@ -3,6 +3,8 @@
 #include "AnimaMeshInstance.h"
 #include "AnimaMaterial.h"
 #include "AnimaMD5.h"
+#include "AnimaShaderData.h"
+#include "AnimaXmlTranslators.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -319,6 +321,37 @@ AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromXml(const AnimaStr
 				if (shader)
 					shaderProgram->AddShader(shader);
 			}
+		}
+
+		try
+		{
+			for (auto& prop : pt.get_child("AnimaShaderProgram.Datas"))
+			{
+				if (prop.first == "Data")
+				{
+					AnimaString dataName = prop.second.get<AnimaString>("<xmlattr>.name");
+					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type");
+					AInt dataArraySize = prop.second.get<AInt>("<xmlattr>.size", 0);
+
+					AnimaShaderData data(dataName);
+					data.SetArraySize(dataArraySize);
+					data.SetType(dataType);
+
+					shaderProgram->AddShaderData(data);
+				}
+			}
+		}
+		catch (boost::property_tree::ptree_bad_path& exception)
+		{
+			printf("[AnimaShadersManager] Error reading AnimaShaderProgram data:\n\t- Shader program name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+		}
+		catch (boost::property_tree::ptree_bad_data& exception)
+		{
+			printf("[AnimaShadersManager] Error reading AnimaShaderProgram data:\n\t- Shader program name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+		}
+		catch (boost::property_tree::ptree_error& exception)
+		{
+			printf("[AnimaShadersManager] Error reading AnimaShaderProgram data:\n\t- Shader program name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 	}
 

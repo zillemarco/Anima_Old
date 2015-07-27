@@ -1,20 +1,23 @@
-#include "AnimaShaderInput.h"
+#include "AnimaShaderData.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaRenderer.h"
 #include "AnimaMappedValues.h"
+#include "AnimaGBuffer.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaShaderInput::AnimaShaderInput(const AnimaString& name)
+AnimaShaderData::AnimaShaderData(const AnimaString& name)
 	: AnimaNamedObject(name, nullptr)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaShaderData);
+
 	_arraySize = 0;
 	_type = NONE;
 
 	DivideName();
 }
 
-AnimaShaderInput::AnimaShaderInput(const AnimaShaderInput& src)
+AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
 	: AnimaNamedObject(src)
 {
 	_locations = src._locations;
@@ -23,7 +26,7 @@ AnimaShaderInput::AnimaShaderInput(const AnimaShaderInput& src)
 	_type = src._type;
 }
 
-AnimaShaderInput::AnimaShaderInput(AnimaShaderInput&& src)
+AnimaShaderData::AnimaShaderData(AnimaShaderData&& src)
 	: AnimaNamedObject(src)
 {
 	_locations = src._locations;
@@ -32,11 +35,11 @@ AnimaShaderInput::AnimaShaderInput(AnimaShaderInput&& src)
 	_type = src._type;
 }
 
-AnimaShaderInput::~AnimaShaderInput()
+AnimaShaderData::~AnimaShaderData()
 {
 }
 
-AnimaShaderInput& AnimaShaderInput::operator=(const AnimaShaderInput& src)
+AnimaShaderData& AnimaShaderData::operator=(const AnimaShaderData& src)
 {
 	if (this != &src)
 	{
@@ -51,7 +54,7 @@ AnimaShaderInput& AnimaShaderInput::operator=(const AnimaShaderInput& src)
 	return *this;
 }
 
-AnimaShaderInput& AnimaShaderInput::operator=(AnimaShaderInput&& src)
+AnimaShaderData& AnimaShaderData::operator=(AnimaShaderData&& src)
 {
 	if (this != &src)
 	{
@@ -66,21 +69,28 @@ AnimaShaderInput& AnimaShaderInput::operator=(AnimaShaderInput&& src)
 	return *this;
 }
 
-bool AnimaShaderInput::operator==(const AnimaShaderInput& left)
+bool AnimaShaderData::operator==(const AnimaShaderData& left)
 {
 	if (_name == left._name && _locations == left._locations && _arraySize == left._arraySize && _type == left._type)
 		return true;
 	return false;
 }
 
-bool AnimaShaderInput::operator!=(const AnimaShaderInput& left)
+bool AnimaShaderData::operator!=(const AnimaShaderData& left)
 {
 	if (_name != left._name || _locations != left._locations || _arraySize != left._arraySize || _type != left._type)
 		return true;
 	return false;
 }
 
-void AnimaShaderInput::FindLocation(AnimaShaderProgram* program)
+void AnimaShaderData::SetName(const AnimaString& name)
+{
+	AnimaNamedObject::SetName(name);
+
+	DivideName();
+}
+
+void AnimaShaderData::FindLocation(AnimaShaderProgram* program)
 {
 	if (program == nullptr)
 		return;
@@ -88,6 +98,10 @@ void AnimaShaderInput::FindLocation(AnimaShaderProgram* program)
 	if (_arraySize == 0)
 	{
 		AInt location = glGetUniformLocation(program->GetID(), _name.c_str());
+
+		if (location < 0)
+			printf("[AnimaShaderData] Error looking for data location on program:\n\t- Program name: %s\n\t- Data name: %s\n", program->GetName().c_str(), _name.c_str());
+
 		_locations.push_back(location);
 	}
 	else
@@ -99,12 +113,16 @@ void AnimaShaderInput::FindLocation(AnimaShaderProgram* program)
 			tmpName = FormatString("%s[%d]", _name, i);
 
 			location = glGetUniformLocation(program->GetID(), _name.c_str());
+
+			if (location < 0)
+				printf("[AnimaShaderData] Error looking for data location on program:\n\t- Program name: %s\n\t- Data name: %s\n", program->GetName().c_str(), _name.c_str());
+
 			_locations.push_back(location);
 		}
 	}
 }
 
-void AnimaShaderInput::DivideName()
+void AnimaShaderData::DivideName()
 {
 	AnimaString namePart1 = _name;
 	AnimaString namePart2 = "";
@@ -124,7 +142,7 @@ void AnimaShaderInput::DivideName()
 	_nameParts.push_back(namePart1);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer)
+void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer)
 {
 	AInt count = _nameParts.size();
 	if (count != 2)
@@ -196,12 +214,86 @@ void AnimaShaderInput::UpdateValue(const AnimaMappedValues* object, AnimaRendere
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const AFloat& value)
+void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
+{
+	AInt count = _nameParts.size();
+	if (count < 2)
+		return;
+
+	AnimaString propertyName = _nameParts[1];
+
+	switch (_type)
+	{
+	case Anima::FLOAT:
+		UpdateValue(renderer->GetFloat(propertyName));
+		break;
+	case Anima::FLOAT_ARRAY:
+		break;
+	case Anima::FLOAT2:
+		UpdateValue(renderer->GetVector2f(propertyName));
+		break;
+	case Anima::FLOAT2_ARRAY:
+		break;
+	case Anima::FLOAT3:
+		UpdateValue(renderer->GetVector3f(propertyName));
+		break;
+	case Anima::FLOAT3_ARRAY:
+		break;
+	case Anima::FLOAT4:
+		UpdateValue(renderer->GetVector4f(propertyName));
+		break;
+	case Anima::FLOAT4_ARRAY:
+		break;
+	case Anima::MATRIX4x4:
+		break;
+	case Anima::MATRIX4x4_ARRAY:
+		break;
+	case Anima::MATRIX3x3:
+		break;
+	case Anima::MATRIX3x3_ARRAY:
+		break;
+	case Anima::INT:
+		UpdateValue(renderer->GetInteger(propertyName));
+		break;
+	case Anima::INT_ARRAY:
+		break;
+	case Anima::BOOL:
+		UpdateValue(renderer->GetBoolean(propertyName));
+		break;
+	case Anima::BOOL_ARRAY:
+		break;
+	case Anima::TEXTURE2D:
+	{
+		if (_nameParts.size() == 4 && _nameParts[1] == GBUFFER_PREFIX)
+		{
+			AnimaGBuffer* gBuffer = renderer->GetGBuffer(_nameParts[2]);
+
+			if (gBuffer != nullptr)
+				UpdateValue(gBuffer->GetTexture(_nameParts[3]), renderer->GetTextureSlot(_nameParts[3]));
+		}
+		else
+		{
+			UpdateValue(renderer->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
+		}
+		break;
+	}
+	case Anima::TEXTURE2D_ARRAY:
+		break;
+	case Anima::TEXTURE3D:
+		break;
+	case Anima::TEXTURE3D_ARRAY:
+		break;
+	default:
+		break;
+	}
+}
+
+void AnimaShaderData::UpdateValue(const AFloat& value)
 {
 	glUniform1f(_locations[0], value);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AFloat>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AFloat>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -210,12 +302,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AFloat>& value)
 		glUniform1f(_locations[i], value[i]);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaVertex2f& value)
+void AnimaShaderData::UpdateValue(const AnimaVertex2f& value)
 {
 	glUniform2f(_locations[0], value.x, value.y);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex2f>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AnimaVertex2f>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -227,12 +319,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex2f>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaVertex3f& value)
+void AnimaShaderData::UpdateValue(const AnimaVertex3f& value)
 {
 	glUniform3f(_locations[0], value.x, value.y, value.z);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex3f>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AnimaVertex3f>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -244,12 +336,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex3f>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaVertex4f& value)
+void AnimaShaderData::UpdateValue(const AnimaVertex4f& value)
 {
 	glUniform4f(_locations[0], value.x, value.y, value.z, value.w);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex4f>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AnimaVertex4f>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -261,12 +353,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaVertex4f>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaMatrix& value)
+void AnimaShaderData::UpdateValue(const AnimaMatrix& value)
 {
 	glUniformMatrix4fv(_locations[0], 1, GL_FALSE, value.m);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaMatrix>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AnimaMatrix>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -278,12 +370,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AnimaMatrix>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const AInt& value)
+void AnimaShaderData::UpdateValue(const AInt& value)
 {
 	glUniform1i(_locations[0], value);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<AInt>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<AInt>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -294,12 +386,12 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<AInt>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(const bool& value)
+void AnimaShaderData::UpdateValue(const bool& value)
 {
 	glUniform1i(_locations[0], value ? 1 : 0);
 }
 
-void AnimaShaderInput::UpdateValue(const AnimaArray<bool>& value)
+void AnimaShaderData::UpdateValue(const AnimaArray<bool>& value)
 {
 	AInt locationsCount = _locations.size();
 	AInt valuesCount = value.size();
@@ -310,7 +402,7 @@ void AnimaShaderInput::UpdateValue(const AnimaArray<bool>& value)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(AnimaTexture* value, const AInt& slot)
+void AnimaShaderData::UpdateValue(AnimaTexture* value, const AInt& slot)
 {
 	UpdateValue(slot);
 
@@ -326,7 +418,7 @@ void AnimaShaderInput::UpdateValue(AnimaTexture* value, const AInt& slot)
 	}
 }
 
-void AnimaShaderInput::UpdateValue(AnimaArray<AnimaTexture*>& value, const AInt& slot)
+void AnimaShaderData::UpdateValue(AnimaArray<AnimaTexture*>& value, const AInt& slot)
 {
 }
 

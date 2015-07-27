@@ -57,11 +57,6 @@ bool _shouldClose = false;
 int lastXPos = 0;
 int lastYPos = 0;
 
-void test(std::string str)
-{
-	printf("%s", str);
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -144,8 +139,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	RedirectIOToConsole();
-
-	test("ciao mondo");
 
 	// Inizializzazione della finestra
 	WNDCLASSEX wcex;
