@@ -10,6 +10,7 @@
 #include "AnimaMaterialsManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaTimer.h"
+#include "AnimaXmlTranslators.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -88,7 +89,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	animationNodeName = sceneNode->mName.C_Str();
 
 	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
-	_models.push_back(currentModel);
+	_models.Add(newModelName, currentModel);
 
 	currentModel->SetAnimationNodeName(animationNodeName);
 
@@ -128,6 +129,7 @@ AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
 		return nullptr;
 
 	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
+	_models.Add(name, newModel);
 	_topLevelModels.Add(name, newModel);
 	return newModel;
 }
@@ -149,7 +151,7 @@ AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name)
 
 void AnimaModelsManager::ClearModels()
 {
-	AInt count = _models.size();
+	AInt count = _models.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaModel* model = _models[i];
@@ -157,7 +159,7 @@ void AnimaModelsManager::ClearModels()
 		model = nullptr;
 	}
 
-	_models.clear();
+	_models.RemoveAll();
 	_topLevelModels.RemoveAll();
 }
 
@@ -173,8 +175,191 @@ AnimaModel* AnimaModelsManager::LoadModelFromFile(const AnimaString& filePath)
 AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefinition)
 {
 	AnimaModel* model = nullptr;
+	
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	std::stringstream ss(modelXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
+
+	AnimaString name = pt.get<AnimaString>("AnimaModel.<xmlattr>.name");
+
+	model = CreateModel(name);
+
+	if (model)
+	{
+		try
+		{
+			for (auto& meshData : pt.get_child("AnimaModel.Meshes"))
+			{
+				if (meshData.first == "Mesh")
+				{
+					AnimaString meshName = meshData.second.get<AnimaString>("<xmlattr>.name");
+					AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
+
+					if (mesh != nullptr)
+					{
+						model->AddMesh(mesh);
+						mesh->SetParentObject(model);
+					}
+				}
+			}
+		}
+		catch (boost::property_tree::ptree_bad_path& exception)
+		{
+		}
+		catch (boost::property_tree::ptree_bad_data& exception)
+		{
+		}
+		catch (boost::property_tree::ptree_error& exception)
+		{
+		}
+
+		try
+		{
+			for (auto& childModelData : pt.get_child("AnimaModel.Children.Models"))
+			{
+				if (childModelData.first == "AnimaModel")
+				{
+					AnimaModel* child = LoadModelFromTree(&childModelData.second);
+
+					if (child != nullptr)
+						model->AddChild(child);
+				}
+			}
+		}
+		catch (boost::property_tree::ptree_bad_path& exception)
+		{
+		}
+		catch (boost::property_tree::ptree_bad_data& exception)
+		{
+		}
+		catch (boost::property_tree::ptree_error& exception)
+		{
+		}
+
+		model->SetPosition(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Position"));
+		model->GetTransformation()->SetTranslation(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Translation"));
+		model->GetTransformation()->SetRotation(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Rotation"));
+		model->GetTransformation()->SetScale(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Scale"));
+	}
 
 	return model;
+}
+
+AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* tree)
+{
+	if (tree == nullptr)
+		return nullptr;
+
+	AnimaModel* model = nullptr;
+
+	AnimaString name = tree->get<AnimaString>("<xmlattr>.name");
+	model = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
+	_models.Add(name, model);
+
+	try
+	{
+		for (auto& meshData : tree->get_child("Meshes"))
+		{
+			if (meshData.first == "Mesh")
+			{
+				AnimaString meshName = meshData.second.get<AnimaString>("<xmlattr>.name");
+				AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
+
+				if (mesh != nullptr)
+				{
+					model->AddMesh(mesh);
+					mesh->SetParentObject(model);
+				}
+			}
+		}
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+	}
+	catch (boost::property_tree::ptree_error& exception)
+	{
+	}
+
+	try
+	{
+		for (auto& childModelData : tree->get_child("Children.Models"))
+		{
+			if (childModelData.first == "AnimaModel")
+			{
+				AnimaModel* child = LoadModelFromTree(&childModelData.second);
+
+				if (child != nullptr)
+					model->AddChild(child);
+			}
+		}
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+	}
+	catch (boost::property_tree::ptree_error& exception)
+	{
+	}
+
+	model->SetPosition(tree->get<AnimaVertex3f>("SpaceData.Position"));
+	model->GetTransformation()->SetTranslation(tree->get<AnimaVertex3f>("SpaceData.Translation"));
+	model->GetTransformation()->SetRotation(tree->get<AnimaVertex3f>("SpaceData.Rotation"));
+	model->GetTransformation()->SetScale(tree->get<AnimaVertex3f>("SpaceData.Scale"));
+	
+	return model;
+}
+
+void AnimaModelsManager::SaveModelToFile(const AnimaString& modelName, const AnimaString& filePath)
+{
+	AnimaModel* model = _models[modelName];
+	SaveModelToFile(model, filePath);
+}
+
+void AnimaModelsManager::SaveModelToFile(AnimaModel* model, const AnimaString& filePath)
+{
+	if (model == nullptr)
+		return;
+
+	using boost::property_tree::ptree;
+
+	boost::property_tree::write_xml(filePath, GetModelTree(model), std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+}
+
+boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
+{
+	using boost::property_tree::ptree;
+
+	if (model == nullptr)
+		return ptree();
+
+	ptree pt;
+
+	// Salvo il nome della mesh come attributo
+	pt.put("AnimaModel.<xmlattr>.name", model->GetName());
+
+	// Salvo i nomi delle mesh
+	AInt meshesCount = model->GetMeshesCount();
+	for (AInt i = 0; i < meshesCount; i++)
+		pt.put("AnimaModel.Meshes.Mesh.<xmlattr>.name", model->GetMesh(i)->GetName());
+
+	// Salvo i dati di posizionamento del modello
+	pt.add("AnimaModel.SpaceData.Position", model->GetPosition());
+	pt.add("AnimaModel.SpaceData.Translation", model->GetTransformation()->GetTranslation());
+	pt.add("AnimaModel.SpaceData.Rotation", model->GetTransformation()->GetRotation());
+	pt.add("AnimaModel.SpaceData.Scale", model->GetTransformation()->GetScale());
+
+	AInt childrenCount = model->GetChildrenCount();
+	for (AInt i = 0; i < childrenCount; i++)
+		pt.add_child("AnimaModel.Children.Models", GetModelTree((AnimaModel*)model->GetChild(i)));
+
+	return pt;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

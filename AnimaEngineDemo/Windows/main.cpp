@@ -312,24 +312,34 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	//// Caricamento di un modello
+	// Caricamento di un modello
+
+	Anima::AnimaTimer timer;
+	timer.Reset();
+
 	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	//if (!_model)
 	//	return false;
-
-	////_model->GetTransformation()->RotateXDeg(-90.0);
 	//
-	//_model->ComputeBoundingBox();
-
-	//_camera->LookAt(0.0, 5.0, 10.0, 0.0, 1.0, 0.0);
-	//_camera->Activate();
-
 	//Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	//_model->GetAllMeshes(&modelMeshes);
 
-	//_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[0], "D:/Progetti/Anima/Build/bin/Debug/mesh.am");
+	//_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[0], "D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
+	//_scene->GetModelsManager()->SaveModelToFile(_model, "D:/Progetti/Anima/Build/bin/Debug/model.amodel");
 
-	Anima::AnimaMesh* laodedMesh = _scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.am");
+	_scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
+	_model = _scene->GetModelsManager()->LoadModelFromFile("D:/Progetti/Anima/Build/bin/Debug/model.amodel");
+
+	printf("Custom loader time: %f\n", timer.Elapsed());
+
+	//_model->GetTransformation()->RotateXDeg(-90.0);
+	
+	_model->ComputeBoundingBox();
+
+	_camera->LookAt(0.0, 5.0, 10.0, 0.0, 1.0, 0.0);
+	_camera->Activate();
+
+	//Anima::AnimaMesh* laodedMesh = _scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
 
 	//Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
 

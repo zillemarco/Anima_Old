@@ -14,6 +14,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/timer.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -300,7 +301,16 @@ void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& file
 	using boost::property_tree::ptree;
 	ptree pt;
 
+	// Salvo il nome della mesh come attributo
 	pt.put("AnimaMesh.<xmlattr>.name", mesh->GetName());
+
+	// Se la mesh ha un materiale oppure ha il nome di un materiale lo salvo come attributo della mesh
+	AnimaString materialName = "";
+	if (mesh->GetMaterial() != nullptr)
+		materialName = mesh->GetMaterial()->GetName();
+	pt.put("AnimaMesh.<xmlattr>.material", materialName);
+
+	// Salvo i dati grafici
 	pt.add("AnimaMesh.Vertices", *mesh->GetVertices());
 	pt.add("AnimaMesh.Normals", *mesh->GetNormals());
 	pt.add("AnimaMesh.TextureCoords", *mesh->GetTextureCoords());
@@ -308,6 +318,22 @@ void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& file
 	pt.add("AnimaMesh.Bitangents", *mesh->GetBitangents());
 	pt.add("AnimaMesh.BoneWeights", *mesh->GetBoneWeights());
 	pt.add("AnimaMesh.BoneIDs", *mesh->GetBoneIDs());
+
+	// Salvo la lista di indici delle face
+	AnimaArray<AUint> indexes;
+	mesh->GetFacesIndicesArray(&indexes);
+	pt.add("AnimaMesh.Indexes", indexes);
+
+	// Salvo la lista di normali delle face
+	AnimaArray<AnimaVertex3f> facesNormals;
+	mesh->GetFacesNormalsArray(&facesNormals);
+	pt.add("AnimaMesh.FacesNormals", facesNormals);
+
+	// Salvo i dati di posizionamento della mesh
+	pt.add("AnimaMesh.SpaceData.Position", mesh->GetPosition());
+	pt.add("AnimaMesh.SpaceData.Translation", mesh->GetTransformation()->GetTranslation());
+	pt.add("AnimaMesh.SpaceData.Rotation", mesh->GetTransformation()->GetRotation());
+	pt.add("AnimaMesh.SpaceData.Scale", mesh->GetTransformation()->GetScale());
 
 	boost::property_tree::write_xml(filePath, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 }
@@ -344,6 +370,34 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 		mesh->SetBitangents(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Bitangents"));
 		mesh->SetBoneWeights(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneWeights"));
 		mesh->SetBoneIDs(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneIDs"));
+
+		AnimaArray<AUint> indexes = pt.get<AnimaArray<AUint>>("AnimaMesh.Indexes");
+		AnimaArray<AnimaVertex3f> facesNormals = pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.FacesNormals");
+
+		AInt indexesCount = indexes.size();
+		AInt facesNormalsCount = facesNormals.size();
+
+		bool hasFacesNormal = (facesNormalsCount == indexesCount % 3);
+
+		for (AInt i = 0; i < indexesCount; i += 3)
+		{
+			AnimaFace face;
+			face.SetIndexes(indexes[i], indexes[i + 1], indexes[i + 2]);
+
+			if (hasFacesNormal)
+				face.SetNormal(facesNormals[i % 3]);
+
+			mesh->AddFace(face);
+		}
+
+		mesh->SetPosition(pt.get<AnimaVertex3f>("AnimaMesh.SpaceData.Position"));
+		mesh->GetTransformation()->SetTranslation(pt.get<AnimaVertex3f>("AnimaMesh.SpaceData.Translation"));
+		mesh->GetTransformation()->SetRotation(pt.get<AnimaVertex3f>("AnimaMesh.SpaceData.Rotation"));
+		mesh->GetTransformation()->SetScale(pt.get<AnimaVertex3f>("AnimaMesh.SpaceData.Scale"));
+
+		AnimaString materialName = pt.get<AnimaString>("AnimaMesh.<xmlattr>.material");
+		if (!materialName.empty())
+			mesh->SetMaterial(_materialsManager->GetMaterialFromName(materialName));
 	}
 
 	return mesh;

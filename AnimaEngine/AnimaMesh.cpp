@@ -1498,4 +1498,26 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 #endif
 }
 
+void AnimaMesh::GetFacesIndicesArray(AnimaArray<AUint>* dst) const
+{
+	if (dst == nullptr)
+		return;
+
+	for (auto& face : _faces)
+	{
+		dst->push_back(face.GetIndex(0));
+		dst->push_back(face.GetIndex(1));
+		dst->push_back(face.GetIndex(2));
+	}
+}
+
+void AnimaMesh::GetFacesNormalsArray(AnimaArray<AnimaVertex3f>* dst) const
+{
+	if (dst == nullptr)
+		return;
+
+	for (auto& face : _faces)
+		dst->push_back(face.GetNormal());
+}
+
 END_ANIMA_ENGINE_NAMESPACE

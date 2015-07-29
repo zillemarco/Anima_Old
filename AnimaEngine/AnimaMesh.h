@@ -219,6 +219,8 @@ public:
 
 	AUint GetFacesIndicesCount();
 	AUint* GetFacesIndices();
+	void GetFacesIndicesArray(AnimaArray<AUint>* dst) const;
+	void GetFacesNormalsArray(AnimaArray<AnimaVertex3f>* dst) const;
 
 	AUint GetFloatVerticesCount();
 	float* GetFloatVertices();

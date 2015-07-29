@@ -26,6 +26,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/vector3.h>
+#include <boost/property_tree/ptree.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -49,8 +50,14 @@ public:
 	
 	void ClearModels();
 	
+	void SaveModelToFile(const AnimaString& modelName, const AnimaString& filePath);
+	void SaveModelToFile(AnimaModel* model, const AnimaString& filePath);
+
 private:
 	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* meshesMap, const AnimaString& modelName);
+
+	boost::property_tree::ptree GetModelTree(AnimaModel* model);
+	AnimaModel* LoadModelFromTree(boost::property_tree::ptree* tree);
 
 private:
 	AnimaScene* _scene;
@@ -59,7 +66,7 @@ private:
 	AnimaMaterialsManager*	_materialsManager;
 	AnimaAnimationsManager* _animationsManager;
 
-	AnimaArray<AnimaModel*>			_models;
+	AnimaMappedArray<AnimaModel*>	_models;
 	AnimaMappedArray<AnimaModel*>	_topLevelModels;
 };
 
