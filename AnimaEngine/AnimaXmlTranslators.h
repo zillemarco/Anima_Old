@@ -21,6 +21,7 @@
 
 #include "AnimaVertex.h"
 #include "AnimaShaderData.h"
+#include "AnimaArray.h"
 
 struct AnimaXmlVertexTranslator
 {
@@ -67,6 +68,153 @@ struct AnimaXmlVertexTranslator
 	boost::optional<internal_type> put_value(const external_type& vertex)
 	{
 		return std::to_string(vertex.x) + ";" + std::to_string(vertex.y) + ";" + std::to_string(vertex.z) + ";" + std::to_string(vertex.w);
+	}
+};
+
+struct AnimaXmlVertex4ArrayTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaArray<Anima::AnimaVertex4f> external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			std::vector<Anima::AnimaString> elements;
+			boost::split(elements, str, boost::is_any_of(";"));
+
+			external_type result;
+			size_t elementsSize = elements.size();
+
+			if (elementsSize % 4 != 0)
+				return boost::optional<external_type>(boost::none);
+
+			for (Anima::AInt i = 0; i < elementsSize; i += 4)
+			{
+				Anima::AnimaVertex4f vertex;
+				vertex.x = (Anima::AFloat)atof(elements[i].c_str());
+				vertex.y = (Anima::AFloat)atof(elements[i + 1].c_str());
+				vertex.z = (Anima::AFloat)atof(elements[i + 2].c_str());
+				vertex.w = (Anima::AFloat)atof(elements[i + 3].c_str());
+
+				result.push_back(vertex);
+			}
+
+			return result;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& input)
+	{
+		internal_type result = "";
+
+		Anima::AInt count = input.size();
+		for (Anima::AInt i = 0; i < count; i++)
+		{
+			Anima::AnimaVertex4f vertex = input[i];
+			result += std::to_string(vertex.x) + ";" + std::to_string(vertex.y) + ";" + std::to_string(vertex.z) + ";" + std::to_string(vertex.w) + ";";
+		}
+
+		return result;
+	}
+};
+
+struct AnimaXmlVertex3ArrayTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaArray<Anima::AnimaVertex3f> external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			std::vector<Anima::AnimaString> elements;
+			boost::split(elements, str, boost::is_any_of(";"));
+			
+			external_type result;
+			size_t elementsSize = elements.size();
+
+			if (elementsSize % 3 != 0)
+				return boost::optional<external_type>(boost::none);
+
+			for (Anima::AInt i = 0; i < elementsSize; i += 3)
+			{
+				Anima::AnimaVertex3f vertex;
+				vertex.x = (Anima::AFloat)atof(elements[i].c_str());
+				vertex.y = (Anima::AFloat)atof(elements[i + 1].c_str());
+				vertex.z = (Anima::AFloat)atof(elements[i + 2].c_str());
+
+				result.push_back(vertex);
+			}
+
+			return result;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& input)
+	{
+		internal_type result = "";
+
+		Anima::AInt count = input.size();
+		for (Anima::AInt i = 0; i < count; i++)
+		{
+			Anima::AnimaVertex3f vertex = input[i];
+			result += std::to_string(vertex.x) + ";" + std::to_string(vertex.y) + ";" + std::to_string(vertex.z) + ";";
+		}
+
+		return result;
+	}
+};
+
+struct AnimaXmlVertex2ArrayTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaArray<Anima::AnimaVertex2f> external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			std::vector<Anima::AnimaString> elements;
+			boost::split(elements, str, boost::is_any_of(";"));
+
+			external_type result;
+			size_t elementsSize = elements.size();
+
+			if (elementsSize % 2 != 0)
+				return boost::optional<external_type>(boost::none);
+
+			for (Anima::AInt i = 0; i < elementsSize; i += 2)
+			{
+				Anima::AnimaVertex2f vertex;
+				vertex.x = (Anima::AFloat)atof(elements[i].c_str());
+				vertex.y = (Anima::AFloat)atof(elements[i + 1].c_str());
+
+				result.push_back(vertex);
+			}
+
+			return result;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& input)
+	{
+		internal_type result = "";
+
+		Anima::AInt count = input.size();
+		for (Anima::AInt i = 0; i < count; i++)
+		{
+			Anima::AnimaVertex2f vertex = input[i];
+			result += std::to_string(vertex.x) + ";" + std::to_string(vertex.y) + ";";
+		}
+
+		return result;
 	}
 };
 
@@ -218,6 +366,21 @@ namespace boost
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaShaderDataType >
 		{
 			typedef AnimaXmlShaderDataTypeTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaArray<Anima::AnimaVertex2f> >
+		{
+			typedef AnimaXmlVertex2ArrayTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaArray<Anima::AnimaVertex3f> >
+		{
+			typedef AnimaXmlVertex3ArrayTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaArray<Anima::AnimaVertex4f> >
+		{
+			typedef AnimaXmlVertex4ArrayTranslator type;
 		};
 	}
 }

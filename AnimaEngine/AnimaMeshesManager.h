@@ -47,6 +47,12 @@ public:
 
 	AInt GetMeshesCount() const;
 
+	AnimaMesh* LoadMeshFromFile(const AnimaString& meshFilePath);
+	AnimaMesh* LoadMeshFromXml(const AnimaString& meshXmlDefinition);
+
+	void SaveMeshToFile(const AnimaString& meshName, const AnimaString& filePath);
+	void SaveMeshToFile(AnimaMesh* mesh, const AnimaString& filePath);
+
 protected:
 	void ClearMeshes();
 

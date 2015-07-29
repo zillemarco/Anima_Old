@@ -7,6 +7,13 @@
 //
 
 #include "AnimaMeshesManager.h"
+#include "AnimaXmlTranslators.h"
+
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -277,6 +284,69 @@ AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
 	AnimaMesh* newMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*(_scene->GetMeshesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetMeshesAllocator());
 	_meshes.Add(name, newMesh);
 	return newMesh;
+}
+
+void AnimaMeshesManager::SaveMeshToFile(const AnimaString& meshName, const AnimaString& filePath)
+{
+	AnimaMesh* mesh = _meshes[meshName];
+	SaveMeshToFile(mesh, filePath);
+}
+
+void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& filePath)
+{
+	if (mesh == nullptr)
+		return;
+
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	pt.put("AnimaMesh.<xmlattr>.name", mesh->GetName());
+	pt.add("AnimaMesh.Vertices", *mesh->GetVertices());
+	pt.add("AnimaMesh.Normals", *mesh->GetNormals());
+	pt.add("AnimaMesh.TextureCoords", *mesh->GetTextureCoords());
+	pt.add("AnimaMesh.Tangents", *mesh->GetTangents());
+	pt.add("AnimaMesh.Bitangents", *mesh->GetBitangents());
+	pt.add("AnimaMesh.BoneWeights", *mesh->GetBoneWeights());
+	pt.add("AnimaMesh.BoneIDs", *mesh->GetBoneIDs());
+
+	boost::property_tree::write_xml(filePath, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+}
+
+AnimaMesh* AnimaMeshesManager::LoadMeshFromFile(const AnimaString& meshFilePath)
+{
+	std::ifstream fileStream(meshFilePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+
+	return LoadMeshFromXml(xml);
+}
+
+AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinition)
+{
+	AnimaMesh* mesh = nullptr;
+
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	std::stringstream ss(meshXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
+
+	AnimaString name = pt.get<AnimaString>("AnimaMesh.<xmlattr>.name");
+
+	mesh = CreateEmptyMesh(name);
+
+	if (mesh)
+	{
+		mesh->SetVertices(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Vertices"));
+		mesh->SetNormals(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Normals"));
+		mesh->SetTextureCoords(&pt.get<AnimaArray<AnimaVertex2f>>("AnimaMesh.TextureCoords"));
+		mesh->SetTangents(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Tangents"));
+		mesh->SetBitangents(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Bitangents"));
+		mesh->SetBoneWeights(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneWeights"));
+		mesh->SetBoneIDs(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneIDs"));
+	}
+
+	return mesh;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
