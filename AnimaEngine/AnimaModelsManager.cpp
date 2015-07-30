@@ -377,10 +377,11 @@ void AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
 		fs::directory_iterator endIterator;
 		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
 		{
-			printf("File extension: %s\n", directoryIterator->path().extension().string().c_str());
-
 			if (directoryIterator->path().extension().string() == ".amodel")
+			{
 				LoadModelFromFile(directoryIterator->path().string());
+				printf("Read %s\n", directoryIterator->path().string().c_str());
+			}
 		}
 	}
 }
