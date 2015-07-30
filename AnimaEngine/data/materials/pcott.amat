@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<AnimaMaterial name="material-1">
+<AnimaMaterial name="pcott">
 	<Properties>
-		<Property name="DiffuseColor" type="color" value="0.741;0.765;0.808;1.0" />
-		<Property name="SpecularColor" type="color" value="1.0;1.0;1.0;1.0" />
+		<Property name="DiffuseColor" type="color" value="0.078;0.078;0.078;1.0" />
+		<Property name="SpecularColor" type="color" value="0.2;0.2;0.2;1.0" />
 		<Property name="AmbientColor" type="color" value="0.2;0.2;0.2;1.0" />
 		<Property name="EmissionColor" type="color" value="0.0;0.0;0.0;1.0" />
-		<Property name="Shininess" type="float" value="0.0" />
+		<Property name="Shininess" type="float" value="32.0" />
 		<Property name="TwoSided" type="bool" value="false" />
 	</Properties>
 	<Shaders></Shaders>

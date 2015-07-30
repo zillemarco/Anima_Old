@@ -182,7 +182,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 	std::stringstream ss(modelXmlDefinition);
 	boost::property_tree::read_xml(ss, pt);
 
-	AnimaString name = pt.get<AnimaString>("AnimaModel.<xmlattr>.name");
+	AnimaString name = pt.get<AnimaString>("AnimaModel.Name");
 
 	model = CreateModel(name);
 
@@ -194,7 +194,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 			{
 				if (meshData.first == "Mesh")
 				{
-					AnimaString meshName = meshData.second.get<AnimaString>("<xmlattr>.name");
+					AnimaString meshName = meshData.second.get_value<AnimaString>("");
 					AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
 
 					if (mesh != nullptr)
@@ -217,9 +217,9 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 
 		try
 		{
-			for (auto& childModelData : pt.get_child("AnimaModel.Children.Models"))
+			for (auto& childModelData : pt.get_child("AnimaModel.Children"))
 			{
-				if (childModelData.first == "AnimaModel")
+				if (childModelData.first == "Child")
 				{
 					AnimaModel* child = LoadModelFromTree(&childModelData.second);
 
@@ -254,17 +254,17 @@ AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* t
 
 	AnimaModel* model = nullptr;
 
-	AnimaString name = tree->get<AnimaString>("<xmlattr>.name");
+	AnimaString name = tree->get<AnimaString>("AnimaModel.Name");
 	model = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_models.Add(name, model);
 
 	try
 	{
-		for (auto& meshData : tree->get_child("Meshes"))
+		for (auto& meshData : tree->get_child("AnimaModel.Meshes"))
 		{
 			if (meshData.first == "Mesh")
 			{
-				AnimaString meshName = meshData.second.get<AnimaString>("<xmlattr>.name");
+				AnimaString meshName = meshData.second.get_value<AnimaString>("");
 				AnimaMesh* mesh = _meshesManager->GetMeshFromName(meshName);
 
 				if (mesh != nullptr)
@@ -287,9 +287,9 @@ AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* t
 
 	try
 	{
-		for (auto& childModelData : tree->get_child("Children.Models"))
+		for (auto& childModelData : tree->get_child("AnimaModel.Children"))
 		{
-			if (childModelData.first == "AnimaModel")
+			if (childModelData.first == "Child")
 			{
 				AnimaModel* child = LoadModelFromTree(&childModelData.second);
 
@@ -308,10 +308,10 @@ AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* t
 	{
 	}
 
-	model->SetPosition(tree->get<AnimaVertex3f>("SpaceData.Position"));
-	model->GetTransformation()->SetTranslation(tree->get<AnimaVertex3f>("SpaceData.Translation"));
-	model->GetTransformation()->SetRotation(tree->get<AnimaVertex3f>("SpaceData.Rotation"));
-	model->GetTransformation()->SetScale(tree->get<AnimaVertex3f>("SpaceData.Scale"));
+	model->SetPosition(tree->get<AnimaVertex3f>("AnimaModel.SpaceData.Position"));
+	model->GetTransformation()->SetTranslation(tree->get<AnimaVertex3f>("AnimaModel.SpaceData.Translation"));
+	model->GetTransformation()->SetRotation(tree->get<AnimaVertex3f>("AnimaModel.SpaceData.Rotation"));
+	model->GetTransformation()->SetScale(tree->get<AnimaVertex3f>("AnimaModel.SpaceData.Scale"));
 	
 	return model;
 }
@@ -342,12 +342,14 @@ boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
 	ptree pt;
 
 	// Salvo il nome della mesh come attributo
-	pt.put("AnimaModel.<xmlattr>.name", model->GetName());
+	pt.put("AnimaModel.Name", model->GetName());
 
 	// Salvo i nomi delle mesh
+	ptree ptMeshes;
 	AInt meshesCount = model->GetMeshesCount();
 	for (AInt i = 0; i < meshesCount; i++)
-		pt.put("AnimaModel.Meshes.Mesh.<xmlattr>.name", model->GetMesh(i)->GetName());
+		ptMeshes.add("Mesh", model->GetMesh(i)->GetName());
+	pt.add_child("AnimaModel.Meshes", ptMeshes);
 
 	// Salvo i dati di posizionamento del modello
 	pt.add("AnimaModel.SpaceData.Position", model->GetPosition());
@@ -355,9 +357,12 @@ boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
 	pt.add("AnimaModel.SpaceData.Rotation", model->GetTransformation()->GetRotation());
 	pt.add("AnimaModel.SpaceData.Scale", model->GetTransformation()->GetScale());
 
+	ptree ptChildren;
 	AInt childrenCount = model->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
-		pt.add_child("AnimaModel.Children.Models", GetModelTree((AnimaModel*)model->GetChild(i)));
+		ptChildren.add_child("Child", GetModelTree((AnimaModel*)model->GetChild(i)));
+
+	pt.add_child("AnimaModel.Children", ptChildren);
 
 	return pt;
 }
@@ -372,9 +377,9 @@ void AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
 		fs::directory_iterator endIterator;
 		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
 		{
-			printf("File extension: %s\n", directoryIterator->path().extension().c_str());
+			printf("File extension: %s\n", directoryIterator->path().extension().string().c_str());
 
-			if (directoryIterator->path().extension() == "amodel")
+			if (directoryIterator->path().extension().string() == ".amodel")
 				LoadModelFromFile(directoryIterator->path().string());
 		}
 	}

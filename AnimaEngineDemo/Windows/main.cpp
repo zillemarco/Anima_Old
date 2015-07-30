@@ -16,6 +16,7 @@
 #include <AnimaModelInstancesManager.h>
 #include <AnimaMaterialsManager.h>
 #include <AnimaMeshesManager.h>
+#include <AnimaLightsManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -27,6 +28,7 @@
 #include <AnimaTimer.h>
 #include <AnimaModelInstance.h>
 #include <AnimaMaterial.h>
+#include <AnimaLight.h>
 
 #include "main.h"
 
@@ -223,56 +225,56 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/MatTester.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 
-#if !defined _DEBUG
-	Anima::AnimaString inputString;
-	while (inputString.empty() || (inputString != "y" && inputString != "n"))
-	{
-		std::cout << "Use defaults? [y/n]: ";
-		std::cin >> inputString;
-	}
-
-	if (inputString == "n")
-	{
-		inputString = "";
-		while (inputString.empty() || (inputString != "y" && inputString != "n"))
-		{
-			std::cout << "Use locals? [y/n]: ";
-			std::cin >> inputString;
-		}
-		
-		if (inputString == "n")
-		{
-			std::cout << "\nInsert shaders parts path: ";
-			std::cin >> inputString;
-			if (!inputString.empty())
-				shadersPartsPath = inputString;
-
-			std::cout << "\nInsert shaders path: ";
-			std::cin >> inputString;
-			if (!inputString.empty())
-				shadersPath = inputString;
-
-			std::cout << "\nInsert materials path: ";
-			std::cin >> inputString;
-			if (!inputString.empty())
-				materialsPath = inputString;
-
-			std::cout << "\nInsert model path: ";
-			std::cin >> inputString;
-			if (!inputString.empty())
-				modelPath = inputString;
-		}
-		else
-		{
-			shadersPartsPath = "data/shaders/Parts";
-			shadersPath = "data/shaders/";
-			materialsPath = "data/materials";
-			modelPath = "data/models/cubo.3ds";
-		}
-	}
-#endif
+//#if !defined _DEBUG
+//	Anima::AnimaString inputString;
+//	while (inputString.empty() || (inputString != "y" && inputString != "n"))
+//	{
+//		std::cout << "Use defaults? [y/n]: ";
+//		std::cin >> inputString;
+//	}
+//
+//	if (inputString == "n")
+//	{
+//		inputString = "";
+//		while (inputString.empty() || (inputString != "y" && inputString != "n"))
+//		{
+//			std::cout << "Use locals? [y/n]: ";
+//			std::cin >> inputString;
+//		}
+//		
+//		if (inputString == "n")
+//		{
+//			std::cout << "\nInsert shaders parts path: ";
+//			std::cin >> inputString;
+//			if (!inputString.empty())
+//				shadersPartsPath = inputString;
+//
+//			std::cout << "\nInsert shaders path: ";
+//			std::cin >> inputString;
+//			if (!inputString.empty())
+//				shadersPath = inputString;
+//
+//			std::cout << "\nInsert materials path: ";
+//			std::cin >> inputString;
+//			if (!inputString.empty())
+//				materialsPath = inputString;
+//
+//			std::cout << "\nInsert model path: ";
+//			std::cin >> inputString;
+//			if (!inputString.empty())
+//				modelPath = inputString;
+//		}
+//		else
+//		{
+//			shadersPartsPath = "data/shaders/Parts";
+//			shadersPath = "data/shaders/";
+//			materialsPath = "data/materials";
+//			modelPath = "data/models/cubo.3ds";
+//		}
+//	}
+//#endif
 
 	// Caricamento degli shader
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
@@ -312,62 +314,38 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	// Caricamento di un modello
-
-	Anima::AnimaTimer timer;
-	timer.Reset();
-
 	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
-	_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/10001.3ds", ANIMA_ENGINE_DEMO_MODEL_NAME);
-	if (!_model)
-		return false;
-	
-	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
-	_model->GetAllMeshes(&modelMeshes);
-
-	Anima::AnimaString str;
-
-	str = "C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/AnimaData/" + _model->GetName() + ".amodel";
-	_scene->GetModelsManager()->SaveModelToFile(_model, str);
-
-	for (int i = 0; i < modelMeshes.size(); i++)
-	{
-		str = "C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/AnimaData/" + modelMeshes[i]->GetName() + ".amesh";
-		_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[i], str);
-	}
-
-	//_scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
-	//_model = _scene->GetModelsManager()->LoadModelFromFile("D:/Progetti/Anima/Build/bin/Debug/model.amodel");
-
-	printf("Custom loader time: %f\n", timer.Elapsed());
+	//if (!_model)
+	//	return false;
 
 	//_model->GetTransformation()->RotateXDeg(-90.0);
-	
-	_model->ComputeBoundingBox();
 
+	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
+	////
+	////Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
+	////_model->GetAllMeshes(&modelMeshes);
+
+	////Anima::AnimaString str;
+
+	////str = "C:/Users/Marco/Desktop/10001/AnimaData/" + _model->GetName() + ".amodel";
+	////_scene->GetModelsManager()->SaveModelToFile(_model, str);
+
+	////for (int i = 0; i < modelMeshes.size(); i++)
+	////{
+	////	str = "C:/Users/Marco/Desktop/10001/AnimaData/" + modelMeshes[i]->GetName() + ".amesh";
+	////	_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[i], str);
+	////}
+
+	_scene->GetMeshesManager()->LoadMeshes("C:/Users/Marco/Desktop/10001/AnimaData/");
+	_scene->GetModelsManager()->LoadModels("C:/Users/Marco/Desktop/10001/AnimaData/");
+
+	Anima::AnimaDirectionalLight* light = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
+	light->SetDirection(-1.0, -1.0, -1.0);
+	light->SetColor(1.0, 1.0, 1.0);
+	light->SetIntensity(0.8);
+	
 	_camera->LookAt(0.0, 5.0, 10.0, 0.0, 1.0, 0.0);
 	_camera->Activate();
-
-	//Anima::AnimaMesh* laodedMesh = _scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
-
-	//Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
-
-	//for (int i = -2; i < 4; i++)
-	//{
-	//	for (int j = -2; j < 4; j++)
-	//	{
-	//		Anima::AnimaString str = Anima::FormatString("%d-%d", i, j);
-	//		Anima::AnimaModelInstance* instance = modelInstancesManager->CreateInstance(str, _model);
-
-	//		instance->GetTransformation()->RotateXDeg(-90);
-	//		instance->GetTransformation()->TranslateX((float)i * 4);
-	//		instance->GetTransformation()->TranslateZ((float)j * 4);
-	//	}
-	//}
-
-	//modelMeshes[0]->SetMaterial(materialsManager->GetMaterialFromName("material-1"));
-	//modelMeshes[1]->SetMaterial(materialsManager->GetMaterialFromName("material-2"));
-	//modelMeshes[2]->SetMaterial(materialsManager->GetMaterialFromName("material-3"));
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
