@@ -42,6 +42,7 @@ public:
 	AnimaModel* LoadModelFromFile(const AnimaString& filePath);
 	AnimaModel* LoadModelFromXml(const AnimaString& modelXmlDefinition);
 	AnimaModel* LoadModelFromExternalFile(const AnimaString& modelPath, const AnimaString& name);
+	void LoadModels(const AnimaString& modelsPath);
 	
 	AInt GetModelsCount();
 

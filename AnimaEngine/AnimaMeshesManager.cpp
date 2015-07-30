@@ -403,4 +403,22 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 	return mesh;
 }
 
+void AnimaMeshesManager::LoadMeshes(const AnimaString& meshesPath)
+{
+	namespace fs = boost::filesystem;
+	fs::path directory(meshesPath);
+
+	if (fs::exists(directory) && fs::is_directory(directory))
+	{
+		fs::directory_iterator endIterator;
+		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
+		{
+			printf("File extension: %s\n", directoryIterator->path().extension().c_str());
+
+			if (directoryIterator->path().extension() == "amesh")
+				LoadMeshFromFile(directoryIterator->path().string());
+		}
+	}
+}
+
 END_ANIMA_ENGINE_NAMESPACE

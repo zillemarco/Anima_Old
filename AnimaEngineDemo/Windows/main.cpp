@@ -318,17 +318,26 @@ bool InitEngine()
 	timer.Reset();
 
 	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
-	//if (!_model)
-	//	return false;
-	//
-	//Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
-	//_model->GetAllMeshes(&modelMeshes);
+	_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/10001.3ds", ANIMA_ENGINE_DEMO_MODEL_NAME);
+	if (!_model)
+		return false;
+	
+	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
+	_model->GetAllMeshes(&modelMeshes);
 
-	//_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[0], "D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
-	//_scene->GetModelsManager()->SaveModelToFile(_model, "D:/Progetti/Anima/Build/bin/Debug/model.amodel");
+	Anima::AnimaString str;
 
-	_scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
-	_model = _scene->GetModelsManager()->LoadModelFromFile("D:/Progetti/Anima/Build/bin/Debug/model.amodel");
+	str = "C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/AnimaData/" + _model->GetName() + ".amodel";
+	_scene->GetModelsManager()->SaveModelToFile(_model, str);
+
+	for (int i = 0; i < modelMeshes.size(); i++)
+	{
+		str = "C:/Users/Marco/Documents/MediaDesign/Esportazioni3DS/10001/AnimaData/" + modelMeshes[i]->GetName() + ".amesh";
+		_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[i], str);
+	}
+
+	//_scene->GetMeshesManager()->LoadMeshFromFile("D:/Progetti/Anima/Build/bin/Debug/mesh.amesh");
+	//_model = _scene->GetModelsManager()->LoadModelFromFile("D:/Progetti/Anima/Build/bin/Debug/model.amodel");
 
 	printf("Custom loader time: %f\n", timer.Elapsed());
 

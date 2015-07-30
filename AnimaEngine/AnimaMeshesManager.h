@@ -49,6 +49,7 @@ public:
 
 	AnimaMesh* LoadMeshFromFile(const AnimaString& meshFilePath);
 	AnimaMesh* LoadMeshFromXml(const AnimaString& meshXmlDefinition);
+	void LoadMeshes(const AnimaString& meshesPath);
 
 	void SaveMeshToFile(const AnimaString& meshName, const AnimaString& filePath);
 	void SaveMeshToFile(AnimaMesh* mesh, const AnimaString& filePath);
