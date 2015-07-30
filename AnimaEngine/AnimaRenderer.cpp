@@ -310,7 +310,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
-	SetColor("AmbientLight", 1.0f, 1.0f, 1.0f);
+	SetColor("AmbientLight", 0.1f, 0.1f, 0.1f);
 	//SetColor("BackColor", 0.3f, 0.3f, 0.3f, 1.0f);
 	SetColor("BackColor", 0.0f, 0.0f, 0.0f, 1.0f);
 

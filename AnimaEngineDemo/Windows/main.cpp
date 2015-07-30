@@ -280,11 +280,11 @@ bool InitEngine()
 	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material.asp");
+	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
 	if (!prepareProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light.asp");
+	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
 	if (!directionalLightProgram->Link())
 		return false;
 
@@ -300,7 +300,7 @@ bool InitEngine()
 	if (!spotLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine.asp");
+	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	if (!combineProgram->Link())
 		return false;
 
@@ -314,11 +314,17 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
-	//if (!_model)
-	//	return false;
+	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	if (!_model)
+		return false;
 
-	//_model->GetTransformation()->RotateXDeg(-90.0);
+	_model->GetTransformation()->RotateXDeg(-90.0);
+	
+	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
+	_model->GetAllMeshes(&modelMeshes);
+
+	for (int i = 0; i < modelMeshes.size(); i++)
+		modelMeshes[i]->SetMaterial(materialsManager->GetMaterialFromName("pbr-material"));
 
 	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	////
@@ -336,8 +342,8 @@ bool InitEngine()
 	////	_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[i], str);
 	////}
 
-	_scene->GetMeshesManager()->LoadMeshes("C:/Users/Marco/Desktop/10001/AnimaData/");
-	_scene->GetModelsManager()->LoadModels("C:/Users/Marco/Desktop/10001/AnimaData/");
+	//_scene->GetMeshesManager()->LoadMeshes("C:/Users/Marco/Desktop/10001/AnimaData/");
+	//_scene->GetModelsManager()->LoadModels("C:/Users/Marco/Desktop/10001/AnimaData/");
 
 	Anima::AnimaDirectionalLight* light = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
 	light->SetDirection(-1.0, -1.0, -1.0);
