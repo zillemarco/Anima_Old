@@ -11,5 +11,6 @@
 		<Data name="MAT_Albedo" type="FLOAT4" />
 		<Data name="MAT_Roughness" type="FLOAT" />
 		<Data name="MAT_Metallic" type="FLOAT" />
+		<Data name="MAT_Specular" type="FLOAT4" />
 	</Datas>
 </AnimaShaderProgram>

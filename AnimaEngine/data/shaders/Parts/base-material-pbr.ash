@@ -8,6 +8,7 @@
 			in vec3 frag_normal;
 
 			uniform vec4 MAT_Albedo;
+			uniform vec4 MAT_Specular;
 			uniform float MAT_Roughness;
 			uniform float MAT_Metallic;
 
@@ -24,7 +25,7 @@
 				vec3 realAlbedo = albedoColor - (albedoColor * MAT_Metallic);
 				
 				// 0.03 default value for dielectic
-				vec3 realSpecular = mix(vec3(0.03f), albedoColor, MAT_Metallic);
+				vec3 realSpecular = mix(MAT_Specular.rgb, albedoColor, MAT_Metallic);
 				
 				FragColor[1] = vec4(realAlbedo, MAT_Roughness);
 				FragColor[2] = vec4(frag_normal * 0.5 + 0.5, 1.0);

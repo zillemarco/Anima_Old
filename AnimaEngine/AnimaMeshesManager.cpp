@@ -60,12 +60,6 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 		int numeroFacce = mesh->mNumFaces;
 		int numeroVertici = mesh->mNumVertices;
 
-		//AnimaVertex3f* vertici = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
-		//AnimaFace* facce = AnimaAllocatorNamespace::AllocateArray<AnimaFace>(*(_scene->GetGenericAllocator()), numeroFacce);
-
-		//int offsetFacce = 0;
-		//int offsetVertici = 0;
-
 		AnimaArray<AnimaVertex3f> vertici;
 		AnimaArray<AnimaFace> facce;
 
@@ -74,8 +68,6 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			const aiVector3D* vert = &mesh->mVertices[t];
 			vertici.push_back(AnimaVertex3f(vert->x, vert->y, vert->z));
 		}
-		//newMesh->SetVertices(vertici, offsetVertici);
-		//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), vertici);
 		newMesh->SetVertices(&vertici);
 
 		for (int t = 0; t < numeroFacce; t++)
@@ -85,52 +77,23 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			int numeroIndiciFaccia = face->mNumIndices;
 			if (numeroIndiciFaccia == 3)
 				facce.push_back(AnimaFace(face->mIndices[0], face->mIndices[1], face->mIndices[2]));
-
-			//ANIMA_ASSERT(numeroIndiciFaccia == 3);
-			//AUint* indiciFaccia = AnimaAllocatorNamespace::AllocateArray<AUint>(*(_scene->GetGenericAllocator()), numeroIndiciFaccia);
-
-			//int offsetIndiciFaccia = 0;
-
-			//for (int i = 0; i < numeroIndiciFaccia; i++)
-			//	indiciFaccia[offsetIndiciFaccia++] = face->mIndices[i];
-
-			//facce[offsetFacce++].SetIndexes(indiciFaccia);
-			//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), indiciFaccia);
 		}
-		//newMesh->SetFaces(facce, offsetFacce);
-		//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), facce);
 		newMesh->SetFaces(&facce);
 
 		if (mesh->HasNormals())
 		{
-			//AnimaVertex3f* normali = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
-			//int offsetNormali = 0;
 			AnimaArray<AnimaVertex3f> normali;
 			for (int t = 0; t < numeroVertici; t++)
 			{
 				const aiVector3D* norm = &mesh->mNormals[t];
 
 				normali.push_back(AnimaVertex3f(norm->x, norm->y, norm->z));
-				//normali[offsetNormali].x = norm->x;
-				//normali[offsetNormali].y = norm->y;
-				//normali[offsetNormali].z = norm->z;
-
-				//offsetNormali++;
 			}
-			//newMesh->SetNormals(normali, offsetNormali);
-			//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), normali);
-
 			newMesh->SetNormals(&normali);
 		}
 
 		if (mesh->HasTangentsAndBitangents())
 		{
-			//AnimaVertex3f* tangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
-			//AnimaVertex3f* bitangents = AnimaAllocatorNamespace::AllocateArray<AnimaVertex3f>(*(_scene->GetGenericAllocator()), numeroVertici);
-
-			//int offsetTangents = 0;
-			//int offsetBitangents = 0;
-
 			AnimaArray<AnimaVertex3f> tangents;
 			AnimaArray<AnimaVertex3f> bitangents;
 
@@ -141,45 +104,18 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 
 				tangents.push_back(AnimaVertex3f(tang->x, tang->y, tang->z));
 				bitangents.push_back(AnimaVertex3f(bita->x, bita->y, bita->z));
-
-				//tangents[offsetTangents].x = tang->x;
-				//tangents[offsetTangents].y = tang->y;
-				//tangents[offsetTangents].z = tang->z;
-
-				//bitangents[offsetBitangents].x = bita->x;
-				//bitangents[offsetBitangents].y = bita->y;
-				//bitangents[offsetBitangents].z = bita->z;
-
-				//offsetTangents++;
-				//offsetBitangents++;
 			}
 
-			//newMesh->SetTangents(tangents, offsetTangents);
-			//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), tangents);
-			//newMesh->SetBitangents(bitangents, offsetTangents);
-			//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), bitangents);
-			
 			newMesh->SetTangents(&tangents);
 			newMesh->SetBitangents(&bitangents);
 		}
 
 		if (mesh->HasTextureCoords(0))
 		{
-			//AnimaVertex2f* textCoords = AnimaAllocatorNamespace::AllocateArray<AnimaVertex2f>(*(_scene->GetGenericAllocator()), numeroVertici);
-			//int offsetTextCoords = 0;
 			AnimaArray<AnimaVertex2f> textCoords;
 			for (int t = 0; t < numeroVertici; t++)
-			{
 				textCoords.push_back(AnimaVertex2f(mesh->mTextureCoords[0][t].x, mesh->mTextureCoords[0][t].y));
-				//textCoords[offsetTextCoords].u = mesh->mTextureCoords[0][t].x;
-				//textCoords[offsetTextCoords].v = mesh->mTextureCoords[0][t].y;
 
-				//offsetTextCoords++;
-			}
-
-			//newMesh->SetTextureCoords(textCoords, offsetTextCoords);
-			//AnimaAllocatorNamespace::DeallocateArray(*(_scene->GetGenericAllocator()), textCoords);
-			
 			newMesh->SetTextureCoords(&textCoords);
 		}
 
@@ -225,11 +161,6 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			newMesh->SetBoneWeights(&meshBoneWeights);
 			newMesh->SetBoneIDs(&meshBoneIDs);
 		}
-
-		//AInt materialIndex = (AInt)mesh->mMaterialIndex;
-		//AnimaString materialName = materialNamesMap->at(materialIndex);
-		//AnimaMaterial* material = _materialsManager->GetMaterialFromName(materialName);
-		//newMesh->SetMaterial(material);
 
 		_meshes.Add(meshName, newMesh);
 		_lastMeshesIndexMap.push_back(meshName);

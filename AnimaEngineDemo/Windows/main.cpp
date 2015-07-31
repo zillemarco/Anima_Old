@@ -54,6 +54,7 @@ Anima::AnimaRenderer* _renderer = nullptr;
 Anima::AnimaEngine _engine;
 Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
+Anima::AnimaMaterial* _pbrMaterial;
 bool _shouldClose = false;
 
 int lastXPos = 0;
@@ -113,6 +114,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return result;
 		break;
 	}
+	case WM_CHAR:
+	{
+		if (_pbrMaterial != nullptr)
+		{
+			float inc = 0.02f;
+			switch (wParam)
+			{
+			case 'o':
+			case 'O':
+			{
+				float val = _pbrMaterial->GetFloat("Roughness");
+				val = max(0.0f, val - inc);
+				_pbrMaterial->SetFloat("Roughness", val);
+				break;
+			}
+			case 'p':
+			case 'P':
+			{
+				float val = _pbrMaterial->GetFloat("Roughness");
+				val = min(1.0f, val + inc);
+				_pbrMaterial->SetFloat("Roughness", val);
+				break;
+			}
+			case 'k':
+			case 'K':
+			{
+				float val = _pbrMaterial->GetFloat("Metallic");
+				val = max(0.0f, val - inc);
+				_pbrMaterial->SetFloat("Metallic", val);
+				break;
+			}
+			case 'l':
+			case 'L':
+			{
+				float val = _pbrMaterial->GetFloat("Metallic");
+				val = min(1.0f, val + inc);
+				_pbrMaterial->SetFloat("Metallic", val);
+				break;
+			}
+			}
+		}
+
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+		break;
+	}
 	case WM_CREATE:
 	{
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
@@ -165,7 +211,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 720, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1280, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -323,8 +369,10 @@ bool InitEngine()
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
 
+	_pbrMaterial = materialsManager->GetMaterialFromName("pbr-material");
+
 	for (int i = 0; i < modelMeshes.size(); i++)
-		modelMeshes[i]->SetMaterial(materialsManager->GetMaterialFromName("pbr-material"));
+		modelMeshes[i]->SetMaterial(_pbrMaterial);
 
 	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	////

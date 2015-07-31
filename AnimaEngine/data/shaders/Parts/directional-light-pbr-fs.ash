@@ -138,9 +138,9 @@
 
 			float Specular_D(float a, float NdH)
 			{
-				//return NormalDistribution_BlinnPhong(a, NdH);
+				return NormalDistribution_BlinnPhong(a, NdH);
 				//return NormalDistribution_Beckmann(a, NdH);
-				return NormalDistribution_GGX(a, NdH);
+				//return NormalDistribution_GGX(a, NdH);
 			}
 
 			vec3 Specular_F(vec3 specularColor, vec3 h, vec3 v)
@@ -153,9 +153,9 @@
 			vec3 Specular_F_Roughness(vec3 specularColor, float a, vec3 h, vec3 v)
 			{
 				// Sclick using roughness to attenuate fresnel.
-				return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * pow((1 - clamp(dot(v, h), 0.0f, 1.0f)), 5));
+				//return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * pow((1 - clamp(dot(v, h), 0.0f, 1.0f)), 5));
 				//return Fresnel_None(specularColor);
-				//return Fresnel_CookTorrance(specularColor, h, v);
+				return Fresnel_CookTorrance(specularColor, h, v);
 			}
 
 			float Specular_G(float a, float NdV, float NdL, float NdH, float VdH, float LdV)
@@ -168,6 +168,7 @@
 				//return Geometric_Smith_GGX(a, NdV, NdL);
 				return Geometric_Smith_Schlick_GGX(a, NdV, NdL);
 			}
+
 			vec3 Specular(vec3 specularColor, vec3 h, vec3 v, vec3 l, float a, float NdL, float NdV, float NdH, float VdH, float LdV)
 			{
 				return ((Specular_D(a, NdH) * Specular_G(a, NdV, NdL, NdH, VdH, LdV)) * Specular_F(specularColor, v, h) ) / (4.0f * NdL * NdV + 0.0001f);
@@ -204,7 +205,7 @@
 				vec3 specularColor 	= specularData.xyz;
 				float roughness		= albedoData.w;
 				float metallic		= specularData.w;
-				vec3 viewDir 		= normalize(CAM_Position - pos);
+				vec3 viewDir 		= normalize(pos - CAM_Position);
 				
 				// Colore dell'ambiente
 				vec3 envColor = vec3(1.0, 1.0, 1.0);
