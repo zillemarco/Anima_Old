@@ -10,7 +10,7 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-enum AnimaTexture3DIndex
+enum AnimaTextureCubeIndex
 {
 	POSITIVE_X = 0,
 	NEGATIVE_X,
@@ -23,7 +23,8 @@ enum AnimaTexture3DIndex
 enum AnimaTextureTarget
 {
 	TEXTURE_2D = 0,
-	TEXTURE_3D
+	TEXTURE_3D,
+	TEXTURE_CUBE
 };
 
 enum AnimaTextureClampMode
@@ -65,7 +66,7 @@ public:
 	void SetHeight(AUint height);
 	AUint GetHeight() const;
 
-	void SetMipMapLevels(AUint levels);
+	void SetMipMapLevels(AUint levels, bool generate);
 	AUint GetMipMapLevels() const;
 
 	void SetFormat(AUint format);
@@ -105,9 +106,9 @@ public:
 	 *	\return		Torna true se il target della texture è stato impostato per essere una texture 3D e l'indice è valido, false altrimenti
 	 *	\author		Zille Marco
 	 */
-	bool SetData(AUchar* data, AUint dataSize, AnimaTexture3DIndex index);
+	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index);
 	const AUchar* GetData() const;
-	const AUchar* GetData(AnimaTexture3DIndex index) const;
+	const AUchar* GetData(AnimaTextureCubeIndex index) const;
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
@@ -154,6 +155,7 @@ private:
 	AnimaTextureClampMode _clamp;
 	AUint _mipMapLevels;
 	AnimaColor4f _borderColor;
+	bool _generateMipMaps;
 
 	bool _texturesReady;
 	bool _needsResize;
@@ -164,6 +166,7 @@ public:
 	static AUint TargetToPlatform(const AnimaTextureTarget& target);
 	static AUint ClampToPlatform(const AnimaTextureClampMode& clamp);
 	static AUint FilterToPlatform(const AnimaTextureFilterMode& filter);
+	static AUint CubeIndexToPlatform(const AnimaTextureCubeIndex& index);
 };
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -174,7 +174,7 @@ bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, A
 		return false;
 
 	pos++;
-	AnimaString ext = filePath.substr(filePath.length() - pos);
+	AnimaString ext = filePath.substr(pos);
 
 	format = 0;
 
@@ -366,7 +366,7 @@ bool AnimaTexturesManager::GetUncompressedTGAData(FILE * file, AUchar** data, AU
 	}
 
 	for (GLuint cswap = 0; cswap < (int)dataSize && invert; cswap += tga.bytesPerPixel)
-		*data[cswap] ^= *data[cswap + 2] ^= *data[cswap] ^= *data[cswap + 2];
+		(*data)[cswap] ^= (*data)[cswap + 2] ^= (*data)[cswap] ^= (*data)[cswap + 2];
 
 	fclose(file);
 

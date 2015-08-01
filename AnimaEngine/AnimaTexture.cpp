@@ -26,6 +26,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_renderBuffer = 0;
 	_attachment = GL_NONE;
 	_borderColor = AnimaColor4f(0.0f);
+	_generateMipMaps = false;
 	
 	_renderTargetsReady = false;
 	_texturesReady = false;
@@ -47,6 +48,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_clamp = REPEAT;
 	_attachment = GL_NONE;
 	_borderColor = AnimaColor4f(0.0f);
+	_generateMipMaps = false;
 
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -78,6 +80,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	_renderBuffer = 0;
 
 	_mipMapLevels = src._mipMapLevels;
+	_generateMipMaps = src._generateMipMaps;
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
@@ -104,6 +107,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	_renderBuffer = 0;
 
 	_mipMapLevels = src._mipMapLevels;
+	_generateMipMaps = src._generateMipMaps;
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
@@ -140,6 +144,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_renderBuffer = 0;
 		
 		_mipMapLevels = src._mipMapLevels;
+		_generateMipMaps = src._generateMipMaps;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
@@ -173,6 +178,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_renderBuffer = 0;
 		
 		_mipMapLevels = src._mipMapLevels;
+		_generateMipMaps = src._generateMipMaps;
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
@@ -210,9 +216,10 @@ AUint AnimaTexture::GetHeight() const
 	return _height;
 }
 
-void AnimaTexture::SetMipMapLevels(AUint levels)
+void AnimaTexture::SetMipMapLevels(AUint levels, bool generate)
 {
 	_mipMapLevels = levels;
+	_generateMipMaps = generate;
 }
 
 AUint AnimaTexture::GetMipMapLevels() const
@@ -300,9 +307,9 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize)
 	return false;
 }
 
-bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTexture3DIndex index)
+bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index)
 {
-	if (_textureTarget == TEXTURE_3D)
+	if (_textureTarget == TEXTURE_CUBE)
 	{
 		// se l'array ha un solo elemento al momento vuol dire che prima la texture non era 3D
 		// e quindi vado a ripulire tutto e importare l'array per avere 6 elementi
@@ -345,7 +352,7 @@ const AUchar* AnimaTexture::GetData() const
 	return nullptr;
 }
 
-const AUchar* AnimaTexture::GetData(AnimaTexture3DIndex index) const
+const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
 	if (_textureTarget == TEXTURE_3D && _data.size() == 6)
@@ -372,7 +379,7 @@ void AnimaTexture::SetTextureTarget(AnimaTextureTarget target)
 
 		if (target == TEXTURE_2D)
 			_data.resize(1);
-		else if (target == TEXTURE_3D)
+		else if (target == TEXTURE_CUBE)
 			_data.resize(6);
 
 		_textureTarget = target;
@@ -436,7 +443,7 @@ bool AnimaTexture::Load()
 	
 	if (_textureTarget == TEXTURE_2D)
 	{
-		if (_mipMapLevels == 0)
+		if (_mipMapLevels == 0 || _generateMipMaps)
 			glTexImage2D(target, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[0][0]);
 		else if (_mipMapLevels > 0)
 		{
@@ -450,7 +457,8 @@ bool AnimaTexture::Load()
 			{
 				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
-				glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+				//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+				glTexImage2D(target, level, _internalFormat, width, height, 0, _format, _dataType, &_data[0][0] + offset);
 
 				offset += size;
 				width /= 2;
@@ -460,10 +468,44 @@ bool AnimaTexture::Load()
 		else
 			return false;
 	}
+	else if (_textureTarget == TEXTURE_CUBE)
+	{
+		if (_mipMapLevels == 0 || _generateMipMaps)
+		{
+			for (AInt i = 0; i < 6; i++)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[i][0]);
+			}
+		}
+		else if (_mipMapLevels > 0)
+		{
+			for (AInt i = 0; i < 6; i++)
+			{
+				unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+				unsigned int offset = 0;
+
+				AUint width = _width;
+				AUint height = _height;
+
+				for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+				{
+					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+
+					//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, _internalFormat, width, height, 0, _format, _dataType, &_data[i][0] + offset);
+
+					offset += size;
+					width /= 2;
+					height /= 2;
+				}
+			}
+		}
+	}
 	
-	if (filter == GL_NEAREST_MIPMAP_NEAREST || filter == GL_NEAREST_MIPMAP_LINEAR || filter == GL_LINEAR_MIPMAP_NEAREST || filter == GL_LINEAR_MIPMAP_LINEAR)
+	if (_generateMipMaps || (_mipMapLevels == 0  && (filter == GL_NEAREST_MIPMAP_NEAREST || filter == GL_NEAREST_MIPMAP_LINEAR || filter == GL_LINEAR_MIPMAP_NEAREST || filter == GL_LINEAR_MIPMAP_LINEAR)))
 	{
 		glGenerateMipmap(target);
+
 		AFloat maxAnisotropy;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
 		glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, Clamp(0.0f, 8.0f, maxAnisotropy));
@@ -677,6 +719,7 @@ AUint AnimaTexture::TargetToPlatform(const AnimaTextureTarget& target)
 	{
 	case TEXTURE_2D:	return GL_TEXTURE_2D;
 	case TEXTURE_3D:	return GL_TEXTURE_3D;
+	case TEXTURE_CUBE:	return GL_TEXTURE_CUBE_MAP;
 	default:			return GL_NONE;
 	}
 }
@@ -704,6 +747,20 @@ AUint AnimaTexture::FilterToPlatform(const AnimaTextureFilterMode& filter)
 	case LINEAR_MIPMAP_NEAREST:		return GL_LINEAR_MIPMAP_NEAREST;
 	case LINEAR_MIPMAP_LINEAR:		return GL_LINEAR_MIPMAP_LINEAR;
 	default:						return GL_NONE;
+	}
+}
+
+AUint AnimaTexture::CubeIndexToPlatform(const AnimaTextureCubeIndex& index)
+{
+	switch (index)
+	{
+	case POSITIVE_X:	return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+	case NEGATIVE_X:	return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+	case POSITIVE_Y:	return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+	case NEGATIVE_Y:	return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+	case POSITIVE_Z:	return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+	case NEGATIVE_Z:	return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+	default:			return GL_NONE;
 	}
 }
 

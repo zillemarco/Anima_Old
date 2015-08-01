@@ -6,6 +6,18 @@
 		<Property name="Roughness" type="float" value="0.5" />
 		<Property name="Metallic" type="float" value="1.0" />
 		<Property name="TwoSided" type="bool" value="false" />
+		<Property name="EnvironmentMap" type="texture">
+			<AnimaTexture>
+				<Name>pbrEnvMap</Name>
+				<Type>CUBE</Type>
+				<File index="px">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</File>
+				<File index="nx">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negx.tga</File>
+				<File index="py">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posy.tga</File>
+				<File index="ny">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negy.tga</File>
+				<File index="pz">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posz.tga</File>
+				<File index="nz">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negz.tga</File>
+			</AnimaTexture>
+		</Property>
 	</Properties>
 	<Shaders></Shaders>
 </AnimaShaderPart>

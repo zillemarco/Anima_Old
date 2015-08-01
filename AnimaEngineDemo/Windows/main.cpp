@@ -17,6 +17,7 @@
 #include <AnimaMaterialsManager.h>
 #include <AnimaMeshesManager.h>
 #include <AnimaLightsManager.h>
+#include <AnimaTexturesManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -29,6 +30,7 @@
 #include <AnimaModelInstance.h>
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
+#include <AnimaTexture.h>
 
 #include "main.h"
 
@@ -294,6 +296,7 @@ bool InitEngine()
 	if (!_scene)
 		return false;
 
+	Anima::AnimaString dataPath = "D:/Git/Anima/AnimaEngine/data";
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
@@ -376,6 +379,35 @@ bool InitEngine()
 	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	if (!combineProgram->Link())
 		return false;
+
+	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+
+	unsigned char *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
+	unsigned int dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
+	unsigned int width, height, format;
+
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negx.tga", &dataPX, dataSizePX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posx.tga", &dataNX, dataSizeNX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negy.tga", &dataPY, dataSizePY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posy.tga", &dataNY, dataSizeNY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negz.tga", &dataPZ, dataSizePZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
+
+	Anima::AnimaTexture* texture = texturesManager->CreateTexture("cube-map");
+	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
+	texture->SetData(dataPX, dataSizePX, Anima::POSITIVE_X);
+	texture->SetData(dataNX, dataSizeNX, Anima::NEGATIVE_X);
+	texture->SetData(dataPY, dataSizePY, Anima::POSITIVE_Y);
+	texture->SetData(dataNY, dataSizeNY, Anima::NEGATIVE_Y);
+	texture->SetData(dataPZ, dataSizePZ, Anima::POSITIVE_Z);
+	texture->SetData(dataNZ, dataSizeNZ, Anima::NEGATIVE_Z);
+
+	free(dataPX);
+	free(dataNX);
+	free(dataPY);
+	free(dataNY);
+	free(dataPZ);
+	free(dataNZ);
 
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
