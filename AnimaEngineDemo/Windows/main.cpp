@@ -121,38 +121,64 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			float inc = 0.02f;
 			switch (wParam)
 			{
-			case 'o':
-			case 'O':
-			{
-				float val = _pbrMaterial->GetFloat("Roughness");
-				val = max(0.0f, val - inc);
-				_pbrMaterial->SetFloat("Roughness", val);
-				break;
-			}
 			case 'p':
 			case 'P':
 			{
+				_pbrMaterial->SetFloat("Metallic", 0.0f);
+				break;
+			}
+			case 'm':
+			case 'M':
+			{
+				_pbrMaterial->SetFloat("Metallic", 1.0f);
+				break;
+			}
+			case '+':
+			{
 				float val = _pbrMaterial->GetFloat("Roughness");
 				val = min(1.0f, val + inc);
 				_pbrMaterial->SetFloat("Roughness", val);
 				break;
 			}
-			case 'k':
-			case 'K':
+			case '-':
 			{
-				float val = _pbrMaterial->GetFloat("Metallic");
+				float val = _pbrMaterial->GetFloat("Roughness");
 				val = max(0.0f, val - inc);
-				_pbrMaterial->SetFloat("Metallic", val);
+				_pbrMaterial->SetFloat("Roughness", val);
 				break;
 			}
-			case 'l':
-			case 'L':
-			{
-				float val = _pbrMaterial->GetFloat("Metallic");
-				val = min(1.0f, val + inc);
-				_pbrMaterial->SetFloat("Metallic", val);
-				break;
-			}
+			//case 'o':
+			//case 'O':
+			//{
+			//	float val = _pbrMaterial->GetFloat("Roughness");
+			//	val = max(0.0f, val - inc);
+			//	_pbrMaterial->SetFloat("Roughness", val);
+			//	break;
+			////}
+			//case 'p':
+			//case 'P':
+			//{
+			//	float val = _pbrMaterial->GetFloat("Roughness");
+			//	val = min(1.0f, val + inc);
+			//	_pbrMaterial->SetFloat("Roughness", val);
+			//	break;
+			//}
+			//case 'k':
+			//case 'K':
+			//{
+			//	float val = _pbrMaterial->GetFloat("Metallic");
+			//	val = max(0.0f, val - inc);
+			//	_pbrMaterial->SetFloat("Metallic", val);
+			//	break;
+			//}
+			//case 'l':
+			//case 'L':
+			//{
+			//	float val = _pbrMaterial->GetFloat("Metallic");
+			//	val = min(1.0f, val + inc);
+			//	_pbrMaterial->SetFloat("Metallic", val);
+			//	break;
+			//}
 			}
 		}
 
@@ -271,7 +297,8 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 
 //#if !defined _DEBUG
 //	Anima::AnimaString inputString;
@@ -364,7 +391,8 @@ bool InitEngine()
 	if (!_model)
 		return false;
 
-	_model->GetTransformation()->RotateXDeg(-90.0);
+	//_model->GetTransformation()->RotateXDeg(-90.0);
+	_model->GetTransformation()->RotateYDeg(180.0);
 	
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
@@ -398,7 +426,7 @@ bool InitEngine()
 	light->SetColor(1.0, 1.0, 1.0);
 	light->SetIntensity(0.8);
 	
-	_camera->LookAt(0.0, 5.0, 10.0, 0.0, 1.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
 	_camera->Activate();
 
 	_animationsManager = _scene->GetAnimationsManager();

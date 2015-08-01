@@ -6,14 +6,49 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaNamedObject.h"
+#include "AnimaVertex.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+enum AnimaTexture3DIndex
+{
+	POSITIVE_X = 0,
+	NEGATIVE_X,
+	POSITIVE_Y,
+	NEGATIVE_Y,
+	POSITIVE_Z,
+	NEGATIVE_Z
+};
+
+enum AnimaTextureTarget
+{
+	TEXTURE_2D = 0,
+	TEXTURE_3D
+};
+
+enum AnimaTextureClampMode
+{
+	REPEAT = 0,
+	MIRRORED_REPEAT,
+	TO_EDGE,
+	TO_BORDER
+};
+
+enum AnimaTextureFilterMode
+{
+	NEAREST = 0,
+	LINEAR,
+	NEAREST_MIPMAP_NEAREST,
+	NEAREST_MIPMAP_LINEAR,
+	LINEAR_MIPMAP_NEAREST,
+	LINEAR_MIPMAP_LINEAR
+};
 
 class ANIMA_ENGINE_EXPORT AnimaTexture : public AnimaNamedObject
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator);
-	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, ASizeT dataSize);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -36,8 +71,8 @@ public:
 	void SetFormat(AUint format);
 	AUint GetFormat() const;
 
-	void SetFilter(AUint filter);
-	AUint GetFilter() const;
+	void SetFilter(AnimaTextureFilterMode filter);
+	AnimaTextureFilterMode GetFilter() const;
 
 	void SetAttachment(AUint attachment);
 	AUint GetAttachment() const;
@@ -48,15 +83,41 @@ public:
 	void SetDataType(AUint dataType);
 	AUint GetDataType() const;
 
-	void SetData(AUchar* data, ASizeT dataSize);
-	AUchar* GetData() const;
-	const AUchar* GetConstData() const;
+	/*!
+	 *	\brief		Imposta il buffer con i dati della texture
+	 *	\details	Imposta il buffer con i dati della texture
+					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
+	 *	\param[in]	data		Buffer con i dati della texture
+	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
+	 *	\return		Torna true se il target della texture è stato impostato per essere non una texture 3D, false altrimenti
+	 *	\author		Zille Marco
+	 */
+	bool SetData(AUchar* data, AUint dataSize);
 
-	void SetTextureTarget(AUint target);
-	AUint GetTextureTarget() const;
+	/*!
+	 *	\brief		Imposta il buffer con i dati della texture all'indice passato
+	 *	\details	Imposta il buffer con i dati della texture all'indice passato. Serve per impostare i dati delle varie texture nel caso
+					di texture 3D.
+					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
+	 *	\param[in]	data		Buffer con i dati della texture
+	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
+	 *	\param[in]	index		Indice su cui andare a copiare il buffer
+	 *	\return		Torna true se il target della texture è stato impostato per essere una texture 3D e l'indice è valido, false altrimenti
+	 *	\author		Zille Marco
+	 */
+	bool SetData(AUchar* data, AUint dataSize, AnimaTexture3DIndex index);
+	const AUchar* GetData() const;
+	const AUchar* GetData(AnimaTexture3DIndex index) const;
 
-	void SetClamp(AUint clamp);
-	AUint GetClamp() const;
+	void SetTextureTarget(AnimaTextureTarget target);
+	AnimaTextureTarget GetTextureTarget() const;
+
+	void SetClamp(AnimaTextureClampMode clamp);
+	AnimaTextureClampMode GetClamp() const;
+
+	void SetBorderColor(const AnimaColor4f& color);
+	void SetBorderColor(const AFloat& r, const AFloat& g, const AFloat& b, const AFloat& a);
+	AnimaColor4f GetColor() const;
 	
 	bool Load();
 	void Unload();
@@ -71,6 +132,10 @@ public:
 	void BindAsRenderTarget();
 
 private:
+	void CopyData(const AnimaTexture& src);
+	bool ResizeTexture();
+
+private:
 	AUint _width;
 	AUint _height;
 
@@ -78,21 +143,27 @@ private:
 	AUint _frameBuffer;
 	AUint _renderBuffer;
 
-	AUchar* _data;
-	ASizeT _dataSize;
+	AnimaArray<AnimaArray<AUchar> > _data;
 		
-	AUint _textureTarget;
-	AUint _filter;
+	AnimaTextureTarget _textureTarget;
+	AnimaTextureFilterMode _filter;
 	AUint _internalFormat;
 	AUint _format;
 	AUint _attachment;
 	AUint _dataType;
-	AUint _clamp;
+	AnimaTextureClampMode _clamp;
 	AUint _mipMapLevels;
+	AnimaColor4f _borderColor;
 
 	bool _texturesReady;
 	bool _needsResize;
 	bool _renderTargetsReady;
+
+	// Funzioni di utilità di conversione tra dati AnimaEngine e dati piattaforma (OpenGL o DirectX)
+public:
+	static AUint TargetToPlatform(const AnimaTextureTarget& target);
+	static AUint ClampToPlatform(const AnimaTextureClampMode& clamp);
+	static AUint FilterToPlatform(const AnimaTextureFilterMode& filter);
 };
 
 END_ANIMA_ENGINE_NAMESPACE

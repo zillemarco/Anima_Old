@@ -119,7 +119,7 @@ void AnimaGBuffer::ClearTextures()
 	_texturesSet.clear();
 }
 
-bool AnimaGBuffer::AddTexture(const AnimaString& name, AUint target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AUint filter, AUint clamp)
+bool AnimaGBuffer::AddTexture(const AnimaString& name, AnimaTextureTarget target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AnimaTextureFilterMode filter, AnimaTextureClampMode clamp)
 {
 	AnimaGBufferDataSetByName& nameIterator = get<1>(_texturesSet);
 	if (nameIterator.find(name) != nameIterator.end())

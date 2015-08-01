@@ -15,41 +15,38 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_mipMapLevels = 0;
 	_width = 0;
 	_height = 0;
-	_textureTarget = GL_TEXTURE_2D;
+	_textureTarget = TEXTURE_2D;
 	_textureID = 0;
-	_data = nullptr;
-	_dataSize = 0;
-	_filter = GL_LINEAR;
+	_filter = LINEAR;
 	_internalFormat = GL_RGB;
 	_format = GL_RGB;
 	_dataType = GL_UNSIGNED_BYTE;
-	_clamp = GL_REPEAT;
+	_clamp = REPEAT;
 	_frameBuffer = 0;
 	_renderBuffer = 0;
 	_attachment = GL_NONE;
+	_borderColor = AnimaColor4f(0.0f);
 	
 	_renderTargetsReady = false;
 	_texturesReady = false;
 	_needsResize = false;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, ASizeT dataSize)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
 
-	_data = nullptr;
-	_dataSize = 0;
-
 	SetData(data, dataSize);
 
-	_textureTarget = GL_TEXTURE_2D;
-	_filter = GL_LINEAR;
+	_textureTarget = TEXTURE_2D;
+	_filter = LINEAR;
 	_internalFormat = GL_RGB;
 	_format = GL_RGB;
 	_dataType = GL_UNSIGNED_BYTE;
-	_clamp = GL_REPEAT;
+	_clamp = REPEAT;
 	_attachment = GL_NONE;
+	_borderColor = AnimaColor4f(0.0f);
 
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -68,15 +65,13 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	: AnimaNamedObject(src)
 {
-	_dataSize = 0;
-
-	SetData(src._data, src._dataSize);
 	SetFilter(src._filter);
 	SetFormat(src._format);
 	SetInternalFormat(src._internalFormat);
 	SetDataType(src._dataType);
 	SetClamp(src._clamp);
 	SetAttachment(src._attachment);
+	SetBorderColor(src._borderColor);
 	
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -89,21 +84,20 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;
+
+	CopyData(src);
 }
 
 AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	: AnimaNamedObject(src)
 {
-	_data = nullptr;
-	_dataSize = 0;
-
-	SetData(src._data, src._dataSize);
 	SetFilter(src._filter);
 	SetFormat(src._format);
 	SetInternalFormat(src._internalFormat);
 	SetDataType(src._dataType);
 	SetClamp(src._clamp);
 	SetAttachment(src._attachment);
+	SetBorderColor(src._borderColor);
 
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -116,24 +110,13 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;
+
+	CopyData(src);
 }
 
 AnimaTexture::~AnimaTexture()
 {
 	Unload();
-
-	if (_data != nullptr)
-	{
-		_allocator->Deallocate(_data);
-		_data = nullptr;
-	}
-
-	_dataSize = 0;
-	_filter = 0;
-	_format = 0;
-	_internalFormat = 0;
-	_dataType = 0;
-	_clamp = 0;
 }
 
 AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
@@ -141,23 +124,16 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 	if (this != &src)
 	{
 		Unload();
-
-		if (_data != nullptr)
-		{
-			_allocator->Deallocate(_data);
-			_data = nullptr;
-			_dataSize = 0;
-		}
-
+		
 		AnimaNamedObject::operator=(src);
 
-		SetData(src._data, src._dataSize);
 		SetFilter(src._filter);
 		SetFormat(src._format);
 		SetInternalFormat(src._internalFormat);
 		SetDataType(src._dataType);
 		SetClamp(src._clamp);
 		SetAttachment(src._attachment);
+		SetBorderColor(src._borderColor);
 		
 		_textureID = 0;
 		_frameBuffer = 0;
@@ -170,6 +146,8 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_texturesReady = false;
 		_needsResize = false;
 		_renderTargetsReady = false;
+
+		CopyData(src);
 	}
 	return *this;
 }
@@ -180,22 +158,15 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 	{
 		Unload();
 
-		if (_data != nullptr)
-		{
-			_allocator->Deallocate(_data);
-			_data = nullptr;
-			_dataSize = 0;
-		}
-
 		AnimaNamedObject::operator=(src);
 
-		SetData(src._data, src._dataSize);
 		SetFilter(src._filter);
 		SetFormat(src._format);
 		SetInternalFormat(src._internalFormat);
 		SetDataType(src._dataType);
 		SetClamp(src._clamp);
 		SetAttachment(src._attachment);
+		SetBorderColor(src._borderColor);
 
 		_textureID = 0;
 		_frameBuffer = 0;
@@ -208,6 +179,8 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_texturesReady = false;
 		_needsResize = false;
 		_renderTargetsReady = false;
+
+		CopyData(src);
 	}
 	return *this;
 }
@@ -257,12 +230,12 @@ AUint AnimaTexture::GetFormat() const
 	return _format;
 }
 
-void AnimaTexture::SetFilter(AUint filter)
+void AnimaTexture::SetFilter(AnimaTextureFilterMode filter)
 {
 	_filter = filter;
 }
 
-AUint AnimaTexture::GetFilter() const
+AnimaTextureFilterMode AnimaTexture::GetFilter() const
 {
 	return _filter;
 }
@@ -297,65 +270,143 @@ AUint AnimaTexture::GetDataType() const
 	return _dataType;
 }
 
-void AnimaTexture::SetData(AUchar* data, ASizeT dataSize)
+bool AnimaTexture::SetData(AUchar* data, AUint dataSize)
 {
-	if (data != nullptr && dataSize > 0)
+	if (_textureTarget == TEXTURE_2D)
 	{
-		if (_data != nullptr && _dataSize != dataSize)
+		if (_data.size() != 1)
 		{
-			_allocator->Deallocate(_data);
+			AInt count = _data.size();
+			for (AInt i = 0; i < count; i++)
+				_data[i].clear();
+			_data.clear();
 
-			_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
-			_dataSize = dataSize;
-		}
-		else if (_data == nullptr)
-		{
-			_data = (AUchar*)(_allocator)->Allocate(sizeof(AUchar) * dataSize, ANIMA_ENGINE_ALIGN_OF(AUchar));
-			_dataSize = dataSize;
+			_data.resize(1);
 		}
 
-		memcpy(_data, data, sizeof(AUchar) * dataSize);
+		AnimaArray<AUchar> newData;
+
+		if (data != nullptr && dataSize > 0)
+		{
+			newData.resize(dataSize);
+			newData.assign(data, data + dataSize);
+		}
+
+		_data[0] = newData;
+
+		return true;
 	}
-	else
+
+	return false;
+}
+
+bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTexture3DIndex index)
+{
+	if (_textureTarget == TEXTURE_3D)
 	{
-		if (_data != nullptr)
+		// se l'array ha un solo elemento al momento vuol dire che prima la texture non era 3D
+		// e quindi vado a ripulire tutto e importare l'array per avere 6 elementi
+		if (_data.size() != 6)
 		{
-			_allocator->Deallocate(_data);
-			_data = nullptr;
+			AInt count = _data.size();
+			for (AInt i = 0; i < count; i++)
+				_data[i].clear();
+			_data.clear();
+
+			_data.resize(6);
 		}
-		_dataSize = 0;
+
+		AnimaArray<AUchar> newData;
+		if (data != nullptr && dataSize > 0)
+		{
+			newData.resize(dataSize);
+			newData.assign(data, data + dataSize);
+		}
+
+		_data[index] = newData;
+
+		return true;
+	}
+
+	return false;
+}
+
+const AUchar* AnimaTexture::GetData() const
+{
+	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
+	if (_textureTarget == TEXTURE_2D && _data.size() == 1)
+	{
+		// Devo controllare anche che il buffer non sia vuoto
+		const AnimaArray<AUchar>* data = &_data[0];
+		if (data->size() > 0)
+			return &(*data)[0];
+	}
+
+	return nullptr;
+}
+
+const AUchar* AnimaTexture::GetData(AnimaTexture3DIndex index) const
+{
+	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
+	if (_textureTarget == TEXTURE_3D && _data.size() == 6)
+	{
+		// Devo controllare anche che il buffer non sia vuoto
+		const AnimaArray<AUchar>* data = &_data[index];
+		if (data->size() > 0)
+			return &(*data)[0];
+	}
+
+	return nullptr;
+}
+
+void AnimaTexture::SetTextureTarget(AnimaTextureTarget target)
+{
+	if (target != _textureTarget)
+	{
+		ANIMA_ASSERT(!IsReady());
+
+		AInt count = _data.size();
+		for (AInt i = 0; i < count; i++)
+			_data[i].clear();
+		_data.clear();
+
+		if (target == TEXTURE_2D)
+			_data.resize(1);
+		else if (target == TEXTURE_3D)
+			_data.resize(6);
+
+		_textureTarget = target;
 	}
 }
 
-AUchar* AnimaTexture::GetData() const
-{
-	return _data;
-}
-
-const AUchar* AnimaTexture::GetConstData() const
-{
-	return const_cast<AUchar*>(_data);
-}
-
-void AnimaTexture::SetTextureTarget(AUint target)
-{
-	ANIMA_ASSERT(!IsReady());
-	_textureTarget = target;
-}
-
-AUint AnimaTexture::GetTextureTarget() const
+AnimaTextureTarget AnimaTexture::GetTextureTarget() const
 {
 	return _textureTarget;
 }
 
-void AnimaTexture::SetClamp(AUint clamp)
+void AnimaTexture::SetClamp(AnimaTextureClampMode clamp)
 {
 	_clamp = clamp;
 }
 
-AUint AnimaTexture::GetClamp() const
+AnimaTextureClampMode AnimaTexture::GetClamp() const
 {
 	return _clamp;
+}
+
+void AnimaTexture::SetBorderColor(const AnimaColor4f& color)
+{
+	_borderColor = color;
+}
+
+void AnimaTexture::SetBorderColor(const AFloat& r, const AFloat& g, const AFloat& b, const AFloat& a)
+{
+	_borderColor = AnimaColor4f(r, g, b, a);
+}
+
+AnimaColor4f AnimaTexture::GetColor() const
+{
+	return _borderColor;
 }
 
 bool AnimaTexture::Load()
@@ -363,100 +414,70 @@ bool AnimaTexture::Load()
 	if (_texturesReady)
 	{
 		if (_needsResize)
-		{
-			glBindTexture(_textureTarget, _textureID);
-
-			if (_mipMapLevels == 0)
-				glTexImage2D(_textureTarget, 0, _internalFormat, _width, _height, 0, _format, _dataType, _data);
-			else if (_mipMapLevels > 0)
-			{
-				unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-				unsigned int offset = 0;
-
-				AUint width = _width;
-				AUint height = _height;
-
-				for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
-				{
-					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
-
-					glCompressedTexImage2D(_textureTarget, level, _format, width, height, 0, size, _data + offset);
-
-					offset += size;
-					width /= 2;
-					height /= 2;
-				}
-			}
-			else
-			{
-				glBindTexture(_textureTarget, 0);
-				return false;
-			}
-			
-			if (glGetError() != GL_NO_ERROR)
-			{
-				glBindTexture(_textureTarget, 0);
-				return false;
-			}
-
-			glBindTexture(_textureTarget, 0);
-			_needsResize = false;
-		}
-
+			return ResizeTexture();
 		return true;
 	}
+
+	AUint target = TargetToPlatform(_textureTarget);
+	AUint clamp = ClampToPlatform(_clamp);
+	AUint filter = FilterToPlatform(_filter);
 	
 	glGenTextures(1, &_textureID);
+
+	glBindTexture(target, _textureID);
 	
-	glBindTexture(_textureTarget, _textureID);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
 	
-	glTexParameteri(_textureTarget, GL_TEXTURE_MAG_FILTER, _filter);
-	glTexParameteri(_textureTarget, GL_TEXTURE_MIN_FILTER, _filter);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+
+	glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, _borderColor.vec);
 	
-	glTexParameteri(_textureTarget, GL_TEXTURE_WRAP_S, _clamp);
-	glTexParameteri(_textureTarget, GL_TEXTURE_WRAP_T, _clamp);
-	
-	if (_mipMapLevels == 0)
-		glTexImage2D(_textureTarget, 0, _internalFormat, _width, _height, 0, _format, _dataType, _data);
-	else if (_mipMapLevels > 0)
+	if (_textureTarget == TEXTURE_2D)
 	{
-		unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-		unsigned int offset = 0;
-
-		AUint width = _width;
-		AUint height = _height;
-
-		for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+		if (_mipMapLevels == 0)
+			glTexImage2D(target, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[0][0]);
+		else if (_mipMapLevels > 0)
 		{
-			unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+			unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+			unsigned int offset = 0;
 
-			glCompressedTexImage2D(_textureTarget, level, _format, width, height, 0, size, _data + offset);
+			AUint width = _width;
+			AUint height = _height;
 
-			offset += size;
-			width /= 2;
-			height /= 2;
+			for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+			{
+				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+
+				glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+
+				offset += size;
+				width /= 2;
+				height /= 2;
+			}
 		}
+		else
+			return false;
 	}
-	else
-		return false;
 	
-	if (_filter == GL_NEAREST_MIPMAP_NEAREST || _filter == GL_NEAREST_MIPMAP_LINEAR || _filter == GL_LINEAR_MIPMAP_NEAREST || _filter == GL_LINEAR_MIPMAP_LINEAR)
+	if (filter == GL_NEAREST_MIPMAP_NEAREST || filter == GL_NEAREST_MIPMAP_LINEAR || filter == GL_LINEAR_MIPMAP_NEAREST || filter == GL_LINEAR_MIPMAP_LINEAR)
 	{
-		glGenerateMipmap(_textureTarget);
+		glGenerateMipmap(target);
 		AFloat maxAnisotropy;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
-		glTexParameterf(_textureTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT, Clamp(0.0f, 8.0f, maxAnisotropy));
+		glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, Clamp(0.0f, 8.0f, maxAnisotropy));
 	}
 	else
 	{ 
-		glTexParameteri(_textureTarget, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(_textureTarget, GL_TEXTURE_MAX_LEVEL, 0);
+		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
 	}
 
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
-	glBindTexture(_textureTarget, 0);
+	glBindTexture(target, 0);
 
 	_texturesReady = true;
 	return true;
@@ -571,12 +592,74 @@ void AnimaTexture::Resize(AUint width, AUint height)
 	}
 }
 
+bool AnimaTexture::ResizeTexture()
+{
+	AUint target = TargetToPlatform(_textureTarget);
+	glBindTexture(target, _textureID);
+
+	if (_textureTarget == TEXTURE_2D)
+	{
+		if (_mipMapLevels == 0)
+			glTexImage2D(target, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[0][0]);
+		else if (_mipMapLevels > 0)
+		{
+			unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+			unsigned int offset = 0;
+
+			AUint width = _width;
+			AUint height = _height;
+
+			for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+			{
+				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+
+				glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+
+				offset += size;
+				width /= 2;
+				height /= 2;
+			}
+		}
+		else
+		{
+			glBindTexture(target, 0);
+			return false;
+		}
+	}
+
+	if (glGetError() != GL_NO_ERROR)
+	{
+		glBindTexture(target, 0);
+		return false;
+	}
+
+	glBindTexture(target, 0);
+	_needsResize = false;
+
+	return true;
+}
+
+void AnimaTexture::CopyData(const AnimaTexture& src)
+{
+	AInt count = _data.size();
+	for (AInt i = 0; i < count; i++)
+		_data[i].clear();
+	_data.clear();
+
+	AInt srcDataSize = src._data.size();
+	
+	_data.resize(srcDataSize);
+
+	for (AInt i = 0; i < count; i++)
+		_data[i] = src._data[i];
+}
+
 void AnimaTexture::Bind(AUint unit) const
 {
 	ANIMA_ASSERT(_texturesReady);
 
 	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(_textureTarget, _textureID);
+	glBindTexture(TargetToPlatform(_textureTarget), _textureID);
 }
 
 void AnimaTexture::BindAsRenderTarget()
@@ -586,6 +669,42 @@ void AnimaTexture::BindAsRenderTarget()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	glViewport(0, 0, _width, _height);
+}
+
+AUint AnimaTexture::TargetToPlatform(const AnimaTextureTarget& target)
+{
+	switch (target)
+	{
+	case TEXTURE_2D:	return GL_TEXTURE_2D;
+	case TEXTURE_3D:	return GL_TEXTURE_3D;
+	default:			return GL_NONE;
+	}
+}
+
+AUint AnimaTexture::ClampToPlatform(const AnimaTextureClampMode& clamp)
+{
+	switch (clamp)
+	{
+	case REPEAT:			return GL_REPEAT;
+	case MIRRORED_REPEAT:	return GL_MIRRORED_REPEAT;
+	case TO_EDGE:			return GL_CLAMP_TO_EDGE;
+	case TO_BORDER:			return GL_CLAMP_TO_BORDER;
+	default:				return GL_NONE;
+	}
+}
+
+AUint AnimaTexture::FilterToPlatform(const AnimaTextureFilterMode& filter)
+{
+	switch (filter)
+	{
+	case NEAREST:					return GL_NEAREST;
+	case LINEAR:					return GL_LINEAR;
+	case NEAREST_MIPMAP_NEAREST:	return GL_NEAREST_MIPMAP_NEAREST;
+	case NEAREST_MIPMAP_LINEAR:		return GL_NEAREST_MIPMAP_LINEAR;
+	case LINEAR_MIPMAP_NEAREST:		return GL_LINEAR_MIPMAP_NEAREST;
+	case LINEAR_MIPMAP_LINEAR:		return GL_LINEAR_MIPMAP_LINEAR;
+	default:						return GL_NONE;
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

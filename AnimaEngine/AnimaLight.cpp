@@ -32,12 +32,12 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 	IMPLEMENT_ANIMA_CLASS(AnimaLight);
 
 	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", 1024, 1024, nullptr, 0);
-	texture->SetTextureTarget(GL_TEXTURE_2D);
-	texture->SetFilter(GL_LINEAR);
+	texture->SetTextureTarget(TEXTURE_2D);
+	texture->SetFilter(LINEAR);
 	texture->SetInternalFormat(GL_DEPTH_COMPONENT24);
 	texture->SetFormat(GL_DEPTH_COMPONENT);
 	texture->SetDataType(GL_FLOAT);
-	texture->SetClamp(GL_CLAMP_TO_BORDER);
+	texture->SetClamp(TO_BORDER);
 	texture->SetAttachment(GL_DEPTH_ATTACHMENT);
 
 	AnimaSceneObject::SetTexture("ShadowMap", texture);	
