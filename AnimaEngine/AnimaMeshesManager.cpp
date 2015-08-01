@@ -68,7 +68,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			const aiVector3D* vert = &mesh->mVertices[t];
 			vertici.push_back(AnimaVertex3f(vert->x, vert->y, vert->z));
 		}
-		newMesh->SetVertices(&vertici);
+		newMesh->SetVertices(vertici);
 
 		for (int t = 0; t < numeroFacce; t++)
 		{
@@ -78,7 +78,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			if (numeroIndiciFaccia == 3)
 				facce.push_back(AnimaFace(face->mIndices[0], face->mIndices[1], face->mIndices[2]));
 		}
-		newMesh->SetFaces(&facce);
+		newMesh->SetFaces(facce);
 
 		if (mesh->HasNormals())
 		{
@@ -89,7 +89,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 
 				normali.push_back(AnimaVertex3f(norm->x, norm->y, norm->z));
 			}
-			newMesh->SetNormals(&normali);
+			newMesh->SetNormals(normali);
 		}
 
 		if (mesh->HasTangentsAndBitangents())
@@ -106,8 +106,8 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 				bitangents.push_back(AnimaVertex3f(bita->x, bita->y, bita->z));
 			}
 
-			newMesh->SetTangents(&tangents);
-			newMesh->SetBitangents(&bitangents);
+			newMesh->SetTangents(tangents);
+			newMesh->SetBitangents(bitangents);
 		}
 
 		if (mesh->HasTextureCoords(0))
@@ -116,7 +116,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			for (int t = 0; t < numeroVertici; t++)
 				textCoords.push_back(AnimaVertex2f(mesh->mTextureCoords[0][t].x, mesh->mTextureCoords[0][t].y));
 
-			newMesh->SetTextureCoords(&textCoords);
+			newMesh->SetTextureCoords(textCoords);
 		}
 
 		if (mesh->mNumBones > 0)
@@ -158,8 +158,8 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 				}
 			}
 
-			newMesh->SetBoneWeights(&meshBoneWeights);
-			newMesh->SetBoneIDs(&meshBoneIDs);
+			newMesh->SetBoneWeights(meshBoneWeights);
+			newMesh->SetBoneIDs(meshBoneIDs);
 		}
 
 		_meshes.Add(meshName, newMesh);
@@ -311,16 +311,16 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 
 	if (mesh)
 	{
-		mesh->SetVertices(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Vertices"));
-		mesh->SetNormals(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Normals"));
-		mesh->SetTextureCoords(&pt.get<AnimaArray<AnimaVertex2f>>("AnimaMesh.TextureCoords"));
-		mesh->SetTangents(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Tangents"));
-		mesh->SetBitangents(&pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.Bitangents"));
-		mesh->SetBoneWeights(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneWeights"));
-		mesh->SetBoneIDs(&pt.get<AnimaArray<AnimaVertex4f>>("AnimaMesh.BoneIDs"));
+		mesh->SetVertices(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Vertices"));
+		mesh->SetNormals(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Normals"));
+		mesh->SetTextureCoords(pt.get<AnimaArray<AnimaVertex2f> >("AnimaMesh.TextureCoords"));
+		mesh->SetTangents(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Tangents"));
+		mesh->SetBitangents(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Bitangents"));
+		mesh->SetBoneWeights(pt.get<AnimaArray<AnimaVertex4f> >("AnimaMesh.BoneWeights"));
+		mesh->SetBoneIDs(pt.get<AnimaArray<AnimaVertex4f> >("AnimaMesh.BoneIDs"));
 
-		AnimaArray<AUint> indexes = pt.get<AnimaArray<AUint>>("AnimaMesh.Indexes");
-		AnimaArray<AnimaVertex3f> facesNormals = pt.get<AnimaArray<AnimaVertex3f>>("AnimaMesh.FacesNormals");
+		AnimaArray<AUint> indexes = pt.get<AnimaArray<AUint> >("AnimaMesh.Indexes");
+		AnimaArray<AnimaVertex3f> facesNormals = pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.FacesNormals");
 
 		AInt indexesCount = indexes.size();
 		AInt facesNormalsCount = facesNormals.size();

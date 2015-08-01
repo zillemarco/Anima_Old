@@ -94,7 +94,7 @@ public:
 	AnimaMeshInstance* GetInstanceFromName(const AnimaString& name) const;
 	
 	// Gestione dati grafici
-	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
+	void SetVertices(const AnimaArray<AnimaVertex3f>& vertices);
 	void SetVertices(AnimaVertex3f* v, AInt n);
 	void AddVertex(const AnimaVertex3f& v);
 	AInt GetVerticesCount();
@@ -103,7 +103,7 @@ public:
 	AnimaArray<AnimaVertex3f>* GetVertices();
 	void ClearVertices();
 
-	void SetNormals(AnimaArray<AnimaVertex3f>* normals);
+	void SetNormals(const AnimaArray<AnimaVertex3f>& normals);
 	void SetNormals(AnimaVertex3f* v, AInt n);
 	void AddNormal(const AnimaVertex3f& v);
 	AInt GetNormalsCount();
@@ -114,7 +114,7 @@ public:
 	void ComputeSmootNormals();
 	void ComputeFlatNormals();
 
-	void SetTextureCoords(AnimaArray<AnimaVertex2f>* textureCoords);
+	void SetTextureCoords(const AnimaArray<AnimaVertex2f>& textureCoords);
 	void SetTextureCoords(AnimaVertex2f* v, AInt n);
 	void AddTextureCoord(const AnimaVertex2f& v);
 	AInt GetTextureCoordsCount();
@@ -123,7 +123,7 @@ public:
 	AnimaArray<AnimaVertex2f>* GetTextureCoords();
 	void ClearTextureCoords();
 
-	void SetTangents(AnimaArray<AnimaVertex3f>* tangents);
+	void SetTangents(const AnimaArray<AnimaVertex3f>& tangents);
 	void SetTangents(AnimaVertex3f* v, AInt n);
 	void AddTangent(const AnimaVertex3f& v);
 	AInt GetTangentsCount();
@@ -132,7 +132,7 @@ public:
 	AnimaArray<AnimaVertex3f>* GetTangents();
 	void ClearTangents();
 
-	void SetBitangents(AnimaArray<AnimaVertex3f>* bitangents);
+	void SetBitangents(const AnimaArray<AnimaVertex3f>& bitangents);
 	void SetBitangents(AnimaVertex3f* v, AInt n);
 	void AddBitangent(const AnimaVertex3f& v);
 	AInt GetBitangentsCount();
@@ -141,7 +141,7 @@ public:
 	AnimaArray<AnimaVertex3f>* GetBitangents();
 	void ClearBitangents();
 
-	void SetBoneWeights(AnimaArray<AnimaVertex4f>* boneWeights);
+	void SetBoneWeights(const AnimaArray<AnimaVertex4f>& boneWeights);
 	void SetBoneWeights(AnimaVertex4f* v, AInt n);
 	void AddBoneWeight(const AnimaVertex4f& v);
 	AInt GetBoneWeightsCount();
@@ -150,7 +150,7 @@ public:
 	AnimaArray<AnimaVertex4f>* GetBoneWeights();
 	void ClearBoneWeights();
 
-	void SetBoneIDs(AnimaArray<AnimaVertex4f>* boneIDs);
+	void SetBoneIDs(const AnimaArray<AnimaVertex4f>& boneIDs);
 	void SetBoneIDs(AnimaVertex4f* v, AInt n);
 	void AddBoneID(const AnimaVertex4f& v);
 	AInt GetBoneIDsCount();
@@ -159,7 +159,7 @@ public:
 	AnimaArray<AnimaVertex4f>* GetBoneIDs();
 	void ClearBoneIDs();
 
-	void SetFaces(AnimaArray<AnimaFace>* faces);
+	void SetFaces(const AnimaArray<AnimaFace>& faces);
 	void SetFaces(AnimaFace* faces, AInt n);
 	void AddFace(const AnimaFace& face);
 	AInt GetFacesCount();

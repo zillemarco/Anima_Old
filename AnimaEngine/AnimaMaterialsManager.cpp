@@ -433,6 +433,10 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 					material->SetFloat(propName.c_str(), prop.second.get<AFloat>("<xmlattr>.value"));
 				else if (propType.compare("bool") == 0)
 					material->SetBoolean(propName.c_str(), prop.second.get<bool>("<xmlattr>.value"));
+				else if (propType.compare("texture") == 0)
+				{
+					material->SetBoolean(propName.c_str(), prop.second.get<bool>("<xmlattr>.value"));
+				}
 			}
 		}
 

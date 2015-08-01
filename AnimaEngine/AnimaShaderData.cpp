@@ -110,7 +110,7 @@ void AnimaShaderData::FindLocation(AnimaShaderProgram* program)
 		AnimaString tmpName;
 		for (AInt i = 0; i < _arraySize; i++)
 		{
-			tmpName = FormatString("%s[%d]", _name, i);
+			tmpName = FormatString("%s[%d]", _name.c_str(), i);
 
 			location = glGetUniformLocation(program->GetID(), _name.c_str());
 
@@ -126,7 +126,6 @@ void AnimaShaderData::DivideName()
 {
 	AnimaString namePart1 = _name;
 	AnimaString namePart2 = "";
-	AUint offset = std::count(namePart1.begin(), namePart1.end(), ('_')) + 1;
 
 	AInt pos = namePart1.find('_');
 	while (pos != -1)

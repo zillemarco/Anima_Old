@@ -8,6 +8,11 @@
 
 #include "AnimaTexturesManager.h"
 
+#include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
+
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
@@ -543,6 +548,63 @@ AnimaTexture* AnimaTexturesManager::GetTexture(AUint index)
 AnimaTexture* AnimaTexturesManager::GetTexture(const AnimaString& textureName)
 {
 	return _textures[textureName];
+}
+
+AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& filePath)
+{
+	std::ifstream fileStream(filePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+	
+	return LoadTextureFromXml(xml);
+}
+
+AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const AnimaString& textureXmlDefinition)
+{
+	boost::property_tree::ptree pt;
+	std::stringstream ss(textureXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
+	
+	return LoadTextureFromXml(pt);
+
+}
+
+AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tree::ptree& xmlTree)
+{
+	AnimaTexture* texture = nullptr;
+	
+	AnimaString name = xmlTree.get<AnimaString>("AnimaTexture.Name");
+	texture = CreateTexture(name);
+	
+	if (texture)
+	{
+		
+	}
+	
+	return texture;
+}
+
+bool AnimaTexturesManager::LoadTextures(const AnimaString& texturesPath)
+{
+	namespace fs = boost::filesystem;
+	fs::path directory(texturesPath);
+	
+	bool returnValue = true;
+	
+	if (fs::exists(directory) && fs::is_directory(directory))
+	{
+		fs::directory_iterator endIterator;
+		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
+		{
+			if (directoryIterator->path().extension().string() == ".atexture")
+			{
+				if (LoadTextureFromFile(directoryIterator->path().string().c_str()) == nullptr)
+					returnValue = false;
+			}
+		}
+	}
+	
+	return returnValue;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

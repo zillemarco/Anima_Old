@@ -326,9 +326,9 @@ void AnimaMesh::ClearFaces()
 	_faces.clear();
 }
 
-void AnimaMesh::SetVertices(AnimaArray<AnimaVertex3f>* vertices)
+void AnimaMesh::SetVertices(const AnimaArray<AnimaVertex3f>& vertices)
 {
-	_vertices = *vertices;
+	_vertices = vertices;
 }
 
 void AnimaMesh::SetVertices(AnimaVertex3f* v, AInt n)
@@ -345,9 +345,9 @@ void AnimaMesh::AddVertex(const AnimaVertex3f& v)
 	_vertices.push_back(v);
 }
 
-void AnimaMesh::SetNormals(AnimaArray<AnimaVertex3f>* normals)
+void AnimaMesh::SetNormals(const AnimaArray<AnimaVertex3f>& normals)
 {
-	_normals = *normals;
+	_normals = normals;
 }
 
 void AnimaMesh::SetNormals(AnimaVertex3f* v, AInt n)
@@ -364,9 +364,9 @@ void AnimaMesh::AddNormal(const AnimaVertex3f& v)
 	_normals.push_back(v);
 }
 
-void AnimaMesh::SetTextureCoords(AnimaArray<AnimaVertex2f>* textureCoords)
+void AnimaMesh::SetTextureCoords(const AnimaArray<AnimaVertex2f>& textureCoords)
 {
-	_textureCoords = *textureCoords;
+	_textureCoords = textureCoords;
 }
 
 void AnimaMesh::SetTextureCoords(AnimaVertex2f* v, AInt n)
@@ -383,9 +383,9 @@ void AnimaMesh::AddTextureCoord(const AnimaVertex2f& v)
 	_textureCoords.push_back(v);
 }
 
-void AnimaMesh::SetTangents(AnimaArray<AnimaVertex3f>* tangents)
+void AnimaMesh::SetTangents(const AnimaArray<AnimaVertex3f>& tangents)
 {
-	_tangents = *tangents;
+	_tangents = tangents;
 }
 
 void AnimaMesh::SetTangents(AnimaVertex3f* v, AInt n)
@@ -402,9 +402,9 @@ void AnimaMesh::AddTangent(const AnimaVertex3f& v)
 	_tangents.push_back(v);
 }
 
-void AnimaMesh::SetBitangents(AnimaArray<AnimaVertex3f>* bitangents)
+void AnimaMesh::SetBitangents(const AnimaArray<AnimaVertex3f>& bitangents)
 {
-	_bitangents = *bitangents;
+	_bitangents = bitangents;
 }
 
 void AnimaMesh::SetBitangents(AnimaVertex3f* v, AInt n)
@@ -421,9 +421,9 @@ void AnimaMesh::AddBitangent(const AnimaVertex3f& v)
 	_bitangents.push_back(v);
 }
 
-void AnimaMesh::SetBoneWeights(AnimaArray<AnimaVertex4f>* boneWeights)
+void AnimaMesh::SetBoneWeights(const AnimaArray<AnimaVertex4f>& boneWeights)
 {
-	_boneWeights = *boneWeights;
+	_boneWeights = boneWeights;
 }
 
 void AnimaMesh::SetBoneWeights(AnimaVertex4f* v, AInt n)
@@ -465,9 +465,9 @@ void AnimaMesh::ClearBoneWeights()
 	_boneWeights.clear();
 }
 
-void AnimaMesh::SetBoneIDs(AnimaArray<AnimaVertex4f>* boneIDs)
+void AnimaMesh::SetBoneIDs(const AnimaArray<AnimaVertex4f>& boneIDs)
 {
-	_boneIDs = *boneIDs;
+	_boneIDs = boneIDs;
 }
 
 void AnimaMesh::SetBoneIDs(AnimaVertex4f* v, AInt n)
@@ -509,9 +509,9 @@ void AnimaMesh::ClearBoneIDs()
 	_boneIDs.clear();;
 }
 
-void AnimaMesh::SetFaces(AnimaArray<AnimaFace>* faces)
+void AnimaMesh::SetFaces(const AnimaArray<AnimaFace>& faces)
 {
-	_faces = *faces;
+	_faces = faces;
 }
 
 void AnimaMesh::SetFaces(AnimaFace* faces, AInt n)

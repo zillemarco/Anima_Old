@@ -8,6 +8,14 @@
 
 #include "AnimaModel.h"
 
+#ifndef min
+#	define min(a, b) (a > b ? b : a)
+#endif
+
+#ifndef max
+#	define max(a, b) (a < b ? b : a)
+#endif
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)

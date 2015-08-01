@@ -18,6 +18,8 @@
 #include "AnimaMappedArray.h"
 #include "AnimaScene.h"
 
+#include <boost/property_tree/ptree.hpp>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 struct AnimaTGAHeader {
@@ -77,6 +79,42 @@ public:
 	 *	\sa			LoadTextureFromBMPFile(), LoadTextureFromTGAFile(), LoadTextureFromDDSFile(), LoadTextureFromData()
 	 */
 	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath, const AnimaString& textureName);
+	
+	/*!
+	 *	\brief		Crea una texture leggengo i dati da un file XML contenente le informazioni
+	 *	\details	Crea una texture leggengo i dati da un file XML contenente le informazioni
+	 *	\param[in]	filePath	Path del file XML con i dati da leggere
+	 *	\return		Nel caso la lettura e la creazione abbiano avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 */
+	AnimaTexture* LoadTextureFromFile(const AnimaString& filePath);
+	
+	/*!
+	 *	\brief		Crea una texture leggengo i dati da una stringa XML che contiene le informazioni
+	 *	\details	Crea una texture leggengo i dati da una stringa XML che contiene le informazioni
+	 *	\param[in]	textureXmlDefinition	Stringa XML che contiene le informazioni
+	 *	\return		Nel caso la lettura e la creazione abbiano avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 */
+	AnimaTexture* LoadTextureFromXml(const AnimaString& textureXmlDefinition);
+	
+	/*!
+	 *	\brief		Crea una texture interpretando i dati dato un albero XML in input
+	 *	\details	Crea una texture interpretando i dati dato un albero XML in input
+	 *	\param[in]	textureXmlDefinition	Stringa XML che contiene le informazioni
+	 *	\return		Nel caso la lettura e la creazione abbiano avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 */
+	AnimaTexture* LoadTextureFromXml(const boost::property_tree::ptree& xmlTree);
+	
+	/*!
+	 *	\brief		Crea delle texture leggendo i file XML contenuti nella cartella passata in input
+	 *	\details	Crea delle texture leggendo i file XML contenuti nella cartella passata in input
+	 *	\param[in]	texturesPath	Path della cartella da cui caricare i file XML contenenti del informazioni delle texture
+	 *	\return		True nel caso la lettura e la creazione di tutti i file contenuti della cartella sia andata a buon fine, false altrimenti
+	 *	\author		Zille Marco
+	 */
+	bool LoadTextures(const AnimaString& texturesPath);
 
 	/*!
 	 *	\brief		Carica i dati contentuti in un file BMP e crea automaticamente la texture associata
