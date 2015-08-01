@@ -10,6 +10,8 @@
 			<AnimaTexture>
 				<Name>pbrEnvMap</Name>
 				<Type>CUBE</Type>
+				<Format>RGB</Format>
+				<InternalFormat>RGB</InternalFormat>
 				<File index="px">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</File>
 				<File index="nx">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negx.tga</File>
 				<File index="py">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posy.tga</File>
