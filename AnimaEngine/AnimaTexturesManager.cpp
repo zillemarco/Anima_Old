@@ -80,7 +80,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& fileP
 	AUint dataSize;
 	AUint width;
 	AUint height;
-	AUint format;
+	AnimaTextureFormat format;
 
 	if (GetTextureDataFromFile(filePath, &data, dataSize, width, height, format))
 	{
@@ -148,7 +148,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 	AUint dataSize;
 	AUint width;
 	AUint height;
-	AUint format;
+	AnimaTextureFormat format;
 
 	if (GetTextureDataFromDDSFile(filePath, &data, dataSize, width, height, format))
 	{
@@ -169,7 +169,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textu
 	return CreateTexture(textureName, width, height, data, dataSize);
 }
 
-bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AUint& format)
+bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format)
 {
 	if (data == nullptr || *data != nullptr)
 		return false;
@@ -181,7 +181,7 @@ bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, A
 	pos++;
 	AnimaString ext = filePath.substr(pos);
 
-	format = 0;
+	format = FORMAT_NONE;
 
 	if (ext.compare("bmp") == 0)
 		return GetTextureDataFromBMPFile(filePath, data, dataSize, width, height);
@@ -260,7 +260,7 @@ bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath
 	return false;
 }
 
-bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AUint& format)
+bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format)
 {
 	if (data == nullptr || *data != nullptr)
 		return false;
@@ -297,13 +297,13 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	switch (fourCC)
 	{
 	case FOURCC_DXT1:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		//format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 		break;
 	case FOURCC_DXT3:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		//format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 		break;
 	case FOURCC_DXT5:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		//format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		break;
 	default:
 		free(*data);

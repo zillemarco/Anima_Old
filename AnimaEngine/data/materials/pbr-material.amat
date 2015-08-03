@@ -9,7 +9,7 @@
 		<Property name="EnvironmentMap" type="texture">
 			<AnimaTexture>
 				<Name>pbrEnvMap</Name>
-				<Type>CUBE</Type>
+				<Target>CUBE</Target>
 				<Format>RGB</Format>
 				<InternalFormat>RGB</InternalFormat>
 				<File index="px">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</File>

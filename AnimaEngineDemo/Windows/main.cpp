@@ -384,7 +384,8 @@ bool InitEngine()
 
 	unsigned char *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
 	unsigned int dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
-	unsigned int width, height, format;
+	unsigned int width, height;
+	Anima::AnimaTextureFormat format;
 
 	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negx.tga", &dataPX, dataSizePX, width, height, format);
 	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posx.tga", &dataNX, dataSizeNX, width, height, format);

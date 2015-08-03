@@ -183,7 +183,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromBMPFile(), GetTextureDataFromTGAFile(), GetTextureDataFromDDSFile()
 	 */
-	bool GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AUint& format);
+	bool GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format);
 
 	/*!
 	 *	\brief		Carica i dati contentuti in un file BMP
@@ -232,7 +232,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromFile(), GetTextureDataFromBMPFile(), GetTextureDataFromTGAFile()
 	 */
-	bool GetTextureDataFromDDSFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AUint& format);
+	bool GetTextureDataFromDDSFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format);
 
 	/*!
 	 *	\brief		Torna il numero di texture contenute dal manager

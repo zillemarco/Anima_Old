@@ -210,10 +210,10 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			prepassBuffer->AddTexture("DepthMap", TEXTURE_2D, GL_DEPTH_ATTACHMENT, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("NormalMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", TEXTURE_2D, GL_DEPTH_ATTACHMENT, DEPTH24, DEPTH, GL_FLOAT, NEAREST, TO_EDGE);
+			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			prepassBuffer->AddTexture("NormalMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			prepassBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
 			ANIMA_ASSERT(prepassBuffer->Create());
 
 			SetGBuffer("PrepassBuffer", prepassBuffer);
@@ -225,8 +225,8 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			lightsBuffer->AddTexture("EmissiveMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			lightsBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			lightsBuffer->AddTexture("EmissiveMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			lightsBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
 			ANIMA_ASSERT(lightsBuffer->Create());
 
 			SetGBuffer("LightsBuffer", lightsBuffer);
@@ -253,8 +253,8 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", width, height, nullptr, 0);
 			diffuseTexture->SetTextureTarget(TEXTURE_2D);
 			diffuseTexture->SetFilter(NEAREST);
-			diffuseTexture->SetInternalFormat(GL_RGBA8);
-			diffuseTexture->SetFormat(GL_RGBA);
+			diffuseTexture->SetInternalFormat(RGBA8);
+			diffuseTexture->SetFormat(RGBA);
 			diffuseTexture->SetDataType(GL_UNSIGNED_BYTE);
 			diffuseTexture->SetClamp(TO_EDGE);
 			diffuseTexture->SetAttachment(GL_COLOR_ATTACHMENT0);

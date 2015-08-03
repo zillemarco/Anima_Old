@@ -111,7 +111,7 @@ public:
 	 *	\return		True se il nome della texture non è già presente all'interno della lista delle texture del GBuffer, false altrimenti.
 	 *	\author		Zille Marco
 	 */
-	bool AddTexture(const AnimaString& name, AnimaTextureTarget target, AUint attachment, AUint internalFormat, AUint format, AUint dataType, AnimaTextureFilterMode filter, AnimaTextureClampMode clamp);
+	bool AddTexture(const AnimaString& name, AnimaTextureTarget target, AUint attachment, AnimaTextureInternalFormat internalFormat, AnimaTextureFormat format, AUint dataType, AnimaTextureFilterMode filter, AnimaTextureClampMode clamp);
 		
 	/*!
 	 *	\brief		Ridimensione le texture del GBuffer

@@ -18,8 +18,8 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_textureTarget = TEXTURE_2D;
 	_textureID = 0;
 	_filter = LINEAR;
-	_internalFormat = GL_RGB;
-	_format = GL_RGB;
+	_internalFormat = AnimaTextureInternalFormat::IF_RGB;
+	_format = AnimaTextureFormat::RGB;
 	_dataType = GL_UNSIGNED_BYTE;
 	_clamp = REPEAT;
 	_frameBuffer = 0;
@@ -42,8 +42,8 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 
 	_textureTarget = TEXTURE_2D;
 	_filter = LINEAR;
-	_internalFormat = GL_RGB;
-	_format = GL_RGB;
+	_internalFormat = AnimaTextureInternalFormat::IF_RGB;
+	_format = AnimaTextureFormat::RGB;
 	_dataType = GL_UNSIGNED_BYTE;
 	_clamp = REPEAT;
 	_attachment = GL_NONE;
@@ -227,12 +227,12 @@ AUint AnimaTexture::GetMipMapLevels() const
 	return _mipMapLevels;
 }
 
-void AnimaTexture::SetFormat(AUint format)
+void AnimaTexture::SetFormat(AnimaTextureFormat format)
 {
 	_format = format;
 }
 
-AUint AnimaTexture::GetFormat() const
+AnimaTextureFormat AnimaTexture::GetFormat() const
 {
 	return _format;
 }
@@ -257,12 +257,12 @@ AUint AnimaTexture::GetAttachment() const
 	return _attachment;
 }
 
-void AnimaTexture::SetInternalFormat(AUint internalFormat)
+void AnimaTexture::SetInternalFormat(AnimaTextureInternalFormat internalFormat)
 {
 	_internalFormat = internalFormat;
 }
 
-AUint AnimaTexture::GetInternalFormat() const
+AnimaTextureInternalFormat AnimaTexture::GetInternalFormat() const
 {
 	return _internalFormat;
 }
@@ -428,6 +428,8 @@ bool AnimaTexture::Load()
 	AUint target = TargetToPlatform(_textureTarget);
 	AUint clamp = ClampToPlatform(_clamp);
 	AUint filter = FilterToPlatform(_filter);
+	AUint format = FormatToPlatform(_format);
+	AUint internalFormat = InternalFormatToPlatform(_internalFormat);
 	
 	glGenTextures(1, &_textureID);
 
@@ -444,10 +446,10 @@ bool AnimaTexture::Load()
 	if (_textureTarget == TEXTURE_2D)
 	{
 		if (_mipMapLevels == 0 || _generateMipMaps)
-			glTexImage2D(target, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[0][0]);
+			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[0][0]);
 		else if (_mipMapLevels > 0)
 		{
-			unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 			unsigned int offset = 0;
 
 			AUint width = _width;
@@ -457,8 +459,8 @@ bool AnimaTexture::Load()
 			{
 				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
-				//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
-				glTexImage2D(target, level, _internalFormat, width, height, 0, _format, _dataType, &_data[0][0] + offset);
+				//glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
+				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, &_data[0][0] + offset);
 
 				offset += size;
 				width /= 2;
@@ -474,14 +476,14 @@ bool AnimaTexture::Load()
 		{
 			for (AInt i = 0; i < 6; i++)
 			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[i][0]);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[i][0]);
 			}
 		}
 		else if (_mipMapLevels > 0)
 		{
 			for (AInt i = 0; i < 6; i++)
 			{
-				unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+				unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 				unsigned int offset = 0;
 
 				AUint width = _width;
@@ -492,7 +494,7 @@ bool AnimaTexture::Load()
 					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
 					//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, _internalFormat, width, height, 0, _format, _dataType, &_data[i][0] + offset);
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, internalFormat, width, height, 0, format, _dataType, &_data[i][0] + offset);
 
 					offset += size;
 					width /= 2;
@@ -637,15 +639,18 @@ void AnimaTexture::Resize(AUint width, AUint height)
 bool AnimaTexture::ResizeTexture()
 {
 	AUint target = TargetToPlatform(_textureTarget);
+	AUint format = FormatToPlatform(_format);
+	AUint internalFormat = InternalFormatToPlatform(_internalFormat);
+
 	glBindTexture(target, _textureID);
 
 	if (_textureTarget == TEXTURE_2D)
 	{
 		if (_mipMapLevels == 0)
-			glTexImage2D(target, 0, _internalFormat, _width, _height, 0, _format, _dataType, &_data[0][0]);
+			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[0][0]);
 		else if (_mipMapLevels > 0)
 		{
-			unsigned int BlockSize = (_format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 			unsigned int offset = 0;
 
 			AUint width = _width;
@@ -655,7 +660,7 @@ bool AnimaTexture::ResizeTexture()
 			{
 				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
-				glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+				glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
 
 				offset += size;
 				width /= 2;
@@ -761,6 +766,111 @@ AUint AnimaTexture::CubeIndexToPlatform(const AnimaTextureCubeIndex& index)
 	case POSITIVE_Z:	return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
 	case NEGATIVE_Z:	return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
 	default:			return GL_NONE;
+	}
+}
+
+AUint AnimaTexture::FormatToPlatform(const AnimaTextureFormat& format)
+{
+	switch (format)
+	{
+	case Anima::AnimaTextureFormat::RED:		return GL_RED; break;
+	case Anima::AnimaTextureFormat::GREEN:		return GL_GREEN; break;
+	case Anima::AnimaTextureFormat::BLUE:		return GL_BLUE; break;
+	case Anima::AnimaTextureFormat::RG:			return GL_RG; break;
+	case Anima::AnimaTextureFormat::RGB:		return GL_RGB; break;
+	case Anima::AnimaTextureFormat::RGBA:		return GL_RGBA; break;
+	case Anima::AnimaTextureFormat::BGR:		return GL_BGR; break;
+	case Anima::AnimaTextureFormat::BGRA:		return GL_BGRA; break;
+	case Anima::AnimaTextureFormat::RED_INT:	return GL_RED_INTEGER; break;
+	case Anima::AnimaTextureFormat::GREEN_INT:	return GL_GREEN_INTEGER; break;
+	case Anima::AnimaTextureFormat::BLUE_INT:	return GL_BLUE_INTEGER; break;
+	case Anima::AnimaTextureFormat::RG_INT:		return GL_RG_INTEGER; break;
+	case Anima::AnimaTextureFormat::RGB_INT:	return GL_RGB_INTEGER; break;
+	case Anima::AnimaTextureFormat::RGBA_INT:	return GL_RGBA_INTEGER; break;
+	case Anima::AnimaTextureFormat::BGR_INT:	return GL_BGR_INTEGER; break;
+	case Anima::AnimaTextureFormat::BGRA_INT:	return GL_BGRA_INTEGER; break;
+	case Anima::AnimaTextureFormat::DEPTH:		return GL_DEPTH; break;
+	default:									return GL_NONE;
+	}
+}
+
+AUint AnimaTexture::InternalFormatToPlatform(const AnimaTextureInternalFormat& internalFormat)
+{
+	switch (internalFormat)
+	{
+	case AnimaTextureInternalFormat::R8:				return GL_R8; break;
+	case AnimaTextureInternalFormat::R8_SNORM:			return GL_R8_SNORM; break;
+	case AnimaTextureInternalFormat::R16:				return GL_R16; break;
+	case AnimaTextureInternalFormat::R16_SNORM:			return GL_R16_SNORM; break;
+	case AnimaTextureInternalFormat::RG8:				return GL_RG8; break;
+	case AnimaTextureInternalFormat::RG8_SNORM:			return GL_RG8_SNORM; break;
+	case AnimaTextureInternalFormat::RG16:				return GL_RG16; break;
+	case AnimaTextureInternalFormat::RG16_SNORM:		return GL_RG16_SNORM; break;
+	case AnimaTextureInternalFormat::R3_G3_B2:			return GL_R3_G3_B2; break;
+	case AnimaTextureInternalFormat::RGB4:				return GL_RGB4; break;
+	case AnimaTextureInternalFormat::RGB5:				return GL_RGB5; break;
+	case AnimaTextureInternalFormat::RGB565:			return GL_RGB565; break;
+	case AnimaTextureInternalFormat::RGB8:				return GL_RGB8; break;
+	case AnimaTextureInternalFormat::RGB8_SNORM:		return GL_RGB8_SNORM; break;
+	case AnimaTextureInternalFormat::RGB10:				return GL_RGB10; break;
+	case AnimaTextureInternalFormat::RGB12:				return GL_RGB12; break;
+	case AnimaTextureInternalFormat::RGB16:				return GL_RGB16; break;
+	case AnimaTextureInternalFormat::RGB16_SNORM:		return GL_RGB16_SNORM; break;
+	case AnimaTextureInternalFormat::RGBA2:				return GL_RGBA2; break;
+	case AnimaTextureInternalFormat::RGBA4:				return GL_RGBA4; break;
+	case AnimaTextureInternalFormat::RGB5_A1:			return GL_RGB5_A1; break;
+	case AnimaTextureInternalFormat::RGBA8:				return GL_RGBA8; break;
+	case AnimaTextureInternalFormat::RGBA8_SNORM:		return GL_RGBA8_SNORM; break;
+	case AnimaTextureInternalFormat::RGB10_A2:			return GL_RGB10_A2; break;
+	case AnimaTextureInternalFormat::RGB10_A2UI:		return GL_RGB10_A2UI; break;
+	case AnimaTextureInternalFormat::RGBA12:			return GL_RGBA12; break;
+	case AnimaTextureInternalFormat::RGBA16:			return GL_RGBA16; break;
+	case AnimaTextureInternalFormat::RGBA16_SNORM:		return GL_RGBA16_SNORM; break;
+	case AnimaTextureInternalFormat::SRGB8:				return GL_SRGB8; break;
+	case AnimaTextureInternalFormat::SRGB8_A8:			return GL_SRGB8_ALPHA8; break;
+	case AnimaTextureInternalFormat::R16F:				return GL_R16F; break;
+	case AnimaTextureInternalFormat::RG16F:				return GL_RG16F; break;
+	case AnimaTextureInternalFormat::RGB16F:			return GL_RGB16F; break;
+	case AnimaTextureInternalFormat::RGBA16F:			return GL_RGBA16F; break;
+	case AnimaTextureInternalFormat::R32F:				return GL_R32F; break;
+	case AnimaTextureInternalFormat::RG32F:				return GL_RG32F; break;
+	case AnimaTextureInternalFormat::RGB32F:			return GL_RGB32F; break;
+	case AnimaTextureInternalFormat::RGBA32F:			return GL_RGBA32F; break;
+	case AnimaTextureInternalFormat::R11F_G11F_B10F:	return GL_R11F_G11F_B10F; break;
+	case AnimaTextureInternalFormat::RGB9_E5:			return GL_RGB9_E5; break;
+	case AnimaTextureInternalFormat::R8I:				return GL_R8I; break;
+	case AnimaTextureInternalFormat::R8UI:				return GL_R8UI; break;
+	case AnimaTextureInternalFormat::R16I:				return GL_R16I; break;
+	case AnimaTextureInternalFormat::R16UI:				return GL_R16UI; break;
+	case AnimaTextureInternalFormat::R32I:				return GL_R32I; break;
+	case AnimaTextureInternalFormat::R32UI:				return GL_R32UI; break;
+	case AnimaTextureInternalFormat::RG8I:				return GL_RG8I; break;
+	case AnimaTextureInternalFormat::RG8UI:				return GL_RG8UI; break;
+	case AnimaTextureInternalFormat::RG16I:				return GL_RG16I; break;
+	case AnimaTextureInternalFormat::RG16UI:			return GL_RG16UI; break;
+	case AnimaTextureInternalFormat::RG32I:				return GL_RG32I; break;
+	case AnimaTextureInternalFormat::RG32UI:			return GL_RG32UI; break;
+	case AnimaTextureInternalFormat::RGB8I:				return GL_RGB8I; break;
+	case AnimaTextureInternalFormat::RGB8UI:			return GL_RGB8UI; break;
+	case AnimaTextureInternalFormat::RGB16I:			return GL_RGB16I; break;
+	case AnimaTextureInternalFormat::RGB16UI:			return GL_RGB16UI; break;
+	case AnimaTextureInternalFormat::RGB32I:			return GL_RGB32I; break;
+	case AnimaTextureInternalFormat::RGB32UI:			return GL_RGB32UI; break;
+	case AnimaTextureInternalFormat::RGBA8I:			return GL_RGBA8I; break;
+	case AnimaTextureInternalFormat::RGBA8UI:			return GL_RGBA8UI; break;
+	case AnimaTextureInternalFormat::RGBA16I:			return GL_RGBA16I; break;
+	case AnimaTextureInternalFormat::RGBA16UI:			return GL_RGBA16UI; break;
+	case AnimaTextureInternalFormat::RGBA32I:			return GL_RGBA32I; break;
+	case AnimaTextureInternalFormat::RGBA32UI:			return GL_RGBA32UI; break;
+	case AnimaTextureInternalFormat::DEPTH16:			return GL_DEPTH_COMPONENT16; break;
+	case AnimaTextureInternalFormat::DEPTH24:			return GL_DEPTH_COMPONENT24; break;
+	case AnimaTextureInternalFormat::DEPTH32:			return GL_DEPTH_COMPONENT32; break;
+	case AnimaTextureInternalFormat::DEPTH32F:			return GL_DEPTH_COMPONENT32F; break;
+	case AnimaTextureInternalFormat::IF_RED:			return GL_RED; break;
+	case AnimaTextureInternalFormat::IF_RG:				return GL_RG; break;
+	case AnimaTextureInternalFormat::IF_RGB:			return GL_RGB; break;
+	case AnimaTextureInternalFormat::IF_RGBA:			return GL_RGBA; break;
+	default:											return GL_NONE;
 	}
 }
 
