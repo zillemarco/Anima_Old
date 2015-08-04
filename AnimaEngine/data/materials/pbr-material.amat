@@ -12,12 +12,12 @@
 				<Target>CUBE</Target>
 				<Format>RGB</Format>
 				<InternalFormat>RGB</InternalFormat>
-				<File index="px">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</File>
-				<File index="nx">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negx.tga</File>
-				<File index="py">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posy.tga</File>
-				<File index="ny">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negy.tga</File>
-				<File index="pz">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posz.tga</File>
-				<File index="nz">D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negz.tga</File>
+				<FilePX>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</FilePX>
+				<FileNX>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negx.tga</FileNX>
+				<FilePY>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posy.tga</FilePY>
+				<FileNY>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negy.tga</FileNY>
+				<FilePZ>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posz.tga</FilePZ>
+				<FileNZ>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negz.tga</FileNZ>
 			</AnimaTexture>
 		</Property>
 	</Properties>

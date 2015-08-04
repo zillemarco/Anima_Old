@@ -7,6 +7,7 @@
 //
 
 #include "AnimaTexturesManager.h"
+#include "AnimaXmlTranslators.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -578,7 +579,183 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 	
 	if (texture)
 	{
-		
+		AnimaTextureTarget target;
+		AnimaTextureFormat format;
+		AnimaTextureInternalFormat internalFormat;
+		AUint width, height;
+		AnimaTextureFormat guessedFormat;
+
+		try
+		{
+			target = xmlTree.get<AnimaTextureTarget>("AnimaTexture.Target");
+			format = xmlTree.get<AnimaTextureFormat>("AnimaTexture.Format");
+			internalFormat = xmlTree.get<AnimaTextureInternalFormat>("AnimaTexture.InternalFormat");
+		}
+		catch (boost::property_tree::ptree_bad_path& exception)
+		{
+			printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+			return nullptr;
+		}
+		catch (boost::property_tree::ptree_bad_data& exception)
+		{
+			printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+			return nullptr;
+		}
+
+		if (target == TEXTURE_CUBE)
+		{
+			AnimaString filePathPX, filePathNX, filePathPY, filePathNY, filePathPZ, filePathNZ;
+
+			try
+			{
+				filePathPX = xmlTree.get<AnimaString>("AnimaTexture.FilePX");
+				filePathNX = xmlTree.get<AnimaString>("AnimaTexture.FileNX");
+				filePathPY = xmlTree.get<AnimaString>("AnimaTexture.FilePY");
+				filePathNY = xmlTree.get<AnimaString>("AnimaTexture.FileNY");
+				filePathPZ = xmlTree.get<AnimaString>("AnimaTexture.FilePZ");
+				filePathNZ = xmlTree.get<AnimaString>("AnimaTexture.FileNZ");
+			}
+			catch (boost::property_tree::ptree_bad_path& exception)
+			{
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+				return nullptr;
+			}
+			catch (boost::property_tree::ptree_bad_data& exception)
+			{
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+				return nullptr;
+			}
+
+			AUchar *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
+			AUint dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
+
+			GetTextureDataFromFile(filePathPX, &dataPX, dataSizePX, width, height, guessedFormat);
+			if (dataPX == nullptr || dataSizePX <= 0)
+			{
+				free(dataPX);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPX.c_str());
+				return nullptr;
+			}
+
+			GetTextureDataFromFile(filePathNX, &dataNX, dataSizeNX, width, height, guessedFormat);
+			if (dataNX == nullptr || dataSizeNX <= 0)
+			{
+				free(dataPX);
+				free(dataNX);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNX.c_str());
+				return nullptr;
+			}
+
+			GetTextureDataFromFile(filePathPY, &dataPY, dataSizePY, width, height, guessedFormat);
+			if (dataPY == nullptr || dataSizePY <= 0)
+			{
+				free(dataPX);
+				free(dataNX);
+				free(dataPY);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPY.c_str());
+				return nullptr;
+			}
+
+			GetTextureDataFromFile(filePathNY, &dataNY, dataSizeNY, width, height, guessedFormat);
+			if (dataNY == nullptr || dataSizeNY <= 0)
+			{
+				free(dataPX);
+				free(dataNX);
+				free(dataPY);
+				free(dataNY);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNY.c_str());
+				return nullptr;
+			}
+
+			GetTextureDataFromFile(filePathPZ, &dataPZ, dataSizePZ, width, height, guessedFormat);
+			if (dataPZ == nullptr || dataSizePZ <= 0)
+			{
+				free(dataPX);
+				free(dataNX);
+				free(dataPY);
+				free(dataNY);
+				free(dataPZ);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPZ.c_str());
+				return nullptr;
+			}
+
+			GetTextureDataFromFile(filePathNZ, &dataNZ, dataSizeNZ, width, height, guessedFormat);
+			if (dataNZ == nullptr || dataSizeNZ <= 0)
+			{
+				free(dataPX);
+				free(dataNX);
+				free(dataPY);
+				free(dataNY);
+				free(dataPZ);
+				free(dataNZ);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNZ.c_str());
+				return nullptr;
+			}
+
+			if (guessedFormat == FORMAT_NONE || guessedFormat == format)
+				texture->SetFormat(format);
+			else
+				texture->SetFormat(guessedFormat);
+
+			texture->SetInternalFormat(internalFormat);
+			texture->SetDataType(GL_UNSIGNED_BYTE);
+			texture->SetWidth(width);
+			texture->SetHeight(height);
+			texture->SetFilter(LINEAR);
+			texture->SetClamp(TO_EDGE);
+			texture->SetTextureTarget(target);
+
+			texture->SetData(dataPX, dataSizePX, POSITIVE_X);
+			texture->SetData(dataNX, dataSizeNX, NEGATIVE_X);
+			texture->SetData(dataPY, dataSizePY, POSITIVE_Y);
+			texture->SetData(dataNY, dataSizeNY, NEGATIVE_Y);
+			texture->SetData(dataPZ, dataSizePZ, POSITIVE_Z);
+			texture->SetData(dataNZ, dataSizeNZ, NEGATIVE_Z);
+		}
+		else
+		{
+			AnimaString filePath;
+
+			try
+			{
+				filePath = xmlTree.get<AnimaString>("AnimaTexture.File");
+			}
+			catch (boost::property_tree::ptree_bad_path& exception)
+			{
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+				return nullptr;
+			}
+			catch (boost::property_tree::ptree_bad_data& exception)
+			{
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: %s\n", name.c_str(), exception.what());
+				return nullptr;
+			}
+
+			AUchar *data = nullptr;
+			AUint dataSize;
+
+			GetTextureDataFromFile(filePath, &data, dataSize, width, height, guessedFormat);
+			if (data == nullptr || dataSize <= 0)
+			{
+				free(data);
+				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePath.c_str());
+				return nullptr;
+			}
+
+			if (guessedFormat == FORMAT_NONE || guessedFormat == format)
+				texture->SetFormat(format);
+			else
+				texture->SetFormat(guessedFormat);
+
+			texture->SetInternalFormat(internalFormat);
+			texture->SetDataType(GL_UNSIGNED_BYTE);
+			texture->SetWidth(width);
+			texture->SetHeight(height);
+			texture->SetFilter(LINEAR);
+			texture->SetClamp(TO_EDGE);
+
+			texture->SetData(data, dataSize);
+		}
 	}
 	
 	return texture;
