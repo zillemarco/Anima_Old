@@ -15,7 +15,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_mipMapLevels = 0;
 	_width = 0;
 	_height = 0;
-	_textureTarget = TEXTURE_2D;
+	_textureTarget = TARGET_NONE;
 	_textureID = 0;
 	_filter = LINEAR;
 	_internalFormat = AnimaTextureInternalFormat::IF_RGB;
@@ -40,7 +40,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 
 	SetData(data, dataSize);
 
-	_textureTarget = TEXTURE_2D;
+	_textureTarget = TARGET_NONE;
 	_filter = LINEAR;
 	_internalFormat = AnimaTextureInternalFormat::IF_RGB;
 	_format = AnimaTextureFormat::RGB;
@@ -424,6 +424,9 @@ bool AnimaTexture::Load()
 			return ResizeTexture();
 		return true;
 	}
+	
+	if (glGetError() != GL_NO_ERROR)
+		return false;
 
 	AUint target = TargetToPlatform(_textureTarget);
 	AUint clamp = ClampToPlatform(_clamp);
@@ -437,16 +440,26 @@ bool AnimaTexture::Load()
 	
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
+	if (glGetError() != GL_NO_ERROR)
+		return false;
 	
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
-
 	glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, _borderColor.vec);
+	if (glGetError() != GL_NO_ERROR)
+		return false;
 	
 	if (_textureTarget == TEXTURE_2D)
 	{
-		if (_mipMapLevels == 0 || _generateMipMaps)
-			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[0][0]);
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+
+		AUchar* data = nullptr;
+		if (_data.size() > 0 && _data[0].size() > 0)
+			data = &_data[0][0];
+
+		if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
+			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, data);
 		else if (_mipMapLevels > 0)
 		{
 			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
@@ -460,7 +473,7 @@ bool AnimaTexture::Load()
 				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
 				//glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
-				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, &_data[0][0] + offset);
+				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, data + offset);
 
 				offset += size;
 				width /= 2;
@@ -468,20 +481,29 @@ bool AnimaTexture::Load()
 			}
 		}
 		else
+		{
 			return false;
+		}
 	}
 	else if (_textureTarget == TEXTURE_CUBE)
 	{
-		if (_mipMapLevels == 0 || _generateMipMaps)
+		glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
+		glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp);
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+
+		for (AInt i = 0; i < 6; i++)
 		{
-			for (AInt i = 0; i < 6; i++)
+			AUchar* data = nullptr;
+			if (_data.size() > i && _data[i].size() > 0)
+				data = &_data[i][0];
+
+			if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
 			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[i][0]);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, data);
 			}
-		}
-		else if (_mipMapLevels > 0)
-		{
-			for (AInt i = 0; i < 6; i++)
+			else if (_mipMapLevels > 0)
 			{
 				unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 				unsigned int offset = 0;
@@ -501,8 +523,18 @@ bool AnimaTexture::Load()
 					height /= 2;
 				}
 			}
+			else
+			{
+				return false;
+			}
+
+			if (glGetError() != GL_NO_ERROR)
+				return false;
 		}
 	}
+
+	if (glGetError() != GL_NO_ERROR)
+		return false;
 	
 	if (_generateMipMaps || (_mipMapLevels == 0  && (filter == GL_NEAREST_MIPMAP_NEAREST || filter == GL_NEAREST_MIPMAP_LINEAR || filter == GL_LINEAR_MIPMAP_NEAREST || filter == GL_LINEAR_MIPMAP_LINEAR)))
 	{
@@ -568,7 +600,7 @@ bool AnimaTexture::LoadRenderTargets()
 		glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	}
 		
-	glFramebufferTexture2D(GL_FRAMEBUFFER, _attachment, _textureTarget, _textureID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, _attachment, TargetToPlatform(_textureTarget), _textureID, 0);
 	
 	if (_frameBuffer == 0)
 		return false;
@@ -646,8 +678,12 @@ bool AnimaTexture::ResizeTexture()
 
 	if (_textureTarget == TEXTURE_2D)
 	{
-		if (_mipMapLevels == 0)
-			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, &_data[0][0]);
+		AUchar* data = nullptr;
+		if (_data.size() > 0 && _data[0].size() > 0)
+			data = &_data[0][0];
+
+		if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
+			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, data);
 		else if (_mipMapLevels > 0)
 		{
 			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
@@ -660,7 +696,8 @@ bool AnimaTexture::ResizeTexture()
 			{
 				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
 
-				glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
+				//glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
+				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, data + offset);
 
 				offset += size;
 				width /= 2;
@@ -669,8 +706,41 @@ bool AnimaTexture::ResizeTexture()
 		}
 		else
 		{
-			glBindTexture(target, 0);
 			return false;
+		}
+	}
+	else if (_textureTarget == TEXTURE_CUBE)
+	{
+		for (AInt i = 0; i < 6; i++)
+		{
+			AUchar* data = nullptr;
+			if (_data.size() > i && _data[i].size() > 0)
+				data = &_data[i][0];
+
+			if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, data);
+			}
+			else if (_mipMapLevels > 0)
+			{
+				unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+				unsigned int offset = 0;
+
+				AUint width = _width;
+				AUint height = _height;
+
+				for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+				{
+					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+
+					//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, internalFormat, width, height, 0, format, _dataType, &_data[i][0] + offset);
+
+					offset += size;
+					width /= 2;
+					height /= 2;
+				}
+			}
 		}
 	}
 
@@ -789,7 +859,7 @@ AUint AnimaTexture::FormatToPlatform(const AnimaTextureFormat& format)
 	case Anima::AnimaTextureFormat::RGBA_INT:	return GL_RGBA_INTEGER; break;
 	case Anima::AnimaTextureFormat::BGR_INT:	return GL_BGR_INTEGER; break;
 	case Anima::AnimaTextureFormat::BGRA_INT:	return GL_BGRA_INTEGER; break;
-	case Anima::AnimaTextureFormat::DEPTH:		return GL_DEPTH; break;
+	case Anima::AnimaTextureFormat::DEPTH:		return GL_DEPTH_COMPONENT; break;
 	default:									return GL_NONE;
 	}
 }

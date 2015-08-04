@@ -52,6 +52,135 @@ void AnimaMeshCreator::MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator)
 	AnimaAllocatorNamespace::DeallocateArray(*allocator, facce);
 }
 
+void AnimaMeshCreator::MakeCube(AnimaMesh* mesh, AnimaAllocator* allocator)
+{
+	mesh->ClearAll();
+
+	AnimaArray<AnimaVertex3f> vertici;
+	AnimaArray<AnimaVertex3f> normali;
+	AnimaArray<AnimaVertex2f> textCoords;
+	AnimaArray<AnimaFace> facce;
+
+	// Faccia dietro
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f,  1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f, -1.0f));
+
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
+	
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(2, 1, 0));
+	facce.push_back(AnimaFace(3, 2, 0));
+
+	// Faccia davanti
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, 1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f,  1.0f, 1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f, 1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f, 1.0f));
+
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, 1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, 1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, 1.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 0.0f, 1.0f));
+
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(4, 5, 6));
+	facce.push_back(AnimaFace(4, 6, 7));
+
+	// Faccia destra
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f,  1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f,  1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f,  1.0f));
+
+	normali.push_back(AnimaVertex3f(1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(1.0f, 0.0f, 0.0f));
+
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(8, 9, 10));
+	facce.push_back(AnimaFace(8, 10, 11));
+
+	// Faccia sinistra
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f, -1.0f));
+
+	normali.push_back(AnimaVertex3f(-1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(-1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(-1.0f, 0.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(-1.0f, 0.0f, 0.0f));
+
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(12, 13, 14));
+	facce.push_back(AnimaFace(12, 14, 15));
+
+	// Faccia sopra
+	vertici.push_back(AnimaVertex3f( 1.0f, 1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f, 1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, 1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, 1.0f,  1.0f));
+
+	normali.push_back(AnimaVertex3f(0.0f, 1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, 1.0f, 0.0f));
+
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(16, 17, 18));
+	facce.push_back(AnimaFace(16, 18, 19));
+
+	// Faccia sotto
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f,  1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f, -1.0f));
+
+	normali.push_back(AnimaVertex3f(0.0f, -1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, -1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, -1.0f, 0.0f));
+	normali.push_back(AnimaVertex3f(0.0f, -1.0f, 0.0f));
+
+	textCoords.push_back(AnimaVertex2f(1.0f, 0.0f));
+	textCoords.push_back(AnimaVertex2f(1.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
+	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
+
+	facce.push_back(AnimaFace(20, 21, 22));
+	facce.push_back(AnimaFace(20, 22, 23));
+
+	mesh->SetVertices(vertici);
+	mesh->SetNormals(normali);
+	mesh->SetTextureCoords(textCoords);
+	mesh->SetFaces(facce);
+}
+
 void AnimaMeshCreator::MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator)
 {
 	mesh->ClearAll();

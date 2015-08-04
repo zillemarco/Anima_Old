@@ -30,6 +30,7 @@ class ANIMA_ENGINE_EXPORT AnimaMeshCreator
 {
 public:
 	static void MakePlane(AnimaMesh* mesh, AnimaAllocator* allocator);
+	static void MakeCube(AnimaMesh* mesh, AnimaAllocator* allocator);
 	static void MakeCylinder(AnimaMesh* mesh, AFloat topRadius, AFloat bottomRadius, AFloat height, AUint radialSegments, AUint heightSegments, bool openEnded, AnimaAllocator* allocator);
 	static void MakeIcosahedralSphere(AnimaMesh* mesh, AUint recursionLevel, AnimaAllocator* allocator);
 		

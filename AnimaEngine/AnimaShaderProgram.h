@@ -135,6 +135,7 @@ public:
 	void SetUniform(AInt location, const AnimaMatrix& value, bool transpose = false);
 
 	void AddShaderData(AnimaShaderData& data);
+	AnimaShaderData* GetShaderData(const AnimaString& name);
 
 private:
 	void ClearUniforms();
@@ -146,7 +147,7 @@ private:
 
 	AnimaShadersManager* _shadersManager;
 
-	AnimaArray<AnimaShaderData> _data;
+	AnimaMappedArray<AnimaShaderData> _data;
 
 	AInt			_id;
 	bool			_linked;

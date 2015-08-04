@@ -6,6 +6,7 @@
 	</Shaders>
 	<Datas>
 		<Data name="MOD_AModelMatrix" type="MATRIX4x4" />
+		<Data name="REN_GB_PrepassBuffer_AlbedoMap" type="TEXTURE2D" />
 		<Data name="REN_GB_PrepassBuffer_DepthMap" type="TEXTURE2D" />
 		<Data name="REN_GB_PrepassBuffer_NormalMap" type="TEXTURE2D" />
 		<Data name="REN_GB_PrepassBuffer_SpecularMap" type="TEXTURE2D" />

@@ -197,7 +197,7 @@ bool AnimaGBuffer::Create()
 			glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 		}
 	
-		glFramebufferTexture2D(GL_FRAMEBUFFER, data->_attachment, data->_texture->GetTextureTarget(), data->_texture->GetID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, data->_attachment, AnimaTexture::TargetToPlatform(data->_texture->GetTextureTarget()), data->_texture->GetID(), 0);
 	}
 	
 	if (_frameBuffer == 0)

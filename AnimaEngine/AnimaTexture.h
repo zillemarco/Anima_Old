@@ -17,7 +17,7 @@ enum AnimaTextureCubeIndex
 
 enum AnimaTextureTarget
 {
-	TEXTURE_2D = 0, TEXTURE_3D, TEXTURE_CUBE
+	TARGET_NONE = 0, TEXTURE_2D, TEXTURE_3D, TEXTURE_CUBE
 };
 
 enum AnimaTextureFormat

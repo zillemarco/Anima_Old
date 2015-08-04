@@ -753,6 +753,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 			texture->SetHeight(height);
 			texture->SetFilter(LINEAR);
 			texture->SetClamp(TO_EDGE);
+			texture->SetTextureTarget(target);
 
 			texture->SetData(data, dataSize);
 		}

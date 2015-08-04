@@ -176,10 +176,10 @@ public:
 		Set(index, newElement);
 	}
 
-	AInt Contains(TYPE element)
-	{
-		return _array.Contains(element);
-	}
+	//AInt Contains(TYPE element)
+	//{
+	//	return _array.Contains(element);
+	//}
 
 	AInt Contains(const AnimaString& name) const
 	{

@@ -37,6 +37,8 @@ public:
 public:
 	bool LoadMeshesFromModel(const aiScene* scene, const AnimaString& modelName/*, AnimaArray<AnimaString>* materialNamesMap*/);
 
+	AnimaMesh* CreateMesh(const AnimaString& name);
+
 	AnimaArray<AnimaString>* GetLastMeshesIndexMap();
 	AnimaMappedArray<AnimaMeshBoneInfo*>* GetLastMeshesBonesInfo();
 	void ClearLastMeshesIndexMap();
@@ -56,9 +58,6 @@ public:
 
 protected:
 	void ClearMeshes();
-
-protected:
-	AnimaMesh* CreateEmptyMesh(const AnimaString& name);
 
 private:
 	AnimaScene* _scene;

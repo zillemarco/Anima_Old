@@ -200,6 +200,7 @@ void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer
 	case Anima::BOOL_ARRAY:
 		break;
 	case Anima::TEXTURE2D:
+	case Anima::TEXTURECUBE:
 		UpdateValue(object->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
 		break;
 	case Anima::TEXTURE2D_ARRAY:
@@ -262,6 +263,7 @@ void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
 	case Anima::BOOL_ARRAY:
 		break;
 	case Anima::TEXTURE2D:
+	case Anima::TEXTURECUBE:
 	{
 		if (_nameParts.size() == 4 && _nameParts[1] == GBUFFER_PREFIX)
 		{

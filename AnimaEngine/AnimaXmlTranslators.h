@@ -472,6 +472,8 @@ struct AnimaXmlShaderDataTypeTranslator
 			else if (iequals(str, "BOOL_ARRAY"))		return Anima::AnimaShaderDataType::BOOL_ARRAY;
 			else if (iequals(str, "TEXTURE2D"))			return Anima::AnimaShaderDataType::TEXTURE2D;
 			else if (iequals(str, "TEXTURE2D_ARRAY"))	return Anima::AnimaShaderDataType::TEXTURE2D_ARRAY;
+			else if (iequals(str, "TEXTURECUBE"))		return Anima::AnimaShaderDataType::TEXTURECUBE;
+			else if (iequals(str, "TEXTURECUBE_ARRAY"))	return Anima::AnimaShaderDataType::TEXTURECUBE_ARRAY;
 			else if (iequals(str, "TEXTURE3D"))			return Anima::AnimaShaderDataType::TEXTURE3D;
 			else if (iequals(str, "TEXTURE3D_ARRAY"))	return Anima::AnimaShaderDataType::TEXTURE3D_ARRAY;
 
@@ -503,6 +505,8 @@ struct AnimaXmlShaderDataTypeTranslator
 		case Anima::AnimaShaderDataType::BOOL_ARRAY:		return Anima::AnimaString("BOOL_ARRAY"); break;
 		case Anima::AnimaShaderDataType::TEXTURE2D:			return Anima::AnimaString("TEXTURE2D"); break;
 		case Anima::AnimaShaderDataType::TEXTURE2D_ARRAY:	return Anima::AnimaString("TEXTURE2D_ARRAY"); break;
+		case Anima::AnimaShaderDataType::TEXTURECUBE:		return Anima::AnimaString("TEXTURECUBE"); break;
+		case Anima::AnimaShaderDataType::TEXTURECUBE_ARRAY:	return Anima::AnimaString("TEXTURECUBE_ARRAY"); break;
 		case Anima::AnimaShaderDataType::TEXTURE3D:			return Anima::AnimaString("TEXTURE3D"); break;
 		case Anima::AnimaShaderDataType::TEXTURE3D_ARRAY:	return Anima::AnimaString("TEXTURE3D_ARRAY"); break;
 		}

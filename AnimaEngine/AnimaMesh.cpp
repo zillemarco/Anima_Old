@@ -1416,6 +1416,25 @@ void AnimaMesh::ComputeFlatNormals()
 	}
 }
 
+void AnimaMesh::FlipNormals()
+{
+	for (AInt i = 0; i < _normals.size(); i++)
+		_normals[i] = -_normals[i];
+}
+
+void AnimaMesh::FlipFaces()
+{
+	for (AInt i = 0; i < _faces.size(); i++)
+	{
+		AnimaFace* face = &_faces[i];
+		AUint a = face->GetIndex(0);
+		AUint b = face->GetIndex(1);
+		AUint c = face->GetIndex(2);
+
+		face->SetIndexes(c, b, a);
+	}
+}
+
 AInt AnimaMesh::GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const
 {
 	AInt facesCount = _faces.size();
@@ -1461,6 +1480,11 @@ AnimaString AnimaMesh::GetShaderProgramName() const
 void AnimaMesh::MakePlane()
 {
 	AnimaMeshCreator::MakePlane(this, _allocator);
+}
+
+void AnimaMesh::MakeCube()
+{
+	AnimaMeshCreator::MakeCube(this, _allocator);
 }
 
 void AnimaMesh::MakeIcosahedralSphere(AInt recursionLevel)

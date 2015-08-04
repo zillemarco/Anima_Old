@@ -15,6 +15,7 @@
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
 #include "AnimaScene.h"
+#include "AnimaMeshCreator.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -58,7 +59,7 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 
-	_lightsMeshMap = src._lightsMeshMap;
+	_meshesMap = src._meshesMap;
 
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
@@ -84,7 +85,7 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 
-	_lightsMeshMap = src._lightsMeshMap;
+	_meshesMap = src._meshesMap;
 
 	_indexesBufferObject = src._indexesBufferObject;
 	_verticesBufferObject = src._verticesBufferObject;
@@ -119,7 +120,7 @@ AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
 
-		_lightsMeshMap = src._lightsMeshMap;
+		_meshesMap = src._meshesMap;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -152,7 +153,7 @@ AnimaRenderer& AnimaRenderer::operator=(AnimaRenderer&& src)
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
 
-		_lightsMeshMap = src._lightsMeshMap;
+		_meshesMap = src._meshesMap;
 
 		_indexesBufferObject = src._indexesBufferObject;
 		_verticesBufferObject = src._verticesBufferObject;
@@ -181,6 +182,7 @@ void AnimaRenderer::InitTextureSlots()
 	SetTextureSlot("EmissiveMap", 3);
 	SetTextureSlot("SpecularMap", 4);
 	SetTextureSlot("ShadowMap", 5);
+	SetTextureSlot("SkyBox", 6);
 
 	// Slot usati dal disegno di primitive
 	SetTextureSlot("DepthMap", 0);
@@ -306,7 +308,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterCamera);
 		_filterCamera = nullptr;
 	}
-	
+
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
@@ -324,6 +326,12 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
+
+	AnimaString nameSkyMesh = "skybox_RENMESH";
+	AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
+	skyMesh->MakeCube();
+	skyMesh->GetTransformation()->Scale(20.0f, 20.0f, 20.0f);
+	_meshesMap[nameSkyMesh] = skyMesh;
 
 	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();
 	ptlMesh->MakeIcosahedralSphere(3);
@@ -790,9 +798,9 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 			continue;
 		
 		AnimaString type = typeid((*lightsArray->at(0))).name();
-		auto lightMeshPair = renderer->_lightsMeshMap.find(type);
+		auto lightMeshPair = renderer->_meshesMap.find(type);
 
-		ANIMA_ASSERT(lightMeshPair != renderer->_lightsMeshMap.end());
+		ANIMA_ASSERT(lightMeshPair != renderer->_meshesMap.end());
 		ANIMA_ASSERT(lightsArray->at(0)->CreateShader(renderer->_scene->GetShadersManager()));
 		AnimaShaderProgram* program = renderer->_scene->GetShadersManager()->GetProgramFromName(lightsArray->at(0)->GetShaderName());
 		AnimaMesh* mesh = lightMeshPair->second;
@@ -848,21 +856,56 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 
-	AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
-	AnimaShaderProgram* program = shadersManager->GetProgramFromName("deferred-combine");
-
-	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	AnimaTexture* skyTexture = renderer->GetTexture("SkyBox");
+	if (skyTexture != nullptr)
 	{
-		program->Use();
-		program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
+		AnimaMesh* skyMesh = renderer->_meshesMap["skybox_RENMESH"];
+		if (skyMesh != nullptr)
+		{
+			AnimaShaderProgram* skyProgram = shadersManager->GetProgramFromName("skybox");
+			AnimaCamera* camera = renderer->_scene->GetCamerasManager()->GetActiveCamera();
+
+			skyProgram->Use();
+			skyProgram->UpdateSceneObjectProperties(camera, renderer);
+			
+			if (skyMesh->NeedsBuffersUpdate())
+				skyMesh->UpdateBuffers();
+
+			skyMesh->GetTransformation()->SetTranslation(camera->GetPosition());
+
+			skyProgram->UpdateRenderingManagerProperies(renderer);
+
+			GLint OldCullFaceMode;
+			glGetIntegerv(GL_CULL_FACE_MODE, &OldCullFaceMode);
+			GLint OldDepthFuncMode;
+			glGetIntegerv(GL_DEPTH_FUNC, &OldDepthFuncMode);
+			
+			glCullFace(GL_FRONT);
+			glDepthFunc(GL_LEQUAL);
+
+			skyMesh->Draw(renderer, skyProgram, true);
+
+			glCullFace(OldCullFaceMode);
+			glDepthFunc(OldDepthFuncMode);
+		}
 	}
+	else
+	{
+		AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
+		AnimaShaderProgram* program = shadersManager->GetProgramFromName("deferred-combine");
 
-	if (renderer->_filterMesh->NeedsBuffersUpdate())
-		renderer->_filterMesh->UpdateBuffers();
+		if (activeProgram == nullptr || (*activeProgram) != (*program))
+		{
+			program->Use();
+			program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
+		}
 
-	program->UpdateRenderingManagerProperies(renderer);
+		if (renderer->_filterMesh->NeedsBuffersUpdate())
+			renderer->_filterMesh->UpdateBuffers();
 
-	renderer->_filterMesh->Draw(renderer, program, false);
+		program->UpdateRenderingManagerProperies(renderer);
+		renderer->_filterMesh->Draw(renderer, program, false);
+	}
 
 	renderer->Finish();
 }
@@ -1298,7 +1341,7 @@ void AnimaRenderer::Clear()
 		_filterMesh = nullptr;
 	}
 	
-	for (auto& pair : _lightsMeshMap)
+	for (auto& pair : _meshesMap)
 	{
 		if (pair.second != nullptr)
 		{
@@ -1337,7 +1380,7 @@ void AnimaRenderer::Clear()
 	_integersMap.clear();
 	_booleansMap.clear();
 
-	_lightsMeshMap.clear();
+	_meshesMap.clear();
 	
 	ClearPrimitives();
 

@@ -77,6 +77,7 @@ public:
 	void ClearAll();
 
 	void MakePlane();
+	void MakeCube();
 	void MakeIcosahedralSphere(AInt recursionLevel = 0);
 	void MakeCylinder(AFloat topRadius = 1.0f, AFloat bottomRadius = 1.0f, AFloat height = 1.0f, AUint radialSegments = 8, AUint heightSegments = 1, bool openEnded = false);
 	
@@ -113,6 +114,7 @@ public:
 	void ClearNormals();
 	void ComputeSmootNormals();
 	void ComputeFlatNormals();
+	void FlipNormals();
 
 	void SetTextureCoords(const AnimaArray<AnimaVertex2f>& textureCoords);
 	void SetTextureCoords(AnimaVertex2f* v, AInt n);
@@ -167,6 +169,7 @@ public:
 	AnimaFace* GetPFace(AInt index);
 	AnimaArray<AnimaFace>* GetFaces();
 	void ClearFaces();
+	void FlipFaces();
 	
 	bool CreateBuffers();
 	void UpdateBuffers();

@@ -53,7 +53,7 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			else
 				meshName = FormatString("%s.mesh%d", modelName.c_str(), i);
 
-			newMesh = CreateEmptyMesh(meshName);
+			newMesh = CreateMesh(meshName);
 			nameOffset++;
 		}
 
@@ -224,7 +224,7 @@ AnimaMappedArray<AnimaMeshBoneInfo*>* AnimaMeshesManager::GetLastMeshesBonesInfo
 	return &_lastMeshesBonesInfo;
 }
 
-AnimaMesh* AnimaMeshesManager::CreateEmptyMesh(const AnimaString& name)
+AnimaMesh* AnimaMeshesManager::CreateMesh(const AnimaString& name)
 {
 	AInt index = _meshes.Contains(name);
 	if (index >= 0)
@@ -307,7 +307,7 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 
 	AnimaString name = pt.get<AnimaString>("AnimaMesh.<xmlattr>.name");
 
-	mesh = CreateEmptyMesh(name);
+	mesh = CreateMesh(name);
 
 	if (mesh)
 	{

@@ -436,7 +436,7 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 				else if (propType.compare("texture") == 0)
 				{
 					AnimaTexture* texture = _texturesManager->LoadTextureFromXml(prop.second);
-					material->SetBoolean(propName.c_str(), prop.second.get<bool>("<xmlattr>.value"));
+					material->SetTexture(propName.c_str(), texture);
 				}
 			}
 		}

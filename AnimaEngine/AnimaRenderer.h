@@ -121,7 +121,6 @@ protected:
 	template<class T> AnimaMesh* CreateMeshForLightType();
 
 	void SetTextureSlot(AnimaString slotName, AUint value);	
-	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);	
 	void SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent = true);
 
 	void SetColor(AnimaString propertyName, AnimaColor3f value);
@@ -141,7 +140,8 @@ protected:
 	void SetInteger(AnimaString propertyName, AInt value);
 
 public:
-	AUint GetTextureSlot(const AnimaString& slotName);	
+	AUint GetTextureSlot(const AnimaString& slotName);
+	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);
 	AnimaTexture* GetTexture(AnimaString propertyName);
 	AnimaGBuffer* GetGBuffer(const AnimaString& gBufferName);
 
@@ -191,7 +191,7 @@ protected:
 	boost::unordered_map<AnimaString, AInt, AnimaStringHasher>	_integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaStringHasher>	_booleansMap;
 
-	boost::unordered_map<AnimaString, AnimaMesh*, AnimaStringHasher>	_lightsMeshMap;
+	boost::unordered_map<AnimaString, AnimaMesh*, AnimaStringHasher>	_meshesMap;
 #pragma warning (default: 4251)
 };
 
@@ -200,14 +200,14 @@ AnimaMesh* AnimaRenderer::CreateMeshForLightType()
 {
 	AnimaString type = typeid(T).name();
 
-	auto pair = _lightsMeshMap.find(type);
-	if (pair != _lightsMeshMap.end())
+	auto pair = _meshesMap.find(type);
+	if (pair != _meshesMap.end())
 		return pair->second;
 
-	AnimaString name = type + "_RENMESH";
+	AnimaString name = type + "_LIGHT_RENMESH";
 
 	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
-	_lightsMeshMap[type] = lightMesh;
+	_meshesMap[type] = lightMesh;
 
 	return lightMesh;
 }

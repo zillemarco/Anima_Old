@@ -300,8 +300,8 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 
 //#if !defined _DEBUG
 //	Anima::AnimaString inputString;
@@ -357,11 +357,17 @@ bool InitEngine()
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
 	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
+	//Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material.asp");
 	if (!prepareProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
+	//Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light.asp");
 	if (!directionalLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
+	if (!skyboxProgram->Link())
 		return false;
 
 	Anima::AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
@@ -377,39 +383,10 @@ bool InitEngine()
 		return false;
 
 	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
+	//Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine.asp");
 	if (!combineProgram->Link())
 		return false;
-
-	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
-
-	unsigned char *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
-	unsigned int dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
-	unsigned int width, height;
-	Anima::AnimaTextureFormat format;
-
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negx.tga", &dataPX, dataSizePX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posx.tga", &dataNX, dataSizeNX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negy.tga", &dataPY, dataSizePY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posy.tga", &dataNY, dataSizeNY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negz.tga", &dataPZ, dataSizePZ, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
-
-	Anima::AnimaTexture* texture = texturesManager->CreateTexture("cube-map");
-	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
-	texture->SetData(dataPX, dataSizePX, Anima::POSITIVE_X);
-	texture->SetData(dataNX, dataSizeNX, Anima::NEGATIVE_X);
-	texture->SetData(dataPY, dataSizePY, Anima::POSITIVE_Y);
-	texture->SetData(dataNY, dataSizeNY, Anima::NEGATIVE_Y);
-	texture->SetData(dataPZ, dataSizePZ, Anima::POSITIVE_Z);
-	texture->SetData(dataNZ, dataSizeNZ, Anima::NEGATIVE_Z);
-
-	free(dataPX);
-	free(dataNX);
-	free(dataPY);
-	free(dataNY);
-	free(dataPZ);
-	free(dataNZ);
-
+	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	materialsManager->LoadMaterials(materialsPath);
@@ -423,9 +400,9 @@ bool InitEngine()
 	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
-
-	//_model->GetTransformation()->RotateXDeg(-90.0);
-	_model->GetTransformation()->RotateYDeg(180.0);
+	
+	_model->GetTransformation()->RotateXDeg(-90.0);
+	//_model->GetTransformation()->RotateYDeg(180.0);
 	
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
@@ -459,13 +436,54 @@ bool InitEngine()
 	light->SetColor(1.0, 1.0, 1.0);
 	light->SetIntensity(0.8);
 	
-	_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
+	//_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
+	_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
 
 	_animationsManager = _scene->GetAnimationsManager();
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 
 	_timer.Reset();
+
+	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+
+	unsigned char *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
+	unsigned int dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
+	unsigned int width, height;
+	Anima::AnimaTextureFormat format;
+
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negx.tga", &dataPX, dataSizePX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posx.tga", &dataNX, dataSizeNX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negy.tga", &dataPY, dataSizePY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posy.tga", &dataNY, dataSizeNY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negz.tga", &dataPZ, dataSizePZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
+
+	Anima::AnimaTexture* texture = texturesManager->CreateTexture("skybox-map");
+	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
+	texture->SetData(dataPX, dataSizePX, Anima::POSITIVE_X);
+	texture->SetData(dataNX, dataSizeNX, Anima::NEGATIVE_X);
+	texture->SetData(dataPY, dataSizePY, Anima::POSITIVE_Y);
+	texture->SetData(dataNY, dataSizeNY, Anima::NEGATIVE_Y);
+	texture->SetData(dataPZ, dataSizePZ, Anima::POSITIVE_Z);
+	texture->SetData(dataNZ, dataSizeNZ, Anima::NEGATIVE_Z);
+
+	texture->SetInternalFormat(Anima::IF_RGB);
+	texture->SetDataType(GL_UNSIGNED_BYTE);
+	texture->SetWidth(width);
+	texture->SetHeight(height);
+	texture->SetFilter(Anima::LINEAR);
+	texture->SetClamp(Anima::TO_EDGE);
+	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
+
+	free(dataPX);
+	free(dataNX);
+	free(dataPY);
+	free(dataNY);
+	free(dataPZ);
+	free(dataNZ);
+
+	_renderer->SetTexture("SkyBox", texture, false);
 
 	return true;
 }
@@ -491,10 +509,6 @@ void UpdateFrame()
 	if (_gc)
 	{
 		_gc->MakeCurrent();
-
-		Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-		Anima::AnimaMaterial* defaultMtl = materialsManager->GetDefaultMaterial();
-		bool b1 = defaultMtl->HasColor("DiffuseColor");
 
 		_renderer->Start(_scene);
 		_renderer->Render();

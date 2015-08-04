@@ -10,7 +10,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 #	define UPD_ERROR ANIMA_ASSERT(false)
 #endif
 
-//#define NEW_DATA_MODE
+#define NEW_DATA_MODE
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* allocator, AnimaShadersManager* shadersManager)
 	: AnimaNamedObject(name, allocator)
@@ -889,10 +889,13 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 
 #if defined NEW_DATA_MODE
 
-	for(auto& data : _data)
+	//for(auto& data : _data)
+	AInt count = _data.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		if(data.GetPrefix() == prefix)
-			data.UpdateValue(object, renderingManager);
+		AnimaShaderData* data = &_data[i];
+		if(data->GetPrefix() == prefix)
+			data->UpdateValue(object, renderingManager);
 	}
 
 #else
@@ -1035,10 +1038,12 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 
 #if defined NEW_DATA_MODE
 
-	for(auto& data : _data)
+	AInt count = _data.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		if(data.GetPrefix() == prefix)
-			data.UpdateValue(renderingManager);
+		AnimaShaderData* data = &_data[i];
+		if(data->GetPrefix() == prefix)
+			data->UpdateValue(renderingManager);
 	}
 #else
 	for (auto& pair : _uniforms)
@@ -1111,7 +1116,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 
 void AnimaShaderProgram::UpdateDataLookup()
 {
-	AInt count = _data.size();
+	AInt count = _data.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		_data[i].FindLocation(this);
@@ -1120,7 +1125,12 @@ void AnimaShaderProgram::UpdateDataLookup()
 
 void AnimaShaderProgram::AddShaderData(AnimaShaderData& data)
 {
-	_data.push_back(data);
+	_data.Add(data.GetName(), data);
+}
+
+AnimaShaderData* AnimaShaderProgram::GetShaderData(const AnimaString& name)
+{
+	return &_data[name];
 }
 
 END_ANIMA_ENGINE_NAMESPACE
