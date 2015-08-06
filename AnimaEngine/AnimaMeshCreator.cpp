@@ -62,10 +62,10 @@ void AnimaMeshCreator::MakeCube(AnimaMesh* mesh, AnimaAllocator* allocator)
 	AnimaArray<AnimaFace> facce;
 
 	// Faccia dietro
-	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, -1.0f));
 	vertici.push_back(AnimaVertex3f( 1.0f,  1.0f, -1.0f));
-	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, -1.0f));
 	vertici.push_back(AnimaVertex3f(-1.0f, -1.0f, -1.0f));
+	vertici.push_back(AnimaVertex3f(-1.0f,  1.0f, -1.0f));
 
 	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
 	normali.push_back(AnimaVertex3f(0.0f, 0.0f, -1.0f));
@@ -77,8 +77,8 @@ void AnimaMeshCreator::MakeCube(AnimaMesh* mesh, AnimaAllocator* allocator)
 	textCoords.push_back(AnimaVertex2f(0.0f, 1.0f));
 	textCoords.push_back(AnimaVertex2f(0.0f, 0.0f));
 
-	facce.push_back(AnimaFace(2, 1, 0));
-	facce.push_back(AnimaFace(3, 2, 0));
+	facce.push_back(AnimaFace(0, 1, 2));
+	facce.push_back(AnimaFace(0, 2, 3));
 
 	// Faccia davanti
 	vertici.push_back(AnimaVertex3f( 1.0f, -1.0f, 1.0f));

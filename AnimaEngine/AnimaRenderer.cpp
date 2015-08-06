@@ -183,6 +183,7 @@ void AnimaRenderer::InitTextureSlots()
 	SetTextureSlot("SpecularMap", 4);
 	SetTextureSlot("ShadowMap", 5);
 	SetTextureSlot("SkyBox", 6);
+	SetTextureSlot("EnvironmentMap", 6);
 
 	// Slot usati dal disegno di primitive
 	SetTextureSlot("DepthMap", 0);
@@ -330,7 +331,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	AnimaString nameSkyMesh = "skybox_RENMESH";
 	AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
 	skyMesh->MakeCube();
-	skyMesh->GetTransformation()->Scale(20.0f, 20.0f, 20.0f);
+	skyMesh->GetTransformation()->RotateZDeg(180.0f);
 	_meshesMap[nameSkyMesh] = skyMesh;
 
 	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();

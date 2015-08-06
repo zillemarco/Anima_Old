@@ -149,38 +149,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				_pbrMaterial->SetFloat("Roughness", val);
 				break;
 			}
-			//case 'o':
-			//case 'O':
-			//{
-			//	float val = _pbrMaterial->GetFloat("Roughness");
-			//	val = max(0.0f, val - inc);
-			//	_pbrMaterial->SetFloat("Roughness", val);
-			//	break;
-			////}
-			//case 'p':
-			//case 'P':
-			//{
-			//	float val = _pbrMaterial->GetFloat("Roughness");
-			//	val = min(1.0f, val + inc);
-			//	_pbrMaterial->SetFloat("Roughness", val);
-			//	break;
-			//}
-			//case 'k':
-			//case 'K':
-			//{
-			//	float val = _pbrMaterial->GetFloat("Metallic");
-			//	val = max(0.0f, val - inc);
-			//	_pbrMaterial->SetFloat("Metallic", val);
-			//	break;
-			//}
-			//case 'l':
-			//case 'L':
-			//{
-			//	float val = _pbrMaterial->GetFloat("Metallic");
-			//	val = min(1.0f, val + inc);
-			//	_pbrMaterial->SetFloat("Metallic", val);
-			//	break;
-			//}
+			case '*':
+			{
+				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
+				val = min(1.0f, val + inc);
+				_pbrMaterial->SetFloat("ReflectionIntensity", val);
+				break;
+			}
+			case '/':
+			{
+				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
+				val = max(0.0f, val - inc);
+				_pbrMaterial->SetFloat("ReflectionIntensity", val);
+				break;
+			}
 			}
 		}
 
@@ -300,8 +282,8 @@ bool InitEngine()
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 
 //#if !defined _DEBUG
 //	Anima::AnimaString inputString;
@@ -397,13 +379,19 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
-	if (!_model)
-		return false;
+	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	//if (!_model)
+	//	return false;
 	
-	_model->GetTransformation()->RotateXDeg(-90.0);
+	//_model->GetTransformation()->RotateXDeg(-90.0);
 	//_model->GetTransformation()->RotateYDeg(180.0);
-	
+
+	_model = _scene->GetModelsManager()->CreateModel("ANIMA_ENGINE_DEMO_MODEL_NAME");
+	Anima::AnimaMesh* mesh = _scene->GetMeshesManager()->CreateMesh("mesh");
+	mesh->MakeCube();
+	mesh->SetParentObject(_model);
+	_model->AddMesh(mesh);
+
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
 
@@ -452,12 +440,12 @@ bool InitEngine()
 	unsigned int width, height;
 	Anima::AnimaTextureFormat format;
 
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negx.tga", &dataPX, dataSizePX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posx.tga", &dataNX, dataSizeNX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negy.tga", &dataPY, dataSizePY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posy.tga", &dataNY, dataSizeNY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/negz.tga", &dataPZ, dataSizePZ, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Yokohama Park/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negx.tga", &dataPX, dataSizePX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posx.tga", &dataNX, dataSizeNX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negy.tga", &dataPY, dataSizePY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posy.tga", &dataNY, dataSizeNY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negz.tga", &dataPZ, dataSizePZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
 
 	Anima::AnimaTexture* texture = texturesManager->CreateTexture("skybox-map");
 	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
@@ -475,6 +463,7 @@ bool InitEngine()
 	texture->SetFilter(Anima::LINEAR);
 	texture->SetClamp(Anima::TO_EDGE);
 	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
+	//texture->SetMipMapLevels(5, true);
 
 	free(dataPX);
 	free(dataNX);
@@ -483,7 +472,7 @@ bool InitEngine()
 	free(dataPZ);
 	free(dataNZ);
 
-	_renderer->SetTexture("SkyBox", texture, false);
+	_renderer->SetTexture("EnvironmentMap", texture, false);
 
 	return true;
 }

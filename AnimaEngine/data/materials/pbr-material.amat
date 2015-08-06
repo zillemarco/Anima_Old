@@ -5,6 +5,7 @@
 		<Property name="Specular" type="color" value="1.0;0.765557;0.336057;1.0" />
 		<Property name="Roughness" type="float" value="0.5" />
 		<Property name="Metallic" type="float" value="1.0" />
+		<Property name="ReflectionIntensity" type="float" value="0.02" />
 		<Property name="TwoSided" type="bool" value="false" />
 		<Property name="EnvironmentMap" type="texture">
 			<AnimaTexture>

@@ -11,6 +11,7 @@
 			uniform sampler2D REN_GB_PrepassBuffer_NormalMap;
 			uniform sampler2D REN_GB_PrepassBuffer_SpecularMap;
 			uniform sampler2D REN_GB_PrepassBuffer_AlbedoMap;
+			uniform samplerCube REN_EnvironmentMap;
 			uniform vec2 REN_InverseScreenSize;
 			uniform vec3 CAM_Position;
 			uniform mat4 CAM_ProjectionViewInverseMatrix;
@@ -195,21 +196,29 @@
 				vec3 genPos	= vec3((gl_FragCoord.x * REN_InverseScreenSize.x), (gl_FragCoord.y * REN_InverseScreenSize.y), 0.0f);
 				genPos.z 	= texture(REN_GB_PrepassBuffer_DepthMap, genPos.xy).r;
 
-				vec3 normal 		= normalize(texture(REN_GB_PrepassBuffer_NormalMap, genPos.xy).xyz * 2.0f - 1.0f);
+				vec4 normalData 	= texture(REN_GB_PrepassBuffer_NormalMap, genPos.xy);
 				vec4 specularData 	= texture(REN_GB_PrepassBuffer_SpecularMap, genPos.xy);
 				vec4 albedoData 	= texture(REN_GB_PrepassBuffer_AlbedoMap, genPos.xy);
+				vec3 normal 		= normalize(normalData.xyz * 2.0f - 1.0f);
 				vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 				vec3 pos 			= clip.xyz / clip.w;
 
-				vec3 albedoColor 	= albedoData.xyz;
-				vec3 specularColor 	= specularData.xyz;
-				float roughness		= albedoData.w;
-				float metallic		= specularData.w;
-				vec3 viewDir 		= normalize(pos - CAM_Position);
+				vec3 albedoColor 			= albedoData.xyz;
+				vec3 specularColor 			= specularData.xyz;
+				float roughness				= albedoData.w;
+				float metallic				= specularData.w;
+				vec3 viewDir 				= normalize(pos - CAM_Position);
+				float reflectionIntensity 	= normalData.w;
 				
 				// Colore dell'ambiente
-				vec3 envColor = vec3(1.0, 1.0, 1.0);
-				float reflectionIntensity = 0.01f;
+				vec3 reflectVector = reflect( -viewDir, normal);
+				float mipIndex =  roughness * roughness * 8.0f;
+
+			    //vec3 envColor = textureLod(REN_EnvironmentMap, reflectVector, mipIndex).rgb;
+			    vec3 envColor = texture(REN_EnvironmentMap, reflectVector).rgb;
+			    envColor = pow(envColor.rgb, vec3(2.2f));
+
+			    //vec3 irradiance = IrradianceMap.Sample(LinearSampler, normal);
 
 				vec3 luce = ComputeLight(albedoColor, specularColor, normal, roughness, DIL_Color, -DIL_Direction, viewDir) * DIL_Intensity;
 				vec3 fresnel = Specular_F_Roughness(specularColor, roughness * roughness, normal, viewDir) * envColor * reflectionIntensity;
