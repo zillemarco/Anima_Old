@@ -328,11 +328,11 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
 
-	AnimaString nameSkyMesh = "skybox_RENMESH";
-	AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
-	skyMesh->MakeCube();
-	skyMesh->GetTransformation()->RotateZDeg(180.0f);
-	_meshesMap[nameSkyMesh] = skyMesh;
+	//AnimaString nameSkyMesh = "skybox_RENMESH";
+	//AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
+	//skyMesh->MakeCube();
+	//skyMesh->GetTransformation()->RotateZDeg(180.0f);
+	//_meshesMap[nameSkyMesh] = skyMesh;
 
 	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();
 	ptlMesh->MakeIcosahedralSphere(3);
@@ -379,7 +379,8 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 	SetTexture("FilterMap", src, false);
 	SetVector("TextureSize", AnimaVertex2f((AFloat)src->GetWidth(), (AFloat)src->GetHeight()));
 
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
@@ -849,6 +850,9 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 {
 	AnimaVertex4f backColor = renderer->GetColor4f("BackColor");
 	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
+
+	renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("nullFilter"), renderer->GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
+	return;
 
 	renderer->Start();
 	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");

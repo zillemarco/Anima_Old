@@ -29,7 +29,8 @@
 				vec3 realSpecular = mix(MAT_Specular.rgb, albedoColor, MAT_Metallic);
 				
 				FragColor[1] = vec4(realAlbedo, MAT_Roughness);
-				FragColor[2] = vec4(frag_normal * 0.5 + 0.5, MAT_ReflectionIntensity);
+				//FragColor[2] = vec4(frag_normal * 0.5 + 0.5, MAT_ReflectionIntensity);
+				FragColor[2] = vec4(frag_normal, 1.0);
 				FragColor[3] = vec4(realSpecular, MAT_Metallic);
 			}
 			]]>
