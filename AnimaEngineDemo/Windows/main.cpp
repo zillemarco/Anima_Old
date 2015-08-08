@@ -364,6 +364,10 @@ bool InitEngine()
 	if (!spotLightProgram->Link())
 		return false;
 
+	Anima::AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
+	if (!nullFilterProgram->Link())
+		return false;
+
 	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	//Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine.asp");
 	if (!combineProgram->Link())

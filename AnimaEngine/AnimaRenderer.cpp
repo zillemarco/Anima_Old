@@ -851,8 +851,8 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	AnimaVertex4f backColor = renderer->GetColor4f("BackColor");
 	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 
-	renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("nullFilter"), renderer->GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
-	return;
+	//renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("nullFilter"), renderer->GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
+	//return;
 
 	renderer->Start();
 	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
