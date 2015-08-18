@@ -12,7 +12,7 @@
 			uniform sampler2D REN_GB_PrepassBuffer_SpecularMap;
 			uniform vec2 REN_InverseScreenSize;
 			uniform vec3 CAM_Position;
-			uniform mat4 CAM_ProjectionViewInverseMatrix;
+			uniform mat4 CAM_InverseProjectionViewMatrix;
 
 			uniform vec3 DIL_Direction;
 			uniform vec3 DIL_Color;
@@ -61,7 +61,7 @@
 
 				vec3 normal 		= normalize(texture(REN_GB_PrepassBuffer_NormalMap, genPos.xy).xyz * 2.0f - 1.0f);
 				vec4 speclarData 	= texture(REN_GB_PrepassBuffer_SpecularMap, genPos.xy);
-				vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
+				vec4 clip 			= CAM_InverseProjectionViewMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 				vec3 pos 			= clip.xyz / clip.w;
 
 				vec4 shadowCoord 	= DIL_ProjectionViewMatrix * vec4(pos, 1.0f);

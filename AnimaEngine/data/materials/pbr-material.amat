@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AnimaMaterial name="pbr-material">
 	<Properties>
-		<Property name="Albedo" type="color" value="0.77254;0.77647;0.78431;1.0" />
-		<Property name="Specular" type="color" value="1.0;0.765557;0.336057;1.0" />
+		<Property name="Albedo" type="color" value="0.560;0.570;0.580;1.0" />
+		<Property name="Specular" type="color" value="0.5;0.5;0.5;1.0" />
 		<Property name="Roughness" type="float" value="0.5" />
-		<Property name="Metallic" type="float" value="1.0" />
-		<Property name="ReflectionIntensity" type="float" value="0.02" />
+		<Property name="Metallic" type="float" value="0.0" />
+		<Property name="ReflectionIntensity" type="float" value="0.8" />
 		<Property name="TwoSided" type="bool" value="false" />
-		<Property name="EnvironmentMap" type="texture">
-			<AnimaTexture>
-				<Name>pbrEnvMap</Name>
-				<Target>CUBE</Target>
-				<Format>RGB</Format>
-				<InternalFormat>RGB</InternalFormat>
-				<FilePX>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posx.tga</FilePX>
-				<FileNX>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negx.tga</FileNX>
-				<FilePY>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posy.tga</FilePY>
-				<FileNY>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negy.tga</FileNY>
-				<FilePZ>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/posz.tga</FilePZ>
-				<FileNZ>D:/Git/Anima/AnimaEngine/data/textures/Yokohama Park/negz.tga</FileNZ>
-			</AnimaTexture>
-		</Property>
 	</Properties>
 	<Shaders></Shaders>
 </AnimaShaderPart>

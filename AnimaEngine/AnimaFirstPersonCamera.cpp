@@ -134,7 +134,7 @@ void AnimaFirstPersonCamera::RotateYDeg(AFloat angle)
 
 void AnimaFirstPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& forward)
 {
-	_position = position;
+	SetPosition(position);
 	
 	_zAxis = forward;
 	_zAxis.Normalize();
@@ -166,7 +166,7 @@ void AnimaFirstPersonCamera::CalculateViewMatrix()
 
 	SetMatrix("ViewMatrix", _viewMatrix);
 	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

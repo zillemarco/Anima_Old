@@ -14,7 +14,7 @@
 			uniform samplerCube REN_EnvironmentMap;
 			uniform vec2 REN_InverseScreenSize;
 			uniform vec3 CAM_Position;
-			uniform mat4 CAM_ProjectionViewInverseMatrix;
+			uniform mat4 CAM_InverseProjectionViewMatrix;
 
 			uniform vec3 DIL_Direction;
 			uniform vec3 DIL_Color;
@@ -139,24 +139,24 @@
 
 			float Specular_D(float a, float NdH)
 			{
-				return NormalDistribution_BlinnPhong(a, NdH);
+				//return NormalDistribution_BlinnPhong(a, NdH);
 				//return NormalDistribution_Beckmann(a, NdH);
-				//return NormalDistribution_GGX(a, NdH);
+				return NormalDistribution_GGX(a, NdH);
 			}
 
 			vec3 Specular_F(vec3 specularColor, vec3 h, vec3 v)
 			{
 				//return Fresnel_None(specularColor);
-				//return Fresnel_Schlick(specularColor, h, v);
-				return Fresnel_CookTorrance(specularColor, h, v);
+				return Fresnel_Schlick(specularColor, h, v);
+				//return Fresnel_CookTorrance(specularColor, h, v);
 			}
 
 			vec3 Specular_F_Roughness(vec3 specularColor, float a, vec3 h, vec3 v)
 			{
 				// Sclick using roughness to attenuate fresnel.
-				//return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * pow((1 - clamp(dot(v, h), 0.0f, 1.0f)), 5));
+				return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * pow((1 - clamp(dot(v, h), 0.0f, 1.0f)), 5));
 				//return Fresnel_None(specularColor);
-				return Fresnel_CookTorrance(specularColor, h, v);
+				//return Fresnel_CookTorrance(specularColor, h, v);
 			}
 
 			float Specular_G(float a, float NdV, float NdL, float NdH, float VdH, float LdV)
@@ -183,7 +183,7 @@
 				float NdH = clamp(dot(normal, h), 0.0, 1.0);
 				float VdH = clamp(dot(viewDir, h), 0.0, 1.0);
 				float LdV = clamp(dot(lightDir, viewDir), 0.0, 1.0);
-				float a = max(0.001f, roughness * roughness);
+				float a = roughness * roughness;
 
 				vec3 cDiff = Diffuse(albedoColor);
 				vec3 cSpec = Specular(specularColor, h, viewDir, lightDir, a, NdL, NdV, NdH, VdH, LdV);
@@ -200,18 +200,18 @@
 				vec4 specularData 	= texture(REN_GB_PrepassBuffer_SpecularMap, genPos.xy);
 				vec4 albedoData 	= texture(REN_GB_PrepassBuffer_AlbedoMap, genPos.xy);
 				vec3 normal 		= normalize(normalData.xyz * 2.0f - 1.0f);
-				vec4 clip 			= CAM_ProjectionViewInverseMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
+				vec4 clip 			= CAM_InverseProjectionViewMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 				vec3 pos 			= clip.xyz / clip.w;
 
 				vec3 albedoColor 			= albedoData.xyz;
 				vec3 specularColor 			= specularData.xyz;
 				float roughness				= albedoData.w;
 				float metallic				= specularData.w;
-				vec3 viewDir 				= normalize(pos - CAM_Position);
+				vec3 viewDir 				= normalize(CAM_Position - pos);
 				float reflectionIntensity 	= normalData.w;
 				
 				// Colore dell'ambiente
-				vec3 reflectVector = reflect( -viewDir, normal);
+				vec3 reflectVector = reflect( viewDir, normal);
 				float mipIndex =  roughness * roughness * 8.0f;
 
 			    //vec3 envColor = textureLod(REN_EnvironmentMap, reflectVector, mipIndex).rgb;

@@ -232,7 +232,7 @@ void AnimaCamera::SetViewMatrix(const AnimaMatrix& matrix)
 
 	SetMatrix("ViewMatrix", _viewMatrix);
 	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 }
 
 AnimaMatrix AnimaCamera::GetViewMatrix()
@@ -249,7 +249,7 @@ void AnimaCamera::SetProjectionMatrix(const AnimaMatrix& matrix)
 
 	SetMatrix("ProjectionMatrix", _projectionMatrix);
 	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 }
 
 AnimaMatrix AnimaCamera::GetProjectionMatrix()
@@ -279,7 +279,7 @@ void AnimaCamera::CalculateProjectionMatrix(float fov, const AnimaVertex2f& size
 
 		SetMatrix("ProjectionMatrix", _projectionMatrix);
 		SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-		SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+		SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 	}
 }
 
@@ -299,7 +299,7 @@ void AnimaCamera::CalculateProjectionMatrix(float left, float right, float botto
 
 	SetMatrix("ProjectionMatrix", _projectionMatrix);
 	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 }
 
 bool AnimaCamera::IsPerspectiveProjectionType()

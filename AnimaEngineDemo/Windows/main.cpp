@@ -221,7 +221,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1280, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -283,7 +283,8 @@ bool InitEngine()
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
 	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/sponza.obj";
 
 //#if !defined _DEBUG
 //	Anima::AnimaString inputString;
@@ -383,26 +384,26 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	//_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
-	//if (!_model)
-	//	return false;
+	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	if (!_model)
+		return false;
 	
 	//_model->GetTransformation()->RotateXDeg(-90.0);
 	//_model->GetTransformation()->RotateYDeg(180.0);
 
-	_model = _scene->GetModelsManager()->CreateModel("ANIMA_ENGINE_DEMO_MODEL_NAME");
-	Anima::AnimaMesh* mesh = _scene->GetMeshesManager()->CreateMesh("mesh");
-	mesh->MakeCube();
-	mesh->SetParentObject(_model);
-	_model->AddMesh(mesh);
+	//_model = _scene->GetModelsManager()->CreateModel("ANIMA_ENGINE_DEMO_MODEL_NAME");
+	//Anima::AnimaMesh* mesh = _scene->GetMeshesManager()->CreateMesh("mesh");
+	//mesh->MakeCube();
+	//mesh->SetParentObject(_model);
+	//_model->AddMesh(mesh);
 
 	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
 	_model->GetAllMeshes(&modelMeshes);
 
 	_pbrMaterial = materialsManager->GetMaterialFromName("pbr-material");
 
-	for (int i = 0; i < modelMeshes.size(); i++)
-		modelMeshes[i]->SetMaterial(_pbrMaterial);
+	//for (int i = 0; i < modelMeshes.size(); i++)
+	//	modelMeshes[i]->SetMaterial(_pbrMaterial);
 
 	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	////
@@ -444,12 +445,12 @@ bool InitEngine()
 	unsigned int width, height;
 	Anima::AnimaTextureFormat format;
 
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negx.tga", &dataPX, dataSizePX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posx.tga", &dataNX, dataSizeNX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negy.tga", &dataPY, dataSizePY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posy.tga", &dataNY, dataSizeNY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/negz.tga", &dataPZ, dataSizePZ, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/San Francisco/posz.tga", &dataNZ, dataSizeNZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negx.bmp", &dataPX, dataSizePX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posx.bmp", &dataNX, dataSizeNX, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negy.bmp", &dataPY, dataSizePY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posy.bmp", &dataNY, dataSizeNY, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negz.bmp", &dataPZ, dataSizePZ, width, height, format);
+	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posz.bmp", &dataNZ, dataSizeNZ, width, height, format);
 
 	Anima::AnimaTexture* texture = texturesManager->CreateTexture("skybox-map");
 	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
@@ -461,6 +462,7 @@ bool InitEngine()
 	texture->SetData(dataNZ, dataSizeNZ, Anima::NEGATIVE_Z);
 
 	texture->SetInternalFormat(Anima::IF_RGB);
+	texture->SetFormat(Anima::BGR);
 	texture->SetDataType(GL_UNSIGNED_BYTE);
 	texture->SetWidth(width);
 	texture->SetHeight(height);

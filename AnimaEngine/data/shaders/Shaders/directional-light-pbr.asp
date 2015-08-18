@@ -13,7 +13,7 @@
 		<Data name="REN_EnvironmentMap" type="TEXTURECUBE" />		
 		<Data name="REN_InverseScreenSize" type="FLOAT2" />
 		<Data name="CAM_Position" type="FLOAT3" />
-		<Data name="CAM_ProjectionViewInverseMatrix" type="MATRIX4x4" />
+		<Data name="CAM_InverseProjectionViewMatrix" type="MATRIX4x4" />
 		<Data name="DIL_Direction" type="FLOAT3" />
 		<Data name="DIL_Color" type="FLOAT3" />
 		<Data name="DIL_Intensity" type="FLOAT" />

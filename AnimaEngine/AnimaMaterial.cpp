@@ -20,13 +20,11 @@ AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManag
 	SetInteger("FrontFace", GL_CCW);
 	SetInteger("CullFace", GL_BACK);
 
-	SetColor("DiffuseColor", 0.3f, 0.3f, 0.3f, 1.0f);
-	SetColor("SpecularColor", 0.0f, 0.0f, 0.0f, 1.0f);
-	
-	// Deprecato	SetBoolean("Wireframe", false);
-	// Deprecato	SetColor("WireframeColor", 0.0f, 0.0f, 0.0f);
-	// Deprecato	SetFloat("MaxTessellationLevel", 1.0f);
-	// Deprecato	SetFloat("TessellationAlpha", 0.0f);
+	SetColor("Albedo", 0.560f, 0.570f, 0.580f, 1.0f);
+	SetColor("Specular", 0.5f, 0.5f, 0.5f, 1.0f);
+	SetFloat("Metallic", 0.0f);
+	SetFloat("Roughness", 0.5f);
+	SetFloat("ReflectionIntensity", 0.8f);
 }
 
 AnimaMaterial::AnimaMaterial(const AnimaMaterial& src)

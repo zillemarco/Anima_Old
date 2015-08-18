@@ -133,7 +133,7 @@ void AnimaThirdPersonCamera::RotateX(AFloat angle)
 	AnimaMath::RotateVector(_zAxis, -angle, _xAxis);
 
 	_position -= _target;		
-	_position = _target + _zAxis * _position.Length();
+	SetPosition(_target + _zAxis * _position.Length());
 
 	CalculateViewMatrix();
 }
@@ -152,7 +152,7 @@ void AnimaThirdPersonCamera::RotateY(AFloat angle)
 	AnimaMath::RotateVector(_zAxis, angle, _worldYAxis);
 
 	float dist = _position.Length();
-	_position = _target + _zAxis * dist;
+	SetPosition(_target + _zAxis * dist);
 
 	CalculateViewMatrix();
 }
@@ -182,14 +182,14 @@ void AnimaThirdPersonCamera::SetDistance(AFloat dist)
 	dir.Normalize();
 	dir *= dist;
 
-	_position = _target + dir;
+	SetPosition(_target + dir);
 
 	LookAt(_position, _target);
 }
 
 void AnimaThirdPersonCamera::LookAt(const AnimaVertex3f& position, const AnimaVertex3f& target)
 {
-	_position = position;
+	SetPosition(position);
 	_target = target;
 
 	_zAxis = _position - _target;
@@ -222,7 +222,7 @@ void AnimaThirdPersonCamera::CalculateViewMatrix()
 
 	SetMatrix("ViewMatrix", _viewMatrix);
 	SetMatrix("ProjectionViewMatrix", _projectionViewMatrix);
-	SetMatrix("InverseProjectionViewMatrix", _projectionMatrix);
+	SetMatrix("InverseProjectionViewMatrix", _inverseProjectionViewMatrix);
 }
 
 END_ANIMA_ENGINE_NAMESPACE
