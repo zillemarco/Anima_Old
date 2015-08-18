@@ -160,6 +160,7 @@ protected:
 	public:
 		bool CheckIntegrity(NSView* view);
 		NSOpenGLContext* GetContext();
+		NSOpenGLPixelFormat* GetPixelFormat();
 	
 	protected:
 		static bool InitializeContextAPIs();

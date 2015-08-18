@@ -486,9 +486,7 @@ void AnimaShaderProgram::SetUniform(AInt location, const AnimaMatrix& value, boo
 
 void AnimaShaderProgram::ScanVariables()
 {
-#if defined NEW_DATA_MODE
-	return;
-#else
+#if !defined NEW_DATA_MODE
 	ClearUniforms();
 	_inputs.clear(); 
 	_outputs.clear();
@@ -772,6 +770,47 @@ void AnimaShaderProgram::ScanVariables()
 			info._type = type;
 			info._name = name;
 
+			_inputs[name] = info;
+		}
+	}
+#else
+	
+	if (!GLEW_ARB_program_interface_query)
+	{
+		GLint numActiveInputs = 0;
+		glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveInputs);
+		
+		AnimaString name;
+		AnimaString namePart1;
+		AnimaString namePart2;
+		AnimaString tmpName;
+		AnimaString nameGetter;
+		GLenum type;
+		GLsizei bufLen;
+		GLsizei elements;
+		GLint location;
+		
+		for (int i = 0; i < numActiveInputs; i++)
+		{
+			std::vector<GLchar> nameArray(200);
+			glGetActiveAttrib(_id, i, nameArray.size(), &bufLen, &elements, &type, &nameArray[0]);
+			name = AnimaString(nameArray.begin(), nameArray.end() - 1);
+			boost::algorithm::trim(name);
+			AInt nameLen = name.length();
+			AInt removeCount = 0;
+			while (removeCount < nameLen && name[nameLen - 1 - removeCount] == '\0')
+				removeCount++;
+			
+			if (removeCount > 0)
+				name = name.substr(0, nameLen - removeCount);
+			
+			location = glGetAttribLocation(_id, name.c_str());
+			
+			AnimaInputInfo info;
+			info._location = location;
+			info._type = type;
+			info._name = name;
+			
 			_inputs[name] = info;
 		}
 	}

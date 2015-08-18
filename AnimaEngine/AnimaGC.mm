@@ -504,6 +504,11 @@ NSOpenGLContext* AnimaGC::GetContext()
 	return _context;
 }
 
+NSOpenGLPixelFormat* AnimaGC::GetPixelFormat()
+{
+	return _pixelFormat;
+}
+
 bool AnimaGC::CheckIntegrity(NSView* view)
 {
 	return true;

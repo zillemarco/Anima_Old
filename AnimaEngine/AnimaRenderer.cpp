@@ -512,8 +512,8 @@ void AnimaRenderer::Finish()
 
 void AnimaRenderer::Render()
 {
-	AnimaVertex4f backColor = GetColor4f("BackColor");
-	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
+	//AnimaVertex4f backColor = GetColor4f("BackColor");
+	//Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
 
 	for (auto func : _renderPassesFunction)
 		func(this);
@@ -732,7 +732,6 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 {
 	ANIMA_FRAME_PUSH("DrawAll");
 	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
-	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
 	AnimaVertex4f backColor = renderer->GetColor4f("BackColor");
 
 	ANIMA_FRAME_PUSH("PreparePass");
