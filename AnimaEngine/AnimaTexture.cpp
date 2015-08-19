@@ -15,6 +15,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_mipMapLevels = 0;
 	_width = 0;
 	_height = 0;
+	_depth = 0;
 	_textureTarget = TARGET_NONE;
 	_textureID = 0;
 	_filter = LINEAR;
@@ -33,12 +34,74 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_needsResize = false;
 }
 
+
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height)
+	: AnimaNamedObject(name, allocator)
+{
+	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
+
+	_textureTarget = TARGET_NONE;
+	_filter = LINEAR;
+	_internalFormat = IF_RGB;
+	_format = RGB;
+	_dataType = GL_UNSIGNED_BYTE;
+	_clamp = REPEAT;
+	_attachment = GL_NONE;
+	_borderColor = AnimaColor4f(0.0f);
+	_generateMipMaps = false;
+
+	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_name = name;
+
+	_mipMapLevels = 0;
+	_width = width;
+	_height = height;
+	_depth = 0;
+	_texturesReady = false;
+	_needsResize = false;
+	_renderTargetsReady = false;
+}
+
+
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth)
+	: AnimaNamedObject(name, allocator)
+{
+	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
+
+	_textureTarget = TARGET_NONE;
+	_filter = LINEAR;
+	_internalFormat = IF_RGB;
+	_format = RGB;
+	_dataType = GL_UNSIGNED_BYTE;
+	_clamp = REPEAT;
+	_attachment = GL_NONE;
+	_borderColor = AnimaColor4f(0.0f);
+	_generateMipMaps = false;
+
+	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_name = name;
+
+	_mipMapLevels = 0;
+	_width = width;
+	_height = height;
+	_depth = depth;
+	_texturesReady = false;
+	_needsResize = false;
+	_renderTargetsReady = false;
+}
+
 AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
 
-	SetData(data, dataSize);
+	SetData(data, dataSize, 0);
 
 	_textureTarget = TARGET_NONE;
 	_filter = LINEAR;
@@ -59,6 +122,39 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_mipMapLevels = 0;
 	_width = width;
 	_height = height;
+	_depth = 0;
+	_texturesReady = false;
+	_needsResize = false;
+	_renderTargetsReady = false;
+}
+
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize)
+	: AnimaNamedObject(name, allocator)
+{
+	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
+
+	SetData(data, dataSize, 0);
+
+	_textureTarget = TARGET_NONE;
+	_filter = LINEAR;
+	_internalFormat = IF_RGB;
+	_format = RGB;
+	_dataType = GL_UNSIGNED_BYTE;
+	_clamp = REPEAT;
+	_attachment = GL_NONE;
+	_borderColor = AnimaColor4f(0.0f);
+	_generateMipMaps = false;
+
+	_textureID = 0;
+	_frameBuffer = 0;
+	_renderBuffer = 0;
+
+	_name = name;
+
+	_mipMapLevels = 0;
+	_width = width;
+	_height = height;
+	_depth = depth;
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;
@@ -84,6 +180,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
+	_depth = src._depth;
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;
@@ -111,6 +208,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	_textureTarget = src._textureTarget;
 	_width = src._width;
 	_height = src._height;
+	_depth = src._depth;
 	_texturesReady = false;
 	_needsResize = false;
 	_renderTargetsReady = false;
@@ -148,6 +246,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
+		_depth = src._depth;
 		_texturesReady = false;
 		_needsResize = false;
 		_renderTargetsReady = false;
@@ -182,6 +281,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		_textureTarget = src._textureTarget;
 		_width = src._width;
 		_height = src._height;
+		_depth = src._depth;
 		_texturesReady = false;
 		_needsResize = false;
 		_renderTargetsReady = false;
@@ -216,15 +316,52 @@ AUint AnimaTexture::GetHeight() const
 	return _height;
 }
 
-void AnimaTexture::SetMipMapLevels(AUint levels, bool generate)
+void AnimaTexture::SetDepth(AUint depth)
 {
-	_mipMapLevels = levels;
-	_generateMipMaps = generate;
+	_depth = depth;
+}
+
+AUint AnimaTexture::GetDepth() const
+{
+	return _depth;
+}
+
+void AnimaTexture::SetMipMapLevels(AUint levels)
+{
+	_mipMapLevels = min(MAX_SURFACES, levels);
+
+	AInt count = _surfaces.size();
+	for (AInt i = 0; i < count; i++)
+	{
+		_surfaces[i].resize(MAX_SURFACES);
+
+		AUint w = _width;
+		AUint h = _height;
+
+		for (AUint j = 1; j <= MAX_SURFACES; j++)
+		{
+			_surfaces[i][j - 1].SetWidth(w);
+			_surfaces[i][j - 1].SetHeight(h);
+
+			w = max(1, w / 2);
+			h = max(1, h / 2);
+		}
+	}
 }
 
 AUint AnimaTexture::GetMipMapLevels() const
 {
 	return _mipMapLevels;
+}
+
+void AnimaTexture::SetGenerateMipMap(bool generate)
+{
+	_generateMipMaps = generate;
+}
+
+bool AnimaTexture::IsGenerateMipMap() const
+{
+	return _generateMipMaps;
 }
 
 void AnimaTexture::SetFormat(AnimaTextureFormat format)
@@ -277,29 +414,33 @@ AUint AnimaTexture::GetDataType() const
 	return _dataType;
 }
 
-bool AnimaTexture::SetData(AUchar* data, AUint dataSize)
+bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AUint surfaceIndex)
 {
 	if (_textureTarget == TEXTURE_2D)
 	{
-		if (_data.size() != 1)
+		if (_surfaces.size() != 1)
 		{
-			AInt count = _data.size();
-			for (AInt i = 0; i < count; i++)
-				_data[i].clear();
-			_data.clear();
+			_surfaces.clear();
+			_surfaces.resize(1);
+			_surfaces[0].resize(MAX_SURFACES);
 
-			_data.resize(1);
+			AUint w = _width;
+			AUint h = _height;
+
+			for (AUint i = 1; i <= MAX_SURFACES; i++)
+			{
+				AnimaTextureSurface surface;
+				surface.SetWidth(w);
+				surface.SetWidth(h);
+
+				_surfaces[0][i - 1] = surface;
+
+				w = max(1, w / 2);
+				h = max(1, h / 2);
+			}
 		}
 
-		AnimaArray<AUchar> newData;
-
-		if (data != nullptr && dataSize > 0)
-		{
-			newData.resize(dataSize);
-			newData.assign(data, data + dataSize);
-		}
-
-		_data[0] = newData;
+		_surfaces[0][surfaceIndex].SetData(data, dataSize);
 
 		return true;
 	}
@@ -307,30 +448,39 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize)
 	return false;
 }
 
-bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index)
+bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint surfaceIndex)
 {
 	if (_textureTarget == TEXTURE_CUBE)
 	{
 		// se l'array ha un solo elemento al momento vuol dire che prima la texture non era 3D
 		// e quindi vado a ripulire tutto e importare l'array per avere 6 elementi
-		if (_data.size() != 6)
+		if (_surfaces.size() != 6)
 		{
-			AInt count = _data.size();
-			for (AInt i = 0; i < count; i++)
-				_data[i].clear();
-			_data.clear();
+			_surfaces.clear();
+			_surfaces.resize(6);
 
-			_data.resize(6);
+			for (AInt i = 0; i < 6; i++)
+			{
+				_surfaces[i].resize(MAX_SURFACES);
+
+				AUint w = _width;
+				AUint h = _height;
+
+				for (AUint j = 1; j <= MAX_SURFACES; j++)
+				{
+					AnimaTextureSurface surface;
+					surface.SetWidth(w);
+					surface.SetWidth(h);
+
+					_surfaces[i][j - 1] = surface;
+
+					w = max(1, w / 2);
+					h = max(1, h / 2);
+				}
+			}
 		}
-
-		AnimaArray<AUchar> newData;
-		if (data != nullptr && dataSize > 0)
-		{
-			newData.resize(dataSize);
-			newData.assign(data, data + dataSize);
-		}
-
-		_data[index] = newData;
+		
+		_surfaces[index][surfaceIndex].SetData(data, dataSize);
 
 		return true;
 	}
@@ -338,29 +488,25 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex i
 	return false;
 }
 
-const AUchar* AnimaTexture::GetData() const
+const AUchar* AnimaTexture::GetData(AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
-	if (_textureTarget == TEXTURE_2D && _data.size() == 1)
+	if (_textureTarget == TEXTURE_2D && _surfaces.size() == 1)
 	{
-		// Devo controllare anche che il buffer non sia vuoto
-		const AnimaArray<AUchar>* data = &_data[0];
-		if (data->size() > 0)
-			return &(*data)[0];
+		if (_surfaces[0].size() > 0)
+			return _surfaces[0][surfaceIndex].GetData();
 	}
 
 	return nullptr;
 }
 
-const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index) const
+const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
-	if (_textureTarget == TEXTURE_3D && _data.size() == 6)
+	if (_textureTarget == TEXTURE_3D && _surfaces.size() == 6)
 	{
-		// Devo controllare anche che il buffer non sia vuoto
-		const AnimaArray<AUchar>* data = &_data[index];
-		if (data->size() > 0)
-			return &(*data)[0];
+		if (_surfaces[index].size() > 0)
+			return _surfaces[index][surfaceIndex].GetData();
 	}
 
 	return nullptr;
@@ -372,15 +518,12 @@ void AnimaTexture::SetTextureTarget(AnimaTextureTarget target)
 	{
 		ANIMA_ASSERT(!IsReady());
 
-		AInt count = _data.size();
-		for (AInt i = 0; i < count; i++)
-			_data[i].clear();
-		_data.clear();
+		_surfaces.clear();
 
 		if (target == TEXTURE_2D)
-			_data.resize(1);
+			_surfaces.resize(1);
 		else if (target == TEXTURE_CUBE)
-			_data.resize(6);
+			_surfaces.resize(6);
 
 		_textureTarget = target;
 	}
@@ -438,7 +581,7 @@ bool AnimaTexture::Load()
 
 	glBindTexture(target, _textureID);
 	
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
 	if (glGetError() != GL_NO_ERROR)
 		return false;
@@ -453,31 +596,21 @@ bool AnimaTexture::Load()
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
 		if (glGetError() != GL_NO_ERROR)
 			return false;
+		
+		if (_mipMapLevels == 0 || _generateMipMaps)
+		{
+			const AUchar* data = nullptr;
+			if (_surfaces.size() > 0 && _surfaces[0].size() > 0)
+				data = _surfaces[0][0].GetData();
 
-		AUchar* data = nullptr;
-		if (_data.size() > 0 && _data[0].size() > 0)
-			data = &_data[0][0];
-
-		if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
 			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, data);
+		}
 		else if (_mipMapLevels > 0)
 		{
-			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-			unsigned int offset = 0;
-
-			AUint width = _width;
-			AUint height = _height;
-
-			for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+			for (unsigned int level = 0; level < _mipMapLevels; level++)
 			{
-				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
-
-				//glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
-				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, data + offset);
-
-				offset += size;
-				width /= 2;
-				height /= 2;
+				AnimaTextureSurface* surface = &_surfaces[0][level];
+				glTexImage2D(target, level, internalFormat, surface->GetWidth(), surface->GetHeight(), 0, format, _dataType, surface->GetData());
 			}
 		}
 		else
@@ -495,33 +628,29 @@ bool AnimaTexture::Load()
 
 		for (AInt i = 0; i < 6; i++)
 		{
-			AUchar* data = nullptr;
-			if (_data.size() > i && _data[i].size() > 0)
-				data = &_data[i][0];
-
-			if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
+			if (_mipMapLevels == 0 || _generateMipMaps)
 			{
+				const AUchar* data = nullptr;
+				if (_surfaces.size() > 0 && _surfaces[i].size() > 0)
+					data = _surfaces[i][0].GetData();
+
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, data);
 			}
 			else if (_mipMapLevels > 0)
 			{
-				unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-				unsigned int offset = 0;
-
-				AUint width = _width;
-				AUint height = _height;
-
-				for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+				for (unsigned int level = 0; level < _mipMapLevels; level++)
 				{
-					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
+					AnimaTextureSurface* surface = &_surfaces[i][level];
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, internalFormat, surface->GetWidth(), surface->GetHeight(), 0, format, _dataType, surface->GetData());
 
-					//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, internalFormat, width, height, 0, format, _dataType, &_data[i][0] + offset);
-
-					offset += size;
-					width /= 2;
-					height /= 2;
+					if (glGetError() != GL_NO_ERROR)
+						return false;
 				}
+
+				glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, _mipMapLevels);
+
+				if (glGetError() != GL_NO_ERROR)
+					return false;
 			}
 			else
 			{
@@ -544,7 +673,7 @@ bool AnimaTexture::Load()
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
 		glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, Clamp(0.0f, 8.0f, maxAnisotropy));
 	}
-	else
+	else if (_mipMapLevels == 0)
 	{ 
 		glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, 0);
@@ -678,30 +807,20 @@ bool AnimaTexture::ResizeTexture()
 
 	if (_textureTarget == TEXTURE_2D)
 	{
-		AUchar* data = nullptr;
-		if (_data.size() > 0 && _data[0].size() > 0)
-			data = &_data[0][0];
+		if (_mipMapLevels == 0 || _generateMipMaps)
+		{
+			const AUchar* data = nullptr;
+			if (_surfaces.size() > 0 && _surfaces[0].size() > 0)
+				data = _surfaces[0][0].GetData();
 
-		if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
 			glTexImage2D(target, 0, internalFormat, _width, _height, 0, format, _dataType, data);
+		}
 		else if (_mipMapLevels > 0)
 		{
-			unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-			unsigned int offset = 0;
-
-			AUint width = _width;
-			AUint height = _height;
-
-			for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+			for (unsigned int level = 0; level < _mipMapLevels; level++)
 			{
-				unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
-
-				//glCompressedTexImage2D(target, level, format, width, height, 0, size, &_data[0][0] + offset);
-				glTexImage2D(target, level, internalFormat, width, height, 0, format, _dataType, data + offset);
-
-				offset += size;
-				width /= 2;
-				height /= 2;
+				AnimaTextureSurface* surface = &_surfaces[0][level];
+				glTexImage2D(target, level, internalFormat, surface->GetWidth(), surface->GetHeight(), 0, format, _dataType, surface->GetData());
 			}
 		}
 		else
@@ -713,32 +832,20 @@ bool AnimaTexture::ResizeTexture()
 	{
 		for (AInt i = 0; i < 6; i++)
 		{
-			AUchar* data = nullptr;
-			if (_data.size() > i && _data[i].size() > 0)
-				data = &_data[i][0];
-
-			if (_mipMapLevels == 0 || _generateMipMaps || data == nullptr)
+			if (_mipMapLevels == 0 || _generateMipMaps)
 			{
+				const AUchar* data = nullptr;
+				if (_surfaces.size() > 0 && _surfaces[i].size() > 0)
+					data = _surfaces[i][0].GetData();
+
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, _width, _height, 0, format, _dataType, data);
 			}
 			else if (_mipMapLevels > 0)
 			{
-				unsigned int BlockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-				unsigned int offset = 0;
-
-				AUint width = _width;
-				AUint height = _height;
-
-				for (unsigned int level = 0; level < _mipMapLevels && (width || height); level++)
+				for (unsigned int level = 0; level < _mipMapLevels; level++)
 				{
-					unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * BlockSize;
-
-					//glCompressedTexImage2D(target, level, _format, width, height, 0, size, &_data[0][0] + offset);
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, level, internalFormat, width, height, 0, format, _dataType, &_data[i][0] + offset);
-
-					offset += size;
-					width /= 2;
-					height /= 2;
+					AnimaTextureSurface* surface = &_surfaces[i][level];
+					glTexImage2D(target, level, internalFormat, surface->GetWidth(), surface->GetHeight(), 0, format, _dataType, surface->GetData());
 				}
 			}
 		}
@@ -758,17 +865,7 @@ bool AnimaTexture::ResizeTexture()
 
 void AnimaTexture::CopyData(const AnimaTexture& src)
 {
-	AInt count = _data.size();
-	for (AInt i = 0; i < count; i++)
-		_data[i].clear();
-	_data.clear();
-
-	AInt srcDataSize = src._data.size();
-	
-	_data.resize(srcDataSize);
-
-	for (AInt i = 0; i < count; i++)
-		_data[i] = src._data[i];
+	_surfaces = src._surfaces;
 }
 
 void AnimaTexture::Bind(AUint unit) const
@@ -846,7 +943,7 @@ AUint AnimaTexture::FormatToPlatform(const AnimaTextureFormat& format)
 	case RED:		return GL_RED; break;
 	case GREEN:		return GL_GREEN; break;
 	case BLUE:		return GL_BLUE; break;
-	case RG:			return GL_RG; break;
+	case RG:		return GL_RG; break;
 	case RGB:		return GL_RGB; break;
 	case RGBA:		return GL_RGBA; break;
 	case BGR:		return GL_BGR; break;
@@ -854,7 +951,7 @@ AUint AnimaTexture::FormatToPlatform(const AnimaTextureFormat& format)
 	case RED_INT:	return GL_RED_INTEGER; break;
 	case GREEN_INT:	return GL_GREEN_INTEGER; break;
 	case BLUE_INT:	return GL_BLUE_INTEGER; break;
-	case RG_INT:		return GL_RG_INTEGER; break;
+	case RG_INT:	return GL_RG_INTEGER; break;
 	case RGB_INT:	return GL_RGB_INTEGER; break;
 	case RGBA_INT:	return GL_RGBA_INTEGER; break;
 	case BGR_INT:	return GL_BGR_INTEGER; break;
@@ -940,8 +1037,124 @@ AUint AnimaTexture::InternalFormatToPlatform(const AnimaTextureInternalFormat& i
 	case IF_RG:				return GL_RG; break;
 	case IF_RGB:			return GL_RGB; break;
 	case IF_RGBA:			return GL_RGBA; break;
+	case FOUR:				return 4; break;
+	case THREE:				return 3; break;
+	case TWO:				return 2; break;
+	case ONE:				return 1; break;
 	default:				return GL_NONE;
 	}
+}
+
+AnimaTextureSurface::AnimaTextureSurface()
+{
+	_width = 0;
+	_height = 0;
+}
+
+AnimaTextureSurface::AnimaTextureSurface(AUint width, AUint height, AUchar* data, AUint dataSize)
+{
+	_width = width;
+	_height = height;
+
+	SetData(data, dataSize);
+}
+
+AnimaTextureSurface::AnimaTextureSurface(const AnimaTextureSurface& src)
+{
+	if (this != &src)
+	{
+		_width = src._width;
+		_height = src._height;
+
+		CopyData(src);
+	}
+}
+
+AnimaTextureSurface::AnimaTextureSurface(AnimaTextureSurface&& src)
+{
+	if (this != &src)
+	{
+		_width = src._width;
+		_height = src._height;
+
+		CopyData(src);
+	}
+}
+
+AnimaTextureSurface::~AnimaTextureSurface()
+{
+}
+
+AnimaTextureSurface& AnimaTextureSurface::operator=(const AnimaTextureSurface& src)
+{
+	if (this != &src)
+	{
+		_width = src._width;
+		_height = src._height;
+
+		CopyData(src);
+	}
+
+	return *this;
+}
+
+AnimaTextureSurface& AnimaTextureSurface::operator=(AnimaTextureSurface&& src)
+{
+	if (this != &src)
+	{
+		_width = src._width;
+		_height = src._height;
+
+		CopyData(src);
+	}
+
+	return *this;
+}
+
+void AnimaTextureSurface::SetData(AUchar* data, AUint dataSize)
+{
+	AnimaArray<AUchar> newData;
+
+	if (data != nullptr && dataSize > 0)
+	{
+		newData.resize(dataSize);
+		newData.assign(data, data + dataSize);
+	}
+
+	_data = newData;
+}
+
+void AnimaTextureSurface::CopyData(const AnimaTextureSurface& src)
+{
+	_data.clear();
+	_data = src._data;
+}
+
+const AUchar* AnimaTextureSurface::GetData() const
+{
+	if (_data.size() > 0)
+		return &(_data)[0];
+	return nullptr;
+}
+
+void AnimaTextureSurface::SetWidth(AUint width)
+{
+	_width = width;
+}
+
+AUint AnimaTextureSurface::GetWidth() const
+{
+	return _width;
+}
+
+void AnimaTextureSurface::SetHeight(AUint height)
+{
+	_height = height;
+}
+
+AUint AnimaTextureSurface::GetHeight() const
+{
+	return _height;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

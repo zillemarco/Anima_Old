@@ -8,6 +8,7 @@
 			uniform sampler2D REN_GB_PrepassBuffer_AlbedoMap;
 			uniform sampler2D REN_GB_LightsBuffer_EmissiveMap;
 			uniform sampler2D REN_GB_LightsBuffer_SpecularMap;
+			uniform sampler2D REN_GB_LightsBuffer_IrradianceMap;
 			uniform vec3 REN_AmbientLight;
 			uniform vec2 REN_ScreenSize;
 
@@ -25,8 +26,9 @@
 				vec3 diffuse 	= texture(REN_GB_PrepassBuffer_AlbedoMap, textureCoord).xyz;
 				vec3 light 		= texture(REN_GB_LightsBuffer_EmissiveMap, textureCoord).xyz;
 				vec3 specular 	= texture(REN_GB_LightsBuffer_SpecularMap, textureCoord).xyz;
+				vec3 irradiance = texture(REN_GB_LightsBuffer_IrradianceMap, textureCoord).xyz;
 
-				FragColor.xyz = 	diffuse * REN_AmbientLight;
+				FragColor.xyz = 	diffuse * REN_AmbientLight * irradiance;
 				FragColor.xyz += 	light;
 				FragColor.xyz += 	specular;
 				FragColor.a =		1.0f;

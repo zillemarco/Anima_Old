@@ -183,7 +183,8 @@ void AnimaRenderer::InitTextureSlots()
 	SetTextureSlot("SpecularMap", 4);
 	SetTextureSlot("ShadowMap", 5);
 	SetTextureSlot("SkyBox", 6);
-	SetTextureSlot("EnvironmentMap", 6);
+	SetTextureSlot("EnvironmentMap", 7);
+	SetTextureSlot("IrradianceMap", 8);
 
 	// Slot usati dal disegno di primitive
 	SetTextureSlot("DepthMap", 0);
@@ -230,6 +231,7 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
 			lightsBuffer->AddTexture("EmissiveMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
 			lightsBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			lightsBuffer->AddTexture("IrradianceMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
 			ANIMA_ASSERT(lightsBuffer->Create());
 
 			SetGBuffer("LightsBuffer", lightsBuffer);

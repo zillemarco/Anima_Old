@@ -10,7 +10,8 @@
 		<Data name="REN_GB_PrepassBuffer_DepthMap" type="TEXTURE2D" />
 		<Data name="REN_GB_PrepassBuffer_NormalMap" type="TEXTURE2D" />
 		<Data name="REN_GB_PrepassBuffer_SpecularMap" type="TEXTURE2D" />
-		<Data name="REN_EnvironmentMap" type="TEXTURECUBE" />		
+		<Data name="REN_EnvironmentMap" type="TEXTURECUBE" />
+		<Data name="REN_IrradianceMap" type="TEXTURECUBE" />
 		<Data name="REN_InverseScreenSize" type="FLOAT2" />
 		<Data name="CAM_Position" type="FLOAT3" />
 		<Data name="CAM_InverseProjectionViewMatrix" type="MATRIX4x4" />

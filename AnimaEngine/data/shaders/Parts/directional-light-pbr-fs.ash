@@ -5,13 +5,14 @@
 			<![CDATA[
 			#version 150 core
 
-			out vec4 FragColor[2];
+			out vec4 FragColor[3];
 
 			uniform sampler2D REN_GB_PrepassBuffer_DepthMap;
 			uniform sampler2D REN_GB_PrepassBuffer_NormalMap;
 			uniform sampler2D REN_GB_PrepassBuffer_SpecularMap;
 			uniform sampler2D REN_GB_PrepassBuffer_AlbedoMap;
 			uniform samplerCube REN_EnvironmentMap;
+			uniform samplerCube REN_IrradianceMap;
 			uniform vec2 REN_InverseScreenSize;
 			uniform vec3 CAM_Position;
 			uniform mat4 CAM_InverseProjectionViewMatrix;
@@ -211,14 +212,14 @@
 				float reflectionIntensity 	= normalData.w;
 				
 				// Colore dell'ambiente
-				vec3 reflectVector = reflect( viewDir, normal);
+				vec3 reflectVector = reflect( -viewDir, normal);
 				float mipIndex =  roughness * roughness * 8.0f;
 
-			    //vec3 envColor = textureLod(REN_EnvironmentMap, reflectVector, mipIndex).rgb;
-			    vec3 envColor = texture(REN_EnvironmentMap, reflectVector).rgb;
+			    vec3 envColor = textureLod(REN_EnvironmentMap, reflectVector, mipIndex).rgb;
+			    //vec3 envColor = texture(REN_EnvironmentMap, reflectVector).rgb;
 			    envColor = pow(envColor.rgb, vec3(2.2f));
 
-			    //vec3 irradiance = IrradianceMap.Sample(LinearSampler, normal);
+			    vec3 irradiance = texture(REN_IrradianceMap, normal).rgb;
 
 				vec3 luce = ComputeLight(albedoColor, specularColor, normal, roughness, DIL_Color, -DIL_Direction, viewDir) * DIL_Intensity;
 				vec3 fresnel = Specular_F_Roughness(specularColor, roughness * roughness, normal, viewDir) * envColor * reflectionIntensity;
@@ -228,6 +229,9 @@
 				
 				// fresnel
 				FragColor[1] = vec4(fresnel, 1.0f);
+
+				// irradiance
+				FragColor[2] = vec4(irradiance, 1.0f);
 			}
 
 			]]>

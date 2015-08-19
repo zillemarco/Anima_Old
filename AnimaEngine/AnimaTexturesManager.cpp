@@ -24,6 +24,54 @@ GLubyte animaUTGAcompareRGBA[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Un
 GLubyte animaUTGAcompareBW[12] = { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	// Uncompressed BW TGA Header
 GLubyte animaCTGAcompare[12] = { 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };		// Compressed TGA Header
 
+enum DXGIFormat {
+	DXGIFormat_FORCE_UINT = 0xffffffff
+};
+
+enum DXGIResourceDimension {
+	DXGIResourceDimension_UNKNOWN = 0,
+	DXGIResourceDimension_BUFFER = 1,
+	DXGIResourceDimension_TEXTURE1D = 2,
+	DXGIResourceDimension_TEXTURE2D = 3,
+	DXGIResourceDimension_TEXTURE3D = 4
+};
+
+typedef struct {
+	ADword dwSize;
+	ADword dwFlags;
+	ADword dwFourCC;
+	ADword dwRGBBitCount;
+	ADword dwRBitMask;
+	ADword dwGBitMask;
+	ADword dwBBitMask;
+	ADword dwABitMask;
+} DDSPixelFormat;
+
+typedef struct {
+	ADword			dwSize;
+	ADword			dwFlags;
+	ADword			dwHeight;
+	ADword			dwWidth;
+	ADword			dwPitchOrLinearSize;
+	ADword			dwDepth;
+	ADword			dwMipMapCount;
+	ADword			dwReserved1[11];
+	DDSPixelFormat	ddspf;
+	ADword			dwCaps;
+	ADword			dwCaps2;
+	ADword			dwCaps3;
+	ADword			dwCaps4;
+	ADword			dwReserved2;
+} DDSFileHeader;
+
+typedef struct {
+	DXGIFormat				dxgiFormat;
+	DXGIResourceDimension	resourceDimension;
+	AUint					miscFlag;
+	AUint					arraySize;
+	AUint					miscFlags2;
+} DDSFileHeader10;
+
 AnimaTexturesManager::AnimaTexturesManager(AnimaScene* scene)
 {
 	_scene = scene;
@@ -47,6 +95,28 @@ AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName
 	return _textures[newIndex];
 }
 
+AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint width, AUint height)
+{
+	AInt index = _textures.Contains(textureName);
+	if (index >= 0)
+		return nullptr;
+
+	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_scene->GetTexturesAllocator()), _scene->GetTexturesAllocator(), textureName, width, height);
+	AInt newIndex = _textures.Add(textureName, texture);
+	return _textures[newIndex];
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUint depth)
+{
+	AInt index = _textures.Contains(textureName);
+	if (index >= 0)
+		return nullptr;
+
+	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_scene->GetTexturesAllocator()), _scene->GetTexturesAllocator(), textureName, width, height, depth);
+	AInt newIndex = _textures.Add(textureName, texture);
+	return _textures[newIndex];
+}
+
 AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUchar* data, ASizeT dataSize)
 {
 	AInt index = _textures.Contains(textureName);
@@ -54,6 +124,17 @@ AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName
 		return nullptr;
 
 	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_scene->GetTexturesAllocator()), _scene->GetTexturesAllocator(), textureName, width, height, data, dataSize);
+	AInt newIndex = _textures.Add(textureName, texture);
+	return _textures[newIndex];
+}
+
+AnimaTexture* AnimaTexturesManager::CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUint depth, AUchar* data, ASizeT dataSize)
+{
+	AInt index = _textures.Contains(textureName);
+	if (index >= 0)
+		return nullptr;
+
+	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*(_scene->GetTexturesAllocator()), _scene->GetTexturesAllocator(), textureName, width, height, depth, data, dataSize);
 	AInt newIndex = _textures.Add(textureName, texture);
 	return _textures[newIndex];
 }
@@ -81,18 +162,17 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& fileP
 	AUint dataSize;
 	AUint width;
 	AUint height;
-	AnimaTextureFormat format;
 
-	if (GetTextureDataFromFile(filePath, &data, dataSize, width, height, format))
+	// Provo a leggere una texture qualsiasi
+	if (GetTextureDataFromFile(filePath, &data, dataSize, width, height))
 	{
 		AnimaTexture* texture = CreateTexture(textureName, width, height, data, dataSize);
-		
-		if (texture != nullptr && format != 0)
-			texture->SetFormat(format);
-
 		free(data);
 		return texture;
 	}
+	// Se non ha funzionato provo a leggere la texture come file DDS
+	else
+		return LoadTextureFromDDSFile(filePath, textureName);
 
 	return nullptr;
 }
@@ -110,7 +190,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& fi
 
 	if (GetTextureDataFromBMPFile(filePath, &data, dataSize, width, height))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, data, dataSize);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, 0, data, dataSize);
 		free(data);
 		return texture;
 	}
@@ -131,7 +211,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 
 	if (GetTextureDataFromTGAFile(filePath, &data, dataSize, width, height))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, data, dataSize);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, 0, data, dataSize);
 		free(data);
 		return texture;
 	}
@@ -144,33 +224,82 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 	AInt index = _textures.Contains(textureName);
 	if (index >= 0)
 		return nullptr;
-	
-	AUchar* data;
-	AUint dataSize;
+
+	AnimaArray<AnimaArray<AUchar> > data;
+	AnimaArray<AUint> dataSize;
 	AUint width;
 	AUint height;
+	AUint depth;
+	AUint mipMapsCount;
+	AUint imagesCount;
 	AnimaTextureFormat format;
-
-	if (GetTextureDataFromDDSFile(filePath, &data, dataSize, width, height, format))
+	AnimaTextureInternalFormat internalFormat;
+	AnimaTextureTarget target;
+	
+	if (GetTextureDataFromDDSFile(filePath, &data, &dataSize, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, data, dataSize);
-		
-		if (texture != nullptr && format != 0)
-			texture->SetFormat(format);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, depth);
+		if (texture != nullptr)
+		{
+			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = max(mipMapsCount, 1);
 
-		free(data);
+			if (format != 0 && internalFormat != 0)
+			{
+				texture->SetFormat(format);
+				texture->SetInternalFormat(internalFormat);
+			}
+
+			texture->SetTextureTarget(target);
+			texture->SetMipMapLevels(mipMapsCount);
+
+			// se il target è una texture cube devo comportarmi diversamente
+			if (target == TEXTURE_CUBE)
+			{
+				AInt offset = 0;
+				for (AUint i = 0; i < imagesCount; i++)
+				{
+					for (AUint j = 0; j < mipMapsCount; j++)
+					{
+						AUchar* buffer = &data[offset][0];
+						AUint bufferSize = dataSize[offset];
+
+						texture->SetData(buffer, bufferSize, (AnimaTextureCubeIndex)i, j);
+
+						offset++;
+					}
+				}
+			}
+			else
+			{
+				AInt offset = 0;
+				for (AUint i = 0; i < imagesCount; i++)
+				{
+					for (AUint j = 0; j < mipMapsCount; j++)
+					{
+						AUchar* buffer = &data[offset][0];
+						AUint bufferSize = dataSize[offset];
+
+						texture->SetData(buffer, bufferSize, j);
+
+						offset++;
+					}
+				}
+			}
+		}
+
 		return texture;
 	}
 
 	return nullptr;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint depth)
 {
-	return CreateTexture(textureName, width, height, data, dataSize);
+	return CreateTexture(textureName, width, height, depth, data, dataSize);
 }
 
-bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format)
+bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
 {
 	if (data == nullptr || *data != nullptr)
 		return false;
@@ -182,14 +311,10 @@ bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, A
 	pos++;
 	AnimaString ext = filePath.substr(pos);
 
-	format = FORMAT_NONE;
-
 	if (ext.compare("bmp") == 0)
 		return GetTextureDataFromBMPFile(filePath, data, dataSize, width, height);
 	else if (ext.compare("tga") == 0)
 		return GetTextureDataFromTGAFile(filePath, data, dataSize, width, height);
-	else if (ext.compare("dds") == 0)
-		return GetTextureDataFromDDSFile(filePath, data, dataSize, width, height, format);
 
 	return false;
 }
@@ -261,12 +386,10 @@ bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath
 	return false;
 }
 
-bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height, AnimaTextureFormat& format)
+// riferimento pagina ftp://download.nvidia.com/developer/GPU_Gems/CD_Image/Image_Processing/Image_Processing_Framework/LIBS/src/nv_dds/nv_dds.cpp
+bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AnimaArray<AnimaArray<AUchar>>* data, AnimaArray<AUint>* dataSize, AUint& imagesCount, AUint& width, AUint& height, AUint& depth, AUint& mipMapsCount, AnimaTextureFormat& format, AnimaTextureInternalFormat& internalFormat, AnimaTextureTarget& target)
 {
-	if (data == nullptr || *data != nullptr)
-		return false;
-
-	unsigned char Header[124];
+	DDSFileHeader header;
 
 	FILE * file;
 	file = fopen(filePath.c_str(), "rb");
@@ -275,42 +398,173 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 
 	char filetype[4];
 	fread(filetype, 1, 4, file);
+
+	// Controllo sia effettivamente un file DDS
 	if (strncmp(filetype, "DDS ", 4) != 0)
 	{
 		fclose(file);
 		return false;
 	}
 
-	fread(&Header, 124, 1, file);
+	// Leggo la testata del file che è sempre di 124 bytes
+	fread(&header, 124, 1, file);
 
-	height = *(unsigned int*)&(Header[8]);
-	width = *(unsigned int*)&(Header[12]);
-	unsigned int linearSize = *(unsigned int*)&(Header[16]);
-	unsigned int mipMapCount = *(unsigned int*)&(Header[24]);
-	unsigned int fourCC = *(unsigned int*)&(Header[80]);
+	DDSPixelFormat pixelFormat = header.ddspf;
+	AUint fourCC = pixelFormat.dwFourCC;
 
-	dataSize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-	*data = (AUchar*)malloc(dataSize * sizeof(AUchar));
+	height = header.dwHeight;
+	width = header.dwWidth;
+	depth = max(1, header.dwDepth);
+	mipMapsCount = header.dwMipMapCount;
 
-	fread(*data, 1, dataSize, file);
-	fclose(file);
+	if (header.dwCaps2 & 0x200)
+		target = TEXTURE_CUBE;
+	else if (header.dwCaps2 & 0x200000)
+		target = TEXTURE_3D;
+	else
+		target = TEXTURE_2D;
 
-	switch (fourCC)
+	bool compressed = false;
+	AUint blockSize = 16;
+	AUint components = 4;
+
+	// Controllo se nei flag c'è DDPF_FOURCC [0x4] e quindi la texture è compressa
+	if (pixelFormat.dwFlags & 0x4)
 	{
-	case FOURCC_DXT1:
-		//format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		break;
-	case FOURCC_DXT3:
-		//format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		break;
-	case FOURCC_DXT5:
-		//format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		break;
-	default:
-		free(*data);
+		compressed = true;
+
+		AUint fourCC = pixelFormat.dwFourCC;
+		switch (fourCC)
+		{
+		case FOURCC_DXT1:
+			internalFormat = THREE;
+			format = COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			blockSize = 8;
+			components = 3;
+			break;
+		case FOURCC_DXT3:
+			internalFormat = FOUR;
+			format = COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			components = 4;
+			break;
+		case FOURCC_DXT5:
+			internalFormat = FOUR;
+			format = COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			components = 4;
+			break;
+		default:
+		{
+			char buf[5];
+			buf[0] = fourCC & 255;
+			buf[1] = (fourCC >> 8) & 255;
+			buf[2] = (fourCC >> 16) & 255;
+			buf[3] = (fourCC >> 24) & 255;
+			buf[4] = 0;
+
+			printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown compression format %s", filePath.c_str(), buf);
+
+			fclose(file);
+			return false;
+			break;
+		}
+		}
+	}
+	else if (pixelFormat.dwRGBBitCount == 32)
+	{
+		internalFormat = RGBA8;//FOUR;
+		format = BGRA;
+		components = 4;
+	}
+	else if (pixelFormat.dwRGBBitCount == 24)
+	{
+		internalFormat = THREE;
+		format = BGR;
+		components = 3;
+	}
+	else if (pixelFormat.dwRGBBitCount == 8)
+	{
+		printf("Error reading texture\n\t- File path: %s\n\t- Error: unable to load luminance texture", filePath.c_str());
+
+		fclose(file);
+		return false;
+	}
+	else
+	{
+		printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown format", filePath.c_str());
+
+		fclose(file);
 		return false;
 	}
 
+	// Controllo se è una texture cube allora ha 6 immagini
+	if (target == TEXTURE_CUBE)
+		imagesCount = 6;
+	// altrimenti ne ha 1
+	else
+		imagesCount = 1;
+
+	// Il numero di buffer è il numero di immagini per il numero di mip-map
+	AUint buffersCount = imagesCount * (mipMapsCount > 0 ? mipMapsCount : 1);
+
+	// Alloco l'array di buffer e anche l'array delle dimensioni
+	data->resize(buffersCount);
+	dataSize->resize(buffersCount);
+
+	AInt numMipMaps = mipMapsCount > 0 ? mipMapsCount - 1 : 0;
+
+	AInt offset = 0;
+	for (AInt i = 0; i < imagesCount; i++)
+	{
+		AUint bufferSize = 0;
+
+		// Calcolo la dimensione della prima immagine
+		if (compressed)
+			bufferSize = (((width + 3) / 4) * ((height + 3) / 4) * blockSize) * depth;
+		else
+			bufferSize = (width * height * components) * depth;
+
+		// Leggo i dati della prima immagine (non ancora i mip)
+		unsigned char *pixels = new unsigned char[bufferSize];
+		fread(pixels, 1, bufferSize, file);
+		
+		(*dataSize)[offset] = bufferSize;
+		(*data)[offset].resize(bufferSize);
+		(*data)[offset].assign(pixels, pixels + bufferSize);
+		
+		delete[] pixels;
+
+		offset++;
+
+		// Divido le dimensioni per due
+		AUint w = max(1, width >> 1);
+		AUint h = max(1, height >> 1);
+		AUint d = max(1, depth >> 1);
+
+		for (AInt j = 0; j < numMipMaps && (w || h); j++)
+		{
+			// Calcolo la dimensione della prima immagine
+			if (compressed)
+				bufferSize = (((w + 3) / 4) * ((h + 3) / 4) * blockSize) * d;
+			else
+				bufferSize = (w * h * components) * d;
+
+			pixels = new unsigned char[bufferSize];
+			fread(pixels, 1, bufferSize, file);
+
+			(*dataSize)[offset] = bufferSize;
+			(*data)[offset].resize(bufferSize);
+			(*data)[offset].assign(pixels, pixels + bufferSize);
+
+			offset++;
+
+			// Divido le dimensioni per due ancora
+			w = max(1, w >> 1);
+			h = max(1, h >> 1);
+			d = max(1, d >> 1);
+		}
+	}
+
+	fclose(file);
 	return true;
 }
 
@@ -582,8 +836,6 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 		AnimaTextureTarget target;
 		AnimaTextureFormat format;
 		AnimaTextureInternalFormat internalFormat;
-		AUint width, height;
-		AnimaTextureFormat guessedFormat;
 
 		try
 		{
@@ -604,158 +856,252 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 
 		if (target == TEXTURE_CUBE)
 		{
-			AnimaString filePathPX, filePathNX, filePathPY, filePathNY, filePathPZ, filePathNZ;
+			//bool singleFile = false;
+			//AnimaString filePath, filePathPX, filePathNX, filePathPY, filePathNY, filePathPZ, filePathNZ;
 
-			try
-			{
-				filePathPX = xmlTree.get<AnimaString>("AnimaTexture.FilePX");
-				filePathNX = xmlTree.get<AnimaString>("AnimaTexture.FileNX");
-				filePathPY = xmlTree.get<AnimaString>("AnimaTexture.FilePY");
-				filePathNY = xmlTree.get<AnimaString>("AnimaTexture.FileNY");
-				filePathPZ = xmlTree.get<AnimaString>("AnimaTexture.FilePZ");
-				filePathNZ = xmlTree.get<AnimaString>("AnimaTexture.FileNZ");
-			}
-			catch (boost::property_tree::ptree_bad_path& exception)
-			{
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
-				return nullptr;
-			}
-			catch (boost::property_tree::ptree_bad_data& exception)
-			{
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
-				return nullptr;
-			}
+			//try
+			//{
+			//	filePath = xmlTree.get<AnimaString>("AnimaTexture.File");
+			//	singleFile = true;
+			//}
+			//catch (boost::property_tree::ptree_bad_path& exception)
+			//{
+			//}
+			//catch (boost::property_tree::ptree_bad_data& exception)
+			//{
+			//}
 
-			AUchar *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
-			AUint dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
+			//if (singleFile)
+			//{
+			//	AUchar** data;
+			//	AUint* dataSize;
+			//	AUint width;
+			//	AUint height;
+			//	AUint depth;
+			//	AUint mipMapsCount;
+			//	AUint imagesCount;
+			//	AnimaTextureFormat format;
+			//	AnimaTextureInternalFormat internalFormat;
+			//	AnimaTextureTarget target;
 
-			GetTextureDataFromFile(filePathPX, &dataPX, dataSizePX, width, height, guessedFormat);
-			if (dataPX == nullptr || dataSizePX <= 0)
-			{
-				free(dataPX);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPX.c_str());
-				return nullptr;
-			}
+			//	if (GetTextureDataFromDDSFile(filePath, &data, &dataSize, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+			//	{
+			//		// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			//		mipMapsCount = max(mipMapsCount, 1);
 
-			GetTextureDataFromFile(filePathNX, &dataNX, dataSizeNX, width, height, guessedFormat);
-			if (dataNX == nullptr || dataSizeNX <= 0)
-			{
-				free(dataPX);
-				free(dataNX);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNX.c_str());
-				return nullptr;
-			}
+			//		if (format != 0 && internalFormat != 0)
+			//		{
+			//			texture->SetFormat(format);
+			//			texture->SetInternalFormat(internalFormat);
+			//		}
 
-			GetTextureDataFromFile(filePathPY, &dataPY, dataSizePY, width, height, guessedFormat);
-			if (dataPY == nullptr || dataSizePY <= 0)
-			{
-				free(dataPX);
-				free(dataNX);
-				free(dataPY);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPY.c_str());
-				return nullptr;
-			}
+			//		texture->SetTextureTarget(target);
+			//		texture->SetMipMapLevels(mipMapsCount);
 
-			GetTextureDataFromFile(filePathNY, &dataNY, dataSizeNY, width, height, guessedFormat);
-			if (dataNY == nullptr || dataSizeNY <= 0)
-			{
-				free(dataPX);
-				free(dataNX);
-				free(dataPY);
-				free(dataNY);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNY.c_str());
-				return nullptr;
-			}
+			//		// se il target è una texture cube devo comportarmi diversamente
+			//		if (target == TEXTURE_CUBE)
+			//		{
+			//			AInt offset = 0;
+			//			for (AUint i = 0; i < imagesCount; i++)
+			//			{
+			//				for (AUint j = 0; j < mipMapsCount; j++)
+			//				{
+			//					AUchar* buffer = data[offset];
+			//					AUint bufferSize = dataSize[offset];
 
-			GetTextureDataFromFile(filePathPZ, &dataPZ, dataSizePZ, width, height, guessedFormat);
-			if (dataPZ == nullptr || dataSizePZ <= 0)
-			{
-				free(dataPX);
-				free(dataNX);
-				free(dataPY);
-				free(dataNY);
-				free(dataPZ);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPZ.c_str());
-				return nullptr;
-			}
+			//					texture->SetData(buffer, bufferSize, (AnimaTextureCubeIndex)i, j);
 
-			GetTextureDataFromFile(filePathNZ, &dataNZ, dataSizeNZ, width, height, guessedFormat);
-			if (dataNZ == nullptr || dataSizeNZ <= 0)
-			{
-				free(dataPX);
-				free(dataNX);
-				free(dataPY);
-				free(dataNY);
-				free(dataPZ);
-				free(dataNZ);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNZ.c_str());
-				return nullptr;
-			}
+			//					free(data[offset]);
 
-			if (guessedFormat == FORMAT_NONE || guessedFormat == format)
-				texture->SetFormat(format);
-			else
-				texture->SetFormat(guessedFormat);
+			//					offset++;
+			//				}
+			//			}
+			//		}
+			//		else
+			//		{
+			//			AInt offset = 0;
+			//			for (AUint i = 0; i < imagesCount; i++)
+			//			{
+			//				for (AUint j = 0; j < mipMapsCount; j++)
+			//				{
+			//					AUchar* buffer = data[offset];
+			//					AUint bufferSize = dataSize[offset];
 
-			texture->SetInternalFormat(internalFormat);
-			texture->SetDataType(GL_UNSIGNED_BYTE);
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetFilter(LINEAR);
-			texture->SetClamp(TO_EDGE);
-			texture->SetTextureTarget(target);
+			//					texture->SetData(buffer, bufferSize, j);
 
-			texture->SetData(dataPX, dataSizePX, POSITIVE_X);
-			texture->SetData(dataNX, dataSizeNX, NEGATIVE_X);
-			texture->SetData(dataPY, dataSizePY, POSITIVE_Y);
-			texture->SetData(dataNY, dataSizeNY, NEGATIVE_Y);
-			texture->SetData(dataPZ, dataSizePZ, POSITIVE_Z);
-			texture->SetData(dataNZ, dataSizeNZ, NEGATIVE_Z);
+			//					free(data[offset]);
+
+			//					offset++;
+			//				}
+			//			}
+			//		}
+
+			//		delete[] * data;
+			//		delete[] dataSize;
+			//	}
+			//	else
+			//	{
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n", name.c_str());
+			//		return nullptr;
+			//	}
+			//}
+			//else
+			//{
+			//	try
+			//	{
+			//		filePathPX = xmlTree.get<AnimaString>("AnimaTexture.FilePX");
+			//		filePathNX = xmlTree.get<AnimaString>("AnimaTexture.FileNX");
+			//		filePathPY = xmlTree.get<AnimaString>("AnimaTexture.FilePY");
+			//		filePathNY = xmlTree.get<AnimaString>("AnimaTexture.FileNY");
+			//		filePathPZ = xmlTree.get<AnimaString>("AnimaTexture.FilePZ");
+			//		filePathNZ = xmlTree.get<AnimaString>("AnimaTexture.FileNZ");
+			//	}
+			//	catch (boost::property_tree::ptree_bad_path& exception)
+			//	{
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
+			//		return nullptr;
+			//	}
+			//	catch (boost::property_tree::ptree_bad_data& exception)
+			//	{
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
+			//		return nullptr;
+			//	}
+
+			//	AUint width, height, depth, mipMapsCount;
+			//	AnimaTextureFormat guessedFormat;
+			//	AnimaTextureInternalFormat guessedInternalFormat;
+			//	AUchar *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
+			//	AUint dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
+
+			//	GetTextureDataFromFile(filePathPX, &dataPX, dataSizePX, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataPX == nullptr || dataSizePX <= 0)
+			//	{
+			//		free(dataPX);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPX.c_str());
+			//		return nullptr;
+			//	}
+
+			//	GetTextureDataFromFile(filePathNX, &dataNX, dataSizeNX, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataNX == nullptr || dataSizeNX <= 0)
+			//	{
+			//		free(dataPX);
+			//		free(dataNX);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNX.c_str());
+			//		return nullptr;
+			//	}
+
+			//	GetTextureDataFromFile(filePathPY, &dataPY, dataSizePY, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataPY == nullptr || dataSizePY <= 0)
+			//	{
+			//		free(dataPX);
+			//		free(dataNX);
+			//		free(dataPY);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPY.c_str());
+			//		return nullptr;
+			//	}
+
+			//	GetTextureDataFromFile(filePathNY, &dataNY, dataSizeNY, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataNY == nullptr || dataSizeNY <= 0)
+			//	{
+			//		free(dataPX);
+			//		free(dataNX);
+			//		free(dataPY);
+			//		free(dataNY);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNY.c_str());
+			//		return nullptr;
+			//	}
+
+			//	GetTextureDataFromFile(filePathPZ, &dataPZ, dataSizePZ, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataPZ == nullptr || dataSizePZ <= 0)
+			//	{
+			//		free(dataPX);
+			//		free(dataNX);
+			//		free(dataPY);
+			//		free(dataNY);
+			//		free(dataPZ);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathPZ.c_str());
+			//		return nullptr;
+			//	}
+
+			//	GetTextureDataFromFile(filePathNZ, &dataNZ, dataSizeNZ, width, height, depth, mipMapsCount, guessedFormat, guessedInternalFormat);
+			//	if (dataNZ == nullptr || dataSizeNZ <= 0)
+			//	{
+			//		free(dataPX);
+			//		free(dataNX);
+			//		free(dataPY);
+			//		free(dataNY);
+			//		free(dataPZ);
+			//		free(dataNZ);
+			//		printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePathNZ.c_str());
+			//		return nullptr;
+			//	}
+
+			//	if (guessedFormat == FORMAT_NONE || guessedFormat == format)
+			//		texture->SetFormat(format);
+			//	else
+			//		texture->SetFormat(guessedFormat);
+
+			//	texture->SetInternalFormat(internalFormat);
+			//	texture->SetDataType(GL_UNSIGNED_BYTE);
+			//	texture->SetWidth(width);
+			//	texture->SetHeight(height);
+			//	texture->SetFilter(LINEAR);
+			//	texture->SetClamp(TO_EDGE);
+			//	texture->SetTextureTarget(target);
+
+			//	texture->SetData(dataPX, dataSizePX, POSITIVE_X, 0);
+			//	texture->SetData(dataNX, dataSizeNX, NEGATIVE_X, 0);
+			//	texture->SetData(dataPY, dataSizePY, POSITIVE_Y, 0);
+			//	texture->SetData(dataNY, dataSizeNY, NEGATIVE_Y, 0);
+			//	texture->SetData(dataPZ, dataSizePZ, POSITIVE_Z, 0);
+			//	texture->SetData(dataNZ, dataSizeNZ, NEGATIVE_Z, 0);
+			//}
 		}
 		else
 		{
-			AnimaString filePath;
+			//AnimaString filePath;
+			//AUint width, height;
 
-			try
-			{
-				filePath = xmlTree.get<AnimaString>("AnimaTexture.File");
-			}
-			catch (boost::property_tree::ptree_bad_path& exception)
-			{
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
-				return nullptr;
-			}
-			catch (boost::property_tree::ptree_bad_data& exception)
-			{
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
-				return nullptr;
-			}
+			//try
+			//{
+			//	filePath = xmlTree.get<AnimaString>("AnimaTexture.File");
+			//}
+			//catch (boost::property_tree::ptree_bad_path& exception)
+			//{
+			//	printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
+			//	return nullptr;
+			//}
+			//catch (boost::property_tree::ptree_bad_data& exception)
+			//{
+			//	printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: %s\n", name.c_str(), exception.what());
+			//	return nullptr;
+			//}
 
-			AUchar *data = nullptr;
-			AUint dataSize;
+			//AUchar *data = nullptr;
+			//AUint dataSize;
 
-			GetTextureDataFromFile(filePath, &data, dataSize, width, height, guessedFormat);
-			if (data == nullptr || dataSize <= 0)
-			{
-				free(data);
-				printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePath.c_str());
-				return nullptr;
-			}
+			//GetTextureDataFromFile(filePath, &data, dataSize, width, height);
+			//if (data == nullptr || dataSize <= 0)
+			//{
+			//	free(data);
+			//	printf("[AnimaTexturesManager] Error reading AnimaTexture data:\n\t- Texture name '%s'\n\t- Error: unable to read the file '%s'\n", name.c_str(), filePath.c_str());
+			//	return nullptr;
+			//}
 
-			if (guessedFormat == FORMAT_NONE || guessedFormat == format)
-				texture->SetFormat(format);
-			else
-				texture->SetFormat(guessedFormat);
+			//if (guessedFormat == FORMAT_NONE || guessedFormat == format)
+			//	texture->SetFormat(format);
+			//else
+			//	texture->SetFormat(guessedFormat);
 
-			texture->SetInternalFormat(internalFormat);
-			texture->SetDataType(GL_UNSIGNED_BYTE);
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetFilter(LINEAR);
-			texture->SetClamp(TO_EDGE);
-			texture->SetTextureTarget(target);
+			//texture->SetInternalFormat(internalFormat);
+			//texture->SetDataType(GL_UNSIGNED_BYTE);
+			//texture->SetWidth(width);
+			//texture->SetHeight(height);
+			//texture->SetFilter(LINEAR);
+			//texture->SetClamp(TO_EDGE);
+			//texture->SetTextureTarget(target);
 
-			texture->SetData(data, dataSize);
+			//texture->SetData(data, dataSize, 0);
 		}
 	}
 	

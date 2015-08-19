@@ -10,6 +10,7 @@
 		<Data name="REN_GB_PrepassBuffer_AlbedoMap" type="TEXTURE2D" />
 		<Data name="REN_GB_LightsBuffer_EmissiveMap" type="TEXTURE2D" />
 		<Data name="REN_GB_LightsBuffer_SpecularMap" type="TEXTURE2D" />
+		<Data name="REN_GB_LightsBuffer_IrradianceMap" type="TEXTURE2D" />
 		<Data name="REN_AmbientLight" type="FLOAT3" />
 		<Data name="REN_ScreenSize" type="FLOAT2" />
 	</Datas>

@@ -21,6 +21,7 @@ typedef int				AInt;
 typedef char			AChar;
 typedef unsigned char	AUchar;
 typedef unsigned int	AUint;
+typedef unsigned long	ADword;
 
 typedef uint8_t		AU8;
 typedef uint16_t	AU16;

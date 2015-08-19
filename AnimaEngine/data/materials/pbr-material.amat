@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AnimaMaterial name="pbr-material">
 	<Properties>
-		<Property name="Albedo" type="color" value="0.560;0.570;0.580;1.0" />
+		<Property name="Albedo" type="color" value="1.0;1.0;1.0;1.0" />
 		<Property name="Specular" type="color" value="0.5;0.5;0.5;1.0" />
 		<Property name="Roughness" type="float" value="0.5" />
 		<Property name="Metallic" type="float" value="0.0" />

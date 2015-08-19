@@ -25,7 +25,8 @@ enum AnimaTextureFormat
 	FORMAT_NONE = 0, RED, GREEN, BLUE, RG, RGB, RGBA,
 	BGR, BGRA, RED_INT, GREEN_INT, BLUE_INT, 
 	RG_INT, RGB_INT, RGBA_INT, BGR_INT, BGRA_INT,
-	DEPTH
+	DEPTH,
+	COMPRESSED_RGBA_S3TC_DXT1_EXT, COMPRESSED_RGBA_S3TC_DXT3_EXT, COMPRESSED_RGBA_S3TC_DXT5_EXT
 };
 
 enum AnimaTextureInternalFormat
@@ -41,7 +42,8 @@ enum AnimaTextureInternalFormat
 	RG32UI, RGB8I, RGB8UI, RGB16I, RGB16UI, RGB32I, RGB32UI,
 	RGBA8I, RGBA8UI, RGBA16I, RGBA16UI, RGBA32I, RGBA32UI,
 	DEPTH16, DEPTH24, DEPTH32, DEPTH32F,
-	IF_RED, IF_RG, IF_RGB, IF_RGBA
+	IF_RED, IF_RG, IF_RGB, IF_RGBA,
+	ONE, TWO, THREE, FOUR
 };
 
 enum AnimaTextureClampMode
@@ -55,11 +57,21 @@ enum AnimaTextureFilterMode
 	LINEAR_MIPMAP_NEAREST, LINEAR_MIPMAP_LINEAR
 };
 
+enum AnimaTextureMaxSurfaces
+{
+	MAX_SURFACES = 16
+};
+
+class AnimaTextureSurface;
+
 class ANIMA_ENGINE_EXPORT AnimaTexture : public AnimaNamedObject
 {
 public:
 	AnimaTexture(AnimaAllocator* allocator);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth);
 	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize);
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -76,8 +88,14 @@ public:
 	void SetHeight(AUint height);
 	AUint GetHeight() const;
 
-	void SetMipMapLevels(AUint levels, bool generate);
+	void SetDepth(AUint depth);
+	AUint GetDepth() const;
+
+	void SetMipMapLevels(AUint levels);
 	AUint GetMipMapLevels() const;
+
+	void SetGenerateMipMap(bool generate);
+	bool IsGenerateMipMap() const;
 
 	void SetFormat(AnimaTextureFormat format);
 	AnimaTextureFormat GetFormat() const;
@@ -98,27 +116,29 @@ public:
 	 *	\brief		Imposta il buffer con i dati della texture
 	 *	\details	Imposta il buffer con i dati della texture
 					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
-	 *	\param[in]	data		Buffer con i dati della texture
-	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
+	 *	\param[in]	data			Buffer con i dati della texture
+	 *	\param[in]	dataSize		Lunghezza del buffer con i dati della texture
+	 *	\param[in]	surfaceIndex	Indice della superifice (mipmap) a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
 	 *	\return		Torna true se il target della texture è stato impostato per essere non una texture 3D, false altrimenti
 	 *	\author		Zille Marco
 	 */
-	bool SetData(AUchar* data, AUint dataSize);
+	bool SetData(AUchar* data, AUint dataSize, AUint surfaceIndex);
 
 	/*!
 	 *	\brief		Imposta il buffer con i dati della texture all'indice passato
 	 *	\details	Imposta il buffer con i dati della texture all'indice passato. Serve per impostare i dati delle varie texture nel caso
 					di texture 3D.
 					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
-	 *	\param[in]	data		Buffer con i dati della texture
-	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
-	 *	\param[in]	index		Indice su cui andare a copiare il buffer
+	 *	\param[in]	data			Buffer con i dati della texture
+	 *	\param[in]	dataSize		Lunghezza del buffer con i dati della texture
+	 *	\param[in]	index			Indice su cui andare a copiare il buffer
+	 *	\param[in]	surfaceIndex	Indice della superifice (mipmap) a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
 	 *	\return		Torna true se il target della texture è stato impostato per essere una texture 3D e l'indice è valido, false altrimenti
 	 *	\author		Zille Marco
 	 */
-	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index);
-	const AUchar* GetData() const;
-	const AUchar* GetData(AnimaTextureCubeIndex index) const;
+	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint surfaceIndex);
+	const AUchar* GetData(AUint surfaceIndex) const;
+	const AUchar* GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
@@ -149,12 +169,14 @@ private:
 private:
 	AUint _width;
 	AUint _height;
+	AUint _depth;
 
 	AUint _textureID;
 	AUint _frameBuffer;
 	AUint _renderBuffer;
 
-	AnimaArray<AnimaArray<AUchar> > _data;
+	//AnimaArray<AnimaArray<AUchar> > _data;
+	AnimaArray<AnimaArray<AnimaTextureSurface>> _surfaces;
 		
 	AnimaTextureTarget			_textureTarget;
 	AnimaTextureFilterMode		_filter;
@@ -180,6 +202,36 @@ public:
 	static AUint CubeIndexToPlatform(const AnimaTextureCubeIndex& index);
 	static AUint FormatToPlatform(const AnimaTextureFormat& format);
 	static AUint InternalFormatToPlatform(const AnimaTextureInternalFormat& internalFormat);
+};
+
+class AnimaTextureSurface
+{
+public:
+	AnimaTextureSurface();
+	AnimaTextureSurface(AUint width, AUint height, AUchar* data, AUint dataSize);
+	AnimaTextureSurface(const AnimaTextureSurface& src);
+	AnimaTextureSurface(AnimaTextureSurface&& src);
+	~AnimaTextureSurface();
+
+	AnimaTextureSurface& operator=(const AnimaTextureSurface& src);
+	AnimaTextureSurface& operator=(AnimaTextureSurface&& src);
+
+public:
+	void SetData(AUchar* data, AUint dataSize);
+	void CopyData(const AnimaTextureSurface& src);
+	const AUchar* GetData() const;
+
+	void SetWidth(AUint width);
+	AUint GetWidth() const;
+
+	void SetHeight(AUint height);
+	AUint GetHeight() const;
+	
+protected:
+	AnimaArray<AUchar> _data;
+
+	AUint _width;
+	AUint _height;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

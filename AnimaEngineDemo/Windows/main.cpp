@@ -283,8 +283,8 @@ bool InitEngine()
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
 	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/sponza.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/sponza.obj";
 
 //#if !defined _DEBUG
 //	Anima::AnimaString inputString;
@@ -389,7 +389,7 @@ bool InitEngine()
 		return false;
 	
 	//_model->GetTransformation()->RotateXDeg(-90.0);
-	//_model->GetTransformation()->RotateYDeg(180.0);
+	_model->GetTransformation()->RotateYDeg(180.0);
 
 	//_model = _scene->GetModelsManager()->CreateModel("ANIMA_ENGINE_DEMO_MODEL_NAME");
 	//Anima::AnimaMesh* mesh = _scene->GetMeshesManager()->CreateMesh("mesh");
@@ -402,8 +402,8 @@ bool InitEngine()
 
 	_pbrMaterial = materialsManager->GetMaterialFromName("pbr-material");
 
-	//for (int i = 0; i < modelMeshes.size(); i++)
-	//	modelMeshes[i]->SetMaterial(_pbrMaterial);
+	for (int i = 0; i < modelMeshes.size(); i++)
+		modelMeshes[i]->SetMaterial(_pbrMaterial);
 
 	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
 	////
@@ -429,8 +429,8 @@ bool InitEngine()
 	light->SetColor(1.0, 1.0, 1.0);
 	light->SetIntensity(0.8);
 	
-	//_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
-	_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
+	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
 
 	_animationsManager = _scene->GetAnimationsManager();
@@ -440,45 +440,12 @@ bool InitEngine()
 
 	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
 
-	unsigned char *dataPX = nullptr, *dataNX = nullptr, *dataPY = nullptr, *dataNY = nullptr, *dataPZ = nullptr, *dataNZ = nullptr;
-	unsigned int dataSizePX, dataSizeNX, dataSizePY, dataSizeNY, dataSizePZ, dataSizeNZ;
-	unsigned int width, height;
-	Anima::AnimaTextureFormat format;
+	Anima::AnimaTexture* textureEnv = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-env-texture");
+	textureEnv->SetFilter(Anima::LINEAR_MIPMAP_LINEAR);
+	_renderer->SetTexture("EnvironmentMap", textureEnv, false);
 
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negx.bmp", &dataPX, dataSizePX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posx.bmp", &dataNX, dataSizeNX, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negy.bmp", &dataPY, dataSizePY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posy.bmp", &dataNY, dataSizeNY, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/negz.bmp", &dataPZ, dataSizePZ, width, height, format);
-	texturesManager->GetTextureDataFromFile(dataPath + "/textures/Roma/posz.bmp", &dataNZ, dataSizeNZ, width, height, format);
-
-	Anima::AnimaTexture* texture = texturesManager->CreateTexture("skybox-map");
-	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
-	texture->SetData(dataPX, dataSizePX, Anima::POSITIVE_X);
-	texture->SetData(dataNX, dataSizeNX, Anima::NEGATIVE_X);
-	texture->SetData(dataPY, dataSizePY, Anima::POSITIVE_Y);
-	texture->SetData(dataNY, dataSizeNY, Anima::NEGATIVE_Y);
-	texture->SetData(dataPZ, dataSizePZ, Anima::POSITIVE_Z);
-	texture->SetData(dataNZ, dataSizeNZ, Anima::NEGATIVE_Z);
-
-	texture->SetInternalFormat(Anima::IF_RGB);
-	texture->SetFormat(Anima::BGR);
-	texture->SetDataType(GL_UNSIGNED_BYTE);
-	texture->SetWidth(width);
-	texture->SetHeight(height);
-	texture->SetFilter(Anima::LINEAR);
-	texture->SetClamp(Anima::TO_EDGE);
-	texture->SetTextureTarget(Anima::TEXTURE_CUBE);
-	//texture->SetMipMapLevels(5, true);
-
-	free(dataPX);
-	free(dataNX);
-	free(dataPY);
-	free(dataNY);
-	free(dataPZ);
-	free(dataNZ);
-
-	_renderer->SetTexture("EnvironmentMap", texture, false);
+	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", "dds-irr-texture");
+	_renderer->SetTexture("IrradianceMap", textureIrr, false);
 
 	return true;
 }
