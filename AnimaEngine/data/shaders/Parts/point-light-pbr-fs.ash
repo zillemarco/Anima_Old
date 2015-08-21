@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<AnimaShader name="directional-light-pbr-fs" type="FS">
+<AnimaShader name="point-light-pbr-fs" type="FS">
 	<Part api="OGL" minVersion="3.3">
 		<ShaderCode>
 			<![CDATA[
@@ -15,34 +15,16 @@
 			uniform samplerCube REN_IrradianceMap;
 			uniform vec2 REN_InverseScreenSize;
 
-			uniform vec2 REN_DILShadowMapTexelSize;
-			uniform sampler2D REN_DILShadowMap;
-
 			uniform vec3 CAM_Position;
 			uniform mat4 CAM_InverseProjectionViewMatrix;
 
-			uniform vec3 DIL_Direction;
-			uniform vec3 DIL_Color;
-			uniform float DIL_Intensity;
-			uniform mat4 DIL_ProjectionViewMatrix;
-			uniform float DIL_ShadowMapBias;
-
-			float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
-			{
-				vec2 pixelPos = coords / REN_DILShadowMapTexelSize + vec2(0.5f);
-				vec2 fractPart = fract(pixelPos);
-				vec2 startTexel = (pixelPos - fractPart) * REN_DILShadowMapTexelSize;
-
-				float bl = step(compare, texture(shadowMap, startTexel).r + DIL_ShadowMapBias);
-				float br = step(compare, texture(shadowMap, startTexel + vec2(REN_DILShadowMapTexelSize.x, 0.0f)).r + DIL_ShadowMapBias);
-				float tl = step(compare, texture(shadowMap, startTexel + vec2(0.0f, REN_DILShadowMapTexelSize.t)).r + DIL_ShadowMapBias);
-				float tr = step(compare, texture(shadowMap, startTexel + REN_DILShadowMapTexelSize).r + DIL_ShadowMapBias);
-
-				float mixA = mix(bl, tl, fractPart.y);
-				float mixB = mix(br, tr, fractPart.y);
-
-				return mix(mixA, mixB, fractPart.x);
-			}
+			uniform float PTL_Range;
+			uniform vec3 PTL_Position;
+			uniform vec3 PTL_Color;
+			uniform float PTL_Intensity;
+			uniform float PTL_ConstantAttenuation;
+			uniform float PTL_LinearAttenuation;
+			uniform float PTL_ExponentAttenuation;
 			
 			vec3 Diffuse(vec3 pAlbedo)
 			{
@@ -226,11 +208,12 @@
 				vec4 clip 			= CAM_InverseProjectionViewMatrix * vec4(genPos * 2.0f - 1.0f, 1.0f);
 				vec3 pos 			= clip.xyz / clip.w;
 
-				vec4 shadowCoord 	= DIL_ProjectionViewMatrix * vec4(pos, 1.0f);
-				shadowCoord 		/= shadowCoord.w;
-				shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
+				float dist 	= length(PTL_Position - pos);
 
-				float shadowAmount 	= 1.0;//ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z);
+				if(dist > PTL_Range)
+				{
+					discard;
+				}
 
 				vec3 albedoColor 			= albedoData.xyz;
 				vec3 specularColor 			= specularData.xyz;
@@ -238,7 +221,10 @@
 				float metallic				= specularData.w;
 				vec3 viewDir 				= normalize(CAM_Position - pos);
 				float reflectionIntensity 	= normalData.w;
-				
+
+				float atten 				= (PTL_ConstantAttenuation + PTL_LinearAttenuation * dist +  PTL_ExponentAttenuation * dist * dist + 0.00001);
+				vec3 lightDirection			= normalize(pos - PTL_Position);
+
 				// Colore dell'ambiente
 				vec3 reflectVector = reflect( -viewDir, normal);
 				float mipIndex =  roughness * roughness * 8.0f;
@@ -249,17 +235,17 @@
 
 			    vec3 irradiance = texture(REN_IrradianceMap, normal).rgb;
 
-				vec3 luce = ComputeLight(albedoColor, specularColor, normal, roughness, DIL_Color, -DIL_Direction, viewDir) * DIL_Intensity;
+				vec3 luce = ComputeLight(albedoColor, specularColor, normal, roughness, PTL_Color, -lightDirection, viewDir) * PTL_Intensity / atten;
 				vec3 fresnel = Specular_F_Roughness(specularColor, roughness * roughness, normal, viewDir) * envColor * reflectionIntensity;
 				
 				// luce
-				FragColor[0] = vec4(luce, 1.0f) * shadowAmount;
+				FragColor[0] = vec4(luce, 1.0f);
 				
 				// fresnel
-				FragColor[1] = vec4(fresnel, 1.0f) * shadowAmount;
+				FragColor[1] = vec4(fresnel, 1.0f);
 
 				// irradiance
-				FragColor[2] = vec4(irradiance, 1.0f) * shadowAmount;
+				FragColor[2] = vec4(irradiance, 1.0f);
 			}
 
 			]]>

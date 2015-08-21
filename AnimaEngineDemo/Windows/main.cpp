@@ -99,15 +99,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				_camera->RotateXDeg((float)yDelta);
 				_camera->RotateYDeg((float)xDelta);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 			}
 			else if (wParam == MK_LBUTTON)
 			{
 				_camera->Move(1.0, 0.0, 0.0, ((float)xDelta) / 100.0f);
 				_camera->Move(0.0, 1.0, 0.0, ((float)-yDelta) / 100.0f);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 			}
 			else if (wParam == MK_RBUTTON)
 			{
 				_camera->Zoom((float)xDelta);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 			}
 		}
 
@@ -307,10 +310,7 @@ bool InitEngine()
 	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
-	
-	//_model->GetTransformation()->RotateXDeg(-90.0);
-	_model->GetTransformation()->RotateYDeg(180.0);
-	
+		
 	_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
 	Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
 	floorModelMesh->MakePlane();
@@ -347,26 +347,107 @@ bool InitEngine()
 		modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
 
 	modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
-	modelInstance1->GetTransformation()->RotateYDeg(180.0);
 	modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
-	modelInstance2->GetTransformation()->RotateYDeg(180.0);
 	modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
-	modelInstance3->GetTransformation()->RotateYDeg(180.0);
 	modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
+
+	modelInstance1->GetTransformation()->RotateYDeg(180.0);
+	modelInstance2->GetTransformation()->RotateYDeg(180.0);
+	modelInstance3->GetTransformation()->RotateYDeg(180.0);
 	modelInstance4->GetTransformation()->RotateYDeg(180.0);
+
+	//modelInstance1->GetTransformation()->RotateXDeg(-90.0);
+	//modelInstance2->GetTransformation()->RotateXDeg(-90.0);
+	//modelInstance3->GetTransformation()->RotateXDeg(-90.0);
+	//modelInstance4->GetTransformation()->RotateXDeg(-90.0);
+	//modelInstance1->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	//modelInstance2->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	//modelInstance3->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	//modelInstance4->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
 
 	_floorModel->GetTransformation()->SetScale(200, 0, 200);
 
 	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
-
-	Anima::AnimaDirectionalLight* light = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
-	light->SetDirection(-1.0, -1.0, -1.0);
-	light->SetColor(1.0, 1.0, 1.0);
-	light->SetIntensity(0.8);
-	
+		
 	_camera->LookAt(0.0, 40.0, 100.0, 0.0, 15.0, 0.0);
 	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
+
+	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
+	directionalLight->SetDirection(-1.0, -1.0, -1.0);
+	directionalLight->SetColor(1.0, 1.0, 1.0);
+	directionalLight->SetIntensity(0.2);
+
+	Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
+	pointLight1->SetPosition(-40.0, 20.0, 0.0);
+	pointLight1->SetColor(1.0, 0.0, 0.0);
+	pointLight1->SetIntensity(1.0);
+	pointLight1->SetConstantAttenuation(1.0);
+	pointLight1->SetLinearAttenuation(0.0);
+	pointLight1->SetExponentAttenuation(0.0);
+	pointLight1->SetRange(200);
+
+	Anima::AnimaPointLight* pointLight2 = _scene->GetLightsManager()->CreatePointLight("light-2");
+	pointLight2->SetPosition(0.0, 20.0, 40.0);
+	pointLight2->SetColor(0.0, 1.0, 0.0);
+	pointLight2->SetIntensity(1.0);
+	pointLight2->SetConstantAttenuation(1.0);
+	pointLight2->SetLinearAttenuation(0.0);
+	pointLight2->SetExponentAttenuation(0.0);
+	pointLight2->SetRange(200);
+
+	Anima::AnimaPointLight* pointLight3 = _scene->GetLightsManager()->CreatePointLight("light-3");
+	pointLight3->SetPosition(40.0, 20.0, 0.0);
+	pointLight3->SetColor(1.0, 0.0, 1.0);
+	pointLight3->SetIntensity(1.0);
+	pointLight3->SetConstantAttenuation(1.0);
+	pointLight3->SetLinearAttenuation(0.0);
+	pointLight3->SetExponentAttenuation(0.0);
+	pointLight3->SetRange(200);
+
+	Anima::AnimaPointLight* pointLight4 = _scene->GetLightsManager()->CreatePointLight("light-4");
+	pointLight4->SetPosition(0.0, 20.0, -40.0);
+	pointLight4->SetColor(1.0, 0.0, 1.0);
+	pointLight4->SetIntensity(1.0);
+	pointLight4->SetConstantAttenuation(1.0);
+	pointLight4->SetLinearAttenuation(0.0);
+	pointLight4->SetExponentAttenuation(0.0);
+	pointLight4->SetRange(200);
+
+	Anima::AnimaPointLight* pointLight5 = _scene->GetLightsManager()->CreatePointLight("light-5");
+	pointLight5->SetPosition(-40.0, 20.0, -40.0);
+	pointLight5->SetColor(1.0, 0.5, 1.0);
+	pointLight5->SetIntensity(1.0);
+	pointLight5->SetConstantAttenuation(1.0);
+	pointLight5->SetLinearAttenuation(0.0);
+	pointLight5->SetExponentAttenuation(0.0);
+	pointLight5->SetRange(200);
+	Anima::AnimaPointLight* pointLight6 = _scene->GetLightsManager()->CreatePointLight("light-6");
+	pointLight6->SetPosition(40.0, 20.0, -40.0);
+	pointLight6->SetColor(1.0, 0.0, 0.5);
+	pointLight6->SetIntensity(1.0);
+	pointLight6->SetConstantAttenuation(1.0);
+	pointLight6->SetLinearAttenuation(0.0);
+	pointLight6->SetExponentAttenuation(0.0);
+	pointLight6->SetRange(200);
+	Anima::AnimaPointLight* pointLight7 = _scene->GetLightsManager()->CreatePointLight("light-7");
+	pointLight7->SetPosition(40.0, 20.0, 40.0);
+	pointLight7->SetColor(1.0, 1.0, .0);
+	pointLight7->SetIntensity(1.0);
+	pointLight7->SetConstantAttenuation(1.0);
+	pointLight7->SetLinearAttenuation(0.0);
+	pointLight7->SetExponentAttenuation(0.0);
+	pointLight7->SetRange(200);
+	Anima::AnimaPointLight* pointLight8 = _scene->GetLightsManager()->CreatePointLight("light-8");
+	pointLight8->SetPosition(-40.0, 20.0, 40.0);
+	pointLight8->SetColor(1.0, 1.0, 1.0);
+	pointLight8->SetIntensity(1.0);
+	pointLight8->SetConstantAttenuation(1.0);
+	pointLight8->SetLinearAttenuation(0.0);
+	pointLight8->SetExponentAttenuation(0.0);
+	pointLight8->SetRange(200);
+
+	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 
 	_animationsManager = _scene->GetAnimationsManager();
 

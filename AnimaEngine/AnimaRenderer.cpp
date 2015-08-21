@@ -190,7 +190,7 @@ void AnimaRenderer::InitTextureSlots()
 	SetTextureSlot("NormalMap", 2);
 	SetTextureSlot("EmissiveMap", 3);
 	SetTextureSlot("SpecularMap", 4);
-	SetTextureSlot("ShadowMap", 5);
+	SetTextureSlot("DILShadowMap", 5);
 	SetTextureSlot("SkyBox", 6);
 	SetTextureSlot("EnvironmentMap", 7);
 	SetTextureSlot("IrradianceMap", 8);
@@ -297,6 +297,7 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			directionalLightShadowMapTexture->SetClampT(TEXTURE_CLAMP_TO_BORDER);
 			directionalLightShadowMapTexture->SetClampR(TEXTURE_CLAMP_TO_BORDER);
 			directionalLightShadowMapTexture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
+			directionalLightShadowMapTexture->SetBorderColor(AnimaColor4f(1.0f, 1.0f, 1.0f, 1.0f));
 			
 			ANIMA_ASSERT(directionalLightShadowMapTexture->LoadRenderTargets());
 			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
@@ -327,8 +328,6 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 
 		SetVector("ScreenSize", (AFloat)screenWidth, (AFloat)screenHeight);
 		SetVector("InverseScreenSize", 1.0f / (AFloat)screenWidth, 1.0f / (AFloat)screenHeight);
-
-		printf("New screen size: %.0f x %.0f\n", (AFloat)screenWidth, (AFloat)screenHeight);
 	}
 }
 
@@ -355,6 +354,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 
 	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
 	SetFloat("SSAODistanceThreshold", 5.0f);
+	SetVector("DILShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	
 	//
 	// Inizializzazione delle mesh di supporto
@@ -371,7 +371,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	//_meshesMap[nameSkyMesh] = skyMesh;
 
 	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();
-	ptlMesh->MakeIcosahedralSphere(3);
+	ptlMesh->MakeIcosahedralSphere(2);
 
 	AnimaMesh* dilMesh = CreateMeshForLightType<AnimaDirectionalLight>();
 	dilMesh->MakePlane();
@@ -782,8 +782,10 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 		if (size == 0)
 			continue;
 		
-		if(lightsArray->at(0)->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
+		if (lightsArray->at(0)->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
 			renderer->DirectionalLightsPass(lightsArray);
+		else if (lightsArray->at(0)->IsOfClass(ANIMA_CLASS_NAME(AnimaPointLight)))
+			renderer->PointLightsPass(lightsArray);
 	}
 	
 	glDepthMask(GL_TRUE);
@@ -847,6 +849,60 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	}
 }
 
+void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
+{
+	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
+	AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+
+	AnimaString type = ANIMA_CLASS_NAME(AnimaPointLight);
+	auto lightMeshPair = _meshesMap.find(type);
+
+	ANIMA_ASSERT(lightMeshPair != _meshesMap.end());
+	ANIMA_ASSERT(pointLights->at(0)->CreateShader(shadersManager));
+
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName(pointLights->at(0)->GetShaderName());
+	AnimaMesh* mesh = lightMeshPair->second;
+
+	AnimaShaderProgram* activeProgram = nullptr;
+	AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
+
+	AInt count = pointLights->size();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaPointLight* light = (AnimaPointLight*)pointLights->at(i);
+
+		//if (light->GetBoolean("CastShadows"))
+		//	UpdateDirectionalLightShadowMap(light);
+
+		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
+		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDepthMask(GL_FALSE);
+
+		activeProgram = shadersManager->GetActiveProgram();
+		if (activeProgram == nullptr || (*activeProgram) != (*program))
+		{
+			program->Use();
+			program->UpdateSceneObjectProperties(activeCamera, this);
+		}
+
+		if (mesh->NeedsBuffersUpdate())
+			mesh->UpdateBuffers();
+
+		light->UpdateMeshTransformation(mesh->GetTransformation());
+		light->UpdateCullFace(activeCamera);
+
+		program->UpdateSceneObjectProperties(light, this);
+		program->UpdateRenderingManagerProperies(this);
+
+		mesh->Draw(this, program, false);
+
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+	}
+}
+
 void AnimaRenderer::UpdateShadowMap(AnimaLight* light)
 {
 	if(light->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
@@ -861,7 +917,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 	
 	AnimaTexture* shadowMap = GetTexture("DILShadowMap");
-	AnimaShaderProgram* program = shadersManager->GetProgramFromName("DILShadow");
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName("dil-shadow-map");
 	
 	shadowMap->BindAsRenderTarget();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1458,39 +1514,43 @@ void AnimaRenderer::ClearPrimitives()
 
 bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath)
 {
-	Anima::AnimaShadersManager* shadersManager = _engine->GetShadersManager();
+	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
+	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
 	if (!prepareProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
+	AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
 	if (!directionalLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
+	AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
 	if (!skyboxProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
+	AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
 	if (!hemisphereLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light.asp");
+	AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light-pbr.asp");
 	if (!pointLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
+	AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
 	if (!spotLightProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
+	AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
 	if (!nullFilterProgram->Link())
 		return false;
 
-	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
+	AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	if (!combineProgram->Link())
+		return false;
+
+	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map.asp");
+	if (!directionalLightShadowMapProgram->Link())
 		return false;
 	
 	return true;

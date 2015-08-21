@@ -360,7 +360,7 @@ AUint AnimaTexture::GetDepth() const
 
 void AnimaTexture::SetMipMapLevels(AUint levels)
 {
-	_mipMapLevels = fmin(TEXUTRE_MAX_SURFACES, levels);
+	_mipMapLevels = fmin((AUint)TEXUTRE_MAX_SURFACES, levels);
 
 	AInt count = _faces.size();
 	for (AInt i = 0; i < count; i++)
@@ -689,15 +689,21 @@ bool AnimaTexture::Load()
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, clampS);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, clampT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_R, clampR);
-		
-		if(GLEW_ARB_seamless_cubemap_per_texture)
-			glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
-		else if(GLEW_ARB_seamless_cube_map)
-			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		
+
 		if (glGetError() != GL_NO_ERROR)
 			return false;
 
+		glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		if (glGetError() != GL_NO_ERROR)
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			if (glGetError() != GL_NO_ERROR)
+				return false;
+		}
+
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+		
 		for (AInt i = 0; i < 6; i++)
 		{
 			if (_mipMapLevels == 0 || _generateMipMaps)

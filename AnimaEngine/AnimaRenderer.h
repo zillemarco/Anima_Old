@@ -101,6 +101,7 @@ protected:
 	virtual void UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light);
 	
 	virtual void DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLights);
+	virtual void PointLightsPass(AnimaArray<AnimaLight*>* pointLights);
 	
 	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
 	

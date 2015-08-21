@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<AnimaShaderProgram name="directional-light">
+<AnimaShaderProgram name="point-light">
 	<Shaders>
-		<Shader name="directional-light-pbr-fs" />
-		<Shader name="directional-light-vs" />
+		<Shader name="point-light-pbr-fs" />
+		<Shader name="point-light-vs" />
 	</Shaders>
 	<Datas>
 		<Data name="MOD_AModelMatrix" type="MATRIX4x4" />
@@ -13,14 +13,15 @@
 		<Data name="REN_EnvironmentMap" type="TEXTURECUBE" />
 		<Data name="REN_IrradianceMap" type="TEXTURECUBE" />
 		<Data name="REN_InverseScreenSize" type="FLOAT2" />
-		<Data name="REN_DILShadowMapTexelSize" type="FLOAT2" />
-		<Data name="REN_DILShadowMap" type="TEXTURE2D" />
 		<Data name="CAM_Position" type="FLOAT3" />
 		<Data name="CAM_InverseProjectionViewMatrix" type="MATRIX4x4" />
-		<Data name="DIL_Direction" type="FLOAT3" />
-		<Data name="DIL_Color" type="FLOAT3" />
-		<Data name="DIL_Intensity" type="FLOAT" />
-		<Data name="DIL_ProjectionViewMatrix" type="MATRIX4x4" />
-		<Data name="DIL_ShadowMapBias" type="FLOAT" />
+		<Data name="CAM_ProjectionViewMatrix" type="MATRIX4x4" />
+		<Data name="PTL_Range" type="FLOAT" />
+		<Data name="PTL_Position" type="FLOAT3" />
+		<Data name="PTL_Color" type="FLOAT3" />
+		<Data name="PTL_Intensity" type="FLOAT" />
+		<Data name="PTL_ConstantAttenuation" type="FLOAT" />
+		<Data name="PTL_LinearAttenuation" type="FLOAT" />
+		<Data name="PTL_ExponentAttenuation" type="FLOAT" />
 	</Datas>
 </AnimaShaderProgram>
