@@ -49,6 +49,7 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 
 	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
 	AnimaSceneObject::SetFloat("Intensity", 1.0f);
+	AnimaSceneObject::SetBoolean("CastShadows", false);
 }
 
 AnimaLight::AnimaLight(const AnimaLight& src)
@@ -235,6 +236,7 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	AnimaLight::SetVector("Direction", AnimaVertex3f(-1.0f, -1.0f, -1.0f).Normalized());
 	AnimaLight::SetVector("ShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
+	AnimaLight::SetBoolean("CastShadows", true);
 	
 	ComputeLightMatrix(nullptr);
 }

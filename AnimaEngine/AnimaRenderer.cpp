@@ -280,6 +280,28 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
 		
+		AnimaTexture* directionalLightShadowMapTexture = GetTexture("DILShadowMap");
+		if(directionalLightShadowMapTexture == nullptr)
+		{
+			AUint w = 1024;
+			AUint h = 1024;
+			
+			directionalLightShadowMapTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DILShadowMap", w, h, nullptr, 0);
+			directionalLightShadowMapTexture->SetTextureTarget(TEXTURE_TARGET_2D);
+			directionalLightShadowMapTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			directionalLightShadowMapTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			directionalLightShadowMapTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
+			directionalLightShadowMapTexture->SetFormat(TEXTURE_FORMAT_DEPTH);
+			directionalLightShadowMapTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			directionalLightShadowMapTexture->SetClampS(TEXTURE_CLAMP_TO_BORDER);
+			directionalLightShadowMapTexture->SetClampT(TEXTURE_CLAMP_TO_BORDER);
+			directionalLightShadowMapTexture->SetClampR(TEXTURE_CLAMP_TO_BORDER);
+			directionalLightShadowMapTexture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
+			
+			ANIMA_ASSERT(directionalLightShadowMapTexture->LoadRenderTargets());
+			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
+		}
+		
 		//AnimaTexture* diffuse2Texture = GetTexture("Diffuse2Map");
 		//if(diffuse2Texture != nullptr)
 		//	diffuse2Texture->Resize(screenWidth, screenHeight);
@@ -740,30 +762,19 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 	AnimaCamera* activeCamera = renderer->_scene->GetCamerasManager()->GetActiveCamera();
 	if (activeCamera == nullptr)
 		return;
-
-	ANIMA_FRAME_PUSH("LightPass");
-
-	ANIMA_FRAME_PUSH("BindTarget");
-	renderer->GetGBuffer("LightsBuffer")->BindAsRenderTarget();
-	ANIMA_FRAME_POP();
-
-	ANIMA_FRAME_PUSH("Setup");
-	renderer->Start();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glDepthMask(GL_FALSE);
-	ANIMA_FRAME_POP();
-
-	ANIMA_FRAME_PUSH("Lightning");
+	
 	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
-	AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	
-	AnimaShaderProgram* activeProgram = nullptr;
-
+	
+	// Pulisco i buffer per le luci
+	renderer->GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	renderer->Start();
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	
 	for (auto pair : (*lightsMap))
 	{
 		AnimaArray<AnimaLight*>* lightsArray = pair.second->GetArray();
@@ -771,54 +782,120 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 		if (size == 0)
 			continue;
 		
-		AnimaString type = typeid((*lightsArray->at(0))).name();
-		auto lightMeshPair = renderer->_meshesMap.find(type);
-
-		ANIMA_ASSERT(lightMeshPair != renderer->_meshesMap.end());
-		ANIMA_ASSERT(lightsArray->at(0)->CreateShader(renderer->_scene->GetShadersManager()));
-
-		AnimaString name = lightsArray->at(0)->_GetClassName();
-
-		AnimaShaderProgram* program = shadersManager->GetProgramFromName(lightsArray->at(0)->GetShaderName());
-		AnimaMesh* mesh = lightMeshPair->second;
-
-		activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
-
-		if (activeProgram == nullptr || (*activeProgram) != (*program))
-		{
-			program->Use();
-			program->UpdateSceneObjectProperties(activeCamera, renderer);
-		}
-
-		if (mesh->NeedsBuffersUpdate())
-			mesh->UpdateBuffers();
-
-		for (AInt i = 0; i < size; i++)
-		{
-			AnimaLight* light = lightsArray->at(i);
-
-			light->UpdateMeshTransformation(mesh->GetTransformation());
-			light->UpdateCullFace(activeCamera);
-
-			program->UpdateSceneObjectProperties(light, renderer);
-			program->UpdateRenderingManagerProperies(renderer);
-
-			mesh->Draw(renderer, program, false);
-
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-		}
+		if(lightsArray->at(0)->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
+			renderer->DirectionalLightsPass(lightsArray);
 	}
-	ANIMA_FRAME_POP();
-
-	ANIMA_FRAME_PUSH("Finish");
+	
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
 	glBlendFunc(GL_ONE, GL_ZERO);
+	
 	renderer->Finish();
-	ANIMA_FRAME_POP();
+}
 
-	ANIMA_FRAME_POP();
+void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLights)
+{
+	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
+	AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+	
+	AnimaString type = ANIMA_CLASS_NAME(AnimaDirectionalLight);
+	auto lightMeshPair = _meshesMap.find(type);
+	
+	ANIMA_ASSERT(lightMeshPair != _meshesMap.end());
+	ANIMA_ASSERT(directionalLights->at(0)->CreateShader(shadersManager));
+	
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName(directionalLights->at(0)->GetShaderName());
+	AnimaMesh* mesh = lightMeshPair->second;
+	
+	AnimaShaderProgram* activeProgram = nullptr;
+	AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
+	
+	AInt count = directionalLights->size();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
+		
+		if(light->GetBoolean("CastShadows"))
+			UpdateDirectionalLightShadowMap(light);
+		
+		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
+		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDepthMask(GL_FALSE);
+		
+		activeProgram = shadersManager->GetActiveProgram();
+		if (activeProgram == nullptr || (*activeProgram) != (*program))
+		{
+			program->Use();
+			program->UpdateSceneObjectProperties(activeCamera, this);
+		}
+		
+		if (mesh->NeedsBuffersUpdate())
+			mesh->UpdateBuffers();
+		
+		light->UpdateMeshTransformation(mesh->GetTransformation());
+		light->UpdateCullFace(activeCamera);
+		
+		program->UpdateSceneObjectProperties(light, this);
+		program->UpdateRenderingManagerProperies(this);
+		
+		mesh->Draw(this, program, false);
+		
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+	}
+}
+
+void AnimaRenderer::UpdateShadowMap(AnimaLight* light)
+{
+	if(light->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
+	{
+		UpdateDirectionalLightShadowMap((AnimaDirectionalLight*)light);
+	}
+}
+
+void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light)
+{
+	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
+	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	
+	AnimaTexture* shadowMap = GetTexture("DILShadowMap");
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName("DILShadow");
+	
+	shadowMap->BindAsRenderTarget();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	
+	program->Use();
+	program->UpdateSceneObjectProperties(light, this);
+	program->UpdateRenderingManagerProperies(this);
+	
+	AInt nMeshes = meshesManager->GetMeshesCount();
+	for (AInt j = 0; j < nMeshes; j++)
+	{
+		DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
+		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+		//
+		//	glCullFace(GL_FRONT);
+		//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+		//	glCullFace(GL_BACK);
+		//
+		//	AInt meshCount = innerModel->GetMeshesCount();
+		//	for (AInt i = 0; i < meshCount; i++)
+		//	{
+		//		glCullFace(GL_FRONT);
+		//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+		//		glCullFace(GL_BACK);
+		//	}
+		//
+		//	AInt childrenCount = innerModel->GetChildrenCount();
+		//	for (AInt i = 0; i < childrenCount; i++)
+		//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+	}
 }
 
 void AnimaRenderer::CombinePass(AnimaRenderer* renderer)

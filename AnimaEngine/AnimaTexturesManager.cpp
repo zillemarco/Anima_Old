@@ -37,31 +37,31 @@ enum DXGIResourceDimension {
 };
 
 typedef struct {
-	ADword dwSize;
-	ADword dwFlags;
-	ADword dwFourCC;
-	ADword dwRGBBitCount;
-	ADword dwRBitMask;
-	ADword dwGBitMask;
-	ADword dwBBitMask;
-	ADword dwABitMask;
+	AUint dwSize;
+	AUint dwFlags;
+	AUint dwFourCC;
+	AUint dwRGBBitCount;
+	AUint dwRBitMask;
+	AUint dwGBitMask;
+	AUint dwBBitMask;
+	AUint dwABitMask;
 } DDSPixelFormat;
 
 typedef struct {
-	ADword			dwSize;
-	ADword			dwFlags;
-	ADword			dwHeight;
-	ADword			dwWidth;
-	ADword			dwPitchOrLinearSize;
-	ADword			dwDepth;
-	ADword			dwMipMapCount;
-	ADword			dwReserved1[11];
+	AUint			dwSize;
+	AUint			dwFlags;
+	AUint			dwHeight;
+	AUint			dwWidth;
+	AUint			dwPitchOrLinearSize;
+	AUint			dwDepth;
+	AUint			dwMipMapCount;
+	AUint			dwReserved1[11];
 	DDSPixelFormat	ddspf;
-	ADword			dwCaps;
-	ADword			dwCaps2;
-	ADword			dwCaps3;
-	ADword			dwCaps4;
-	ADword			dwReserved2;
+	AUint			dwCaps;
+	AUint			dwCaps2;
+	AUint			dwCaps3;
+	AUint			dwCaps4;
+	AUint			dwReserved2;
 } DDSFileHeader;
 
 typedef struct {
@@ -235,7 +235,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 		if (texture != nullptr)
 		{
 			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = max(mipMapsCount, 1);
+			mipMapsCount = fmax(mipMapsCount, 1);
 
 			if (format != 0 && internalFormat != 0)
 			{
@@ -396,14 +396,13 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	}
 
 	// Leggo la testata del file che è sempre di 124 bytes
-	fread(&header, 124, 1, file);
+	fread(&header, sizeof(DDSFileHeader), 1, file);
 
 	DDSPixelFormat pixelFormat = header.ddspf;
-	AUint fourCC = pixelFormat.dwFourCC;
 
 	height = header.dwHeight;
 	width = header.dwWidth;
-	depth = max(1, header.dwDepth);
+	depth = fmax(1, header.dwDepth);
 	mipMapsCount = header.dwMipMapCount;
 
 	if (header.dwCaps2 & 0x200)
@@ -450,7 +449,7 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 			buf[3] = (fourCC >> 24) & 255;
 			buf[4] = 0;
 
-			printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown compression format %s", filePath.c_str(), buf);
+			printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown compression format %s\n", filePath.c_str(), buf);
 
 			fclose(file);
 			return false;
@@ -472,14 +471,14 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	}
 	else if (pixelFormat.dwRGBBitCount == 8)
 	{
-		printf("Error reading texture\n\t- File path: %s\n\t- Error: unable to load luminance texture", filePath.c_str());
+		printf("Error reading texture\n\t- File path: %s\n\t- Error: unable to load luminance texture\n", filePath.c_str());
 
 		fclose(file);
 		return false;
 	}
 	else
 	{
-		printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown format", filePath.c_str());
+		printf("Error reading texture\n\t- File path: %s\n\t- Error: unknown format\n", filePath.c_str());
 
 		fclose(file);
 		return false;
@@ -523,9 +522,9 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 		offset++;
 
 		// Divido le dimensioni per due
-		AUint w = max(1, width >> 1);
-		AUint h = max(1, height >> 1);
-		AUint d = max(1, depth >> 1);
+		AUint w = fmax(1, width >> 1);
+		AUint h = fmax(1, height >> 1);
+		AUint d = fmax(1, depth >> 1);
 
 		for (AInt j = 0; j < numMipMaps && (w || h); j++)
 		{
@@ -544,9 +543,9 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 			offset++;
 
 			// Divido le dimensioni per due ancora
-			w = max(1, w >> 1);
-			h = max(1, h >> 1);
-			d = max(1, d >> 1);
+			w = fmax(1, w >> 1);
+			h = fmax(1, h >> 1);
+			d = fmax(1, d >> 1);
 		}
 	}
 
@@ -596,7 +595,7 @@ bool AnimaTexturesManager::GetUncompressedTGAData(FILE * file, AnimaArray<AUchar
 	AUint bufferSize = (tga.bytesPerPixel * tga.Width * tga.Height);
 	AUchar* buffer = (AUchar*)malloc(bufferSize);
 
-	if (*buffer == NULL)
+	if (buffer == NULL)
 	{
 		fclose(file);
 		return false;

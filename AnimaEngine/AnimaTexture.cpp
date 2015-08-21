@@ -360,7 +360,7 @@ AUint AnimaTexture::GetDepth() const
 
 void AnimaTexture::SetMipMapLevels(AUint levels)
 {
-	_mipMapLevels = min(TEXUTRE_MAX_SURFACES, levels);
+	_mipMapLevels = fmin(TEXUTRE_MAX_SURFACES, levels);
 
 	AInt count = _faces.size();
 	for (AInt i = 0; i < count; i++)
@@ -375,8 +375,8 @@ void AnimaTexture::SetMipMapLevels(AUint levels)
 			_faces[i][j - 1].SetWidth(w);
 			_faces[i][j - 1].SetHeight(h);
 
-			w = max(1, w / 2);
-			h = max(1, h / 2);
+			w = fmax(1, w / 2);
+			h = fmax(1, h / 2);
 		}
 	}
 }
@@ -477,8 +477,8 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AUint mipMapIndex)
 
 				_faces[0][i - 1] = surface;
 
-				w = max(1, w / 2);
-				h = max(1, h / 2);
+				w = fmax(1, w / 2);
+				h = fmax(1, h / 2);
 			}
 		}
 
@@ -516,8 +516,8 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex i
 
 					_faces[i][j - 1] = surface;
 
-					w = max(1, w / 2);
-					h = max(1, h / 2);
+					w = fmax(1, w / 2);
+					h = fmax(1, h / 2);
 				}
 			}
 		}
@@ -689,7 +689,12 @@ bool AnimaTexture::Load()
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, clampS);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, clampT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_R, clampR);
-		glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		
+		if(GLEW_ARB_seamless_cubemap_per_texture)
+			glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		else if(GLEW_ARB_seamless_cube_map)
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		
 		if (glGetError() != GL_NO_ERROR)
 			return false;
 

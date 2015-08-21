@@ -97,6 +97,10 @@ protected:
 
 protected:
 	virtual void UpdateShadowMaps(AnimaShaderProgram* program);
+	virtual void UpdateShadowMap(AnimaLight* light);
+	virtual void UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light);
+	
+	virtual void DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLights);
 	
 	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
 	
@@ -201,7 +205,7 @@ protected:
 template<class T> 
 AnimaMesh* AnimaRenderer::CreateMeshForLightType()
 {
-	AnimaString type = typeid(T).name();
+	AnimaString type = ANIMA_CLASS_NAME(T);
 
 	auto pair = _meshesMap.find(type);
 	if (pair != _meshesMap.end())
