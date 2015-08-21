@@ -29,6 +29,8 @@ enum AnimaShaderInfoType {
 
 class ANIMA_ENGINE_EXPORT AnimaShaderProgram : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaShaderProgram);
+
 public:
 	struct AnimaShaderInfo {
 		AnimaString			_text;

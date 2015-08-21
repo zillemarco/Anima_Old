@@ -25,6 +25,8 @@ class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaSceneObject : public AnimaMappedValues
 {
+	DECLARE_ANIMA_CLASS(AnimaSceneObject);
+
 	friend class AnimaShaderProgram;
 	friend class AnimaScene;
 	friend class AnimaMappedValues;

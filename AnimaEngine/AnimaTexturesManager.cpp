@@ -158,16 +158,14 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& fileP
 	if (index >= 0)
 		return nullptr;
 
-	AUchar* data;
-	AUint dataSize;
+	AnimaArray<AUchar> data;
 	AUint width;
 	AUint height;
 
 	// Provo a leggere una texture qualsiasi
-	if (GetTextureDataFromFile(filePath, &data, dataSize, width, height))
+	if (GetTextureDataFromFile(filePath, &data, width, height))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, data, dataSize);
-		free(data);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
 		return texture;
 	}
 	// Se non ha funzionato provo a leggere la texture come file DDS
@@ -182,16 +180,14 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& fi
 	AInt index = _textures.Contains(textureName);
 	if (index >= 0)
 		return nullptr;
-	
-	AUchar* data;
-	AUint dataSize;
+
+	AnimaArray<AUchar> data;
 	AUint width;
 	AUint height;
 
-	if (GetTextureDataFromBMPFile(filePath, &data, dataSize, width, height))
+	if (GetTextureDataFromBMPFile(filePath, &data, width, height))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, 0, data, dataSize);
-		free(data);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
 		return texture;
 	}
 
@@ -204,15 +200,13 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 	if (index >= 0)
 		return nullptr;
 
-	AUchar* data;
-	AUint dataSize;
+	AnimaArray<AUchar> data;
 	AUint width;
 	AUint height;
 
-	if (GetTextureDataFromTGAFile(filePath, &data, dataSize, width, height))
+	if (GetTextureDataFromTGAFile(filePath, &data, width, height))
 	{
-		AnimaTexture* texture = CreateTexture(textureName, width, height, 0, data, dataSize);
-		free(data);
+		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
 		return texture;
 	}
 
@@ -226,7 +220,6 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 		return nullptr;
 
 	AnimaArray<AnimaArray<AUchar> > data;
-	AnimaArray<AUint> dataSize;
 	AUint width;
 	AUint height;
 	AUint depth;
@@ -236,7 +229,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 	AnimaTextureInternalFormat internalFormat;
 	AnimaTextureTarget target;
 	
-	if (GetTextureDataFromDDSFile(filePath, &data, &dataSize, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	if (GetTextureDataFromDDSFile(filePath, &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
 		AnimaTexture* texture = CreateTexture(textureName, width, height, depth);
 		if (texture != nullptr)
@@ -254,7 +247,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 			texture->SetMipMapLevels(mipMapsCount);
 
 			// se il target è una texture cube devo comportarmi diversamente
-			if (target == TEXTURE_CUBE)
+			if (target == TEXTURE_TARGET_CUBE)
 			{
 				AInt offset = 0;
 				for (AUint i = 0; i < imagesCount; i++)
@@ -262,7 +255,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 					for (AUint j = 0; j < mipMapsCount; j++)
 					{
 						AUchar* buffer = &data[offset][0];
-						AUint bufferSize = dataSize[offset];
+						AUint bufferSize = data[offset].size();
 
 						texture->SetData(buffer, bufferSize, (AnimaTextureCubeIndex)i, j);
 
@@ -278,7 +271,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 					for (AUint j = 0; j < mipMapsCount; j++)
 					{
 						AUchar* buffer = &data[offset][0];
-						AUint bufferSize = dataSize[offset];
+						AUint bufferSize = data[offset].size();
 
 						texture->SetData(buffer, bufferSize, j);
 
@@ -294,16 +287,13 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 	return nullptr;
 }
 
-AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint depth)
+AnimaTexture* AnimaTexturesManager::LoadTextureFromData(const AnimaString& textureName, AUchar* data, AUint dataSize, AUint width, AUint height, AUint depth)
 {
 	return CreateTexture(textureName, width, height, depth, data, dataSize);
 }
 
-bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
+bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height)
 {
-	if (data == nullptr || *data != nullptr)
-		return false;
-
 	AInt pos = filePath.rfind('.');
 	if (pos == -1)
 		return false;
@@ -312,54 +302,53 @@ bool AnimaTexturesManager::GetTextureDataFromFile(const AnimaString& filePath, A
 	AnimaString ext = filePath.substr(pos);
 
 	if (ext.compare("bmp") == 0)
-		return GetTextureDataFromBMPFile(filePath, data, dataSize, width, height);
+		return GetTextureDataFromBMPFile(filePath, data, width, height);
 	else if (ext.compare("tga") == 0)
-		return GetTextureDataFromTGAFile(filePath, data, dataSize, width, height);
+		return GetTextureDataFromTGAFile(filePath, data, width, height);
 
 	return false;
 }
 
-bool AnimaTexturesManager::GetTextureDataFromBMPFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
+bool AnimaTexturesManager::GetTextureDataFromBMPFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height)
 {
-	if (data == nullptr || *data != nullptr)
-		return false;
-
-	unsigned char header[54];
-	unsigned int dataPos;
+	AUchar header[54];
+	AUint dataPos;
 	
 	FILE * file = fopen(filePath.c_str(), "rb");
 	if (!file)
-		return nullptr;
+		return false;
 
 	if (fread(header, 1, 54, file) != 54)
-		return nullptr;
+		return false;
 
 	if (header[0] != 'B' || header[1] != 'M')
-		return nullptr;
+		return false;
 
 	dataPos = *(int*)&(header[0x0A]);
-	dataSize = *(int*)&(header[0x22]);
+	AUint bufferSize = *(int*)&(header[0x22]);
 	width = *(int*)&(header[0x12]);
 	height = *(int*)&(header[0x16]);
 
-	if (dataSize == 0)
-		dataSize = width * height * 3;
+	if (bufferSize == 0)
+		bufferSize = width * height * 3;
 
 	if (dataPos == 0)
 		dataPos = 54;
 
-	*data = (AUchar*)malloc(dataSize * sizeof(AUchar));
-	fread(*data, 1, dataSize, file);
+	AUchar* buffer = (AUchar*)malloc(bufferSize * sizeof(AUchar));
+	fread(buffer, 1, bufferSize, file);
 	fclose(file);
+
+	data->resize(bufferSize);
+	data->assign(buffer, buffer + bufferSize);
+
+	free(buffer);
 
 	return true;
 }
 
-bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
+bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height)
 {
-	if (data == nullptr || *data != nullptr)
-		return false;
-
 	FILE* file;
 	file = fopen(filePath.c_str(), "rb");
 
@@ -375,9 +364,9 @@ bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath
 	}
 
 	if (memcmp(animaUTGAcompareRGBA, &tgaHeader, sizeof(tgaHeader)) == 0 || memcmp(animaUTGAcompareBW, &tgaHeader, sizeof(tgaHeader)) == 0)
-		return GetUncompressedTGAData(file, data, dataSize, width, height);
+		return GetUncompressedTGAData(file, data, width, height);
 	else if (memcmp(animaCTGAcompare, &tgaHeader, sizeof(tgaHeader)) == 0)
-		return GetCompressedTGAData(file, data, dataSize, width, height);
+		return GetCompressedTGAData(file, data, width, height);
 	else
 	{
 		fclose(file);
@@ -387,7 +376,7 @@ bool AnimaTexturesManager::GetTextureDataFromTGAFile(const AnimaString& filePath
 }
 
 // riferimento pagina ftp://download.nvidia.com/developer/GPU_Gems/CD_Image/Image_Processing/Image_Processing_Framework/LIBS/src/nv_dds/nv_dds.cpp
-bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AnimaArray<AnimaArray<AUchar>>* data, AnimaArray<AUint>* dataSize, AUint& imagesCount, AUint& width, AUint& height, AUint& depth, AUint& mipMapsCount, AnimaTextureFormat& format, AnimaTextureInternalFormat& internalFormat, AnimaTextureTarget& target)
+bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath, AnimaArray<AnimaArray<AUchar> >* data, AUint& imagesCount, AUint& width, AUint& height, AUint& depth, AUint& mipMapsCount, AnimaTextureFormat& format, AnimaTextureInternalFormat& internalFormat, AnimaTextureTarget& target)
 {
 	DDSFileHeader header;
 
@@ -418,11 +407,11 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	mipMapsCount = header.dwMipMapCount;
 
 	if (header.dwCaps2 & 0x200)
-		target = TEXTURE_CUBE;
+		target = TEXTURE_TARGET_CUBE;
 	else if (header.dwCaps2 & 0x200000)
-		target = TEXTURE_3D;
+		target = TEXTURE_TARGET_3D;
 	else
-		target = TEXTURE_2D;
+		target = TEXTURE_TARGET_2D;
 
 	bool compressed = false;
 	AUint blockSize = 16;
@@ -437,19 +426,19 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 		switch (fourCC)
 		{
 		case FOURCC_DXT1:
-			internalFormat = THREE;
-			format = COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			internalFormat = TEXTURE_INTERNAL_FORMAT_RGB8;
+			format = TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			blockSize = 8;
 			components = 3;
 			break;
 		case FOURCC_DXT3:
-			internalFormat = FOUR;
-			format = COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			internalFormat = TEXTURE_INTERNAL_FORMAT_RGBA8;
+			format = TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 			components = 4;
 			break;
 		case FOURCC_DXT5:
-			internalFormat = FOUR;
-			format = COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			internalFormat = TEXTURE_INTERNAL_FORMAT_RGBA8;
+			format = TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			components = 4;
 			break;
 		default:
@@ -471,14 +460,14 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	}
 	else if (pixelFormat.dwRGBBitCount == 32)
 	{
-		internalFormat = RGBA8;//FOUR;
-		format = BGRA;
+		internalFormat = TEXTURE_INTERNAL_FORMAT_RGBA8;
+		format = TEXTURE_FORMAT_BGRA;
 		components = 4;
 	}
 	else if (pixelFormat.dwRGBBitCount == 24)
 	{
-		internalFormat = THREE;
-		format = BGR;
+		internalFormat = TEXTURE_INTERNAL_FORMAT_RGB8;
+		format = TEXTURE_FORMAT_BGR;
 		components = 3;
 	}
 	else if (pixelFormat.dwRGBBitCount == 8)
@@ -497,7 +486,7 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	}
 
 	// Controllo se è una texture cube allora ha 6 immagini
-	if (target == TEXTURE_CUBE)
+	if (target == TEXTURE_TARGET_CUBE)
 		imagesCount = 6;
 	// altrimenti ne ha 1
 	else
@@ -508,7 +497,6 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 
 	// Alloco l'array di buffer e anche l'array delle dimensioni
 	data->resize(buffersCount);
-	dataSize->resize(buffersCount);
 
 	AInt numMipMaps = mipMapsCount > 0 ? mipMapsCount - 1 : 0;
 
@@ -527,7 +515,6 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 		unsigned char *pixels = new unsigned char[bufferSize];
 		fread(pixels, 1, bufferSize, file);
 		
-		(*dataSize)[offset] = bufferSize;
 		(*data)[offset].resize(bufferSize);
 		(*data)[offset].assign(pixels, pixels + bufferSize);
 		
@@ -551,7 +538,6 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 			pixels = new unsigned char[bufferSize];
 			fread(pixels, 1, bufferSize, file);
 
-			(*dataSize)[offset] = bufferSize;
 			(*data)[offset].resize(bufferSize);
 			(*data)[offset].assign(pixels, pixels + bufferSize);
 
@@ -568,7 +554,7 @@ bool AnimaTexturesManager::GetTextureDataFromDDSFile(const AnimaString& filePath
 	return true;
 }
 
-bool AnimaTexturesManager::GetUncompressedTGAData(FILE * file, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
+bool AnimaTexturesManager::GetUncompressedTGAData(FILE * file, AnimaArray<AUchar>* data, AUint& width, AUint& height)
 {
 	AnimaTGA tga;
 	if (fread(tga.header, sizeof(tga.header), 1, file) == 0)
@@ -607,33 +593,38 @@ bool AnimaTexturesManager::GetUncompressedTGAData(FILE * file, AUchar** data, AU
 	}
 
 	tga.bytesPerPixel = (tga.Bpp / 8);
-	dataSize = (tga.bytesPerPixel * tga.Width * tga.Height);
-	*data = (GLubyte*)malloc(dataSize);
+	AUint bufferSize = (tga.bytesPerPixel * tga.Width * tga.Height);
+	AUchar* buffer = (AUchar*)malloc(bufferSize);
 
-	if (*data == NULL)
+	if (*buffer == NULL)
 	{
 		fclose(file);
 		return false;
 	}
 
-	if (fread(*data, 1, dataSize, file) != dataSize)
+	if (fread(buffer, 1, bufferSize, file) != bufferSize)
 	{
-		if (*data != NULL)
-			free(*data);
+		if (buffer != NULL)
+			free(buffer);
 		fclose(file);
 
 		return false;
 	}
 
-	for (GLuint cswap = 0; cswap < (int)dataSize && invert; cswap += tga.bytesPerPixel)
-		(*data)[cswap] ^= (*data)[cswap + 2] ^= (*data)[cswap] ^= (*data)[cswap + 2];
+	for (GLuint cswap = 0; cswap < (int)bufferSize && invert; cswap += tga.bytesPerPixel)
+		buffer[cswap] ^= buffer[cswap + 2] ^= buffer[cswap] ^= buffer[cswap + 2];
 
 	fclose(file);
+
+	data->resize(bufferSize);
+	data->assign(buffer, buffer + bufferSize);
+
+	free(buffer);
 
 	return true;
 }
 
-bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint& dataSize, AUint& width, AUint& height)
+bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AnimaArray<AUchar>* data, AUint& width, AUint& height)
 {
 	AnimaTGA tga;
 	if (fread(tga.header, sizeof(tga.header), 1, file) == 0)
@@ -666,30 +657,30 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 
 	tga.bytesPerPixel = (tga.Bpp / 8);
 	tga.imageSize = (tga.bytesPerPixel * tga.Width * tga.Height);
-	*data = (GLubyte *)malloc(tga.imageSize);
+	AUchar* buffer = (AUchar*)malloc(tga.imageSize);
 
-	if (*data == NULL)
+	if (buffer == NULL)
 	{
 		fclose(file);
 		return false;
 	}
 
-	GLuint pixelcount = tga.Height * tga.Width;
-	GLuint currentpixel = 0;
-	GLuint currentbyte = 0;
-	GLubyte* colorbuffer = (GLubyte *)malloc(tga.bytesPerPixel);
+	AUint pixelcount = tga.Height * tga.Width;
+	AUint currentpixel = 0;
+	AUint currentbyte = 0;
+	AUchar* colorbuffer = (AUchar*)malloc(tga.bytesPerPixel);
 
 	do
 	{
-		GLubyte chunkheader = 0;
+		AUchar chunkheader = 0;
 
-		if (fread(&chunkheader, sizeof(GLubyte), 1, file) == 0)
+		if (fread(&chunkheader, sizeof(AUchar), 1, file) == 0)
 		{
 			if (file != NULL)
 				fclose(file);
 			
-			if (*data != NULL)
-				free(*data);
+			if (buffer != NULL)
+				free(buffer);
 
 			return false;
 		}
@@ -707,18 +698,18 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 					if (colorbuffer != NULL)
 						free(colorbuffer);
 
-					if (*data != NULL)
-						free(*data);
+					if (buffer != NULL)
+						free(buffer);
 
 					return false;
 				}
 
-				*data[currentbyte] = colorbuffer[2];
-				*data[currentbyte + 1] = colorbuffer[1];
-				*data[currentbyte + 2] = colorbuffer[0];
+				buffer[currentbyte] = colorbuffer[2];
+				buffer[currentbyte + 1] = colorbuffer[1];
+				buffer[currentbyte + 2] = colorbuffer[0];
 
 				if (tga.bytesPerPixel == 4)
-					*data[currentbyte + 3] = colorbuffer[3];
+					buffer[currentbyte + 3] = colorbuffer[3];
 
 				currentbyte += tga.bytesPerPixel;
 				currentpixel++;
@@ -731,8 +722,8 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 					if (colorbuffer != NULL)
 						free(colorbuffer);
 
-					if (*data != NULL)
-						free(*data);
+					if (buffer != NULL)
+						free(buffer);
 
 					return false;
 				}
@@ -749,20 +740,20 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 				if (colorbuffer != NULL)
 					free(colorbuffer);
 
-				if (*data != NULL)
-					free(*data);
+				if (buffer != NULL)
+					free(buffer);
 
 				return false;
 			}
 
 			for (short counter = 0; counter < chunkheader; counter++)
 			{
-				*data[currentbyte] = colorbuffer[2];
-				*data[currentbyte + 1] = colorbuffer[1];
-				*data[currentbyte + 2] = colorbuffer[0];
+				buffer[currentbyte] = colorbuffer[2];
+				buffer[currentbyte + 1] = colorbuffer[1];
+				buffer[currentbyte + 2] = colorbuffer[0];
 
 				if (tga.bytesPerPixel == 4)
-					*data[currentbyte + 3] = colorbuffer[3];
+					buffer[currentbyte + 3] = colorbuffer[3];
 
 				currentbyte += tga.bytesPerPixel;
 				currentpixel++;
@@ -775,8 +766,8 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 					if (colorbuffer != NULL)
 						free(colorbuffer);
 
-					if (*data != NULL)
-						free(*data);
+					if (buffer != NULL)
+						free(buffer);
 
 					return false;
 				}
@@ -786,6 +777,12 @@ bool AnimaTexturesManager::GetCompressedTGAData(FILE* file, AUchar** data, AUint
 
 	while (currentpixel < pixelcount);
 	fclose(file);
+
+	data->resize(tga.imageSize);
+	data->assign(buffer, buffer + tga.imageSize);
+
+	free(buffer);
+	free(colorbuffer);
 
 	return true;
 }
@@ -854,7 +851,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 			return nullptr;
 		}
 
-		if (target == TEXTURE_CUBE)
+		if (target == TEXTURE_TARGET_CUBE)
 		{
 			//bool singleFile = false;
 			//AnimaString filePath, filePathPX, filePathNX, filePathPY, filePathNY, filePathPZ, filePathNZ;

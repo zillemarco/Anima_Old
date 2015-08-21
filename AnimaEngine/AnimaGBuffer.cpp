@@ -17,7 +17,8 @@ AnimaGBuffer::AnimaGBuffer(AnimaAllocator* allocator)
 	_width = 0;
 	_height = 0;
 	_frameBuffer = 0;
-	_renderBuffer = 0;
+	_depthRenderBuffer = 0;
+	_stencilRenderBuffer = 0;
 	_created = false;
 	_needsResize = false;
 }
@@ -28,7 +29,8 @@ AnimaGBuffer::AnimaGBuffer(AnimaAllocator* allocator, AUint width, AUint height)
 	_width = width;
 	_height = height;
 	_frameBuffer = 0;
-	_renderBuffer = 0;
+	_depthRenderBuffer = 0;
+	_stencilRenderBuffer = 0;
 	_created = false;
 	_needsResize = false;
 }
@@ -41,7 +43,8 @@ AnimaGBuffer::AnimaGBuffer(const AnimaGBuffer& src)
 	_height = src._height;
 
 	_frameBuffer = 0;
-	_renderBuffer = 0;
+	_depthRenderBuffer = 0;
+	_stencilRenderBuffer = 0;
 	_created = false;
 	_needsResize = false;
 }
@@ -54,7 +57,8 @@ AnimaGBuffer::AnimaGBuffer(AnimaGBuffer&& src)
 	_height = src._height;
 
 	_frameBuffer = 0;
-	_renderBuffer = 0;
+	_depthRenderBuffer = 0;
+	_stencilRenderBuffer = 0;
 	_created = false;
 	_needsResize = false;
 }
@@ -119,7 +123,7 @@ void AnimaGBuffer::ClearTextures()
 	_texturesSet.clear();
 }
 
-bool AnimaGBuffer::AddTexture(const AnimaString& name, AnimaTextureTarget target, AUint attachment, AnimaTextureInternalFormat internalFormat, AnimaTextureFormat format, AUint dataType, AnimaTextureFilterMode filter, AnimaTextureClampMode clamp)
+bool AnimaGBuffer::AddTexture(const AnimaString& name, AnimaTextureTarget target, AnimaTextureAttachment attachment, AnimaTextureInternalFormat internalFormat, AnimaTextureFormat format, AnimaTextureDataType dataType, AnimaTextureMinFilterMode minFilter, AnimaTextureMagFilterMode magFilter, AnimaTextureClampMode clampS, AnimaTextureClampMode clampT, AnimaTextureClampMode clampR)
 {
 	AnimaGBufferDataSetByName& nameIterator = get<1>(_texturesSet);
 	if (nameIterator.find(name) != nameIterator.end())
@@ -129,11 +133,14 @@ bool AnimaGBuffer::AddTexture(const AnimaString& name, AnimaTextureTarget target
 
 	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, name, _width, _height, nullptr, 0);
 	texture->SetTextureTarget(target);
-	texture->SetFilter(filter);
+	texture->SetMinFilter(minFilter);
+	texture->SetMagFilter(magFilter);
 	texture->SetInternalFormat(internalFormat);
 	texture->SetFormat(format);
 	texture->SetDataType(dataType);
-	texture->SetClamp(clamp);
+	texture->SetClampS(clampS);
+	texture->SetClampT(clampT);
+	texture->SetClampR(clampR);
 	texture->SetAttachment(attachment);
 
 	AnimaGBufferData* data = AnimaAllocatorNamespace::AllocateNew<AnimaGBufferData>(*_allocator, name, texture, index, attachment);
@@ -152,12 +159,18 @@ bool AnimaGBuffer::Create()
 			for (auto element = indexIterator.begin(), end = indexIterator.end(); element != end; element++)
 				(*element)->_texture->Load();
 
-			if (_renderBuffer != 0)
+			if (_depthRenderBuffer != 0)
 			{
-				glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+				glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
 				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
 			}
 
+			if (_stencilRenderBuffer != 0)
+			{
+				glBindRenderbuffer(GL_RENDERBUFFER, _stencilRenderBuffer);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, _width, _height);
+			}
+			
 			_needsResize = false;
 		}
 
@@ -166,58 +179,125 @@ bool AnimaGBuffer::Create()
 	
 	AUint size = (AUint)_texturesSet.size();
 	if (size == 0)
+	{
+		_created = false;
 		return false;
+	}
 		
 	AUint drawBuffers[32];
 	ANIMA_ASSERT(size <= 32);
 	
 	bool hasDepth = false;
+	bool hasStencil = false;
 	int i = 0;
 	AnimaGBufferDataSetByIndex& indexIterator = get<0>(_texturesSet);
 	for (auto element = indexIterator.begin(), end = indexIterator.end(); element != end; element++, i++)
 	{
 		AnimaGBufferData* data = *element;
+		AUint dataAttachment = AnimaTexture::AttachmentToPlatform(data->_attachment);
 		
 		ANIMA_ASSERT(data->_texture->Load());
 
-		if (data->_attachment == GL_DEPTH_ATTACHMENT)
+		if (dataAttachment == GL_DEPTH_ATTACHMENT)
 		{
 			drawBuffers[i] = GL_NONE;
 			hasDepth = true;
 		}
+		else if (dataAttachment == GL_STENCIL_ATTACHMENT)
+		{
+			drawBuffers[i] = GL_NONE;
+			hasStencil = true;
+		}
+		else if (dataAttachment == GL_DEPTH_STENCIL_ATTACHMENT)
+		{
+			drawBuffers[i] = GL_NONE;
+			hasDepth = true;
+			hasStencil = true;
+		}
 		else
-			drawBuffers[i] = data->_attachment;
+			drawBuffers[i] = dataAttachment;
 	
-		if (data->_attachment == GL_NONE)
+		if (dataAttachment == GL_NONE)
 			continue;
 	
 		if (_frameBuffer == 0)
 		{
 			glGenFramebuffers(1, &_frameBuffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+
+			if (glGetError() != GL_NO_ERROR)
+			{
+				_created = false;
+				return false;
+			}
 		}
 	
-		glFramebufferTexture2D(GL_FRAMEBUFFER, data->_attachment, AnimaTexture::TargetToPlatform(data->_texture->GetTextureTarget()), data->_texture->GetID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, dataAttachment, AnimaTexture::TargetToPlatform(data->_texture->GetTextureTarget()), data->_texture->GetID(), 0);
+
+		if (glGetError() != GL_NO_ERROR)
+		{
+			_created = false;
+			return false;
+		}
 	}
 	
 	if (_frameBuffer == 0)
+	{
+		_created = false;
 		return false;
+	}
 	
 	if (!hasDepth)
 	{
-		glGenRenderbuffers(1, &_renderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+		glGenRenderbuffers(1, &_depthRenderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
+
+		if (glGetError() != GL_NO_ERROR)
+		{
+			_created = false;
+			return false;
+		}
 	}
+
+	//if (!hasStencil)
+	//{
+	//	glGenRenderbuffers(1, &_stencilRenderBuffer);
+	//	glBindRenderbuffer(GL_RENDERBUFFER, _stencilRenderBuffer);
+	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, _width, _height);
+	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencilRenderBuffer);
+	//
+	//	if (glGetError() != GL_NO_ERROR)
+	//	{
+	//		_created = false;
+	//		return false;
+	//	}
+	//}
 	
 	glDrawBuffers(size, drawBuffers);
-	
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || glGetError() != GL_NO_ERROR)
+
+	if (glGetError() != GL_NO_ERROR)
 	{
-		ANIMA_ASSERT(false);
 		_created = false;
 		return false;
+	}
+
+	AUint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	switch (status)
+	{
+	case GL_FRAMEBUFFER_COMPLETE:
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+		printf("AnimaGBuffer error: unsupported extension\n");
+		_created = false;
+		return false;
+		break;
+	default:
+		printf("AnimaGBuffer error: unable to create the FBO\n");
+		_created = false;
+		return false;
+		break;
 	}
 	
 	_created = true;
@@ -233,10 +313,16 @@ void AnimaGBuffer::Destroy()
 		_frameBuffer = 0;
 	}
 
-	if (_renderBuffer != 0)
+	if (_depthRenderBuffer != 0)
 	{
-		glDeleteRenderbuffers(1, &_renderBuffer);
-		_renderBuffer = 0;
+		glDeleteRenderbuffers(1, &_depthRenderBuffer);
+		_depthRenderBuffer = 0;
+	}
+
+	if (_stencilRenderBuffer != 0)
+	{
+		glDeleteRenderbuffers(1, &_stencilRenderBuffer);
+		_stencilRenderBuffer = 0;
 	}
 
 	_created = false;

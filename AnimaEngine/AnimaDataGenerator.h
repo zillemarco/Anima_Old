@@ -21,6 +21,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaDataGenerator : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaDataGenerator);
 public:
 	AnimaDataGenerator(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaDataGenerator(const AnimaDataGenerator& src);

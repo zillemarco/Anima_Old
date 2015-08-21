@@ -40,6 +40,15 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	AddRenderPassFunction(PreparePass);
 	AddRenderPassFunction(LightPass);
 	AddRenderPassFunction(CombinePass);
+
+	AnimaTexture* environmentTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
+	AnimaTexture* irradianceTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
+
+	environmentTexture->SetName("EnvironmentMap");
+	irradianceTexture->SetName("IrradianceMap");
+
+	SetTexture("EnvironmentMap", environmentTexture);
+	SetTexture("IrradianceMap", irradianceTexture);
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
@@ -214,10 +223,10 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			prepassBuffer->AddTexture("DepthMap", TEXTURE_2D, GL_DEPTH_ATTACHMENT, DEPTH24, DEPTH, GL_FLOAT, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("NormalMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			prepassBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH, TEXTURE_INTERNAL_FORMAT_DEPTH24, TEXTURE_FORMAT_DEPTH, TEXTURE_DATA_TYPE_FLOAT, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR0, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("NormalMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR1, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("SpecularMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR2, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			ANIMA_ASSERT(prepassBuffer->Create());
 
 			SetGBuffer("PrepassBuffer", prepassBuffer);
@@ -229,9 +238,9 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			lightsBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			lightsBuffer->AddTexture("EmissiveMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			lightsBuffer->AddTexture("SpecularMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 1, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
-			lightsBuffer->AddTexture("IrradianceMap", TEXTURE_2D, GL_COLOR_ATTACHMENT0 + 2, RGBA8, RGBA, GL_UNSIGNED_BYTE, NEAREST, TO_EDGE);
+			lightsBuffer->AddTexture("EmissiveMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR0, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			lightsBuffer->AddTexture("SpecularMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR1, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			lightsBuffer->AddTexture("IrradianceMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR2, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			ANIMA_ASSERT(lightsBuffer->Create());
 
 			SetGBuffer("LightsBuffer", lightsBuffer);
@@ -256,13 +265,16 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", width, height, nullptr, 0);
-			diffuseTexture->SetTextureTarget(TEXTURE_2D);
-			diffuseTexture->SetFilter(NEAREST);
-			diffuseTexture->SetInternalFormat(RGBA8);
-			diffuseTexture->SetFormat(RGBA);
-			diffuseTexture->SetDataType(GL_UNSIGNED_BYTE);
-			diffuseTexture->SetClamp(TO_EDGE);
-			diffuseTexture->SetAttachment(GL_COLOR_ATTACHMENT0);
+			diffuseTexture->SetTextureTarget(TEXTURE_TARGET_2D);
+			diffuseTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_NEAREST);
+			diffuseTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_NEAREST);
+			diffuseTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA8);
+			diffuseTexture->SetFormat(TEXTURE_FORMAT_RGBA);
+			diffuseTexture->SetDataType(TEXTURE_DATA_TYPE_UNSIGNED_BYTE);
+			diffuseTexture->SetClampS(TEXTURE_CLAMP_TO_EDGE);
+			diffuseTexture->SetClampT(TEXTURE_CLAMP_TO_EDGE);
+			diffuseTexture->SetClampR(TEXTURE_CLAMP_TO_EDGE);
+			diffuseTexture->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
 
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
@@ -321,7 +333,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 
 	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
 	SetFloat("SSAODistanceThreshold", 5.0f);
-
+	
 	//
 	// Inizializzazione delle mesh di supporto
 	//
@@ -514,50 +526,8 @@ void AnimaRenderer::Finish()
 
 void AnimaRenderer::Render()
 {
-	//AnimaVertex4f backColor = GetColor4f("BackColor");
-	//Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
-
 	for (auto func : _renderPassesFunction)
 		func(this);
-
-	////
-	////	Aggiorno il buffer per SSAO
-	////
-	//ApplyEffectFromGBufferToTexture(shadersManager->GetProgramFromName("ssao"), GetGBuffer("PrepassBuffer"), nullptr);
-	
-	////
-	////	Aggiorno le mappature per le ombre
-	////
-	//Start();
-	//UpdateShadowMaps(shadersManager->GetProgramFromName("deferred-shadowMap"));
-	//Finish();
-	
-	//// Renderizzo l'immagine finale completa di luci in Diffuse2Map
-	//GetTexture("Diffuse2Map")->BindAsRenderTarget();
-	//Start();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
-	//CombinePass(shadersManager->GetProgramFromName("deferred-combine"));
-	//Finish();
-	//	
-	//// Disegno le primitive in PrimitivesBuffer
-	//GetGBuffer("PrimitivesBuffer")->BindAsRenderTarget();
-	//Start();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
-	//DrawPrimitives(shadersManager->GetProgramFromName("primitive-draw"));
-	//Finish();
-	//	
-	//// Compongo l'immagine finale prendendo la profondità da PrepassBuffer, il colore della scena da Diffuse2Map
-	//// ed il colore + profondità da PrimitivesBuffer
-	//GetTexture("DiffuseMap")->BindAsRenderTarget();
-	//Start();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
-	//CombinePrimitives(shadersManager->GetProgramFromName("primitive-combine"));
-	//Finish();
-	//	
-	//ClearPrimitives();
 }
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
@@ -788,10 +758,11 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 
 	ANIMA_FRAME_PUSH("Lightning");
 	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
+	AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	
-	AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
+	AnimaShaderProgram* activeProgram = nullptr;
 
 	for (auto pair : (*lightsMap))
 	{
@@ -805,7 +776,10 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 
 		ANIMA_ASSERT(lightMeshPair != renderer->_meshesMap.end());
 		ANIMA_ASSERT(lightsArray->at(0)->CreateShader(renderer->_scene->GetShadersManager()));
-		AnimaShaderProgram* program = renderer->_scene->GetShadersManager()->GetProgramFromName(lightsArray->at(0)->GetShaderName());
+
+		AnimaString name = lightsArray->at(0)->_GetClassName();
+
+		AnimaShaderProgram* program = shadersManager->GetProgramFromName(lightsArray->at(0)->GetShaderName());
 		AnimaMesh* mesh = lightMeshPair->second;
 
 		activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
@@ -918,63 +892,63 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 
 void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 {
-	AnimaLightsManager* lightsManager = _scene->GetLightsManager();
-	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	//AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	//AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 
-	AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
+	//AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
 
-	if (lights == nullptr)
-		return;
+	//if (lights == nullptr)
+	//	return;
 
-	AInt nLights = lights->size();
-	AInt nMeshes = meshesManager->GetMeshesCount();
+	//AInt nLights = lights->size();
+	//AInt nMeshes = meshesManager->GetMeshesCount();
 
-	if (nLights == 0 || nMeshes == 0)
-		return;
+	//if (nLights == 0 || nMeshes == 0)
+	//	return;
 
-	AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
-	if (activeProgram == nullptr || (*activeProgram) != (*program))
-		program->Use();
-	
-	for (AInt i = 0; i < nLights; i++)
-	{
-		AnimaLight* light = lights->at(i);
-		AnimaTexture* shadowMap = light->GetShadowTexture();
-		if (!shadowMap->AreRenderTargetsReady())
-			shadowMap->LoadRenderTargets();
+	//AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
+	//if (activeProgram == nullptr || (*activeProgram) != (*program))
+	//	program->Use();
+	//
+	//for (AInt i = 0; i < nLights; i++)
+	//{
+	//	AnimaLight* light = lights->at(i);
+	//	AnimaTexture* shadowMap = light->GetShadowTexture();
+	//	if (!shadowMap->AreRenderTargetsReady())
+	//		shadowMap->LoadRenderTargets();
 
-		shadowMap->BindAsRenderTarget();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0, 0.0, 0.0, 0.0);
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
+	//	shadowMap->BindAsRenderTarget();
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	glClearColor(0.0, 0.0, 0.0, 0.0);
+	//	glEnable(GL_DEPTH_TEST);
+	//	glDepthMask(GL_TRUE);
 
-		program->UpdateSceneObjectProperties(light, this);
-		program->UpdateRenderingManagerProperies(this);
+	//	program->UpdateSceneObjectProperties(light, this);
+	//	program->UpdateRenderingManagerProperies(this);
 
-		for (AInt j = 0; j < nMeshes; j++)
-		{
-			DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
-			//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-			//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-			//	
-			//	glCullFace(GL_FRONT);
-			//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
-			//	glCullFace(GL_BACK);
-			//	
-			//	AInt meshCount = innerModel->GetMeshesCount();
-			//	for (AInt i = 0; i < meshCount; i++)
-			//	{
-			//		glCullFace(GL_FRONT);
-			//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-			//		glCullFace(GL_BACK);
-			//	}
-			//	
-			//	AInt childrenCount = innerModel->GetChildrenCount();
-			//	for (AInt i = 0; i < childrenCount; i++)
-			//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
-		}
-	}
+	//	for (AInt j = 0; j < nMeshes; j++)
+	//	{
+	//		DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
+	//		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+	//		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+	//		//	
+	//		//	glCullFace(GL_FRONT);
+	//		//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+	//		//	glCullFace(GL_BACK);
+	//		//	
+	//		//	AInt meshCount = innerModel->GetMeshesCount();
+	//		//	for (AInt i = 0; i < meshCount; i++)
+	//		//	{
+	//		//		glCullFace(GL_FRONT);
+	//		//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+	//		//		glCullFace(GL_BACK);
+	//		//	}
+	//		//	
+	//		//	AInt childrenCount = innerModel->GetChildrenCount();
+	//		//	for (AInt i = 0; i < childrenCount; i++)
+	//		//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+	//	}
+	//}
 }
 
 void AnimaRenderer::UpdateModelsVisibility()
@@ -1403,6 +1377,46 @@ void AnimaRenderer::ClearPrimitives()
 	}
 	
 	_primitives.clear();
+}
+
+bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath)
+{
+	Anima::AnimaShadersManager* shadersManager = _engine->GetShadersManager();
+	shadersManager->LoadShadersParts(shadersPartsPath);
+
+	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
+	if (!prepareProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
+	if (!directionalLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
+	if (!skyboxProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
+	if (!hemisphereLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light.asp");
+	if (!pointLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
+	if (!spotLightProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
+	if (!nullFilterProgram->Link())
+		return false;
+
+	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
+	if (!combineProgram->Link())
+		return false;
+	
+	return true;
 }
 
 AnimaPrimitiveData::AnimaPrimitiveData(AnimaAllocator* allocator)

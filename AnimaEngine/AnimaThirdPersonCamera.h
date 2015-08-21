@@ -20,6 +20,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaThirdPersonCamera : public AnimaCamera
 {
+	DECLARE_ANIMA_CLASS(AnimaThirdPersonCamera);
+
 public:
 	AnimaThirdPersonCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaThirdPersonCamera(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);

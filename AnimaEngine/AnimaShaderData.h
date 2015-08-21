@@ -46,6 +46,8 @@ enum AnimaShaderDataType {
 
 class ANIMA_ENGINE_EXPORT AnimaShaderData : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaShaderData);
+
 public:
 	AnimaShaderData(const AnimaString& name);
 	AnimaShaderData(const AnimaShaderData& src);

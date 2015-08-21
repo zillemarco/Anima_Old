@@ -51,6 +51,7 @@ Anima::AnimaScene* _scene = nullptr;
 Anima::AnimaCamerasManager* _camerasManager = nullptr;
 Anima::AnimaCamera* _camera = nullptr;
 Anima::AnimaModel* _model = nullptr;
+Anima::AnimaModel* _floorModel = nullptr;
 Anima::AnimaAnimationsManager* _animationsManager = nullptr;
 Anima::AnimaRenderer* _renderer = nullptr;
 Anima::AnimaEngine _engine;
@@ -273,6 +274,9 @@ bool InitEngine()
 	if (!_engine.Initialize())
 		return false;
 
+	// Creazione del renderer
+	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
+
 	// Creazione della scena
 	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
 	if (!_scene)
@@ -284,98 +288,14 @@ bool InitEngine()
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
 	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/sponza.obj";
-
-//#if !defined _DEBUG
-//	Anima::AnimaString inputString;
-//	while (inputString.empty() || (inputString != "y" && inputString != "n"))
-//	{
-//		std::cout << "Use defaults? [y/n]: ";
-//		std::cin >> inputString;
-//	}
-//
-//	if (inputString == "n")
-//	{
-//		inputString = "";
-//		while (inputString.empty() || (inputString != "y" && inputString != "n"))
-//		{
-//			std::cout << "Use locals? [y/n]: ";
-//			std::cin >> inputString;
-//		}
-//		
-//		if (inputString == "n")
-//		{
-//			std::cout << "\nInsert shaders parts path: ";
-//			std::cin >> inputString;
-//			if (!inputString.empty())
-//				shadersPartsPath = inputString;
-//
-//			std::cout << "\nInsert shaders path: ";
-//			std::cin >> inputString;
-//			if (!inputString.empty())
-//				shadersPath = inputString;
-//
-//			std::cout << "\nInsert materials path: ";
-//			std::cin >> inputString;
-//			if (!inputString.empty())
-//				materialsPath = inputString;
-//
-//			std::cout << "\nInsert model path: ";
-//			std::cin >> inputString;
-//			if (!inputString.empty())
-//				modelPath = inputString;
-//		}
-//		else
-//		{
-//			shadersPartsPath = "data/shaders/Parts";
-//			shadersPath = "data/shaders/";
-//			materialsPath = "data/materials";
-//			modelPath = "data/models/cubo.3ds";
-//		}
-//	}
-//#endif
-
-	// Caricamento degli shader
-	Anima::AnimaShadersManager* shadersManager = _scene->GetShadersManager();
-	shadersManager->LoadShadersParts(shadersPartsPath);
-
-	Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
-	//Anima::AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material.asp");
-	if (!prepareProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
-	//Anima::AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light.asp");
-	if (!directionalLightProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
-	if (!skyboxProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
-	if (!hemisphereLightProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light.asp");
-	if (!pointLightProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
-	if (!spotLightProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
-	if (!nullFilterProgram->Link())
-		return false;
-
-	Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
-	//Anima::AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine.asp");
-	if (!combineProgram->Link())
-		return false;
 	
+	// Caricamento degli shader
+	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath))
+		return false;
+			
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
 	materialsManager->LoadMaterials(materialsPath);
 
 	// Creazione di una telecamera
@@ -390,63 +310,168 @@ bool InitEngine()
 	
 	//_model->GetTransformation()->RotateXDeg(-90.0);
 	_model->GetTransformation()->RotateYDeg(180.0);
+	
+	_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
+	Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
+	floorModelMesh->MakePlane();
+	floorModelMesh->SetParentObject(_floorModel);
+	_floorModel->AddMesh(floorModelMesh);
+	
+	Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
+	Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
+	Anima::AnimaModelInstance* modelInstance3 = modelInstancesManager->CreateInstance("modelInstance-3", _model);
+	Anima::AnimaModelInstance* modelInstance4 = modelInstancesManager->CreateInstance("modelInstance-4", _model);
+	
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance1Meshes;
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance2Meshes;
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance3Meshes;
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance4Meshes;
+	
+	modelInstance1->GetAllMeshes(&modelInstance1Meshes);
+	modelInstance2->GetAllMeshes(&modelInstance2Meshes);
+	modelInstance3->GetAllMeshes(&modelInstance3Meshes);
+	modelInstance4->GetAllMeshes(&modelInstance4Meshes);
 
-	//_model = _scene->GetModelsManager()->CreateModel("ANIMA_ENGINE_DEMO_MODEL_NAME");
-	//Anima::AnimaMesh* mesh = _scene->GetMeshesManager()->CreateMesh("mesh");
-	//mesh->MakeCube();
-	//mesh->SetParentObject(_model);
-	//_model->AddMesh(mesh);
+	floorModelMesh->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-	Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
-	_model->GetAllMeshes(&modelMeshes);
+	for (int i = 0; i < modelInstance1Meshes.size(); i++)
+		modelInstance1Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
 
-	_pbrMaterial = materialsManager->GetMaterialFromName("pbr-material");
+	for (int i = 0; i < modelInstance2Meshes.size(); i++)
+		modelInstance2Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model2-material"));
 
-	for (int i = 0; i < modelMeshes.size(); i++)
-		modelMeshes[i]->SetMaterial(_pbrMaterial);
+	for (int i = 0; i < modelInstance3Meshes.size(); i++)
+		modelInstance3Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model3-material"));
 
-	////_model = _scene->GetModelsManager()->LoadModelFromExternalFile("C:/Users/Marco/Desktop/10001/exp.fbx", ANIMA_ENGINE_DEMO_MODEL_NAME);
-	////
-	////Anima::AnimaArray<Anima::AnimaMesh*> modelMeshes;
-	////_model->GetAllMeshes(&modelMeshes);
+	for (int i = 0; i < modelInstance4Meshes.size(); i++)
+		modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
 
-	////Anima::AnimaString str;
+	modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
+	modelInstance1->GetTransformation()->RotateYDeg(180.0);
+	modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
+	modelInstance2->GetTransformation()->RotateYDeg(180.0);
+	modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
+	modelInstance3->GetTransformation()->RotateYDeg(180.0);
+	modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
+	modelInstance4->GetTransformation()->RotateYDeg(180.0);
 
-	////str = "C:/Users/Marco/Desktop/10001/AnimaData/" + _model->GetName() + ".amodel";
-	////_scene->GetModelsManager()->SaveModelToFile(_model, str);
+	_floorModel->GetTransformation()->SetScale(200, 0, 200);
 
-	////for (int i = 0; i < modelMeshes.size(); i++)
-	////{
-	////	str = "C:/Users/Marco/Desktop/10001/AnimaData/" + modelMeshes[i]->GetName() + ".amesh";
-	////	_scene->GetMeshesManager()->SaveMeshToFile(modelMeshes[i], str);
-	////}
-
-	//_scene->GetMeshesManager()->LoadMeshes("C:/Users/Marco/Desktop/10001/AnimaData/");
-	//_scene->GetModelsManager()->LoadModels("C:/Users/Marco/Desktop/10001/AnimaData/");
+	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
 
 	Anima::AnimaDirectionalLight* light = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
 	light->SetDirection(-1.0, -1.0, -1.0);
 	light->SetColor(1.0, 1.0, 1.0);
 	light->SetIntensity(0.8);
 	
-	_camera->LookAt(0.0, 40.0, 40.0, 0.0, 15.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 100.0, 0.0, 15.0, 0.0);
 	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
 
 	_animationsManager = _scene->GetAnimationsManager();
-	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 
 	_timer.Reset();
 
 	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
 
-	Anima::AnimaTexture* textureEnv = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-env-texture");
-	textureEnv->SetFilter(Anima::LINEAR_MIPMAP_LINEAR);
-	_renderer->SetTexture("EnvironmentMap", textureEnv, false);
+	Anima::AnimaArray<Anima::AnimaArray<Anima::AUchar> > data;
+	Anima::AUint width;
+	Anima::AUint height;
+	Anima::AUint depth;
+	Anima::AUint mipMapsCount;
+	Anima::AUint imagesCount;
+	Anima::AnimaTextureFormat format;
+	Anima::AnimaTextureInternalFormat internalFormat;
+	Anima::AnimaTextureTarget target;
 
-	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", "dds-irr-texture");
-	_renderer->SetTexture("IrradianceMap", textureIrr, false);
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	{
+		Anima::AnimaTexture* texture = _renderer->GetTexture("EnvironmentMap");
+		if (texture != nullptr)
+		{
+			texture->SetWidth(width);
+			texture->SetHeight(height);
+			texture->SetDepth(depth);
 
+			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = max(mipMapsCount, 1);
+
+			if (format != 0 && internalFormat != 0)
+			{
+				texture->SetFormat(format);
+				texture->SetInternalFormat(internalFormat);
+			}
+
+			texture->SetTextureTarget(target);
+			texture->SetMipMapLevels(mipMapsCount);
+
+			Anima::AInt offset = 0;
+			for (Anima::AUint i = 0; i < imagesCount; i++)
+			{
+				for (Anima::AUint j = 0; j < mipMapsCount; j++)
+				{
+					Anima::AUchar* buffer = &data[offset][0];
+					Anima::AUint bufferSize = data[offset].size();
+
+					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
+
+					offset++;
+				}
+			}
+
+			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
+			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
+		}
+	}
+
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	{
+		Anima::AnimaTexture* texture = _renderer->GetTexture("IrradianceMap");
+		if (texture != nullptr)
+		{
+			texture->SetWidth(width);
+			texture->SetHeight(height);
+			texture->SetDepth(depth);
+
+			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = max(mipMapsCount, 1);
+
+			if (format != 0 && internalFormat != 0)
+			{
+				texture->SetFormat(format);
+				texture->SetInternalFormat(internalFormat);
+			}
+
+			texture->SetTextureTarget(target);
+			texture->SetMipMapLevels(mipMapsCount);
+
+			Anima::AInt offset = 0;
+			for (Anima::AUint i = 0; i < imagesCount; i++)
+			{
+				for (Anima::AUint j = 0; j < mipMapsCount; j++)
+				{
+					Anima::AUchar* buffer = &data[offset][0];
+					Anima::AUint bufferSize = data[offset].size();
+
+					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
+
+					offset++;
+				}
+			}
+
+			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
+			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
+		}
+	}
+
+	//Anima::AnimaTexture* textureEnv = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-env-texture");
+	//textureEnv->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
+	//textureEnv->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
+	//_renderer->SetTexture("EnvironmentMap", textureEnv, false);
+
+	//Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", "dds-irr-texture");
+	//_renderer->SetTexture("IrradianceMap", textureIrr, false);
+	
 	return true;
 }
 

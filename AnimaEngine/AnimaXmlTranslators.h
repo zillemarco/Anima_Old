@@ -487,11 +487,11 @@ struct AnimaXmlShaderDataTypeTranslator
 		{
 		case Anima::FLOAT:				return Anima::AnimaString("FLOAT"); break;
 		case Anima::FLOAT_ARRAY:		return Anima::AnimaString("FLOAT_ARRAY"); break;
-		case Anima::FLOAT2:			return Anima::AnimaString("FLOAT2"); break;
+		case Anima::FLOAT2:				return Anima::AnimaString("FLOAT2"); break;
 		case Anima::FLOAT2_ARRAY:		return Anima::AnimaString("FLOAT2_ARRAY"); break;
-		case Anima::FLOAT3:			return Anima::AnimaString("FLOAT3"); break;
+		case Anima::FLOAT3:				return Anima::AnimaString("FLOAT3"); break;
 		case Anima::FLOAT3_ARRAY:		return Anima::AnimaString("FLOAT3_ARRAY"); break;
-		case Anima::FLOAT4:			return Anima::AnimaString("FLOAT4"); break;
+		case Anima::FLOAT4:				return Anima::AnimaString("FLOAT4"); break;
 		case Anima::FLOAT4_ARRAY:		return Anima::AnimaString("FLOAT4_ARRAY"); break;
 		case Anima::MATRIX4x4:			return Anima::AnimaString("MATRIX4x4"); break;
 		case Anima::MATRIX4x4_ARRAY:	return Anima::AnimaString("MATRIX4x4_ARRAY"); break;
@@ -500,7 +500,7 @@ struct AnimaXmlShaderDataTypeTranslator
 		case Anima::INT:				return Anima::AnimaString("INT"); break;
 		case Anima::INT_ARRAY:			return Anima::AnimaString("INT_ARRAY"); break;
 		case Anima::BOOL:				return Anima::AnimaString("BOOL"); break;
-		case Anima::BOOL_ARRAY:		return Anima::AnimaString("BOOL_ARRAY"); break;
+		case Anima::BOOL_ARRAY:			return Anima::AnimaString("BOOL_ARRAY"); break;
 		case Anima::TEXTURE2D:			return Anima::AnimaString("TEXTURE2D"); break;
 		case Anima::TEXTURE2D_ARRAY:	return Anima::AnimaString("TEXTURE2D_ARRAY"); break;
 		case Anima::TEXTURECUBE:		return Anima::AnimaString("TEXTURECUBE"); break;
@@ -524,9 +524,9 @@ struct AnimaXmlTextureTargetTranslator
 		{
 			using boost::algorithm::iequals;
 
-			if (iequals(str, "CUBE"))		return Anima::TEXTURE_CUBE;
-			else if (iequals(str, "2D"))	return Anima::TEXTURE_2D;
-			else if (iequals(str, "3D"))	return Anima::TEXTURE_3D;
+			if (iequals(str, "CUBE"))		return Anima::TEXTURE_TARGET_CUBE;
+			else if (iequals(str, "2D"))	return Anima::TEXTURE_TARGET_2D;
+			else if (iequals(str, "3D"))	return Anima::TEXTURE_TARGET_3D;
 
 			return boost::optional<external_type>(boost::none);
 		}
@@ -538,9 +538,159 @@ struct AnimaXmlTextureTargetTranslator
 	{
 		switch (type)
 		{
-		case Anima::TEXTURE_CUBE:	return Anima::AnimaString("CUBE"); break;
-		case Anima::TEXTURE_2D:		return Anima::AnimaString("2D"); break;
-		case Anima::TEXTURE_3D:		return Anima::AnimaString("3D"); break;
+		case Anima::TEXTURE_TARGET_CUBE:	return Anima::AnimaString("CUBE"); break;
+		case Anima::TEXTURE_TARGET_2D:		return Anima::AnimaString("2D"); break;
+		case Anima::TEXTURE_TARGET_3D:		return Anima::AnimaString("3D"); break;
+		}
+
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
+struct AnimaXmlTextureMinFilterModeTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaTextureMinFilterMode external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+
+			if (iequals(str, "NEAREST"))						return Anima::TEXTURE_MIN_FILTER_MODE_NEAREST;
+			else if (iequals(str, "LINEAR"))					return Anima::TEXTURE_MIN_FILTER_MODE_LINEAR;
+			else if (iequals(str, "NEAREST_MIPMAP_NEAREST"))	return Anima::TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_NEAREST;
+			else if (iequals(str, "NEAREST_MIPMAP_LINEAR"))		return Anima::TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_LINEAR;
+			else if (iequals(str, "LINEAR_MIPMAP_NEAREST"))		return Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_NEAREST;
+			else if (iequals(str, "LINEAR_MIPMAP_LINEAR"))		return Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
+
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+		case Anima::TEXTURE_MIN_FILTER_MODE_NEAREST:				return Anima::AnimaString("NEAREST"); break;
+		case Anima::TEXTURE_MIN_FILTER_MODE_LINEAR:					return Anima::AnimaString("LINEAR"); break;
+		case Anima::TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_NEAREST:	return Anima::AnimaString("NEAREST_MIPMAP_NEAREST"); break;
+		case Anima::TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_LINEAR:	return Anima::AnimaString("NEAREST_MIPMAP_LINEAR"); break;
+		case Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_NEAREST:	return Anima::AnimaString("LINEAR_MIPMAP_NEAREST"); break;
+		case Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR:	return Anima::AnimaString("LINEAR_MIPMAP_LINEAR"); break;
+		}
+
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
+struct AnimaXmlTextureMagFilterModeTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaTextureMagFilterMode external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+
+			if (iequals(str, "NEAREST"))		return Anima::TEXTURE_MAG_FILTER_MODE_NEAREST;
+			else if (iequals(str, "LINEAR"))	return Anima::TEXTURE_MAG_FILTER_MODE_LINEAR;
+
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+		case Anima::TEXTURE_MAG_FILTER_MODE_NEAREST:	return Anima::AnimaString("NEAREST"); break;
+		case Anima::TEXTURE_MAG_FILTER_MODE_LINEAR:		return Anima::AnimaString("LINEAR"); break;
+		}
+
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
+struct AnimaXmlTextureDataTypeTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaTextureDataType external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+
+			if (iequals(str, "UBYTE"))			return Anima::TEXTURE_DATA_TYPE_UNSIGNED_BYTE;
+			else if (iequals(str, "BYTE"))		return Anima::TEXTURE_DATA_TYPE_BYTE;
+			else if (iequals(str, "USHORT"))	return Anima::TEXTURE_DATA_TYPE_UNSIGNED_SHORT;
+			else if (iequals(str, "SHORT"))		return Anima::TEXTURE_DATA_TYPE_SHORT;
+			else if (iequals(str, "UINT"))		return Anima::TEXTURE_DATA_TYPE_UNSIGNED_INT;
+			else if (iequals(str, "INT"))		return Anima::TEXTURE_DATA_TYPE_INT;
+			else if (iequals(str, "FLOAT"))		return Anima::TEXTURE_DATA_TYPE_FLOAT;
+
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+		case Anima::TEXTURE_DATA_TYPE_UNSIGNED_BYTE:	return Anima::AnimaString("UBYTE"); break;
+		case Anima::TEXTURE_DATA_TYPE_BYTE:				return Anima::AnimaString("BYTE"); break;
+		case Anima::TEXTURE_DATA_TYPE_UNSIGNED_SHORT:	return Anima::AnimaString("USHORT"); break;
+		case Anima::TEXTURE_DATA_TYPE_SHORT:			return Anima::AnimaString("SHORT"); break;
+		case Anima::TEXTURE_DATA_TYPE_UNSIGNED_INT:		return Anima::AnimaString("UINT"); break;
+		case Anima::TEXTURE_DATA_TYPE_INT:				return Anima::AnimaString("INT"); break;
+		case Anima::TEXTURE_DATA_TYPE_FLOAT:			return Anima::AnimaString("FLOAT"); break;
+		}
+
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
+struct AnimaXmlTextureClampModeTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaTextureClampMode external_type;
+
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+
+			if (iequals(str, "REPEAT"))					return Anima::TEXTURE_CLAMP_REPEAT;
+			else if (iequals(str, "MIRRORED_REPEAT"))	return Anima::TEXTURE_CLAMP_MIRRORED_REPEAT;
+			else if (iequals(str, "TO_EDGE"))			return Anima::TEXTURE_CLAMP_TO_EDGE;
+			else if (iequals(str, "TO_BORDER"))			return Anima::TEXTURE_CLAMP_TO_BORDER;
+
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+		case Anima::TEXTURE_CLAMP_REPEAT:			return Anima::AnimaString("REPEAT"); break;
+		case Anima::TEXTURE_CLAMP_MIRRORED_REPEAT:	return Anima::AnimaString("MIRRORED_REPEAT"); break;
+		case Anima::TEXTURE_CLAMP_TO_EDGE:			return Anima::AnimaString("TO_EDGE"); break;
+		case Anima::TEXTURE_CLAMP_TO_BORDER:		return Anima::AnimaString("TO_BORDER"); break;
 		}
 
 		return boost::optional<internal_type>(boost::none);
@@ -558,25 +708,30 @@ struct AnimaXmlTextureFormatTranslator
 		{
 			using boost::algorithm::iequals;
 
-			if (iequals(str, "RED"))			return Anima::RED;
-			else if (iequals(str, "GREEN"))		return Anima::GREEN;
-			else if (iequals(str, "BLUE"))		return Anima::BLUE;
-			else if (iequals(str, "RG"))		return Anima::RG;
-			else if (iequals(str, "RGB"))		return Anima::RGB;
-			else if (iequals(str, "RGBA"))		return Anima::RGBA;
-			else if (iequals(str, "BGR"))		return Anima::BGR;
-			else if (iequals(str, "BGRA"))		return Anima::BGRA;
-			else if (iequals(str, "RED_INT"))	return Anima::RED_INT;
-			else if (iequals(str, "GREEN_INT"))	return Anima::GREEN_INT;
-			else if (iequals(str, "BLUE_INT"))	return Anima::BLUE_INT;
-			else if (iequals(str, "RG_INT"))	return Anima::RG_INT;
-			else if (iequals(str, "RGB_INT"))	return Anima::RGB_INT;
-			else if (iequals(str, "RGBA_INT"))	return Anima::RGBA_INT;
-			else if (iequals(str, "BGR_INT"))	return Anima::BGR_INT;
-			else if (iequals(str, "BGRA_INT"))	return Anima::BGRA_INT;
-			else if (iequals(str, "DEPTH"))		return Anima::DEPTH;
+			if (iequals(str, "RED"))				return Anima::TEXTURE_FORMAT_RED;
+			else if (iequals(str, "GREEN"))			return Anima::TEXTURE_FORMAT_GREEN;
+			else if (iequals(str, "BLUE"))			return Anima::TEXTURE_FORMAT_BLUE;
+			else if (iequals(str, "RG"))			return Anima::TEXTURE_FORMAT_RG;
+			else if (iequals(str, "RGB"))			return Anima::TEXTURE_FORMAT_RGB;
+			else if (iequals(str, "RGBA"))			return Anima::TEXTURE_FORMAT_RGBA;
+			else if (iequals(str, "BGR"))			return Anima::TEXTURE_FORMAT_BGR;
+			else if (iequals(str, "BGRA"))			return Anima::TEXTURE_FORMAT_BGRA;
+			else if (iequals(str, "RED_INT"))		return Anima::TEXTURE_FORMAT_RED_INT;
+			else if (iequals(str, "GREEN_INT"))		return Anima::TEXTURE_FORMAT_GREEN_INT;
+			else if (iequals(str, "BLUE_INT"))		return Anima::TEXTURE_FORMAT_BLUE_INT;
+			else if (iequals(str, "RG_INT"))		return Anima::TEXTURE_FORMAT_RG_INT;
+			else if (iequals(str, "RGB_INT"))		return Anima::TEXTURE_FORMAT_RGB_INT;
+			else if (iequals(str, "RGBA_INT"))		return Anima::TEXTURE_FORMAT_RGBA_INT;
+			else if (iequals(str, "BGR_INT"))		return Anima::TEXTURE_FORMAT_BGR_INT;
+			else if (iequals(str, "BGRA_INT"))		return Anima::TEXTURE_FORMAT_BGRA_INT;
+			else if (iequals(str, "DEPTH"))			return Anima::TEXTURE_FORMAT_DEPTH;
+			else if (iequals(str, "DEPTH_STENCIL"))	return Anima::TEXTURE_FORMAT_DEPTH_STENCIL;
+			else if (iequals(str, "STENCIL"))		return Anima::TEXTURE_FORMAT_STENCIL;
+			else if (iequals(str, "DXT1"))			return Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			else if (iequals(str, "DXT3"))			return Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			else if (iequals(str, "DXT5"))			return Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 
-			return Anima::FORMAT_NONE;
+			return Anima::TEXTURE_FORMAT_NONE;
 		}
 		else
 			return boost::optional<external_type>(boost::none);
@@ -586,24 +741,29 @@ struct AnimaXmlTextureFormatTranslator
 	{
 		switch (type)
 		{
-		case Anima::FORMAT_NONE:	return Anima::AnimaString("NONE"); break;
-		case Anima::RED:			return Anima::AnimaString("RED"); break;
-		case Anima::GREEN:			return Anima::AnimaString("GREEN"); break;
-		case Anima::BLUE:			return Anima::AnimaString("BLUE"); break;
-		case Anima::RG:				return Anima::AnimaString("RG"); break;
-		case Anima::RGB:			return Anima::AnimaString("RGB"); break;
-		case Anima::RGBA:			return Anima::AnimaString("RGBA"); break;
-		case Anima::BGR:			return Anima::AnimaString("BGR"); break;
-		case Anima::BGRA:			return Anima::AnimaString("BGRA"); break;
-		case Anima::RED_INT:		return Anima::AnimaString("RED_INT"); break;
-		case Anima::GREEN_INT:		return Anima::AnimaString("GREEN_INT"); break;
-		case Anima::BLUE_INT:		return Anima::AnimaString("BLUE_INT"); break;
-		case Anima::RG_INT:			return Anima::AnimaString("RG_INT"); break;
-		case Anima::RGB_INT:		return Anima::AnimaString("RGB_INT"); break;
-		case Anima::RGBA_INT:		return Anima::AnimaString("RGBA_INT"); break;
-		case Anima::BGR_INT:		return Anima::AnimaString("BGR_INT"); break;
-		case Anima::BGRA_INT:		return Anima::AnimaString("BGRA_INT"); break;
-		case Anima::DEPTH:			return Anima::AnimaString("DEPTH"); break;
+		case Anima::TEXTURE_FORMAT_NONE:							return Anima::AnimaString("NONE"); break;
+		case Anima::TEXTURE_FORMAT_RED:								return Anima::AnimaString("RED"); break;
+		case Anima::TEXTURE_FORMAT_GREEN:							return Anima::AnimaString("GREEN"); break;
+		case Anima::TEXTURE_FORMAT_BLUE:							return Anima::AnimaString("BLUE"); break;
+		case Anima::TEXTURE_FORMAT_RG:								return Anima::AnimaString("RG"); break;
+		case Anima::TEXTURE_FORMAT_RGB:								return Anima::AnimaString("RGB"); break;
+		case Anima::TEXTURE_FORMAT_RGBA:							return Anima::AnimaString("RGBA"); break;
+		case Anima::TEXTURE_FORMAT_BGR:								return Anima::AnimaString("BGR"); break;
+		case Anima::TEXTURE_FORMAT_BGRA:							return Anima::AnimaString("BGRA"); break;
+		case Anima::TEXTURE_FORMAT_RED_INT:							return Anima::AnimaString("RED_INT"); break;
+		case Anima::TEXTURE_FORMAT_GREEN_INT:						return Anima::AnimaString("GREEN_INT"); break;
+		case Anima::TEXTURE_FORMAT_BLUE_INT:						return Anima::AnimaString("BLUE_INT"); break;
+		case Anima::TEXTURE_FORMAT_RG_INT:							return Anima::AnimaString("RG_INT"); break;
+		case Anima::TEXTURE_FORMAT_RGB_INT:							return Anima::AnimaString("RGB_INT"); break;
+		case Anima::TEXTURE_FORMAT_RGBA_INT:						return Anima::AnimaString("RGBA_INT"); break;
+		case Anima::TEXTURE_FORMAT_BGR_INT:							return Anima::AnimaString("BGR_INT"); break;
+		case Anima::TEXTURE_FORMAT_BGRA_INT:						return Anima::AnimaString("BGRA_INT"); break;
+		case Anima::TEXTURE_FORMAT_DEPTH:							return Anima::AnimaString("DEPTH"); break;
+		case Anima::TEXTURE_FORMAT_DEPTH_STENCIL:					return Anima::AnimaString("DEPTH_STENCIL"); break;
+		case Anima::TEXTURE_FORMAT_STENCIL:							return Anima::AnimaString("STENCIL"); break;
+		case Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT1_EXT:	return Anima::AnimaString("DXT1"); break;
+		case Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT3_EXT:	return Anima::AnimaString("DXT3"); break;
+		case Anima::TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT5_EXT:	return Anima::AnimaString("DXT5"); break;
 		}
 
 		return boost::optional<internal_type>(boost::none);
@@ -621,80 +781,90 @@ struct AnimaXmlTextureInternalFormatTranslator
 		{
 			using boost::algorithm::iequals;
 
-			if (iequals(str, "R8"))						return Anima::R8;
-			else if (iequals(str, "R8_SNORM"))			return Anima::R8_SNORM;
-			else if (iequals(str, "R16"))				return Anima::R16;
-			else if (iequals(str, "R16_SNORM"))			return Anima::R16_SNORM;
-			else if (iequals(str, "RG8"))				return Anima::RG8;
-			else if (iequals(str, "RG8_SNORM"))			return Anima::RG8_SNORM;
-			else if (iequals(str, "RG16"))				return Anima::RG16;
-			else if (iequals(str, "RG16_SNORM"))		return Anima::RG16_SNORM;
-			else if (iequals(str, "R3_G3_B2"))			return Anima::R3_G3_B2;
-			else if (iequals(str, "RGB4"))				return Anima::RGB4;
-			else if (iequals(str, "RGB5"))				return Anima::RGB5;
-			else if (iequals(str, "RGB565"))			return Anima::RGB565;
-			else if (iequals(str, "RGB8"))				return Anima::RGB8;
-			else if (iequals(str, "RGB8_SNORM"))		return Anima::RGB8_SNORM;
-			else if (iequals(str, "RGB10"))				return Anima::RGB10;
-			else if (iequals(str, "RGB12"))				return Anima::RGB12;
-			else if (iequals(str, "RGB16"))				return Anima::RGB16;
-			else if (iequals(str, "RGB16_SNORM"))		return Anima::RGB16_SNORM;
-			else if (iequals(str, "RGBA2"))				return Anima::RGBA2;
-			else if (iequals(str, "RGBA4"))				return Anima::RGBA4;
-			else if (iequals(str, "RGB5_A1"))			return Anima::RGB5_A1;
-			else if (iequals(str, "RGBA8"))				return Anima::RGBA8;
-			else if (iequals(str, "RGBA8_SNORM"))		return Anima::RGBA8_SNORM;
-			else if (iequals(str, "RGB10_A2"))			return Anima::RGB10_A2;
-			else if (iequals(str, "RGB10_A2UI"))		return Anima::RGB10_A2UI;
-			else if (iequals(str, "RGBA12"))			return Anima::RGBA12;
-			else if (iequals(str, "RGBA16"))			return Anima::RGBA16;
-			else if (iequals(str, "RGBA16_SNORM"))		return Anima::RGBA16_SNORM;
-			else if (iequals(str, "SRGB8"))				return Anima::SRGB8;
-			else if (iequals(str, "SRGB8_A8"))			return Anima::SRGB8_A8;
-			else if (iequals(str, "R16F"))				return Anima::R16F;
-			else if (iequals(str, "RG16F"))				return Anima::RG16F;
-			else if (iequals(str, "RGB16F"))			return Anima::RGB16F;
-			else if (iequals(str, "RGBA16F"))			return Anima::RGBA16F;
-			else if (iequals(str, "R32F"))				return Anima::R32F;
-			else if (iequals(str, "RG32F"))				return Anima::RG32F;
-			else if (iequals(str, "RGB32F"))			return Anima::RGB32F;
-			else if (iequals(str, "RGBA32F"))			return Anima::RGBA32F;
-			else if (iequals(str, "R11F_G11F_B10F"))	return Anima::R11F_G11F_B10F;
-			else if (iequals(str, "RGB9_E5"))			return Anima::RGB9_E5;
-			else if (iequals(str, "R8I"))				return Anima::R8I;
-			else if (iequals(str, "R8UI"))				return Anima::R8UI;
-			else if (iequals(str, "R16I"))				return Anima::R16I;
-			else if (iequals(str, "R16UI"))				return Anima::R16UI;
-			else if (iequals(str, "R32I"))				return Anima::R32I;
-			else if (iequals(str, "R32UI"))				return Anima::R32UI;
-			else if (iequals(str, "RG8I"))				return Anima::RG8I;
-			else if (iequals(str, "RG8UI"))				return Anima::RG8UI;
-			else if (iequals(str, "RG16I"))				return Anima::RG16I;
-			else if (iequals(str, "RG16UI"))			return Anima::RG16UI;
-			else if (iequals(str, "RG32I"))				return Anima::RG32I;
-			else if (iequals(str, "RG32UI"))			return Anima::RG32UI;
-			else if (iequals(str, "RGB8I"))				return Anima::RGB8I;
-			else if (iequals(str, "RGB8UI"))			return Anima::RGB8UI;
-			else if (iequals(str, "RGB16I"))			return Anima::RGB16I;
-			else if (iequals(str, "RGB16UI"))			return Anima::RGB16UI;
-			else if (iequals(str, "RGB32I"))			return Anima::RGB32I;
-			else if (iequals(str, "RGB32UI"))			return Anima::RGB32UI;
-			else if (iequals(str, "RGBA8I"))			return Anima::RGBA8I;
-			else if (iequals(str, "RGBA8UI"))			return Anima::RGBA8UI;
-			else if (iequals(str, "RGBA16I"))			return Anima::RGBA16I;
-			else if (iequals(str, "RGBA16UI"))			return Anima::RGBA16UI;
-			else if (iequals(str, "RGBA32I"))			return Anima::RGBA32I;
-			else if (iequals(str, "RGBA32UI"))			return Anima::RGBA32UI;
-			else if (iequals(str, "DEPTH16"))			return Anima::DEPTH16;
-			else if (iequals(str, "DEPTH24"))			return Anima::DEPTH24;
-			else if (iequals(str, "DEPTH32"))			return Anima::DEPTH32;
-			else if (iequals(str, "DEPTH32F"))			return Anima::DEPTH32F;
-			else if (iequals(str, "RED"))				return Anima::IF_RED;
-			else if (iequals(str, "RG"))				return Anima::IF_RG;
-			else if (iequals(str, "RGB"))				return Anima::IF_RGB;
-			else if (iequals(str, "RGBA"))				return Anima::IF_RGBA;
+			if (iequals(str, "R8"))						return Anima::TEXTURE_INTERNAL_FORMAT_R8;
+			else if (iequals(str, "R8_SNORM"))			return Anima::TEXTURE_INTERNAL_FORMAT_R8_SNORM;
+			else if (iequals(str, "R16"))				return Anima::TEXTURE_INTERNAL_FORMAT_R16;
+			else if (iequals(str, "R16_SNORM"))			return Anima::TEXTURE_INTERNAL_FORMAT_R16_SNORM;
+			else if (iequals(str, "RG8"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG8;
+			else if (iequals(str, "RG8_SNORM"))			return Anima::TEXTURE_INTERNAL_FORMAT_RG8_SNORM;
+			else if (iequals(str, "RG16"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG16;
+			else if (iequals(str, "RG16_SNORM"))		return Anima::TEXTURE_INTERNAL_FORMAT_RG16_SNORM;
+			else if (iequals(str, "R3_G3_B2"))			return Anima::TEXTURE_INTERNAL_FORMAT_R3_G3_B2;
+			else if (iequals(str, "RGB4"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB4;
+			else if (iequals(str, "RGB5"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB5;
+			else if (iequals(str, "RGB565"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB565;
+			else if (iequals(str, "RGB8"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB8;
+			else if (iequals(str, "RGB8_SNORM"))		return Anima::TEXTURE_INTERNAL_FORMAT_RGB8_SNORM;
+			else if (iequals(str, "RGB10"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB10;
+			else if (iequals(str, "RGB12"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB12;
+			else if (iequals(str, "RGB16"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB16;
+			else if (iequals(str, "RGB16_SNORM"))		return Anima::TEXTURE_INTERNAL_FORMAT_RGB16_SNORM;
+			else if (iequals(str, "RGBA2"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGBA2;
+			else if (iequals(str, "RGBA4"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGBA4;
+			else if (iequals(str, "RGB5_A1"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB5_A1;
+			else if (iequals(str, "RGBA8"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGBA8;
+			else if (iequals(str, "RGBA8_SNORM"))		return Anima::TEXTURE_INTERNAL_FORMAT_RGBA8_SNORM;
+			else if (iequals(str, "RGB10_A2"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB10_A2;
+			else if (iequals(str, "RGB10_A2UI"))		return Anima::TEXTURE_INTERNAL_FORMAT_RGB10_A2UI;
+			else if (iequals(str, "RGBA12"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA12;
+			else if (iequals(str, "RGBA16"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA16;
+			else if (iequals(str, "RGBA16_SNORM"))		return Anima::TEXTURE_INTERNAL_FORMAT_RGBA16_SNORM;
+			else if (iequals(str, "SRGB8"))				return Anima::TEXTURE_INTERNAL_FORMAT_SRGB8;
+			else if (iequals(str, "SRGB8_A8"))			return Anima::TEXTURE_INTERNAL_FORMAT_SRGB8_A8;
+			else if (iequals(str, "R16F"))				return Anima::TEXTURE_INTERNAL_FORMAT_R16F;
+			else if (iequals(str, "RG16F"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG16F;
+			else if (iequals(str, "RGB16F"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB16F;
+			else if (iequals(str, "RGBA16F"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA16F;
+			else if (iequals(str, "R32F"))				return Anima::TEXTURE_INTERNAL_FORMAT_R32F;
+			else if (iequals(str, "RG32F"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG32F;
+			else if (iequals(str, "RGB32F"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB32F;
+			else if (iequals(str, "RGBA32F"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA32F;
+			else if (iequals(str, "R11F_G11F_B10F"))	return Anima::TEXTURE_INTERNAL_FORMAT_R11F_G11F_B10F;
+			else if (iequals(str, "RGB9_E5"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB9_E5;
+			else if (iequals(str, "R8I"))				return Anima::TEXTURE_INTERNAL_FORMAT_R8I;
+			else if (iequals(str, "R8UI"))				return Anima::TEXTURE_INTERNAL_FORMAT_R8UI;
+			else if (iequals(str, "R16I"))				return Anima::TEXTURE_INTERNAL_FORMAT_R16I;
+			else if (iequals(str, "R16UI"))				return Anima::TEXTURE_INTERNAL_FORMAT_R16UI;
+			else if (iequals(str, "R32I"))				return Anima::TEXTURE_INTERNAL_FORMAT_R32I;
+			else if (iequals(str, "R32UI"))				return Anima::TEXTURE_INTERNAL_FORMAT_R32UI;
+			else if (iequals(str, "RG8I"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG8I;
+			else if (iequals(str, "RG8UI"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG8UI;
+			else if (iequals(str, "RG16I"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG16I;
+			else if (iequals(str, "RG16UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RG16UI;
+			else if (iequals(str, "RG32I"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG32I;
+			else if (iequals(str, "RG32UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RG32UI;
+			else if (iequals(str, "RGB8I"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB8I;
+			else if (iequals(str, "RGB8UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB8UI;
+			else if (iequals(str, "RGB16I"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB16I;
+			else if (iequals(str, "RGB16UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB16UI;
+			else if (iequals(str, "RGB32I"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB32I;
+			else if (iequals(str, "RGB32UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGB32UI;
+			else if (iequals(str, "RGBA8I"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA8I;
+			else if (iequals(str, "RGBA8UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA8UI;
+			else if (iequals(str, "RGBA16I"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA16I;
+			else if (iequals(str, "RGBA16UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA16UI;
+			else if (iequals(str, "RGBA32I"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA32I;
+			else if (iequals(str, "RGBA32UI"))			return Anima::TEXTURE_INTERNAL_FORMAT_RGBA32UI;
+			else if (iequals(str, "DEPTH"))				return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH_COMPONENT;
+			else if (iequals(str, "DEPTH_STENCIL"))		return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH_STENCIL;
+			else if (iequals(str, "STENCIL"))			return Anima::TEXTURE_INTERNAL_FORMAT_STENCIL;
+			else if (iequals(str, "DEPTH16"))			return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH16;
+			else if (iequals(str, "DEPTH24"))			return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH24;
+			else if (iequals(str, "DEPTH32"))			return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32;
+			else if (iequals(str, "DEPTH32F"))			return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32F;
+			else if (iequals(str, "DEPTH24_STENCIL8"))	return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH24_STENCIL8;
+			else if (iequals(str, "DEPTH32F_STENCIL8"))	return Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32F_STENCIL8;
+			else if (iequals(str, "STENCIL8"))			return Anima::TEXTURE_INTERNAL_FORMAT_STENCIL8;
+			else if (iequals(str, "RED"))				return Anima::TEXTURE_INTERNAL_FORMAT_RED;
+			else if (iequals(str, "RG"))				return Anima::TEXTURE_INTERNAL_FORMAT_RG;
+			else if (iequals(str, "RGB"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGB;
+			else if (iequals(str, "RGBA"))				return Anima::TEXTURE_INTERNAL_FORMAT_RGBA;
+			else if (iequals(str, "1"))					return Anima::TEXTURE_INTERNAL_FORMAT_1;
+			else if (iequals(str, "2"))					return Anima::TEXTURE_INTERNAL_FORMAT_2;
+			else if (iequals(str, "3"))					return Anima::TEXTURE_INTERNAL_FORMAT_3;
+			else if (iequals(str, "4"))					return Anima::TEXTURE_INTERNAL_FORMAT_4;
 
-			return Anima::INTERNAL_FORMAT_NONE;
+			return Anima::TEXTURE_INTERNAL_FORMAT_NONE;
 		}
 		else
 			return boost::optional<external_type>(boost::none);
@@ -704,79 +874,89 @@ struct AnimaXmlTextureInternalFormatTranslator
 	{
 		switch (type)
 		{
-		case Anima::INTERNAL_FORMAT_NONE:	return Anima::AnimaString("NONE"); break;
-		case Anima::R8:						return Anima::AnimaString("R8"); break;
-		case Anima::R8_SNORM:				return Anima::AnimaString("R8_SNORM"); break;
-		case Anima::R16:					return Anima::AnimaString("R16"); break;
-		case Anima::R16_SNORM:				return Anima::AnimaString("R16_SNORM"); break;
-		case Anima::RG8:					return Anima::AnimaString("RG8"); break;
-		case Anima::RG8_SNORM:				return Anima::AnimaString("RG8_SNORM"); break;
-		case Anima::RG16:					return Anima::AnimaString("RG16"); break;
-		case Anima::RG16_SNORM:				return Anima::AnimaString("RG16_SNORM"); break;
-		case Anima::R3_G3_B2:				return Anima::AnimaString("R3_G3_B2"); break;
-		case Anima::RGB4:					return Anima::AnimaString("RGB4"); break;
-		case Anima::RGB5:					return Anima::AnimaString("RGB5"); break;
-		case Anima::RGB565:					return Anima::AnimaString("RGB565"); break;
-		case Anima::RGB8:					return Anima::AnimaString("RGB8"); break;
-		case Anima::RGB8_SNORM:				return Anima::AnimaString("RGB8_SNORM"); break;
-		case Anima::RGB10:					return Anima::AnimaString("RGB10"); break;
-		case Anima::RGB12:					return Anima::AnimaString("RGB12"); break;
-		case Anima::RGB16:					return Anima::AnimaString("RGB16"); break;
-		case Anima::RGB16_SNORM:			return Anima::AnimaString("RGB16_SNORM"); break;
-		case Anima::RGBA2:					return Anima::AnimaString("RGBA2"); break;
-		case Anima::RGBA4:					return Anima::AnimaString("RGBA4"); break;
-		case Anima::RGB5_A1:				return Anima::AnimaString("RGB5_A1"); break;
-		case Anima::RGBA8:					return Anima::AnimaString("RGBA8"); break;
-		case Anima::RGBA8_SNORM:			return Anima::AnimaString("RGBA8_SNORM"); break;
-		case Anima::RGB10_A2:				return Anima::AnimaString("RGB10_A2"); break;
-		case Anima::RGB10_A2UI:				return Anima::AnimaString("RGB10_A2UI"); break;
-		case Anima::RGBA12:					return Anima::AnimaString("RGBA12"); break;
-		case Anima::RGBA16:					return Anima::AnimaString("RGBA16"); break;
-		case Anima::RGBA16_SNORM:			return Anima::AnimaString("RGBA16_SNORM"); break;
-		case Anima::SRGB8:					return Anima::AnimaString("SRGB8"); break;
-		case Anima::SRGB8_A8:				return Anima::AnimaString("SRGB8_A8"); break;
-		case Anima::R16F:					return Anima::AnimaString("R16F"); break;
-		case Anima::RG16F:					return Anima::AnimaString("RG16F"); break;
-		case Anima::RGB16F:					return Anima::AnimaString("RGB16F"); break;
-		case Anima::RGBA16F:				return Anima::AnimaString("RGBA16F"); break;
-		case Anima::R32F:					return Anima::AnimaString("R32F"); break;
-		case Anima::RG32F:					return Anima::AnimaString("RG32F"); break;
-		case Anima::RGB32F:					return Anima::AnimaString("RGB32F"); break;
-		case Anima::RGBA32F:				return Anima::AnimaString("RGBA32F"); break;
-		case Anima::R11F_G11F_B10F:			return Anima::AnimaString("R11F_G11F_B10F"); break;
-		case Anima::RGB9_E5:				return Anima::AnimaString("RGB9_E5"); break;
-		case Anima::R8I:					return Anima::AnimaString("R8I"); break;
-		case Anima::R8UI:					return Anima::AnimaString("R8UI"); break;
-		case Anima::R16I:					return Anima::AnimaString("R16I"); break;
-		case Anima::R16UI:					return Anima::AnimaString("R16UI"); break;
-		case Anima::R32I:					return Anima::AnimaString("R32I"); break;
-		case Anima::R32UI:					return Anima::AnimaString("R32UI"); break;
-		case Anima::RG8I:					return Anima::AnimaString("RG8I"); break;
-		case Anima::RG8UI:					return Anima::AnimaString("RG8UI"); break;
-		case Anima::RG16I:					return Anima::AnimaString("RG16I"); break;
-		case Anima::RG16UI:					return Anima::AnimaString("RG16UI"); break;
-		case Anima::RG32I:					return Anima::AnimaString("RG32I"); break;
-		case Anima::RG32UI:					return Anima::AnimaString("RG32UI"); break;
-		case Anima::RGB8I:					return Anima::AnimaString("RGB8I"); break;
-		case Anima::RGB8UI:					return Anima::AnimaString("RGB8UI"); break;
-		case Anima::RGB16I:					return Anima::AnimaString("RGB16I"); break;
-		case Anima::RGB16UI:				return Anima::AnimaString("RGB16UI"); break;
-		case Anima::RGB32I:					return Anima::AnimaString("RGB32I"); break;
-		case Anima::RGB32UI:				return Anima::AnimaString("RGB32UI"); break;
-		case Anima::RGBA8I:					return Anima::AnimaString("RGBA8I"); break;
-		case Anima::RGBA8UI:				return Anima::AnimaString("RGBA8UI"); break;
-		case Anima::RGBA16I:				return Anima::AnimaString("RGBA16I"); break;
-		case Anima::RGBA16UI:				return Anima::AnimaString("RGBA16UI"); break;
-		case Anima::RGBA32I:				return Anima::AnimaString("RGBA32I"); break;
-		case Anima::RGBA32UI:				return Anima::AnimaString("RGBA32UI"); break;
-		case Anima::DEPTH16:				return Anima::AnimaString("DEPTH16"); break;
-		case Anima::DEPTH24:				return Anima::AnimaString("DEPTH24"); break;
-		case Anima::DEPTH32:				return Anima::AnimaString("DEPTH32"); break;
-		case Anima::DEPTH32F:				return Anima::AnimaString("DEPTH32F"); break;
-		case Anima::IF_RED:					return Anima::AnimaString("RED"); break;
-		case Anima::IF_RG:					return Anima::AnimaString("RG"); break;
-		case Anima::IF_RGB:					return Anima::AnimaString("RGB"); break;
-		case Anima::IF_RGBA:				return Anima::AnimaString("RGBA"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_NONE:				return Anima::AnimaString("NONE"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R8:					return Anima::AnimaString("R8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R8_SNORM:			return Anima::AnimaString("R8_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R16:				return Anima::AnimaString("R16"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R16_SNORM:			return Anima::AnimaString("R16_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG8:				return Anima::AnimaString("RG8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG8_SNORM:			return Anima::AnimaString("RG8_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG16:				return Anima::AnimaString("RG16"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG16_SNORM:			return Anima::AnimaString("RG16_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R3_G3_B2:			return Anima::AnimaString("R3_G3_B2"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB4:				return Anima::AnimaString("RGB4"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB5:				return Anima::AnimaString("RGB5"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB565:				return Anima::AnimaString("RGB565"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB8:				return Anima::AnimaString("RGB8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB8_SNORM:			return Anima::AnimaString("RGB8_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB10:				return Anima::AnimaString("RGB10"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB12:				return Anima::AnimaString("RGB12"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB16:				return Anima::AnimaString("RGB16"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB16_SNORM:		return Anima::AnimaString("RGB16_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA2:				return Anima::AnimaString("RGBA2"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA4:				return Anima::AnimaString("RGBA4"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB5_A1:			return Anima::AnimaString("RGB5_A1"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA8:				return Anima::AnimaString("RGBA8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA8_SNORM:		return Anima::AnimaString("RGBA8_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB10_A2:			return Anima::AnimaString("RGB10_A2"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB10_A2UI:			return Anima::AnimaString("RGB10_A2UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA12:				return Anima::AnimaString("RGBA12"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA16:				return Anima::AnimaString("RGBA16"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA16_SNORM:		return Anima::AnimaString("RGBA16_SNORM"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_SRGB8:				return Anima::AnimaString("SRGB8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_SRGB8_A8:			return Anima::AnimaString("SRGB8_A8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R16F:				return Anima::AnimaString("R16F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG16F:				return Anima::AnimaString("RG16F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB16F:				return Anima::AnimaString("RGB16F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA16F:			return Anima::AnimaString("RGBA16F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R32F:				return Anima::AnimaString("R32F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG32F:				return Anima::AnimaString("RG32F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB32F:				return Anima::AnimaString("RGB32F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA32F:			return Anima::AnimaString("RGBA32F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R11F_G11F_B10F:		return Anima::AnimaString("R11F_G11F_B10F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB9_E5:			return Anima::AnimaString("RGB9_E5"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R8I:				return Anima::AnimaString("R8I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R8UI:				return Anima::AnimaString("R8UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R16I:				return Anima::AnimaString("R16I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R16UI:				return Anima::AnimaString("R16UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R32I:				return Anima::AnimaString("R32I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_R32UI:				return Anima::AnimaString("R32UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG8I:				return Anima::AnimaString("RG8I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG8UI:				return Anima::AnimaString("RG8UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG16I:				return Anima::AnimaString("RG16I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG16UI:				return Anima::AnimaString("RG16UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG32I:				return Anima::AnimaString("RG32I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG32UI:				return Anima::AnimaString("RG32UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB8I:				return Anima::AnimaString("RGB8I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB8UI:				return Anima::AnimaString("RGB8UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB16I:				return Anima::AnimaString("RGB16I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB16UI:			return Anima::AnimaString("RGB16UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB32I:				return Anima::AnimaString("RGB32I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB32UI:			return Anima::AnimaString("RGB32UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA8I:				return Anima::AnimaString("RGBA8I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA8UI:			return Anima::AnimaString("RGBA8UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA16I:			return Anima::AnimaString("RGBA16I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA16UI:			return Anima::AnimaString("RGBA16UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA32I:			return Anima::AnimaString("RGBA32I"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA32UI:			return Anima::AnimaString("RGBA32UI"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH_COMPONENT:	return Anima::AnimaString("DEPTH"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH_STENCIL:		return Anima::AnimaString("DEPTH_STENCIL"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_STENCIL:			return Anima::AnimaString("STENCIL"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH16:			return Anima::AnimaString("DEPTH16"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH24:			return Anima::AnimaString("DEPTH24"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32:			return Anima::AnimaString("DEPTH32"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32F:			return Anima::AnimaString("DEPTH32F"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH24_STENCIL8:	return Anima::AnimaString("DEPTH24_STENCIL8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_DEPTH32F_STENCIL8:	return Anima::AnimaString("DEPTH32F_STENCIL8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_STENCIL8:			return Anima::AnimaString("STENCIL8"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RED:				return Anima::AnimaString("RED"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RG:					return Anima::AnimaString("RG"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGB:				return Anima::AnimaString("RGB"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_RGBA:				return Anima::AnimaString("RGBA"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_1:					return Anima::AnimaString("1"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_2:					return Anima::AnimaString("2"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_3:					return Anima::AnimaString("3"); break;
+		case Anima::TEXTURE_INTERNAL_FORMAT_4:					return Anima::AnimaString("4"); break;
 		}
 
 		return boost::optional<internal_type>(boost::none);
@@ -850,6 +1030,26 @@ namespace boost
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaMatrix >
 		{
 			typedef AnimaXmlMatrixTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureMinFilterMode >
+		{
+			typedef AnimaXmlTextureMinFilterModeTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureMagFilterMode >
+		{
+			typedef AnimaXmlTextureMagFilterModeTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureDataType>
+		{
+			typedef AnimaXmlTextureDataTypeTranslator type;
+		};
+
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureClampMode>
+		{
+			typedef AnimaXmlTextureClampModeTranslator type;
 		};
 	}
 }

@@ -20,6 +20,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaVectorGenerator : public AnimaDataGenerator
 {
+	DECLARE_ANIMA_CLASS(AnimaVectorGenerator);
 public:
 	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaVectorGenerator(const AnimaString& name, AnimaAllocator* allocator, const AnimaVertex2f& color);

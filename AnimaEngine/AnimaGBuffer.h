@@ -106,12 +106,15 @@ public:
 	 +	\param[in]	internalFormat	Formato interno della texture (ad esempio GL_RGB, GL_RGBA, GL_BGR, ecc...)
 	 *	\param[in]	format			Formato della texture (ad esempio GL_RGB, GL_RGBA, ecc...)
 	 *	\param[in]	dataType		Tipo di dati memorizzati nella texture (ad esempio GL_FLOAT, GL_BYTE, ecc...)
-	 *	\param[in]	filter			Filtro da applicare alla texture (ad esempio GL_LINEAR, ecc...)
-	 *	\param[in]	clamp			Metodo di clamping della texture (ad esempio GL_REPEAT, GL_BORDER, ecc...)
+	 *	\param[in]	minFilter		Filtro da applicare alla texture quanto viene ridotta
+	 *	\param[in]	minFilter		Filtro da applicare alla texture quanto viene ingrandita
+	 *	\param[in]	clampS			Metodo di clamping della texture in orizzontale
+	 *	\param[in]	clampT			Metodo di clamping della texture in verticale
+	 *	\param[in]	clampR			Metodo di clamping della texture in profondità
 	 *	\return		True se il nome della texture non è già presente all'interno della lista delle texture del GBuffer, false altrimenti.
 	 *	\author		Zille Marco
 	 */
-	bool AddTexture(const AnimaString& name, AnimaTextureTarget target, AUint attachment, AnimaTextureInternalFormat internalFormat, AnimaTextureFormat format, AUint dataType, AnimaTextureFilterMode filter, AnimaTextureClampMode clamp);
+	bool AddTexture(const AnimaString& name, AnimaTextureTarget target, AnimaTextureAttachment attachment, AnimaTextureInternalFormat internalFormat, AnimaTextureFormat format, AnimaTextureDataType dataType, AnimaTextureMinFilterMode minFilter, AnimaTextureMagFilterMode magFilter, AnimaTextureClampMode clampS, AnimaTextureClampMode clampT, AnimaTextureClampMode clampR);
 		
 	/*!
 	 *	\brief		Ridimensione le texture del GBuffer
@@ -186,7 +189,7 @@ protected:
 		 *	\param[in]	attachment	Buffer in output dello shader a cui la texture è legata
 		 *	\author		Zille Marco
 		 */
-		AnimaGBufferData(const AnimaString& name, AnimaTexture* texture, AUint index, AUint attachment) {
+		AnimaGBufferData(const AnimaString& name, AnimaTexture* texture, AUint index, AnimaTextureAttachment attachment) {
 			_name = name;
 			_index = index;
 			_texture = texture;
@@ -220,10 +223,10 @@ protected:
 		}
 
 	public:
-		AnimaString		_name;			/*!< Nome della texture */
-		AUint			_index;			/*!< Indice di binding della textuer con uno shader */
-		AUint			_attachment;	/*!< Buffer in output dello shader a cui la texture sarà legata */
-		AnimaTexture*	_texture;		/*!< Texture del GBuffer */
+		AnimaString				_name;			/*!< Nome della texture */
+		AUint					_index;			/*!< Indice di binding della texture con uno shader */
+		AnimaTextureAttachment	_attachment;	/*!< Buffer in output dello shader a cui la texture sarà legata */
+		AnimaTexture*			_texture;		/*!< Texture del GBuffer */
 	};
 
 	/*!
@@ -255,7 +258,8 @@ protected:
 	AUint	_width;					/*!<	Larghezza delle texture del GBuffer */
 	AUint	_height;				/*!<	Altezza delle texture del GBuffer */
 	AUint	_frameBuffer;			/*!<	Frame buffer di OpenGL a cui il GBuffer è legato */
-	AUint	_renderBuffer;			/*!<	Render buffer di OpenGL a cui il GBuffer è legato */
+	AUint	_depthRenderBuffer;		/*!<	Render buffer di OpenGL a cui il GBuffer è legato */
+	AUint	_stencilRenderBuffer;	/*!<	Render buffer di OpenGL a cui il GBuffer è legato */
 	bool	_created;				/*!<	Flag che indica se il GBuffer è già stato creato */
 	bool	_needsResize;			/*!<	Flag che indica che è stato chiamato il metodo Resize() e le texture devono ancora essere											ridimensionate */
 	

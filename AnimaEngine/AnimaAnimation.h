@@ -33,6 +33,7 @@ class AnimaModel;
  */
 class ANIMA_ENGINE_EXPORT AnimaAnimation : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaAnimation);
 public:
 	/*!
 	 *	\brief		Costruttore della classe
@@ -193,6 +194,7 @@ protected:
  */
 class ANIMA_ENGINE_EXPORT AnimaAnimationNode : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaAnimationNode);
 public:
 	/*!
 	 *	\brief		Costruttore della classe

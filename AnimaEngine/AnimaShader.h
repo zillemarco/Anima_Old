@@ -20,6 +20,8 @@ enum AnimaShaderType {
 
 class ANIMA_ENGINE_EXPORT AnimaShader : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaShader);
+
 public:
 	AnimaShader(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type);

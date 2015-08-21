@@ -75,6 +75,9 @@ public:
 	AnimaRenderer& operator=(AnimaRenderer&& src);
 	
 public:
+	virtual bool InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath);
+
+public:
 	virtual void Start(AnimaScene* scene);
 
 	AnimaScene* GetActiveScene() { return _scene; }
@@ -188,8 +191,8 @@ protected:
 	boost::unordered_map<AnimaString, AnimaVertex4f, AnimaStringHasher> _vectors4fMap;
 
 	boost::unordered_map<AnimaString, AFloat, AnimaStringHasher>	_floatsMap;
-	boost::unordered_map<AnimaString, AInt, AnimaStringHasher>	_integersMap;
-	boost::unordered_map<AnimaString, bool, AnimaStringHasher>	_booleansMap;
+	boost::unordered_map<AnimaString, AInt, AnimaStringHasher>		_integersMap;
+	boost::unordered_map<AnimaString, bool, AnimaStringHasher>		_booleansMap;
 
 	boost::unordered_map<AnimaString, AnimaMesh*, AnimaStringHasher>	_meshesMap;
 #pragma warning (default: 4251)

@@ -113,4 +113,16 @@ void AnimaModelInstance::UpdateChildrenTransformation()
 		_meshes[i]->GetTransformation()->UpdateMatrix();
 }
 
+void AnimaModelInstance::GetAllMeshes(AnimaArray<AnimaMeshInstance*> *meshes)
+{
+	if (meshes == nullptr)
+		return;
+
+	for (AInt nm = 0; nm < _meshes.size(); nm++)
+		meshes->push_back(_meshes[nm]);
+
+	for (AInt nc = 0; nc < _children.GetSize(); nc++)
+		((AnimaModelInstance*)_children[nc])->GetAllMeshes(meshes);
+}
+
 END_ANIMA_ENGINE_NAMESPACE

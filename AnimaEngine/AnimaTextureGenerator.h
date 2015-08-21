@@ -20,6 +20,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaTextureGenerator : public AnimaDataGenerator
 {
+	DECLARE_ANIMA_CLASS(AnimaTextureGenerator);
 public:
 	AnimaTextureGenerator(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaTextureGenerator(const AnimaString& name, AnimaAllocator* allocator, AnimaTexture* texture);

@@ -34,6 +34,8 @@ class ANIMA_ENGINE_EXPORT AnimaMappedValues : public AnimaNamedObject
 	friend class AnimaScene;
 	friend class AnimaMappedValues;
 
+	DECLARE_ANIMA_CLASS(AnimaMappedValues);
+
 protected:
 	AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaMappedValues(const AnimaMappedValues& src);

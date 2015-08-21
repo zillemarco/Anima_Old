@@ -13,9 +13,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaNamedObject::AnimaNamedObject(const AnimaString& name, AnimaAllocator* allocator)
 	: _allocator(allocator)
 {
-	_name = name;
-
 	IMPLEMENT_ANIMA_CLASS(AnimaNamedObject);
+
+	_name = name;
 }
 
 AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
@@ -74,12 +74,12 @@ AnimaString AnimaNamedObject::GetName() const
 	return _name;
 }
 
-void AnimaNamedObject::AddDerivedClassName(AnimaString derivedClassName)
+void AnimaNamedObject::_AddDerivedClassName(AnimaString derivedClassName)
 {
 	_derivedClassNames.push_back(derivedClassName);
 }
 
-void AnimaNamedObject::SetClassName(AnimaString className)
+void AnimaNamedObject::_SetClassName(AnimaString className)
 {
 	_className = className;
 }

@@ -22,6 +22,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaModel : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaModel);
+
 	friend class AnimaModelInstancesManager;
 	friend class AnimaMeshInstancesManager;
 

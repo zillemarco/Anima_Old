@@ -17,55 +17,78 @@ enum AnimaTextureCubeIndex
 
 enum AnimaTextureTarget
 {
-	TARGET_NONE = 0, TEXTURE_2D, TEXTURE_3D, TEXTURE_CUBE
+	TEXTURE_TARGET_NONE = 0, TEXTURE_TARGET_2D, TEXTURE_TARGET_3D, TEXTURE_TARGET_CUBE
 };
 
 enum AnimaTextureFormat
 {
-	FORMAT_NONE = 0, RED, GREEN, BLUE, RG, RGB, RGBA,
-	BGR, BGRA, RED_INT, GREEN_INT, BLUE_INT, 
-	RG_INT, RGB_INT, RGBA_INT, BGR_INT, BGRA_INT,
-	DEPTH,
-	COMPRESSED_RGBA_S3TC_DXT1_EXT, COMPRESSED_RGBA_S3TC_DXT3_EXT, COMPRESSED_RGBA_S3TC_DXT5_EXT
+	TEXTURE_FORMAT_NONE = 0, TEXTURE_FORMAT_RED, TEXTURE_FORMAT_GREEN, TEXTURE_FORMAT_BLUE, TEXTURE_FORMAT_RG, TEXTURE_FORMAT_RGB, TEXTURE_FORMAT_RGBA,
+	TEXTURE_FORMAT_BGR, TEXTURE_FORMAT_BGRA, TEXTURE_FORMAT_RED_INT, TEXTURE_FORMAT_GREEN_INT, TEXTURE_FORMAT_BLUE_INT,
+	TEXTURE_FORMAT_RG_INT, TEXTURE_FORMAT_RGB_INT, TEXTURE_FORMAT_RGBA_INT, TEXTURE_FORMAT_BGR_INT, TEXTURE_FORMAT_BGRA_INT,
+	TEXTURE_FORMAT_DEPTH, TEXTURE_FORMAT_DEPTH_STENCIL, TEXTURE_FORMAT_STENCIL,
+	TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT1_EXT, TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT3_EXT, TEXTURE_FORMAT_COMPRESSED_RGBA_S3TC_DXT5_EXT
 };
 
 enum AnimaTextureInternalFormat
 {
-	INTERNAL_FORMAT_NONE = 0, R8, R8_SNORM, R16, R16_SNORM, RG8, RG8_SNORM,
-	RG16, RG16_SNORM, R3_G3_B2, RGB4, RGB5, RGB565,
-	RGB8, RGB8_SNORM, RGB10, RGB12, RGB16, RGB16_SNORM,
-	RGBA2, RGBA4, RGB5_A1, RGBA8, RGBA8_SNORM, RGB10_A2,
-	RGB10_A2UI, RGBA12, RGBA16, RGBA16_SNORM, SRGB8,
-	SRGB8_A8, R16F, RG16F, RGB16F, RGBA16F, R32F, RG32F,
-	RGB32F, RGBA32F, R11F_G11F_B10F, RGB9_E5, R8I, R8UI,
-	R16I, R16UI, R32I, R32UI, RG8I, RG8UI, RG16I, RG16UI, RG32I,
-	RG32UI, RGB8I, RGB8UI, RGB16I, RGB16UI, RGB32I, RGB32UI,
-	RGBA8I, RGBA8UI, RGBA16I, RGBA16UI, RGBA32I, RGBA32UI,
-	DEPTH16, DEPTH24, DEPTH32, DEPTH32F,
-	IF_RED, IF_RG, IF_RGB, IF_RGBA,
-	ONE, TWO, THREE, FOUR
+	TEXTURE_INTERNAL_FORMAT_NONE = 0, TEXTURE_INTERNAL_FORMAT_R8, TEXTURE_INTERNAL_FORMAT_R8_SNORM, TEXTURE_INTERNAL_FORMAT_R16, TEXTURE_INTERNAL_FORMAT_R16_SNORM, TEXTURE_INTERNAL_FORMAT_RG8, TEXTURE_INTERNAL_FORMAT_RG8_SNORM,
+	TEXTURE_INTERNAL_FORMAT_RG16, TEXTURE_INTERNAL_FORMAT_RG16_SNORM, TEXTURE_INTERNAL_FORMAT_R3_G3_B2, TEXTURE_INTERNAL_FORMAT_RGB4, TEXTURE_INTERNAL_FORMAT_RGB5, TEXTURE_INTERNAL_FORMAT_RGB565,
+	TEXTURE_INTERNAL_FORMAT_RGB8, TEXTURE_INTERNAL_FORMAT_RGB8_SNORM, TEXTURE_INTERNAL_FORMAT_RGB10, TEXTURE_INTERNAL_FORMAT_RGB12, TEXTURE_INTERNAL_FORMAT_RGB16, TEXTURE_INTERNAL_FORMAT_RGB16_SNORM,
+	TEXTURE_INTERNAL_FORMAT_RGBA2, TEXTURE_INTERNAL_FORMAT_RGBA4, TEXTURE_INTERNAL_FORMAT_RGB5_A1, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_INTERNAL_FORMAT_RGBA8_SNORM, TEXTURE_INTERNAL_FORMAT_RGB10_A2,
+	TEXTURE_INTERNAL_FORMAT_RGB10_A2UI, TEXTURE_INTERNAL_FORMAT_RGBA12, TEXTURE_INTERNAL_FORMAT_RGBA16, TEXTURE_INTERNAL_FORMAT_RGBA16_SNORM, TEXTURE_INTERNAL_FORMAT_SRGB8,
+	TEXTURE_INTERNAL_FORMAT_SRGB8_A8, TEXTURE_INTERNAL_FORMAT_R16F, TEXTURE_INTERNAL_FORMAT_RG16F, TEXTURE_INTERNAL_FORMAT_RGB16F, TEXTURE_INTERNAL_FORMAT_RGBA16F, TEXTURE_INTERNAL_FORMAT_R32F, TEXTURE_INTERNAL_FORMAT_RG32F,
+	TEXTURE_INTERNAL_FORMAT_RGB32F, TEXTURE_INTERNAL_FORMAT_RGBA32F, TEXTURE_INTERNAL_FORMAT_R11F_G11F_B10F, TEXTURE_INTERNAL_FORMAT_RGB9_E5, TEXTURE_INTERNAL_FORMAT_R8I, TEXTURE_INTERNAL_FORMAT_R8UI,
+	TEXTURE_INTERNAL_FORMAT_R16I, TEXTURE_INTERNAL_FORMAT_R16UI, TEXTURE_INTERNAL_FORMAT_R32I, TEXTURE_INTERNAL_FORMAT_R32UI, TEXTURE_INTERNAL_FORMAT_RG8I, TEXTURE_INTERNAL_FORMAT_RG8UI, TEXTURE_INTERNAL_FORMAT_RG16I, TEXTURE_INTERNAL_FORMAT_RG16UI, TEXTURE_INTERNAL_FORMAT_RG32I,
+	TEXTURE_INTERNAL_FORMAT_RG32UI, TEXTURE_INTERNAL_FORMAT_RGB8I, TEXTURE_INTERNAL_FORMAT_RGB8UI, TEXTURE_INTERNAL_FORMAT_RGB16I, TEXTURE_INTERNAL_FORMAT_RGB16UI, TEXTURE_INTERNAL_FORMAT_RGB32I, TEXTURE_INTERNAL_FORMAT_RGB32UI,
+	TEXTURE_INTERNAL_FORMAT_RGBA8I, TEXTURE_INTERNAL_FORMAT_RGBA8UI, TEXTURE_INTERNAL_FORMAT_RGBA16I, TEXTURE_INTERNAL_FORMAT_RGBA16UI, TEXTURE_INTERNAL_FORMAT_RGBA32I, TEXTURE_INTERNAL_FORMAT_RGBA32UI,
+	TEXTURE_INTERNAL_FORMAT_DEPTH_COMPONENT, TEXTURE_INTERNAL_FORMAT_DEPTH_STENCIL, TEXTURE_INTERNAL_FORMAT_STENCIL,
+	TEXTURE_INTERNAL_FORMAT_DEPTH16, TEXTURE_INTERNAL_FORMAT_DEPTH24, TEXTURE_INTERNAL_FORMAT_DEPTH32, TEXTURE_INTERNAL_FORMAT_DEPTH32F, TEXTURE_INTERNAL_FORMAT_DEPTH24_STENCIL8, TEXTURE_INTERNAL_FORMAT_DEPTH32F_STENCIL8, TEXTURE_INTERNAL_FORMAT_STENCIL8,
+	TEXTURE_INTERNAL_FORMAT_RED, TEXTURE_INTERNAL_FORMAT_RG, TEXTURE_INTERNAL_FORMAT_RGB, TEXTURE_INTERNAL_FORMAT_RGBA,
+	TEXTURE_INTERNAL_FORMAT_1, TEXTURE_INTERNAL_FORMAT_2, TEXTURE_INTERNAL_FORMAT_3, TEXTURE_INTERNAL_FORMAT_4
 };
 
 enum AnimaTextureClampMode
 {
-	REPEAT = 0, MIRRORED_REPEAT, TO_EDGE, TO_BORDER
+	TEXTURE_CLAMP_REPEAT = 0, TEXTURE_CLAMP_MIRRORED_REPEAT, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_BORDER
 };
 
-enum AnimaTextureFilterMode
+enum AnimaTextureMinFilterMode
 {
-	NEAREST = 0, LINEAR, NEAREST_MIPMAP_NEAREST, NEAREST_MIPMAP_LINEAR, 
-	LINEAR_MIPMAP_NEAREST, LINEAR_MIPMAP_LINEAR
+	TEXTURE_MIN_FILTER_MODE_NEAREST = 0, TEXTURE_MIN_FILTER_MODE_LINEAR, TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_NEAREST, 
+	TEXTURE_MIN_FILTER_MODE_NEAREST_MIPMAP_LINEAR, TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_NEAREST, TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR
+};
+
+enum AnimaTextureMagFilterMode
+{
+	TEXTURE_MAG_FILTER_MODE_NEAREST = 0, TEXTURE_MAG_FILTER_MODE_LINEAR
+};
+
+enum AnimaTextureAttachment
+{
+	TEXTURE_ATTACHMENT_NONE = 0, TEXTURE_ATTACHMENT_DEPTH, TEXTURE_ATTACHMENT_STENCIL, TEXTURE_ATTACHMENT_DEPTH_STENCIL, 
+	TEXTURE_ATTACHMENT_COLOR0, TEXTURE_ATTACHMENT_COLOR1, TEXTURE_ATTACHMENT_COLOR2, TEXTURE_ATTACHMENT_COLOR3,
+	TEXTURE_ATTACHMENT_COLOR4, TEXTURE_ATTACHMENT_COLOR5, TEXTURE_ATTACHMENT_COLOR6, TEXTURE_ATTACHMENT_COLOR7,
+	TEXTURE_ATTACHMENT_COLOR8, TEXTURE_ATTACHMENT_COLOR9, TEXTURE_ATTACHMENT_COLOR10, TEXTURE_ATTACHMENT_COLOR11,
+	TEXTURE_ATTACHMENT_COLOR12, TEXTURE_ATTACHMENT_COLOR13, TEXTURE_ATTACHMENT_COLOR14, TEXTURE_ATTACHMENT_COLOR15
+};
+
+enum AnimaTextureDataType
+{
+	TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_DATA_TYPE_BYTE, TEXTURE_DATA_TYPE_UNSIGNED_SHORT, TEXTURE_DATA_TYPE_SHORT, 
+	TEXTURE_DATA_TYPE_UNSIGNED_INT, TEXTURE_DATA_TYPE_INT, TEXTURE_DATA_TYPE_FLOAT
 };
 
 enum AnimaTextureMaxSurfaces
 {
-	MAX_SURFACES = 16
+	TEXUTRE_MAX_SURFACES = 16
 };
 
 class AnimaTextureSurface;
 
 class ANIMA_ENGINE_EXPORT AnimaTexture : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaTexture);
+
 public:
 	AnimaTexture(AnimaAllocator* allocator);
 	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height);
@@ -100,51 +123,60 @@ public:
 	void SetFormat(AnimaTextureFormat format);
 	AnimaTextureFormat GetFormat() const;
 
-	void SetFilter(AnimaTextureFilterMode filter);
-	AnimaTextureFilterMode GetFilter() const;
+	void SetMinFilter(AnimaTextureMinFilterMode filter);
+	AnimaTextureMinFilterMode GetMinFilter() const;
 
-	void SetAttachment(AUint attachment);
-	AUint GetAttachment() const;
+	void SetMagFilter(AnimaTextureMagFilterMode filter);
+	AnimaTextureMagFilterMode GetMagFilter() const;
+
+	void SetAttachment(AnimaTextureAttachment attachment);
+	AnimaTextureAttachment GetAttachment() const;
 
 	void SetInternalFormat(AnimaTextureInternalFormat internalFormat);
 	AnimaTextureInternalFormat GetInternalFormat() const;
 
-	void SetDataType(AUint dataType);
-	AUint GetDataType() const;
+	void SetDataType(AnimaTextureDataType dataType);
+	AnimaTextureDataType GetDataType() const;
 
 	/*!
 	 *	\brief		Imposta il buffer con i dati della texture
 	 *	\details	Imposta il buffer con i dati della texture
 					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
-	 *	\param[in]	data			Buffer con i dati della texture
-	 *	\param[in]	dataSize		Lunghezza del buffer con i dati della texture
-	 *	\param[in]	surfaceIndex	Indice della superifice (mipmap) a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
+	 *	\param[in]	data		Buffer con i dati della texture
+	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
+	 *	\param[in]	mipMapIndex	Indice della mipmap a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
 	 *	\return		Torna true se il target della texture è stato impostato per essere non una texture 3D, false altrimenti
 	 *	\author		Zille Marco
 	 */
-	bool SetData(AUchar* data, AUint dataSize, AUint surfaceIndex);
+	bool SetData(AUchar* data, AUint dataSize, AUint mipMapIndex);
 
 	/*!
 	 *	\brief		Imposta il buffer con i dati della texture all'indice passato
 	 *	\details	Imposta il buffer con i dati della texture all'indice passato. Serve per impostare i dati delle varie texture nel caso
 					di texture 3D.
 					I dati vengono copiati, quindi è possibile deallocare il buffer dopo la chiamata a questa funzione
-	 *	\param[in]	data			Buffer con i dati della texture
-	 *	\param[in]	dataSize		Lunghezza del buffer con i dati della texture
-	 *	\param[in]	index			Indice su cui andare a copiare il buffer
-	 *	\param[in]	surfaceIndex	Indice della superifice (mipmap) a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
+	 *	\param[in]	data		Buffer con i dati della texture
+	 *	\param[in]	dataSize	Lunghezza del buffer con i dati della texture
+	 *	\param[in]	index		Indice su cui andare a copiare il buffer
+	 *	\param[in]	mipMapIndex	Indice della mipmap a cui appartengono i nuovi dati (compreso tra 0 e AnimaTextureMaxSurfaces::MAX_SURFACES)
 	 *	\return		Torna true se il target della texture è stato impostato per essere una texture 3D e l'indice è valido, false altrimenti
 	 *	\author		Zille Marco
 	 */
-	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint surfaceIndex);
+	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint mipMapIndex);
 	const AUchar* GetData(AUint surfaceIndex) const;
 	const AUchar* GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
 
-	void SetClamp(AnimaTextureClampMode clamp);
-	AnimaTextureClampMode GetClamp() const;
+	void SetClampS(AnimaTextureClampMode clamp);
+	AnimaTextureClampMode GetClampS() const;
+
+	void SetClampT(AnimaTextureClampMode clamp);
+	AnimaTextureClampMode GetClampT() const;
+
+	void SetClampR(AnimaTextureClampMode clamp);
+	AnimaTextureClampMode GetClampR() const;
 
 	void SetBorderColor(const AnimaColor4f& color);
 	void SetBorderColor(const AFloat& r, const AFloat& g, const AFloat& b, const AFloat& a);
@@ -175,16 +207,18 @@ private:
 	AUint _frameBuffer;
 	AUint _renderBuffer;
 
-	//AnimaArray<AnimaArray<AUchar> > _data;
-	AnimaArray<AnimaArray<AnimaTextureSurface>> _surfaces;
+	AnimaArray<AnimaArray<AnimaTextureSurface> > _faces;
 		
 	AnimaTextureTarget			_textureTarget;
-	AnimaTextureFilterMode		_filter;
+	AnimaTextureMinFilterMode	_minFilter;
+	AnimaTextureMagFilterMode	_magFilter;
 	AnimaTextureFormat			_format;
 	AnimaTextureInternalFormat	_internalFormat;
-	AUint _attachment;
-	AUint _dataType;
-	AnimaTextureClampMode		_clamp;
+	AnimaTextureAttachment		_attachment;
+	AnimaTextureDataType		_dataType;
+	AnimaTextureClampMode		_clampS;
+	AnimaTextureClampMode		_clampT;
+	AnimaTextureClampMode		_clampR;
 	
 	AUint _mipMapLevels;
 	AnimaColor4f _borderColor;
@@ -198,13 +232,16 @@ private:
 public:
 	static AUint TargetToPlatform(const AnimaTextureTarget& target);
 	static AUint ClampToPlatform(const AnimaTextureClampMode& clamp);
-	static AUint FilterToPlatform(const AnimaTextureFilterMode& filter);
+	static AUint MinFilterToPlatform(const AnimaTextureMinFilterMode& filter);
+	static AUint MagFilterToPlatform(const AnimaTextureMagFilterMode& filter);
 	static AUint CubeIndexToPlatform(const AnimaTextureCubeIndex& index);
 	static AUint FormatToPlatform(const AnimaTextureFormat& format);
 	static AUint InternalFormatToPlatform(const AnimaTextureInternalFormat& internalFormat);
+	static AUint AttachmentToPlatform(const AnimaTextureAttachment& attachment);
+	static AUint DataTypeToPlatform(const AnimaTextureDataType& dataType);
 };
 
-class AnimaTextureSurface
+class ANIMA_ENGINE_EXPORT AnimaTextureSurface
 {
 public:
 	AnimaTextureSurface();

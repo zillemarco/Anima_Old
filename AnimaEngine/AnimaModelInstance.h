@@ -24,6 +24,8 @@ class AnimaModelInstancesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaModelInstance : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaModelInstance);
+
 	friend class AnimaModelInstancesManager;
 
 public:
@@ -43,6 +45,8 @@ public:
 	AInt GetMeshesCount() const;
 	AnimaMeshInstance* GetMesh(AInt index);
 	AnimaArray<AnimaMeshInstance*>* GetMeshes() const;
+
+	void GetAllMeshes(AnimaArray<AnimaMeshInstance*> *meshes);
 
 	AnimaModel* GetModel() const;
 

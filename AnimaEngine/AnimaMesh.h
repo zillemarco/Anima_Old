@@ -34,6 +34,8 @@ class AnimaShaderProgram;
 
 class ANIMA_ENGINE_EXPORT AnimaMeshBoneInfo : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaMeshBoneInfo);
+
 public:
 	AnimaMeshBoneInfo(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaMeshBoneInfo(const AnimaMeshBoneInfo& src);
@@ -57,6 +59,8 @@ protected:
 
 class ANIMA_ENGINE_EXPORT AnimaMesh : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaMesh);
+
 public:
 	AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator);
 	AnimaMesh(const AnimaMesh& src);

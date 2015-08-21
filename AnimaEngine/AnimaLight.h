@@ -28,6 +28,8 @@ class AnimaShadersManager;
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaLight : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaLight);
+
 protected:
 	AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaLight(const AnimaLight& src);
@@ -66,8 +68,8 @@ public:
 
 	virtual void ComputeLightMatrix(AnimaCamera* activeCamera);
 
-	AnimaTexture* GetShadowTexture();
-	AnimaTexture* GetTempShadowTexture();
+	//AnimaTexture* GetShadowTexture();
+	//AnimaTexture* GetTempShadowTexture();
 
 	virtual AnimaMatrix GetViewMatrix();
 	virtual AnimaMatrix GetProjectionMatrix();
@@ -90,6 +92,8 @@ protected:
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaDirectionalLight : public AnimaLight
 {
+	DECLARE_ANIMA_CLASS(AnimaDirectionalLight);
+
 public:
 	AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaDirectionalLight();
@@ -114,6 +118,8 @@ public:
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaPointLight : public AnimaLight
 {
+	DECLARE_ANIMA_CLASS(AnimaPointLight);
+
 public:
 	AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaPointLight();
@@ -141,6 +147,8 @@ public:
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaSpotLight : public AnimaPointLight
 {
+	DECLARE_ANIMA_CLASS(AnimaSpotLight);
+
 public:
 	AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaSpotLight();
@@ -171,6 +179,8 @@ protected:
 //----------------------------------------------------------------
 class ANIMA_ENGINE_EXPORT AnimaHemisphereLight : public AnimaLight
 {
+	DECLARE_ANIMA_CLASS(AnimaHemisphereLight);
+
 public:
 	AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaHemisphereLight();

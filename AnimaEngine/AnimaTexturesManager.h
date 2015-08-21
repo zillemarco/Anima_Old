@@ -53,32 +53,32 @@ public:
 	AnimaTexture* CreateTexture(const AnimaString& textureName);
 
 	/*!
-	*	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
-	*	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
-	Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
-	Perfettamente equivalente a LoadTextureFromData()
-	*	\param[in]	textureName	Nome della texture da creare
-	*	\param[in]	width		Larghezza della texture
-	*	\param[in]	height		Altezza della texture
-	*	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
-	*	\author		Zille Marco
-	*	\sa			LoadTextureFromData()
-	*/
+	 *	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
+	 *	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
+	 				Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
+	 				Perfettamente equivalente a LoadTextureFromData()
+	 *	\param[in]	textureName	Nome della texture da creare
+	 *	\param[in]	width		Larghezza della texture
+	 *	\param[in]	height		Altezza della texture
+	 *	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 *	\sa			LoadTextureFromData()
+	 */
 	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint width, AUint height);
 
 	/*!
-	*	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
-	*	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
-	Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
-	Perfettamente equivalente a LoadTextureFromData()
-	*	\param[in]	textureName	Nome della texture da creare
-	*	\param[in]	width		Larghezza della texture
-	*	\param[in]	height		Altezza della texture
-	*	\param[in]	depth		Profondità dell'immagine
-	*	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
-	*	\author		Zille Marco
-	*	\sa			LoadTextureFromData()
-	*/
+	 *	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
+	 *	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
+	 				Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
+	 				Perfettamente equivalente a LoadTextureFromData()
+	 *	\param[in]	textureName	Nome della texture da creare
+	 *	\param[in]	width		Larghezza della texture
+	 *	\param[in]	height		Altezza della texture
+	 *	\param[in]	depth		Profondità dell'immagine
+	 *	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 *	\sa			LoadTextureFromData()
+	 */
 	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUint depth);
 
 	/*!
@@ -98,20 +98,20 @@ public:
 	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUchar* data, ASizeT dataSize);
 
 	/*!
-	*	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
-	*	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
-	Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
-	Perfettamente equivalente a LoadTextureFromData()
-	*	\param[in]	textureName	Nome della texture da creare
-	*	\param[in]	width		Larghezza della texture
-	*	\param[in]	height		Altezza della texture
-	*	\param[in]	depth		Profondità dell'immagine
-	*	\param[in]	data		Puntatore al buffer con i dati della texture
-	*	\param[in]	dataSize	Lunghezza del buffer con i dati
-	*	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
-	*	\author		Zille Marco
-	*	\sa			LoadTextureFromData()
-	*/
+	 *	\brief		Crea una texture e ci associa automaticamente il buffer passato in input
+	 *	\details	Crea una texture e ci associa automaticamente il buffer passato in input.
+	 				Si dovranno comunque impostare dati riguardo al tipo di formato, formato interno, clamp, ecc...
+	 				Perfettamente equivalente a LoadTextureFromData()
+	 *	\param[in]	textureName	Nome della texture da creare
+	 *	\param[in]	width		Larghezza della texture
+	 *	\param[in]	height		Altezza della texture
+	 *	\param[in]	depth		Profondità dell'immagine
+	 *	\param[in]	data		Puntatore al buffer con i dati della texture
+	 *	\param[in]	dataSize	Lunghezza del buffer con i dati
+	 *	\return		Nel caso la creazione della texture abbia avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
+	 *	\author		Zille Marco
+	 *	\sa			LoadTextureFromData()
+	 */
 	AnimaTexture* CreateTexture(const AnimaString& textureName, AUint width, AUint height, AUint depth, AUchar* data, ASizeT dataSize);
 
 	/*!
@@ -212,7 +212,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			LoadTextureFromFile(), LoadTextureFromBMPFile(), LoadTextureFromTGAFile(), LoadTextureFromDDSFile()
 	 */
-	AnimaTexture* LoadTextureFromData(const AnimaString& textureName, AUchar* data, ASizeT dataSize, AUint width, AUint height, AUint depth);
+	AnimaTexture* LoadTextureFromData(const AnimaString& textureName, AUchar* data, AUint dataSize, AUint width, AUint height, AUint depth);
 	
 	/*!
 	 *	\brief		Carica i dati contentuti in un file immagine utile per una texture riconoscendo il tipo di file
@@ -228,7 +228,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromBMPFile(), GetTextureDataFromTGAFile(), GetTextureDataFromDDSFile()
 	 */
-	bool GetTextureDataFromFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height);
+	bool GetTextureDataFromFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height);
 
 	/*!
 	 *	\brief		Carica i dati contentuti in un file BMP
@@ -244,7 +244,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromFile(), GetTextureDataFromTGAFile(), GetTextureDataFromDDSFile()
 	 */
-	bool GetTextureDataFromBMPFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height);
+	bool GetTextureDataFromBMPFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height);
 
 	/*!
 	 *	\brief		Carica i dati contentuti in un file TGA
@@ -260,7 +260,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromFile(), GetTextureDataFromBMPFile(), GetTextureDataFromDDSFile()
 	 */
-	bool GetTextureDataFromTGAFile(const AnimaString& filePath, AUchar** data, AUint& dataSize, AUint& width, AUint& height);
+	bool GetTextureDataFromTGAFile(const AnimaString& filePath, AnimaArray<AUchar>* data, AUint& width, AUint& height);
 
 	/*!
 	 *	\brief		Carica i dati contentuti in un file DDS
@@ -281,7 +281,7 @@ public:
 	 *	\author		Zille Marco
 	 *	\sa			GetTextureDataFromFile(), GetTextureDataFromBMPFile(), GetTextureDataFromTGAFile()
 	 */
-	bool GetTextureDataFromDDSFile(const AnimaString& filePath, AnimaArray<AnimaArray<AUchar>>* data, AnimaArray<AUint>* dataSize, AUint& surfacesCount, AUint& width, AUint& height, AUint& depth, AUint& mipMapsCount, AnimaTextureFormat& format, AnimaTextureInternalFormat& internalformat, AnimaTextureTarget& target);
+	bool GetTextureDataFromDDSFile(const AnimaString& filePath, AnimaArray<AnimaArray<AUchar> >* data, AUint& surfacesCount, AUint& width, AUint& height, AUint& depth, AUint& mipMapsCount, AnimaTextureFormat& format, AnimaTextureInternalFormat& internalformat, AnimaTextureTarget& target);
 
 	/*!
 	 *	\brief		Torna il numero di texture contenute dal manager
@@ -310,8 +310,8 @@ public:
 private:
 	void ClearTextures();
 
-	bool GetUncompressedTGAData(FILE* file, AUchar** data, AUint& dataSize, AUint& width, AUint& height);
-	bool GetCompressedTGAData(FILE* file, AUchar** data, AUint& dataSize, AUint& width, AUint& height);
+	bool GetUncompressedTGAData(FILE* file, AnimaArray<AUchar>* data, AUint& width, AUint& height);
+	bool GetCompressedTGAData(FILE* file, AnimaArray<AUchar>* data, AUint& width, AUint& height);
 	
 private:
 	AnimaScene* _scene;

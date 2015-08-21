@@ -20,6 +20,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMaterial : public AnimaMappedValues
 {
+	DECLARE_ANIMA_CLASS(AnimaMaterial);
 public:
 	AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	AnimaMaterial(const AnimaMaterial& src);

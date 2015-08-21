@@ -31,16 +31,19 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaLight);
 
-	AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", 1024, 1024, nullptr, 0);
-	texture->SetTextureTarget(TEXTURE_2D);
-	texture->SetFilter(LINEAR);
-	texture->SetInternalFormat(DEPTH24);
-	texture->SetFormat(DEPTH);
-	texture->SetDataType(GL_FLOAT);
-	texture->SetClamp(TO_BORDER);
-	texture->SetAttachment(GL_DEPTH_ATTACHMENT);
+	//AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", 1024, 1024, nullptr, 0);
+	//texture->SetTextureTarget(TEXTURE_TARGET_2D);
+	//texture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+	//texture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+	//texture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
+	//texture->SetFormat(TEXTURE_FORMAT_DEPTH);
+	//texture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+	//texture->SetClampS(TEXTURE_CLAMP_TO_BORDER);
+	//texture->SetClampT(TEXTURE_CLAMP_TO_BORDER);
+	//texture->SetClampR(TEXTURE_CLAMP_TO_BORDER);
+	//texture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
 
-	AnimaSceneObject::SetTexture("ShadowMap", texture);	
+	//AnimaSceneObject::SetTexture("ShadowMap", texture);	
 
 	ComputeLightMatrix(nullptr);
 
@@ -60,19 +63,19 @@ AnimaLight::AnimaLight(AnimaLight&& src)
 
 AnimaLight::~AnimaLight()
 {
-	AnimaTexture* shadowMap = AnimaSceneObject::GetTexture("ShadowMap");
-	if (shadowMap != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, shadowMap);
-		shadowMap = nullptr;
-	}
+	//AnimaTexture* shadowMap = AnimaSceneObject::GetTexture("ShadowMap");
+	//if (shadowMap != nullptr)
+	//{
+	//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, shadowMap);
+	//	shadowMap = nullptr;
+	//}
 
-	AnimaTexture* tempShadowMap = AnimaSceneObject::GetTexture("TempShadowMap");
-	if (tempShadowMap != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, tempShadowMap);
-		tempShadowMap = nullptr;
-	}
+	//AnimaTexture* tempShadowMap = AnimaSceneObject::GetTexture("TempShadowMap");
+	//if (tempShadowMap != nullptr)
+	//{
+	//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, tempShadowMap);
+	//	tempShadowMap = nullptr;
+	//}
 }
 
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
@@ -185,15 +188,15 @@ AFloat AnimaLight::GetCutoff()
 	return 0.0f;
 }
 
-AnimaTexture* AnimaLight::GetShadowTexture()
-{
-	return AnimaSceneObject::GetTexture("ShadowMap");
-}
-
-AnimaTexture* AnimaLight::GetTempShadowTexture()
-{
-	return AnimaSceneObject::GetTexture("TempShadowMap");
-}
+//AnimaTexture* AnimaLight::GetShadowTexture()
+//{
+//	return AnimaSceneObject::GetTexture("ShadowMap");
+//}
+//
+//AnimaTexture* AnimaLight::GetTempShadowTexture()
+//{
+//	return AnimaSceneObject::GetTexture("TempShadowMap");
+//}
 
 AnimaMatrix AnimaLight::GetViewMatrix()
 {
@@ -332,22 +335,6 @@ bool AnimaDirectionalLight::CreateShader(AnimaShadersManager* shadersManager)
 
 	ANIMA_ASSERT(false);
 	return false;
-
-	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-directional");
-
-	//if (pgr == nullptr)
-	//	return false;
-
-	//if (!pgr->Create())
-	//	return false;
-
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-vs.glsl", Anima::VERTEX));
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-directional-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-directional-fs.glsl", Anima::FRAGMENT));
-
-	//if (!pgr->Link())
-	//	return false;
-
-	//return true;
 }
 
 //----------------------------------------------------------------
@@ -442,22 +429,6 @@ bool AnimaPointLight::CreateShader(AnimaShadersManager* shadersManager)
 
 	ANIMA_ASSERT(false);
 	return false;
-
-	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-point");
-
-	//if (pgr == nullptr)
-	//	return false;
-
-	//if (!pgr->Create())
-	//	return false;
-
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-vs.glsl", Anima::VERTEX));
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-point-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-point-fs.glsl", Anima::FRAGMENT));
-
-	//if (!pgr->Link())
-	//	return false;
-
-	//return true;
 }
 
 //----------------------------------------------------------------
@@ -564,22 +535,6 @@ bool AnimaSpotLight::CreateShader(AnimaShadersManager* shadersManager)
 	
 	ANIMA_ASSERT(false);
 	return false;
-
-	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-spot");
-	//
-	//if (pgr == nullptr)
-	//	return false;
-	//
-	//if (!pgr->Create())
-	//	return false;
-	//
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-vs.glsl", Anima::VERTEX));
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-spot-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-spot-fs.glsl", Anima::FRAGMENT));
-	//
-	//if (!pgr->Link())
-	//	return false;
-	//
-	//return true;
 }
 
 
@@ -657,22 +612,6 @@ bool AnimaHemisphereLight::CreateShader(AnimaShadersManager* shadersManager)
 
 	ANIMA_ASSERT(false);
 	return false;
-
-	//AnimaShaderProgram* pgr = shadersManager->CreateProgram("deferred-hemisphere");
-
-	//if (pgr == nullptr)
-	//	return false;
-
-	//if (!pgr->Create())
-	//	return false;
-
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-vs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-vs.glsl", Anima::VERTEX));
-	//pgr->AddShader(shadersManager->LoadShaderFromFile("deferred-hemisphere-fs", ANIMA_ENGINE_SHADERS_PATH "Deferred/deferred-hemisphere-fs.glsl", Anima::FRAGMENT));
-
-	//if (!pgr->Link())
-	//	return false;
-
-	//return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

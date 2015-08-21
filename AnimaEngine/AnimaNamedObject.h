@@ -17,11 +17,18 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#define ANIMA_CLASS_NAME(class_name)		#class_name
-#define IMPLEMENT_ANIMA_CLASS(class_name)	AddDerivedClassName(#class_name);	SetClassName(#class_name);
+#define DECLARE_ANIMA_CLASS(class_name)		public:																		\
+												static AnimaString _sGetClassName() { return AnimaString(#class_name); }
+
+#define IMPLEMENT_ANIMA_CLASS(class_name)	_AddDerivedClassName(class_name::_sGetClassName());	\
+											_SetClassName(class_name::_sGetClassName());
+
+#define ANIMA_CLASS_NAME(class_name)		class_name::_sGetClassName()
 
 class ANIMA_ENGINE_EXPORT AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaNamedObject);
+
 public:
 	AnimaNamedObject(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaNamedObject(const AnimaNamedObject& src);
@@ -36,11 +43,12 @@ public:
 	AnimaString GetName() const;
 	
 protected:
-	void AddDerivedClassName(AnimaString derivedClassName);
-	void SetClassName(AnimaString className);
+	void _AddDerivedClassName(AnimaString derivedClassName);
+	void _SetClassName(AnimaString className);
 
 public:
 	bool IsOfClass(AnimaString className);
+	AnimaString _GetClassName() { return _className; }
 
 protected:
 	AnimaAllocator* _allocator;

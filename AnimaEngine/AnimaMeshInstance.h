@@ -24,6 +24,8 @@ class AnimaMeshInstancesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaMeshInstance : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaMeshInstance);
+
 	friend class AnimaMeshInstancesManager;
 
 public:

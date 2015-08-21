@@ -179,6 +179,7 @@ AFloat AnimaAnimation::GetTicksPerSecond() const
 AnimaAnimationNode::AnimaAnimationNode(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaAnimationNode);
 	SetName(name);
 }
 

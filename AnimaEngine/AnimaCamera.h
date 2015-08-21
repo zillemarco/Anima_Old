@@ -22,6 +22,8 @@ class AnimaCamerasManager;
 
 class ANIMA_ENGINE_EXPORT AnimaCamera : public AnimaSceneObject
 {
+	DECLARE_ANIMA_CLASS(AnimaCamera);
+
 public:
 	enum AnimaCameraProjectionType {
 		PERSPECTIVE,
