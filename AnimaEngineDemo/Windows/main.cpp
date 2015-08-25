@@ -287,13 +287,14 @@ bool InitEngine()
 
 	Anima::AnimaString dataPath = "D:/Git/Anima/AnimaEngine/data";
 	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
+	Anima::AnimaString shadersIncludesPath = "D:/Git/Anima/AnimaEngine/data/shaders/Includes";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
 	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 	
 	// Caricamento degli shader
-	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath))
+	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
 		return false;
 			
 	// Caricamento dei materiali
@@ -316,6 +317,8 @@ bool InitEngine()
 	floorModelMesh->MakePlane();
 	floorModelMesh->SetParentObject(_floorModel);
 	_floorModel->AddMesh(floorModelMesh);
+
+	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);
 	
 	Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
 	Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
@@ -365,7 +368,7 @@ bool InitEngine()
 	//modelInstance3->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
 	//modelInstance4->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
 
-	_floorModel->GetTransformation()->SetScale(200, 0, 200);
+	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
 
 	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
 		
@@ -378,74 +381,77 @@ bool InitEngine()
 	directionalLight->SetColor(1.0, 1.0, 1.0);
 	directionalLight->SetIntensity(0.2);
 
-	Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
-	pointLight1->SetPosition(-40.0, 20.0, 0.0);
-	pointLight1->SetColor(1.0, 0.0, 0.0);
-	pointLight1->SetIntensity(1.0);
-	pointLight1->SetConstantAttenuation(1.0);
-	pointLight1->SetLinearAttenuation(0.0);
-	pointLight1->SetExponentAttenuation(0.0);
-	pointLight1->SetRange(200);
+	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
+	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
+	//pointLight1->SetColor(1.0, 0.0, 0.0);
+	//pointLight1->SetIntensity(1.0);
+	//pointLight1->SetConstantAttenuation(1.0);
+	//pointLight1->SetLinearAttenuation(0.0);
+	//pointLight1->SetExponentAttenuation(0.0);
+	//pointLight1->SetRange(200);
 
-	Anima::AnimaPointLight* pointLight2 = _scene->GetLightsManager()->CreatePointLight("light-2");
-	pointLight2->SetPosition(0.0, 20.0, 40.0);
-	pointLight2->SetColor(0.0, 1.0, 0.0);
-	pointLight2->SetIntensity(1.0);
-	pointLight2->SetConstantAttenuation(1.0);
-	pointLight2->SetLinearAttenuation(0.0);
-	pointLight2->SetExponentAttenuation(0.0);
-	pointLight2->SetRange(200);
+	//Anima::AnimaPointLight* pointLight2 = _scene->GetLightsManager()->CreatePointLight("light-2");
+	//pointLight2->SetPosition(0.0, 20.0, 40.0);
+	//pointLight2->SetColor(0.0, 1.0, 0.0);
+	//pointLight2->SetIntensity(1.0);
+	//pointLight2->SetConstantAttenuation(1.0);
+	//pointLight2->SetLinearAttenuation(0.0);
+	//pointLight2->SetExponentAttenuation(0.0);
+	//pointLight2->SetRange(200);
 
-	Anima::AnimaPointLight* pointLight3 = _scene->GetLightsManager()->CreatePointLight("light-3");
-	pointLight3->SetPosition(40.0, 20.0, 0.0);
-	pointLight3->SetColor(1.0, 0.0, 1.0);
-	pointLight3->SetIntensity(1.0);
-	pointLight3->SetConstantAttenuation(1.0);
-	pointLight3->SetLinearAttenuation(0.0);
-	pointLight3->SetExponentAttenuation(0.0);
-	pointLight3->SetRange(200);
+	//Anima::AnimaPointLight* pointLight3 = _scene->GetLightsManager()->CreatePointLight("light-3");
+	//pointLight3->SetPosition(40.0, 20.0, 0.0);
+	//pointLight3->SetColor(1.0, 0.0, 1.0);
+	//pointLight3->SetIntensity(1.0);
+	//pointLight3->SetConstantAttenuation(1.0);
+	//pointLight3->SetLinearAttenuation(0.0);
+	//pointLight3->SetExponentAttenuation(0.0);
+	//pointLight3->SetRange(200);
 
-	Anima::AnimaPointLight* pointLight4 = _scene->GetLightsManager()->CreatePointLight("light-4");
-	pointLight4->SetPosition(0.0, 20.0, -40.0);
-	pointLight4->SetColor(1.0, 0.0, 1.0);
-	pointLight4->SetIntensity(1.0);
-	pointLight4->SetConstantAttenuation(1.0);
-	pointLight4->SetLinearAttenuation(0.0);
-	pointLight4->SetExponentAttenuation(0.0);
-	pointLight4->SetRange(200);
+	//Anima::AnimaPointLight* pointLight4 = _scene->GetLightsManager()->CreatePointLight("light-4");
+	//pointLight4->SetPosition(0.0, 20.0, -40.0);
+	//pointLight4->SetColor(1.0, 0.0, 1.0);
+	//pointLight4->SetIntensity(1.0);
+	//pointLight4->SetConstantAttenuation(1.0);
+	//pointLight4->SetLinearAttenuation(0.0);
+	//pointLight4->SetExponentAttenuation(0.0);
+	//pointLight4->SetRange(200);
 
-	Anima::AnimaPointLight* pointLight5 = _scene->GetLightsManager()->CreatePointLight("light-5");
-	pointLight5->SetPosition(-40.0, 20.0, -40.0);
-	pointLight5->SetColor(1.0, 0.5, 1.0);
-	pointLight5->SetIntensity(1.0);
-	pointLight5->SetConstantAttenuation(1.0);
-	pointLight5->SetLinearAttenuation(0.0);
-	pointLight5->SetExponentAttenuation(0.0);
-	pointLight5->SetRange(200);
-	Anima::AnimaPointLight* pointLight6 = _scene->GetLightsManager()->CreatePointLight("light-6");
-	pointLight6->SetPosition(40.0, 20.0, -40.0);
-	pointLight6->SetColor(1.0, 0.0, 0.5);
-	pointLight6->SetIntensity(1.0);
-	pointLight6->SetConstantAttenuation(1.0);
-	pointLight6->SetLinearAttenuation(0.0);
-	pointLight6->SetExponentAttenuation(0.0);
-	pointLight6->SetRange(200);
-	Anima::AnimaPointLight* pointLight7 = _scene->GetLightsManager()->CreatePointLight("light-7");
-	pointLight7->SetPosition(40.0, 20.0, 40.0);
-	pointLight7->SetColor(1.0, 1.0, .0);
-	pointLight7->SetIntensity(1.0);
-	pointLight7->SetConstantAttenuation(1.0);
-	pointLight7->SetLinearAttenuation(0.0);
-	pointLight7->SetExponentAttenuation(0.0);
-	pointLight7->SetRange(200);
-	Anima::AnimaPointLight* pointLight8 = _scene->GetLightsManager()->CreatePointLight("light-8");
-	pointLight8->SetPosition(-40.0, 20.0, 40.0);
-	pointLight8->SetColor(1.0, 1.0, 1.0);
-	pointLight8->SetIntensity(1.0);
-	pointLight8->SetConstantAttenuation(1.0);
-	pointLight8->SetLinearAttenuation(0.0);
-	pointLight8->SetExponentAttenuation(0.0);
-	pointLight8->SetRange(200);
+	//Anima::AnimaPointLight* pointLight5 = _scene->GetLightsManager()->CreatePointLight("light-5");
+	//pointLight5->SetPosition(-40.0, 20.0, -40.0);
+	//pointLight5->SetColor(1.0, 0.5, 1.0);
+	//pointLight5->SetIntensity(1.0);
+	//pointLight5->SetConstantAttenuation(1.0);
+	//pointLight5->SetLinearAttenuation(0.0);
+	//pointLight5->SetExponentAttenuation(0.0);
+	//pointLight5->SetRange(200);
+	//
+	//Anima::AnimaPointLight* pointLight6 = _scene->GetLightsManager()->CreatePointLight("light-6");
+	//pointLight6->SetPosition(40.0, 20.0, -40.0);
+	//pointLight6->SetColor(1.0, 0.0, 0.5);
+	//pointLight6->SetIntensity(1.0);
+	//pointLight6->SetConstantAttenuation(1.0);
+	//pointLight6->SetLinearAttenuation(0.0);
+	//pointLight6->SetExponentAttenuation(0.0);
+	//pointLight6->SetRange(200);
+	//
+	//Anima::AnimaPointLight* pointLight7 = _scene->GetLightsManager()->CreatePointLight("light-7");
+	//pointLight7->SetPosition(40.0, 20.0, 40.0);
+	//pointLight7->SetColor(1.0, 1.0, .0);
+	//pointLight7->SetIntensity(1.0);
+	//pointLight7->SetConstantAttenuation(1.0);
+	//pointLight7->SetLinearAttenuation(0.0);
+	//pointLight7->SetExponentAttenuation(0.0);
+	//pointLight7->SetRange(200);
+
+	//Anima::AnimaPointLight* pointLight8 = _scene->GetLightsManager()->CreatePointLight("light-8");
+	//pointLight8->SetPosition(-40.0, 20.0, 40.0);
+	//pointLight8->SetColor(1.0, 1.0, 1.0);
+	//pointLight8->SetIntensity(1.0);
+	//pointLight8->SetConstantAttenuation(1.0);
+	//pointLight8->SetLinearAttenuation(0.0);
+	//pointLight8->SetExponentAttenuation(0.0);
+	//pointLight8->SetRange(200);
 
 	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 
@@ -552,6 +558,8 @@ bool InitEngine()
 
 	//Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", "dds-irr-texture");
 	//_renderer->SetTexture("IrradianceMap", textureIrr, false);
+
+	_renderer->CheckPrograms(_scene);
 	
 	return true;
 }

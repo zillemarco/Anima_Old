@@ -74,7 +74,7 @@ public:
 	bool operator!=(const AnimaMesh& other);
 	
 public:
-	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial = true);
+	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial = true);
 
 public:
 	// Gestione dati struttura

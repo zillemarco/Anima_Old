@@ -147,7 +147,7 @@ public:
 	/*!
 	 *	\brief		Crea una texture interpretando i dati dato un albero XML in input
 	 *	\details	Crea una texture interpretando i dati dato un albero XML in input
-	 *	\param[in]	textureXmlDefinition	Stringa XML che contiene le informazioni
+	 *	\param[in]	xmlTree	Struttura dati contenente i dati XML dell'albero
 	 *	\return		Nel caso la lettura e la creazione abbiano avuto successo torna il puntatore alla nuova texture appena creata, NULL altrimenti
 	 *	\author		Zille Marco
 	 */

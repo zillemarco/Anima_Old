@@ -79,7 +79,11 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaXmlTranslators.h
 					AnimaMD5.h
 					AnimaTextureGenerator.h
-					AnimaShaderData.h)
+					AnimaShaderData.h
+					AnimaRendererDrawableMesh.h
+					AnimaRendererDrawableMeshInstances.h
+					AnimaShaderInclude.h
+					AnimaShaderGroupData.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -140,7 +144,11 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaXmlTranslators.cpp
 					AnimaMD5.cpp
 					AnimaTextureGenerator.cpp
-					AnimaShaderData.cpp)
+					AnimaShaderData.cpp
+					AnimaRendererDrawableMesh.cpp
+					AnimaRendererDrawableMeshInstances.cpp
+					AnimaShaderInclude.cpp
+					AnimaShaderGroupData.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -183,12 +191,12 @@ source_group(Engine\\DataStructures\\Transformations FILES AnimaTransformation.h
 source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h AnimaVertex.cpp AnimaFace.h AnimaFace.cpp AnimaMatrix.h AnimaMatrix.cpp AnimaMath.h AnimaMath.cpp AnimaFrustum.h AnimaFrustum.cpp AnimaGBuffer.h AnimaGBuffer.cpp AnimaQuaternion.h AnimaQuaternion.cpp)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
-source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp)
+source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)
 source_group(Engine\\Scene\\Data\\Animations FILES AnimaAnimation.cpp AnimaAnimation.h)
 source_group(Engine\\Scene\\Data\\Objects\\Cameras FILES AnimaCamera.h AnimaFirstPersonCamera.h AnimaThirdPersonCamera.h AnimaCamera.cpp AnimaFirstPersonCamera.cpp AnimaThirdPersonCamera.cpp)
 source_group(Engine\\Scene\\Data\\Objects\\Graphics FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp AnimaModel.h AnimaModel.cpp AnimaModelInstance.h AnimaModelInstance.cpp AnimaMeshInstance.h AnimaMeshInstance.cpp)
 source_group(Engine\\Scene\\Data\\Objects\\Lights FILES AnimaLight.h AnimaLight.cpp)
-source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp AnimaShaderData.h AnimaShaderData.cpp)
+source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp AnimaShaderData.h AnimaShaderData.cpp AnimaShaderInclude.h AnimaShaderInclude.cpp AnimaShaderGroupData.h AnimaShaderGroupData.cpp)
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)
 source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
 source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp AnimaTextureGenerator.h AnimaTextureGenerator.cpp)

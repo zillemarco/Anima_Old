@@ -7,8 +7,10 @@
 #include "AnimaString.h"
 #include "AnimaShader.h"
 #include "AnimaShaderProgram.h"
+#include "AnimaShaderInclude.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
+#include <boost/property_tree/ptree.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -53,6 +55,15 @@ public:
 	 *	\author		Zille Marco
 	 */
 	AnimaShaderProgram* CreateProgram(const AnimaString& name);
+
+	/*!
+	 *	\brief		Crea un file di inclusione
+	 *	\details	Crea un file di inclusione senza alcun dato. Se un file di inclusione con il nome passato è già esistente torna null
+	 *	\param[in]	name	Nome del file di inclusione che si vuole creare
+	 *	\return		Puntatore al nuovo file di inclusione appena creato. Null se un file di inclusione con il nome passato era già esistente
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderInclude* CreateShaderInclude(const AnimaString& name);
 
 	/*!
 	 *	\brief		Crea un programma da una mesh ed il suo materiale
@@ -117,6 +128,15 @@ public:
 	AnimaShader* LoadShaderFromXml(const AnimaString& shaderXmlDefinition);
 
 	/*!
+	 *	\brief		Crea un nuovo shader interpretando i dati dato un albero XML in input
+	 *	\details	Crea un nuovo shader interpretando i dati dato un albero XML in input. Se la creazione non va a buon fine torna null
+	 *	\param[in]	xmlTree	Struttura dati contenente i dati XML dell'albero
+	 *	\return		Puntatore al nuovo shader appena creato. Null se la creazione non va a buon fine
+	 *	\author		Zille Marco
+	 */
+	AnimaShader* LoadShaderFromXml(const boost::property_tree::ptree& xmlTree);
+
+	/*!
 	 *	\brief		Carica tutti i file di definizione di shader contenuto nel percorso passato
 	 *	\details	Carica tutti i file di definizione di shader contenuto nel percorso passato chiamando LoadShaderFromFile per ogni file. Se il caricamento di un file non
 	 				va a buon fine torna null
@@ -143,6 +163,63 @@ public:
 	 *	\author		Zille Marco
 	 */
 	AnimaShaderProgram* LoadShaderProgramFromXml(const AnimaString& shaderProgramXmlDefinition);
+
+	/*!
+	 *	\brief		Crea un nuovo programma interpretando i dati dato un albero XML in input
+	 *	\details	Crea un nuovo programma interpretando i dati dato un albero XML in input. Se la creazione non va a buon fine torna null
+	 *	\param[in]	xmlTree	Struttura dati contenente i dati XML dell'albero
+	 *	\return		Puntatore al nuovo programma appena creato. Null se la creazione non va a buon fine
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderProgram* LoadShaderProgramFromXml(const boost::property_tree::ptree& xmlTree);
+	
+	/*!
+	 *	\brief		Crea un nuovo shader con il nome e del tipo passati ed imposta il suo codice leggendolo dal file passato
+	 *	\details	Crea un nuovo shader con il nome e del tipo passati ed imposta il suo codice leggendolo dal file passato. Se uno shader con il nome passato è già esistente torna null
+	 *	\param[in]	name Nome dello shader che si vuole creare
+	 *	\param[in]	filePath Path del file da dove viene recupero il codice dello shader
+	 *	\param[in]	type Tipo dello shader
+	 *	\return		Puntatore al nuovo shader appena creato. Null se uno shader con il nome passato era già esistente
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderInclude* LoadShaderIncludeFromFile(const AnimaString& name, const AnimaString& filePath);
+
+	/*!
+	 *	\brief		Crea un nuovo shader dato il percorso di un file contenente la definizione di uno shader
+	 *	\details	Crea un nuovo shader dato il percorso di un file contenente la definizione di uno shader. Se la creazione non va a buon fine torna null
+	 *	\param[in]	filePath Path del file contenente la definizione dello shader da caricare
+	 *	\return		Puntatore al nuovo shader appena creato. Null se la creazione non va a buon fine
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderInclude* LoadShaderIncludeFromFile(const AnimaString& filePath);
+
+	/*!
+	 *	\brief		Carica un file di definizione di inclusione di shader dato un xml contenente la definizione di uno shader
+	 *	\details	Carica un file di definizione di inclusione di shader dato un xml contenente la definizione di uno shader. Se la creazione non va a buon fine torna null
+	 *	\param[in]	shaderXmlDefinition Xml contenente la definizione dello shader
+	 *	\return		Puntatore al nuovo shader appena creato. Null se la creazione non va a buon fine
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderInclude* LoadShaderIncludeFromXml(const AnimaString& includeXmlDefinition);
+
+	/*!
+	 *	\brief		Carica un file di definizione di inclusione di shader dato un albero XML in input
+	 *	\details	Carica un file di definizione di inclusione di shader dato un albero XML in input. Se la creazione non va a buon fine torna null
+	 *	\param[in]	xmlTree	Struttura dati contenente i dati XML dell'albero
+	 *	\return		Puntatore al nuovo shader appena creato. Null se la creazione non va a buon fine
+	 *	\author		Zille Marco
+	 */
+	AnimaShaderInclude* LoadShaderIncludeFromXml(const boost::property_tree::ptree& xmlTree);
+
+	/*!
+	 *	\brief		Carica tutti i file di definizione di inclusione di shader contenuti nel percorso passato
+	 *	\details	Carica tutti i file di definizione di inclusione di shader contenuti nel percorso passato chiamando LoadShaderIncludeFromFile per ogni file. Se il caricamento di un file non
+	 				va a buon fine torna null
+	 *	\param[in]	includesPath Path della cartella contenente i file da caricare
+	 *	\return		True se il caricamento va a buon fine, false altrimenti
+	 *	\author		Zille Marco
+	 */
+	bool LoadShadersIncludes(const AnimaString& includesPath);
 
 	/*!
 	 *	\brief		Torna uno shader dato il suo indice all'interno dell'array contenente tutti gli shader
@@ -204,9 +281,18 @@ public:
 	 */
 	AnimaShaderProgram* GetActiveProgram();
 
+	/*!
+	 *	\brief		Cerca nel testo dello shader passato dei riferimenti a include e li sostituisce
+	 *	\details	Cerca nel testo dello shader passato dei riferimenti a include e li sostituisce
+	 *	\param[in]	shader Shader da controllare
+	 *	\author		Zille Marco
+	 */
+	void AttachIncludes(AnimaShader* shader);
+
 private:
 	void ClearShaders();
 	void ClearPrograms();
+	void ClearIncludes();
 
 	void NotifyProgramActivation(AnimaShaderProgram* program);
 	void NotifyProgramDeactivation(AnimaShaderProgram* program);
@@ -215,6 +301,7 @@ private:
 	AnimaEngine* _engine;								/*!< Puntatore all'istanza di un'istanza di AnimaEngine di cui questa classe fa parte */
 	AnimaMappedArray<AnimaShader*> _shaders;			/*!< Mappa contenente tutti gli shader */
 	AnimaMappedArray<AnimaShaderProgram*> _programs;	/*!< Mappa contenente tutti i programmi */
+	AnimaMappedArray<AnimaShaderInclude*> _includes;	/*!< Mappa contenente tutti gli include possibili dei programmi */
 
 	AnimaShaderProgram* _activeProgram;					/*!< Puntatore al programma attivo per il rendering */
 };

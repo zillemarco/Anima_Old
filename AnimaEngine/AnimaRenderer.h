@@ -18,6 +18,7 @@
 #include "AnimaMeshInstance.h"
 #include "AnimaModel.h"
 #include "AnimaModelInstance.h"
+#include "AnimaRendererDrawableMesh.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -27,36 +28,42 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-class ANIMA_ENGINE_EXPORT AnimaPrimitiveData
+//class ANIMA_ENGINE_EXPORT AnimaPrimitiveData
+//{
+//public:
+//	AnimaPrimitiveData(AnimaAllocator* allocator);
+//	AnimaPrimitiveData(AnimaPrimitiveData& src);
+//	AnimaPrimitiveData(AnimaPrimitiveData&& src);
+//	~AnimaPrimitiveData();
+//	
+//public:
+//	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
+//	AnimaArray<AnimaVertex3f>* GetVertices();
+//	
+//	void SetIndices(AnimaArray<AUint>* indices);
+//	AnimaArray<AUint>* GetIndices();
+//	
+//	void SetColor(const AnimaColor4f& color);
+//	AnimaColor4f GetColor();
+//	
+//	void SetType(AUint type);
+//	AUint GetType();
+//	
+//	void SetModelMatrix(const AnimaMatrix& modelMatrix);
+//	AnimaMatrix GetModelMatrix();
+//	
+//protected:
+//	AnimaArray<AnimaVertex3f>	_vertices;
+//	AnimaArray<AUint>			_indices;
+//	AnimaColor4f				_color;
+//	AUint						_type;
+//	AnimaMatrix					_modelMatrix;
+//};
+
+struct AnimaRendererProgramInstances
 {
-public:
-	AnimaPrimitiveData(AnimaAllocator* allocator);
-	AnimaPrimitiveData(AnimaPrimitiveData& src);
-	AnimaPrimitiveData(AnimaPrimitiveData&& src);
-	~AnimaPrimitiveData();
-	
-public:
-	void SetVertices(AnimaArray<AnimaVertex3f>* vertices);
-	AnimaArray<AnimaVertex3f>* GetVertices();
-	
-	void SetIndices(AnimaArray<AUint>* indices);
-	AnimaArray<AUint>* GetIndices();
-	
-	void SetColor(const AnimaColor4f& color);
-	AnimaColor4f GetColor();
-	
-	void SetType(AUint type);
-	AUint GetType();
-	
-	void SetModelMatrix(const AnimaMatrix& modelMatrix);
-	AnimaMatrix GetModelMatrix();
-	
-protected:
-	AnimaArray<AnimaVertex3f>	_vertices;
-	AnimaArray<AUint>			_indices;
-	AnimaColor4f				_color;
-	AUint						_type;
-	AnimaMatrix					_modelMatrix;
+	AnimaShaderProgram* _program;
+	AnimaArray<AnimaMeshInstance*> _instances;
 };
 
 class AnimaEngine;
@@ -75,15 +82,17 @@ public:
 	AnimaRenderer& operator=(AnimaRenderer&& src);
 	
 public:
-	virtual bool InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath);
+	virtual bool InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath, const AnimaString& shadersIncludesPath);
 
 public:
 	virtual void Start(AnimaScene* scene);
 
+	void CheckPrograms(AnimaScene* scene);
+
 	AnimaScene* GetActiveScene() { return _scene; }
 
 	virtual void Render();
-	virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
+	//virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
 	virtual void UpdateModelsVisibility();
 	
 public:
@@ -104,7 +113,17 @@ protected:
 	virtual void PointLightsPass(AnimaArray<AnimaLight*>* pointLights);
 	
 	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
-	
+
+	void BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes, AnimaCamera* camera);
+	AInt FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances, AnimaShaderProgram* program);
+
+	void BuildProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera);
+	AInt FindProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaShaderProgram* program);
+
+	void SetupProgramInstancesStaticBuffers(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera);
+
+	void BuildStaticBuffers(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes);
+		
 protected:
 	static void PreparePass(AnimaRenderer* renderer);
 	static void LightPass(AnimaRenderer* renderer);
@@ -112,11 +131,11 @@ protected:
 
 protected:
 	void Clear();
-	void ClearPrimitives();
+	//void ClearPrimitives();
 	
-	void DrawPrimitives(AnimaShaderProgram* program);
-	void DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProgram* program);
-	void CombinePrimitives(AnimaShaderProgram* program);
+	//void DrawPrimitives(AnimaShaderProgram* program);
+	//void DrawPrimitive(AnimaPrimitiveData* primitive, AnimaShaderProgram* program);
+	//void CombinePrimitives(AnimaShaderProgram* program);
 
 	void ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaTexture* dst);
 	void ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst);
@@ -176,16 +195,18 @@ protected:
 	AnimaMesh*		_filterMesh;
 	AnimaCamera*	_filterCamera;
 
-	AnimaArray<AnimaPrimitiveData*> _primitives;
-	AUint _vertexArrayObject;
-	AUint _verticesBufferObject;
-	AUint _indexesBufferObject;
+	//AnimaArray<AnimaPrimitiveData*> _primitives;
+	//AUint _vertexArrayObject;
+	//AUint _verticesBufferObject;
+	//AUint _indexesBufferObject;
 
 	AnimaModel* _lastUpdatedModel;
 	AnimaModelInstance* _lastUpdatedModelInstance;
 
 	AnimaArray<AnimaRenderPassFunc> _renderPassesFunction;
-	
+
+	AnimaShaderProgram* _defaultShaderProgram;
+		
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaStringHasher>			_textureSlotsMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaStringHasher>	_texturesMap;

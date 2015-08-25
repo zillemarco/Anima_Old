@@ -21,6 +21,7 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGenerator
 	_material = nullptr;
 	_mesh = nullptr;
 	_shaderProgramName = "";
+	_shaderProgram = nullptr;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
@@ -29,6 +30,7 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
 	, _meshName(src._meshName)
 	, _shadersNames(src._shadersNames)
 	, _shaderProgramName(src._shaderProgramName)
+	, _shaderProgram(src._shaderProgram)
 {
 	_material = src._material;
 	_mesh = src._mesh;
@@ -40,6 +42,7 @@ AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
 	, _meshName(src._meshName)
 	, _shadersNames(src._shadersNames)
 	, _shaderProgramName(src._shaderProgramName)
+	, _shaderProgram(src._shaderProgram)
 {
 	_material = src._material;
 	_mesh = src._mesh;
@@ -63,6 +66,7 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(const AnimaMeshInstance& src)
 
 		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
+		_shaderProgram = src._shaderProgram;
 	}
 	
 	return *this;
@@ -82,6 +86,7 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(AnimaMeshInstance&& src)
 
 		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
+		_shaderProgram = src._shaderProgram;
 	}
 	
 	return *this;
@@ -111,7 +116,7 @@ void AnimaMeshInstance::SetMesh(AnimaMesh* mesh)
 	_mesh = mesh;
 }
 
-void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial)
+void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial)
 {
 	ANIMA_FRAME_PUSH("MeshInstanceUpdateProp");
 	program->UpdateSceneObjectProperties(this, renderer);
@@ -129,17 +134,24 @@ void AnimaMeshInstance::Draw(AnimaRenderer* renderer, AnimaShaderProgram* progra
 	}
 
 #ifdef _WIN32
-	ANIMA_FRAME_PUSH("BindVAO");
-	glBindVertexArray(_mesh->GetVertexArrayObject());
-	ANIMA_FRAME_POP();
+	if (start)
+	{
+		ANIMA_FRAME_PUSH("BindVAO");
+		glBindVertexArray(_mesh->GetVertexArrayObject());
+		ANIMA_FRAME_POP();
+	}
 
 	ANIMA_FRAME_PUSH("DrawElements");
 	glDrawElements(GL_TRIANGLES, _mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 	ANIMA_FRAME_POP();
 
-	ANIMA_FRAME_PUSH("Bind0");
-	glBindVertexArray(0);
-	ANIMA_FRAME_POP();
+	if (end)
+	{
+		ANIMA_FRAME_PUSH("Bind0");
+		glBindVertexArray(0);
+		ANIMA_FRAME_POP();
+	}
+
 #else
 	program->EnableInputs(_mesh);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mesh->GetIndexesBufferObject());
@@ -168,7 +180,21 @@ AnimaString AnimaMeshInstance::GetShaderName(AInt index) const
 	return _shadersNames[index];
 }
 
-void AnimaMeshInstance::SetShaderProgram(const AnimaString& shaderProgramName)
+void AnimaMeshInstance::SetShaderProgram(AnimaShaderProgram* program)
+{
+	_shaderProgram = program;
+	if (_shaderProgram)
+		_shaderProgramName = _shaderProgram->GetName();
+	else
+		_shaderProgramName = "";
+}
+
+AnimaShaderProgram* AnimaMeshInstance::GetShaderProgram()
+{
+	return _shaderProgram;
+}
+
+void AnimaMeshInstance::SetShaderProgramName(const AnimaString& shaderProgramName)
 {
 	_shaderProgramName = shaderProgramName;
 }

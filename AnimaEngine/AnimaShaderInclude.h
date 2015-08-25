@@ -12,47 +12,23 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-enum AnimaShaderType {
-	INVALID = -1,
-	VERTEX = GL_VERTEX_SHADER,
-	TESSELLATION_CONTROL = GL_TESS_CONTROL_SHADER,
-	TESSELLATION_EVALUATION = GL_TESS_EVALUATION_SHADER,
-	GEOMETRY = GL_GEOMETRY_SHADER,
-	FRAGMENT = GL_FRAGMENT_SHADER
-};
-
-class ANIMA_ENGINE_EXPORT AnimaShader : public AnimaNamedObject
+class ANIMA_ENGINE_EXPORT AnimaShaderInclude : public AnimaNamedObject
 {
-	DECLARE_ANIMA_CLASS(AnimaShader);
+	DECLARE_ANIMA_CLASS(AnimaShaderInclude);
 
 public:
-	AnimaShader(const AnimaString& name, AnimaAllocator* allocator);
-	AnimaShader(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText, AnimaShaderType type);
-	AnimaShader(const AnimaShader& src);
-	AnimaShader(AnimaShader&& src);
-	~AnimaShader();
+	AnimaShaderInclude(const AnimaString& name, AnimaAllocator* allocator);
+	AnimaShaderInclude(const AnimaString& name, AnimaAllocator* allocator, AnimaString shaderText);
+	AnimaShaderInclude(const AnimaShaderInclude& src);
+	AnimaShaderInclude(AnimaShaderInclude&& src);
+	~AnimaShaderInclude();
 	
-	AnimaShader& operator=(const AnimaShader& src);
-	AnimaShader& operator=(AnimaShader&& src);
-
-	bool operator==(const AnimaShader& left);
-	bool operator!=(const AnimaShader& left);
-
+	AnimaShaderInclude& operator=(const AnimaShaderInclude& src);
+	AnimaShaderInclude& operator=(AnimaShaderInclude&& src);
+	
 public:	
 	void SetText(AnimaString text);
 	AnimaString GetText();
-
-	void SetType(AnimaShaderType type);
-	AnimaShaderType GetType();
-
-	bool Create();
-	bool Delete();
-	bool Compile();
-
-	bool IsCreated();
-	bool IsCompiled();
-
-	AInt GetID();
 
 	void AddShaderData(const AnimaShaderData& data);
 	AInt GetShaderDataCount() const;
@@ -70,15 +46,10 @@ public:
 	AnimaShaderGroupData* GetShaderDynamicGroupData(const AnimaString& name);
 
 private:
-	AnimaShaderType _type;
-	AnimaString		_text;
-
+	AnimaString	_text;
 	AnimaMappedArray<AnimaShaderData> _data;
 	AnimaMappedArray<AnimaShaderGroupData> _staticGroupData;
 	AnimaMappedArray<AnimaShaderGroupData> _dynamicGroupData;
-
-	AInt			_id;
-	bool			_compiled;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

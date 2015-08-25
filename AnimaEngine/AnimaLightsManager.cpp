@@ -36,6 +36,11 @@ AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 	return CreateLight<AnimaSpotLight>(name);
 }
 
+AnimaHemisphereLight* AnimaLightsManager::CreateHemisphereLight(const AnimaString& name)
+{
+	return CreateLight<AnimaHemisphereLight>(name);
+}
+
 void AnimaLightsManager::ClearLights()
 {
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = _lights.GetArraysMap();

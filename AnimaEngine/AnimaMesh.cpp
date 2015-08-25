@@ -1497,7 +1497,7 @@ void AnimaMesh::MakeCylinder(AFloat topRadius, AFloat bottomRadius, AFloat heigh
 	AnimaMeshCreator::MakeCylinder(this, topRadius, bottomRadius, height, radialSegments, heightSegments, openEnded, _allocator);
 }
 
-void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial)
+void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial)
 {
 	program->UpdateSceneObjectProperties(this, renderer);
 
@@ -1511,9 +1511,13 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 	}
 
 #ifdef _WIN32
-	glBindVertexArray(GetVertexArrayObject());
+	if (start)
+		glBindVertexArray(GetVertexArrayObject());
+	
 	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+
+	if (end)
+		glBindVertexArray(0);
 #else
 	program->EnableInputs(this);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());

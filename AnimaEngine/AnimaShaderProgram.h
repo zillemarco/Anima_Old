@@ -14,6 +14,7 @@
 #include "AnimaScene.h"
 #include "AnimaNamedObject.h"
 #include "AnimaShaderData.h"
+#include "AnimaShaderGroupData.h"
 
 #include <boost/unordered_map.hpp>
 
@@ -22,7 +23,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class AnimaShadersManager;
 class AnimaRenderer;
 
-enum AnimaShaderInfoType {
+enum AnimaShaderInfoType 
+{
 	SHADER_FILE,
 	SHADER_TEXT
 };
@@ -31,39 +33,7 @@ class ANIMA_ENGINE_EXPORT AnimaShaderProgram : public AnimaNamedObject
 {
 	DECLARE_ANIMA_CLASS(AnimaShaderProgram);
 
-public:
-	struct AnimaShaderInfo {
-		AnimaString			_text;
-		AnimaShaderInfoType	_infoType;
-		AnimaShaderType		_shaderType;
-
-		AnimaShaderInfo() {
-			_text = "";
-			_infoType = SHADER_FILE;
-			_shaderType = VERTEX;
-		}
-	};
-
-	struct AnimaUniformInfo {
-		AInt* _locations;
-		AInt _locationsCount;
-		AUint _type;
-		AnimaString _name;
-		AUint _arraySize;
-
-		AnimaString* _nameParts;
-		AUint _namePartsCount;
-
-		AnimaUniformInfo() {
-			_locations = nullptr;
-			_locationsCount = 0;
-			_type = GL_FLOAT;
-			_nameParts = nullptr;
-			_namePartsCount = 0;
-			_arraySize = 1;
-		}
-	};
-
+public:	
 	struct AnimaInputInfo {
 		AInt _location;
 		AUint _type;
@@ -100,10 +70,10 @@ public:
 	bool Use();
 	bool Delete();
 
-	bool IsCreated();
-	bool IsLinked();
+	bool IsCreated() const;
+	bool IsLinked() const;
 
-	AInt GetID();
+	AInt GetID() const;
 
 public:
 	void ScanVariables();
@@ -116,17 +86,6 @@ public:
 	void UpdateMappedValuesObjectProperties(AnimaMappedValues* object, AnimaRenderer* renderingManager);
 	void UpdateRenderingManagerProperies(AnimaRenderer* renderingManager);
 
-	void SetUniformi(const AnimaString& uniformName, int value);
-	void SetUniformf(const AnimaString& uniformName, AFloat value);
-	void SetUniform(const AnimaString& uniformName, const AnimaVertex2f& value);
-	void SetUniform(const AnimaString& uniformName, const AnimaVertex3f& value);
-	void SetUniform(const AnimaString& uniformName, const AnimaColor4f& value);
-	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c);
-	void SetUniform(const AnimaString& uniformName, AFloat a, AFloat b, AFloat c, AFloat d);
-	void SetUniform(const AnimaString& uniformName, const AnimaMatrix& value, bool transpose = false);
-	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaVectorGenerator*>* value, AUint type);
-	void SetUniform(const AnimaString& uniformName, const AnimaArray<AnimaMatrix>* value);
-
 	void SetUniformi(AInt location, int value);
 	void SetUniformf(AInt location, AFloat value);
 	void SetUniform(AInt location, const AnimaVertex2f& value);
@@ -136,11 +95,22 @@ public:
 	void SetUniform(AInt location, AFloat a, AFloat b, AFloat c, AFloat d);
 	void SetUniform(AInt location, const AnimaMatrix& value, bool transpose = false);
 
-	void AddShaderData(AnimaShaderData& data);
+	void AddShaderData(const AnimaShaderData& data);
+	AInt GetShaderDataCount() const;
+	AnimaShaderData* GetShaderData(const AInt& index);
 	AnimaShaderData* GetShaderData(const AnimaString& name);
 
+	void AddShaderStaticGroupData(const AnimaShaderGroupData& groupData);
+	AInt GetShaderStaticGroupDataCount() const;
+	AnimaShaderGroupData* GetShaderStaticGroupData(const AInt& index);
+	AnimaShaderGroupData* GetShaderStaticGroupData(const AnimaString& name);
+
+	void AddShaderDynamicGroupData(const AnimaShaderGroupData& groupData);
+	AInt GetShaderDynamicGroupDataCount() const;
+	AnimaShaderGroupData* GetShaderDynamicGroupData(const AInt& index);
+	AnimaShaderGroupData* GetShaderDynamicGroupData(const AnimaString& name);
+
 private:
-	void ClearUniforms();
 	void UpdateDataLookup();
 	
 private:
@@ -150,12 +120,13 @@ private:
 	AnimaShadersManager* _shadersManager;
 
 	AnimaMappedArray<AnimaShaderData> _data;
+	AnimaMappedArray<AnimaShaderGroupData> _staticGroupData;
+	AnimaMappedArray<AnimaShaderGroupData> _dynamicGroupData;
 
 	AInt			_id;
 	bool			_linked;
 
 #pragma warning (disable: 4251)
-	boost::unordered_map<AnimaString, AnimaUniformInfo, AnimaStringHasher> _uniforms;
 	boost::unordered_map<AnimaString, AnimaInputInfo, AnimaStringHasher> _inputs;
 	boost::unordered_map<AnimaString, AnimaOutputInfo, AnimaStringHasher> _outputs;
 #pragma warning (default: 4251) 

@@ -236,7 +236,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	class_<Anima::AnimaRenderer, boost::noncopyable>("AnimaRenderer", init<Anima::AnimaEngine*, Anima::AnimaAllocator*>())
 		.def("Start", RendererStart)
 		.def("DrawAll", &Anima::AnimaRenderer::Render)
-		.def("AddPrimitive", &Anima::AnimaRenderer::AddPrimitive)
+		//.def("AddPrimitive", &Anima::AnimaRenderer::AddPrimitive)
 		.def("UpdateModelsVisibility", &Anima::AnimaRenderer::UpdateModelsVisibility)
 		.def("InitTextureSlots", &Anima::AnimaRenderer::InitTextureSlots)
 		.def("InitRenderingTargets", &Anima::AnimaRenderer::InitRenderingTargets)
@@ -269,11 +269,6 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	enum_<Anima::AnimaShaderInfoType>("AnimaShaderInfoType")
 		.value("SHADER_FILE", Anima::SHADER_FILE)
 		.value("SHADER_TEXT", Anima::SHADER_TEXT);
-
-	class_<Anima::AnimaShaderProgram::AnimaShaderInfo>("AnimaShaderInfo")
-		.def_readwrite("text", &Anima::AnimaShaderProgram::AnimaShaderInfo::_text)
-		.def_readwrite("infoType", &Anima::AnimaShaderProgram::AnimaShaderInfo::_infoType)
-		.def_readwrite("shaderType", &Anima::AnimaShaderProgram::AnimaShaderInfo::_shaderType);
 
 	class_<Anima::AnimaShaderProgram>("AnimaShaderProgram", no_init)
 		.def("AddShader", &Anima::AnimaShaderProgram::AddShader)

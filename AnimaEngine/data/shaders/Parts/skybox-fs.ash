@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<AnimaShader name="skybox-fs" type="FS">
-	<Part api="OGL" minVersion="3.3">
-		<ShaderCode>
-			<![CDATA[
-			#version 150 core
+<AnimaShader>
+	<Name>skybox-fs</Name>
+	<Type>FS</Type>
+	<Versions>
+		<Version>
+			<API>OGL</API>
+			<MinVersion>3.3</MinVersion>
+			<Datas>
+				<Data name="REN_SkyBox" type="TEXTURECUBE" />
+			</Datas>
+			<Code>
+				<![CDATA[
+				#version 150 core
 
-			in vec3 frag_textureCoord;
-			out vec4 FragColor;
+				in vec3 frag_textureCoord;
+				out vec4 FragColor;
 
-			uniform samplerCube REN_SkyBox;
+				uniform samplerCube REN_SkyBox;
 
-			void main()
-			{
-			    vec4 color = texture(REN_SkyBox, frag_textureCoord);
-			    FragColor = color * 1.0f;
-			}
-			]]>
-		</ShaderCode>
-	</Part>
+				void main()
+				{
+				    vec4 color = texture(REN_SkyBox, frag_textureCoord);
+				    FragColor = color * 1.0f;
+				}
+				]]>
+			</Code>
+		</Version>
+	</Versions>
 </AnimaShader>

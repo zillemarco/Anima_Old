@@ -38,7 +38,7 @@ public:
 	AnimaMeshInstance& operator=(AnimaMeshInstance&& src);
 
 public:
-	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool updateMaterial = true);
+	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial = true);
 
 public:
 	void SetMaterial(AnimaMaterial* material);
@@ -51,7 +51,10 @@ public:
 	AInt GetShadersCount() const;
 	AnimaString GetShaderName(AInt index) const;
 
-	void SetShaderProgram(const AnimaString& shaderProgramName);
+	void SetShaderProgram(AnimaShaderProgram* program);
+	AnimaShaderProgram* GetShaderProgram();
+
+	void SetShaderProgramName(const AnimaString& shaderProgramName);
 	AnimaString GetShaderProgramName() const;
 
 protected:
@@ -68,6 +71,8 @@ protected:
 
 	// Dati necessari al disegno
 	AnimaArray<AnimaString> _shadersNames;
+
+	AnimaShaderProgram* _shaderProgram;
 	AnimaString _shaderProgramName;
 };
 

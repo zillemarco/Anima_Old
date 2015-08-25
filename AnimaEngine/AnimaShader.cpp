@@ -29,6 +29,9 @@ AnimaShader::AnimaShader(const AnimaShader& src)
 	: AnimaNamedObject(src)
 	, _text(src._text)
 {
+	_data = src._data;
+	_staticGroupData = src._staticGroupData;
+	_dynamicGroupData = src._dynamicGroupData;
 	_id = src._id;
 	_type = src._type;
 	_compiled = src._compiled;
@@ -40,6 +43,9 @@ AnimaShader::AnimaShader(AnimaShader&& src)
 	, _text(src._text)
 	, _id(src._id)
 	, _compiled(src._compiled)
+	, _data(src._data)
+	, _staticGroupData(src._staticGroupData)
+	, _dynamicGroupData(src._dynamicGroupData)
 {
 	src._id = 0;
 	src._compiled = false;
@@ -59,6 +65,9 @@ AnimaShader& AnimaShader::operator=(const AnimaShader& src)
 		_id = src._id;
 		_type = src._type;
 		_compiled = src._compiled;
+		_data = src._data;
+		_staticGroupData = src._staticGroupData;
+		_dynamicGroupData = src._dynamicGroupData;
 	}
 
 	return *this;
@@ -73,6 +82,9 @@ AnimaShader& AnimaShader::operator=(AnimaShader&& src)
 		_id = src._id;
 		_type = src._type;
 		_compiled = src._compiled;
+		_data = src._data;
+		_staticGroupData = src._staticGroupData;
+		_dynamicGroupData = src._dynamicGroupData;
 
 		src._id = 0;
 	}
@@ -165,9 +177,7 @@ bool AnimaShader::Compile()
 		char* infoLog = new char[maxLength];
 		glGetShaderInfoLog(_id, maxLength, &maxLength, &infoLog[0]);
 
-		//ANIMA_ASSERT(false);// , infoLog);
-
-//		Delete();
+		printf("AnimaShader error compiling:\n%s\n", infoLog);
 
 		_compiled = false;
 	}
@@ -200,6 +210,66 @@ bool AnimaShader::IsCreated()
 bool AnimaShader::IsCompiled()
 {
 	return _compiled;
+}
+
+void AnimaShader::AddShaderData(const AnimaShaderData& data)
+{
+	_data.Add(data.GetName(), data);
+}
+
+AInt AnimaShader::GetShaderDataCount() const
+{
+	return _data.GetSize();
+}
+
+AnimaShaderData* AnimaShader::GetShaderData(const AnimaString& name)
+{
+	return &_data[name];
+}
+
+AnimaShaderData* AnimaShader::GetShaderData(const AInt& index)
+{
+	return &_data[index];
+}
+
+void AnimaShader::AddShaderStaticGroupData(const AnimaShaderGroupData& groupData)
+{
+	_staticGroupData.Add(groupData.GetName(), groupData);
+}
+
+AInt AnimaShader::GetShaderStaticGroupDataCount() const
+{
+	return _staticGroupData.GetSize();
+}
+
+AnimaShaderGroupData* AnimaShader::GetShaderStaticGroupData(const AInt& index)
+{
+	return &_staticGroupData[index];
+}
+
+AnimaShaderGroupData* AnimaShader::GetShaderStaticGroupData(const AnimaString& name)
+{
+	return &_staticGroupData[name];
+}
+
+void AnimaShader::AddShaderDynamicGroupData(const AnimaShaderGroupData& groupData)
+{
+	_dynamicGroupData.Add(groupData.GetName(), groupData);
+}
+
+AInt AnimaShader::GetShaderDynamicGroupDataCount() const
+{
+	return _dynamicGroupData.GetSize();
+}
+
+AnimaShaderGroupData* AnimaShader::GetShaderDynamicGroupData(const AInt& index)
+{
+	return &_dynamicGroupData[index];
+}
+
+AnimaShaderGroupData* AnimaShader::GetShaderDynamicGroupData(const AnimaString& name)
+{
+	return &_dynamicGroupData[name];
 }
 
 END_ANIMA_ENGINE_NAMESPACE

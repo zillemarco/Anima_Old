@@ -73,6 +73,7 @@ public:
 
 	AnimaString GetNamePart(AInt index) const { return _nameParts[index]; }
 	AnimaString GetPrefix() { return _nameParts[0]; }
+	AInt GetNamePartsCount() const { return _nameParts.size(); }
 
 public:
 	void UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer);
