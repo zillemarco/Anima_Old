@@ -61,7 +61,7 @@ public:
 	bool operator!=(const AnimaShaderData& left);
 
 public:
-	void FindLocation(AnimaShaderProgram* program);
+	void Analize(AnimaShaderProgram* program);
 
 	virtual void SetName(const AnimaString& name);
 
@@ -74,6 +74,15 @@ public:
 	AnimaString GetNamePart(AInt index) const { return _nameParts[index]; }
 	AnimaString GetPrefix() { return _nameParts[0]; }
 	AInt GetNamePartsCount() const { return _nameParts.size(); }
+
+	void SetOffset(AInt offset) { _offset = offset; }
+	AInt GetOffset() const { return _offset; }
+	
+	void SetArrayStride(AInt arrayStride) { _arrayStride = arrayStride; }
+	AInt GetArrayStride() const { return _arrayStride; }
+
+	void SetMatrixStride(AInt matrixStride) { _matrixStride = matrixStride; }
+	AInt GetMatrixStride() const { return _matrixStride; }
 
 public:
 	void UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer);
@@ -106,6 +115,10 @@ protected:
 	AnimaShaderDataType _type;
 
 	AInt _arraySize;
+
+	AInt _offset;
+	AInt _arrayStride;
+	AInt _matrixStride;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

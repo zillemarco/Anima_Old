@@ -354,8 +354,11 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 				if (groupProp.first == "Group")
 				{
 					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.name");
-					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic");
+					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic", true);
+					bool supportsInstance = groupProp.second.get<bool>("<xmlattr>.supportsInstance", false);
+
 					AnimaShaderGroupData groupData(groupName, _engine->GetShadersAllocator());
+					groupData.SetSupportsInstance(supportsInstance);
 
 					for (auto& dataProp : groupProp.second.get_child("Datas"))
 					{
@@ -442,6 +445,12 @@ AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromXml(const boost::p
 
 	if (shaderProgram)
 	{
+		bool supportsInstance = xmlTree.get<bool>("AnimaShaderProgram.SupportsInstance", false);
+		AUint maxInstances = xmlTree.get<AUint>("AnimaShaderProgram.MaxInstances", 1);
+
+		shaderProgram->SetSupportsInstance(supportsInstance);
+		shaderProgram->SetMaxInstances(maxInstances);
+
 		for (auto& prop : xmlTree.get_child("AnimaShaderProgram.Shaders"))
 		{
 			if (prop.first == "Shader")
@@ -558,8 +567,11 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 				if (groupProp.first == "Group")
 				{
 					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.name");
-					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic");
+					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic", true);
+					bool supportsInstance = groupProp.second.get<bool>("<xmlattr>.supportsInstance", false);
+					
 					AnimaShaderGroupData groupData(groupName, _engine->GetShadersAllocator());
+					groupData.SetSupportsInstance(supportsInstance);
 					
 					for (auto& dataProp : groupProp.second.get_child("Datas"))
 					{

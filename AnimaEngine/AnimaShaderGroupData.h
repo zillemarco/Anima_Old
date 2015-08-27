@@ -34,14 +34,14 @@ public:
 
 public:
 	bool Create();
-	void FindLocation(AnimaShaderProgram* program);
+	void Analize(AnimaShaderProgram* program);
 
 	void AddShaderData(const AnimaShaderData& data);
 	AInt GetShaderDataCount() const;
 	AnimaShaderData* GetShaderData(const AInt& index);
 	AnimaShaderData* GetShaderData(const AnimaString& name);
 
-	void SetBindingPoint(AUint index)	{ _bindingPoint = index; }
+	bool SetBindingPoint(AnimaShaderProgram* program, AUint bindingPoint);
 	AUint GetBindingPoint()				{ return _bindingPoint; }
 	
 	AUint GetBufferDataSize() const { return _bufferDataSize; }
@@ -49,23 +49,32 @@ public:
 	void SetBufferLength(AUint length);
 	AUint GetBufferLength() const { return _bufferLength; }
 
+	void SetSupportsInstance(bool supports) { _supportsInstance = supports; }
+	bool CanSupportInstance() { return _supportsInstance; }
+
+	bool BindForUpdate() const;
+
 public:
 	void UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset = 0);
 	void UpdateValue(AnimaRenderer* renderer, const AnimaShaderProgram* program);
 
-	void EnableValue(AUint offset, bool link);
+	void Enable();
+	void EnableValue(AUint offset);
 
 protected:
-	AUint CalculateBufferDataSize();
+	void UpdateObjectValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset = 0);
+	void UpdateObjectInstanceValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset = 0);
 	
 protected:
 	AnimaMappedArray<AnimaShaderData> _data;
 
 	AInt _groupLocation;
 	AUint _ubo;
-	AUint _bufferDataSize;
+	AInt _bufferDataSize;
 	AUint _bufferLength;
 	AUint _bindingPoint;
+	
+	bool _supportsInstance;
 
 	bool _created;
 	bool _needsResize;

@@ -675,7 +675,7 @@ AInt AnimaRenderer::FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawab
 	return -1;
 }
 
-void AnimaRenderer::BuildProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera)
+void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera)
 {
 	if (programs == nullptr || camera == nullptr || _scene == nullptr)
 		return;
@@ -701,22 +701,81 @@ void AnimaRenderer::BuildProgramInstances(AnimaArray<AnimaRendererProgramInstanc
 			if (program == nullptr)
 				continue;
 
-			AInt index = FindProgramInstances(programs, program);
-			if (index >= 0)
-				programs->at(index)._instances.push_back(instance);
+			AnimaMaterial* material = instance->GetMaterial();
+			if (material == nullptr)
+				material = AnimaMaterialsManager::GetDefaultMaterial();
+
+			AnimaMesh* mesh = instance->GetMesh();
+
+			AInt programDataIndex = FindProgramData(programs, program);
+			if (programDataIndex >= 0)
+			{
+				AnimaRendererProgramData* programData = &programs->at(programDataIndex);
+
+				if (program->CanSupportInstance())
+				{
+					AInt meshInstancesIndex = FindMeshInstances(&programData->_meshes, mesh);
+					if (meshInstancesIndex >= 0)
+					{
+						AnimaRendererMeshInstances* meshInstances = &programData->_meshes.at(meshInstancesIndex);
+						meshInstances->_instances.push_back(instance);
+					}
+					else
+					{
+						AnimaRendererMeshInstances meshInstances;
+						meshInstances._mesh = mesh;
+						meshInstances._instances.push_back(instance);
+
+						programData->_meshes.push_back(meshInstances);
+					}
+				}
+				else
+				{
+					AInt materialInstancesIndex = FindMaterialInstances(&programData->_materials, material);
+					if (materialInstancesIndex >= 0)
+					{
+						AnimaRendererMaterialInstances* materialInstances = &programData->_materials.at(materialInstancesIndex);
+						materialInstances->_instances.push_back(instance);
+					}
+					else
+					{
+						AnimaRendererMaterialInstances materialInstances;
+						materialInstances._material = material;
+						materialInstances._instances.push_back(instance);
+
+						programData->_materials.push_back(materialInstances);
+					}
+				}
+			}
 			else
 			{
-				AnimaRendererProgramInstances programInstances;
-				programInstances._program = program;
-				programInstances._instances.push_back(instance);
+				AnimaRendererProgramData programData;
+				programData._program = program;
 
-				programs->push_back(programInstances);
+				if (program->CanSupportInstance())
+				{
+					AnimaRendererMeshInstances meshInstances;
+					meshInstances._mesh = mesh;
+					meshInstances._instances.push_back(instance);
+
+					programData._meshes.push_back(meshInstances);
+				}
+				else
+				{
+					AnimaRendererMaterialInstances materialInstances;
+					materialInstances._material = material;
+					materialInstances._instances.push_back(instance);
+
+					programData._materials.push_back(materialInstances);
+				}
+
+				programs->push_back(programData);
 			}
 		}
 	}
 }
 
-AInt AnimaRenderer::FindProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaShaderProgram* program)
+AInt AnimaRenderer::FindProgramData(AnimaArray<AnimaRendererProgramData>* programs, AnimaShaderProgram* program)
 {
 	if (programs == nullptr || program == nullptr)
 		return -1;
@@ -731,11 +790,44 @@ AInt AnimaRenderer::FindProgramInstances(AnimaArray<AnimaRendererProgramInstance
 	return -1;
 }
 
-void AnimaRenderer::SetupProgramInstancesStaticBuffers(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera)
+AInt AnimaRenderer::FindMaterialInstances(AnimaArray<AnimaRendererMaterialInstances>* materials, AnimaMaterial* material)
 {
-	for (auto& programInstances : *programs)
+	if (materials == nullptr || material == nullptr)
+		return -1;
+
+	AInt count = materials->size();
+	for (AInt i = 0; i < count; i++)
 	{
-		AnimaShaderProgram* program = programInstances._program;
+		if (materials->at(i)._material == material)
+			return i;
+	}
+
+	return -1;
+}
+
+AInt AnimaRenderer::FindMeshInstances(AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaMesh* mesh)
+{
+	if (meshes == nullptr || mesh == nullptr)
+		return -1;
+
+	AInt count = meshes->size();
+	for (AInt i = 0; i < count; i++)
+	{
+		if (meshes->at(i)._mesh == mesh)
+			return i;
+	}
+
+	return -1;
+}
+
+void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera)
+{
+	for (auto& programData : *programs)
+	{
+		AnimaShaderProgram* program = programData._program;
+
+		if (program->CanSupportInstance())
+			continue;
 
 		AInt count = program->GetShaderStaticGroupDataCount();
 		for (AInt i = 0; i < count; i++)
@@ -743,33 +835,40 @@ void AnimaRenderer::SetupProgramInstancesStaticBuffers(AnimaArray<AnimaRendererP
 			AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
 			AnimaString groupDataName = groupData->GetName();
 
+			groupData->BindForUpdate();
+			
 			if (groupDataName == "MAT")
 			{
-				AInt instancesCount = programInstances._instances.size();
+				AInt materialsCount = programData._materials.size();
 
-				// Il numero dei materiali è uguale al numero di istanze
-				groupData->SetBufferLength(instancesCount);
+				// Il numero dei materiali
+				groupData->SetBufferLength(materialsCount);
 
-				for (AInt j = 0; j < instancesCount; j++)
+				for (AInt j = 0; j < materialsCount; j++)
 				{
-					AnimaMeshInstance* instance = programInstances._instances.at(j);
-
-					AnimaMaterial* material = instance->GetMaterial();
-					if (material == nullptr)
-						material = AnimaMaterialsManager::GetDefaultMaterial();
-
+					AnimaMaterial* material = programData._materials.at(j)._material;
 					groupData->UpdateValue(material, this, program, j);
 				}
 			}
 			else if (groupDataName == "MOD")
 			{
-				AInt instancesCount = programInstances._instances.size();
+				AInt instancesCount = 0;
+
+				for (auto& programMaterial : programData._materials)
+					instancesCount += programMaterial._instances.size();
+
+				if (instancesCount <= 0)
+					continue;
+
 				groupData->SetBufferLength(instancesCount);
 
-				for (AInt j = 0; j < instancesCount; j++)
+				AInt instanceOffset = 0;
+				for (auto& programMaterial : programData._materials)
 				{
-					AnimaMeshInstance* instance = programInstances._instances.at(j);
-					groupData->UpdateValue(instance, this, program, j);
+					for (auto& instance : programMaterial._instances)
+					{
+						groupData->UpdateValue(instance, this, program, instanceOffset++);
+					}
 				}
 			}
 			else if (groupDataName == "CAM")
@@ -780,8 +879,58 @@ void AnimaRenderer::SetupProgramInstancesStaticBuffers(AnimaArray<AnimaRendererP
 	}
 }
 
+void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaCamera* camera)
+{
+	AInt count = program->GetShaderStaticGroupDataCount();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
+		AnimaString groupDataName = groupData->GetName();
+
+		ANIMA_FRAME_PUSH("bind for update");
+		groupData->BindForUpdate();
+		ANIMA_FRAME_POP();
+
+		if (groupDataName == "MAT")
+		{
+			ANIMA_FRAME_PUSH("material update");
+			AInt instancesCount = meshInstances->_instances.size();
+			for (AInt j = 0; j < instancesCount; j++)
+			{
+				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+
+				AnimaMaterial* material = instance->GetMaterial();
+				if (material == nullptr)
+					material = AnimaMaterialsManager::GetDefaultMaterial();
+
+				groupData->UpdateValue(material, this, program, j);
+			}
+			ANIMA_FRAME_POP();
+		}
+		else if (groupDataName == "MOD")
+		{
+			ANIMA_FRAME_PUSH("model update");
+			AInt instancesCount = meshInstances->_instances.size();
+			for (AInt j = 0; j < instancesCount; j++)
+			{
+				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+				groupData->UpdateValue(instance, this, program, j);
+			}
+			ANIMA_FRAME_POP();
+		}
+		else if (groupDataName == "CAM")
+		{
+			ANIMA_FRAME_PUSH("camera update");
+			groupData->UpdateValue(camera, this, program, 0);
+			ANIMA_FRAME_POP();
+		}
+	}
+}
+
 void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 {
+	ANIMA_FRAME_PUSH("Prepare pass");
+
 	AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 	AnimaCamerasManager* camerasManager = renderer->_scene->GetCamerasManager();
 
@@ -798,130 +947,106 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
-	AnimaArray<AnimaRendererProgramInstances> programs;
-	renderer->BuildProgramInstances(&programs, camera);
-	renderer->SetupProgramInstancesStaticBuffers(&programs, camera);
+	ANIMA_FRAME_PUSH("Build data");
+	AnimaArray<AnimaRendererProgramData> programs;
+	renderer->BuildProgramsData(&programs, camera);
+	renderer->SetupProgramDataStaticBuffers(&programs, camera);
+	ANIMA_FRAME_POP();
 
-	for (auto& programInstances : programs)
+	for (auto& programData : programs)
 	{
-		AnimaShaderProgram* program = programInstances._program;
+		AnimaShaderProgram* program = programData._program;
+		bool supportsInstance = program->CanSupportInstance();
 
-		program->Use();
-		program->UpdateSceneObjectProperties(camera, renderer);
-		program->UpdateRenderingManagerProperies(renderer);
-		
-		AInt staticDataCount = program->GetShaderStaticGroupDataCount();
-		AInt offset = 0;
+		AnimaArray<AnimaShaderGroupData*> materialDataGroups;
+		AnimaArray<AnimaShaderGroupData*> meshDataGroups;
+		AnimaArray<AnimaShaderGroupData*> cameraDataGroups;
 
-		for (auto& instance : programInstances._instances)
+		AInt staticGroupDataCount = program->GetShaderStaticGroupDataCount();
+		for (AInt i = 0; i < staticGroupDataCount; i++)
 		{
-			AnimaMesh* mesh = instance->GetMesh();
+			AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
+			AnimaString groupDataName = groupData->GetName();
 
-			if (mesh->NeedsBuffersUpdate())
-				mesh->UpdateBuffers();
-			
-			AnimaMaterial* material = instance->GetMaterial();
-			if (material == nullptr)
-				material = AnimaMaterialsManager::GetDefaultMaterial();
+			if (groupDataName == "MAT")
+				materialDataGroups.push_back(groupData);
+			else if (groupDataName == "MOD")
+				meshDataGroups.push_back(groupData);
+			else if (groupDataName == "CAM")
+				cameraDataGroups.push_back(groupData);
+		}
 
-			for (AInt i = 0; i < staticDataCount; i++)
-				program->GetShaderStaticGroupData(i)->EnableValue(offset, offset == 0);
-
-			program->UpdateMappedValuesObjectProperties(material, renderer);
-			program->UpdateSceneObjectProperties(instance, renderer);
-
-			glBindVertexArray(mesh->GetVertexArrayObject());
-			glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-
-			AUint error = glGetError();
-			if (error != GL_NO_ERROR)
+		if (supportsInstance)
+		{
+			for (auto& programMesh : programData._meshes)
 			{
-				ANIMA_ASSERT(false);
-			}
+				ANIMA_FRAME_PUSH("SetupProgramDataInstancedStaticBuffers");
+				renderer->SetupProgramDataInstancedStaticBuffers(program, &programMesh, camera);
+				ANIMA_FRAME_POP();
 
-			offset++;
+				program->Use();
+
+				ANIMA_FRAME_PUSH("Update normal uniforms");
+				program->UpdateSceneObjectProperties(camera, renderer);
+				program->UpdateRenderingManagerProperies(renderer);
+				ANIMA_FRAME_POP();
+
+				ANIMA_FRAME_PUSH("Enable UBO");
+				for (auto& group : materialDataGroups)
+					group->Enable();
+				for (auto& group : meshDataGroups)
+					group->Enable();
+				ANIMA_FRAME_POP();
+
+				AnimaMesh* mesh = programMesh._mesh;
+				if (mesh->NeedsBuffersUpdate())
+					mesh->UpdateBuffers();
+
+				ANIMA_FRAME_PUSH("Draw");
+				glBindVertexArray(mesh->GetVertexArrayObject());
+				glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+				ANIMA_FRAME_POP();
+			}
+		}
+		else
+		{
+			program->Use();
+			program->UpdateSceneObjectProperties(camera, renderer);
+			program->UpdateRenderingManagerProperies(renderer);
+			
+			AInt materialsOffset = 0;
+			AInt instancesOffset = 0;
+
+			for (auto& programMaterial : programData._materials)
+			{
+				for (auto& group : materialDataGroups)
+					group->EnableValue(materialsOffset);
+
+				for (auto& instance : programMaterial._instances)
+				{
+					AnimaMesh* mesh = instance->GetMesh();
+					if (mesh->NeedsBuffersUpdate())
+						mesh->UpdateBuffers();
+
+					for (auto& group : meshDataGroups)
+						group->EnableValue(instancesOffset);
+
+					program->UpdateMappedValuesObjectProperties(programMaterial._material, renderer);
+					program->UpdateSceneObjectProperties(instance, renderer);
+
+					glBindVertexArray(mesh->GetVertexArrayObject());
+					glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+
+					instancesOffset++;
+				}
+
+				materialsOffset++;
+			}
 		}
 	}
 
-	//AnimaArray<AnimaRendererDrawableMesh> drawableMeshes;
-	//renderer->BuildDrawableObjectsArray(&drawableMeshes, renderer->_scene->GetCamerasManager()->GetActiveCamera());
-	//
-	//AnimaShaderProgram* activeProgram = nullptr;
-
-	//AInt count = drawableMeshes.size();
-	//for (AInt i = 0; i < count; i++)
-	//{
-	//	AnimaRendererDrawableMesh* drawableMesh = &drawableMeshes[i];
-	//	AnimaMesh* mesh = drawableMesh->GetMesh();
-
-	//	if (mesh->NeedsBuffersUpdate())
-	//		mesh->UpdateBuffers();
-
-	//	glBindVertexArray(mesh->GetVertexArrayObject());
-
-	//	AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances = drawableMesh->GetDrawableMeshInstances();
-	//	
-	//	AInt drawableMeshInstancesCount = drawableMeshInstances->size();
-	//	for (AInt j = 0; j < drawableMeshInstancesCount; j++)
-	//	{
-	//		AnimaRendererDrawableMeshInstances* drawableMeshInstance = &drawableMeshInstances->at(j);
-	//		AnimaShaderProgram* program = drawableMeshInstance->GetShaderProgram();
-	//		
-	//		activeProgram = shadersManager->GetActiveProgram();
-	//		if (activeProgram == nullptr || (*activeProgram) != (*program))
-	//		{
-	//			program->Use();
-	//			program->UpdateSceneObjectProperties(camera, renderer);
-	//			program->UpdateRenderingManagerProperies(renderer);
-	//		}
-
-	//		AnimaArray<AnimaMeshInstance*>* meshInstances = drawableMeshInstance->GetMeshesInstances();
-	//		AInt instancesCount = meshInstances->size();
-
-	//		for (AInt k = 0; k < instancesCount; k++)
-	//		{
-	//			AnimaMeshInstance* instance = meshInstances->at(k);
-
-	//			AnimaMaterial* material = instance->GetMaterial();
-	//			if (material == nullptr)
-	//				material = AnimaMaterialsManager::GetDefaultMaterial();
-
-	//			program->UpdateMappedValuesObjectProperties(material, renderer);
-	//			program->UpdateSceneObjectProperties(instance, renderer);
-
-	//			glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	//		}
-	//	}
-	//}
-
-	////AnimaMeshesManager* meshesManager = renderer->_scene->GetMeshesManager();
-	////AInt meshesCount = meshesManager->GetMeshesCount();
-	////if (meshesCount == 0)
-	////	return;
-
-	////AnimaFrustum* frustum = nullptr;
-	////for (AInt i = 0; i < meshesCount; i++)
-	////{
-	////	ANIMA_FRAME_PUSH("MeshGet");
-	////	AnimaMesh* mesh = meshesManager->GetMesh(i);
-	////	ANIMA_FRAME_POP();
-
-	////	ANIMA_FRAME_PUSH("MeshDraw");
-	////	renderer->DrawMesh(mesh, shadersManager->GetProgramFromName("deferred-prepare"), true, false, frustum);
-	////	ANIMA_FRAME_POP();
-	////}
-
 	renderer->Finish();
-}
-
-void AnimaRenderer::BuildStaticBuffers(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes)
-{
-	AInt count = drawableMeshes->size();
-	for (AInt i = 0; i < count; i++)
-	{
-		AnimaRendererDrawableMesh* drawableMesh = &drawableMeshes->at(i);
-
-	}
+	ANIMA_FRAME_POP();
 }
 
 void AnimaRenderer::LightPass(AnimaRenderer* renderer)
@@ -933,7 +1058,6 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
 	AnimaTypeMappedArray<AnimaLight*>* lights = lightsManager->GetLights();
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
-	
 	
 	// Pulisco i buffer per le luci
 	renderer->GetGBuffer("LightsBuffer")->BindAsRenderTarget();
@@ -964,6 +1088,8 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 
 void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLights)
 {
+	ANIMA_FRAME_PUSH("DirectionalLightsPass");
+
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
 	
@@ -1004,7 +1130,6 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 		if (mesh->NeedsBuffersUpdate())
 			mesh->UpdateBuffers();
 		
-		light->UpdateMeshTransformation(mesh->GetTransformation());
 		light->UpdateCullFace(activeCamera);
 		
 		program->UpdateSceneObjectProperties(light, this);
@@ -1014,6 +1139,7 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 	}
+	ANIMA_FRAME_POP();
 }
 
 void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
@@ -1058,7 +1184,6 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 		if (mesh->NeedsBuffersUpdate())
 			mesh->UpdateBuffers();
 
-		light->UpdateMeshTransformation(mesh->GetTransformation());
 		light->UpdateCullFace(activeCamera);
 
 		program->UpdateSceneObjectProperties(light, this);
@@ -1080,6 +1205,8 @@ void AnimaRenderer::UpdateShadowMap(AnimaLight* light)
 
 void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light)
 {
+	ANIMA_FRAME_PUSH("UpdateDirectionalLightShadowMap");
+
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 	
@@ -1119,6 +1246,8 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 		//	for (AInt i = 0; i < childrenCount; i++)
 		//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
 	}
+
+	ANIMA_FRAME_POP();
 }
 
 void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
@@ -1685,7 +1814,7 @@ bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const Anim
 	shadersManager->LoadShadersIncludes(shadersIncludesPath);
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr.asp");
+	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr-inst.asp");
 	if (!prepareProgram->Link())
 		return false;
 

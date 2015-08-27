@@ -359,15 +359,15 @@ void AnimaGBuffer::BindAsRenderTarget()
 {
 	ANIMA_ASSERT(Create());
 
-	if(glGetError() != GL_NO_ERROR)
-		return;
+	//if(glGetError() != GL_NO_ERROR)
+	//	return;
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 	glViewport(0, 0, _width, _height);
 	
-	if(glGetError() != GL_NO_ERROR)
-		return;
+	//if(glGetError() != GL_NO_ERROR)
+	//	return;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

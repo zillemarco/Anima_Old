@@ -13,6 +13,9 @@ AnimaShaderData::AnimaShaderData(const AnimaString& name)
 
 	_arraySize = 0;
 	_type = NONE;
+	_offset = -1;
+	_arrayStride = -1;
+	_matrixStride = -1;
 
 	DivideName();
 }
@@ -24,6 +27,10 @@ AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
 	_arraySize = src._arraySize;
 	_nameParts = src._nameParts;
 	_type = src._type;
+
+	_offset = src._offset;
+	_arrayStride = src._arrayStride;
+	_matrixStride = src._matrixStride;
 }
 
 AnimaShaderData::AnimaShaderData(AnimaShaderData&& src)
@@ -33,6 +40,10 @@ AnimaShaderData::AnimaShaderData(AnimaShaderData&& src)
 	_arraySize = src._arraySize;
 	_nameParts = src._nameParts;
 	_type = src._type;
+
+	_offset = src._offset;
+	_arrayStride = src._arrayStride;
+	_matrixStride = src._matrixStride;
 }
 
 AnimaShaderData::~AnimaShaderData()
@@ -49,6 +60,10 @@ AnimaShaderData& AnimaShaderData::operator=(const AnimaShaderData& src)
 		_arraySize = src._arraySize;
 		_nameParts = src._nameParts;
 		_type = src._type;
+
+		_offset = src._offset;
+		_arrayStride = src._arrayStride;
+		_matrixStride = src._matrixStride;
 	}
 
 	return *this;
@@ -64,6 +79,10 @@ AnimaShaderData& AnimaShaderData::operator=(AnimaShaderData&& src)
 		_arraySize = src._arraySize;
 		_nameParts = src._nameParts;
 		_type = src._type;
+
+		_offset = src._offset;
+		_arrayStride = src._arrayStride;
+		_matrixStride = src._matrixStride;
 	}
 
 	return *this;
@@ -90,7 +109,7 @@ void AnimaShaderData::SetName(const AnimaString& name)
 	DivideName();
 }
 
-void AnimaShaderData::FindLocation(AnimaShaderProgram* program)
+void AnimaShaderData::Analize(AnimaShaderProgram* program)
 {
 	if (program == nullptr)
 		return;

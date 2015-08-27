@@ -77,11 +77,13 @@ public:
 
 	AnimaFrustum* GetFrustum();
 
-	virtual void UpdateMeshTransformation(AnimaTransformation* meshTransformation) = 0;
 	virtual void UpdateCullFace(AnimaCamera* activeCamera) = 0;
-
+	
 	virtual const char* GetShaderName() = 0;
 	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
+
+protected:
+	virtual void UpdateLightMeshMatrix();
 
 protected:
 	AnimaFrustum _frustum;
@@ -105,12 +107,14 @@ public:
 	
 	void ComputeLightMatrix(AnimaCamera* activeCamera) override;
 
-	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
 	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
+
+protected:
+	void UpdateLightMeshMatrix() override;
 };
 
 //----------------------------------------------------------------
@@ -134,12 +138,16 @@ public:
 	AFloat GetExponentAttenuation() override;
 	AFloat GetRange() override;
 	
-	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
 	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
+
+	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
+
+protected:
+	void UpdateLightMeshMatrix() override;
 };
 
 //----------------------------------------------------------------
@@ -159,8 +167,7 @@ public:
 
 	AnimaVertex3f GetDirection() override;
 	AFloat GetCutoff() override;
-
-	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
+	
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
 	const char* GetShaderPrefix() override;
@@ -169,6 +176,9 @@ public:
 	
 protected:
 	void UpdateConeRotation();
+
+protected:
+	void UpdateLightMeshMatrix() override;
 	
 protected:
 	AnimaVertex3f _coneRotation;
@@ -194,8 +204,10 @@ public:
 	void SetGroundColor(AFloat r, AFloat g, AFloat b);
 	AnimaColor3f GetGroundColor();
 
+protected:
+	void UpdateLightMeshMatrix() override;
+
 public:
-	void UpdateMeshTransformation(AnimaTransformation* meshTransformation) override;
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
 	const char* GetShaderPrefix() override;

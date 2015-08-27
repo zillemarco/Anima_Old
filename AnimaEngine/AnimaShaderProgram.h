@@ -110,6 +110,12 @@ public:
 	AnimaShaderGroupData* GetShaderDynamicGroupData(const AInt& index);
 	AnimaShaderGroupData* GetShaderDynamicGroupData(const AnimaString& name);
 
+	void SetSupportsInstance(bool supports) { _supportsInstance = supports; }
+	bool CanSupportInstance() { return _supportsInstance; }
+
+	void SetMaxInstances(AUint maxInstances) { _maxInstances = maxInstances; }
+	AUint GetMaxInstances() { return _maxInstances; }
+
 private:
 	void UpdateDataLookup();
 	
@@ -123,8 +129,11 @@ private:
 	AnimaMappedArray<AnimaShaderGroupData> _staticGroupData;
 	AnimaMappedArray<AnimaShaderGroupData> _dynamicGroupData;
 
-	AInt			_id;
-	bool			_linked;
+	AInt _id;
+	bool _linked;
+
+	bool _supportsInstance;
+	AUint _maxInstances;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaInputInfo, AnimaStringHasher> _inputs;

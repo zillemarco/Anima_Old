@@ -21,6 +21,9 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* 
 	_linked = false;
 
 	_shadersManager = shadersManager;
+
+	_supportsInstance = false;
+	_maxInstances = 1;
 }
 
 AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
@@ -37,6 +40,9 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_staticGroupData = src._staticGroupData;
 	_dynamicGroupData = src._dynamicGroupData;
 
+	_supportsInstance = src._supportsInstance;
+	_maxInstances = src._maxInstances;
+
 	SetShaders(src._shaders, src._shadersCount);
 }
 
@@ -51,6 +57,9 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	_data = src._data;
 	_staticGroupData = src._staticGroupData;
 	_dynamicGroupData = src._dynamicGroupData;
+
+	_supportsInstance = src._supportsInstance;
+	_maxInstances = src._maxInstances;
 
 	src._shaders = nullptr;
 	src._shadersCount = 0;
@@ -84,6 +93,9 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 		_staticGroupData = src._staticGroupData;
 		_dynamicGroupData = src._dynamicGroupData;
 
+		_supportsInstance = src._supportsInstance;
+		_maxInstances = src._maxInstances;
+
 		_id = src._id;
 		_linked = src._linked;
 	}
@@ -103,6 +115,9 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_data = src._data;
 		_staticGroupData = src._staticGroupData;
 		_dynamicGroupData = src._dynamicGroupData;
+
+		_supportsInstance = src._supportsInstance;
+		_maxInstances = src._maxInstances;
 
 		_id = src._id;
 		_linked = src._linked;
@@ -590,7 +605,7 @@ void AnimaShaderProgram::UpdateDataLookup()
 	AInt count = _data.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
-		_data[i].FindLocation(this);
+		_data[i].Analize(this);
 	}
 
 	AInt bindingPoint = 0;
@@ -598,17 +613,17 @@ void AnimaShaderProgram::UpdateDataLookup()
 	count = _dynamicGroupData.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
+		_dynamicGroupData[i].Analize(this);
 		_dynamicGroupData[i].Create();
-		_dynamicGroupData[i].FindLocation(this);
-		_dynamicGroupData[i].SetBindingPoint(bindingPoint++);
+		_dynamicGroupData[i].SetBindingPoint(this, bindingPoint++);
 	}
 
 	count = _staticGroupData.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
+		_staticGroupData[i].Analize(this);
 		_staticGroupData[i].Create();
-		_staticGroupData[i].FindLocation(this);
-		_staticGroupData[i].SetBindingPoint(bindingPoint++);
+		_staticGroupData[i].SetBindingPoint(this, bindingPoint++);
 	}
 }
 

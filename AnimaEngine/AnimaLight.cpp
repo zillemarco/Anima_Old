@@ -31,21 +31,8 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaLight);
 
-	//AnimaTexture* texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "ShadowMap", 1024, 1024, nullptr, 0);
-	//texture->SetTextureTarget(TEXTURE_TARGET_2D);
-	//texture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
-	//texture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
-	//texture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
-	//texture->SetFormat(TEXTURE_FORMAT_DEPTH);
-	//texture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
-	//texture->SetClampS(TEXTURE_CLAMP_TO_BORDER);
-	//texture->SetClampT(TEXTURE_CLAMP_TO_BORDER);
-	//texture->SetClampR(TEXTURE_CLAMP_TO_BORDER);
-	//texture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
-
-	//AnimaSceneObject::SetTexture("ShadowMap", texture);	
-
 	ComputeLightMatrix(nullptr);
+	UpdateLightMeshMatrix();
 
 	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
 	AnimaSceneObject::SetFloat("Intensity", 1.0f);
@@ -55,42 +42,42 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 AnimaLight::AnimaLight(const AnimaLight& src)
 	: AnimaSceneObject(src)
 {
+	UpdateLightMeshMatrix();
 }
 
 AnimaLight::AnimaLight(AnimaLight&& src)
 	: AnimaSceneObject(src)
 {
+	UpdateLightMeshMatrix();
 }
 
 AnimaLight::~AnimaLight()
 {
-	//AnimaTexture* shadowMap = AnimaSceneObject::GetTexture("ShadowMap");
-	//if (shadowMap != nullptr)
-	//{
-	//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, shadowMap);
-	//	shadowMap = nullptr;
-	//}
-
-	//AnimaTexture* tempShadowMap = AnimaSceneObject::GetTexture("TempShadowMap");
-	//if (tempShadowMap != nullptr)
-	//{
-	//	AnimaAllocatorNamespace::DeallocateObject(*_allocator, tempShadowMap);
-	//	tempShadowMap = nullptr;
-	//}
 }
 
 AnimaLight& AnimaLight::operator=(const AnimaLight& src)
 {
 	if (this != &src)
+	{
 		AnimaSceneObject::operator=(src);
+		UpdateLightMeshMatrix();
+	}
 	return *this;
 }
 
 AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 {
 	if (this != &src)
+	{
 		AnimaSceneObject::operator=(src);
+		UpdateLightMeshMatrix();
+	}
 	return *this;
+}
+
+void AnimaLight::UpdateLightMeshMatrix()
+{
+	AnimaLight::SetMatrix("LightMeshMatrix", AnimaMatrix());
 }
 
 void AnimaLight::SetColor(const AnimaColor3f& color)
@@ -189,16 +176,6 @@ AFloat AnimaLight::GetCutoff()
 	return 0.0f;
 }
 
-//AnimaTexture* AnimaLight::GetShadowTexture()
-//{
-//	return AnimaSceneObject::GetTexture("ShadowMap");
-//}
-//
-//AnimaTexture* AnimaLight::GetTempShadowTexture()
-//{
-//	return AnimaSceneObject::GetTexture("TempShadowMap");
-//}
-
 AnimaMatrix AnimaLight::GetViewMatrix()
 {
 	return AnimaSceneObject::GetMatrix("ViewMatrix");
@@ -237,12 +214,18 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	AnimaLight::SetVector("ShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
 	AnimaLight::SetBoolean("CastShadows", true);
-	
+
 	ComputeLightMatrix(nullptr);
+	UpdateLightMeshMatrix();
 }
 
 AnimaDirectionalLight::~AnimaDirectionalLight()
 {
+}
+
+void AnimaDirectionalLight::UpdateLightMeshMatrix()
+{
+	AnimaLight::SetMatrix("LightMeshMatrix", AnimaMatrix::MakeRotationDeg(1.0f, 0.0, 0.0, 90.0));
 }
 
 void AnimaDirectionalLight::SetDirection(const AnimaVertex3f& direction)
@@ -314,13 +297,6 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	_frustum.ComputeFrustum(projectionViewMatrix);
 }
 
-void AnimaDirectionalLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
-{
-	meshTransformation->SetRotationDeg(90.0f, 0.0f, 0.0f);
-	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
-	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
-}
-
 void AnimaDirectionalLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
 }
@@ -355,10 +331,20 @@ AnimaPointLight::AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsM
 	AnimaSceneObject::SetFloat("LinearAttenuation", 0.0f);
 	AnimaSceneObject::SetFloat("ExponentAttenuation", 1.0f);
 	AnimaSceneObject::SetFloat("Range", 20.0f);
+
+	UpdateLightMeshMatrix();
 }
 
 AnimaPointLight::~AnimaPointLight()
 {
+}
+
+void AnimaPointLight::UpdateLightMeshMatrix()
+{
+	AFloat range = GetRange();
+	AnimaVertex3f position = GetPosition();
+
+	AnimaSceneObject::SetMatrix("LightMeshMatrix", AnimaMatrix::MakeTranslation(position) * AnimaMatrix::MakeScale(range, range, range, 1.0));
 }
 
 void AnimaPointLight::SetConstantAttenuation(AFloat attenuation)
@@ -379,6 +365,13 @@ void AnimaPointLight::SetExponentAttenuation(AFloat attenuation)
 void AnimaPointLight::SetRange(AFloat range)
 {
 	AnimaSceneObject::SetFloat("Range", range);
+	UpdateLightMeshMatrix();
+}
+
+void AnimaPointLight::SetPosition(AFloat x, AFloat y, AFloat z)
+{
+	AnimaSceneObject::SetPosition(x, y, z);
+	UpdateLightMeshMatrix();
 }
 
 AFloat AnimaPointLight::GetConstantAttenuation()
@@ -399,16 +392,6 @@ AFloat AnimaPointLight::GetExponentAttenuation()
 AFloat AnimaPointLight::GetRange()
 {
 	return AnimaSceneObject::GetFloat("Range");
-}
-
-void AnimaPointLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
-{
-	AFloat range = GetRange();
-	AnimaVertex3f position = GetPosition();
-
-	meshTransformation->SetRotationDeg(0.0f, 0.0f, 0.0f);
-	meshTransformation->SetScale(range, range, range);
-	meshTransformation->SetTranslation(position);
 }
 
 void AnimaPointLight::UpdateCullFace(AnimaCamera* activeCamera)
@@ -454,6 +437,17 @@ AnimaSpotLight::~AnimaSpotLight()
 {
 }
 
+void AnimaSpotLight::UpdateLightMeshMatrix()
+{
+	AFloat range = GetRange();
+	AFloat raggio = range * tanf(acosf(GetCutoff()) / 2.0f);
+	AnimaVertex3f position = GetPosition();
+
+	AnimaSceneObject::SetMatrix("LightMeshMatrix",	AnimaMatrix::MakeTranslation(position) * 
+													(AnimaMatrix::MakeRotationZRad(_coneRotation.x) * (AnimaMatrix::MakeRotationYRad(_coneRotation.y) * AnimaMatrix::MakeRotationXRad(_coneRotation.x))) * 
+													AnimaMatrix::MakeScale(raggio, range, raggio, 1.0));
+}
+
 void AnimaSpotLight::SetDirection(const AnimaVertex3f& direction)
 {
 	AnimaSceneObject::SetVector("Direction", direction.Normalized());
@@ -479,16 +473,6 @@ AnimaVertex3f AnimaSpotLight::GetDirection()
 AFloat AnimaSpotLight::GetCutoff()
 {
 	return AnimaSceneObject::GetFloat("Cutoff");
-}
-
-void AnimaSpotLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
-{
-	AFloat range = GetRange();
-	AFloat raggio = range * tanf(acosf(GetCutoff()) / 2.0f);
-	
-	meshTransformation->SetRotation(_coneRotation);
-	meshTransformation->SetScale(raggio, range, raggio);
-	meshTransformation->SetTranslation(GetPosition());
 }
 
 void AnimaSpotLight::UpdateCullFace(AnimaCamera* activeCamera)
@@ -523,6 +507,8 @@ void AnimaSpotLight::UpdateConeRotation()
 	m += vx + (vx2 * ((1 - c) / s));
 	
 	_coneRotation = m.GetRotationAxes();
+
+	UpdateLightMeshMatrix();
 }
 
 const char* AnimaSpotLight::GetShaderPrefix()
@@ -555,10 +541,17 @@ AnimaHemisphereLight::AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataG
 
 	AnimaSceneObject::SetColor("SkyColor", AnimaColor3f(1.0f, 1.0f, 1.0f));
 	AnimaSceneObject::SetColor("GroundColor", AnimaColor3f(0.0f, 0.0f, 0.0f));
+
+	UpdateLightMeshMatrix();
 }
 
 AnimaHemisphereLight::~AnimaHemisphereLight()
 {
+}
+
+void AnimaHemisphereLight::UpdateLightMeshMatrix()
+{
+	AnimaSceneObject::SetMatrix("LightMeshMatrix", AnimaMatrix::MakeRotationDeg(1.0f, 0.0, 0.0, 90.0));
 }
 
 void AnimaHemisphereLight::SetSkyColor(const AnimaColor3f& color)
@@ -589,13 +582,6 @@ void AnimaHemisphereLight::SetGroundColor(AFloat r, AFloat g, AFloat b)
 AnimaColor3f AnimaHemisphereLight::GetGroundColor()
 {
 	return AnimaSceneObject::GetColor3f("GroundColor");
-}
-
-void AnimaHemisphereLight::UpdateMeshTransformation(AnimaTransformation* meshTransformation)
-{
-	meshTransformation->SetRotationDeg(90.0f, 0.0f, 0.0f);
-	meshTransformation->SetScale(1.0f, 1.0f, 1.0f);
-	meshTransformation->SetTranslation(0.0f, 0.0f, 0.0f);
 }
 
 void AnimaHemisphereLight::UpdateCullFace(AnimaCamera* activeCamera)

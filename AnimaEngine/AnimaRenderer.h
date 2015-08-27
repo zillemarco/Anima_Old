@@ -60,10 +60,23 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 //	AnimaMatrix					_modelMatrix;
 //};
 
-struct AnimaRendererProgramInstances
+struct AnimaRendererMaterialInstances
+{
+	AnimaMaterial* _material;
+	AnimaArray<AnimaMeshInstance*> _instances;
+};
+
+struct AnimaRendererMeshInstances
+{
+	AnimaMesh* _mesh;
+	AnimaArray<AnimaMeshInstance*> _instances;
+};
+
+struct AnimaRendererProgramData
 {
 	AnimaShaderProgram* _program;
-	AnimaArray<AnimaMeshInstance*> _instances;
+	AnimaArray<AnimaRendererMaterialInstances> _materials;	/*!< Usato se il programma NON supporta le istanze */
+	AnimaArray<AnimaRendererMeshInstances> _meshes;			/*!< Usato se il programma supporta le istanze */
 };
 
 class AnimaEngine;
@@ -117,13 +130,15 @@ protected:
 	void BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes, AnimaCamera* camera);
 	AInt FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances, AnimaShaderProgram* program);
 
-	void BuildProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera);
-	AInt FindProgramInstances(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaShaderProgram* program);
+	void BuildProgramsData(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
+	AInt FindProgramData(AnimaArray<AnimaRendererProgramData>* programs, AnimaShaderProgram* program);
 
-	void SetupProgramInstancesStaticBuffers(AnimaArray<AnimaRendererProgramInstances>* programs, AnimaCamera* camera);
+	AInt FindMaterialInstances(AnimaArray<AnimaRendererMaterialInstances>* materials, AnimaMaterial* material);
+	AInt FindMeshInstances(AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaMesh* mesh);
 
-	void BuildStaticBuffers(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes);
-		
+	void SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
+	void SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaCamera* camera);
+
 protected:
 	static void PreparePass(AnimaRenderer* renderer);
 	static void LightPass(AnimaRenderer* renderer);
