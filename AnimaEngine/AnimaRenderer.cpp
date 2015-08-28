@@ -1195,6 +1195,117 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 	}
 }
 
+void AnimaRenderer::BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>* meshes)
+{
+	if (meshes == nullptr || _scene == nullptr)
+		return;
+
+	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+
+	AInt meshesCount = meshesManager->GetMeshesCount();
+	for (AInt i = 0; i < meshesCount; i++)
+	{
+		AnimaMesh* mesh = meshesManager->GetMesh(i);
+
+		AInt instancesCount = mesh->GetInstancesCount();
+		for (AInt j = 0; j < instancesCount; j++)
+		{
+			AnimaMeshInstance* instance = mesh->GetInstance(j);
+			AnimaMesh* mesh = instance->GetMesh();
+
+			AInt meshInstancesIndex = FindMeshInstances(meshes, mesh);
+			if (meshInstancesIndex >= 0)
+			{
+				AnimaRendererMeshInstances* meshInstances = &meshes->at(meshInstancesIndex);
+				meshInstances->_instances.push_back(instance);
+			}
+			else
+			{
+				AnimaRendererMeshInstances meshInstances;
+				meshInstances._mesh = mesh;
+				meshInstances._instances.push_back(instance);
+
+				meshes->push_back(meshInstances);
+			}
+		}
+	}
+}
+
+void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaLight* light)
+{
+	if (program->CanSupportInstance())
+		return;
+
+	AInt count = program->GetShaderStaticGroupDataCount();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
+		AnimaString groupDataName = groupData->GetName();
+
+		groupData->BindForUpdate();
+
+		if (groupDataName == "MOD")
+		{
+			AInt instancesCount = 0;
+
+			for (auto& meshInstances : (*meshes))
+				instancesCount += meshInstances._instances.size();
+
+			if (instancesCount <= 0)
+				continue;
+
+			groupData->SetBufferLength(instancesCount);
+
+			AInt instanceOffset = 0;
+			for (auto& meshInstances : (*meshes))
+			{
+				for (auto& instance : meshInstances._instances)
+				{
+					groupData->UpdateValue(instance, this, program, instanceOffset++);
+				}
+			}
+		}
+		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+		{
+			ANIMA_FRAME_PUSH("light update");
+			groupData->UpdateValue(light, this, program, 0);
+			ANIMA_FRAME_POP();
+		}
+	}
+}
+
+void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaLight* light)
+{
+	AInt count = program->GetShaderStaticGroupDataCount();
+	for (AInt i = 0; i < count; i++)
+	{
+		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
+		AnimaString groupDataName = groupData->GetName();
+
+		ANIMA_FRAME_PUSH("bind for update");
+		groupData->BindForUpdate();
+		ANIMA_FRAME_POP();
+
+		if (groupDataName == "MOD")
+		{
+			ANIMA_FRAME_PUSH("model update");
+			AInt instancesCount = meshInstances->_instances.size();
+			for (AInt j = 0; j < instancesCount; j++)
+			{
+				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+				groupData->UpdateValue(instance, this, program, j);
+			}
+			ANIMA_FRAME_POP();
+		}
+		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+		{
+			ANIMA_FRAME_PUSH("light update");
+			groupData->UpdateValue(light, this, program, 0);
+			ANIMA_FRAME_POP();
+		}
+	}
+}
+
 void AnimaRenderer::UpdateShadowMap(AnimaLight* light)
 {
 	if(light->IsOfClass(ANIMA_CLASS_NAME(AnimaDirectionalLight)))
@@ -1218,34 +1329,112 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
+
+	ANIMA_FRAME_PUSH("Build data");
+	AnimaArray<AnimaRendererMeshInstances> meshInstances;
+	BuildShadowMapMeshes(&meshInstances);
+	SetupShadowMapStaticBuffers(program, &meshInstances, light);
+	ANIMA_FRAME_POP();
 	
-	program->Use();
-	program->UpdateSceneObjectProperties(light, this);
-	program->UpdateRenderingManagerProperies(this);
-	
-	AInt nMeshes = meshesManager->GetMeshesCount();
-	for (AInt j = 0; j < nMeshes; j++)
+	bool supportsInstance = program->CanSupportInstance();
+
+	AnimaArray<AnimaShaderGroupData*> meshDataGroups;
+	AnimaArray<AnimaShaderGroupData*> lightDataGroups;
+
+	AInt staticGroupDataCount = program->GetShaderStaticGroupDataCount();
+	for (AInt i = 0; i < staticGroupDataCount; i++)
 	{
-		DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
-		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-		//
-		//	glCullFace(GL_FRONT);
-		//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
-		//	glCullFace(GL_BACK);
-		//
-		//	AInt meshCount = innerModel->GetMeshesCount();
-		//	for (AInt i = 0; i < meshCount; i++)
-		//	{
-		//		glCullFace(GL_FRONT);
-		//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-		//		glCullFace(GL_BACK);
-		//	}
-		//
-		//	AInt childrenCount = innerModel->GetChildrenCount();
-		//	for (AInt i = 0; i < childrenCount; i++)
-		//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
+		AnimaString groupDataName = groupData->GetName();
+
+		if (groupDataName == "MOD")
+			meshDataGroups.push_back(groupData);
+		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+			lightDataGroups.push_back(groupData);
 	}
+
+	program->Use();
+
+	ANIMA_FRAME_PUSH("Update normal uniforms");
+	program->UpdateRenderingManagerProperies(this);
+	program->UpdateSceneObjectProperties(light, this);
+	ANIMA_FRAME_POP();
+
+	if (supportsInstance)
+	{
+		for (auto& programMesh : meshInstances)
+		{
+			ANIMA_FRAME_PUSH("SetupShadowMapInstancedStaticBuffers");
+			SetupShadowMapInstancedStaticBuffers(program, &programMesh, light);
+			ANIMA_FRAME_POP();
+			
+			ANIMA_FRAME_PUSH("Enable UBO");
+			for (auto& group : meshDataGroups)
+				group->Enable();
+			for (auto& group : lightDataGroups)
+				group->Enable();
+			ANIMA_FRAME_POP();
+
+			AnimaMesh* mesh = programMesh._mesh;
+			if (mesh->NeedsBuffersUpdate())
+				mesh->UpdateBuffers();
+
+			ANIMA_FRAME_PUSH("Draw");
+			glBindVertexArray(mesh->GetVertexArrayObject());
+			glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+			ANIMA_FRAME_POP();
+		}
+	}
+	else
+	{
+		AInt instancesOffset = 0;
+
+		for (auto& programMesh : meshInstances)
+		{
+			for (auto& instance : programMesh._instances)
+			{
+				AnimaMesh* mesh = instance->GetMesh();
+				if (mesh->NeedsBuffersUpdate())
+					mesh->UpdateBuffers();
+
+				for (auto& group : meshDataGroups)
+					group->EnableValue(instancesOffset);
+				for (auto& group : lightDataGroups)
+					group->Enable();
+
+				program->UpdateSceneObjectProperties(instance, this);
+
+				glBindVertexArray(mesh->GetVertexArrayObject());
+				glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+
+				instancesOffset++;
+			}
+		}
+	}
+	
+	//AInt nMeshes = meshesManager->GetMeshesCount();
+	//for (AInt j = 0; j < nMeshes; j++)
+	//{
+	//	DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
+	//	//	AnimaMesh* innerModel = modelsManager->GetModel(j);
+	//	//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+	//	//
+	//	//	glCullFace(GL_FRONT);
+	//	//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+	//	//	glCullFace(GL_BACK);
+	//	//
+	//	//	AInt meshCount = innerModel->GetMeshesCount();
+	//	//	for (AInt i = 0; i < meshCount; i++)
+	//	//	{
+	//	//		glCullFace(GL_FRONT);
+	//	//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+	//	//		glCullFace(GL_BACK);
+	//	//	}
+	//	//
+	//	//	AInt childrenCount = innerModel->GetChildrenCount();
+	//	//	for (AInt i = 0; i < childrenCount; i++)
+	//	//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+	//}
 
 	ANIMA_FRAME_POP();
 }
@@ -1846,7 +2035,7 @@ bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const Anim
 	if (!combineProgram->Link())
 		return false;
 
-	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map.asp");
+	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map-inst.asp");
 	if (!directionalLightShadowMapProgram->Link())
 		return false;
 

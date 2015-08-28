@@ -130,6 +130,7 @@ protected:
 	void BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes, AnimaCamera* camera);
 	AInt FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances, AnimaShaderProgram* program);
 
+	// Funzioni usate dal prepare pass
 	void BuildProgramsData(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
 	AInt FindProgramData(AnimaArray<AnimaRendererProgramData>* programs, AnimaShaderProgram* program);
 
@@ -138,6 +139,12 @@ protected:
 
 	void SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
 	void SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaCamera* camera);
+
+	// Funzioni usate da update shadow map pass
+	void BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>* meshes);
+
+	void SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaLight* light);
+	void SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaLight* light);
 
 protected:
 	static void PreparePass(AnimaRenderer* renderer);

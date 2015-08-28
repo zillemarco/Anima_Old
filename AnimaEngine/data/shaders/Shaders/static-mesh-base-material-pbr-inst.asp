@@ -2,7 +2,7 @@
 <AnimaShaderProgram>
 	<Name>deferred-prepare</Name>
 	<SupportsInstance>True</SupportsInstance>
-	<MaxInstances>5</MaxInstances>
+	<MaxInstances>20</MaxInstances>
 	<Shaders>
 		<Shader name="static-mesh-vs-inst" />
 		<Shader name="base-material-pbr-fs-inst" />

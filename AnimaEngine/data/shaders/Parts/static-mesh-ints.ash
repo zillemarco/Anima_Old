@@ -12,8 +12,8 @@
 			<GroupsData>
 				<Group name="MOD" dynamic="false" supportsInstance="true">
 					<Datas>
-						<Data name="AModelMatrix" type="MATRIX4x4_ARRAY" size="5"/>
-						<Data name="ANormalMatrix" type="MATRIX4x4_ARRAY" size="5"/>
+						<Data name="AModelMatrix" type="MATRIX4x4_ARRAY" size="20"/>
+						<Data name="ANormalMatrix" type="MATRIX4x4_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -31,8 +31,8 @@
 
 				layout(std140) uniform MOD
 				{
-					mat4 AModelMatrix[5];
-					mat4 ANormalMatrix[5];
+					mat4 AModelMatrix[20];
+					mat4 ANormalMatrix[20];
 				};
 
 				out vec2 frag_textureCoord;

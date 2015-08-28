@@ -9,11 +9,11 @@
 			<GroupsData>
 				<Group name="MAT" dynamic="false" supportsInstance="true">
 					<Datas>
-						<Data name="Albedo" type="FLOAT4_ARRAY" size="5"/>
-						<Data name="Specular" type="FLOAT4_ARRAY" size="5"/>
-						<Data name="Roughness" type="FLOAT_ARRAY" size="5"/>
-						<Data name="Metallic" type="FLOAT_ARRAY" size="5"/>
-						<Data name="ReflectionIntensity" type="FLOAT_ARRAY" size="5"/>
+						<Data name="Albedo" type="FLOAT4_ARRAY" size="20"/>
+						<Data name="Specular" type="FLOAT4_ARRAY" size="20"/>
+						<Data name="Roughness" type="FLOAT_ARRAY" size="20"/>
+						<Data name="Metallic" type="FLOAT_ARRAY" size="20"/>
+						<Data name="ReflectionIntensity" type="FLOAT_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -26,11 +26,11 @@
 
 				layout(std140) uniform MAT
 				{
-					vec4 Albedo[5];
-					vec4 Specular[5];
-					float Roughness[5];
-					float Metallic[5];
-					float ReflectionIntensity[5];
+					vec4 Albedo[20];
+					vec4 Specular[20];
+					float Roughness[20];
+					float Metallic[20];
+					float ReflectionIntensity[20];
 				};
 
 				out vec4 FragColor[4];

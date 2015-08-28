@@ -292,6 +292,8 @@ bool InitEngine()
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
 	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
 	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+
+	int numInstances = 10;
 	
 	// Caricamento degli shader
 	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
@@ -320,54 +322,76 @@ bool InitEngine()
 
 	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);
 	
-	Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
-	Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
-	Anima::AnimaModelInstance* modelInstance3 = modelInstancesManager->CreateInstance("modelInstance-3", _model);
-	Anima::AnimaModelInstance* modelInstance4 = modelInstancesManager->CreateInstance("modelInstance-4", _model);
-	
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance1Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance2Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance3Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance4Meshes;
-	
-	modelInstance1->GetAllMeshes(&modelInstance1Meshes);
-	modelInstance2->GetAllMeshes(&modelInstance2Meshes);
-	modelInstance3->GetAllMeshes(&modelInstance3Meshes);
-	modelInstance4->GetAllMeshes(&modelInstance4Meshes);
+	float degOffset = 0.0f;
+	float span = M_PI * 2.0 / numInstances;
+
+	for (int i = 0; i < numInstances; i++)
+	{
+		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
+		Anima::AnimaModelInstance* modelInstance = modelInstancesManager->CreateInstance(name, _model);
+		Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+
+		modelInstance->GetAllMeshes(&modelInstanceMeshes);
+
+		for (int j = 0; j < modelInstanceMeshes.size(); j++)
+			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
+
+		modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * 40.0, 0, sin(degOffset) * 40.0);
+
+		modelInstance->GetTransformation()->RotateYDeg(180.0);
+		//modelInstance->GetTransformation()->RotateXDeg(-90.0);
+		//modelInstance->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+
+		degOffset += span;
+	}
+
+	//Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
+	//Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
+	//Anima::AnimaModelInstance* modelInstance3 = modelInstancesManager->CreateInstance("modelInstance-3", _model);
+	//Anima::AnimaModelInstance* modelInstance4 = modelInstancesManager->CreateInstance("modelInstance-4", _model);
+	//
+	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance1Meshes;
+	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance2Meshes;
+	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance3Meshes;
+	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance4Meshes;
+	//
+	//modelInstance1->GetAllMeshes(&modelInstance1Meshes);
+	//modelInstance2->GetAllMeshes(&modelInstance2Meshes);
+	//modelInstance3->GetAllMeshes(&modelInstance3Meshes);
+	//modelInstance4->GetAllMeshes(&modelInstance4Meshes);
+	//
+	//for (int i = 0; i < modelInstance1Meshes.size(); i++)
+	//	modelInstance1Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
+
+	//for (int i = 0; i < modelInstance2Meshes.size(); i++)
+	//	modelInstance2Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model2-material"));
+
+	//for (int i = 0; i < modelInstance3Meshes.size(); i++)
+	//	modelInstance3Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model3-material"));
+
+	//for (int i = 0; i < modelInstance4Meshes.size(); i++)
+	//	modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
+
+	//modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
+	//modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
+	//modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
+	//modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
+
+	//modelInstance1->GetTransformation()->RotateYDeg(180.0);
+	//modelInstance2->GetTransformation()->RotateYDeg(180.0);
+	//modelInstance3->GetTransformation()->RotateYDeg(180.0);
+	//modelInstance4->GetTransformation()->RotateYDeg(180.0);
+
+	////modelInstance1->GetTransformation()->RotateXDeg(-90.0);
+	////modelInstance2->GetTransformation()->RotateXDeg(-90.0);
+	////modelInstance3->GetTransformation()->RotateXDeg(-90.0);
+	////modelInstance4->GetTransformation()->RotateXDeg(-90.0);
+	////modelInstance1->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	////modelInstance2->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	////modelInstance3->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+	////modelInstance4->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
 
 	floorModelMesh->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	for (int i = 0; i < modelInstance1Meshes.size(); i++)
-		modelInstance1Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
-
-	for (int i = 0; i < modelInstance2Meshes.size(); i++)
-		modelInstance2Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model2-material"));
-
-	for (int i = 0; i < modelInstance3Meshes.size(); i++)
-		modelInstance3Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model3-material"));
-
-	for (int i = 0; i < modelInstance4Meshes.size(); i++)
-		modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
-
-	modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
-	modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
-	modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
-	modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
-
-	modelInstance1->GetTransformation()->RotateYDeg(180.0);
-	modelInstance2->GetTransformation()->RotateYDeg(180.0);
-	modelInstance3->GetTransformation()->RotateYDeg(180.0);
-	modelInstance4->GetTransformation()->RotateYDeg(180.0);
-
-	//modelInstance1->GetTransformation()->RotateXDeg(-90.0);
-	//modelInstance2->GetTransformation()->RotateXDeg(-90.0);
-	//modelInstance3->GetTransformation()->RotateXDeg(-90.0);
-	//modelInstance4->GetTransformation()->RotateXDeg(-90.0);
-	//modelInstance1->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	//modelInstance2->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	//modelInstance3->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	//modelInstance4->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-
 	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
 
 	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
