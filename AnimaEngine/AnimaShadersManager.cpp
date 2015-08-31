@@ -17,6 +17,9 @@ AnimaShadersManager::AnimaShadersManager(AnimaEngine* engine)
 {
 	_engine = engine;
 	_activeProgram = nullptr;
+
+	_defaultVertexShader = nullptr;
+	_defaultFragmentShader = nullptr;
 }
 
 AnimaShadersManager::~AnimaShadersManager()
@@ -213,7 +216,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 	AInt meshShadersCount = meshInstance != nullptr ? meshInstance->GetShadersCount() : 0;
 	AInt materialShadersCount = material != nullptr ? material->GetShadersCount() : 0;
 
-	if (meshShadersCount <= 0 || materialShadersCount <= 0)
+	if (meshShadersCount <= 0 && materialShadersCount <= 0)
 		return nullptr;
 	
 	AnimaString str;
@@ -234,11 +237,50 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 		program = CreateProgram(programName);
 		if (program)
 		{
+			bool vertexFound = false;
+			bool fragmentFound = false;
+
 			for (AInt ms = 0; ms < meshShadersCount; ms++)
-				program->AddShader(GetShaderFromName(meshInstance->GetShaderName(ms)));
+			{
+				AnimaShader* shader = GetShaderFromName(meshInstance->GetShaderName(ms));
+
+				if (shader->GetType() == FRAGMENT)
+					fragmentFound = true;
+				else if (shader->GetType() == VERTEX)
+					vertexFound = true;
+
+				program->AddShader(shader);
+			}
 
 			for (AInt ms = 0; ms < materialShadersCount; ms++)
-				program->AddShader(GetShaderFromName(material->GetShaderName(ms)));
+			{
+				AnimaShader* shader = GetShaderFromName(material->GetShaderName(ms));
+
+				if (shader->GetType() == FRAGMENT)
+					fragmentFound = true;
+				else if (shader->GetType() == VERTEX)
+					vertexFound = true;
+
+				program->AddShader(shader);
+			}
+
+			if (!vertexFound)
+			{
+				if (_defaultVertexShader == nullptr)
+					return nullptr;
+				else
+					program->AddShader(_defaultVertexShader);
+			}
+
+			if (!fragmentFound)
+			{
+				if (_defaultFragmentShader == nullptr)
+					return nullptr;
+				else
+					program->AddShader(_defaultFragmentShader);
+			}
+
+			program->SetSupportsInstance(true);
 		}
 	}
 

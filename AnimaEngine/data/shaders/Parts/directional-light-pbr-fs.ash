@@ -85,7 +85,7 @@
 					shadowCoord 		/= shadowCoord.w;
 					shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-					float shadowAmount 	= ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z);
+					float shadowAmount 	= 1.0;//ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z);
 
 					vec3 albedoColor 			= albedoData.xyz;
 					vec3 specularColor 			= specularData.xyz;

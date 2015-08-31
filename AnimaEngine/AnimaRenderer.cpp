@@ -989,6 +989,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				ANIMA_FRAME_PUSH("Update normal uniforms");
 				program->UpdateSceneObjectProperties(camera, renderer);
 				program->UpdateRenderingManagerProperies(renderer);
+				program->UpdateMappedValuesObjectProperties(programMesh._instances[0]->GetMaterial(), renderer);
 				ANIMA_FRAME_POP();
 
 				ANIMA_FRAME_PUSH("Enable UBO");
@@ -1001,7 +1002,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				AnimaMesh* mesh = programMesh._mesh;
 				if (mesh->NeedsBuffersUpdate())
 					mesh->UpdateBuffers();
-
+				
 				ANIMA_FRAME_PUSH("Draw");
 				glBindVertexArray(mesh->GetVertexArrayObject());
 				glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
@@ -2040,6 +2041,8 @@ bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const Anim
 		return false;
 
 	_defaultShaderProgram = prepareProgram;
+	shadersManager->SetDefaultFragmentShader(shadersManager->GetShaderFromName("base-material-pbr-fs-inst"));
+	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-mesh-vs-inst"));
 	
 	return true;
 }

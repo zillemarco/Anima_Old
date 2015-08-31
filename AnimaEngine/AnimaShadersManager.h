@@ -289,6 +289,9 @@ public:
 	 */
 	void AttachIncludes(AnimaShader* shader);
 
+	void SetDefaultVertexShader(AnimaShader* shader) { _defaultVertexShader = shader; }
+	void SetDefaultFragmentShader(AnimaShader* shader) { _defaultFragmentShader = shader; }
+
 private:
 	void ClearShaders();
 	void ClearPrograms();
@@ -302,6 +305,9 @@ private:
 	AnimaMappedArray<AnimaShader*> _shaders;			/*!< Mappa contenente tutti gli shader */
 	AnimaMappedArray<AnimaShaderProgram*> _programs;	/*!< Mappa contenente tutti i programmi */
 	AnimaMappedArray<AnimaShaderInclude*> _includes;	/*!< Mappa contenente tutti gli include possibili dei programmi */
+
+	AnimaShader* _defaultVertexShader;
+	AnimaShader* _defaultFragmentShader;
 
 	AnimaShaderProgram* _activeProgram;					/*!< Puntatore al programma attivo per il rendering */
 };

@@ -225,7 +225,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1600, 1200, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -290,10 +290,11 @@ bool InitEngine()
 	Anima::AnimaString shadersIncludesPath = "D:/Git/Anima/AnimaEngine/data/shaders/Includes";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 
-	int numInstances = 10;
+	int numInstances = 1;
+	Anima::AnimaString materialName = "legno";
 	
 	// Caricamento degli shader
 	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
@@ -324,6 +325,9 @@ bool InitEngine()
 	
 	float degOffset = 0.0f;
 	float span = M_PI * 2.0 / numInstances;
+	float raggio = 50.0;
+	//float scale = 5.0;
+	float scale = 20.0;
 
 	for (int i = 0; i < numInstances; i++)
 	{
@@ -334,13 +338,14 @@ bool InitEngine()
 		modelInstance->GetAllMeshes(&modelInstanceMeshes);
 
 		for (int j = 0; j < modelInstanceMeshes.size(); j++)
-			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
+			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName(materialName));
 
-		modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * 40.0, 0, sin(degOffset) * 40.0);
+		if (numInstances > 1)
+			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
 
-		modelInstance->GetTransformation()->RotateYDeg(180.0);
-		//modelInstance->GetTransformation()->RotateXDeg(-90.0);
-		//modelInstance->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
+		//modelInstance->GetTransformation()->RotateYDeg(180.0);
+		modelInstance->GetTransformation()->RotateXDeg(-90.0);
+		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
 
 		degOffset += span;
 	}
@@ -394,7 +399,7 @@ bool InitEngine()
 	floorModelMesh->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
 
-	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
+	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 		
 	_camera->LookAt(0.0, 40.0, 100.0, 0.0, 15.0, 0.0);
 	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
@@ -403,7 +408,12 @@ bool InitEngine()
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
 	directionalLight->SetDirection(-1.0, -1.0, -1.0);
 	directionalLight->SetColor(1.0, 1.0, 1.0);
-	directionalLight->SetIntensity(0.2);
+	directionalLight->SetIntensity(1.0);
+
+	Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
+	directionalLight->SetDirection(1.0, -1.0, 1.0);
+	directionalLight->SetColor(1.0, 1.0, 1.0);
+	directionalLight->SetIntensity(1.0);
 
 	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
 	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
