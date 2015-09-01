@@ -49,6 +49,8 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 
 	SetTexture("EnvironmentMap", environmentTexture);
 	SetTexture("IrradianceMap", irradianceTexture);
+
+	_programsBufferIndex = 0;
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
@@ -76,6 +78,8 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
 
 	_scene = src._scene;
 	_engine = src._engine;
+
+	_programsBufferIndex = 0;
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
@@ -102,6 +106,8 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
 
 	_scene = src._scene;
 	_engine = src._engine;
+
+	_programsBufferIndex = 0;
 }
 
 AnimaRenderer::~AnimaRenderer()
@@ -137,6 +143,8 @@ AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
 
 		_scene = src._scene;
 		_engine = src._engine;
+
+		_programsBufferIndex = 0;
 	}
 
 	return *this;
@@ -170,6 +178,8 @@ AnimaRenderer& AnimaRenderer::operator=(AnimaRenderer&& src)
 
 		_scene = src._scene;
 		_engine = src._engine;
+
+		_programsBufferIndex = 0;
 	}
 
 	return *this;
@@ -539,6 +549,8 @@ void AnimaRenderer::Render()
 {
 	for (auto func : _renderPassesFunction)
 		func(this);
+
+	_programsBufferIndex = (_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
 }
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
@@ -835,7 +847,7 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 			AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
 			AnimaString groupDataName = groupData->GetName();
 
-			groupData->BindForUpdate();
+			groupData->BindForUpdate(_programsBufferIndex);
 			
 			if (groupDataName == "MAT")
 			{
@@ -875,6 +887,8 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 			{
 				groupData->UpdateValue(camera, this, program, 0);
 			}
+
+			groupData->UnbindFromUpdate();
 		}
 	}
 }
@@ -888,7 +902,7 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 		AnimaString groupDataName = groupData->GetName();
 
 		ANIMA_FRAME_PUSH("bind for update");
-		groupData->BindForUpdate();
+		groupData->BindForUpdate(_programsBufferIndex);
 		ANIMA_FRAME_POP();
 
 		if (groupDataName == "MAT")
@@ -924,6 +938,10 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 			groupData->UpdateValue(camera, this, program, 0);
 			ANIMA_FRAME_POP();
 		}
+		
+		ANIMA_FRAME_PUSH("unbind from update");
+		groupData->UnbindFromUpdate();
+		ANIMA_FRAME_POP();
 	}
 }
 
@@ -994,19 +1012,21 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 				ANIMA_FRAME_PUSH("Enable UBO");
 				for (auto& group : materialDataGroups)
-					group->Enable();
+					group->Enable(renderer->_programsBufferIndex);
 				for (auto& group : meshDataGroups)
-					group->Enable();
+					group->Enable(renderer->_programsBufferIndex);
 				ANIMA_FRAME_POP();
 
 				AnimaMesh* mesh = programMesh._mesh;
 				if (mesh->NeedsBuffersUpdate())
 					mesh->UpdateBuffers();
-				
+
 				ANIMA_FRAME_PUSH("Draw");
 				glBindVertexArray(mesh->GetVertexArrayObject());
 				glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
 				ANIMA_FRAME_POP();
+
+				program->SyncBuffers(renderer->_programsBufferIndex);
 			}
 		}
 		else
@@ -1021,7 +1041,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 			for (auto& programMaterial : programData._materials)
 			{
 				for (auto& group : materialDataGroups)
-					group->EnableValue(materialsOffset);
+					group->EnableValue(materialsOffset, renderer->_programsBufferIndex);
 
 				for (auto& instance : programMaterial._instances)
 				{
@@ -1030,13 +1050,15 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 						mesh->UpdateBuffers();
 
 					for (auto& group : meshDataGroups)
-						group->EnableValue(instancesOffset);
+						group->EnableValue(instancesOffset, renderer->_programsBufferIndex);
 
 					program->UpdateMappedValuesObjectProperties(programMaterial._material, renderer);
 					program->UpdateSceneObjectProperties(instance, renderer);
 
 					glBindVertexArray(mesh->GetVertexArrayObject());
 					glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+
+					program->SyncBuffers(renderer->_programsBufferIndex);
 
 					instancesOffset++;
 				}
@@ -1110,10 +1132,10 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
-		
+
 		if(light->GetBoolean("CastShadows"))
 			UpdateDirectionalLightShadowMap(light);
-		
+
 		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
 		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 		glEnable(GL_BLEND);
@@ -1243,7 +1265,7 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
 		AnimaString groupDataName = groupData->GetName();
 
-		groupData->BindForUpdate();
+		groupData->BindForUpdate(_programsBufferIndex);
 
 		if (groupDataName == "MOD")
 		{
@@ -1272,6 +1294,8 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 			groupData->UpdateValue(light, this, program, 0);
 			ANIMA_FRAME_POP();
 		}
+
+		groupData->UnbindFromUpdate();
 	}
 }
 
@@ -1284,7 +1308,7 @@ void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* pro
 		AnimaString groupDataName = groupData->GetName();
 
 		ANIMA_FRAME_PUSH("bind for update");
-		groupData->BindForUpdate();
+		groupData->BindForUpdate(_programsBufferIndex);
 		ANIMA_FRAME_POP();
 
 		if (groupDataName == "MOD")
@@ -1304,6 +1328,10 @@ void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* pro
 			groupData->UpdateValue(light, this, program, 0);
 			ANIMA_FRAME_POP();
 		}
+
+		ANIMA_FRAME_PUSH("unbind from update");
+		groupData->UnbindFromUpdate();
+		ANIMA_FRAME_POP();
 	}
 }
 
@@ -1371,9 +1399,9 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			
 			ANIMA_FRAME_PUSH("Enable UBO");
 			for (auto& group : meshDataGroups)
-				group->Enable();
+				group->Enable(_programsBufferIndex);
 			for (auto& group : lightDataGroups)
-				group->Enable();
+				group->Enable(_programsBufferIndex);
 			ANIMA_FRAME_POP();
 
 			AnimaMesh* mesh = programMesh._mesh;
@@ -1384,6 +1412,8 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			glBindVertexArray(mesh->GetVertexArrayObject());
 			glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
 			ANIMA_FRAME_POP();
+
+			program->SyncBuffers(_programsBufferIndex);
 		}
 	}
 	else
@@ -1399,14 +1429,17 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 					mesh->UpdateBuffers();
 
 				for (auto& group : meshDataGroups)
-					group->EnableValue(instancesOffset);
+					group->EnableValue(instancesOffset, _programsBufferIndex);
+
 				for (auto& group : lightDataGroups)
-					group->Enable();
+					group->Enable(_programsBufferIndex);
 
 				program->UpdateSceneObjectProperties(instance, this);
 
 				glBindVertexArray(mesh->GetVertexArrayObject());
 				glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+
+				program->SyncBuffers(_programsBufferIndex);
 
 				instancesOffset++;
 			}

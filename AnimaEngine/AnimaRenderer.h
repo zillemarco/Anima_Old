@@ -228,6 +228,8 @@ protected:
 	AnimaArray<AnimaRenderPassFunc> _renderPassesFunction;
 
 	AnimaShaderProgram* _defaultShaderProgram;
+
+	AUint _programsBufferIndex;
 		
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaStringHasher>			_textureSlotsMap;

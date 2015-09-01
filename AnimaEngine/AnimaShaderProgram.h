@@ -116,6 +116,8 @@ public:
 	void SetMaxInstances(AUint maxInstances) { _maxInstances = maxInstances; }
 	AUint GetMaxInstances() { return _maxInstances; }
 
+	void SyncBuffers(AUint buffersIndex);
+
 private:
 	void UpdateDataLookup();
 	

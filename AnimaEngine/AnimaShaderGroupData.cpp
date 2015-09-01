@@ -6,19 +6,26 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+#define BUFFERS_UPDATE_TIMEOUT	100000000
+
+AUint AnimaShaderGroupData::s_maxBuffersCount = 5;
+
 AnimaShaderGroupData::AnimaShaderGroupData(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaShaderGroupData);
 
+	_ubos.resize(s_maxBuffersCount, 0);
+	_fences.resize(s_maxBuffersCount);
+
 	_created = false;
 	_groupLocation = -1;
-	_ubo = 0;
 	_bindingPoint = 0;
 	_bufferDataSize = 0;
 	_bufferLength = 1;
 	_needsResize = false;
 	_supportsInstance = false;
+	_updateDataBuffer = nullptr;
 }
 
 AnimaShaderGroupData::AnimaShaderGroupData(const AnimaShaderGroupData& src)
@@ -26,14 +33,17 @@ AnimaShaderGroupData::AnimaShaderGroupData(const AnimaShaderGroupData& src)
 {
 	_data = src._data;
 
+	_ubos.resize(s_maxBuffersCount, 0);
+	_fences.resize(s_maxBuffersCount);
+
 	_created = false;
 	_groupLocation = src._groupLocation;
 	_bindingPoint = src._bindingPoint;
 	_bufferDataSize = src._bufferDataSize;
 	_bufferLength = src._bufferLength;
-	_ubo = 0;
 	_needsResize = false;
 	_supportsInstance = src._supportsInstance;
+	_updateDataBuffer = nullptr;
 }
 
 AnimaShaderGroupData::AnimaShaderGroupData(AnimaShaderGroupData&& src)
@@ -41,14 +51,17 @@ AnimaShaderGroupData::AnimaShaderGroupData(AnimaShaderGroupData&& src)
 {
 	_data = src._data;
 
+	_ubos.resize(s_maxBuffersCount, 0);
+	_fences.resize(s_maxBuffersCount);
+
 	_created = false;
 	_groupLocation = src._groupLocation;
 	_bindingPoint = src._bindingPoint;
 	_bufferDataSize = src._bufferDataSize;
 	_bufferLength = src._bufferLength;
-	_ubo = 0;
 	_needsResize = false;
 	_supportsInstance = src._supportsInstance;
+	_updateDataBuffer = nullptr;
 }
 
 AnimaShaderGroupData::~AnimaShaderGroupData()
@@ -68,9 +81,12 @@ AnimaShaderGroupData& AnimaShaderGroupData::operator=(const AnimaShaderGroupData
 		_bindingPoint = src._bindingPoint;
 		_bufferDataSize = src._bufferDataSize;
 		_bufferLength = src._bufferLength;
-		_ubo = 0;
 		_needsResize = false;
 		_supportsInstance = src._supportsInstance;
+		_updateDataBuffer = nullptr;
+
+		_ubos.resize(s_maxBuffersCount, 0);
+		_fences.resize(s_maxBuffersCount);
 	}
 
 	return *this;
@@ -89,9 +105,12 @@ AnimaShaderGroupData& AnimaShaderGroupData::operator=(AnimaShaderGroupData&& src
 		_bindingPoint = src._bindingPoint;
 		_bufferDataSize = src._bufferDataSize;
 		_bufferLength = src._bufferLength;
-		_ubo = 0;
 		_needsResize = false;
 		_supportsInstance = src._supportsInstance;
+		_updateDataBuffer = nullptr;
+
+		_ubos.resize(s_maxBuffersCount, 0);
+		_fences.resize(s_maxBuffersCount);
 	}
 
 	return *this;
@@ -124,16 +143,19 @@ bool AnimaShaderGroupData::Create()
 	{
 		if (_needsResize)
 		{
-			// Attivo il buffer
-			glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
+			for (AUint i = 0; i < s_maxBuffersCount; i++)
+			{
+				// Attivo il buffer
+				glBindBuffer(GL_UNIFORM_BUFFER, _ubos[i]);
 
-			// Alloco la memoria del buffer
-			glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
+				// Alloco la memoria del buffer
+				glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
 
-			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-			if (glGetError() != GL_NO_ERROR)
-				return false;
+				if (glGetError() != GL_NO_ERROR)
+					return false;
+			}
 
 			_needsResize = false;
 		}
@@ -141,19 +163,24 @@ bool AnimaShaderGroupData::Create()
 		return true;
 	}
 
-	glGenBuffers(1, &_ubo);
+	glGenBuffers(s_maxBuffersCount, &_ubos[0]);
 
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
-	// Attivo il buffer
-	glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
+	for (AUint i = 0; i < s_maxBuffersCount; i++)
+	{
+		// Attivo il buffer
+		glBindBuffer(GL_UNIFORM_BUFFER, _ubos[i]);
 
-	// Alloco la memoria del buffer
-	glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
+		// Alloco la memoria del buffer
+		glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
 
-	if (glGetError() != GL_NO_ERROR)
-		return false;
+		_fences[i] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+	}
 
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	_created = true;
@@ -234,27 +261,60 @@ bool AnimaShaderGroupData::SetBindingPoint(AnimaShaderProgram* program, AUint bi
 
 	_bindingPoint = bindingPoint;
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, _bindingPoint, _ubo);
-	if (glGetError() != GL_NO_ERROR)
-		return false;
+	for (AUint i = 0; i < s_maxBuffersCount; i++)
+	{
+		glBindBufferBase(GL_UNIFORM_BUFFER, _bindingPoint, _ubos[i]);
+		if (glGetError() != GL_NO_ERROR)
+			return false;
 
-	glUniformBlockBinding(program->GetID(), _groupLocation, _bindingPoint);
-	if (glGetError() != GL_NO_ERROR)
-		return false;
+		glUniformBlockBinding(program->GetID(), _groupLocation, _bindingPoint);
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+	}
 
 	return true;
 }
 
-bool AnimaShaderGroupData::BindForUpdate() const
+#define MAP_BUFFERS
+
+bool AnimaShaderGroupData::BindForUpdate(AUint bufferIndex)
 {
 	if (!_created)
 		return false;
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, _bindingPoint, _ubo);
-	//if (glGetError() != GL_NO_ERROR)
-	//	return false;
+#if defined MAP_BUFFERS
+	AUint result = glClientWaitSync(_fences[bufferIndex], 0, BUFFERS_UPDATE_TIMEOUT);
+	if(result == GL_TIMEOUT_EXPIRED || result == GL_WAIT_FAILED)
+		return false;
+	glDeleteSync(_fences[bufferIndex]);
+#endif
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, _bindingPoint, _ubos[bufferIndex]);
+
+#if defined MAP_BUFFERS
+	//AUchar* buffer = (AUchar*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	_updateDataBuffer = (AUchar*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, _bufferDataSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+	if (_updateDataBuffer == nullptr)
+		return false;
+#endif
 
 	return true;
+}
+
+bool AnimaShaderGroupData::UnbindFromUpdate()
+{
+#if defined MAP_BUFFERS
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	_updateDataBuffer = nullptr;
+#endif
+	return true;
+}
+
+void AnimaShaderGroupData::SyncBuffers(AUint bufferIndex)
+{
+#if defined MAP_BUFFERS
+	_fences[bufferIndex] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+#endif
 }
 
 void AnimaShaderGroupData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset)
@@ -264,8 +324,6 @@ void AnimaShaderGroupData::UpdateValue(const AnimaMappedValues* object, AnimaRen
 	else
 		UpdateObjectValue(object, renderer, program, offset);
 }
-
-//#define MAP_BUFFERS
 
 void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset)
 {
@@ -278,9 +336,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 	AUint arraySize = 0;
 
 #if defined MAP_BUFFERS
-	//AUchar* buffer = (AUchar*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	AUchar* buffer = (AUchar*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, _bufferDataSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-	if (buffer == nullptr)
+	if (_updateDataBuffer == nullptr)
 		return;
 #endif
 	
@@ -298,7 +354,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 			AFloat val = object->GetFloat(propertyName);
 
 #if defined MAP_BUFFERS
-			memcpy(buffer + bufferOffset, &val, size);
+			memcpy(_updateDataBuffer + bufferOffset, &val, size);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, bufferOffset, size, &val);
 #endif
@@ -312,7 +368,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 		{
 			size = sizeof(AFloat) * 2;
 #if defined MAP_BUFFERS
-			memcpy(buffer + bufferOffset, object->GetVector2f(propertyName).vec, size);
+			memcpy(_updateDataBuffer + bufferOffset, object->GetVector2f(propertyName).vec, size);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, bufferOffset, size, object->GetVector2f(propertyName).vec);
 #endif
@@ -330,7 +386,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 
 			for (auto& vecVal : (*vectorData))
 			{
-				memcpy(buffer + bufferOffset + tmpOffset, vecVal->GetVector2f().vec, tmpSize);
+				memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal->GetVector2f().vec, tmpSize);
 				tmpOffset += tmpSize;
 			}
 #else
@@ -356,9 +412,9 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 			size = sizeof(AFloat) * 4;
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
-				memcpy(buffer + bufferOffset, object->GetColor3f(propertyName).vec, sizeof(AFloat) * 3);
+				memcpy(_updateDataBuffer + bufferOffset, object->GetColor3f(propertyName).vec, sizeof(AFloat) * 3);
 			else
-				memcpy(buffer + bufferOffset, object->GetVector3f(propertyName).vec, sizeof(AFloat) * 3);
+				memcpy(_updateDataBuffer + bufferOffset, object->GetVector3f(propertyName).vec, sizeof(AFloat) * 3);
 #else
 			AFloat val[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -384,9 +440,9 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 			for (auto& vecVal : (*vectorData))
 			{
 				if (object->HasColor(propertyName))
-					memcpy(buffer + bufferOffset + tmpOffset, vecVal->GetColor4f().vec, tmpSize);
+					memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal->GetColor4f().vec, tmpSize);
 				else
-					memcpy(buffer + bufferOffset + tmpOffset, vecVal->GetVector4f().vec, tmpSize);
+					memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal->GetVector4f().vec, tmpSize);
 				tmpOffset += tmpSize;
 			}
 #else
@@ -415,9 +471,9 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 			size = sizeof(AFloat) * 4;
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
-				memcpy(buffer + bufferOffset, object->GetColor4f(propertyName).vec, size);
+				memcpy(_updateDataBuffer + bufferOffset, object->GetColor4f(propertyName).vec, size);
 			else
-				memcpy(buffer + bufferOffset, object->GetVector4f(propertyName).vec, size);
+				memcpy(_updateDataBuffer + bufferOffset, object->GetVector4f(propertyName).vec, size);
 #else
 			if (object->HasColor(propertyName))
 				glBufferSubData(GL_UNIFORM_BUFFER, bufferOffset, size, object->GetColor4f(propertyName).vec);
@@ -439,9 +495,9 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 			for (auto& vecVal : (*vectorData))
 			{
 				if (object->HasColor(propertyName))
-					memcpy(buffer + bufferOffset + tmpOffset, vecVal->GetColor4f().vec, tmpSize);
+					memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal->GetColor4f().vec, tmpSize);
 				else
-					memcpy(buffer + bufferOffset + tmpOffset, vecVal->GetVector4f().vec, tmpSize);
+					memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal->GetVector4f().vec, tmpSize);
 				tmpOffset += tmpSize;
 			}
 #else
@@ -469,7 +525,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 		{
 			size = sizeof(AFloat) * 16;
 #if defined MAP_BUFFERS
-			memcpy(buffer + bufferOffset, object->GetMatrix(propertyName).m, size);
+			memcpy(_updateDataBuffer + bufferOffset, object->GetMatrix(propertyName).m, size);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, bufferOffset, size, object->GetMatrix(propertyName).m);
 #endif
@@ -487,7 +543,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 
 			for (auto& vecVal : (*vectorData))
 			{
-				memcpy(buffer + bufferOffset + tmpOffset, vecVal.m, tmpSize);
+				memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal.m, tmpSize);
 				tmpOffset += tmpSize;
 			}
 #else
@@ -512,7 +568,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 		{
 			size = sizeof(AFloat) * 16;
 #if defined MAP_BUFFERS
-			memcpy(buffer + bufferOffset, object->GetMatrix(propertyName).m, size);
+			memcpy(_updateDataBuffer + bufferOffset, object->GetMatrix(propertyName).m, size);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, bufferOffset, size, object->GetMatrix(propertyName).m);
 #endif
@@ -529,7 +585,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 
 			for (auto& vecVal : (*vectorData))
 			{
-				memcpy(buffer + bufferOffset + tmpOffset, vecVal.m, tmpSize);
+				memcpy(_updateDataBuffer + bufferOffset + tmpOffset, vecVal.m, tmpSize);
 				tmpOffset += tmpSize;
 			}
 #else
@@ -570,10 +626,6 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 
 		bufferOffset += size;
 	}
-
-#if defined MAP_BUFFERS
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-#endif
 }
 
 void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset)
@@ -585,9 +637,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 	AUint bufferOffset = 0;
 
 #if defined MAP_BUFFERS
-	//AUchar* buffer = (AUchar*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	AUchar* buffer = (AUchar*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, _bufferDataSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-	if (buffer == nullptr)
+	if (_updateDataBuffer == nullptr)
 		return;
 #endif
 
@@ -619,7 +669,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 			AFloat val = object->GetFloat(propertyName);
 
 #if defined MAP_BUFFERS
-			memcpy(buffer + dataOffset + bufferOffset, &val, singleDataSize);
+			memcpy(_updateDataBuffer + dataOffset + bufferOffset, &val, singleDataSize);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, dataOffset + bufferOffset, singleDataSize, &val);
 #endif
@@ -628,7 +678,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		case FLOAT2_ARRAY:
 		{
 #if defined MAP_BUFFERS
-			memcpy(buffer + dataOffset + bufferOffset, object->GetVector2f(propertyName).vec, singleDataSize);
+			memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetVector2f(propertyName).vec, singleDataSize);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, dataOffset + bufferOffset, singleDataSize, object->GetVector2f(propertyName).vec);
 #endif
@@ -638,9 +688,9 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		{
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
-				memcpy(buffer + dataOffset + bufferOffset, object->GetColor3f(propertyName).vec, sizeof(AFloat) * 3);
+				memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetColor3f(propertyName).vec, sizeof(AFloat) * 3);
 			else
-				memcpy(buffer + dataOffset + bufferOffset, object->GetVector3f(propertyName).vec, sizeof(AFloat) * 3);
+				memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetVector3f(propertyName).vec, sizeof(AFloat) * 3);
 #else
 			AFloat val[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -657,9 +707,9 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		{
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
-				memcpy(buffer + dataOffset + bufferOffset, object->GetColor4f(propertyName).vec, singleDataSize);
+				memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetColor4f(propertyName).vec, singleDataSize);
 			else
-				memcpy(buffer + dataOffset + bufferOffset, object->GetVector4f(propertyName).vec, singleDataSize);
+				memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetVector4f(propertyName).vec, singleDataSize);
 #else
 			if (object->HasColor(propertyName))
 				glBufferSubData(GL_UNIFORM_BUFFER, dataOffset + bufferOffset, singleDataSize, object->GetColor4f(propertyName).vec);
@@ -672,7 +722,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		case MATRIX3x3_ARRAY:
 		{
 #if defined MAP_BUFFERS
-			memcpy(buffer + dataOffset + bufferOffset, object->GetMatrix(propertyName).m, singleDataSize);
+			memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetMatrix(propertyName).m, singleDataSize);
 #else
 			glBufferSubData(GL_UNIFORM_BUFFER, dataOffset + bufferOffset, singleDataSize, object->GetMatrix(propertyName).m);
 #endif
@@ -682,10 +732,6 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		ANIMA_FRAME_POP();
 	}
 	ANIMA_FRAME_POP();
-
-#if defined MAP_BUFFERS
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-#endif
 }
 
 void AnimaShaderGroupData::UpdateValue(AnimaRenderer* renderer, const AnimaShaderProgram* program)
@@ -701,21 +747,21 @@ void AnimaShaderGroupData::SetBufferLength(AUint length)
 	}
 }
 
-void AnimaShaderGroupData::EnableValue(AUint offset)
+void AnimaShaderGroupData::EnableValue(AUint offset, AUint bufferIndex)
 {
 	if (!Create())
 		return;
 
-	glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-	glBindBufferRange(GL_UNIFORM_BUFFER, _bindingPoint, _ubo, _bufferDataSize * offset, _bufferDataSize);
+	glBindBuffer(GL_UNIFORM_BUFFER, _ubos[bufferIndex]);
+	glBindBufferRange(GL_UNIFORM_BUFFER, _bindingPoint, _ubos[bufferIndex], _bufferDataSize * offset, _bufferDataSize);
 }
-void AnimaShaderGroupData::Enable()
+void AnimaShaderGroupData::Enable(AUint bufferIndex)
 {
 	if (!Create())
 		return;
 
-	glBindBuffer(GL_UNIFORM_BUFFER, _ubo);
-	glBindBufferRange(GL_UNIFORM_BUFFER, _bindingPoint, _ubo, 0, _bufferDataSize * _bufferLength);
+	glBindBuffer(GL_UNIFORM_BUFFER, _ubos[bufferIndex]);
+	glBindBufferRange(GL_UNIFORM_BUFFER, _bindingPoint, _ubos[bufferIndex], 0, _bufferDataSize * _bufferLength);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

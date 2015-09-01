@@ -687,4 +687,15 @@ AnimaShaderGroupData* AnimaShaderProgram::GetShaderDynamicGroupData(const AnimaS
 	return &_dynamicGroupData[name];
 }
 
+void AnimaShaderProgram::SyncBuffers(AUint buffersIndex)
+{
+	AInt count = _dynamicGroupData.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_dynamicGroupData[i].SyncBuffers(buffersIndex);
+
+	count = _staticGroupData.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_staticGroupData[i].SyncBuffers(buffersIndex);
+}
+
 END_ANIMA_ENGINE_NAMESPACE
