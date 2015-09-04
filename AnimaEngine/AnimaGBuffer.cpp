@@ -247,19 +247,19 @@ bool AnimaGBuffer::Create()
 		return false;
 	}
 	
-	if (!hasDepth)
-	{
-		glGenRenderbuffers(1, &_depthRenderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
+	//if (!hasDepth)
+	//{
+	//	glGenRenderbuffers(1, &_depthRenderBuffer);
+	//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
+	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
 
-		if (glGetError() != GL_NO_ERROR)
-		{
-			_created = false;
-			return false;
-		}
-	}
+	//	if (glGetError() != GL_NO_ERROR)
+	//	{
+	//		_created = false;
+	//		return false;
+	//	}
+	//}
 
 	//if (!hasStencil)
 	//{

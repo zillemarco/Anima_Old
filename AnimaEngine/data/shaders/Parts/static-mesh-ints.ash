@@ -37,7 +37,6 @@
 
 				out vec2 frag_textureCoord;
 				out vec3 frag_normal;
-				out vec3 frag_worldPosition;
 				out mat3 frag_TBNMatrix;
 				flat out int frag_index;
 
@@ -51,7 +50,6 @@
 				    vec3 tangent = normalize((ANormalMatrix[frag_index] * vec4(_tangent, 0.0)).xyz);
 				    vec3 bitangent = normalize((ANormalMatrix[frag_index] * vec4(_bitangent, 0.0)).xyz);
 
-					frag_worldPosition = (AModelMatrix[frag_index] * vec4(_position, 1.0)).xyz;
 				    frag_textureCoord = _textureCoord;
 					frag_TBNMatrix = mat3(tangent, bitangent, frag_normal);
 				}

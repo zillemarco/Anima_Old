@@ -16,8 +16,11 @@
 #include "AnimaArray.h"
 #include "AnimaScene.h"
 #include "AnimaMeshCreator.h"
+#include "AnimaLogger.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+//#define USE_VAOS
 
 AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 {
@@ -233,7 +236,8 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH, TEXTURE_INTERNAL_FORMAT_DEPTH24, TEXTURE_FORMAT_DEPTH, TEXTURE_DATA_TYPE_FLOAT, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH_STENCIL, TEXTURE_INTERNAL_FORMAT_DEPTH32F_STENCIL8, TEXTURE_FORMAT_DEPTH_STENCIL, TEXTURE_DATA_TYPE_UNSIGNED_INT_24_8, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			//prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH, TEXTURE_INTERNAL_FORMAT_DEPTH24, TEXTURE_FORMAT_DEPTH, TEXTURE_DATA_TYPE_FLOAT, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR0, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("NormalMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR1, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("SpecularMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR2, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
@@ -960,10 +964,15 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 	renderer->GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	renderer->Start();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
+
+	//glEnable(GL_STENCIL_TEST);
+	//glStencilFunc(GL_NEVER, 1, 0xFF);
+	//glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
+	//glStencilMask(0xFF);
 
 	ANIMA_FRAME_PUSH("Build data");
 	AnimaArray<AnimaRendererProgramData> programs;
@@ -1022,8 +1031,16 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 					mesh->UpdateBuffers();
 
 				ANIMA_FRAME_PUSH("Draw");
+#if defined USE_VAOS
 				glBindVertexArray(mesh->GetVertexArrayObject());
+#else
+				program->EnableInputs(mesh);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+#endif
 				glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+#if !defined USE_VAOS
+				program->DisableInputs();
+#endif
 				ANIMA_FRAME_POP();
 
 				program->SyncBuffers(renderer->_programsBufferIndex);
@@ -1055,8 +1072,16 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 					program->UpdateMappedValuesObjectProperties(programMaterial._material, renderer);
 					program->UpdateSceneObjectProperties(instance, renderer);
 
+#if defined USE_VAOS
 					glBindVertexArray(mesh->GetVertexArrayObject());
+#else
+					program->EnableInputs(mesh);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+#endif
 					glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+#if !defined USE_VAOS
+					program->DisableInputs();
+#endif
 
 					program->SyncBuffers(renderer->_programsBufferIndex);
 
@@ -1132,10 +1157,10 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
-
+		
 		if(light->GetBoolean("CastShadows"))
 			UpdateDirectionalLightShadowMap(light);
-
+				
 		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
 		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 		glEnable(GL_BLEND);
@@ -1357,6 +1382,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDepthMask(GL_TRUE);
 
 	ANIMA_FRAME_PUSH("Build data");
@@ -1409,8 +1435,16 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 				mesh->UpdateBuffers();
 
 			ANIMA_FRAME_PUSH("Draw");
+#if defined USE_VAOS
 			glBindVertexArray(mesh->GetVertexArrayObject());
+#else
+			program->EnableInputs(mesh);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+#endif
 			glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+#if !defined USE_VAOS
+			program->DisableInputs();
+#endif
 			ANIMA_FRAME_POP();
 
 			program->SyncBuffers(_programsBufferIndex);
@@ -1436,8 +1470,16 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 
 				program->UpdateSceneObjectProperties(instance, this);
 
+#if defined USE_VAOS
 				glBindVertexArray(mesh->GetVertexArrayObject());
+#else
+				program->EnableInputs(mesh);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+#endif
 				glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+#if !defined USE_VAOS
+				program->DisableInputs();
+#endif
 
 				program->SyncBuffers(_programsBufferIndex);
 
@@ -1445,30 +1487,8 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			}
 		}
 	}
-	
-	//AInt nMeshes = meshesManager->GetMeshesCount();
-	//for (AInt j = 0; j < nMeshes; j++)
-	//{
-	//	DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
-	//	//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-	//	//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
-	//	//
-	//	//	glCullFace(GL_FRONT);
-	//	//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
-	//	//	glCullFace(GL_BACK);
-	//	//
-	//	//	AInt meshCount = innerModel->GetMeshesCount();
-	//	//	for (AInt i = 0; i < meshCount; i++)
-	//	//	{
-	//	//		glCullFace(GL_FRONT);
-	//	//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
-	//	//		glCullFace(GL_BACK);
-	//	//	}
-	//	//
-	//	//	AInt childrenCount = innerModel->GetChildrenCount();
-	//	//	for (AInt i = 0; i < childrenCount; i++)
-	//	//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
-	//}
+
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	ANIMA_FRAME_POP();
 }

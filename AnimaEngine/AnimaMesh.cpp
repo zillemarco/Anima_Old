@@ -746,8 +746,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesCount(), vertices, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(0);
+		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, vertices);
 		vertices = nullptr;
@@ -759,8 +759,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _normalsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesNormalCount(), normals, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, normals);
 		normals = nullptr;
@@ -772,8 +772,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _textureCoordsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesTextureCoordCount(), textureCoords, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(2);
+		//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, textureCoords);
 		textureCoords = nullptr;
@@ -785,8 +785,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _tangentsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesTangentsCount(), tangents, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(3);
+		//glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tangents);
 		tangents = nullptr;
@@ -798,8 +798,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _bitangentsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesBitangentsCount(), bitangents, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(4);
+		//glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, bitangents);
 		bitangents = nullptr;
@@ -811,8 +811,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _boneWeightsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatBoneWeightsCount(), boneWeights, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(5);
+		//glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, boneWeights);
 		boneWeights = nullptr;
@@ -824,8 +824,8 @@ void AnimaMesh::UpdateBuffers()
 		glBindBuffer(GL_ARRAY_BUFFER, _boneIDsBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatBoneIDsCount(), boneIDs, GL_STATIC_DRAW);
 
-		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		//glEnableVertexAttribArray(6);
+		//glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 		AnimaAllocatorNamespace::DeallocateArray(*_allocator, boneIDs);
 		boneIDs = nullptr;
@@ -1512,12 +1512,19 @@ void AnimaMesh::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool 
 
 #ifdef _WIN32
 	if (start)
-		glBindVertexArray(GetVertexArrayObject());
-	
+	{
+		//glBindVertexArray(GetVertexArrayObject());
+		program->EnableInputs(this);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
+	}
+
 	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
 	if (end)
-		glBindVertexArray(0);
+	{
+		//glBindVertexArray(0);
+		program->DisableInputs();
+	}
 #else
 	program->EnableInputs(this);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());

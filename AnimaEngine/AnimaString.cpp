@@ -57,6 +57,26 @@ AnimaString FormatString(const AnimaString& format, ...)
 	return AnimaString(formatted.get());
 }
 
+AnimaString FormatString(const AnimaString& format, va_list params)
+{
+	int final_n, n = ((int)format.size()) * 2; /* Reserve two times as much as the length of the fmt_str */
+	AnimaString str;
+	std::unique_ptr<char[]> formatted;
+	
+	while (true)
+	{
+		formatted.reset(new char[n]); /* Wrap the plain char array into the unique_ptr */
+		strcpy(&formatted[0], format.c_str());
+		final_n = vsnprintf(&formatted[0], n, format.c_str(), params);
+		if (final_n < 0 || final_n >= n)
+			n += abs(final_n - n + 1);
+		else
+			break;
+	}
+
+	return AnimaString(formatted.get());
+}
+
 //bool AnimaString::s_randInitialized = false;
 //char* AnimaString::s_randomCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 //AInt AnimaString::s_randomCharsetLenght = 62;

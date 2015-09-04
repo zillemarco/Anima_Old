@@ -1,4 +1,5 @@
 #include "AnimaGC.h"
+#include "AnimaLogger.h"
 
 #include <stdlib.h>
 #include <malloc.h>
@@ -710,7 +711,7 @@ void AnimaGC::TerminateContextAPIs(void)
 		FreeLibrary(_OpenGL32Instance);
 }
 
-AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig)
+AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig, bool vSyncEnabled)
 {
 	HWND hWnd = (HWND)windowId;
 
@@ -853,9 +854,27 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 			return nullptr;
 		}
 	}
-
+	
 	newGC->MakeCurrent();
 	InitializeGLEWExtensions();
+
+	if (_EXT_swap_control)
+	{
+		BOOL result = TRUE;
+		if (vSyncEnabled)
+			result = _SwapIntervalEXT(1);
+		else
+			result = _SwapIntervalEXT(0);
+
+		if (result == FALSE)
+		{
+			DestroyContext(newGC);
+			delete newGC;
+			return nullptr;
+		}
+	}
+
+	AnimaLogger::InitGraphicsLogger();
 
 	return newGC;
 }

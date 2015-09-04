@@ -6,9 +6,9 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#define BUFFERS_UPDATE_TIMEOUT	100000000
+#define BUFFERS_UPDATE_TIMEOUT	1
 
-AUint AnimaShaderGroupData::s_maxBuffersCount = 5;
+AUint AnimaShaderGroupData::s_maxBuffersCount = 3;
 
 AnimaShaderGroupData::AnimaShaderGroupData(const AnimaString& name, AnimaAllocator* allocator)
 	: AnimaNamedObject(name, allocator)
@@ -283,17 +283,31 @@ bool AnimaShaderGroupData::BindForUpdate(AUint bufferIndex)
 		return false;
 
 #if defined MAP_BUFFERS
+	ANIMA_FRAME_PUSH("Client Wait Sync");
 	AUint result = glClientWaitSync(_fences[bufferIndex], 0, BUFFERS_UPDATE_TIMEOUT);
-	if(result == GL_TIMEOUT_EXPIRED || result == GL_WAIT_FAILED)
-		return false;
+	while (result == GL_TIMEOUT_EXPIRED || result == GL_WAIT_FAILED)
+		result = glClientWaitSync(_fences[bufferIndex], 0, BUFFERS_UPDATE_TIMEOUT);
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_PUSH("Delete fence");
 	glDeleteSync(_fences[bufferIndex]);
+	ANIMA_FRAME_POP();
 #endif
 
+	ANIMA_FRAME_PUSH("Bind buffer base");
 	glBindBufferBase(GL_UNIFORM_BUFFER, _bindingPoint, _ubos[bufferIndex]);
+	ANIMA_FRAME_POP();
+
+	ANIMA_FRAME_PUSH("Buffer data");
+	glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
+	ANIMA_FRAME_POP();
 
 #if defined MAP_BUFFERS
 	//AUchar* buffer = (AUchar*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	ANIMA_FRAME_PUSH("Map Buffer");
 	_updateDataBuffer = (AUchar*)glMapBufferRange(GL_UNIFORM_BUFFER, 0, _bufferDataSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+	ANIMA_FRAME_POP();
+
 	if (_updateDataBuffer == nullptr)
 		return false;
 #endif

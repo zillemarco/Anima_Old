@@ -377,8 +377,8 @@ void AnimaShaderProgram::SetUniform(AInt location, const AnimaMatrix& value, boo
 
 void AnimaShaderProgram::ScanVariables()
 {
-	if (!GLEW_ARB_program_interface_query)
-	{
+	//if (!GLEW_ARB_program_interface_query)
+	//{
 		GLint numActiveInputs = 0;
 		glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveInputs);
 		
@@ -415,7 +415,7 @@ void AnimaShaderProgram::ScanVariables()
 			
 			_inputs[name] = info;
 		}
-	}
+	//}
 }
 
 void AnimaShaderProgram::EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer)
@@ -511,7 +511,8 @@ void AnimaShaderProgram::DisableInputs()
 	for (auto key : _inputs)
 	{
 		AnimaInputInfo info = key.second;
-		glDisableVertexAttribArray(info._location);
+		if (info._location > -1)
+			glDisableVertexAttribArray(info._location);
 	}
 }
 

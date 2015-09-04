@@ -795,13 +795,25 @@ bool AnimaTexture::LoadRenderTargets()
 	
 	AUint drawBuffer;
 	bool hasDepth = false;
+	bool hasStencil = false;
 	
 	ANIMA_ASSERT(Load());
-	
+
 	if (attachment == GL_DEPTH_ATTACHMENT)
 	{
 		drawBuffer = GL_NONE;
 		hasDepth = true;
+	}
+	else if (attachment == GL_STENCIL_ATTACHMENT)
+	{
+		drawBuffer = GL_NONE;
+		hasStencil = true;
+	}
+	else if (attachment == GL_DEPTH_STENCIL_ATTACHMENT)
+	{
+		drawBuffer = GL_NONE;
+		hasDepth = true;
+		hasStencil = true;
 	}
 	else
 		drawBuffer = attachment;
@@ -816,22 +828,51 @@ bool AnimaTexture::LoadRenderTargets()
 	
 	if (_frameBuffer == 0)
 		return false;
-	
-	if (!hasDepth)
-	{
-		glGenRenderbuffers(1, &_renderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
-	}
+
+	//if (!hasDepth)
+	//{
+	//	glGenRenderbuffers(1, &_depthRenderBuffer);
+	//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
+	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
+
+	//	if (glGetError() != GL_NO_ERROR)
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (!hasStencil)
+	//{
+	//	glGenRenderbuffers(1, &_stencilRenderBuffer);
+	//	glBindRenderbuffer(GL_RENDERBUFFER, _stencilRenderBuffer);
+	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, _width, _height);
+	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencilRenderBuffer);
+	//
+	//	if (glGetError() != GL_NO_ERROR)
+	//	{
+	//		return false;
+	//	}
+	//}
 	
 	glDrawBuffers(1, &drawBuffer);
-	
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE || glGetError() != GL_NO_ERROR)
-	{
-		ANIMA_ASSERT(false);
-		_renderTargetsReady = false;
+
+	if (glGetError() != GL_NO_ERROR)
 		return false;
+
+	AUint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	switch (status)
+	{
+	case GL_FRAMEBUFFER_COMPLETE:
+		break;
+	case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+		printf("AnimaGBuffer error: unsupported extension\n");
+		return false;
+		break;
+	default:
+		printf("AnimaGBuffer error: unable to create the FBO\n");
+		return false;
+		break;
 	}
 	
 	_renderTargetsReady = true;
@@ -1181,14 +1222,27 @@ AUint AnimaTexture::DataTypeToPlatform(const AnimaTextureDataType& dataType)
 {
 	switch (dataType)
 	{
-	case TEXTURE_DATA_TYPE_UNSIGNED_BYTE:	return GL_UNSIGNED_BYTE; break;
-	case TEXTURE_DATA_TYPE_BYTE:			return GL_BYTE; break;
-	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT:	return GL_UNSIGNED_SHORT; break;
-	case TEXTURE_DATA_TYPE_SHORT:			return GL_SHORT; break;
-	case TEXTURE_DATA_TYPE_UNSIGNED_INT:	return GL_UNSIGNED_INT; break;
-	case TEXTURE_DATA_TYPE_INT:				return GL_INT; break;
-	case TEXTURE_DATA_TYPE_FLOAT:			return GL_FLOAT; break;
-	default:								return GL_NONE;
+	case TEXTURE_DATA_TYPE_UNSIGNED_BYTE:				return GL_UNSIGNED_BYTE; break;
+	case TEXTURE_DATA_TYPE_BYTE:						return GL_BYTE; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT:				return GL_UNSIGNED_SHORT; break;
+	case TEXTURE_DATA_TYPE_SHORT:						return GL_SHORT; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT:				return GL_UNSIGNED_INT; break;
+	case TEXTURE_DATA_TYPE_INT:							return GL_INT; break;
+	case TEXTURE_DATA_TYPE_FLOAT:						return GL_FLOAT; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_BYTE_3_3_2:			return GL_UNSIGNED_BYTE_3_3_2; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_BYTE_2_3_3_REV:		return GL_UNSIGNED_BYTE_2_3_3_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_5_6_5:		return GL_UNSIGNED_SHORT_5_6_5; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_5_6_5_REV:	return GL_UNSIGNED_SHORT_5_6_5_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_4_4_4_4:		return GL_UNSIGNED_SHORT_4_4_4_4; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_4_4_4_4_REV:	return GL_UNSIGNED_SHORT_4_4_4_4_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_5_5_5_1:		return GL_UNSIGNED_SHORT_5_5_5_1; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_SHORT_1_5_5_5_REV:	return GL_UNSIGNED_SHORT_1_5_5_5_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT_8_8_8_8:		return GL_UNSIGNED_INT_8_8_8_8; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT_8_8_8_8_REV:	return GL_UNSIGNED_INT_8_8_8_8_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT_10_10_10_2:		return GL_UNSIGNED_INT_10_10_10_2; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT_2_10_10_10_REV:	return GL_UNSIGNED_INT_2_10_10_10_REV; break;
+	case TEXTURE_DATA_TYPE_UNSIGNED_INT_24_8:			return GL_UNSIGNED_INT_24_8; break;
+	default:											return GL_NONE;
 	}
 }
 

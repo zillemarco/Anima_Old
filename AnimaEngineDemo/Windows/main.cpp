@@ -177,7 +177,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
 
-		_gc = Anima::AnimaGC::CreateContext((long)hWnd, Anima::AnimaGC::GetDefaultContextConfig(), Anima::AnimaGC::GetDefaultFrameBufferConfig());
+		Anima::AnimaGCContextConfig context = Anima::AnimaGC::GetDefaultContextConfig();
+		context._major = 3;
+		context._minor = 3;
+		context._debug = false;
+
+		_gc = Anima::AnimaGC::CreateContext((long)hWnd, context, Anima::AnimaGC::GetDefaultFrameBufferConfig(), false);
 		if (!_gc)
 		{
 			MessageBox(NULL, _T("GC creation failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -225,7 +230,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1600, 1200, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -290,10 +295,10 @@ bool InitEngine()
 	Anima::AnimaString shadersIncludesPath = "D:/Git/Anima/AnimaEngine/data/shaders/Includes";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material.3ds";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
+	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material2.3ds";
+	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
 
-	int numInstances = 1;
+	int numInstances = 20;
 	Anima::AnimaString materialName = "legno";
 	
 	// Caricamento degli shader
@@ -327,7 +332,8 @@ bool InitEngine()
 	float span = M_PI * 2.0 / numInstances;
 	float raggio = 50.0;
 	//float scale = 5.0;
-	float scale = 20.0;
+	//float scale = 10.0;
+	float scale = 1.0;
 
 	for (int i = 0; i < numInstances; i++)
 	{
@@ -343,8 +349,8 @@ bool InitEngine()
 		if (numInstances > 1)
 			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
 
-		//modelInstance->GetTransformation()->RotateYDeg(180.0);
-		modelInstance->GetTransformation()->RotateXDeg(-90.0);
+		modelInstance->GetTransformation()->RotateYDeg(180.0);
+		//modelInstance->GetTransformation()->RotateXDeg(-90.0);
 		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
 
 		degOffset += span;
@@ -410,10 +416,10 @@ bool InitEngine()
 	directionalLight->SetColor(1.0, 1.0, 1.0);
 	directionalLight->SetIntensity(1.0);
 
-	Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
-	directionalLight->SetDirection(1.0, -1.0, 1.0);
-	directionalLight->SetColor(1.0, 1.0, 1.0);
-	directionalLight->SetIntensity(1.0);
+	//Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
+	//directionalLight->SetDirection(1.0, -1.0, 1.0);
+	//directionalLight->SetColor(1.0, 1.0, 1.0);
+	//directionalLight->SetIntensity(1.0);
 
 	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
 	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
@@ -514,9 +520,6 @@ bool InitEngine()
 			texture->SetHeight(height);
 			texture->SetDepth(depth);
 
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = max(mipMapsCount, 1);
-
 			if (format != 0 && internalFormat != 0)
 			{
 				texture->SetFormat(format);
@@ -526,6 +529,9 @@ bool InitEngine()
 			texture->SetTextureTarget(target);
 			texture->SetMipMapLevels(mipMapsCount);
 
+			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = max(mipMapsCount, 1);
+			
 			Anima::AInt offset = 0;
 			for (Anima::AUint i = 0; i < imagesCount; i++)
 			{
@@ -554,9 +560,6 @@ bool InitEngine()
 			texture->SetHeight(height);
 			texture->SetDepth(depth);
 
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = max(mipMapsCount, 1);
-
 			if (format != 0 && internalFormat != 0)
 			{
 				texture->SetFormat(format);
@@ -565,6 +568,11 @@ bool InitEngine()
 
 			texture->SetTextureTarget(target);
 			texture->SetMipMapLevels(mipMapsCount);
+
+			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = max(mipMapsCount, 1);
+
+			texture->SetTextureTarget(target);
 
 			Anima::AInt offset = 0;
 			for (Anima::AUint i = 0; i < imagesCount; i++)
