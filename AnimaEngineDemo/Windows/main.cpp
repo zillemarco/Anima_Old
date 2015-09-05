@@ -38,7 +38,9 @@
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
-#define SHADERS_PATH			"D:/Git/Anima/AnimaEngine/data/shaders/"
+//#define DATA_PATH				"data"
+#define DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define SHADERS_PATH			DATA_PATH "/shaders/"
 #define DEFERRED_SHADERS_START	"Deferred/"
 #define PRIMITIVE_SHADERS_START "Primitive/"
 #define FILTERS_SHADERS_START	"Filters/"
@@ -228,9 +230,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
+	int width, height;
+
+	int scelta = 0;
+	printf("Scegliere la dimensione della finestra:\n");
+	printf("\t- 0: 1024x768\n");
+	printf("\t- 1: 1920x1080\n");
+	printf("\t- 2: 1920x1200\n");
+	printf("\t- 3: 512x512\n");
+	printf("Inserisci la tua scelta: ");
+	std::cin >> scelta;
+
+	switch (scelta)
+	{
+	case 1:		width = 1920;	height = 1080;	break;
+	case 2:		width = 1920;	height = 1200;	break;
+	case 3:		width = 512;	height = 512;	break;
+	case 0:
+	default:	width = 1024;	height = 768;	break;
+	}
+
 	static TCHAR szWindowClass[] = _T(ANIMA_ENGINE_DEMO_NAME);
 	static TCHAR szTitle[] = _T(ANIMA_ENGINE_DEMO_NAME);
-	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 768, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, hInstance, NULL);
 	if (!hWnd)
 	{
 		MessageBox(NULL, _T("Call to CreateWindow failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -260,7 +282,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		elapsed += _fpsTimer.Elapsed();
 		if (elapsed >= 100.0)
 		{
-			printf("FPS: %d\n", FPS);
+			Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
+			SetWindowText(hWnd, title.c_str());
 			FPS = 0;
 			elapsed = 0.0;
 			_fpsTimer.Reset();
@@ -290,17 +313,73 @@ bool InitEngine()
 	if (!_scene)
 		return false;
 
-	Anima::AnimaString dataPath = "D:/Git/Anima/AnimaEngine/data";
-	Anima::AnimaString shadersPartsPath = "D:/Git/Anima/AnimaEngine/data/shaders/Parts";
-	Anima::AnimaString shadersIncludesPath = "D:/Git/Anima/AnimaEngine/data/shaders/Includes";
+	Anima::AnimaString dataPath = DATA_PATH;
+	Anima::AnimaString shadersPartsPath = dataPath + "/shaders/Parts";
+	Anima::AnimaString shadersIncludesPath = dataPath + "/shaders/Includes";
 	Anima::AnimaString shadersPath = SHADERS_PATH;
-	Anima::AnimaString materialsPath = "D:/Git/Anima/AnimaEngine/data/materials";
-	//Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/material2.3ds";
-	Anima::AnimaString modelPath = "D:/Git/Anima/AnimaEngine/data/models/matTester.obj";
-
-	int numInstances = 20;
+	Anima::AnimaString materialsPath = dataPath + "/materials";
+	Anima::AnimaString modelPath = dataPath + "/models/";
+	Anima::AnimaString modelName = "";
 	Anima::AnimaString materialName = "legno";
-	
+
+	int numInstances = 1;
+	float degOffset = 0.0f;
+	float span = M_PI * 2.0 / numInstances;
+	float raggio = 50.0;
+	float scale = 5.0;
+	float rx = 0.0;
+	float ry = 0.0;
+
+	int scelta = 0;
+	printf("\nScegliere il modello da caricare:\n");
+	printf("\t- 0: materia2.3ds\n");
+	printf("\t- 1: matTester.obj\n");
+	printf("\t- 2: sponza.obj\n");
+	printf("Inserisci la tua scelta: ");
+	std::cin >> scelta;
+
+	switch (scelta)
+	{
+	case 1:		
+		modelName = "matTester.obj";
+		scale = 5.0;
+		rx = 0.0;
+		ry = 180.0;
+		break;
+	case 2:		
+		modelName = "sponza.obj";
+		scale = 0.01;
+		rx = -90.0;
+		ry = 0.0;
+		break;
+	case 0:
+	default:	
+		modelName = "material2.3ds";
+		scale = 20.0;
+		rx = -90.0;
+		ry = 0.0;
+		break;
+	}
+
+	printf("\nScegliere il materiale da applicare:\n");
+	printf("\t- 0: oro\n");
+	printf("\t- 1: rame\n");
+	printf("\t- 2: cromo\n");
+	printf("\t- 3: gomma\n");
+	printf("\t- 4: legno\n");
+	printf("Inserisci la tua scelta: ");
+	std::cin >> scelta;
+
+	switch (scelta)
+	{
+	case 1:		materialName = "rame";
+	case 2:		materialName = "cromo";
+	case 3:		materialName = "gomma";
+	case 4:		materialName = "legno";
+	case 0:
+	default:	materialName = "oro";
+	}
+		
 	// Caricamento degli shader
 	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
 		return false;
@@ -316,7 +395,7 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath + modelName, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
 		
@@ -328,13 +407,6 @@ bool InitEngine()
 
 	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);
 	
-	float degOffset = 0.0f;
-	float span = M_PI * 2.0 / numInstances;
-	float raggio = 50.0;
-	//float scale = 5.0;
-	//float scale = 10.0;
-	float scale = 1.0;
-
 	for (int i = 0; i < numInstances; i++)
 	{
 		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
@@ -349,8 +421,8 @@ bool InitEngine()
 		if (numInstances > 1)
 			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
 
-		modelInstance->GetTransformation()->RotateYDeg(180.0);
-		//modelInstance->GetTransformation()->RotateXDeg(-90.0);
+		modelInstance->GetTransformation()->RotateYDeg(ry);
+		modelInstance->GetTransformation()->RotateXDeg(rx);
 		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
 
 		degOffset += span;
@@ -416,10 +488,10 @@ bool InitEngine()
 	directionalLight->SetColor(1.0, 1.0, 1.0);
 	directionalLight->SetIntensity(1.0);
 
-	//Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
-	//directionalLight->SetDirection(1.0, -1.0, 1.0);
-	//directionalLight->SetColor(1.0, 1.0, 1.0);
-	//directionalLight->SetIntensity(1.0);
+	Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
+	directionalLight->SetDirection(1.0, -1.0, 1.0);
+	directionalLight->SetColor(1.0, 1.0, 1.0);
+	directionalLight->SetIntensity(1.0);
 
 	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
 	//pointLight1->SetPosition(-40.0, 20.0, 0.0);

@@ -690,16 +690,16 @@ bool AnimaTexture::Load()
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, clampT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_R, clampR);
 
-		//if (glGetError() != GL_NO_ERROR)
-		//	return false;
+		if (glGetError() != GL_NO_ERROR)
+			return false;
 
-		//glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
-		//if (glGetError() != GL_NO_ERROR)
-		//{
-		//	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		//	if (glGetError() != GL_NO_ERROR)
-		//		return false;
-		//}
+		glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		if (glGetError() != GL_NO_ERROR)
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			if (glGetError() != GL_NO_ERROR)
+				return false;
+		}
 
 		if (glGetError() != GL_NO_ERROR)
 			return false;
