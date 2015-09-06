@@ -263,11 +263,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UpdateWindow(hWnd);
 	
 	MSG msg;
-	_fpsTimer.Reset();
-	int FPS = 0;
-	double elapsed = 0.0;
+	//_fpsTimer.Reset();
+	//int FPS = 0;
+	//double elapsed = 0.0;
 
-	_fpsTimer.Reset();
+	//_fpsTimer.Reset();
 	while (!_shouldClose)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -277,17 +277,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		UpdateFrame();
 		
-		FPS++;
+		//FPS++;
 
-		elapsed += _fpsTimer.Elapsed();
-		if (elapsed >= 100.0)
-		{
-			Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
-			SetWindowText(hWnd, title.c_str());
-			FPS = 0;
-			elapsed = 0.0;
-			_fpsTimer.Reset();
-		}
+		//elapsed += _fpsTimer.Elapsed();
+		//if (elapsed >= 100.0)
+		//{
+		//	Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
+		//	SetWindowText(hWnd, title.c_str());
+		//	FPS = 0;
+		//	elapsed = 0.0;
+		//	_fpsTimer.Reset();
+		//}
 	}
 
 	if (_renderer)
@@ -372,12 +372,12 @@ bool InitEngine()
 
 	switch (scelta)
 	{
-	case 1:		materialName = "rame";
-	case 2:		materialName = "cromo";
-	case 3:		materialName = "gomma";
-	case 4:		materialName = "legno";
+	case 1:		materialName = "rame";	break;
+	case 2:		materialName = "cromo";	break;
+	case 3:		materialName = "gomma";	break;
+	case 4:		materialName = "legno";	break;
 	case 0:
-	default:	materialName = "oro";
+	default:	materialName = "oro";	break;
 	}
 		
 	// Caricamento degli shader
