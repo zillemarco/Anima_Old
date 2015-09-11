@@ -7,6 +7,7 @@
 //
 
 #include "AnimaGBuffer.h"
+#include "AnimaLogger.h"
 using namespace boost::multi_index;
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -247,33 +248,32 @@ bool AnimaGBuffer::Create()
 		return false;
 	}
 	
-	//if (!hasDepth)
-	//{
-	//	glGenRenderbuffers(1, &_depthRenderBuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
+	if (!hasDepth && !hasStencil)
+	{
+		glGenRenderbuffers(1, &_depthRenderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
 
-	//	if (glGetError() != GL_NO_ERROR)
-	//	{
-	//		_created = false;
-	//		return false;
-	//	}
-	//}
+		if (glGetError() != GL_NO_ERROR)
+		{
+			_created = false;
+			return false;
+		}
+	}
+	else if (!hasDepth)
+	{
+		glGenRenderbuffers(1, &_depthRenderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
 
-	//if (!hasStencil)
-	//{
-	//	glGenRenderbuffers(1, &_stencilRenderBuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, _stencilRenderBuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, _width, _height);
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencilRenderBuffer);
-	//
-	//	if (glGetError() != GL_NO_ERROR)
-	//	{
-	//		_created = false;
-	//		return false;
-	//	}
-	//}
+		if (glGetError() != GL_NO_ERROR)
+		{
+			_created = false;
+			return false;
+		}
+	}
 	
 	glDrawBuffers(size, drawBuffers);
 
@@ -368,6 +368,14 @@ void AnimaGBuffer::BindAsRenderTarget()
 	
 	//if(glGetError() != GL_NO_ERROR)
 	//	return;
+}
+
+void AnimaGBuffer::BindAsReadingSource()
+{
+	ANIMA_ASSERT(Create());
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, _frameBuffer);
+
+	//AnimaLogger::CheckGraphicErrors();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -113,11 +113,11 @@ void AnimaLogger::OpenGLErrorCallback(AUint source, AUint type, AUint id, AUint 
 		LogMessageFormatColor(textColor, " Source:    %s", OpenGLDebugSourceString(source));
 		LogMessageFormatColor(textColor, " Message:   %s", message);
 
-#ifdef _MSC_VER
-		if(IsDebuggerPresent()) __debugbreak();
-#else
-		asm("int $3");
-#endif
+//#ifdef _MSC_VER
+//		if(IsDebuggerPresent()) __debugbreak();
+//#else
+//		asm("int $3");
+//#endif
 	}
 #endif
 }

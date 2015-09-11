@@ -20,8 +20,6 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-//#define USE_VAOS
-
 AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 {
 	_allocator = allocator != nullptr ? allocator : engine->GetGenericAllocator();
@@ -236,7 +234,7 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		else
 		{
 			prepassBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaGBuffer>(*_allocator, _allocator, width, height);
-			prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH_STENCIL, TEXTURE_INTERNAL_FORMAT_DEPTH32F_STENCIL8, TEXTURE_FORMAT_DEPTH_STENCIL, TEXTURE_DATA_TYPE_UNSIGNED_INT_24_8, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
+			prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH_STENCIL, TEXTURE_INTERNAL_FORMAT_DEPTH24_STENCIL8, TEXTURE_FORMAT_DEPTH_STENCIL, TEXTURE_DATA_TYPE_UNSIGNED_INT_24_8, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			//prepassBuffer->AddTexture("DepthMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_DEPTH, TEXTURE_INTERNAL_FORMAT_DEPTH24, TEXTURE_FORMAT_DEPTH, TEXTURE_DATA_TYPE_FLOAT, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("AlbedoMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR0, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
 			prepassBuffer->AddTexture("NormalMap", TEXTURE_TARGET_2D, TEXTURE_ATTACHMENT_COLOR1, TEXTURE_INTERNAL_FORMAT_RGBA8, TEXTURE_FORMAT_RGBA, TEXTURE_DATA_TYPE_UNSIGNED_BYTE, TEXTURE_MIN_FILTER_MODE_NEAREST, TEXTURE_MAG_FILTER_MODE_NEAREST, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE, TEXTURE_CLAMP_TO_EDGE);
@@ -378,11 +376,10 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	_filterMesh->MakePlane();
 	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
 
-	//AnimaString nameSkyMesh = "skybox_RENMESH";
-	//AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
-	//skyMesh->MakeCube();
-	//skyMesh->GetTransformation()->RotateZDeg(180.0f);
-	//_meshesMap[nameSkyMesh] = skyMesh;
+	AnimaString nameSkyMesh = "skybox_RENMESH";
+	AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
+	skyMesh->MakeCube();
+	_meshesMap[nameSkyMesh] = skyMesh;
 
 	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();
 	ptlMesh->MakeIcosahedralSphere(2);
@@ -964,15 +961,14 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 	renderer->GetGBuffer("PrepassBuffer")->BindAsRenderTarget();
 	renderer->Start();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT/* | GL_STENCIL_BUFFER_BIT*/);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 
-	//glEnable(GL_STENCIL_TEST);
-	//glStencilFunc(GL_NEVER, 1, 0xFF);
-	//glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);  // draw 1s on test fail (always)
-	//glStencilMask(0xFF);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 1, 1);
+	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
 	ANIMA_FRAME_PUSH("Build data");
 	AnimaArray<AnimaRendererProgramData> programs;
@@ -1093,6 +1089,8 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 		}
 	}
 
+	glDisable(GL_STENCIL_TEST);
+
 	renderer->Finish();
 	ANIMA_FRAME_POP();
 }
@@ -1108,11 +1106,18 @@ void AnimaRenderer::LightPass(AnimaRenderer* renderer)
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaLight*>*, AnimaStringHasher>* lightsMap = lights->GetArraysMap();
 	
 	// Pulisco i buffer per le luci
-	renderer->GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+	AnimaGBuffer* lightsBuffrer = renderer->GetGBuffer("LightsBuffer");
+	lightsBuffrer->BindAsRenderTarget();
 	renderer->Start();
 	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
+
+	ANIMA_FRAME_PUSH("Stencil copy");
+	AnimaGBuffer* prepassBuffer = renderer->GetGBuffer("PrepassBuffer");
+	prepassBuffer->BindAsReadingSource();
+	glBlitFramebuffer(0, 0, prepassBuffer->GetWidth(), prepassBuffer->GetHeight(), 0, 0, lightsBuffrer->GetWidth(), lightsBuffrer->GetHeight(), GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+	ANIMA_FRAME_POP()
 	
 	for (auto pair : (*lightsMap))
 	{
@@ -1158,14 +1163,18 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	{
 		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
 		
-		if(light->GetBoolean("CastShadows"))
-			UpdateDirectionalLightShadowMap(light);
+		//if(light->GetBoolean("CastShadows"))
+		//	UpdateDirectionalLightShadowMap(light);
 				
 		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
 		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glDepthMask(GL_FALSE);
+
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_EQUAL, 1, 1);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		
 		activeProgram = shadersManager->GetActiveProgram();
 		if (activeProgram == nullptr || (*activeProgram) != (*program))
@@ -1183,7 +1192,9 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 		program->UpdateSceneObjectProperties(light, this);
 		
 		mesh->Draw(this, program, true, true, false);
-		
+
+		glDisable(GL_STENCIL_TEST);
+
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 	}
@@ -1497,16 +1508,38 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 {
 	AnimaVertex4f backColor = renderer->GetColor4f("BackColor");
 	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
-
-	//renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("nullFilter"), renderer->GetGBuffer("PrepassBuffer")->GetTexture("AlbedoMap"), nullptr);
-	//return;
-
+	
 	renderer->Start();
 	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
 	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
+
+	ANIMA_FRAME_PUSH("Stencil copy");
+	AnimaGBuffer* prepassBuffer = renderer->GetGBuffer("PrepassBuffer");
+	prepassBuffer->BindAsReadingSource();
+	glBlitFramebuffer(0, 0, prepassBuffer->GetWidth(), prepassBuffer->GetHeight(), 0, 0, (AUint)size.x, (AUint)size.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+	ANIMA_FRAME_POP();
+	
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_EQUAL, 1, 1);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+	AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName("deferred-combine");
+
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		program->Use();
+		program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
+	}
+
+	if (renderer->_filterMesh->NeedsBuffersUpdate())
+		renderer->_filterMesh->UpdateBuffers();
+
+	program->UpdateRenderingManagerProperies(renderer);
+	renderer->_filterMesh->Draw(renderer, program, true, true, false);
 
 	AnimaTexture* skyTexture = renderer->GetTexture("SkyBox");
 	if (skyTexture != nullptr)
@@ -1526,38 +1559,19 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 			skyMesh->GetTransformation()->SetTranslation(camera->GetPosition());
 
 			skyProgram->UpdateRenderingManagerProperies(renderer);
+						
+			glStencilFunc(GL_EQUAL, 0, 1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-			GLint OldCullFaceMode;
-			glGetIntegerv(GL_CULL_FACE_MODE, &OldCullFaceMode);
-			GLint OldDepthFuncMode;
-			glGetIntegerv(GL_DEPTH_FUNC, &OldDepthFuncMode);
-			
 			glCullFace(GL_FRONT);
-			glDepthFunc(GL_LEQUAL);
-
+			glDisable(GL_DEPTH_TEST);
 			skyMesh->Draw(renderer, skyProgram, true, true, true);
-
-			glCullFace(OldCullFaceMode);
-			glDepthFunc(OldDepthFuncMode);
+			glEnable(GL_DEPTH_TEST);
+			glCullFace(GL_BACK);
 		}
 	}
-	else
-	{
-		AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
-		AnimaShaderProgram* program = shadersManager->GetProgramFromName("deferred-combine");
 
-		if (activeProgram == nullptr || (*activeProgram) != (*program))
-		{
-			program->Use();
-			program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
-		}
-
-		if (renderer->_filterMesh->NeedsBuffersUpdate())
-			renderer->_filterMesh->UpdateBuffers();
-
-		program->UpdateRenderingManagerProperies(renderer);
-		renderer->_filterMesh->Draw(renderer, program, true, true, false);
-	}
+	glDisable(GL_STENCIL_TEST);
 
 	renderer->Finish();
 }

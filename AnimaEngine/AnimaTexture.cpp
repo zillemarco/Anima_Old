@@ -693,13 +693,13 @@ bool AnimaTexture::Load()
 		if (glGetError() != GL_NO_ERROR)
 			return false;
 
-		//glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
-		//if (glGetError() != GL_NO_ERROR)
-		//{
-		//	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		//	if (glGetError() != GL_NO_ERROR)
-		//		return false;
-		//}
+		glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		if (glGetError() != GL_NO_ERROR)
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			if (glGetError() != GL_NO_ERROR)
+				return false;
+		}
 
 		if (glGetError() != GL_NO_ERROR)
 			return false;
@@ -829,31 +829,26 @@ bool AnimaTexture::LoadRenderTargets()
 	if (_frameBuffer == 0)
 		return false;
 
-	//if (!hasDepth)
-	//{
-	//	glGenRenderbuffers(1, &_depthRenderBuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderBuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderBuffer);
+	if (!hasDepth && !hasStencil)
+	{
+		glGenRenderbuffers(1, &_renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, _width, _height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
 
-	//	if (glGetError() != GL_NO_ERROR)
-	//	{
-	//		return false;
-	//	}
-	//}
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+	}
+	else if (!hasDepth)
+	{
+		glGenRenderbuffers(1, &_renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
 
-	//if (!hasStencil)
-	//{
-	//	glGenRenderbuffers(1, &_stencilRenderBuffer);
-	//	glBindRenderbuffer(GL_RENDERBUFFER, _stencilRenderBuffer);
-	//	glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX, _width, _height);
-	//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencilRenderBuffer);
-	//
-	//	if (glGetError() != GL_NO_ERROR)
-	//	{
-	//		return false;
-	//	}
-	//}
+		if (glGetError() != GL_NO_ERROR)
+			return false;
+	}
 	
 	glDrawBuffers(1, &drawBuffer);
 

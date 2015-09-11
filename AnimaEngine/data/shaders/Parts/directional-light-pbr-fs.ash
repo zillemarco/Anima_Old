@@ -49,7 +49,7 @@
 				uniform float DIL_Intensity;
 				uniform mat4 DIL_ProjectionViewMatrix;
 				uniform float DIL_ShadowMapBias;
-
+				
 				#include "pbr-functions"
 
 				float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
@@ -85,7 +85,7 @@
 					shadowCoord 		/= shadowCoord.w;
 					shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-					float shadowAmount 	= 1.0;//ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z);
+					float shadowAmount 	= max(1.0, ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z));
 
 					vec3 albedoColor 			= albedoData.xyz;
 					vec3 specularColor 			= specularData.xyz;

@@ -151,6 +151,14 @@ public:
 	 *	\author		Zille Marco
 	 */
 	void BindAsRenderTarget();
+
+	/*!
+	*	\brief		Imposta le texture del GBuffer come sorgente per poter essere lette
+	*	\details	Imposta le texture del GBuffer come sorgente per poter essere lette. Deve essere stato chiamato il metodo Create() in precedenza e deve essere andato a buon fine
+	*	\sa			Create()
+	*	\author		Zille Marco
+	*/
+	void BindAsReadingSource();
 	
 	/*!
 	 *	\brief		Torna una delle texture del GBuffer
@@ -160,7 +168,23 @@ public:
 	 *	\author		Zille Marco
 	 */
 	AnimaTexture* GetTexture(const AnimaString& name);
-	
+
+	/*!
+	 *	\brief		Torna la largezza in pixel del buffer
+	 *	\details	Torna la largezza in pixel del buffer
+	 *	\return		Largezza in pixel del buffer
+	 *	\author		Zille Marco
+	 */
+	AUint GetWidth() const { return _width; }
+
+	/*!
+	 *	\brief		Torna l'altezza in pixel del buffer
+	 *	\details	Torna l'altezza in pixel del buffer
+	 *	\return		Altezza in pixel del buffer
+	 *	\author		Zille Marco
+	 */
+	AUint GetHeight() const { return _height; }
+
 protected:
 	/*!
 	 *	\brief		Elimina completamente le texture del GBuffer deallocandone anche la memoria

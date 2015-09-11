@@ -183,8 +183,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		context._major = 3;
 		context._minor = 3;
 		context._debug = false;
+		Anima::AnimaGCFrameBufferConfig frameBuffer = Anima::AnimaGC::GetDefaultFrameBufferConfig();
+		frameBuffer._depthBits = 32;
 
-		_gc = Anima::AnimaGC::CreateContext((long)hWnd, context, Anima::AnimaGC::GetDefaultFrameBufferConfig(), false);
+		_gc = Anima::AnimaGC::CreateContext((long)hWnd, context, frameBuffer, false);
 		if (!_gc)
 		{
 			MessageBox(NULL, _T("GC creation failed!"), _T(ANIMA_ENGINE_DEMO_NAME), NULL);
@@ -263,11 +265,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UpdateWindow(hWnd);
 	
 	MSG msg;
-	//_fpsTimer.Reset();
-	//int FPS = 0;
-	//double elapsed = 0.0;
+	_fpsTimer.Reset();
+	int FPS = 0;
+	double elapsed = 0.0;
 
-	//_fpsTimer.Reset();
+	_fpsTimer.Reset();
 	while (!_shouldClose)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -277,17 +279,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		UpdateFrame();
 		
-		//FPS++;
+		FPS++;
 
-		//elapsed += _fpsTimer.Elapsed();
-		//if (elapsed >= 100.0)
-		//{
-		//	Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
-		//	SetWindowText(hWnd, title.c_str());
-		//	FPS = 0;
-		//	elapsed = 0.0;
-		//	_fpsTimer.Reset();
-		//}
+		elapsed += _fpsTimer.Elapsed();
+		if (elapsed >= 100.0)
+		{
+			Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
+			SetWindowText(hWnd, title.c_str());
+			FPS = 0;
+			elapsed = 0.0;
+			_fpsTimer.Reset();
+		}
 	}
 
 	if (_renderer)
@@ -335,6 +337,7 @@ bool InitEngine()
 	printf("\t- 0: materia2.3ds\n");
 	printf("\t- 1: matTester.obj\n");
 	printf("\t- 2: sponza.obj\n");
+	printf("\t- 3: cubo.3ds\n");
 	printf("Inserisci la tua scelta: ");
 	std::cin >> scelta;
 
@@ -348,8 +351,14 @@ bool InitEngine()
 		break;
 	case 2:		
 		modelName = "sponza.obj";
-		scale = 0.01;
-		rx = -90.0;
+		scale = 0.1;
+		rx = 0.0;
+		ry = 0.0;
+		break;
+	case 3:
+		modelName = "cubo.3ds";
+		scale = 20.0;
+		rx = 0.0;
 		ry = 0.0;
 		break;
 	case 0:
@@ -479,7 +488,7 @@ bool InitEngine()
 
 	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 		
-	_camera->LookAt(0.0, 40.0, 100.0, 0.0, 15.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 15.0, 0.0);
 	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
 
@@ -488,10 +497,10 @@ bool InitEngine()
 	directionalLight->SetColor(1.0, 1.0, 1.0);
 	directionalLight->SetIntensity(1.0);
 
-	Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
-	directionalLight->SetDirection(1.0, -1.0, 1.0);
-	directionalLight->SetColor(1.0, 1.0, 1.0);
-	directionalLight->SetIntensity(1.0);
+	//Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
+	//directionalLight2->SetDirection(1.0, -1.0, 1.0);
+	//directionalLight2->SetColor(1.0, 1.0, 1.0);
+	//directionalLight2->SetIntensity(1.0);
 
 	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
 	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
@@ -665,13 +674,9 @@ bool InitEngine()
 		}
 	}
 
-	//Anima::AnimaTexture* textureEnv = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-env-texture");
-	//textureEnv->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
-	//textureEnv->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
-	//_renderer->SetTexture("EnvironmentMap", textureEnv, false);
-
-	//Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", "dds-irr-texture");
-	//_renderer->SetTexture("IrradianceMap", textureIrr, false);
+	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	textureSkyBox->Load();
+	_renderer->SetTexture("SkyBox", textureSkyBox, false);
 
 	_renderer->CheckPrograms(_scene);
 	
