@@ -291,7 +291,34 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
-		
+
+		AnimaTexture* directionalLightShadowMapTextureTemp = GetTexture("DILShadowMapTemp");
+		if (directionalLightShadowMapTextureTemp == nullptr)
+		{
+			AUint w = 1024;
+			AUint h = 1024;
+
+			directionalLightShadowMapTextureTemp = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DILShadowMapTemp", w, h, nullptr, 0);
+			directionalLightShadowMapTextureTemp->SetTextureTarget(TEXTURE_TARGET_2D);
+			directionalLightShadowMapTextureTemp->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			directionalLightShadowMapTextureTemp->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			//directionalLightShadowMapTextureTemp->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
+			//directionalLightShadowMapTextureTemp->SetFormat(TEXTURE_FORMAT_DEPTH);
+			//directionalLightShadowMapTextureTemp->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			directionalLightShadowMapTextureTemp->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RG32F);
+			directionalLightShadowMapTextureTemp->SetFormat(TEXTURE_FORMAT_RG);
+			directionalLightShadowMapTextureTemp->SetDataType(TEXTURE_DATA_TYPE_UNSIGNED_BYTE);
+			directionalLightShadowMapTextureTemp->SetClampS(TEXTURE_CLAMP_TO_BORDER);
+			directionalLightShadowMapTextureTemp->SetClampT(TEXTURE_CLAMP_TO_BORDER);
+			directionalLightShadowMapTextureTemp->SetClampR(TEXTURE_CLAMP_TO_BORDER);
+			//directionalLightShadowMapTextureTemp->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
+			directionalLightShadowMapTextureTemp->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
+			directionalLightShadowMapTextureTemp->SetBorderColor(AnimaColor4f(1.0f, 1.0f, 1.0f, 1.0f));
+
+			ANIMA_ASSERT(directionalLightShadowMapTextureTemp->LoadRenderTargets());
+			SetTexture("DILShadowMapTemp", directionalLightShadowMapTextureTemp);
+		}
+
 		AnimaTexture* directionalLightShadowMapTexture = GetTexture("DILShadowMap");
 		if(directionalLightShadowMapTexture == nullptr)
 		{
@@ -302,38 +329,22 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			directionalLightShadowMapTexture->SetTextureTarget(TEXTURE_TARGET_2D);
 			directionalLightShadowMapTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
 			directionalLightShadowMapTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
-			directionalLightShadowMapTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
-			directionalLightShadowMapTexture->SetFormat(TEXTURE_FORMAT_DEPTH);
-			directionalLightShadowMapTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			//directionalLightShadowMapTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_DEPTH24);
+			//directionalLightShadowMapTexture->SetFormat(TEXTURE_FORMAT_DEPTH);
+			//directionalLightShadowMapTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			directionalLightShadowMapTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RG32F);
+			directionalLightShadowMapTexture->SetFormat(TEXTURE_FORMAT_RG);
+			directionalLightShadowMapTexture->SetDataType(TEXTURE_DATA_TYPE_UNSIGNED_BYTE);
 			directionalLightShadowMapTexture->SetClampS(TEXTURE_CLAMP_TO_BORDER);
 			directionalLightShadowMapTexture->SetClampT(TEXTURE_CLAMP_TO_BORDER);
 			directionalLightShadowMapTexture->SetClampR(TEXTURE_CLAMP_TO_BORDER);
-			directionalLightShadowMapTexture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
+			//directionalLightShadowMapTexture->SetAttachment(TEXTURE_ATTACHMENT_DEPTH);
+			directionalLightShadowMapTexture->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
 			directionalLightShadowMapTexture->SetBorderColor(AnimaColor4f(1.0f, 1.0f, 1.0f, 1.0f));
 			
 			ANIMA_ASSERT(directionalLightShadowMapTexture->LoadRenderTargets());
 			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
 		}
-		
-		//AnimaTexture* diffuse2Texture = GetTexture("Diffuse2Map");
-		//if(diffuse2Texture != nullptr)
-		//	diffuse2Texture->Resize(screenWidth, screenHeight);
-		//else
-		//{
-		//	diffuse2Texture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
-		//	ANIMA_ASSERT(diffuse2Texture->LoadRenderTargets());
-		//	SetTexture("Diffuse2Map", diffuse2Texture);
-		//}
-
-		//AnimaTexture* ssaoTexture = GetTexture("SSAOMap");
-		//if (ssaoTexture != nullptr)
-		//	ssaoTexture->Resize(screenWidth, screenHeight);
-		//else
-		//{
-		//	ssaoTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, GL_TEXTURE_2D, screenWidth, screenHeight, nullptr, 0, 0, GL_NEAREST, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0);
-		//	ANIMA_ASSERT(ssaoTexture->LoadRenderTargets());
-		//	SetTexture("SSAOMap", ssaoTexture);
-		//}
 		
 		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
@@ -360,8 +371,8 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
-	SetColor("AmbientLight", 0.1f, 0.1f, 0.1f);
-	//SetColor("BackColor", 0.3f, 0.3f, 0.3f, 1.0f);
+	SetFloat("BlurSize", 0.002f);
+	SetColor("AmbientLight", 0.5f, 0.5f, 0.5f);
 	SetColor("BackColor", 0.0f, 0.0f, 0.0f, 1.0f);
 
 	SetVector("SSAOFilterRadius", 5.0f, 5.0f);
@@ -1163,8 +1174,8 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	{
 		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
 		
-		//if(light->GetBoolean("CastShadows"))
-		//	UpdateDirectionalLightShadowMap(light);
+		if(light->GetBoolean("CastShadows"))
+			UpdateDirectionalLightShadowMap(light);
 				
 		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
 		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
@@ -1386,6 +1397,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 	
+	AnimaTexture* shadowMapTemp = GetTexture("DILShadowMapTemp");
 	AnimaTexture* shadowMap = GetTexture("DILShadowMap");
 	AnimaShaderProgram* program = shadersManager->GetProgramFromName("dil-shadow-map");
 	
@@ -1393,7 +1405,6 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDepthMask(GL_TRUE);
 
 	ANIMA_FRAME_PUSH("Build data");
@@ -1499,7 +1510,11 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 		}
 	}
 
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	AFloat b = GetFloat("BlurSize");
+	SetVector("BlurScale", b, 0.0);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussianFilter"), shadowMap, shadowMapTemp);
+	SetVector("BlurScale", 0.0, b);
+	ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussianFilter"), shadowMapTemp, shadowMap);
 
 	ANIMA_FRAME_POP();
 }
@@ -2099,11 +2114,15 @@ bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const Anim
 	if (!nullFilterProgram->Link())
 		return false;
 
+	AnimaShaderProgram* gaussianFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/gaussianFilter.asp");
+	if (!gaussianFilterProgram->Link())
+		return false;
+
 	AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	if (!combineProgram->Link())
 		return false;
 
-	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map-inst.asp");
+	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map-inst-vsm.asp");
 	if (!directionalLightShadowMapProgram->Link())
 		return false;
 

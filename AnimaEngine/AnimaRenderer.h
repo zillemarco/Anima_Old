@@ -171,23 +171,7 @@ protected:
 
 	void SetTextureSlot(AnimaString slotName, AUint value);	
 	void SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent = true);
-
-	void SetColor(AnimaString propertyName, AnimaColor3f value);
-	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b);
-	void SetColor(AnimaString propertyName, AnimaColor4f value);
-	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-
-	void SetVector(AnimaString propertyName, AnimaVertex2f value);
-	void SetVector(AnimaString propertyName, AFloat x, AFloat y);
-	void SetVector(AnimaString propertyName, AnimaVertex3f value);
-	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z);
-	void SetVector(AnimaString propertyName, AnimaVertex4f value);
-	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-
-	void SetFloat(AnimaString propertyName, AFloat value);
-	void SetBoolean(AnimaString propertyName, bool value);
-	void SetInteger(AnimaString propertyName, AInt value);
-
+	
 public:
 	AUint GetTextureSlot(const AnimaString& slotName);
 	void SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent = true);
@@ -204,6 +188,22 @@ public:
 	AFloat GetFloat(AnimaString propertyName);
 	AInt GetInteger(AnimaString propertyName);
 	bool GetBoolean(AnimaString propertyName);
+
+	void SetColor(AnimaString propertyName, AnimaColor3f value);
+	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b);
+	void SetColor(AnimaString propertyName, AnimaColor4f value);
+	void SetColor(AnimaString propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
+
+	void SetVector(AnimaString propertyName, AnimaVertex2f value);
+	void SetVector(AnimaString propertyName, AFloat x, AFloat y);
+	void SetVector(AnimaString propertyName, AnimaVertex3f value);
+	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z);
+	void SetVector(AnimaString propertyName, AnimaVertex4f value);
+	void SetVector(AnimaString propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
+
+	void SetFloat(AnimaString propertyName, AFloat value);
+	void SetBoolean(AnimaString propertyName, bool value);
+	void SetInteger(AnimaString propertyName, AInt value);
 
 	void AddRenderPassFunction(AnimaRenderPassFunc function) { _renderPassesFunction.push_back(function); }
 	void InsertRenderPassFunction(AnimaRenderPassFunc function, AInt index) { _renderPassesFunction.insert(_renderPassesFunction.begin() + index, function); }

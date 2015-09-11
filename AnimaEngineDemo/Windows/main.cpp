@@ -161,6 +161,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				_pbrMaterial->SetFloat("Specular", val);
 				break;
 			}
+			case 'v':
+			case 'V':
+			{
+				float val = _renderer->GetFloat("BlurSize");
+				val = max(0.0f, val - (inc / 1000.0));
+				_renderer->SetFloat("BlurSize", val);
+				printf("%f\n", val);
+				break;
+			}
+			case 'b':
+			case 'B':
+			{
+				float val = _renderer->GetFloat("BlurSize");
+				val = min(0.5f, val + (inc / 1000.0));
+				_renderer->SetFloat("BlurSize", val);
+				printf("%f\n", val);
+				break;
+			}
 			case '+':
 			{
 				float val = _pbrMaterial->GetFloat("Roughness");
@@ -467,7 +485,7 @@ bool InitEngine()
 		degOffset += span;
 	}
 
-	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 15.0, 0.0);
+	_camera->LookAt(0.0, 40.0, -250.0, 0.0, 15.0, 0.0);
 	_camera->Activate();
 
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");

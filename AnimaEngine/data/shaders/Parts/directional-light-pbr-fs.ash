@@ -51,23 +51,7 @@
 				uniform float DIL_ShadowMapBias;
 				
 				#include "pbr-functions"
-
-				float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare)
-				{
-					vec2 pixelPos = coords / REN_DILShadowMapTexelSize + vec2(0.5f);
-					vec2 fractPart = fract(pixelPos);
-					vec2 startTexel = (pixelPos - fractPart) * REN_DILShadowMapTexelSize;
-
-					float bl = step(compare, texture(shadowMap, startTexel).r + DIL_ShadowMapBias);
-					float br = step(compare, texture(shadowMap, startTexel + vec2(REN_DILShadowMapTexelSize.x, 0.0f)).r + DIL_ShadowMapBias);
-					float tl = step(compare, texture(shadowMap, startTexel + vec2(0.0f, REN_DILShadowMapTexelSize.t)).r + DIL_ShadowMapBias);
-					float tr = step(compare, texture(shadowMap, startTexel + REN_DILShadowMapTexelSize).r + DIL_ShadowMapBias);
-
-					float mixA = mix(bl, tl, fractPart.y);
-					float mixB = mix(br, tr, fractPart.y);
-
-					return mix(mixA, mixB, fractPart.x);
-				}
+				#include "compute-shadows-amount"
 
 				void main()
 				{
@@ -85,7 +69,7 @@
 					shadowCoord 		/= shadowCoord.w;
 					shadowCoord.xyz		= shadowCoord.xyz * vec3(0.5f, 0.5f, 0.5f) + vec3(0.5f, 0.5f, 0.5f);
 
-					float shadowAmount 	= max(1.0, ComputeShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z));
+					float shadowAmount 	= ComputeVarianceShadowAmount(REN_DILShadowMap, shadowCoord.xy, shadowCoord.z);
 
 					vec3 albedoColor 			= albedoData.xyz;
 					vec3 specularColor 			= specularData.xyz;
