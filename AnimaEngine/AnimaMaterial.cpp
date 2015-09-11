@@ -21,7 +21,7 @@ AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManag
 	SetInteger("CullFace", GL_BACK);
 
 	SetColor("Albedo", 0.560f, 0.570f, 0.580f, 1.0f);
-	SetColor("Specular", 0.5f, 0.5f, 0.5f, 1.0f);
+	SetFloat("Specular", 0.5f);
 	SetFloat("Metallic", 0.0f);
 	SetFloat("Roughness", 0.5f);
 	SetFloat("ReflectionIntensity", 0.8f);

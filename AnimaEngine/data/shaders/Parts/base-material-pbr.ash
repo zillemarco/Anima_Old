@@ -10,7 +10,7 @@
 				<Group name="MAT" dynamic="false">
 					<Datas>
 						<Data name="Albedo" type="FLOAT4" />
-						<Data name="Specular" type="FLOAT4" />
+						<Data name="Specular" type="FLOAT" />
 						<Data name="Roughness" type="FLOAT" />
 						<Data name="Metallic" type="FLOAT" />
 						<Data name="ReflectionIntensity" type="FLOAT" />
@@ -26,7 +26,7 @@
 				layout(std140) uniform MAT
 				{
 					vec4 MAT_Albedo;
-					vec4 MAT_Specular;
+					float MAT_Specular;
 					float MAT_Roughness;
 					float MAT_Metallic;
 					float MAT_ReflectionIntensity;
@@ -44,8 +44,8 @@
 					// Lerp with metallic
 					vec3 realAlbedo = albedoColor - (albedoColor * MAT_Metallic);
 					
-					// 0.03 default value for dielectic
-					vec3 realSpecular = mix(MAT_Specular.rgb, albedoColor, MAT_Metallic);
+					float spec = 0.02 + MAT_Specular * 0.03;
+					vec3 realSpecular = mix(vec3(spec), albedoColor, MAT_Metallic);
 					
 					FragColor[1] = vec4(realAlbedo, MAT_Roughness);
 					FragColor[2] = vec4(frag_normal * 0.5 + 0.5, MAT_ReflectionIntensity);

@@ -132,13 +132,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'p':
 			case 'P':
 			{
-				_pbrMaterial->SetFloat("Metallic", 0.0f);
+				float val = _pbrMaterial->GetFloat("Metallic");
+				val = max(0.0f, val - inc);
+				_pbrMaterial->SetFloat("Metallic", val);
 				break;
 			}
 			case 'm':
 			case 'M':
 			{
-				_pbrMaterial->SetFloat("Metallic", 1.0f);
+				float val = _pbrMaterial->GetFloat("Metallic");
+				val = min(1.0f, val + inc);
+				_pbrMaterial->SetFloat("Metallic", val);
+				break;
+			}
+			case 'a':
+			case 'A':
+			{
+				float val = _pbrMaterial->GetFloat("Specular");
+				val = max(0.0f, val - inc);
+				_pbrMaterial->SetFloat("Specular", val);
+				break;
+			}
+			case 's':
+			case 'S':
+			{
+				float val = _pbrMaterial->GetFloat("Specular");
+				val = min(1.0f, val + inc);
+				_pbrMaterial->SetFloat("Specular", val);
 				break;
 			}
 			case '+':
@@ -396,7 +416,8 @@ bool InitEngine()
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
-	materialsManager->LoadMaterials(materialsPath);
+	if (!materialsManager->LoadMaterials(materialsPath))
+		return false;
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
@@ -407,15 +428,24 @@ bool InitEngine()
 	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath + modelName, ANIMA_ENGINE_DEMO_MODEL_NAME);
 	if (!_model)
 		return false;
-		
+
+	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
+	
 	_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
 	Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
 	floorModelMesh->MakePlane();
 	floorModelMesh->SetParentObject(_floorModel);
 	_floorModel->AddMesh(floorModelMesh);
-
-	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);
 	
+	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);	
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
+
+	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
+	floorModelInstance->GetAllMeshes(&floorModelInstanceMeshes);
+
+	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+		
 	for (int i = 0; i < numInstances; i++)
 	{
 		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
@@ -437,59 +467,7 @@ bool InitEngine()
 		degOffset += span;
 	}
 
-	//Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
-	//Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
-	//Anima::AnimaModelInstance* modelInstance3 = modelInstancesManager->CreateInstance("modelInstance-3", _model);
-	//Anima::AnimaModelInstance* modelInstance4 = modelInstancesManager->CreateInstance("modelInstance-4", _model);
-	//
-	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance1Meshes;
-	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance2Meshes;
-	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance3Meshes;
-	//Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance4Meshes;
-	//
-	//modelInstance1->GetAllMeshes(&modelInstance1Meshes);
-	//modelInstance2->GetAllMeshes(&modelInstance2Meshes);
-	//modelInstance3->GetAllMeshes(&modelInstance3Meshes);
-	//modelInstance4->GetAllMeshes(&modelInstance4Meshes);
-	//
-	//for (int i = 0; i < modelInstance1Meshes.size(); i++)
-	//	modelInstance1Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
-
-	//for (int i = 0; i < modelInstance2Meshes.size(); i++)
-	//	modelInstance2Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model2-material"));
-
-	//for (int i = 0; i < modelInstance3Meshes.size(); i++)
-	//	modelInstance3Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model3-material"));
-
-	//for (int i = 0; i < modelInstance4Meshes.size(); i++)
-	//	modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
-
-	//modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
-	//modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
-	//modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
-	//modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
-
-	//modelInstance1->GetTransformation()->RotateYDeg(180.0);
-	//modelInstance2->GetTransformation()->RotateYDeg(180.0);
-	//modelInstance3->GetTransformation()->RotateYDeg(180.0);
-	//modelInstance4->GetTransformation()->RotateYDeg(180.0);
-
-	////modelInstance1->GetTransformation()->RotateXDeg(-90.0);
-	////modelInstance2->GetTransformation()->RotateXDeg(-90.0);
-	////modelInstance3->GetTransformation()->RotateXDeg(-90.0);
-	////modelInstance4->GetTransformation()->RotateXDeg(-90.0);
-	////modelInstance1->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	////modelInstance2->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	////modelInstance3->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-	////modelInstance4->GetTransformation()->SetScale(5.0f, 5.0f, 5.0f);
-
-	floorModelMesh->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
-
-	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
-		
 	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 15.0, 0.0);
-	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
 	_camera->Activate();
 
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");

@@ -378,7 +378,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			//printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
@@ -427,7 +427,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
@@ -591,7 +591,7 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
@@ -640,7 +640,7 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{

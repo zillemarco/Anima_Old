@@ -19,7 +19,7 @@
 				<File>D:\Git\Anima\AnimaEngine\data\textures\legno_1_norm.dds</File>
 			</AnimaTexture>
 		</Property>
-		<Property name="Specular" type="color" value="0.05;0.05;0.05;1.0" />
+		<Property name="Specular" type="float" value="0.5" />
 		<Property name="Roughness" type="float" value="0.5" />
 		<Property name="Metallic" type="float" value="0.1" />
 		<Property name="ReflectionIntensity" type="float" value="0.2" />
