@@ -31,6 +31,7 @@
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
+#include <AnimaRandom.h>
 
 #include "main.h"
 
@@ -99,7 +100,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			if (wParam == MK_MBUTTON)
 			{
-				_camera->RotateXDeg((float)yDelta);
+				_camera->RotateXDeg((float)-yDelta);
 				_camera->RotateYDeg((float)xDelta);
 				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 			}
@@ -129,6 +130,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			float inc = 0.02f;
 			switch (wParam)
 			{
+			case 'w':
+			case 'W':
+			{
+				_camera->Move(_camera->GetForward(), 2.0);
+				break;
+			}
+			case 's':
+			case 'S':
+			{
+				_camera->Move(_camera->GetForward(), -2.0);
+				break;
+			}
+			case 'd':
+			case 'D':
+			{
+				_camera->Move(_camera->GetRight(), 2.0);
+				break;
+			}
+			case 'a':
+			case 'A':
+			{
+				_camera->Move(_camera->GetRight(), -2.0);
+				break;
+			}
 			case 'p':
 			case 'P':
 			{
@@ -145,16 +170,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				_pbrMaterial->SetFloat("Metallic", val);
 				break;
 			}
-			case 'a':
-			case 'A':
+			case 'x':
+			case 'X':
 			{
 				float val = _pbrMaterial->GetFloat("Specular");
 				val = max(0.0f, val - inc);
 				_pbrMaterial->SetFloat("Specular", val);
 				break;
 			}
-			case 's':
-			case 'S':
+			case 'z':
+			case 'Z':
 			{
 				float val = _pbrMaterial->GetFloat("Specular");
 				val = min(1.0f, val + inc);
@@ -248,7 +273,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	RedirectIOToConsole();
-
+	
 	// Inizializzazione della finestra
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -278,6 +303,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	printf("\t- 1: 1920x1080\n");
 	printf("\t- 2: 1920x1200\n");
 	printf("\t- 3: 512x512\n");
+	printf("\t- 4: 1280x720\n");
 	printf("Inserisci la tua scelta: ");
 	std::cin >> scelta;
 
@@ -286,6 +312,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	case 1:		width = 1920;	height = 1080;	break;
 	case 2:		width = 1920;	height = 1200;	break;
 	case 3:		width = 512;	height = 512;	break;
+	case 4:		width = 1280;	height = 720;	break;
 	case 0:
 	default:	width = 1024;	height = 768;	break;
 	}
@@ -376,6 +403,7 @@ bool InitEngine()
 	printf("\t- 1: matTester.obj\n");
 	printf("\t- 2: sponza.obj\n");
 	printf("\t- 3: cubo.3ds\n");
+	printf("\t- 4: busto.obj\n");
 	printf("Inserisci la tua scelta: ");
 	std::cin >> scelta;
 
@@ -396,6 +424,12 @@ bool InitEngine()
 	case 3:
 		modelName = "cubo.3ds";
 		scale = 20.0;
+		rx = 0.0;
+		ry = 0.0;
+		break;
+	case 4:
+		modelName = "busto.obj";
+		scale = 100.0;
 		rx = 0.0;
 		ry = 0.0;
 		break;
@@ -439,7 +473,7 @@ bool InitEngine()
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
-	_camera = _camerasManager->CreateThirdPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
 	
@@ -485,7 +519,7 @@ bool InitEngine()
 		degOffset += span;
 	}
 
-	_camera->LookAt(0.0, 40.0, -250.0, 0.0, 15.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 0.0, -1.0);
 	_camera->Activate();
 
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
@@ -684,7 +718,7 @@ void SetViewport(int w, int h)
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 10000.0f);
+		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 1000.0f);
 	}
 
 	if (_renderer)
