@@ -833,7 +833,7 @@ bool AnimaTexture::LoadRenderTargets()
 	{
 		glGenRenderbuffers(1, &_renderBuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, _renderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, _width, _height);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderBuffer);
 
 		if (glGetError() != GL_NO_ERROR)

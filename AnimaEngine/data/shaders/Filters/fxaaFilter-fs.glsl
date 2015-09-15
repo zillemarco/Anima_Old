@@ -19,7 +19,7 @@ void main()
 	vec2 textureCoord = CalcTexCoord();
 	vec2 texCoordOffset = REN_InverseScreenSize.xy;
 	
-	vec3 luma = vec3(0.299, 0.587, 0.114);	
+	vec3 luma = vec3(0.299, 0.587, 0.114);
 	float lumaTL = dot(luma, texture(REN_FilterMap, textureCoord.xy + (vec2(-1.0, -1.0) * texCoordOffset)).xyz);
 	float lumaTR = dot(luma, texture(REN_FilterMap, textureCoord.xy + (vec2(1.0, -1.0) * texCoordOffset)).xyz);
 	float lumaBL = dot(luma, texture(REN_FilterMap, textureCoord.xy + (vec2(-1.0, 1.0) * texCoordOffset)).xyz);

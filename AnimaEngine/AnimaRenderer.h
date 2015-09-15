@@ -150,6 +150,8 @@ protected:
 	static void PreparePass(AnimaRenderer* renderer);
 	static void LightPass(AnimaRenderer* renderer);
 	static void CombinePass(AnimaRenderer* renderer);
+	static void BloomCreationPass(AnimaRenderer* renderer);
+	static void FinalPass(AnimaRenderer* renderer);
 
 protected:
 	void Clear();

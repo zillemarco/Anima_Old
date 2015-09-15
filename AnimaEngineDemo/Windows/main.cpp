@@ -204,6 +204,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				printf("%f\n", val);
 				break;
 			}
+			case 'l':
+			case 'L':
+			{
+				float val = _renderer->GetFloat("BrightnessThreshold");
+				val = max(0.0f, val - inc);
+				_renderer->SetFloat("BrightnessThreshold", val);
+				printf("%f\n", val);
+				break;
+			}
+			case 'k':
+			case 'K':
+			{
+				float val = _renderer->GetFloat("BrightnessThreshold");
+				val = min(1.0f, val + inc);
+				_renderer->SetFloat("BrightnessThreshold", val);
+				printf("%f\n", val);
+				break;
+			}
+			case 'h':
+			case 'H':
+			{
+				float val = _renderer->GetFloat("BloomBlurScale");
+				val = max(0.0f, val - (inc / 1000.0));
+				_renderer->SetFloat("BloomBlurScale", val);
+				printf("%f\n", val);
+				break;
+			}
+			case 'g':
+			case 'G':
+			{
+				float val = _renderer->GetFloat("BloomBlurScale");
+				val = min(0.5f, val + (inc / 1000.0));
+				_renderer->SetFloat("BloomBlurScale", val);
+				printf("%f\n", val);
+				break;
+			}
 			case '+':
 			{
 				float val = _pbrMaterial->GetFloat("Roughness");
@@ -704,9 +740,9 @@ bool InitEngine()
 		}
 	}
 
-	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
-	textureSkyBox->Load();
-	_renderer->SetTexture("SkyBox", textureSkyBox, false);
+	//Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	//textureSkyBox->Load();
+	//_renderer->SetTexture("SkyBox", textureSkyBox, false);
 
 	_renderer->CheckPrograms(_scene);
 	

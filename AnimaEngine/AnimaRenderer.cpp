@@ -41,6 +41,8 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	AddRenderPassFunction(PreparePass);
 	AddRenderPassFunction(LightPass);
 	AddRenderPassFunction(CombinePass);
+	AddRenderPassFunction(BloomCreationPass);
+	AddRenderPassFunction(FinalPass);
 
 	AnimaTexture* environmentTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
 	AnimaTexture* irradianceTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
@@ -211,6 +213,7 @@ void AnimaRenderer::InitTextureSlots()
 	SetTextureSlot("Diffuse2Map", 1);
 	SetTextureSlot("PDepthMap", 2);
 	SetTextureSlot("PColorMap", 3);
+	SetTextureSlot("BloomMap", 4);
 
 	// Slot usati dal deferred shading
 
@@ -278,11 +281,11 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 		{
 			diffuseTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "DiffuseMap", width, height, nullptr, 0);
 			diffuseTexture->SetTextureTarget(TEXTURE_TARGET_2D);
-			diffuseTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_NEAREST);
-			diffuseTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_NEAREST);
-			diffuseTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA8);
+			diffuseTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			diffuseTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			diffuseTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA32F);
 			diffuseTexture->SetFormat(TEXTURE_FORMAT_RGBA);
-			diffuseTexture->SetDataType(TEXTURE_DATA_TYPE_UNSIGNED_BYTE);
+			diffuseTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
 			diffuseTexture->SetClampS(TEXTURE_CLAMP_TO_EDGE);
 			diffuseTexture->SetClampT(TEXTURE_CLAMP_TO_EDGE);
 			diffuseTexture->SetClampR(TEXTURE_CLAMP_TO_EDGE);
@@ -345,6 +348,78 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			ANIMA_ASSERT(directionalLightShadowMapTexture->LoadRenderTargets());
 			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
 		}
+
+		AUint divisore = 8;
+
+		AnimaTexture* bloomTexture = GetTexture("BloomMap");
+		if (bloomTexture != nullptr)
+		{
+			AUint w = width / divisore;
+			AUint h = height / divisore;
+
+			bloomTexture->Resize(w, h);
+
+			AnimaVertex2f bloomMapSize((AFloat)w, (AFloat)h);
+			AnimaVertex2f inverseBloomMapSize(1.0f / (AFloat)w, 1.0f / (AFloat)h);
+
+			SetVector("BloomMapSize", bloomMapSize);
+			SetVector("InverseBloomMapSize", inverseBloomMapSize);
+		}
+		else
+		{
+			AUint w = width / divisore;
+			AUint h = height / divisore;
+
+			bloomTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "BloomMap", w, h, nullptr, 0);
+			bloomTexture->SetTextureTarget(TEXTURE_TARGET_2D);
+			bloomTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			bloomTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			bloomTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA32F);
+			bloomTexture->SetFormat(TEXTURE_FORMAT_RGBA);
+			bloomTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			bloomTexture->SetClampS(TEXTURE_CLAMP_TO_EDGE);
+			bloomTexture->SetClampT(TEXTURE_CLAMP_TO_EDGE);
+			bloomTexture->SetClampR(TEXTURE_CLAMP_TO_EDGE);
+			bloomTexture->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
+
+			ANIMA_ASSERT(bloomTexture->LoadRenderTargets());
+			SetTexture("BloomMap", bloomTexture);
+
+			AnimaVertex2f bloomMapSize((AFloat)w, (AFloat)h);
+			AnimaVertex2f inverseBloomMapSize(1.0f / (AFloat)w, 1.0f / (AFloat)h);
+
+			SetVector("BloomMapSize", bloomMapSize);
+			SetVector("InverseBloomMapSize", inverseBloomMapSize);
+		}
+
+		AnimaTexture* bloomTextureTemp = GetTexture("BloomMapTemp");
+		if (bloomTextureTemp != nullptr)
+		{
+			AUint w = width / divisore;
+			AUint h = height / divisore;
+
+			bloomTextureTemp->Resize(w, h);
+		}
+		else
+		{
+			AUint w = width / divisore;
+			AUint h = height / divisore;
+
+			bloomTextureTemp = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "BloomMapTemp", w, h, nullptr, 0);
+			bloomTextureTemp->SetTextureTarget(TEXTURE_TARGET_2D);
+			bloomTextureTemp->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			bloomTextureTemp->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			bloomTextureTemp->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA32F);
+			bloomTextureTemp->SetFormat(TEXTURE_FORMAT_RGBA);
+			bloomTextureTemp->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			bloomTextureTemp->SetClampS(TEXTURE_CLAMP_TO_EDGE);
+			bloomTextureTemp->SetClampT(TEXTURE_CLAMP_TO_EDGE);
+			bloomTextureTemp->SetClampR(TEXTURE_CLAMP_TO_EDGE);
+			bloomTextureTemp->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
+
+			ANIMA_ASSERT(bloomTextureTemp->LoadRenderTargets());
+			SetTexture("BloomMapTemp", bloomTextureTemp);
+		}
 		
 		SetGBuffer("FilterBuffer", nullptr, false);
 		SetTexture("FilterMap", nullptr, false);
@@ -372,6 +447,8 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
 	SetFloat("BlurSize", 0.002f);
+	SetFloat("BloomBlurScale", 0.002f);
+	SetFloat("BrightnessThreshold", 0.9f);
 	SetColor("AmbientLight", 0.5f, 0.5f, 0.5f);
 	SetColor("BackColor", 0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -422,7 +499,11 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 	ANIMA_ASSERT(src != dst);
 
 	if (dst != nullptr)
+	{
 		dst->BindAsRenderTarget();
+
+		SetVector("DestinationTextureSize", AnimaVertex2f((AFloat)dst->GetWidth(), (AFloat)dst->GetHeight()));
+	}
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -451,7 +532,11 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 void AnimaRenderer::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterProgram, AnimaTexture* src, AnimaGBuffer* dst)
 {
 	if (dst != nullptr)
+	{
 		dst->BindAsRenderTarget();
+
+		SetVector("DestinationTextureSize", AnimaVertex2f((AFloat)dst->GetWidth(), (AFloat)dst->GetHeight()));
+	}
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -481,7 +566,11 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 	ANIMA_ASSERT(src != dst);
 
 	if (dst != nullptr)
+	{
 		dst->BindAsRenderTarget();
+
+		SetVector("DestinationTextureSize", AnimaVertex2f((AFloat)dst->GetWidth(), (AFloat)dst->GetHeight()));
+	}
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -508,7 +597,11 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst)
 {
 	if (dst != nullptr)
+	{
 		dst->BindAsRenderTarget();
+
+		SetVector("DestinationTextureSize", AnimaVertex2f((AFloat)dst->GetWidth(), (AFloat)dst->GetHeight()));
+	}
 	else
 	{
 		AnimaVertex2f size = GetVector2f("ScreenSize");
@@ -1525,9 +1618,14 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 	
 	renderer->Start();
-	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
-	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	AnimaTexture* diffuseMap = renderer->GetTexture("DiffuseMap");
+	diffuseMap->BindAsRenderTarget();
+	AnimaVertex2f size(diffuseMap->GetWidth(), diffuseMap->GetHeight());
+
+	//AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
+	//glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 
@@ -1587,6 +1685,58 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	}
 
 	glDisable(GL_STENCIL_TEST);
+
+	renderer->Finish();
+}
+
+void AnimaRenderer::BloomCreationPass(AnimaRenderer* renderer)
+{
+	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
+	
+	AnimaTexture* diffuseMap = renderer->GetTexture("DiffuseMap");
+	AnimaTexture* bloomMap = renderer->GetTexture("BloomMap");
+	AnimaTexture* bloomMapTemp = renderer->GetTexture("BloomMapTemp");
+
+	renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("brightnessFilter"), diffuseMap, bloomMap);
+
+	AFloat b = renderer->GetFloat("BloomBlurScale");
+
+	for (int i = 0; i < 5; i++)
+	{
+		renderer->SetVector("BlurScale", b, 0.0);
+		renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussianFilter"), bloomMap, bloomMapTemp);
+		renderer->SetVector("BlurScale", 0.0, b);
+		renderer->ApplyEffectFromTextureToTexture(shadersManager->GetProgramFromName("gaussianFilter"), bloomMapTemp, bloomMap);
+	}
+}
+
+void AnimaRenderer::FinalPass(AnimaRenderer* renderer)
+{
+	AnimaVertex4f backColor = renderer->GetColor4f("BackColor");
+	Anima::AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
+
+	renderer->Start();
+
+	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
+	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
+
+	AnimaShaderProgram* activeProgram = renderer->_scene->GetShadersManager()->GetActiveProgram();
+	AnimaShaderProgram* program = shadersManager->GetProgramFromName("final");
+
+	if (activeProgram == nullptr || (*activeProgram) != (*program))
+	{
+		program->Use();
+		program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
+	}
+
+	if (renderer->_filterMesh->NeedsBuffersUpdate())
+		renderer->_filterMesh->UpdateBuffers();
+
+	program->UpdateRenderingManagerProperies(renderer);
+	renderer->_filterMesh->Draw(renderer, program, true, true, false);
 
 	renderer->Finish();
 }
@@ -2113,17 +2263,25 @@ bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const Anim
 	AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
 	if (!nullFilterProgram->Link())
 		return false;
-
-	AnimaShaderProgram* gaussianFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/gaussianFilter.asp");
-	if (!gaussianFilterProgram->Link())
-		return false;
-
+	
 	AnimaShaderProgram* combineProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/combine-pbr.asp");
 	if (!combineProgram->Link())
 		return false;
 
 	AnimaShaderProgram* directionalLightShadowMapProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/dil-shadow-map-inst-vsm.asp");
 	if (!directionalLightShadowMapProgram->Link())
+		return false;
+
+	AnimaShaderProgram* brightnessFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/brightnessFilter.asp");
+	if (!brightnessFilterProgram->Link())
+		return false;
+
+	AnimaShaderProgram* gaussianFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/gaussianFilter.asp");
+	if (!gaussianFilterProgram->Link())
+		return false;
+
+	AnimaShaderProgram* finalProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/final.asp");
+	if (!finalProgram->Link())
 		return false;
 
 	_defaultShaderProgram = prepareProgram;
