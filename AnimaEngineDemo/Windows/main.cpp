@@ -519,16 +519,23 @@ bool InitEngine()
 
 	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 	
-	_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
-	Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
-	floorModelMesh->MakePlane();
-	floorModelMesh->SetParentObject(_floorModel);
-	_floorModel->AddMesh(floorModelMesh);
+	_floorModel = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath + "base.3ds", "floorModel");
+	if (!_floorModel)
+		return false;
+
+	//_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
+	//Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
+	//floorModelMesh->MakePlane();
+	//floorModelMesh->SetParentObject(_floorModel);
+	//_floorModel->AddMesh(floorModelMesh);
 	
 	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);	
 	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
 
-	floorModelInstance->GetTransformation()->SetScale(200, 0, 200);
+	floorModelInstance->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance->GetTransformation()->SetRotationYDeg(-90);
+	//floorModelInstance->GetTransformation()->SetScale(0.1, 0, 0.1);
 	floorModelInstance->GetAllMeshes(&floorModelInstanceMeshes);
 
 	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
@@ -740,9 +747,9 @@ bool InitEngine()
 		}
 	}
 
-	//Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
-	//textureSkyBox->Load();
-	//_renderer->SetTexture("SkyBox", textureSkyBox, false);
+	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	textureSkyBox->Load();
+	_renderer->SetTexture("SkyBox", textureSkyBox, false);
 
 	_renderer->CheckPrograms(_scene);
 	

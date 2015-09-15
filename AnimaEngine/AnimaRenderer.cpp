@@ -810,9 +810,9 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 		{
 			AnimaMeshInstance* instance = mesh->GetInstance(j);
 
-			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
-			if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
-				continue;
+			//AnimaTransformation* instanceTransfomation = instance->GetTransformation();
+			//if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			//	continue;
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
 			if (program == nullptr)
