@@ -1,41 +1,23 @@
 #include "AnimaEngine.h"
 #include "AnimaScenesManager.h"
 #include "AnimaShadersManager.h"
+#include "AnimaParallelProgramsManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-//_INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE(AnimaEngine)
-//_INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_CONTEXT_STATE(AnimaEngine)
-//_INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE(AnimaEngine)
-//_INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_JOYSTICK_STATE(AnimaEngine)
-//_INIT_STATIC_ANIMA_ENGINE_PLATFORM_LIBRARY_TLS_STATE(AnimaEngine)
-
 bool								Anima::AnimaEngine::_animaEngineInitialized = false;
-//_AnimaEngineWindowmonitor**			Anima::AnimaEngine::_monitors = NULL;
-//int									Anima::AnimaEngine::_monitorCount = 0;
-//_AnimaEngineWindowMonitorCallbacks	Anima::AnimaEngine::_callbacks;
 int									Anima::AnimaEngine::_animaEngineCount = 0;
-//_AnimaEngineWindowHints				Anima::AnimaEngine::_windowHints;
-//bool								Anima::AnimaEngine::_platformLibraryWindowStateInitialized = false;
-//bool								Anima::AnimaEngine::_platformLibraryContextStateInitialized = false;
-//bool								Anima::AnimaEngine::_platformLibraryTimeStateInitialized = false;
-//bool								Anima::AnimaEngine::_platformLibraryJoystickStateInitialized = false;
-//bool								Anima::AnimaEngine::_platformLibraryTLSStateInitialized = false;
 bool								Anima::AnimaEngine::_usedExternal = false;
-//	Deprecato	bool								Anima::AnimaEngine::_glewExtensionsInitialized = false;
 AChar								Anima::AnimaEngine::_logFilePath[PATH_MAX] = "";
 
 #define _ANIMA_LOCAL_MEMORY_SIZE			524288000 	// 500 MB
 #define _ANIMA_MESHES_MEMORY_SIZE			52428800	// 50 MB
 #define _ANIMA_TEXTURES_MEMORY_SIZE			104857600	// 100 MB
-#define _ANIMA_ALLOCATORS_NUMBER			12
+#define _ANIMA_ALLOCATORS_NUMBER			13
 #define _ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE	((_ANIMA_LOCAL_MEMORY_SIZE - _ANIMA_MESHES_MEMORY_SIZE - _ANIMA_TEXTURES_MEMORY_SIZE) / _ANIMA_ALLOCATORS_NUMBER) - 300
 
 AnimaEngine::AnimaEngine()
 {
-	//_windowListHead = nullptr;
-	//_focusedWindow = nullptr;
-
 	_localMemory = nullptr;
 	_localMemorySize = 0;
 	_localMemoryAllocator = nullptr;
@@ -45,7 +27,6 @@ AnimaEngine::AnimaEngine()
 	_modelInstancesAllocator = nullptr;
 	_meshInstancesAllocator = nullptr;
 	_genericAllocator = nullptr;
-	//	Deprecato	_stringAllocator = nullptr;
 	_shadersAllocator = nullptr;
 	_camerasAllocator = nullptr;
 	_texturesAllocator = nullptr;
@@ -54,10 +35,12 @@ AnimaEngine::AnimaEngine()
 	_dataGeneratorsAllocator = nullptr;
 	_scenesAllocator = nullptr;
 	_animationsAllocator = nullptr;
+	_parallelProgramsAllocator = nullptr;
 
 	_scenesManager = nullptr;
 	_shadersManager = nullptr;
 	_dataGeneratorsManager = nullptr;
+	_parallelProgramsManager = nullptr;
 
 	_animaEngineCount++;
 }
@@ -71,12 +54,6 @@ AnimaEngine::~AnimaEngine()
 
 bool AnimaEngine::Initialize()
 {
-	//if(!_platformLibraryWindowStateInitialized)
-	//	_INIT_ANIMA_ENGINE_PLATFORM_LIBRARY_WINDOW_STATE;
-	//
-	//if(!_platformLibraryTimeStateInitialized)
-	//	_INIT_ANIMA_ENGINE_PLATFORM_LIBRARY_TIME_STATE;
-	
 	InitializeMemorySystem();
 	InitializeManagers();
 
@@ -105,7 +82,6 @@ void AnimaEngine::InitializeMemorySystem()
 	_texturesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_TEXTURES_MEMORY_SIZE, *_localMemoryAllocator);
 	_genericAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_managersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
-	//	Deprecato	_stringAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_shadersAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_camerasAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_materialsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
@@ -113,6 +89,7 @@ void AnimaEngine::InitializeMemorySystem()
 	_dataGeneratorsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_scenesAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 	_animationsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
+	_parallelProgramsAllocator = AnimaAllocatorNamespace::NewAnimaFreeListAllocator(_ANIMA_OTHER_ALLOCATORS_MEMORY_SIZE, *_localMemoryAllocator);
 
 	ASizeT usedSize = 0;
 	usedSize += _meshesAllocator->GetSize();
@@ -121,7 +98,6 @@ void AnimaEngine::InitializeMemorySystem()
 	usedSize += _meshInstancesAllocator->GetSize();
 	usedSize += _genericAllocator->GetSize(); 
 	usedSize += _managersAllocator->GetSize(); 
-	//	Deprecato	usedSize += _stringAllocator->GetSize(); 
 	usedSize += _shadersAllocator->GetSize(); 
 	usedSize += _camerasAllocator->GetSize(); 
 	usedSize += _texturesAllocator->GetSize(); 
@@ -130,6 +106,7 @@ void AnimaEngine::InitializeMemorySystem()
 	usedSize += _dataGeneratorsAllocator->GetSize(); 
 	usedSize += _scenesAllocator->GetSize();
 	usedSize += _animationsAllocator->GetSize();
+	usedSize += _parallelProgramsAllocator->GetSize();
 
 	ANIMA_ASSERT(usedSize < _localMemorySize - 1000);
 }
@@ -139,22 +116,7 @@ bool AnimaEngine::InitializeWindowSystem()
 	if (_animaEngineInitialized)
 		return true;
 
-	//if (!_AnimaEngineWindowPlatformInit())
-	//{
-	//	_AnimaEngineWindowPlatformTerminate();
-	//	return false;
-	//}
-	//
-	//_monitors = _AnimaEngineWindowPlatformGetMonitors(&_monitorCount);
-	//if (_monitorCount <= 0)
-	//{
-	//	_AnimaEngineWindowPlatformTerminate();
-	//	return false;
-	//}
-
 	_animaEngineInitialized = true;
-
-	//DefaultWindowHints();
 
 	return true;
 }
@@ -164,6 +126,7 @@ void AnimaEngine::InitializeManagers()
 	_scenesManager = AnimaAllocatorNamespace::AllocateNew<AnimaScenesManager>(*_managersAllocator, this);
 	_shadersManager = AnimaAllocatorNamespace::AllocateNew<AnimaShadersManager>(*_managersAllocator, this);
 	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_managersAllocator, nullptr, this);
+	_parallelProgramsManager = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgramsManager>(*_managersAllocator, this);
 }
 
 void AnimaEngine::Terminate()
@@ -204,12 +167,6 @@ void AnimaEngine::TerminateMemorySystem()
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_genericAllocator, *_localMemoryAllocator);
 		_genericAllocator = nullptr;
 	}
-	
-	//	Deprecato	if (_stringAllocator != nullptr)
-	//	Deprecato	{
-	//	Deprecato		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_stringAllocator, *_localMemoryAllocator);
-	//	Deprecato		_stringAllocator = nullptr;
-	//	Deprecato	}
 
 	if (_shadersAllocator != nullptr)
 	{
@@ -259,12 +216,18 @@ void AnimaEngine::TerminateMemorySystem()
 		_animationsAllocator = nullptr;
 	}
 
+	if (_parallelProgramsAllocator != nullptr)
+	{
+		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_parallelProgramsAllocator, *_localMemoryAllocator);
+		_parallelProgramsAllocator = nullptr;
+	}
+
 	if (_managersAllocator != nullptr)
 	{
 		AnimaAllocatorNamespace::DeleteAnimaFreeListAllocator(*_managersAllocator, *_localMemoryAllocator);
 		_managersAllocator = nullptr;
 	}
-
+	
 	if (_localMemoryAllocator != nullptr)
 	{
 		delete _localMemoryAllocator;
@@ -299,372 +262,19 @@ void AnimaEngine::TerminateManagers()
 		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _dataGeneratorsManager);
 		_dataGeneratorsManager = nullptr;
 	}
+
+	if (_parallelProgramsManager != nullptr)
+	{
+		AnimaAllocatorNamespace::DeallocateObject(*_managersAllocator, _parallelProgramsManager);
+		_parallelProgramsManager = nullptr;
+	}
 }
 
 void AnimaEngine::TerminateWindowSystem()
 {
 	if (!_animaEngineInitialized)
 		return;
-
-	////memset(&_glfw.callbacks, 0, sizeof(_glfw.callbacks));
-	//
-	//while (_windowListHead)
-	//	DestroyAnimaWindow((AnimaEngineWindow_Base*)_windowListHead);
-	//
-	////while (_cursorListHead)
-	////	DestroyAnimaCursor((AnimaEngineWindowcursor*)_cursorListHead);
-	//
-	//if (_animaEngineCount == 0)
-	//{
-	//	for (int i = 0; i < _monitorCount; i++)
-	//	{
-	//		_AnimaEngineWindowmonitor* monitor = _monitors[i];
-	//		if (monitor->_originalRamp._size)
-	//			_AnimaEngineWindowPlatformSetGammaRamp(monitor, &monitor->_originalRamp);
-	//	}
-	//
-	//	_AnimaEngineWindowFreeMonitors(_monitors, _monitorCount);
-	//	_monitors = NULL;
-	//	_monitorCount = 0;
-	//
-	//	_AnimaEngineWindowPlatformTerminate();
-	//
-	//	//memset(&_glfw, 0, sizeof(_glfw));
-	//	_animaEngineInitialized = false;
-	//}
 }
-
-//void AnimaEngine::DestroyAnimaWindow(AnimaEngineWindow_Base* handle)
-//{
-//	AnimaEngineWindow_Base* window = (AnimaEngineWindow_Base*)handle;
-//
-//	_ANIMA_ENGINE_REQUIRE_INIT();
-//
-//	// Allow closing of NULL (to match the behavior of free)
-//	if (window == NULL)
-//		return;
-//
-//	// Clear all callbacks to avoid exposing a half torn-down window object
-//	//memset(&window->_callbacks, 0, sizeof(window->callbacks));
-//
-//	// The window's context must not be current on another thread when the
-//	// window is destroyed
-//	if (window == _AnimaEngineWindowPlatformGetCurrentContext())
-//		_AnimaEngineWindowPlatformMakeContextCurrent(NULL);
-//
-//	// Clear the focused window pointer if this is the focused window
-//	if (window == window->GetEngine()->GetFocusedWindow())
-//		window->GetEngine()->SetFocusedWindow(NULL);
-//
-//	_AnimaEngineWindowPlatformDestroyWindow(window);
-//
-//	// Unlink window from global linked list
-//	AnimaEngineWindow_Base** prev = &_windowListHead;
-//
-//	while (*prev != window)
-//		(*prev) = ((*prev)->GetNext());
-//
-//	*prev = window->GetNext();
-//
-//	delete window;
-//	window = NULL;
-//}
-//
-//void AnimaEngine::DefaultWindowHints(void)
-//{
-//	_ANIMA_ENGINE_REQUIRE_INIT();
-//
-//	memset(&_windowHints, 0, sizeof(_windowHints));
-//
-//	// The default is OpenGL with minimum version 1.0
-//	_windowHints._api = ANIMA_ENGINE_OPENGL_API;
-//	_windowHints._major = 1;
-//	_windowHints._minor = 0;
-//
-//	// The default is a focused, visible, resizable window with decorations
-//	_windowHints._resizable		= true;
-//	_windowHints._visible		= true;
-//	_windowHints._decorated		= true;
-//	_windowHints._focused		= true;
-//	_windowHints._autoIconify	= true;
-//
-//	// The default is to select the highest available refresh rate
-//	_windowHints._refreshRate = ANIMA_ENGINE_DONT_CARE;
-//
-//	// The default is 24 bits of color, 24 bits of depth and 8 bits of stencil,
-//	// double buffered
-//	_windowHints._redBits		= 8;
-//	_windowHints._greenBits		= 8;
-//	_windowHints._blueBits		= 8;
-//	_windowHints._alphaBits		= 8;
-//	_windowHints._depthBits		= 24;
-//	_windowHints._stencilBits	= 8;
-//	_windowHints._doublebuffer	= true;
-//}
-//
-//void AnimaEngine::SetWindowHint(int target, int hint)
-//{
-//	_ANIMA_ENGINE_REQUIRE_INIT();
-//
-//	switch (target)
-//	{
-//	case ANIMA_ENGINE_RED_BITS:
-//		_windowHints._redBits = hint;
-//		break;
-//	case ANIMA_ENGINE_GREEN_BITS:
-//		_windowHints._greenBits = hint;
-//		break;
-//	case ANIMA_ENGINE_BLUE_BITS:
-//		_windowHints._blueBits = hint;
-//		break;
-//	case ANIMA_ENGINE_ALPHA_BITS:
-//		_windowHints._alphaBits = hint;
-//		break;
-//	case ANIMA_ENGINE_DEPTH_BITS:
-//		_windowHints._depthBits = hint;
-//		break;
-//	case ANIMA_ENGINE_STENCIL_BITS:
-//		_windowHints._stencilBits = hint;
-//		break;
-//	case ANIMA_ENGINE_ACCUM_RED_BITS:
-//		_windowHints._accumRedBits = hint;
-//		break;
-//	case ANIMA_ENGINE_ACCUM_GREEN_BITS:
-//		_windowHints._accumGreenBits = hint;
-//		break;
-//	case ANIMA_ENGINE_ACCUM_BLUE_BITS:
-//		_windowHints._accumBlueBits = hint;
-//		break;
-//	case ANIMA_ENGINE_ACCUM_ALPHA_BITS:
-//		_windowHints._accumAlphaBits = hint;
-//		break;
-//	case ANIMA_ENGINE_AUX_BUFFERS:
-//		_windowHints._auxBuffers = hint;
-//		break;
-//	case ANIMA_ENGINE_REFRESH_RATE:
-//		_windowHints._refreshRate = hint;
-//		break;
-//	case ANIMA_ENGINE_SAMPLES:
-//		_windowHints._samples = hint;
-//		break;
-//	case ANIMA_ENGINE_CLIENT_API:
-//		_windowHints._api = hint;
-//		break;
-//	case ANIMA_ENGINE_CONTEXT_VERSION_MAJOR:
-//		_windowHints._major = hint;
-//		break;
-//	case ANIMA_ENGINE_CONTEXT_VERSION_MINOR:
-//		_windowHints._minor = hint;
-//		break;
-//	case ANIMA_ENGINE_CONTEXT_ROBUSTNESS:
-//		_windowHints._robustness = hint;
-//		break;
-//	case ANIMA_ENGINE_OPENGL_PROFILE:
-//		_windowHints._profile = hint;
-//		break;
-//	case ANIMA_ENGINE_CONTEXT_RELEASE_BEHAVIOR:
-//		_windowHints._release = hint;
-//		break;
-//	default:
-//		//_glfwInputError(GLFW_INVALID_ENUM, NULL);
-//		break;
-//	}
-//}
-//
-//void AnimaEngine::SetWindowHint(int target, bool hint)
-//{
-//	switch (target)
-//	{
-//	case ANIMA_ENGINE_STEREO:
-//		_windowHints._stereo = hint;
-//		break;
-//	case ANIMA_ENGINE_DOUBLEBUFFER:
-//		_windowHints._doublebuffer = hint;
-//		break;
-//	case ANIMA_ENGINE_RESIZABLE:
-//		_windowHints._resizable = hint;
-//		break;
-//	case ANIMA_ENGINE_DECORATED:
-//		_windowHints._decorated = hint;
-//		break;
-//	case ANIMA_ENGINE_FOCUSED:
-//		_windowHints._focused = hint;
-//		break;
-//	case ANIMA_ENGINE_AUTO_ICONIFY:
-//		_windowHints._autoIconify = hint;
-//		break;
-//	case ANIMA_ENGINE_FLOATING:
-//		_windowHints._floating = hint;
-//		break;
-//	case ANIMA_ENGINE_VISIBLE:
-//		_windowHints._visible = hint;
-//		break;
-//	case ANIMA_ENGINE_SRGB_CAPABLE:
-//		_windowHints._sRGB = hint;
-//		break;
-//	case ANIMA_ENGINE_OPENGL_FORWARD_COMPAT:
-//		_windowHints._forward = hint;
-//		break;
-//	case ANIMA_ENGINE_OPENGL_DEBUG_CONTEXT:
-//		_windowHints._debug = hint;
-//		break;
-//	default:
-//		break;
-//	}
-//}
-//
-//void AnimaEngine::GetVersion(int* major, int* minor, int* rev)
-//{
-//	if (major != NULL)
-//		*major = _ANIMA_ENGINE_VERSION_MAJOR;
-//
-//	if (minor != NULL)
-//		*minor = _ANIMA_ENGINE_VERSION_MINOR;
-//
-//	if (rev != NULL)
-//		*rev = _ANIMA_ENGINE_VERSION_REVISION;
-//}
-//
-//const char* AnimaEngine::GetVersionString()
-//{
-//	return _AnimaEngineWindowPlatformGetVersionString();
-//}
-//
-//
-//AnimaEngineWindowmonitor* AnimaEngine::GetPrimaryMonitor(void)
-//{
-//	int count;
-//	AnimaEngineWindowmonitor** monitors = (AnimaEngineWindowmonitor**)_AnimaEngineWindowPlatformGetMonitors(&count);
-//
-//	if (count > 0)
-//		return monitors[0];
-//	return nullptr;
-//
-//}
-//
-//void AnimaEngine::GetMonitorPos(AnimaEngineWindowmonitor* monitor, int* xpos, int* ypos)
-//{
-//}
-
-//void AnimaEngine::GetMonitorPhysicalSize(AnimaEngineWindowmonitor* monitor, int* width, int* height)
-//{
-//}
-//
-//const char* AnimaEngine::GetMonitorName(AnimaEngineWindowmonitor* monitor)
-//{
-//	return nullptr;
-//}
-//
-//bool AnimaEngine::ExtensionSupported(const char* extension)
-//{
-//	const GLubyte* extensions;
-//	AnimaEngineWindow_Base* window;
-//
-//	_ANIMA_ENGINE_REQUIRE_INIT_OR_RETURN(false);
-//
-//	window = _AnimaEngineWindowPlatformGetCurrentContext();
-//	if (!window)
-//	{
-//		//_glfwInputError(GLFW_NO_CURRENT_CONTEXT, NULL);
-//		return false;
-//	}
-//
-//	if (!extension || *extension == '\0')
-//	{
-//		//_glfwInputError(GLFW_INVALID_VALUE, NULL);
-//		return false;
-//	}
-//
-//	if (window->GetContext()->_major < 3)
-//	{
-//		// Check if extension is in the old style OpenGL extensions string
-//		extensions = glGetString(GL_EXTENSIONS);
-//		if (!extensions)
-//		{
-//			//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to retrieve extension string");
-//			return false;
-//		}
-//
-//		if (_AnimaEngineWindowStringInExtensionString(extension, extensions))
-//			return true;
-//	}
-//#if defined(_ANIMA_ENGINE_USE_OPENGL)
-//	else
-//	{
-//		int i;
-//		GLint count;
-//
-//		// Check if extension is in the modern OpenGL extensions string list
-//
-//		glGetIntegerv(GL_NUM_EXTENSIONS, &count);
-//
-//		if (!window->GetGetStringiCallback())
-//			return false;
-//
-//		for (i = 0; i < count; i++)
-//		{
-//			const char* en = (const char*)window->GetGetStringiCallback()(GL_EXTENSIONS, i);
-//			if (!en)
-//			{
-//				//_glfwInputError(GLFW_PLATFORM_ERROR, "Failed to retrieve extension string %i", i);
-//				return false;
-//			}
-//
-//			if (strcmp(en, extension) == 0)
-//				return true;
-//		}
-//	}
-//#endif
-//
-//	// Check if extension is in the platform-specific string
-//	return _AnimaEngineWindowPlatformExtensionSupported(extension);
-//}
-//
-//void AnimaEngine::PollEvents()
-//{
-//	_AnimaEngineWindowPlatformPollEvents(this);
-//}
-//
-//void AnimaEngine::WaitEvents(void)
-//{
-//	if (!_windowListHead)
-//		return;
-//
-//	_AnimaEngineWindowPlatformWaitEvents(this);
-//}
-//
-//void AnimaEngine::PostEmptyEvent(void)
-//{
-//	if (!_windowListHead)
-//		return;
-//
-//	_AnimaEngineWindowPlatformPostEmptyEvent(this);
-//}
-//
-//void AnimaEngine::SwapInterval(int interval)
-//{
-//	_AnimaEngineWindowPlatformSwapInterval(interval);
-//}
-//
-//double AnimaEngine::GetTime(void)
-//{
-//	return _AnimaEngineWindowPlatformGetTime();
-//}
-//
-//void AnimaEngine::SetTime(double time)
-//{
-//	_AnimaEngineWindowPlatformSetTime(time);
-//}
-//
-//void AnimaEngine::MakeContextCurrent(AnimaWindow* window)
-//{
-//	_AnimaEngineWindowPlatformMakeContextCurrent(window);
-//}
-//
-//AnimaWindow* AnimaEngine::GetCurrentContext(void)
-//{
-//	return _AnimaEngineWindowPlatformGetCurrentContext();
-//}
 
 void AnimaEngine::DumpMemory(const char* fileName, bool bLogToFile)
 {
@@ -704,16 +314,6 @@ bool AnimaEngine::IsUsedExteral()
 { 
 	return _usedExternal; 
 }
-
-//	Deprecato	bool AnimaEngine::IsGlewExtensionsInitialized()
-//	Deprecato	{ 
-//	Deprecato		return _glewExtensionsInitialized; 
-//	Deprecato	}
-//	Deprecato	
-//	Deprecato	void AnimaEngine::SetGlewExtensionsInitialized(bool bSet) 
-//	Deprecato	{ 
-//	Deprecato		_glewExtensionsInitialized = bSet; 
-//	Deprecato	}
 
 bool AnimaEngine::IsInitialized()
 { 

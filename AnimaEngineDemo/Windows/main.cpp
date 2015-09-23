@@ -18,6 +18,7 @@
 #include <AnimaMeshesManager.h>
 #include <AnimaLightsManager.h>
 #include <AnimaTexturesManager.h>
+#include <AnimaParallelProgramsManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -39,8 +40,8 @@
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
-//#define DATA_PATH				"data"
-#define DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define DATA_PATH				"data"
+//#define DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH			DATA_PATH "/shaders/"
 #define DEFERRED_SHADERS_START	"Deferred/"
 #define PRIMITIVE_SHADERS_START "Primitive/"
@@ -407,6 +408,24 @@ bool InitEngine()
 	// Inizializzazione del motore
 	if (!_engine.Initialize())
 		return false;
+
+	printf("\nOpenCL available platforms:\n\n");
+	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
+	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
+	for (auto& plat : platforms)
+	{
+		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
+		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
+		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
+
+		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
+		for (auto& dev : devices)
+		{
+			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
+			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
+			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
+		}
+	}
 
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());

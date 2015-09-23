@@ -45,6 +45,7 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 find_package(OpenGL REQUIRED)
+find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 
 if (ANIMA_ENGINE_BUILD_DOCS)
@@ -195,11 +196,6 @@ if (_ANIMA_ENGINE_COCOA AND _ANIMA_ENGINE_NSGL)
 endif()
 
 #--------------------------------------------------------------------
-# Export ANIMA_ENGINE library dependencies
-#--------------------------------------------------------------------
-set(ANIMA_ENGINE_LIBRARIES ${AnimaEngine_LIBRARIES} CACHE STRING "Dependencies of ANIMA_ENGINE")
-
-#--------------------------------------------------------------------
 # Choose library output name
 #--------------------------------------------------------------------
 set(ANIMA_ENGINE_LIB_NAME AnimaEngine)
@@ -218,6 +214,15 @@ endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
+
+# Include OpenCL headers and libraries
+list(APPEND AnimaEngine_INCLUDE_DIRS "${OpenCL_INCLUDE_DIRS}")
+list(APPEND AnimaEngine_LIBRARIES "${OpenCL_LIBRARIES}")
+
+#--------------------------------------------------------------------
+# Export ANIMA_ENGINE library dependencies
+#--------------------------------------------------------------------
+set(ANIMA_ENGINE_LIBRARIES ${AnimaEngine_LIBRARIES} CACHE STRING "Dependencies of ANIMA_ENGINE")
 
 #--------------------------------------------------------------------
 # Add subdirectories

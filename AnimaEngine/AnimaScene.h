@@ -27,6 +27,7 @@ class AnimaModelsManager;
 class AnimaMeshesManager;
 class AnimaModelInstancesManager;
 class AnimaMeshInstancesManager;
+class AnimaParallelProgramsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaScene
 {
@@ -46,31 +47,32 @@ public:
 public:
 	inline AnimaEngine* GetEngine() { return _engine; }
 
-	inline AnimaModelsManager* GetModelsManager()					{ return _modelsManager;				}
-	inline AnimaMeshesManager* GetMeshesManager()					{ return _meshesManager;				}
-	inline AnimaModelInstancesManager* GetModelInstancesManager()	{ return _modelInstancesManager;		}
-	inline AnimaMeshInstancesManager* GetMeshInstancesManager()		{ return _meshInstancesManager;			}
-	inline AnimaShadersManager* GetShadersManager()					{ return _engine->GetShadersManager();	}
-	inline AnimaCamerasManager* GetCamerasManager()					{ return _camerasManager;				}
-	inline AnimaTexturesManager* GetTexturesManager()				{ return _texturesManager;				}
-	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()	{ return _dataGeneratorsManager;		}
-	inline AnimaMaterialsManager* GetMaterialsManager()				{ return _materialsManager;				}
-	inline AnimaLightsManager* GetLightsManager()					{ return _lightsManager;				}
-	inline AnimaAnimationsManager* GetAnimationsManager()			{ return _animationsManager;			}
+	inline AnimaModelsManager* GetModelsManager()						{ return _modelsManager; }
+	inline AnimaMeshesManager* GetMeshesManager()						{ return _meshesManager; }
+	inline AnimaModelInstancesManager* GetModelInstancesManager()		{ return _modelInstancesManager; }
+	inline AnimaMeshInstancesManager* GetMeshInstancesManager()			{ return _meshInstancesManager; }
+	inline AnimaShadersManager* GetShadersManager()						{ return _engine->GetShadersManager(); }
+	inline AnimaCamerasManager* GetCamerasManager()						{ return _camerasManager; }
+	inline AnimaTexturesManager* GetTexturesManager()					{ return _texturesManager; }
+	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()		{ return _dataGeneratorsManager; }
+	inline AnimaMaterialsManager* GetMaterialsManager()					{ return _materialsManager; }
+	inline AnimaLightsManager* GetLightsManager()						{ return _lightsManager; }
+	inline AnimaAnimationsManager* GetAnimationsManager()				{ return _animationsManager; }
+	inline AnimaParallelProgramsManager* GetParallelProgramsManager()	{ return _engine->GetParallelProgramsManager(); }
 
-	inline AnimaAllocator* GetMeshesAllocator()			{ return _engine->GetMeshesAllocator();			}
-	inline AnimaAllocator* GetModelsAllocator()			{ return _engine->GetModelsAllocator();			}
-	inline AnimaAllocator* GetModelInstancesAllocator()	{ return _engine->GetModelInstancesAllocator(); }
-	inline AnimaAllocator* GetMeshInstancesAllocator()	{ return _engine->GetMeshInstancesAllocator();	}
-	inline AnimaAllocator* GetGenericAllocator()		{ return _engine->GetGenericAllocator();		}
-	// Deprecato	inline AnimaAllocator* GetStringAllocator()			{ return _engine->GetStringAllocator();			}
-	inline AnimaAllocator* GetShadersAllocator()		{ return _engine->GetShadersAllocator();		}
-	inline AnimaAllocator* GetCamerasAllocator()		{ return _engine->GetCamerasAllocator();		}
-	inline AnimaAllocator* GetTexturesAllocator()		{ return _engine->GetTexturesAllocator();		}
-	inline AnimaAllocator* GetMaterialsAllocator()		{ return _engine->GetMaterialsAllocator();		}
-	inline AnimaAllocator* GetLightsAllocator()			{ return _engine->GetLightsAllocator();			}
-	inline AnimaAllocator* GetDataGeneratorsAllocator()	{ return _engine->GetDataGeneratorsAllocator(); }
-	inline AnimaAllocator* GetAnimationsAllocator()		{ return _engine->GetAnimationsAllocator();		}
+	inline AnimaAllocator* GetMeshesAllocator()				{ return _engine->GetMeshesAllocator(); }
+	inline AnimaAllocator* GetModelsAllocator()				{ return _engine->GetModelsAllocator(); }
+	inline AnimaAllocator* GetModelInstancesAllocator()		{ return _engine->GetModelInstancesAllocator(); }
+	inline AnimaAllocator* GetMeshInstancesAllocator()		{ return _engine->GetMeshInstancesAllocator(); }
+	inline AnimaAllocator* GetGenericAllocator()			{ return _engine->GetGenericAllocator(); }
+	inline AnimaAllocator* GetShadersAllocator()			{ return _engine->GetShadersAllocator(); }
+	inline AnimaAllocator* GetCamerasAllocator()			{ return _engine->GetCamerasAllocator(); }
+	inline AnimaAllocator* GetTexturesAllocator()			{ return _engine->GetTexturesAllocator(); }
+	inline AnimaAllocator* GetMaterialsAllocator()			{ return _engine->GetMaterialsAllocator(); }
+	inline AnimaAllocator* GetLightsAllocator()				{ return _engine->GetLightsAllocator(); }
+	inline AnimaAllocator* GetDataGeneratorsAllocator()		{ return _engine->GetDataGeneratorsAllocator(); }
+	inline AnimaAllocator* GetAnimationsAllocator()			{ return _engine->GetAnimationsAllocator(); }
+	inline AnimaAllocator* GetParallelProgramsAllocator()	{ return _engine->GetParallelProgramsAllocator(); }
 
 protected:
 	AnimaEngine* _engine;

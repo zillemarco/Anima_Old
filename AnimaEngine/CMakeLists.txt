@@ -85,7 +85,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaShaderInclude.h
 					AnimaShaderGroupData.h
 					AnimaLogger.h
-					AnimaRandom.h)
+					AnimaRandom.h
+					AnimaParallelProgram.h
+					AnimaParallelProgramsManager.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -152,7 +154,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaShaderInclude.cpp
 					AnimaShaderGroupData.cpp
 					AnimaLogger.cpp
-					AnimaRandom.cpp)
+					AnimaRandom.cpp
+					AnimaParallelProgram.cpp
+					AnimaParallelProgramsManager.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -185,7 +189,7 @@ endif()
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h)
 source_group(Engine\\Types FILES AnimaTypes.h)
 
-source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h)
+source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h AnimaParallelProgramsManager.h AnimaParallelProgramsManager.cpp)
 
 source_group(Engine\\DataStructures\\Arrays FILES AnimaArray.h AnimaMappedArray.h AnimaTypeMappedArray.h AnimaArray.cpp AnimaMappedArray.cpp AnimaTypeMappedArray.cpp)
 source_group(Engine\\DataStructures\\MappedValues FILES AnimaMappedValues.h AnimaMappedValues.cpp)
@@ -204,6 +208,7 @@ source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)
 source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
 source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp AnimaTextureGenerator.h AnimaTextureGenerator.cpp)
+source_group("Engine\\Parallel Programming" FILES AnimaParallelProgram.cpp AnimaParallelProgram.h)
 
 source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h AnimaLinearAllocator.h AnimaFreeListAllocator.h AnimaPoolAllocator.h AnimaProxyAllocator.h AnimaAllocator.cpp AnimaStackAllocator.cpp AnimaLinearAllocator.cpp AnimaFreeListAllocator.cpp AnimaPoolAllocator.cpp AnimaProxyAllocator.cpp)
 
@@ -323,6 +328,7 @@ if (ANIMA_ENGINE_INSTALL)
 		
 	if(WIN32)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/assimp.dll 	DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/glew32.dll 	DESTINATION AnimaEngine/bin)
 		if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 			INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngine/bin)
 		endif()
@@ -330,5 +336,8 @@ if (ANIMA_ENGINE_INSTALL)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.1.1.dylib 	DESTINATION AnimaEngine/bin)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.3.dylib 		DESTINATION AnimaEngine/bin)
 		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/Assimp/Lib/libassimp.dylib 			DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.12.0.dylib 	DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.1.12.dylib 		DESTINATION AnimaEngine/bin)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../Dependencies/OpenGL/Lib/libGLEW.dylib 			DESTINATION AnimaEngine/bin)
 	endif()
 endif()

@@ -34,13 +34,25 @@ if(ANIMA_ENGINE_USE_NVTOOLSEXT)
 endif()
 
 if (ANIMA_ENGINE_INSTALL)
-	SET(plugin_dest_dir ${CMAKE_INSTALL_PREFIX}/AnimaEditor/plugins)
-	SET(qtconf_dest_dir AnimaEditor)
-	SET(APPS "\${CMAKE_INSTALL_PREFIX}/AnimaEngineDemo/${PROJECT_NAME}.exe")
-	set(DIRS 	"${PROJECT_SOURCE_DIR}/../../Dependencies/Assimp/Lib"
-				"${PROJECT_SOURCE_DIR}/../../Dependencies/OpenGL/Lib"
-				"${CMAKE_INSTALL_PREFIX}/AnimaEngineDemo/bin")
+	INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION AnimaEngineDemo
+									LIBRARY DESTINATION AnimaEngineDemo
+									ARCHIVE DESTINATION AnimaEngineDemo)
 
-    INSTALL(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION AnimaEngineDemo COMPONENT Runtime
-    								RUNTIME DESTINATION AnimaEngineDemo COMPONENT Runtime)
+	INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/../../AnimaEngine/data 	DESTINATION AnimaEngineDemo)
+		
+	if(WIN32)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/Assimp/Lib/assimp.dll 	DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/OpenGL/Lib/glew32.dll 	DESTINATION AnimaEngineDemo)
+		INSTALL(FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/AnimaEngine.dll" DESTINATION AnimaEngineDemo)
+		if(ANIMA_ENGINE_USE_NVTOOLSEXT)
+			INSTALL(FILES ${ANIMA_ENGINE_NVTOOLSEXT_BIN} DESTINATION AnimaEngineDemo)
+		endif()
+	else()		
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/Assimp/Lib/libassimp.3.1.1.dylib 	DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/Assimp/Lib/libassimp.3.dylib 		DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/Assimp/Lib/libassimp.dylib 			DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/OpenGL/Lib/libGLEW.1.12.0.dylib 		DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/OpenGL/Lib/libGLEW.1.12.dylib 		DESTINATION AnimaEngineDemo)
+		INSTALL(FILES ${PROJECT_SOURCE_DIR}/../../Dependencies/OpenGL/Lib/libGLEW.dylib 			DESTINATION AnimaEngineDemo)
+	endif()
 endif()
