@@ -45,7 +45,7 @@ if (BUILD_SHARED_LIBS)
 endif()
 
 find_package(OpenGL REQUIRED)
-find_package(OpenCL REQUIRED)
+#find_package(OpenCL REQUIRED)
 find_package(Threads REQUIRED)
 
 if (ANIMA_ENGINE_BUILD_DOCS)
@@ -207,6 +207,7 @@ set(ANIMA_EDITOR_NAME AnimaEditor)
 if (WIN32)	
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/assimp.lib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
+    set(AnimaEngine_DEP_OPENCL ${PROJECT_SOURCE_DIR}/Dependencies/OpenCL/Lib/OpenCL.lib)
 elseif(APPLE)
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/libassimp.3.1.1.dylib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.a)
@@ -214,6 +215,7 @@ endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenCL/Include")
 
 # Include OpenCL headers and libraries
 list(APPEND AnimaEngine_INCLUDE_DIRS "${OpenCL_INCLUDE_DIRS}")

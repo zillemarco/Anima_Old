@@ -270,6 +270,7 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_ASSIMP})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_GLEW})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_OPENCL})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
