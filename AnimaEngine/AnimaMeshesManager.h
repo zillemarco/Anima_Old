@@ -51,10 +51,11 @@ public:
 
 	AnimaMesh* LoadMeshFromFile(const AnimaString& meshFilePath);
 	AnimaMesh* LoadMeshFromXml(const AnimaString& meshXmlDefinition);
-	void LoadMeshes(const AnimaString& meshesPath);
+	bool LoadMeshes(const AnimaString& meshesPath);
 
-	void SaveMeshToFile(const AnimaString& meshName, const AnimaString& filePath);
-	void SaveMeshToFile(AnimaMesh* mesh, const AnimaString& filePath);
+	void SaveMeshToFile(const AnimaString& meshName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMeshToFile(AnimaMesh* mesh, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMeshes(const AnimaString& destinationPath);
 
 protected:
 	void ClearMeshes();

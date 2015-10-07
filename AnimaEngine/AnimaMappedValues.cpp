@@ -989,7 +989,7 @@ bool AnimaMappedValues::HasMatrixArray(const AnimaString& propertyName) const
 	return (_matricesArraysMap.find(pName) != _matricesArraysMap.end());
 }
 
-AnimaString AnimaMappedValues::ExtractName(const AnimaString& src) const
+AnimaString AnimaMappedValues::ExtractName(const AnimaString& src)
 {
 	AInt pos = src.find(".");
 	if (pos == -1)

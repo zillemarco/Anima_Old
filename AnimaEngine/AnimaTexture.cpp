@@ -7,7 +7,7 @@ AFloat Clamp(const AFloat& value, const AFloat& low, const AFloat& high)
 	return value < low ? low : (value > high ? high : value);
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& sourceFileName)
 	: AnimaNamedObject(AnimaString("AnimaTexture"), allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
@@ -19,7 +19,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_textureID = 0;
 
 	_textureTarget	= TEXTURE_TARGET_NONE;
-	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR;
+	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
 	_magFilter		= TEXTURE_MAG_FILTER_MODE_LINEAR;
 	_internalFormat = TEXTURE_INTERNAL_FORMAT_RGB;
 	_format			= TEXTURE_FORMAT_RGB;
@@ -28,6 +28,8 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 	_clampT			= TEXTURE_CLAMP_REPEAT;
 	_clampR			= TEXTURE_CLAMP_REPEAT;
 	_attachment		= TEXTURE_ATTACHMENT_NONE;
+	
+	_sourceFileName = sourceFileName;
 
 	_borderColor = AnimaColor4f(0.0f);
 	_generateMipMaps = false;	
@@ -39,7 +41,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator)
 }
 
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, const AnimaString& sourceFileName)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
@@ -54,7 +56,9 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_clampT			= TEXTURE_CLAMP_REPEAT;
 	_clampR			= TEXTURE_CLAMP_REPEAT;
 	_attachment		= TEXTURE_ATTACHMENT_NONE;
-
+	
+	_sourceFileName = sourceFileName;
+	
 	_borderColor = AnimaColor4f(0.0f);
 	_generateMipMaps = false;
 	
@@ -74,7 +78,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 }
 
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, const AnimaString& sourceFileName)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
@@ -89,7 +93,9 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_clampT			= TEXTURE_CLAMP_REPEAT;
 	_clampR			= TEXTURE_CLAMP_REPEAT;
 	_attachment		= TEXTURE_ATTACHMENT_NONE;
-
+	
+	_sourceFileName = sourceFileName;
+	
 	_borderColor = AnimaColor4f(0.0f);
 	
 	_name = name;
@@ -108,7 +114,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_renderBuffer = 0;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize, const AnimaString& sourceFileName)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
@@ -125,7 +131,9 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_clampT			= TEXTURE_CLAMP_REPEAT;
 	_clampR			= TEXTURE_CLAMP_REPEAT;
 	_attachment		= TEXTURE_ATTACHMENT_NONE;
-
+	
+	_sourceFileName = sourceFileName;
+	
 	_borderColor = AnimaColor4f(0.0f);
 	
 	_name = name;
@@ -144,7 +152,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_renderBuffer = 0;
 }
 
-AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize)
+AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize, const AnimaString& sourceFileName)
 	: AnimaNamedObject(name, allocator)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
@@ -161,7 +169,9 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	_clampT			= TEXTURE_CLAMP_REPEAT;
 	_clampR			= TEXTURE_CLAMP_REPEAT;
 	_attachment		= TEXTURE_ATTACHMENT_NONE;
-
+	
+	_sourceFileName = sourceFileName;
+	
 	_borderColor = AnimaColor4f(0.0f);
 	
 	_name = name;
@@ -193,6 +203,7 @@ AnimaTexture::AnimaTexture(const AnimaTexture& src)
 	SetClampR(src._clampR);
 	SetAttachment(src._attachment);
 	SetBorderColor(src._borderColor);
+	SetSourceFileName(src._sourceFileName);
 	
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -224,6 +235,7 @@ AnimaTexture::AnimaTexture(AnimaTexture&& src)
 	SetClampR(src._clampR);
 	SetAttachment(src._attachment);
 	SetBorderColor(src._borderColor);
+	SetSourceFileName(src._sourceFileName);
 
 	_textureID = 0;
 	_frameBuffer = 0;
@@ -265,6 +277,7 @@ AnimaTexture& AnimaTexture::operator=(const AnimaTexture& src)
 		SetClampR(src._clampR);
 		SetAttachment(src._attachment);
 		SetBorderColor(src._borderColor);
+		SetSourceFileName(src._sourceFileName);
 		
 		_textureID = 0;
 		_frameBuffer = 0;
@@ -303,6 +316,7 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 		SetClampR(src._clampR);
 		SetAttachment(src._attachment);
 		SetBorderColor(src._borderColor);
+		SetSourceFileName(src._sourceFileName);
 
 		_textureID = 0;
 		_frameBuffer = 0;
@@ -530,27 +544,51 @@ bool AnimaTexture::SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex i
 	return false;
 }
 
-const AUchar* AnimaTexture::GetData(AUint mipMapIndex) const
+const AUchar* AnimaTexture::GetData(AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
 	if (_textureTarget == TEXTURE_TARGET_2D && _faces.size() == 1)
 	{
 		if (_faces[0].size() > 0)
-			return _faces[0][mipMapIndex].GetData();
+			return _faces[0][surfaceIndex].GetData();
 	}
 
 	return nullptr;
 }
 
-const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index, AUint mipMapIndex) const
+AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AUint surfaceIndex)
+{
+	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
+	if (_textureTarget == TEXTURE_TARGET_2D && _faces.size() == 1)
+	{
+		if (_faces[0].size() > 0)
+			return _faces[0][surfaceIndex].GetDataAsArray();
+	}
+	
+	return nullptr;
+}
+
+const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
-	if (_textureTarget == TEXTURE_TARGET_3D && _faces.size() == 6)
+	if (_textureTarget == TEXTURE_TARGET_CUBE && _faces.size() == 6)
 	{
 		if (_faces[index].size() > 0)
-			return _faces[index][mipMapIndex].GetData();
+			return _faces[index][surfaceIndex].GetData();
 	}
 
+	return nullptr;
+}
+
+AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex)
+{
+	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
+	if (_textureTarget == TEXTURE_TARGET_CUBE && _faces.size() == 6)
+	{
+		if (_faces[index].size() > 0)
+			return _faces[index][surfaceIndex].GetDataAsArray();
+	}
+	
 	return nullptr;
 }
 
@@ -616,9 +654,19 @@ void AnimaTexture::SetBorderColor(const AFloat& r, const AFloat& g, const AFloat
 	_borderColor = AnimaColor4f(r, g, b, a);
 }
 
-AnimaColor4f AnimaTexture::GetColor() const
+AnimaColor4f AnimaTexture::GetBorderColor() const
 {
 	return _borderColor;
+}
+
+void AnimaTexture::SetSourceFileName(const AnimaString& sourceFileName)
+{
+	_sourceFileName = sourceFileName;
+}
+
+AnimaString AnimaTexture::GetSourceFileName() const
+{
+	return _sourceFileName;
 }
 
 bool AnimaTexture::Load()
@@ -693,13 +741,13 @@ bool AnimaTexture::Load()
 		if (glGetError() != GL_NO_ERROR)
 			return false;
 
-		//glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
-		//if (glGetError() != GL_NO_ERROR)
-		//{
-		//	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		//	if (glGetError() != GL_NO_ERROR)
-		//		return false;
-		//}
+		glTexParameteri(target, GL_TEXTURE_CUBE_MAP_SEAMLESS, 1);
+		if (glGetError() != GL_NO_ERROR)
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+			if (glGetError() != GL_NO_ERROR)
+				return false;
+		}
 
 		if (glGetError() != GL_NO_ERROR)
 			return false;
@@ -1331,6 +1379,11 @@ const AUchar* AnimaTextureSurface::GetData() const
 	if (_data.size() > 0)
 		return &(_data)[0];
 	return nullptr;
+}
+
+AnimaArray<AUchar>* AnimaTextureSurface::GetDataAsArray()
+{
+	return &_data;
 }
 
 void AnimaTextureSurface::SetWidth(AUint width)

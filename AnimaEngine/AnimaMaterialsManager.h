@@ -46,6 +46,10 @@ public:
 	AnimaMappedArray<AnimaMaterial*>* GetMaterials();
 
 	static AnimaMaterial* GetDefaultMaterial() { ANIMA_ASSERT(_defaultMaterial != nullptr);  return _defaultMaterial; }
+	
+	void SaveMaterialToFile(const AnimaString& materialName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMaterialToFile(AnimaMaterial* material, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMaterials(const AnimaString& destinationPath);
 
 public:
 	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);

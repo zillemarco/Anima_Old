@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnimaMaterial>
+	<Name>rame</Name>
+	<Properties>
+		<Property>
+			<Name>Albedo</Name>
+			<Type>color</Type>
+			<Value>0.955;0.637;0.538;1.0</Value>
+		</Property>
+		<Property>
+			<Name>Specular</Name>
+			<Type>float</Type>
+			<Value>0.5</Value>
+		</Property>
+		<Property>
+			<Name>Roughness</Name>
+			<Type>float</Type>
+			<Value>0.25</Value>
+		</Property>
+		<Property>
+			<Name>Metallic</Name>
+			<Type>float</Type>
+			<Value>1.0</Value>
+		</Property>
+		<Property>
+			<Name>ReflectionIntensity</Name>
+			<Type>float</Type>
+			<Value>0.8</Value>
+		</Property>
+		<Property>
+			<Name>TwoSided</Name>
+			<Type>bool</Type>
+			<Value>false</Value>
+		</Property>
+	</Properties>
+	<Shaders></Shaders>
+</AnimaShaderPart>

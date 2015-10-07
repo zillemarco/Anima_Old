@@ -18,6 +18,10 @@
 #include "AnimaMeshCreator.h"
 #include "AnimaLogger.h"
 
+//#define ENGINE_DATA_PATH				"data"
+#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+#define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
@@ -43,6 +47,7 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	AddRenderPassFunction(CombinePass);
 	AddRenderPassFunction(BloomCreationPass);
 	AddRenderPassFunction(FinalPass);
+//	AddRenderPassFunction(DirectionalLightShadowMap);
 
 	AnimaTexture* environmentTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
 	AnimaTexture* irradianceTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
@@ -54,6 +59,8 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	SetTexture("IrradianceMap", irradianceTexture);
 
 	_programsBufferIndex = 0;
+	
+	InitializeShaders();
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
@@ -652,10 +659,14 @@ void AnimaRenderer::Finish()
 
 void AnimaRenderer::Render()
 {
+	_renderMutex.lock();
+	
 	for (auto func : _renderPassesFunction)
 		func(this);
 
 	_programsBufferIndex = (_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
+	
+	_renderMutex.unlock();
 }
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
@@ -1005,11 +1016,11 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 	{
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
 		AnimaString groupDataName = groupData->GetName();
-
+		
 		ANIMA_FRAME_PUSH("bind for update");
 		groupData->BindForUpdate(_programsBufferIndex);
 		ANIMA_FRAME_POP();
-
+		
 		if (groupDataName == "MAT")
 		{
 			ANIMA_FRAME_PUSH("material update");
@@ -1110,7 +1121,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				ANIMA_FRAME_PUSH("SetupProgramDataInstancedStaticBuffers");
 				renderer->SetupProgramDataInstancedStaticBuffers(program, &programMesh, camera);
 				ANIMA_FRAME_POP();
-
+		
 				program->Use();
 
 				ANIMA_FRAME_PUSH("Update normal uniforms");
@@ -1129,7 +1140,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				AnimaMesh* mesh = programMesh._mesh;
 				if (mesh->NeedsBuffersUpdate())
 					mesh->UpdateBuffers();
-
+				
 				ANIMA_FRAME_PUSH("Draw");
 #if defined USE_VAOS
 				glBindVertexArray(mesh->GetVertexArrayObject());
@@ -1142,8 +1153,9 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				program->DisableInputs();
 #endif
 				ANIMA_FRAME_POP();
-
+				
 				program->SyncBuffers(renderer->_programsBufferIndex);
+				glFlush();
 			}
 		}
 		else
@@ -1171,7 +1183,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 					program->UpdateMappedValuesObjectProperties(programMaterial._material, renderer);
 					program->UpdateSceneObjectProperties(instance, renderer);
-
+					
 #if defined USE_VAOS
 					glBindVertexArray(mesh->GetVertexArrayObject());
 #else
@@ -1184,6 +1196,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 #endif
 
 					program->SyncBuffers(renderer->_programsBufferIndex);
+					glFlush();
 
 					instancesOffset++;
 				}
@@ -1358,6 +1371,24 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 	}
 }
 
+void AnimaRenderer::DirectionalLightShadowMap(AnimaRenderer* renderer)
+{
+	ANIMA_FRAME_PUSH("DirectionalLightsPass");
+	
+	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
+	
+	AnimaString type = ANIMA_CLASS_NAME(AnimaDirectionalLight);
+	auto lightMeshPair = renderer->_meshesMap.find(type);
+	
+	ANIMA_ASSERT(lightMeshPair != renderer->_meshesMap.end());
+	AnimaDirectionalLight* light = (AnimaDirectionalLight*)lightsManager->GetLightFromName("light-0");
+	
+	if(light->GetBoolean("CastShadows"))
+		renderer->UpdateDirectionalLightShadowMap(light);
+	
+	ANIMA_FRAME_POP();
+}
+
 void AnimaRenderer::BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>* meshes)
 {
 	if (meshes == nullptr || _scene == nullptr)
@@ -1488,7 +1519,8 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	ANIMA_FRAME_PUSH("UpdateDirectionalLightShadowMap");
 
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
-	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	
+	AnimaMatrix m = light->GetMatrix("ProjectionViewMatrix");
 	
 	AnimaTexture* shadowMapTemp = GetTexture("DILShadowMapTemp");
 	AnimaTexture* shadowMap = GetTexture("DILShadowMap");
@@ -1563,6 +1595,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			ANIMA_FRAME_POP();
 
 			program->SyncBuffers(_programsBufferIndex);
+			glFlush();
 		}
 	}
 	else
@@ -1597,6 +1630,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 #endif
 
 				program->SyncBuffers(_programsBufferIndex);
+				glFlush();
 
 				instancesOffset++;
 			}
@@ -2230,8 +2264,13 @@ void AnimaRenderer::Clear()
 //	_primitives.clear();
 //}
 
-bool AnimaRenderer::InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath, const AnimaString& shadersIncludesPath)
+bool AnimaRenderer::InitializeShaders()
 {
+	
+	AnimaString shadersPartsPath = SHADERS_PATH "Parts";
+	AnimaString shadersIncludesPath = SHADERS_PATH "Includes";
+	AnimaString shadersPath = SHADERS_PATH;
+	
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	shadersManager->LoadShadersIncludes(shadersIncludesPath);
 	shadersManager->LoadShadersParts(shadersPartsPath);

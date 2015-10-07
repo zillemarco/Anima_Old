@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
+set(CMAKE_CXX_STANDARD 11)
+
 project(Anima C CXX)
 
 set(ANIMA_ENGINE_VERSION_MAJOR "0")
@@ -44,8 +46,10 @@ if (BUILD_SHARED_LIBS)
     set(_ANIMA_ENGINE_BUILD_DLL 1)
 endif()
 
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/Dependencies/CMake)
+
 find_package(OpenGL REQUIRED)
-#find_package(OpenCL REQUIRED)
+find_package(OCL)
 find_package(Threads REQUIRED)
 
 if (ANIMA_ENGINE_BUILD_DOCS)
@@ -207,7 +211,6 @@ set(ANIMA_EDITOR_NAME AnimaEditor)
 if (WIN32)	
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/assimp.lib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
-    set(AnimaEngine_DEP_OPENCL ${PROJECT_SOURCE_DIR}/Dependencies/OpenCL/Lib/OpenCL.lib)
 elseif(APPLE)
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/libassimp.3.1.1.dylib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.a)
@@ -215,11 +218,10 @@ endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
-list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenCL/Include")
 
-# Include OpenCL headers and libraries
-list(APPEND AnimaEngine_INCLUDE_DIRS "${OpenCL_INCLUDE_DIRS}")
-list(APPEND AnimaEngine_LIBRARIES "${OpenCL_LIBRARIES}")
+# Dipendenze da OpenCL
+list(APPEND AnimaEngine_INCLUDE_DIRS "${OCL_INCLUDE_DIR}")
+set(AnimaEngine_DEP_OPENCL "${OCL_LIBRARIES}")
 
 #--------------------------------------------------------------------
 # Export ANIMA_ENGINE library dependencies

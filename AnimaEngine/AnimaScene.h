@@ -14,6 +14,7 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaMappedArray.h"
+#include "AnimaNamedObject.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -29,10 +30,12 @@ class AnimaModelInstancesManager;
 class AnimaMeshInstancesManager;
 class AnimaParallelProgramsManager;
 
-class ANIMA_ENGINE_EXPORT AnimaScene
+class ANIMA_ENGINE_EXPORT AnimaScene : public AnimaNamedObject
 {
+	DECLARE_ANIMA_CLASS(AnimaScene);
+	
 public:
-	AnimaScene(AnimaEngine* engine);
+	AnimaScene(AnimaEngine* engine, const AnimaString& name);
 	AnimaScene(const AnimaScene& src);
 	AnimaScene(AnimaScene&& src);
 	~AnimaScene();

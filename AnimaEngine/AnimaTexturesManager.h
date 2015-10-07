@@ -305,7 +305,11 @@ public:
 	 *	\return		Puntatore alla texture contenuta dal manager con il nome passato. NULL se la texture con quel nome non esiste
 	 *	\author		Zille Marco
 	 */
-	AnimaTexture* GetTexture(const AnimaString& textureName);
+	AnimaTexture* GetTextureFromName(const AnimaString& textureName);
+	
+	void SaveTextureToFile(const AnimaString& textureName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveTextureToFile(AnimaTexture* texture, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveTextures(const AnimaString& destinationPath);
 	
 private:
 	void ClearTextures();

@@ -94,11 +94,11 @@ class ANIMA_ENGINE_EXPORT AnimaTexture : public AnimaNamedObject
 	DECLARE_ANIMA_CLASS(AnimaTexture);
 
 public:
-	AnimaTexture(AnimaAllocator* allocator);
-	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height);
-	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth);
-	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize);
-	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize);
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& sourceFileName = "");
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, const AnimaString& sourceFileName = "");
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, const AnimaString& sourceFileName = "");
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUchar* data, AUint dataSize, const AnimaString& sourceFileName = "");
+	AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, AUint width, AUint height, AUint depth, AUchar* data, AUint dataSize, const AnimaString& sourceFileName = "");
 	AnimaTexture(const AnimaTexture& src);
 	AnimaTexture(AnimaTexture&& src);
 	~AnimaTexture();
@@ -141,6 +141,9 @@ public:
 
 	void SetDataType(AnimaTextureDataType dataType);
 	AnimaTextureDataType GetDataType() const;
+	
+	void SetSourceFileName(const AnimaString& sourceFileName);
+	AnimaString GetSourceFileName() const;
 
 	/*!
 	 *	\brief		Imposta il buffer con i dati della texture
@@ -168,7 +171,9 @@ public:
 	 */
 	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint mipMapIndex);
 	const AUchar* GetData(AUint surfaceIndex) const;
+	AnimaArray<AUchar>* GetDataAsArray(AUint surfaceIndex);
 	const AUchar* GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
+	AnimaArray<AUchar>* GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex);
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
@@ -184,7 +189,7 @@ public:
 
 	void SetBorderColor(const AnimaColor4f& color);
 	void SetBorderColor(const AFloat& r, const AFloat& g, const AFloat& b, const AFloat& a);
-	AnimaColor4f GetColor() const;
+	AnimaColor4f GetBorderColor() const;
 	
 	bool Load();
 	void Unload();
@@ -210,6 +215,8 @@ private:
 	AUint _textureID;
 	AUint _frameBuffer;
 	AUint _renderBuffer;
+	
+	AnimaString _sourceFileName;
 
 	AnimaArray<AnimaArray<AnimaTextureSurface> > _faces;
 		
@@ -261,6 +268,7 @@ public:
 	void SetData(AUchar* data, AUint dataSize);
 	void CopyData(const AnimaTextureSurface& src);
 	const AUchar* GetData() const;
+	AnimaArray<AUchar>* GetDataAsArray();
 
 	void SetWidth(AUint width);
 	AUint GetWidth() const;

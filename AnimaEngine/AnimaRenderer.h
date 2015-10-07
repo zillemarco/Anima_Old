@@ -25,6 +25,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <mutex>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -94,8 +95,8 @@ public:
 	AnimaRenderer& operator=(const AnimaRenderer& src);
 	AnimaRenderer& operator=(AnimaRenderer&& src);
 	
-public:
-	virtual bool InitializeShaders(const AnimaString& shadersPath, const AnimaString& shadersPartsPath, const AnimaString& shadersIncludesPath);
+protected:
+	virtual bool InitializeShaders();
 
 public:
 	virtual void Start(AnimaScene* scene);
@@ -152,6 +153,7 @@ protected:
 	static void CombinePass(AnimaRenderer* renderer);
 	static void BloomCreationPass(AnimaRenderer* renderer);
 	static void FinalPass(AnimaRenderer* renderer);
+	static void DirectionalLightShadowMap(AnimaRenderer* renderer);
 
 protected:
 	void Clear();
@@ -232,7 +234,9 @@ protected:
 	AnimaShaderProgram* _defaultShaderProgram;
 
 	AUint _programsBufferIndex;
-		
+	
+	std::mutex _renderMutex;
+	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaStringHasher>			_textureSlotsMap;
 	boost::unordered_map<AnimaString, AnimaTexture*, AnimaStringHasher>	_texturesMap;

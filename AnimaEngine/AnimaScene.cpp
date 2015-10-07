@@ -20,8 +20,11 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaScene::AnimaScene(AnimaEngine* engine)
+AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
+	: AnimaNamedObject(name, nullptr)
 {
+	IMPLEMENT_ANIMA_CLASS(AnimaScene);
+	
 	_engine = engine;
 	
 	_modelsManager = nullptr;
@@ -40,6 +43,7 @@ AnimaScene::AnimaScene(AnimaEngine* engine)
 }
 
 AnimaScene::AnimaScene(const AnimaScene& src)
+	: AnimaNamedObject(src)
 {
 	_engine = src._engine;
 
@@ -57,6 +61,7 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 }
 
 AnimaScene::AnimaScene(AnimaScene&& src)
+	: AnimaNamedObject(src)
 {
 	_engine = src._engine;
 
@@ -83,6 +88,8 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 	if (this != &src)
 	{
 		Terminate();
+		
+		AnimaNamedObject::operator=(src);
 
 		_engine = src._engine;
 
@@ -107,6 +114,8 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 	if (this != &src)
 	{
 		Terminate();
+		
+		AnimaNamedObject::operator=(src);
 
 		_engine = src._engine;
 

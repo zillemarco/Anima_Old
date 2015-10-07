@@ -55,12 +55,28 @@ public:
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
+	void SetTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
+	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
+	AnimaTexture* GetTexture(const AnimaString& propertyName) const;
+	bool HasTexture(const AnimaString& propertyName) const;
+	void CopyTextures(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaTextureGenerator*, AnimaStringHasher>* GetTextures() { return &_texturesMap; }
 	
 	void AddColor(const AnimaString& propertyName, AnimaColorGenerator* value);
 	void AddColor(const AnimaString& propertyName, AnimaColor3f value);
 	void AddColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b);
 	void AddColor(const AnimaString& propertyName, AnimaColor4f value);
 	void AddColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
+	void SetColor(const AnimaString& propertyName, AnimaColorGenerator* value);
+	void SetColor(const AnimaString& propertyName, AnimaColor3f value);
+	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b);
+	void SetColor(const AnimaString& propertyName, AnimaColor4f value);
+	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
+	AnimaColor3f GetColor3f(const AnimaString& propertyName) const;
+	AnimaColor4f GetColor4f(const AnimaString& propertyName) const;
+	bool HasColor(const AnimaString& propertyName) const;
+	void CopyColors(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaStringHasher>* GetColors() { return &_colorsMap; }
 	
 	void AddVector(const AnimaString& propertyName, AnimaVectorGenerator* value);
 	void AddVector(const AnimaString& propertyName, AnimaVertex2f value);
@@ -69,32 +85,6 @@ public:
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z);
 	void AddVector(const AnimaString& propertyName, AnimaVertex4f value);
 	void AddVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
-	
-	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
-	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
-	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
-	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
-	
-	void AddFloat(const AnimaString& propertyName, AFloat value);
-	
-	void AddBoolean(const AnimaString& propertyName, bool value);
-	
-	void AddInteger(const AnimaString& propertyName, AInt value);
-	
-	void AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
-	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
-	
-	void AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
-
-	void SetTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
-	void SetTexture(const AnimaString& propertyName, AnimaTexture* value);
-	
-	void SetColor(const AnimaString& propertyName, AnimaColorGenerator* value);
-	void SetColor(const AnimaString& propertyName, AnimaColor3f value);
-	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b);
-	void SetColor(const AnimaString& propertyName, AnimaColor4f value);
-	void SetColor(const AnimaString& propertyName, AFloat r, AFloat g, AFloat b, AFloat a);
-	
 	void SetVector(const AnimaString& propertyName, AnimaVectorGenerator* value);
 	void SetVector(const AnimaString& propertyName, AnimaVertex2f value);
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y);
@@ -102,74 +92,67 @@ public:
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z);
 	void SetVector(const AnimaString& propertyName, AnimaVertex4f value);
 	void SetVector(const AnimaString& propertyName, AFloat x, AFloat y, AFloat z, AFloat w);
+	AnimaVertex2f GetVector2f(const AnimaString& propertyName) const;
+	AnimaVertex3f GetVector3f(const AnimaString& propertyName) const;
+	AnimaVertex4f GetVector4f(const AnimaString& propertyName) const;
+	bool HasVector(const AnimaString& propertyName) const;
+	void CopyVectors(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaStringHasher>* GetVectors() { return &_vectorsMap; }
 	
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
+	void AddVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVectorGenerator*>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex2f>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex3f>* value);
 	void SetVectorArray(const AnimaString& propertyName, AnimaArray<AnimaVertex4f>* value);
+	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName) const;
+	bool HasVectorArray(const AnimaString& propertyName) const;
+	void CopyVectorsArrays(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaArray<AnimaVectorGenerator*>*, AnimaStringHasher>* GetVectorArrays() { return &_vectorsArraysMap; }
 	
+	void AddFloat(const AnimaString& propertyName, AFloat value);
 	void SetFloat(const AnimaString& propertyName, AFloat value);
+	AFloat GetFloat(const AnimaString& propertyName) const;
+	bool HasFloat(const AnimaString& propertyName) const;
+	void CopyFloats(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AFloat, AnimaStringHasher>* GetFloats() { return &_floatsMap; }
 	
+	void AddBoolean(const AnimaString& propertyName, bool value);
 	void SetBoolean(const AnimaString& propertyName, bool value);
+	bool GetBoolean(const AnimaString& propertyName) const;
+	bool HasBoolean(const AnimaString& propertyName) const;
+	void CopyBooleans(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, bool, AnimaStringHasher>* GetBooleans() { return &_booleansMap; }
 	
+	void AddInteger(const AnimaString& propertyName, AInt value);
 	void SetInteger(const AnimaString& propertyName, AInt value);
+	AInt GetInteger(const AnimaString& propertyName) const;
+	bool HasInteger(const AnimaString& propertyName) const;
+	void CopyIntegers(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AInt, AnimaStringHasher>* GetIntegers() { return &_integersMap; }
 	
+	void AddMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
+	void AddMatrix(const AnimaString& propertyName, AFloat value[16]);
 	void SetMatrix(const AnimaString& propertyName, const AnimaMatrix& value);
 	void SetMatrix(const AnimaString& propertyName, AFloat value[16]);
-	
-	void SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
-	
-	AnimaTexture* GetTexture(const AnimaString& propertyName) const;
-	
-	AnimaColor3f GetColor3f(const AnimaString& propertyName) const;
-	AnimaColor4f GetColor4f(const AnimaString& propertyName) const;
-	
-	AnimaVertex2f GetVector2f(const AnimaString& propertyName) const;
-	AnimaVertex3f GetVector3f(const AnimaString& propertyName) const;
-	AnimaVertex4f GetVector4f(const AnimaString& propertyName) const;
-	
-	AnimaArray<AnimaVectorGenerator*>* GetVectorArray(const AnimaString& propertyName) const;
-	
-	AFloat GetFloat(const AnimaString& propertyName) const;
-	
-	AInt GetInteger(const AnimaString& propertyName) const;
-	
-	bool GetBoolean(const AnimaString& propertyName) const;
-	
 	AnimaMatrix GetMatrix(const AnimaString& propertyName) const;
-	
-	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName) const;
-	
-	bool HasTexture(const AnimaString& propertyName) const;
-	
-	bool HasColor(const AnimaString& propertyName) const;
-	
-	bool HasVector(const AnimaString& propertyName) const;
-	
-	bool HasVectorArray(const AnimaString& propertyName) const;
-	
-	bool HasFloat(const AnimaString& propertyName) const;
-	
-	bool HasInteger(const AnimaString& propertyName) const;
-	
-	bool HasBoolean(const AnimaString& propertyName) const;
-	
 	bool HasMatrix(const AnimaString& propertyName) const;
-	
-	bool HasMatrixArray(const AnimaString& propertyName) const;
-	
-	void CopyTextures(const AnimaMappedValues& src);
-	void CopyColors(const AnimaMappedValues& src);
-	void CopyVectors(const AnimaMappedValues& src);
-	void CopyVectorsArrays(const AnimaMappedValues& src);
 	void CopyMatrices(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaMatrix, AnimaStringHasher>* GetMatrices() { return &_matricesMap; }
+	
+	void AddMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
+	void SetMatrixArray(const AnimaString& propertyName, AnimaArray<AnimaMatrix>* value);
+	AnimaArray<AnimaMatrix>* GetMatrixArray(const AnimaString& propertyName) const;
+	bool HasMatrixArray(const AnimaString& propertyName) const;
 	void CopyMatricesArrays(const AnimaMappedValues& src);
-	void CopyFloats(const AnimaMappedValues& src);
-	void CopyIntegers(const AnimaMappedValues& src);
-	void CopyBooleans(const AnimaMappedValues& src);
+	inline boost::unordered_map<AnimaString, AnimaArray<AnimaMatrix>*, AnimaStringHasher>* GetMatrixArrays() { return &_matricesArraysMap; }
 
+public:
+	static AnimaString ExtractName(const AnimaString& src);
+	
 protected:
-	AnimaString ExtractName(const AnimaString& src) const;
 	void ClearAllVectorsArrays();
 	void ClearAllMatricesArrays();
 	

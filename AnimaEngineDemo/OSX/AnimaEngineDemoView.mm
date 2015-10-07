@@ -22,6 +22,7 @@
 #include <AnimaMeshesManager.h>
 #include <AnimaLightsManager.h>
 #include <AnimaTexturesManager.h>
+#include <AnimaParallelProgramsManager.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -35,16 +36,16 @@
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
+#include <AnimaRandom.h>
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
-#define SHADERS_PATH			"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/"
-#define DEFERRED_SHADERS_START	"Deferred/"
-#define PRIMITIVE_SHADERS_START "Primitive/"
-#define FILTERS_SHADERS_START	"Filters/"
+//#define DATA_PATH				"data"
+#define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene"
 
+Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
 Anima::AnimaCamerasManager* _camerasManager = nullptr;
 Anima::AnimaCamera* _camera = nullptr;
@@ -243,6 +244,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	_camera->Move(1.0, 0.0, 0.0, ((float)xDelta) / 100.0f);
 	_camera->Move(0.0, 1.0, 0.0, ((float)yDelta) / 100.0f);
+
+	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
 	lastXPos = pt.x;
 	lastYPos = pt.y;
@@ -257,6 +260,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	_camera->RotateXDeg((float)yDelta);
 	_camera->RotateYDeg((float)xDelta);
+	
+	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
 	lastXPos = pt.x;
 	lastYPos = pt.y;
@@ -278,16 +283,118 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 			float inc = 0.02f;
 			switch (keyChar)
 			{
+				case 'w':
+				case 'W':
+				{
+					_camera->Move(_camera->GetForward(), 2.0);
+					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+					break;
+				}
+				case 's':
+				case 'S':
+				{
+					_camera->Move(_camera->GetForward(), -2.0);
+					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+					break;
+				}
+				case 'd':
+				case 'D':
+				{
+					_camera->Move(_camera->GetRight(), 2.0);
+					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+					break;
+				}
+				case 'a':
+				case 'A':
+				{
+					_camera->Move(_camera->GetRight(), -2.0);
+					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+					break;
+				}
 				case 'p':
 				case 'P':
 				{
-					_pbrMaterial->SetFloat("Metallic", 0.0f);
+					float val = _pbrMaterial->GetFloat("Metallic");
+					val = fmax(0.0f, val - inc);
+					_pbrMaterial->SetFloat("Metallic", val);
 					break;
 				}
 				case 'm':
 				case 'M':
 				{
-					_pbrMaterial->SetFloat("Metallic", 1.0f);
+					float val = _pbrMaterial->GetFloat("Metallic");
+					val = fmin(1.0f, val + inc);
+					_pbrMaterial->SetFloat("Metallic", val);
+					break;
+				}
+				case 'x':
+				case 'X':
+				{
+					float val = _pbrMaterial->GetFloat("Specular");
+					val = fmax(0.0f, val - inc);
+					_pbrMaterial->SetFloat("Specular", val);
+					break;
+				}
+				case 'z':
+				case 'Z':
+				{
+					float val = _pbrMaterial->GetFloat("Specular");
+					val = fmin(1.0f, val + inc);
+					_pbrMaterial->SetFloat("Specular", val);
+					break;
+				}
+				case 'v':
+				case 'V':
+				{
+					float val = _renderer->GetFloat("BlurSize");
+					val = fmax(0.0f, val - (inc / 1000.0));
+					_renderer->SetFloat("BlurSize", val);
+					printf("%f\n", val);
+					break;
+				}
+				case 'b':
+				case 'B':
+				{
+					float val = _renderer->GetFloat("BlurSize");
+					val = fmin(0.5f, val + (inc / 1000.0));
+					_renderer->SetFloat("BlurSize", val);
+					printf("%f\n", val);
+					break;
+				}
+				case 'l':
+				case 'L':
+				{
+					float val = _renderer->GetFloat("BrightnessThreshold");
+					val = fmax(0.0f, val - inc);
+					_renderer->SetFloat("BrightnessThreshold", val);
+					printf("%f\n", val);
+					break;
+				}
+				case 'k':
+				case 'K':
+				{
+					float val = _renderer->GetFloat("BrightnessThreshold");
+					val = fmin(1.0f, val + inc);
+					_renderer->SetFloat("BrightnessThreshold", val);
+					printf("%f\n", val);
+					break;
+				}
+				case 'h':
+				case 'H':
+				{
+					float val = _renderer->GetFloat("BloomBlurScale");
+					val = fmax(0.0f, val - (inc / 1000.0));
+					_renderer->SetFloat("BloomBlurScale", val);
+					printf("%f\n", val);
+					break;
+				}
+				case 'g':
+				case 'G':
+				{
+					float val = _renderer->GetFloat("BloomBlurScale");
+					val = fmin(0.5f, val + (inc / 1000.0));
+					_renderer->SetFloat("BloomBlurScale", val);
+					printf("%f\n", val);
 					break;
 				}
 				case '+':
@@ -354,6 +461,23 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (!_engine.Initialize())
 		return false;
 	
+	printf("\nOpenCL available platforms:\n\n");
+	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
+	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
+	for (auto& plat : platforms)
+	{
+		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
+		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
+		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
+		
+		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
+		for (auto& dev : devices)
+		{
+			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
+			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
+			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
+		}
+	}
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 	
@@ -362,91 +486,231 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (!_scene)
 		return false;
 	
-	Anima::AnimaString dataPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data";
-	Anima::AnimaString shadersPartsPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/shaders/Parts";
-	Anima::AnimaString shadersPath = SHADERS_PATH;
-	Anima::AnimaString materialsPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/materials";
-	//Anima::AnimaString modelPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/models/material.3ds";
-	Anima::AnimaString modelPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data/models/matTester.obj";
+	Anima::AnimaString dataPath = DATA_PATH;
+	Anima::AnimaString materialsPath = dataPath + "/materials";
+	Anima::AnimaString modelPath = dataPath + "/models/";
+	Anima::AnimaString modelName = "";
+	Anima::AnimaString materialName = "legno";
+	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
+	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 	
-	// Caricamento degli shader
-	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath))
-		return false;
+	int nufminstances = 1;
+	float degOffset = 0.0f;
+	float span = M_PI * 2.0 / nufminstances;
+	float raggio = 50.0;
+	float scale = 5.0;
+	float rx = 0.0;
+	float ry = 0.0;
 	
+	int scelta = 0;
+	printf("\nScegliere il modello da caricare:\n");
+	printf("\t- 0: materia2.3ds\n");
+	printf("\t- 1: matTester.obj\n");
+	printf("\t- 2: sponza.obj\n");
+	printf("\t- 3: cubo.3ds\n");
+	printf("\t- 4: busto.obj\n");
+	printf("Inserisci la tua scelta: ");
+	//std::cin >> scelta;
+	scelta = 0;
+	
+	switch (scelta)
+	{
+		case 1:
+			modelName = "matTester.obj";
+			scale = 5.0;
+			rx = 0.0;
+			ry = 180.0;
+			break;
+		case 2:
+			modelName = "sponza.obj";
+			scale = 0.1;
+			rx = 0.0;
+			ry = 0.0;
+			break;
+		case 3:
+			modelName = "cubo.3ds";
+			scale = 20.0;
+			rx = 0.0;
+			ry = 0.0;
+			break;
+		case 4:
+			modelName = "busto.obj";
+			scale = 100.0;
+			rx = 0.0;
+			ry = 0.0;
+			break;
+		case 0:
+		default:
+			modelName = "material2.3ds";
+			scale = 20.0;
+			rx = -90.0;
+			ry = 0.0;
+			break;
+	}
+	
+	printf("\nScegliere il materiale da applicare:\n");
+	printf("\t- 0: oro\n");
+	printf("\t- 1: rame\n");
+	printf("\t- 2: cromo\n");
+	printf("\t- 3: gomma\n");
+	printf("\t- 4: legno\n");
+	printf("Inserisci la tua scelta: ");
+	//std::cin >> scelta;
+	scelta = 1;
+	
+	switch (scelta)
+	{
+		case 1:		materialName = "rame";	break;
+		case 2:		materialName = "cromo";	break;
+		case 3:		materialName = "gomma";	break;
+		case 4:		materialName = "legno";	break;
+		case 0:
+		default:	materialName = "oro";	break;
+	}
+		
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
-	materialsManager->LoadMaterials(materialsPath);
+	if (!materialsManager->LoadMaterials(materialsPath))
+		return false;
 	
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
-	_camera = _camerasManager->CreateThirdPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
 	
-	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath, ANIMA_ENGINE_DEMO_MODEL_NAME);
+	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
+	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+	
+	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
 	if (!_model)
 		return false;
 	
-	//_model->GetTransformation()->RotateXDeg(-90.0);
-	_model->GetTransformation()->RotateYDeg(180.0);
+	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
+	if (!_floorModel)
+		return false;
 	
-	_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
-	Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
-	floorModelMesh->MakePlane();
-	floorModelMesh->SetParentObject(_floorModel);
-	_floorModel->AddMesh(floorModelMesh);
+	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 	
-	Anima::AnimaModelInstance* modelInstance1 = modelInstancesManager->CreateInstance("modelInstance-1", _model);
-	Anima::AnimaModelInstance* modelInstance2 = modelInstancesManager->CreateInstance("modelInstance-2", _model);
-	Anima::AnimaModelInstance* modelInstance3 = modelInstancesManager->CreateInstance("modelInstance-3", _model);
-	Anima::AnimaModelInstance* modelInstance4 = modelInstancesManager->CreateInstance("modelInstance-4", _model);
+	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
 	
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance1Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance2Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance3Meshes;
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstance4Meshes;
+	floorModelInstance->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance->GetTransformation()->SetRotationYDeg(-90);
+	floorModelInstance->GetAllMeshes(&floorModelInstanceMeshes);
 	
-	modelInstance1->GetAllMeshes(&modelInstance1Meshes);
-	modelInstance2->GetAllMeshes(&modelInstance2Meshes);
-	modelInstance3->GetAllMeshes(&modelInstance3Meshes);
-	modelInstance4->GetAllMeshes(&modelInstance4Meshes);
+	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 	
-	floorModelMesh->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	for (int i = 0; i < nufminstances; i++)
+	{
+		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
+		Anima::AnimaModelInstance* modelInstance = modelInstancesManager->CreateInstance(name, _model);
+		Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+		
+		modelInstance->GetAllMeshes(&modelInstanceMeshes);
+		
+		for (int j = 0; j < modelInstanceMeshes.size(); j++)
+			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName(materialName));
+		
+		if (nufminstances > 1)
+			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
+		
+		modelInstance->GetTransformation()->RotateYDeg(ry);
+		modelInstance->GetTransformation()->RotateXDeg(rx);
+		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
+		
+		degOffset += span;
+	}
 	
-	for (int i = 0; i < modelInstance1Meshes.size(); i++)
-		modelInstance1Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model1-material"));
-	
-	for (int i = 0; i < modelInstance2Meshes.size(); i++)
-		modelInstance2Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model2-material"));
-	
-	for (int i = 0; i < modelInstance3Meshes.size(); i++)
-		modelInstance3Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model3-material"));
-	
-	for (int i = 0; i < modelInstance4Meshes.size(); i++)
-		modelInstance4Meshes[i]->SetMaterial(materialsManager->GetMaterialFromName("model4-material"));
-	
-	modelInstance1->GetTransformation()->SetTranslation(-40, 0, -40);
-	modelInstance1->GetTransformation()->RotateYDeg(180.0);
-	modelInstance2->GetTransformation()->SetTranslation(40, 0, -40);
-	modelInstance2->GetTransformation()->RotateYDeg(180.0);
-	modelInstance3->GetTransformation()->SetTranslation(40, 0, 40);
-	modelInstance3->GetTransformation()->RotateYDeg(180.0);
-	modelInstance4->GetTransformation()->SetTranslation(-40, 0, 40);
-	modelInstance4->GetTransformation()->RotateYDeg(180.0);
-	
-	_floorModel->GetTransformation()->SetScale(200, 0, 200);
-	
-	_pbrMaterial = materialsManager->GetMaterialFromName("model3-material");
-	
-	Anima::AnimaDirectionalLight* light = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
-	light->SetDirection(-1.0, -1.0, -1.0);
-	light->SetColor(1.0, 1.0, 1.0);
-	light->SetIntensity(0.8);
-	
-	_camera->LookAt(0.0, 40.0, 100.0, 0.0, 15.0, 0.0);
-	//_camera->LookAt(0.0, 2.0, 5.0, 0.0, 0.0, 0.0);
+	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 0.0, -1.0);
 	_camera->Activate();
+	
+	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
+	directionalLight->SetDirection(-1.0, -1.0, -1.0);
+	directionalLight->SetColor(1.0, 1.0, 1.0);
+	directionalLight->SetIntensity(1.0);
+	
+	//Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
+	//directionalLight2->SetDirection(1.0, -1.0, 1.0);
+	//directionalLight2->SetColor(1.0, 1.0, 1.0);
+	//directionalLight2->SetIntensity(1.0);
+	
+	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
+	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
+	//pointLight1->SetColor(1.0, 0.0, 0.0);
+	//pointLight1->SetIntensity(1.0);
+	//pointLight1->SetConstantAttenuation(1.0);
+	//pointLight1->SetLinearAttenuation(0.0);
+	//pointLight1->SetExponentAttenuation(0.0);
+	//pointLight1->SetRange(200);
+	
+	//Anima::AnimaPointLight* pointLight2 = _scene->GetLightsManager()->CreatePointLight("light-2");
+	//pointLight2->SetPosition(0.0, 20.0, 40.0);
+	//pointLight2->SetColor(0.0, 1.0, 0.0);
+	//pointLight2->SetIntensity(1.0);
+	//pointLight2->SetConstantAttenuation(1.0);
+	//pointLight2->SetLinearAttenuation(0.0);
+	//pointLight2->SetExponentAttenuation(0.0);
+	//pointLight2->SetRange(200);
+	
+	//Anima::AnimaPointLight* pointLight3 = _scene->GetLightsManager()->CreatePointLight("light-3");
+	//pointLight3->SetPosition(40.0, 20.0, 0.0);
+	//pointLight3->SetColor(1.0, 0.0, 1.0);
+	//pointLight3->SetIntensity(1.0);
+	//pointLight3->SetConstantAttenuation(1.0);
+	//pointLight3->SetLinearAttenuation(0.0);
+	//pointLight3->SetExponentAttenuation(0.0);
+	//pointLight3->SetRange(200);
+	
+	//Anima::AnimaPointLight* pointLight4 = _scene->GetLightsManager()->CreatePointLight("light-4");
+	//pointLight4->SetPosition(0.0, 20.0, -40.0);
+	//pointLight4->SetColor(1.0, 0.0, 1.0);
+	//pointLight4->SetIntensity(1.0);
+	//pointLight4->SetConstantAttenuation(1.0);
+	//pointLight4->SetLinearAttenuation(0.0);
+	//pointLight4->SetExponentAttenuation(0.0);
+	//pointLight4->SetRange(200);
+	
+	//Anima::AnimaPointLight* pointLight5 = _scene->GetLightsManager()->CreatePointLight("light-5");
+	//pointLight5->SetPosition(-40.0, 20.0, -40.0);
+	//pointLight5->SetColor(1.0, 0.5, 1.0);
+	//pointLight5->SetIntensity(1.0);
+	//pointLight5->SetConstantAttenuation(1.0);
+	//pointLight5->SetLinearAttenuation(0.0);
+	//pointLight5->SetExponentAttenuation(0.0);
+	//pointLight5->SetRange(200);
+	//
+	//Anima::AnimaPointLight* pointLight6 = _scene->GetLightsManager()->CreatePointLight("light-6");
+	//pointLight6->SetPosition(40.0, 20.0, -40.0);
+	//pointLight6->SetColor(1.0, 0.0, 0.5);
+	//pointLight6->SetIntensity(1.0);
+	//pointLight6->SetConstantAttenuation(1.0);
+	//pointLight6->SetLinearAttenuation(0.0);
+	//pointLight6->SetExponentAttenuation(0.0);
+	//pointLight6->SetRange(200);
+	//
+	//Anima::AnimaPointLight* pointLight7 = _scene->GetLightsManager()->CreatePointLight("light-7");
+	//pointLight7->SetPosition(40.0, 20.0, 40.0);
+	//pointLight7->SetColor(1.0, 1.0, .0);
+	//pointLight7->SetIntensity(1.0);
+	//pointLight7->SetConstantAttenuation(1.0);
+	//pointLight7->SetLinearAttenuation(0.0);
+	//pointLight7->SetExponentAttenuation(0.0);
+	//pointLight7->SetRange(200);
+	
+	//Anima::AnimaPointLight* pointLight8 = _scene->GetLightsManager()->CreatePointLight("light-8");
+	//pointLight8->SetPosition(-40.0, 20.0, 40.0);
+	//pointLight8->SetColor(1.0, 1.0, 1.0);
+	//pointLight8->SetIntensity(1.0);
+	//pointLight8->SetConstantAttenuation(1.0);
+	//pointLight8->SetLinearAttenuation(0.0);
+	//pointLight8->SetExponentAttenuation(0.0);
+	//pointLight8->SetRange(200);
+	
+	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
 	_animationsManager = _scene->GetAnimationsManager();
 	
@@ -473,9 +737,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 			texture->SetHeight(height);
 			texture->SetDepth(depth);
 			
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = fmax(mipMapsCount, 1);
-			
 			if (format != 0 && internalFormat != 0)
 			{
 				texture->SetFormat(format);
@@ -484,6 +745,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 			
 			texture->SetTextureTarget(target);
 			texture->SetMipMapLevels(mipMapsCount);
+			
+			// Forzo ad avere come fminimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = fmax(mipMapsCount, 1);
 			
 			Anima::AInt offset = 0;
 			for (Anima::AUint i = 0; i < imagesCount; i++)
@@ -513,9 +777,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 			texture->SetHeight(height);
 			texture->SetDepth(depth);
 			
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = fmax(mipMapsCount, 1);
-			
 			if (format != 0 && internalFormat != 0)
 			{
 				texture->SetFormat(format);
@@ -524,6 +785,11 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 			
 			texture->SetTextureTarget(target);
 			texture->SetMipMapLevels(mipMapsCount);
+			
+			// Forzo ad avere come fminimo un livello di mip-map per evitare condizioni dopo sui cicli
+			mipMapsCount = fmax(mipMapsCount, 1);
+			
+			texture->SetTextureTarget(target);
 			
 			Anima::AInt offset = 0;
 			for (Anima::AUint i = 0; i < imagesCount; i++)
@@ -544,6 +810,14 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		}
 	}
 	
+	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	textureSkyBox->Load();
+	_renderer->SetTexture("SkyBox", textureSkyBox, false);
+	
+	_renderer->CheckPrograms(_scene);
+	
+	_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
+	
 	return true;
 }
 
@@ -552,8 +826,11 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 10000.0f);
+		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 1000.0f);
 	}
+	
+	if(_scene)
+		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
 	if (_renderer)
 	{

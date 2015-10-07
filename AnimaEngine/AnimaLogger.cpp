@@ -126,7 +126,7 @@ const char* AnimaLogger::OpenGLDebugSourceString(AUint source)
 {
 	static const char* sources[] = { "API", "Window System", "Shader Compiler", "Third Party", "Application", "Other", "Unknown" };
 
-	int str_idx = min(source - GL_DEBUG_SOURCE_API, sizeof(sources) / sizeof(const char *));
+	int str_idx = fmin(source - GL_DEBUG_SOURCE_API, sizeof(sources) / sizeof(const char *));
 
 	return sources[str_idx];
 }
@@ -135,7 +135,7 @@ const char* AnimaLogger::OpenGLDebugTypeString(AUint type)
 {
 	static const char* types[] = { "Error", "Deprecated Behavior", "Undefined Behavior", "Portability", "Performance", "Other", "Marker", "Push group", "Pop group" };
 
-	int str_idx = min(type - GL_DEBUG_TYPE_ERROR, sizeof(types) / sizeof(const char *));
+	int str_idx = fmin(type - GL_DEBUG_TYPE_ERROR, sizeof(types) / sizeof(const char *));
 
 	return types[str_idx];
 }
@@ -144,7 +144,7 @@ const char* AnimaLogger::OpenGLDebugSeverityString(AUint severity)
 {
 	static const char* severities[] = { "High", "Medium", "Low", "Unknown", "Notification", "Unknown" };
 
-	int str_idx = min(severity - GL_DEBUG_SEVERITY_HIGH, sizeof(severities) / sizeof(const char *));
+	int str_idx = fmin(severity - GL_DEBUG_SEVERITY_HIGH, sizeof(severities) / sizeof(const char *));
 
 	return severities[str_idx];
 }
@@ -158,7 +158,7 @@ AnimaLoggerTextColor AnimaLogger::OpenGLDebugSeverityColor(AUint severity)
 		ANIMA_LOGGER_TEXT_COLOR_WHITE	// ???  (White)
 	};
 
-	int col_idx = min(severity - GL_DEBUG_SEVERITY_HIGH, sizeof(severities) / sizeof(AnimaLoggerTextColor));
+	int col_idx = fmin(severity - GL_DEBUG_SEVERITY_HIGH, sizeof(severities) / sizeof(AnimaLoggerTextColor));
 
 	return severities[col_idx];
 }

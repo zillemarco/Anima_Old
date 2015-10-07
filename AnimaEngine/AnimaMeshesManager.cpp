@@ -235,17 +235,28 @@ AnimaMesh* AnimaMeshesManager::CreateMesh(const AnimaString& name)
 	return newMesh;
 }
 
-void AnimaMeshesManager::SaveMeshToFile(const AnimaString& meshName, const AnimaString& filePath)
+void AnimaMeshesManager::SaveMeshToFile(const AnimaString& meshName, const AnimaString& destinationPath, bool createFinalPath)
 {
 	AnimaMesh* mesh = _meshes[meshName];
-	SaveMeshToFile(mesh, filePath);
+	SaveMeshToFile(mesh, destinationPath, createFinalPath);
 }
 
-void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& filePath)
+void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& destinationPath, bool createFinalPath)
 {
 	if (mesh == nullptr)
 		return;
 
+	AnimaString saveFileName = destinationPath;
+	if(createFinalPath)
+	{
+		namespace fs = boost::filesystem;
+		fs::path firstPart(destinationPath);
+		fs::path secondPart(mesh->GetName() + ".amesh");
+		fs::path completePath = firstPart / secondPart;
+		
+		saveFileName = completePath.string();
+	}
+	
 	using boost::property_tree::ptree;
 	ptree pt;
 
@@ -283,7 +294,7 @@ void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& file
 	pt.add("AnimaMesh.SpaceData.Rotation", mesh->GetTransformation()->GetRotation());
 	pt.add("AnimaMesh.SpaceData.Scale", mesh->GetTransformation()->GetScale());
 
-	boost::property_tree::write_xml(filePath, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+	boost::property_tree::write_xml(saveFileName, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 }
 
 AnimaMesh* AnimaMeshesManager::LoadMeshFromFile(const AnimaString& meshFilePath)
@@ -351,7 +362,7 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 	return mesh;
 }
 
-void AnimaMeshesManager::LoadMeshes(const AnimaString& meshesPath)
+bool AnimaMeshesManager::LoadMeshes(const AnimaString& meshesPath)
 {
 	namespace fs = boost::filesystem;
 	fs::path directory(meshesPath);
@@ -363,10 +374,20 @@ void AnimaMeshesManager::LoadMeshes(const AnimaString& meshesPath)
 		{
 			if (directoryIterator->path().extension().string() == ".amesh")
 			{
-				LoadMeshFromFile(directoryIterator->path().string());
-				printf("Read %s\n", directoryIterator->path().string().c_str());
+				if(LoadMeshFromFile(directoryIterator->path().string()) == nullptr)
+					return false;
 			}
 		}
+	}
+	return true;
+}
+
+void AnimaMeshesManager::SaveMeshes(const AnimaString& destinationPath)
+{
+	AInt count = _meshes.GetSize();
+	for(AInt i = 0; i < count; i++)
+	{
+		SaveMeshToFile(_meshes[i], destinationPath, true);
 	}
 }
 

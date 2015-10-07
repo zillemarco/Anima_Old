@@ -42,7 +42,7 @@ public:
 	AnimaModel* LoadModelFromFile(const AnimaString& filePath);
 	AnimaModel* LoadModelFromXml(const AnimaString& modelXmlDefinition);
 	AnimaModel* LoadModelFromExternalFile(const AnimaString& modelPath, const AnimaString& name);
-	void LoadModels(const AnimaString& modelsPath);
+	bool LoadModels(const AnimaString& modelsPath);
 	
 	AInt GetModelsCount();
 
@@ -51,8 +51,9 @@ public:
 	
 	void ClearModels();
 	
-	void SaveModelToFile(const AnimaString& modelName, const AnimaString& filePath);
-	void SaveModelToFile(AnimaModel* model, const AnimaString& filePath);
+	void SaveModelToFile(const AnimaString& modelName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveModelToFile(AnimaModel* model, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveModels(const AnimaString& destinationPath);
 
 private:
 	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* meshesMap, const AnimaString& modelName);

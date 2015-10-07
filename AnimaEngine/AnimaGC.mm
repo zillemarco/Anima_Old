@@ -332,10 +332,10 @@ void AnimaGC::SurfaceNeedsUpdateHandler(CFNotificationCenterRef center, void* ob
 		[gc->_context update];
 }
 
-AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig)
+AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig, bool vSyncEnabled)
 {
 	if(!InitializeContextAPIs())
-		return false;
+		return nullptr;
 	
 	AnimaGC* newGC = new AnimaGC();
 	newGC->_view = (NSView*)windowId;
@@ -347,14 +347,14 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 	if (ctxconfig._api == ANIMAGC_OPENGL_ES_API)
 	{
 		//		_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: This API does not support OpenGL ES");
-		return false;
+		return nullptr;
 	}
 	
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 	if (ctxconfig._major == 3 && ctxconfig._minor < 2)
 	{
 		//		_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: The targeted version of OS X does not " "support OpenGL 3.0 or 3.1");
-		return false;
+		return nullptr;
 	}
 	
 	if (ctxconfig._major > 2)
@@ -362,13 +362,13 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 		if (!ctxconfig._forward)
 		{
 			//			_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: The targeted version of OS X only " "supports OpenGL 3.2 and later versions if they " "are forward-compatible");
-			return false;
+			return nullptr;
 		}
 		
 		if (ctxconfig._profile != ANIMAGC_OPENGL_CORE_PROFILE)
 		{
 			//			_glfwInputError(GLFW_VERSION_UNAVAILABLE, "NSGL: The targeted version of OS X only " "supports OpenGL 3.2 and later versions if they " "use the core profile");
-			return false;
+			return nullptr;
 		}
 	}
 #else
@@ -466,7 +466,7 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 	if (newGC->_pixelFormat == nil)
 	{
 		//		_glfwInputError(GLFW_PLATFORM_ERROR, "NSGL: Failed to create OpenGL pixel format");
-		return false;
+		return nullptr;
 	}
 	
 	NSOpenGLContext* share = NULL;
@@ -477,7 +477,7 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 	if (newGC->_context == nil)
 	{
 		//		_glfwInputError(GLFW_PLATFORM_ERROR, "NSGL: Failed to create OpenGL context");
-		return false;
+		return nullptr;
 	}
 	
 	[newGC->_context setView:newGC->_view];

@@ -8,6 +8,7 @@
 
 #include "AnimaTexturesManager.h"
 #include "AnimaXmlTranslators.h"
+#include "AnimaTools.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -166,6 +167,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromFile(const AnimaString& fileP
 	if (GetTextureDataFromFile(filePath, &data, width, height))
 	{
 		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
+		texture->SetSourceFileName(filePath);
 		return texture;
 	}
 	// Se non ha funzionato provo a leggere la texture come file DDS
@@ -188,6 +190,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromBMPFile(const AnimaString& fi
 	if (GetTextureDataFromBMPFile(filePath, &data, width, height))
 	{
 		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
+		texture->SetSourceFileName(filePath);
 		return texture;
 	}
 
@@ -207,6 +210,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromTGAFile(const AnimaString& fi
 	if (GetTextureDataFromTGAFile(filePath, &data, width, height))
 	{
 		AnimaTexture* texture = CreateTexture(textureName, width, height, &data[0], data.size());
+		texture->SetSourceFileName(filePath);
 		return texture;
 	}
 
@@ -280,7 +284,8 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromDDSFile(const AnimaString& fi
 				}
 			}
 		}
-
+		
+		texture->SetSourceFileName(filePath);
 		return texture;
 	}
 
@@ -796,7 +801,7 @@ AnimaTexture* AnimaTexturesManager::GetTexture(AUint index)
 	return _textures[index];
 }
 
-AnimaTexture* AnimaTexturesManager::GetTexture(const AnimaString& textureName)
+AnimaTexture* AnimaTexturesManager::GetTextureFromName(const AnimaString& textureName)
 {
 	return _textures[textureName];
 }
@@ -1089,7 +1094,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 				texture->SetDepth(depth);
 				
 				// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-				mipMapsCount = max(mipMapsCount, 1);
+				mipMapsCount = fmax(mipMapsCount, 1);
 
 				if (format != 0 && internalFormat != 0)
 				{
@@ -1121,6 +1126,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 				texture->SetClampT(TEXTURE_CLAMP_REPEAT);
 				texture->SetDataType(TEXTURE_DATA_TYPE_UNSIGNED_BYTE);
 			}
+			texture->SetSourceFileName(filePath);
 		}
 	}
 	
@@ -1148,6 +1154,127 @@ bool AnimaTexturesManager::LoadTextures(const AnimaString& texturesPath)
 	}
 	
 	return returnValue;
+}
+
+void AnimaTexturesManager::SaveTextureToFile(const AnimaString& textureName, const AnimaString& destinationPath, bool createFinalPath)
+{
+	return SaveTextureToFile(GetTextureFromName(textureName), destinationPath, createFinalPath);
+}
+
+void AnimaTexturesManager::SaveTextureToFile(AnimaTexture* texture, const AnimaString& destinationPath, bool createFinalPath)
+{
+	if(texture == nullptr)
+		return;
+	
+	namespace fs = boost::filesystem;
+	
+	AnimaString saveFileName = destinationPath;
+	if(createFinalPath)
+	{
+		namespace fs = boost::filesystem;
+		fs::path firstPart(destinationPath);
+		fs::path secondPart(texture->GetName() + ".atexture");
+		fs::path completePath = firstPart / secondPart;
+		
+		saveFileName = completePath.string();
+	}
+	AnimaString saveDirectory = fs::path(saveFileName).parent_path().string();
+	
+	using ptree = boost::property_tree::ptree;
+	ptree textureTree;
+	
+	textureTree.add("AnimaTexture.Name", texture->GetName());
+	textureTree.add("AnimaTexture.Target", texture->GetTextureTarget());
+	textureTree.add("AnimaTexture.Format", texture->GetFormat());
+	textureTree.add("AnimaTexture.InternalFormat", texture->GetInternalFormat());
+	textureTree.add("AnimaTexture.MinFilter", texture->GetMinFilter());
+	textureTree.add("AnimaTexture.MagFilter", texture->GetMagFilter());
+	textureTree.add("AnimaTexture.Attachment", texture->GetAttachment());
+	textureTree.add("AnimaTexture.DataType", texture->GetDataType());
+	textureTree.add("AnimaTexture.ClampS", texture->GetClampS());
+	textureTree.add("AnimaTexture.ClampT", texture->GetClampT());
+	textureTree.add("AnimaTexture.ClampR", texture->GetClampR());
+	textureTree.add("AnimaTexture.MipMapLevels", texture->GetMipMapLevels());
+	textureTree.add("AnimaTexture.BorderColor", texture->GetBorderColor());
+	textureTree.add("AnimaTexture.GenerateMipMaps", texture->IsGenerateMipMap());
+	
+	AnimaString textureSourceFileName = texture->GetSourceFileName();
+	if(textureSourceFileName.empty() || texture->GetTextureTarget() == TEXTURE_TARGET_CUBE)
+	{
+		AUint mipMapLevels = fmax(texture->GetMipMapLevels(), 1);
+		
+		if(texture->GetTextureTarget() == TEXTURE_TARGET_CUBE)
+		{
+			ptree cubeTree;
+			for(AInt cubeIndex = 0; cubeIndex < 6; cubeIndex++)
+			{
+				AnimaTextureCubeIndex textureCubeIndex = (AnimaTextureCubeIndex)cubeIndex;
+				ptree cubeFaceTree;
+				cubeFaceTree.add("Index", textureCubeIndex);
+				
+				ptree surfacesTree;
+				
+				for(AInt mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
+				{
+					AnimaArray<AUchar>* data = texture->GetDataAsArray(textureCubeIndex, mipIndex);
+					
+					if(data != nullptr)
+					{
+						AnimaString base64Data = AnimaTools::Base64Encode(*data);
+						surfacesTree.add("Surface.Data", base64Data);
+					}
+					else
+					{
+						surfacesTree.add("Surface.Data", "");
+					}
+				}
+				cubeFaceTree.add_child("Sufaces", surfacesTree);
+				
+				cubeTree.add_child("CubeFace", cubeFaceTree);
+			}
+			textureTree.add_child("AnimaTextures.CubeFaces", cubeTree);
+		}
+		else
+		{
+			ptree surfacesTree;
+			
+			for(AInt mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
+			{
+				AnimaArray<AUchar>* data = texture->GetDataAsArray(mipIndex);
+				
+				if(data != nullptr)
+				{
+					AnimaString base64Data = AnimaTools::Base64Encode(*data);
+					surfacesTree.add("Surface.Data", base64Data);
+				}
+				else
+				{
+					surfacesTree.add("Surface.Data", "");
+				}
+			}
+			
+			textureTree.add_child("AnimaTexture.Surfaces", surfacesTree);
+		}
+	}
+	else
+	{
+		fs::path sourcePath(textureSourceFileName);
+		AnimaString destinationFileName = (fs::path(saveDirectory) / sourcePath.filename()).string();
+
+		fs::copy_file(fs::path(textureSourceFileName), fs::path(destinationFileName), fs::copy_option::overwrite_if_exists);
+		textureTree.add("AnimaTexture.FileName", destinationFileName);
+	}
+	
+	boost::property_tree::write_xml(saveFileName, textureTree, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+}
+
+void AnimaTexturesManager::SaveTextures(const AnimaString& destinationPath)
+{
+	AInt count = _textures.GetSize();
+	for (AInt i = 0; i < count; i++)
+	{
+		SaveTextureToFile(_textures[i], destinationPath, true);
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE

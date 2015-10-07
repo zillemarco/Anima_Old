@@ -87,14 +87,12 @@ AnimaModelInstance* AnimaModelInstancesManager::CreateInstanceFromModel(const An
 	newInstance->CopyData(*srcModel);
 	newInstance->SetMeshes(_meshInstancesManager->CreateInstances(srcModel));
 
-	AnimaTimer timer;
 	AInt childrenCount = srcModel->GetChildrenCount();
 	for (AInt i = 0; i < childrenCount; i++)
 	{
 		AnimaModelInstance* newChild = CreateInstanceFromModel(instanceName, (AnimaModel*)srcModel->GetChild(i), true);
 		newInstance->AddChild(newChild);
 	}
-	timer.PrintElapsed();
 
 	newInstance->UpdateChildrenTransformation();
 

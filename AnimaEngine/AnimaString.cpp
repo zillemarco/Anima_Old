@@ -14,7 +14,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 bool s_randInitialized = false;
-char* s_randomCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const char* s_randomCharset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 AInt s_randomCharsetLenght = 62;
 
 AnimaString MakeRandonString(AInt length)

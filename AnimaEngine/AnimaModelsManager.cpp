@@ -316,20 +316,31 @@ AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* t
 	return model;
 }
 
-void AnimaModelsManager::SaveModelToFile(const AnimaString& modelName, const AnimaString& filePath)
+void AnimaModelsManager::SaveModelToFile(const AnimaString& modelName, const AnimaString& destinationPath, bool createFinalPath)
 {
 	AnimaModel* model = _models[modelName];
-	SaveModelToFile(model, filePath);
+	SaveModelToFile(model, destinationPath, createFinalPath);
 }
 
-void AnimaModelsManager::SaveModelToFile(AnimaModel* model, const AnimaString& filePath)
+void AnimaModelsManager::SaveModelToFile(AnimaModel* model, const AnimaString& destinationPath, bool createFinalPath)
 {
 	if (model == nullptr)
 		return;
-
+	
+	AnimaString saveFileName = destinationPath;
+	if(createFinalPath)
+	{
+		namespace fs = boost::filesystem;
+		fs::path firstPart(destinationPath);
+		fs::path secondPart(model->GetName() + ".amodel");
+		fs::path completePath = firstPart / secondPart;
+		
+		saveFileName = completePath.string();
+	}
+	
 	using boost::property_tree::ptree;
 
-	boost::property_tree::write_xml(filePath, GetModelTree(model), std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+	boost::property_tree::write_xml(saveFileName, GetModelTree(model), std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 }
 
 boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
@@ -367,7 +378,7 @@ boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
 	return pt;
 }
 
-void AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
+bool AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
 {
 	namespace fs = boost::filesystem;
 	fs::path directory(modelsPath);
@@ -379,10 +390,20 @@ void AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
 		{
 			if (directoryIterator->path().extension().string() == ".amodel")
 			{
-				LoadModelFromFile(directoryIterator->path().string());
-				printf("Read %s\n", directoryIterator->path().string().c_str());
+				if(LoadModelFromFile(directoryIterator->path().string()) == nullptr)
+					return false;
 			}
 		}
+	}
+	return true;
+}
+
+void AnimaModelsManager::SaveModels(const AnimaString& destinationPath)
+{
+	AInt count = _topLevelModels.GetSize();
+	for(AInt i = 0; i < count; i++)
+	{
+		SaveModelToFile(_topLevelModels[i], destinationPath, true);
 	}
 }
 

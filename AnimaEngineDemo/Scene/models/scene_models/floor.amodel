@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnimaModel>
+	<Name>floorModel</Name>
+	<Meshes/>
+	<SpaceData>
+		<Position>0.000000;0.000000;0.000000</Position>
+		<Translation>0.000000;0.000000;0.000000</Translation>
+		<Rotation>-1.570796;-1.570796;0.000000</Rotation>
+		<Scale>60.000000;60.000000;60.000000</Scale>
+	</SpaceData>
+	<Children>
+		<Child>
+			<AnimaModel>
+				<Name>3DSMesh_0</Name>
+				<Meshes>
+					<Mesh>floorModel.mesh0</Mesh>
+				</Meshes>
+				<SpaceData>
+					<Position>0.000000;0.000000;0.000000</Position>
+					<Translation>0.000000;0.000000;0.000000</Translation>
+					<Rotation>0.000000;0.000000;0.000000</Rotation>
+					<Scale>1.000000;1.000000;1.000000</Scale>
+				</SpaceData>
+				<Children/>
+			</AnimaModel>
+		</Child>
+	</Children>
+</AnimaModel>

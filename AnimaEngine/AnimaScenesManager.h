@@ -29,8 +29,16 @@ public:
 	AnimaScene* CreateScene(const AnimaString& name);
 
 	AnimaScene* GetScene(AUint index);
-	AnimaScene* GetScene(const AnimaString& name);
-
+	AnimaScene* GetSceneFromName(const AnimaString& name);
+	
+	bool LoadScenes(const AnimaString& scenesPath);
+	AnimaScene* LoadSceneFromFile(const AnimaString& sceneFilePath);
+	AnimaScene* LoadSceneFromXml(const AnimaString& sceneXmlDefinition);
+	
+	void SaveSceneToFile(const AnimaString& sceneName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveSceneToFile(AnimaScene* scene, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveScenes(const AnimaString& destinationPath);
+	
 private:
 	void ClearScenes();
 	
