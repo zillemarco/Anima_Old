@@ -32,7 +32,6 @@ class ANIMA_ENGINE_EXPORT AnimaMappedValues : public AnimaNamedObject
 {
 	friend class AnimaShaderProgram;
 	friend class AnimaScene;
-	friend class AnimaMappedValues;
 
 	DECLARE_ANIMA_CLASS(AnimaMappedValues);
 
@@ -48,6 +47,10 @@ public:
 	AnimaMappedValues& operator=(AnimaMappedValues&& src);
 	
 	virtual void CopyData(const AnimaMappedValues& src);
+	
+public:
+	virtual ptree GetObjectTree() const;
+	virtual bool ReadObject(const ptree& objectTree);
 	
 public:
 	virtual const char* GetShaderPrefix() = 0;

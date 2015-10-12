@@ -14,8 +14,15 @@
 #include "AnimaAllocator.h"
 #include "AnimaArray.h"
 #include "AnimaString.h"
+#include "AnimaLogger.h"
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+using ptree = boost::property_tree::ptree;
 
 #define DECLARE_ANIMA_CLASS(class_name)		public:																		\
 												static AnimaString _sGetClassName() { return AnimaString(#class_name); }
@@ -41,6 +48,15 @@ public:
 public:
 	virtual void SetName(const AnimaString& name);
 	AnimaString GetName() const;
+	
+public:
+	virtual void SaveObject(const AnimaString& destinationPath, const AnimaString& extension = "", bool createCompletePath = false) const;
+	virtual AnimaString GetObjectAsXML() const;
+	virtual ptree GetObjectTree() const;
+	
+	virtual bool ReadObject(const AnimaString& sourcePath);
+	virtual bool ReadObjectFromXML(const AnimaString& xml);
+	virtual bool ReadObject(const ptree& objectTree);
 	
 protected:
 	void _AddDerivedClassName(AnimaString derivedClassName);

@@ -1125,4 +1125,88 @@ void AnimaMappedValues::CopyBooleans(const AnimaMappedValues& src)
 	}
 }
 
+ptree AnimaMappedValues::GetObjectTree() const
+{
+	ptree tree;
+	
+	ptree propertiesTree;
+	
+	for (auto& pair : _texturesMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "texture");
+		propertyTree.add_child("Value", pair.second->GetObjectTree());
+
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	for (auto& pair : _colorsMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "color");
+		propertyTree.add_child("Value", pair.second->GetObjectTree());
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	for (auto& pair : _vectorsMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "vector");
+		propertyTree.add_child("Value", pair.second->GetObjectTree());
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	for (auto& pair : _floatsMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "float");
+		propertyTree.add("Value", pair.second);
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	for (auto& pair : _booleansMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "bool");
+		propertyTree.add("Value", pair.second);
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	
+	tree.add_child("AnimaMappedValues.Properties", propertiesTree);
+	
+	tree.add_child("AnimaMappedValues.NamedObject", AnimaNamedObject::GetObjectTree());
+	
+	return tree;
+}
+
+bool AnimaMappedValues::ReadObject(const ptree& objectTree)
+{
+	try
+	{
+		_name = objectTree.get<AnimaString>("Name");
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		return false;
+	}
+	
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

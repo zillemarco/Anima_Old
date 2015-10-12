@@ -98,4 +98,88 @@ bool AnimaNamedObject::IsOfClass(AnimaString className)
 	return false;
 }
 
+void AnimaNamedObject::SaveObject(const AnimaString& destinationPath, const AnimaString& extension, bool createCompletePath) const
+{
+	
+	namespace fs = boost::filesystem;
+	
+	AnimaString saveFileName = destinationPath;
+	if(createCompletePath)
+	{
+		namespace fs = boost::filesystem;
+		fs::path firstPart(destinationPath);
+		fs::path secondPart(this->GetName() + extension);
+		fs::path completePath = firstPart / secondPart;
+		
+		saveFileName = completePath.string();
+	}
+
+	ptree tree = GetObjectTree();
+	
+	boost::property_tree::write_xml(saveFileName, tree, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+}
+
+AnimaString AnimaNamedObject::GetObjectAsXML() const
+{
+	ptree tree = GetObjectTree();
+	
+	std::stringstream ss;
+	boost::property_tree::write_xml(ss, tree);
+	
+	return ss.str();
+}
+
+ptree AnimaNamedObject::GetObjectTree() const
+{
+	ptree tree;
+	tree.add("AnimaNamedObject.Name", GetName());
+	return tree;
+}
+
+bool AnimaNamedObject::ReadObject(const AnimaString& sourcePath)
+{
+	std::ifstream fileStream(sourcePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+	
+	return ReadObject(xml);
+}
+
+bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml)
+{
+	try
+	{
+		boost::property_tree::ptree pt;
+		std::stringstream ss(xml);
+		boost::property_tree::read_xml(ss, pt);
+		
+		return ReadObject(pt);
+	}
+	catch (boost::property_tree::ptree_error& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		return false;
+	}
+}
+
+bool AnimaNamedObject::ReadObject(const ptree& objectTree)
+{
+	try
+	{
+		_name = objectTree.get<AnimaString>("AnimaNamedObject.Name");
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		return false;
+	}
+	
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

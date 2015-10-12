@@ -301,6 +301,28 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			ANIMA_ASSERT(diffuseTexture->LoadRenderTargets());
 			SetTexture("DiffuseMap", diffuseTexture);
 		}
+		
+		
+		AnimaTexture* finalTexture = GetTexture("FinalMap");
+		if(finalTexture != nullptr)
+			diffuseTexture->Resize(width, height);
+		else
+		{
+			finalTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator, "FinalMap", width, height, nullptr, 0);
+			finalTexture->SetTextureTarget(TEXTURE_TARGET_2D);
+			finalTexture->SetMinFilter(TEXTURE_MIN_FILTER_MODE_LINEAR);
+			finalTexture->SetMagFilter(TEXTURE_MAG_FILTER_MODE_LINEAR);
+			finalTexture->SetInternalFormat(TEXTURE_INTERNAL_FORMAT_RGBA32F);
+			finalTexture->SetFormat(TEXTURE_FORMAT_RGBA);
+			finalTexture->SetDataType(TEXTURE_DATA_TYPE_FLOAT);
+			finalTexture->SetClampS(TEXTURE_CLAMP_TO_EDGE);
+			finalTexture->SetClampT(TEXTURE_CLAMP_TO_EDGE);
+			finalTexture->SetClampR(TEXTURE_CLAMP_TO_EDGE);
+			finalTexture->SetAttachment(TEXTURE_ATTACHMENT_COLOR0);
+			
+			ANIMA_ASSERT(finalTexture->LoadRenderTargets());
+			SetTexture("FinalMap", finalTexture);
+		}
 
 		AnimaTexture* directionalLightShadowMapTextureTemp = GetTexture("DILShadowMapTemp");
 		if (directionalLightShadowMapTextureTemp == nullptr)
@@ -453,6 +475,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetFloat("FxaaReduceMin", 1.0f / 128.0f);
 	SetFloat("FxaaReduceMul", 1.0f / 8.0f);
 	SetFloat("FxaaSpanMax", 8.0f);
+	SetBoolean("ApplyFXAA", true);
 	SetFloat("BlurSize", 0.002f);
 	SetFloat("BloomBlurScale", 0.002f);
 	SetFloat("BrightnessThreshold", 0.9f);
@@ -1751,9 +1774,19 @@ void AnimaRenderer::FinalPass(AnimaRenderer* renderer)
 
 	renderer->Start();
 
-	AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
-	glViewport(0, 0, (AUint)size.x, (AUint)size.y);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	bool applyFxaa = renderer->GetBoolean("ApplyFXAA");
+	
+	if(applyFxaa)
+	{
+		renderer->GetTexture("FinalMap")->BindAsRenderTarget();
+	}
+	else
+	{
+		AnimaVertex2f size = renderer->GetVector2f("ScreenSize");
+		glViewport(0, 0, (AUint)size.x, (AUint)size.y);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
 
@@ -1771,7 +1804,11 @@ void AnimaRenderer::FinalPass(AnimaRenderer* renderer)
 
 	program->UpdateRenderingManagerProperies(renderer);
 	renderer->_filterMesh->Draw(renderer, program, true, true, false);
-
+	
+	if(applyFxaa)
+	{
+		renderer->ApplyEffectFromTextureToTexture(renderer->_scene->GetShadersManager()->GetProgramFromName("fxaaFilter"), renderer->GetTexture("FinalMap"), nullptr);
+	}
 	renderer->Finish();
 }
 
@@ -2321,6 +2358,10 @@ bool AnimaRenderer::InitializeShaders()
 
 	AnimaShaderProgram* finalProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/final.asp");
 	if (!finalProgram->Link())
+		return false;
+	
+	AnimaShaderProgram* fxaaFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/fxaaFilter.asp");
+	if (!fxaaFilterProgram->Link())
 		return false;
 
 	_defaultShaderProgram = prepareProgram;
