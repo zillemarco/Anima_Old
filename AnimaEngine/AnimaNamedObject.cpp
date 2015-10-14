@@ -16,6 +16,7 @@ AnimaNamedObject::AnimaNamedObject(const AnimaString& name, AnimaAllocator* allo
 	IMPLEMENT_ANIMA_CLASS(AnimaNamedObject);
 
 	_name = name;
+	_savingDirectory = "";
 }
 
 AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
@@ -24,6 +25,7 @@ AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
 	, _className(src._className)
 	, _derivedClassNames(src._derivedClassNames)
 {
+	_savingDirectory = "";
 }
 
 AnimaNamedObject::AnimaNamedObject(AnimaNamedObject&& src)
@@ -32,6 +34,7 @@ AnimaNamedObject::AnimaNamedObject(AnimaNamedObject&& src)
 	, _className(src._className)
 	, _derivedClassNames(src._derivedClassNames)
 {
+	_savingDirectory = "";
 }
 
 AnimaNamedObject::~AnimaNamedObject()
@@ -46,6 +49,8 @@ AnimaNamedObject& AnimaNamedObject::operator=(const AnimaNamedObject& src)
 		_name = src._name;
 		_className = src._className;
 		_derivedClassNames = src._derivedClassNames;
+		
+		_savingDirectory = "";
 	}
 
 	return *this;
@@ -59,6 +64,8 @@ AnimaNamedObject& AnimaNamedObject::operator=(AnimaNamedObject&& src)
 		_name = src._name;
 		_className = src._className;
 		_derivedClassNames = src._derivedClassNames;
+		
+		_savingDirectory = "";
 	}
 
 	return *this;
@@ -98,23 +105,23 @@ bool AnimaNamedObject::IsOfClass(AnimaString className)
 	return false;
 }
 
-void AnimaNamedObject::SaveObject(const AnimaString& destinationPath, const AnimaString& extension, bool createCompletePath) const
-{
-	
+void AnimaNamedObject::SaveObject(const AnimaString& destinationPath, const AnimaString& extension, bool createCompletePath)
+{	
 	namespace fs = boost::filesystem;
 	
 	AnimaString saveFileName = destinationPath;
 	if(createCompletePath)
 	{
-		namespace fs = boost::filesystem;
 		fs::path firstPart(destinationPath);
 		fs::path secondPart(this->GetName() + extension);
 		fs::path completePath = firstPart / secondPart;
 		
 		saveFileName = completePath.string();
 	}
-
+	
+	_savingDirectory = fs::path(saveFileName).parent_path().string();
 	ptree tree = GetObjectTree();
+	_savingDirectory = "";
 	
 	boost::property_tree::write_xml(saveFileName, tree, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 }
@@ -129,10 +136,13 @@ AnimaString AnimaNamedObject::GetObjectAsXML() const
 	return ss.str();
 }
 
-ptree AnimaNamedObject::GetObjectTree() const
+ptree AnimaNamedObject::GetObjectTree(bool saveName) const
 {
 	ptree tree;
-	tree.add("AnimaNamedObject.Name", GetName());
+	
+	if(saveName)
+		tree.add("AnimaNamedObject.Name", GetName());
+	
 	return tree;
 }
 
@@ -162,11 +172,12 @@ bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml)
 	}
 }
 
-bool AnimaNamedObject::ReadObject(const ptree& objectTree)
+bool AnimaNamedObject::ReadObject(const ptree& objectTree, bool readName)
 {
 	try
 	{
-		_name = objectTree.get<AnimaString>("AnimaNamedObject.Name");
+		if(readName)
+			_name = objectTree.get<AnimaString>("AnimaNamedObject.Name");
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

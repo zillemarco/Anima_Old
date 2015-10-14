@@ -22,6 +22,9 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaDataGenerator : public AnimaNamedObject
 {
 	DECLARE_ANIMA_CLASS(AnimaDataGenerator);
+	
+	friend class AnimaMappedValues;
+	
 public:
 	AnimaDataGenerator(const AnimaString& name, AnimaAllocator* allocator);
 	AnimaDataGenerator(const AnimaDataGenerator& src);
@@ -30,6 +33,10 @@ public:
 
 	AnimaDataGenerator& operator=(const AnimaDataGenerator& src);
 	AnimaDataGenerator& operator=(AnimaDataGenerator&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
 
 public:
 	virtual void UpdateValue() = 0;
@@ -57,10 +64,18 @@ public:
 	virtual void StopValueUpdate();
 	virtual void StartValueUpdate();
 
-	bool CanUpdateValue();
+	virtual void SetCanUpdateValue(bool canUpdateValue) { _canUpdateValue = CanUpdateValue(); }
+	virtual bool CanUpdateValue() const { return _canUpdateValue; }
+	
+	bool IsGeneratedFromMappedValues() const { return _generatedFromMappedValues; }
+	
+protected:
+	void SetGeneratedFromMappedValues(bool generatedFromMappedValues) { _generatedFromMappedValues = generatedFromMappedValues; }
 
 protected:
 	bool _canUpdateValue;
+	bool _updatingValue;
+	bool _generatedFromMappedValues;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

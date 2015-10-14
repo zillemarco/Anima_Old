@@ -8,6 +8,14 @@
 
 #include "AnimaSceneObject.h"
 #include "AnimaMath.h"
+#include "AnimaCamera.h"
+#include "AnimaFirstPersonCamera.h"
+#include "AnimaThirdPersonCamera.h"
+#include "AnimaLight.h"
+#include "AnimaMesh.h"
+#include "AnimaMeshInstance.h"
+#include "AnimaModel.h"
+#include "AnimaModelInstance.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -61,6 +69,123 @@ AnimaSceneObject& AnimaSceneObject::operator=(AnimaSceneObject&& src)
 	}
 
 	return *this;
+}
+
+ptree AnimaSceneObject::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if(saveName)
+	{
+		tree.add("AnimaSceneObject.Name", GetName());
+	}
+	
+	tree.add_child("AnimaSceneObject.Transformation", _transformation.GetObjectTree());
+	
+	ptree childrenTree;
+	
+	AInt count = _children.GetSize();
+	for(AInt i = 0; i < count; i++)
+	{
+		AnimaSceneObject* child = _children[i];
+		AnimaString childType = child->_GetClassName();
+		
+		ptree childTree;
+		childTree.add("Child.Type", childType);
+		childTree.add("Child.Name", child);
+		childrenTree.add_child("Child.Value", child->GetObjectTree(true));
+	}
+	
+	tree.add_child("AnimaSceneObject.Children", childrenTree);
+	tree.add_child("AnimaSceneObject.MappedValues", AnimaMappedValues::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaSceneObject::ReadObject(const ptree& objectTree, bool readName)
+{
+	try
+	{
+		if(readName)
+			SetName(objectTree.get<AnimaString>("AnimaSceneObject.Name"));
+		
+		_transformation.ReadObject(objectTree.get_child("AnimaSceneObject.Transformaton"));
+		
+		for(auto& child : objectTree.get_child("AnimaSceneObject.Children"))
+		{
+			if(child.first == "Child")
+			{
+				AnimaString name = child.second.get<AnimaString>("Name");
+				AnimaString type = child.second.get<AnimaString>("Type");
+				
+				if(type == ANIMA_CLASS_NAME(AnimaCamera))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaThirdPersonCamera))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaLight))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaDirectionalLight))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaHemisphereLight))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaPointLight))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaSpotLight))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaMesh))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaMeshInstance))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaModel))
+				{
+					
+				}
+				else if(type == ANIMA_CLASS_NAME(AnimaModelInstance))
+				{
+					
+				}
+				else
+				{
+					AnimaLogger::LogMessageFormat("WARNING - Unrecognized child type, named '%s', while reading a scene object named '%s'", name.c_str(), GetName().c_str());
+				}
+			}
+		}
+		
+		ptree mappedValuesTree = objectTree.get_child("AnimaSceneObject.MappedValues");
+		return AnimaMappedValues::ReadObject(mappedValuesTree, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing scene object: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing scene object: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)

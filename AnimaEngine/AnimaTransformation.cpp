@@ -9,6 +9,7 @@
 #include "AnimaTransformation.h"
 #include "AnimaMath.h"
 #include "AnimaSceneObject.h"
+#include "AnimaXmlTranslators.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -106,6 +107,45 @@ AnimaTransformation& AnimaTransformation::operator=(AnimaTransformation&& src)
 	}
 	
 	return *this;
+}
+
+ptree AnimaTransformation::GetObjectTree() const
+{
+	ptree tree;
+	
+	tree.add("AnimaTransformation.Traslation", _translation);
+	tree.add("AnimaTransformation.Rotation", _rotation);
+	tree.add("AnimaTransformation.Scale", _scale);
+	tree.add("AnimaTransformation.TransformationMatrix", _transformationMatrix);
+	tree.add("AnimaTransformation.NormalMatrix", _normalMatrix);
+	tree.add("AnimaTransformation.ModelNodeTransformationMatrix", _modelNodeTransformationMatrix);
+	
+	return tree;
+}
+
+bool AnimaTransformation::ReadObject(const ptree& objectTree)
+{
+	try
+	{
+		_translation = objectTree.get<AnimaVertex3f>("AnimaTransformation.Traslation", AnimaVertex3f(0.0f));
+		_rotation = objectTree.get<AnimaVertex3f>("AnimaTransformation.Rotation", AnimaVertex3f(0.0f));
+		_scale = objectTree.get<AnimaVertex3f>("AnimaTransformation.Scale", AnimaVertex3f(1.0f));
+		_transformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		_normalMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		_modelNodeTransformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing transformation: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing transformation: %s", exception.what());
+		return false;
+	}
+	
+	return true;
 }
 
 void AnimaTransformation::Translate(const AnimaVertex3f& t)

@@ -7,6 +7,8 @@
 //
 
 #include "AnimaColorGenerator.h"
+#include "AnimaMappedValues.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -83,6 +85,50 @@ AnimaColorGenerator& AnimaColorGenerator::operator=(AnimaColorGenerator&& src)
 	}
 
 	return *this;
+}
+
+ptree AnimaColorGenerator::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if(saveName)
+	{
+		if(IsGeneratedFromMappedValues())
+			tree.add("AnimaColorGenerator.Name", AnimaMappedValues::ExtractName(GetName()));
+		else
+			tree.add("AnimaColorGenerator.Name", GetName());
+	}
+	
+	tree.add("AnimaColorGenerator.Color", _color);
+	
+	tree.add_child("AnimaColorGenerator.DataGenerator", AnimaDataGenerator::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaColorGenerator::ReadObject(const ptree& objectTree, bool readName)
+{
+	try
+	{
+		if(readName)
+			SetName(objectTree.get<AnimaString>("AnimaColorGenerator.Name"));
+		
+		SetColor(objectTree.get<AnimaColor4f>("AnimaColorGenerator.Color"));
+		
+		ptree dataGeneratorTree = objectTree.get_child("AnimaColorGenerator.DataGenerator");
+		
+		return AnimaDataGenerator::ReadObject(dataGeneratorTree, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing color generator: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing color generator: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaColorGenerator::UpdateValue()

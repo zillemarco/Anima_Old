@@ -34,7 +34,16 @@ AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const An
 
 AnimaTextureGenerator* AnimaDataGeneratorsManager::CreateTextureGenerator(const AnimaString& name)
 {
-	return CreateDataGenerator<AnimaTextureGenerator>(name);
+	AnimaDataGenerator* dataGenerator = _dataGenerators.Contains(name);
+	if (dataGenerator != nullptr)
+		return nullptr;
+	
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+	ANIMA_ASSERT(allocator != nullptr);
+	AnimaTextureGenerator* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaTextureGenerator>(*allocator, name, allocator, _scene != nullptr ? _scene->GetTexturesManager() : nullptr);
+	_dataGenerators.Add<AnimaTextureGenerator*>(name, newDataGenerator);
+	
+	return newDataGenerator;
 }
 
 void AnimaDataGeneratorsManager::ClearGenerators()

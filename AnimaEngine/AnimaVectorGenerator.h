@@ -35,7 +35,11 @@ public:
 
 	AnimaVectorGenerator& operator=(const AnimaVectorGenerator& src);
 	AnimaVectorGenerator& operator=(AnimaVectorGenerator&& src);
-
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
+	
 public:
 	void UpdateValue() override;
 

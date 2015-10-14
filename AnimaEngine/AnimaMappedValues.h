@@ -49,8 +49,8 @@ public:
 	virtual void CopyData(const AnimaMappedValues& src);
 	
 public:
-	virtual ptree GetObjectTree() const;
-	virtual bool ReadObject(const ptree& objectTree);
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
 	
 public:
 	virtual const char* GetShaderPrefix() = 0;

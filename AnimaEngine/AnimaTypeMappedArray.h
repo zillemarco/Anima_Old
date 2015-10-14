@@ -113,7 +113,7 @@ public:
 		auto pair = _mappedArrays.find(type);
 
 		if (pair != _mappedArrays.end())
-			return pair->second->GetWithName(name);
+			return (TYPE)pair->second->GetWithName(name);
 		return nullptr;
 	}
 

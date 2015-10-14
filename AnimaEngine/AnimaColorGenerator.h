@@ -33,6 +33,10 @@ public:
 
 	AnimaColorGenerator& operator=(const AnimaColorGenerator& src);
 	AnimaColorGenerator& operator=(AnimaColorGenerator&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
 
 public:
 	void UpdateValue() override;

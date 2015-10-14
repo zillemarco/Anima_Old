@@ -770,6 +770,73 @@ struct AnimaXmlTextureFormatTranslator
 	}
 };
 
+struct AnimaXmlTextureAttachmentTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaTextureAttachment external_type;
+	
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+			
+			if (iequals(str, "DEPTH"))				return Anima::TEXTURE_ATTACHMENT_DEPTH;
+			else if (iequals(str, "STENCIL"))		return Anima::TEXTURE_ATTACHMENT_STENCIL;
+			else if (iequals(str, "DEPTH_STENCIL"))	return Anima::TEXTURE_ATTACHMENT_DEPTH_STENCIL;
+			else if (iequals(str, "COLOR_0"))		return Anima::TEXTURE_ATTACHMENT_COLOR0;
+			else if (iequals(str, "COLOR_1"))		return Anima::TEXTURE_ATTACHMENT_COLOR1;
+			else if (iequals(str, "COLOR_2"))		return Anima::TEXTURE_ATTACHMENT_COLOR2;
+			else if (iequals(str, "COLOR_3"))		return Anima::TEXTURE_ATTACHMENT_COLOR3;
+			else if (iequals(str, "COLOR_4"))		return Anima::TEXTURE_ATTACHMENT_COLOR4;
+			else if (iequals(str, "COLOR_5"))		return Anima::TEXTURE_ATTACHMENT_COLOR5;
+			else if (iequals(str, "COLOR_6"))		return Anima::TEXTURE_ATTACHMENT_COLOR6;
+			else if (iequals(str, "COLOR_7"))		return Anima::TEXTURE_ATTACHMENT_COLOR7;
+			else if (iequals(str, "COLOR_8"))		return Anima::TEXTURE_ATTACHMENT_COLOR8;
+			else if (iequals(str, "COLOR_9"))		return Anima::TEXTURE_ATTACHMENT_COLOR9;
+			else if (iequals(str, "COLOR_10"))		return Anima::TEXTURE_ATTACHMENT_COLOR10;
+			else if (iequals(str, "COLOR_11"))		return Anima::TEXTURE_ATTACHMENT_COLOR11;
+			else if (iequals(str, "COLOR_12"))		return Anima::TEXTURE_ATTACHMENT_COLOR12;
+			else if (iequals(str, "COLOR_13"))		return Anima::TEXTURE_ATTACHMENT_COLOR13;
+			else if (iequals(str, "COLOR_14"))		return Anima::TEXTURE_ATTACHMENT_COLOR14;
+			else if (iequals(str, "COLOR_15"))		return Anima::TEXTURE_ATTACHMENT_COLOR15;
+			
+			return Anima::TEXTURE_ATTACHMENT_NONE;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+	
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+			case Anima::TEXTURE_ATTACHMENT_DEPTH:			return Anima::AnimaString("DEPTH"); break;
+			case Anima::TEXTURE_ATTACHMENT_STENCIL:			return Anima::AnimaString("STENCIL"); break;
+			case Anima::TEXTURE_ATTACHMENT_DEPTH_STENCIL:	return Anima::AnimaString("DEPTH_STENCIL"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR0:			return Anima::AnimaString("COLOR_0"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR1:			return Anima::AnimaString("COLOR_1"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR2:			return Anima::AnimaString("COLOR_2"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR3:			return Anima::AnimaString("COLOR_3"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR4:			return Anima::AnimaString("COLOR_4"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR5:			return Anima::AnimaString("COLOR_5"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR6:			return Anima::AnimaString("COLOR_6"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR7:			return Anima::AnimaString("COLOR_7"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR8:			return Anima::AnimaString("COLOR_8"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR9:			return Anima::AnimaString("COLOR_9"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR10:			return Anima::AnimaString("COLOR_10"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR11:			return Anima::AnimaString("COLOR_11"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR12:			return Anima::AnimaString("COLOR_12"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR13:			return Anima::AnimaString("COLOR_13"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR14:			return Anima::AnimaString("COLOR_14"); break;
+			case Anima::TEXTURE_ATTACHMENT_COLOR15:			return Anima::AnimaString("COLOR_15"); break;
+			case Anima::TEXTURE_ATTACHMENT_NONE:			return Anima::AnimaString("NONE"); break;
+		}
+		
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
 struct AnimaXmlTextureInternalFormatTranslator
 {
 	typedef Anima::AnimaString internal_type;
@@ -1050,6 +1117,11 @@ namespace boost
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureClampMode>
 		{
 			typedef AnimaXmlTextureClampModeTranslator type;
+		};
+		
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureAttachment>
+		{
+			typedef AnimaXmlTextureAttachmentTranslator type;
 		};
 	}
 }

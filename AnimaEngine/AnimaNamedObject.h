@@ -50,13 +50,15 @@ public:
 	AnimaString GetName() const;
 	
 public:
-	virtual void SaveObject(const AnimaString& destinationPath, const AnimaString& extension = "", bool createCompletePath = false) const;
+	virtual void SaveObject(const AnimaString& destinationPath, const AnimaString& extension = "", bool createCompletePath = false);
 	virtual AnimaString GetObjectAsXML() const;
-	virtual ptree GetObjectTree() const;
+	virtual ptree GetObjectTree(bool saveName = true) const;
 	
 	virtual bool ReadObject(const AnimaString& sourcePath);
 	virtual bool ReadObjectFromXML(const AnimaString& xml);
-	virtual bool ReadObject(const ptree& objectTree);
+	virtual bool ReadObject(const ptree& objectTree, bool readName = true);
+	
+	virtual AnimaString GetSavingDirectory() const { return _savingDirectory; };
 	
 protected:
 	void _AddDerivedClassName(AnimaString derivedClassName);
@@ -72,6 +74,8 @@ protected:
 
 	AnimaString _className;
 	AnimaArray<AnimaString> _derivedClassNames;
+	
+	AnimaString _savingDirectory;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

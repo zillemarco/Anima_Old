@@ -16,7 +16,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name)
 : AnimaNamedObject(name, allocator)
 {
-	_dataGeneratorManager = dataGeneratorManager;	
+	_dataGeneratorManager = dataGeneratorManager;
 	_uniqueName = MakeRandonString(15) + ".";
 }
 
@@ -133,6 +133,7 @@ void AnimaMappedValues::AddTexture(const AnimaString& propertyName, AnimaTexture
 		}
 	}
 
+	generator->SetGeneratedFromMappedValues(true);
 	generator->SetTexture(value);
 
 	AddTexture(propertyName, generator);
@@ -177,6 +178,7 @@ void AnimaMappedValues::AddColor(const AnimaString& propertyName, AnimaColor4f v
 		}
 	}
 
+	generator->SetGeneratedFromMappedValues(true);
 	generator->SetColor(value);
 
 	AddColor(propertyName, generator);
@@ -240,6 +242,7 @@ void AnimaMappedValues::AddVector(const AnimaString& propertyName, AnimaVertex4f
 		}
 	}
 
+	generator->SetGeneratedFromMappedValues(true);
 	generator->SetVector(value);
 
 	AddVector(propertyName, generator);
@@ -289,6 +292,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 			}
 		}
 
+		generator->SetGeneratedFromMappedValues(true);
 		generator->SetVector(value->at(i));
 		newVectorArray->push_back(generator);
 	}
@@ -324,6 +328,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 			}
 		}
 
+		generator->SetGeneratedFromMappedValues(true);
 		generator->SetVector(value->at(i));
 		newVectorArray->push_back(generator);
 	}
@@ -359,6 +364,7 @@ void AnimaMappedValues::AddVectorArray(const AnimaString& propertyName, AnimaArr
 			}
 		}
 
+		generator->SetGeneratedFromMappedValues(true);
 		generator->SetVector(value->at(i));
 		newVectorArray->push_back(generator);
 	}
@@ -603,6 +609,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 				}
 			}
 
+			generator->SetGeneratedFromMappedValues(true);
 			generator->SetVector(value->at(offset));
 			currentArray->push_back(generator);
 		}
@@ -661,6 +668,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 				}
 			}
 
+			generator->SetGeneratedFromMappedValues(true);
 			generator->SetVector(value->at(offset));
 			currentArray->push_back(generator);
 		}
@@ -719,6 +727,7 @@ void AnimaMappedValues::SetVectorArray(const AnimaString& propertyName, AnimaArr
 				}
 			}
 
+			generator->SetGeneratedFromMappedValues(true);
 			generator->SetVector(value->at(offset));
 			currentArray->push_back(generator);
 		}
@@ -1125,9 +1134,14 @@ void AnimaMappedValues::CopyBooleans(const AnimaMappedValues& src)
 	}
 }
 
-ptree AnimaMappedValues::GetObjectTree() const
+ptree AnimaMappedValues::GetObjectTree(bool saveName) const
 {
 	ptree tree;
+	
+	if(saveName)
+	{
+		tree.add("AnimaMappedValues.Name", GetName());
+	}
 	
 	ptree propertiesTree;
 	
@@ -1136,7 +1150,7 @@ ptree AnimaMappedValues::GetObjectTree() const
 		ptree propertyTree;
 		propertyTree.add("Name", ExtractName(pair.first));
 		propertyTree.add("Type", "texture");
-		propertyTree.add_child("Value", pair.second->GetObjectTree());
+		propertyTree.add_child("Value", pair.second->GetObjectTree(true));
 
 		propertiesTree.add_child("Property", propertyTree);
 	}
@@ -1146,7 +1160,7 @@ ptree AnimaMappedValues::GetObjectTree() const
 		ptree propertyTree;
 		propertyTree.add("Name", ExtractName(pair.first));
 		propertyTree.add("Type", "color");
-		propertyTree.add_child("Value", pair.second->GetObjectTree());
+		propertyTree.add_child("Value", pair.second->GetObjectTree(true));
 		
 		propertiesTree.add_child("Property", propertyTree);
 	}
@@ -1156,7 +1170,7 @@ ptree AnimaMappedValues::GetObjectTree() const
 		ptree propertyTree;
 		propertyTree.add("Name", ExtractName(pair.first));
 		propertyTree.add("Type", "vector");
-		propertyTree.add_child("Value", pair.second->GetObjectTree());
+		propertyTree.add_child("Value", pair.second->GetObjectTree(true));
 		
 		propertiesTree.add_child("Property", propertyTree);
 	}
@@ -1184,29 +1198,133 @@ ptree AnimaMappedValues::GetObjectTree() const
 	
 	tree.add_child("AnimaMappedValues.Properties", propertiesTree);
 	
-	tree.add_child("AnimaMappedValues.NamedObject", AnimaNamedObject::GetObjectTree());
+	tree.add_child("AnimaMappedValues.NamedObject", AnimaNamedObject::GetObjectTree(false));
 	
 	return tree;
 }
 
-bool AnimaMappedValues::ReadObject(const ptree& objectTree)
+bool AnimaMappedValues::ReadObject(const ptree& objectTree, bool readName)
 {
 	try
 	{
-		_name = objectTree.get<AnimaString>("Name");
+		if(readName)
+			SetName(objectTree.get<AnimaString>("AnimaMappedValues.Name"));
+		
+		for (auto& property : objectTree.get_child("AnimaMappedValues.Properties"))
+		{
+			if (property.first == "Property")
+			{
+				AnimaString name = property.second.get<AnimaString>("Name");
+				AnimaString type = property.second.get<AnimaString>("Type");
+				
+				if(type == "bool")
+				{
+					bool value = property.second.get<bool>("Value");
+					SetBoolean(name, value);
+				}
+				else if(type == "float")
+				{
+					AFloat value = property.second.get<AFloat>("Value");
+					SetFloat(name, value);
+				}
+				else if(type == "vector")
+				{
+					for(auto& valueTree : property.second.get_child("Value"))
+					{
+						if(valueTree.first == "AnimaVectorGenerator")
+						{
+							ptree generatorTree;
+							generatorTree.add_child("AnimaVectorGenerator", valueTree.second);
+							
+							AnimaString generatorName = _uniqueName + generatorTree.get<AnimaString>("AnimaVectorGenerator.Name");
+							
+							AnimaVectorGenerator* generator = _dataGeneratorManager->GetDataGeneratorOfTypeFromName<AnimaVectorGenerator>(generatorName);
+
+							if(generator == nullptr)
+								generator = _dataGeneratorManager->CreateVectorGenerator(generatorName);
+							
+							if(generator)
+							{
+								if(!generator->ReadObject(generatorTree, false))
+									return false;
+								generator->SetGeneratedFromMappedValues(true);
+								
+								SetVector(name, generator);
+							}
+						}
+					}
+				}
+				else if(type == "color")
+				{
+					for(auto& valueTree : property.second.get_child("Value"))
+					{
+						if(valueTree.first == "AnimaColorGenerator")
+						{
+							ptree generatorTree;
+							generatorTree.add_child("AnimaColorGenerator", valueTree.second);
+							
+							AnimaString generatorName = _uniqueName + generatorTree.get<AnimaString>("AnimaColorGenerator.Name");
+							
+							AnimaColorGenerator* generator = _dataGeneratorManager->GetDataGeneratorOfTypeFromName<AnimaColorGenerator>(generatorName);
+							
+							if(generator == nullptr)
+								generator = _dataGeneratorManager->CreateColorGenerator(generatorName);
+							
+							if(generator)
+							{
+								if(!generator->ReadObject(generatorTree, false))
+									return false;
+								generator->SetGeneratedFromMappedValues(true);
+								
+								SetColor(name, generator);
+							}
+						}
+					}
+				}
+				else if(type == "texture")
+				{
+					for(auto& valueTree : property.second.get_child("Value"))
+					{
+						if(valueTree.first == "AnimaTextureGenerator")
+						{
+							ptree generatorTree;
+							generatorTree.add_child("AnimaTextureGenerator", valueTree.second);
+							
+							AnimaString generatorName = _uniqueName + generatorTree.get<AnimaString>("AnimaTextureGenerator.Name");
+							
+							AnimaTextureGenerator* generator = _dataGeneratorManager->GetDataGeneratorOfTypeFromName<AnimaTextureGenerator>(generatorName);
+							
+							if(generator == nullptr)
+								generator = _dataGeneratorManager->CreateTextureGenerator(generatorName);
+							
+							if(generator)
+							{
+								if(!generator->ReadObject(generatorTree, false))
+									return false;
+								generator->SetGeneratedFromMappedValues(true);
+								
+								SetTexture(name, generator);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		ptree namedObjectTree = objectTree.get_child("AnimaMappedValues.NamedObject");
+		
+		return AnimaNamedObject::ReadObject(namedObjectTree, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{
-		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mapped values: %s", exception.what());
 		return false;
 	}
 	catch (boost::property_tree::ptree_bad_data& exception)
 	{
-		AnimaLogger::LogMessageFormat("ERROR - Error parsing named object: %s", exception.what());
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mapped values: %s", exception.what());
 		return false;
 	}
-	
-	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

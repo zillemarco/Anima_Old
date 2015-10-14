@@ -1,4 +1,6 @@
 #include "AnimaTexture.h"
+#include "AnimaTools.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -337,6 +339,194 @@ AnimaTexture& AnimaTexture::operator=(AnimaTexture&& src)
 	return *this;
 }
 
+ptree AnimaTexture::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if(saveName)
+	{
+		tree.add("AnimaTexture.Name", GetName());
+	}
+	
+	namespace fs = boost::filesystem;
+	
+	tree.add("AnimaTexture.Width", GetWidth());
+	tree.add("AnimaTexture.Height", GetHeight());
+	tree.add("AnimaTexture.Depth", GetDepth());
+	tree.add("AnimaTexture.Target", GetTextureTarget());
+	tree.add("AnimaTexture.Format", GetFormat());
+	tree.add("AnimaTexture.InternalFormat", GetInternalFormat());
+	tree.add("AnimaTexture.MinFilter", GetMinFilter());
+	tree.add("AnimaTexture.MagFilter", GetMagFilter());
+	tree.add("AnimaTexture.Attachment", GetAttachment());
+	tree.add("AnimaTexture.DataType", GetDataType());
+	tree.add("AnimaTexture.ClampS", GetClampS());
+	tree.add("AnimaTexture.ClampT", GetClampT());
+	tree.add("AnimaTexture.ClampR", GetClampR());
+	tree.add("AnimaTexture.MipMapLevels", GetMipMapLevels());
+	tree.add("AnimaTexture.BorderColor", GetBorderColor());
+	tree.add("AnimaTexture.GenerateMipMaps", IsGenerateMipMap());
+	
+//	AnimaString textureSourceFileName = GetSourceFileName();
+//	if(textureSourceFileName.empty() || GetTextureTarget() == TEXTURE_TARGET_CUBE)
+//	{
+		AUint mipMapLevels = fmax(GetMipMapLevels(), 1);
+		
+		if(GetTextureTarget() == TEXTURE_TARGET_CUBE)
+		{
+			ptree cubeTree;
+			for(AInt cubeIndex = 0; cubeIndex < 6; cubeIndex++)
+			{
+				AnimaTextureCubeIndex textureCubeIndex = (AnimaTextureCubeIndex)cubeIndex;
+				ptree cubeFaceTree;
+				cubeFaceTree.add("Index", textureCubeIndex);
+				
+				ptree surfacesTree;
+				
+				for(AUint mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
+				{
+					AnimaArray<AUchar>* data = GetDataAsArray(textureCubeIndex, mipIndex);
+					
+					if(data != nullptr)
+					{
+						AnimaString base64Data = AnimaTools::Base64Encode(*data);
+						surfacesTree.add("Surface", base64Data);
+					}
+					else
+					{
+						surfacesTree.add("Surface", "");
+					}
+				}
+				cubeFaceTree.add_child("Surfaces", surfacesTree);
+				
+				cubeTree.add_child("CubeFace", cubeFaceTree);
+			}
+			tree.add_child("AnimaTexture.CubeFaces", cubeTree);
+		}
+		else
+		{
+			ptree surfacesTree;
+			
+			for(AInt mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
+			{
+				AnimaArray<AUchar>* data = GetDataAsArray(mipIndex);
+				
+				if(data != nullptr)
+				{
+					AnimaString base64Data = AnimaTools::Base64Encode(*data);
+					surfacesTree.add("Surface", base64Data);
+				}
+				else
+				{
+					surfacesTree.add("Surface", "");
+				}
+			}
+			
+			tree.add_child("AnimaTexture.Surfaces", surfacesTree);
+		}
+//	}
+//	else
+//	{
+//		fs::path sourcePath(textureSourceFileName);
+//		AnimaString destinationFileName = (fs::path(GetSavingDirectory()) / sourcePath.filename()).string();
+//		
+//		fs::copy_file(fs::path(textureSourceFileName), fs::path(destinationFileName), fs::copy_option::overwrite_if_exists);
+//		tree.add("AnimaTexture.FileName", destinationFileName);
+//	}
+	
+	tree.add_child("AnimaTexture.NamedObject", AnimaNamedObject::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaTexture::ReadObject(const ptree& objectTree, bool readName)
+{
+	try
+	{
+		if(readName)
+			SetName(objectTree.get<AnimaString>("AnimaTexture.Name"));
+		
+		SetWidth(objectTree.get<AFloat>("AnimaTexture.Width", 0.0f));
+		SetHeight(objectTree.get<AFloat>("AnimaTexture.Height", 0.0f));
+		SetDepth(objectTree.get<AFloat>("AnimaTexture.Depth", 0.0f));
+		SetTextureTarget(objectTree.get<AnimaTextureTarget>("AnimaTexture.Target", TEXTURE_TARGET_NONE));
+		SetFormat(objectTree.get<AnimaTextureFormat>("AnimaTexture.Format", TEXTURE_FORMAT_RGB));
+		SetInternalFormat(objectTree.get<AnimaTextureInternalFormat>("AnimaTexture.InternalFormat", TEXTURE_INTERNAL_FORMAT_RG8));
+		SetMinFilter(objectTree.get<AnimaTextureMinFilterMode>("AnimaTexture.MinFilter", TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR));
+	 	SetMagFilter(objectTree.get<AnimaTextureMagFilterMode>("AnimaTexture.MagFilter", TEXTURE_MAG_FILTER_MODE_LINEAR));
+		SetAttachment(objectTree.get<AnimaTextureAttachment>("AnimaTexture.Attachment", TEXTURE_ATTACHMENT_NONE));
+		SetDataType(objectTree.get<AnimaTextureDataType>("AnimaTexture.DataType", TEXTURE_DATA_TYPE_UNSIGNED_BYTE));
+		SetClampS(objectTree.get<AnimaTextureClampMode>("AnimaTexture.ClampS", TEXTURE_CLAMP_REPEAT));
+	 	SetClampT(objectTree.get<AnimaTextureClampMode>("AnimaTexture.ClampT", TEXTURE_CLAMP_REPEAT));
+		SetClampR(objectTree.get<AnimaTextureClampMode>("AnimaTexture.ClampR", TEXTURE_CLAMP_REPEAT));
+		SetMipMapLevels(objectTree.get<AUint>("AnimaTexture.MipMapLevels", 0));
+		SetBorderColor(objectTree.get<AnimaColor4f>("AnimaTexture.BorderColor", AnimaColor4f(0.0f)));
+		SetGenerateMipMap(objectTree.get<bool>("AnimaTexture.GenerateMipMaps", false));
+		
+		if(GetTextureTarget() == TEXTURE_TARGET_CUBE)
+		{
+			AUint faceIndex = 0;
+			for(auto& cubeFace : objectTree.get_child("AnimaTexture.CubeFaces"))
+			{
+				if(cubeFace.first == "CubeFace")
+				{
+					AnimaTextureCubeIndex cubeIndex = (AnimaTextureCubeIndex)faceIndex;
+					AUint surfaceIndex = 0;
+					for(auto& surface : cubeFace.second.get_child("Surfaces"))
+					{
+						if(surface.first == "Surface")
+						{
+							AnimaString stringData = surface.second.get_value<AnimaString>("");
+							
+							if(stringData.empty())
+								return false;
+							
+							AnimaArray<AUchar> data = AnimaTools::Base64Decode(stringData);
+							SetData(&data[0], data.size(), cubeIndex, surfaceIndex);
+							surfaceIndex++;
+						}
+					}
+					
+					faceIndex++;
+				}
+			}
+		}
+		else
+		{
+			AUint surfaceIndex = 0;
+			for(auto& surface : objectTree.get_child("AnimaTexture.Surfaces"))
+			{
+				if(surface.first == "Surface")
+				{
+					AnimaString stringData = surface.second.get_value<AnimaString>("");
+					
+					if(stringData.empty())
+						return false;
+					
+					AnimaArray<AUchar> data = AnimaTools::Base64Decode(stringData);
+					SetData(&data[0], data.size(), surfaceIndex);
+					surfaceIndex++;
+				}
+			}
+		}
+		
+		ptree namedObjectTree = objectTree.get_child("AnimaTexture.NamedObject");
+		return AnimaNamedObject::ReadObject(namedObjectTree, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing texture: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing texture: %s", exception.what());
+		return false;
+	}
+	
+	return true;
+}
+
 AUint AnimaTexture::GetID(AUint index) const
 {
 	return _textureID;
@@ -556,7 +746,7 @@ const AUchar* AnimaTexture::GetData(AUint surfaceIndex) const
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AUint surfaceIndex)
+AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
 	if (_textureTarget == TEXTURE_TARGET_2D && _faces.size() == 1)
@@ -580,7 +770,7 @@ const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index, AUint surfaceIn
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex)
+AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
 	if (_textureTarget == TEXTURE_TARGET_CUBE && _faces.size() == 6)
@@ -1381,9 +1571,9 @@ const AUchar* AnimaTextureSurface::GetData() const
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTextureSurface::GetDataAsArray()
+AnimaArray<AUchar>* AnimaTextureSurface::GetDataAsArray() const
 {
-	return &_data;
+	return const_cast<AnimaArray<AUchar>*>(&_data);
 }
 
 void AnimaTextureSurface::SetWidth(AUint width)

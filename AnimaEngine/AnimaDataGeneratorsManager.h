@@ -36,7 +36,7 @@ public:
 	template<class T> T* CreateDataGenerator(const AnimaString& name);
 	
 	template<class T> AnimaArray<AnimaDataGenerator*>* GetDataGeneratorsArrayOfType();
-	template<class T> AnimaDataGenerator* GetDataGeneratorOfTypeFromName(const AnimaString& name);
+	template<class T> T* GetDataGeneratorOfTypeFromName(const AnimaString& name);
 	
 	AnimaColorGenerator* CreateColorGenerator(const AnimaString& name);
 	AnimaVectorGenerator* CreateVectorGenerator(const AnimaString& name);
@@ -85,7 +85,7 @@ AnimaArray<AnimaDataGenerator*>* AnimaDataGeneratorsManager::GetDataGeneratorsAr
 }
 
 template<class T>
-AnimaDataGenerator* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(const AnimaString& name)
+T* AnimaDataGeneratorsManager::GetDataGeneratorOfTypeFromName(const AnimaString& name)
 {
 	return _dataGenerators.GetWithNameAndType<T*>(name);
 }

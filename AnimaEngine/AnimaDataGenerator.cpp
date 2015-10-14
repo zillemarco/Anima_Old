@@ -7,6 +7,8 @@
 //
 
 #include "AnimaDataGenerator.h"
+#include "AnimaMappedValues.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -15,18 +17,24 @@ AnimaDataGenerator::AnimaDataGenerator(const AnimaString& name, AnimaAllocator* 
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaDataGenerator);
 	_canUpdateValue = true;
+	_updatingValue = false;
+	_generatedFromMappedValues = false;
 }
 
 AnimaDataGenerator::AnimaDataGenerator(const AnimaDataGenerator& src)
 	: AnimaNamedObject(src)
 {
 	_canUpdateValue = src._canUpdateValue;
+	_updatingValue = src._updatingValue;
+	_generatedFromMappedValues = src._generatedFromMappedValues;
 }
 
 AnimaDataGenerator::AnimaDataGenerator(AnimaDataGenerator&& src)
 	: AnimaNamedObject(src)
 {
 	_canUpdateValue = src._canUpdateValue;
+	_updatingValue = src._updatingValue;
+	_generatedFromMappedValues = src._generatedFromMappedValues;
 }
 
 AnimaDataGenerator::~AnimaDataGenerator()
@@ -38,7 +46,10 @@ AnimaDataGenerator& AnimaDataGenerator::operator=(const AnimaDataGenerator& src)
 	if (this != &src)
 	{
 		AnimaNamedObject::operator=(src);
+		
 		_canUpdateValue = src._canUpdateValue;
+		_updatingValue = src._updatingValue;
+		_generatedFromMappedValues = src._generatedFromMappedValues;
 	}
 
 	return *this;
@@ -49,10 +60,53 @@ AnimaDataGenerator& AnimaDataGenerator::operator=(AnimaDataGenerator&& src)
 	if (this != &src)
 	{
 		AnimaNamedObject::operator=(src);
+		
 		_canUpdateValue = src._canUpdateValue;
+		_updatingValue = src._updatingValue;
+		_generatedFromMappedValues = src._generatedFromMappedValues;
 	}
 
 	return *this;
+}
+
+ptree AnimaDataGenerator::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if(saveName)
+	{
+		if(IsGeneratedFromMappedValues())
+			tree.add("AnimaDataGenerator.Name", AnimaMappedValues::ExtractName(GetName()));
+		else
+			tree.add("AnimaDataGenerator.Name", GetName());
+	}
+	
+	tree.add("AnimaDataGenerator.CanUpdateValue", CanUpdateValue());
+	
+	return tree;
+}
+
+bool AnimaDataGenerator::ReadObject(const ptree& objectTree, bool readName)
+{
+	try
+	{
+		if(readName)
+			SetName(objectTree.get<AnimaString>("AnimaDataGenerator.Name"));
+		
+		SetCanUpdateValue(objectTree.get<bool>("AnimaDataGenerator.CanUpdateValue"));
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing data generator: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing data generator: %s", exception.what());
+		return false;
+	}
+	
+	return true;
 }
 
 void AnimaDataGenerator::SetColor(const AnimaColor4f& color)
@@ -148,17 +202,13 @@ AnimaTexture* AnimaDataGenerator::GetTexture()
 
 void AnimaDataGenerator::StopValueUpdate()
 {
-	_canUpdateValue = false;
+	_updatingValue = false;
 }
 
 void AnimaDataGenerator::StartValueUpdate()
 {
-	_canUpdateValue = false;
-}
-
-bool AnimaDataGenerator::CanUpdateValue()
-{
-	return _canUpdateValue;
+	if(CanUpdateValue())
+		_updatingValue = true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -34,7 +34,11 @@ public:
 	void AddShader(const AnimaString& shaderName);
 	AInt GetShadersCount() const;
 	AnimaString GetShaderName(AInt index) const;
-
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
+	
 public:
 	virtual const char* GetShaderPrefix() { return "MAT"; }
 

@@ -44,6 +44,10 @@ public:
 	AnimaSceneObject& operator=(AnimaSceneObject&& src);
 	
 public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
+	
+public:
 	virtual void SetPosition(const AnimaVertex3f& position);
 
 public:

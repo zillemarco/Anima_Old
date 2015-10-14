@@ -105,6 +105,10 @@ public:
 	
 	AnimaTexture& operator=(const AnimaTexture& src);
 	AnimaTexture& operator=(AnimaTexture&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, bool readName = true) override;
 
 public:
 	AUint GetID(AUint index = 0) const;
@@ -171,9 +175,9 @@ public:
 	 */
 	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint mipMapIndex);
 	const AUchar* GetData(AUint surfaceIndex) const;
-	AnimaArray<AUchar>* GetDataAsArray(AUint surfaceIndex);
+	AnimaArray<AUchar>* GetDataAsArray(AUint surfaceIndex) const;
 	const AUchar* GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
-	AnimaArray<AUchar>* GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex);
+	AnimaArray<AUchar>* GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
@@ -268,7 +272,7 @@ public:
 	void SetData(AUchar* data, AUint dataSize);
 	void CopyData(const AnimaTextureSurface& src);
 	const AUchar* GetData() const;
-	AnimaArray<AUchar>* GetDataAsArray();
+	AnimaArray<AUchar>* GetDataAsArray() const;
 
 	void SetWidth(AUint width);
 	AUint GetWidth() const;

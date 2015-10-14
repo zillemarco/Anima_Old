@@ -15,7 +15,11 @@
 #include "AnimaEngine.h"
 #include "AnimaMatrix.h"
 
+#include <boost/property_tree/ptree.hpp>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+using ptree = boost::property_tree::ptree;
 
 class AnimaSceneObject;
 
@@ -280,6 +284,10 @@ public:
 	AnimaMatrix* GetPTModelNoderansformationMatrix();
 	
 	AnimaSceneObject* GetParentObject() const;
+	
+public:
+	virtual ptree GetObjectTree() const;
+	virtual bool ReadObject(const ptree& objectTree);
 
 protected:
 	void SetParentObject(AnimaSceneObject* parentObject);
