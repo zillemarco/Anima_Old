@@ -439,7 +439,7 @@ ptree AnimaTexture::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaTexture::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaTexture::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -511,7 +511,7 @@ bool AnimaTexture::ReadObject(const ptree& objectTree, bool readName)
 		}
 		
 		ptree namedObjectTree = objectTree.get_child("AnimaTexture.NamedObject");
-		return AnimaNamedObject::ReadObject(namedObjectTree, false);
+		return AnimaNamedObject::ReadObject(namedObjectTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

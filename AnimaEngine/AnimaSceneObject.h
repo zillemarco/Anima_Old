@@ -23,6 +23,11 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class AnimaShaderProgram;
 class AnimaScene;
 
+struct AnimaSceneObjectChildrenReadData {
+	AnimaString _type;
+	AnimaString _name;
+};
+
 class ANIMA_ENGINE_EXPORT AnimaSceneObject : public AnimaMappedValues
 {
 	DECLARE_ANIMA_CLASS(AnimaSceneObject);
@@ -45,7 +50,7 @@ public:
 	
 public:
 	ptree GetObjectTree(bool saveName = true) const override;
-	bool ReadObject(const ptree& objectTree, bool readName = true) override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 	
 public:
 	virtual void SetPosition(const AnimaVertex3f& position);
@@ -75,12 +80,16 @@ public:
 
 protected:
 	virtual void UpdateChildrenTransformation();
+
+	virtual bool TranslateChildrenData(AnimaScene* scene);
 	
 protected:
 	AnimaTransformation _transformation;
 
 	AnimaSceneObject* _parentObject;
 	AnimaMappedArray<AnimaSceneObject*> _children;
+
+	AnimaArray<AnimaSceneObjectChildrenReadData> _childrenReadData;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

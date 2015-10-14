@@ -106,7 +106,7 @@ ptree AnimaColorGenerator::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaColorGenerator::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaColorGenerator::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -117,7 +117,7 @@ bool AnimaColorGenerator::ReadObject(const ptree& objectTree, bool readName)
 		
 		ptree dataGeneratorTree = objectTree.get_child("AnimaColorGenerator.DataGenerator");
 		
-		return AnimaDataGenerator::ReadObject(dataGeneratorTree, false);
+		return AnimaDataGenerator::ReadObject(dataGeneratorTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

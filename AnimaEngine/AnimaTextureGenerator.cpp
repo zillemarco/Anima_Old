@@ -92,7 +92,7 @@ ptree AnimaTextureGenerator::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaTextureGenerator::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaTextureGenerator::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -105,7 +105,7 @@ bool AnimaTextureGenerator::ReadObject(const ptree& objectTree, bool readName)
 		
 		ptree dataGeneratorTree = objectTree.get_child("AnimaTextureGenerator.DataGenerator");
 		
-		return AnimaDataGenerator::ReadObject(dataGeneratorTree, false);
+		return AnimaDataGenerator::ReadObject(dataGeneratorTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

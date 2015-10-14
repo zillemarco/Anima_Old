@@ -120,7 +120,7 @@ ptree AnimaVectorGenerator::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaVectorGenerator::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaVectorGenerator::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -131,7 +131,7 @@ bool AnimaVectorGenerator::ReadObject(const ptree& objectTree, bool readName)
 		
 		ptree dataGeneratorTree = objectTree.get_child("AnimaVectorGenerator.DataGenerator");
 		
-		return AnimaDataGenerator::ReadObject(dataGeneratorTree, false);
+		return AnimaDataGenerator::ReadObject(dataGeneratorTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

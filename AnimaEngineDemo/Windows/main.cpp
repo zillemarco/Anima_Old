@@ -516,9 +516,9 @@ bool InitEngine()
 	default:	materialName = "oro";	break;
 	}
 		
-	// Caricamento degli shader
-	if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
-		return false;
+	//// Caricamento degli shader
+	//if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
+	//	return false;
 			
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();

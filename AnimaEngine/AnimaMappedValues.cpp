@@ -1203,7 +1203,7 @@ ptree AnimaMappedValues::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaMappedValues::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaMappedValues::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -1313,7 +1313,7 @@ bool AnimaMappedValues::ReadObject(const ptree& objectTree, bool readName)
 		
 		ptree namedObjectTree = objectTree.get_child("AnimaMappedValues.NamedObject");
 		
-		return AnimaNamedObject::ReadObject(namedObjectTree, false);
+		return AnimaNamedObject::ReadObject(namedObjectTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

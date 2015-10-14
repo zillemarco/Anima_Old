@@ -80,7 +80,7 @@ struct AnimaString_from_python_str
 
 Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::CreateScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneInt)(Anima::AUint) = &Anima::AnimaScenesManager::GetScene;
-Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetScene;
+Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetSceneFromName;
 
 Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelFromExternalFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModelFromExternalFile;
 Anima::AnimaModel* (Anima::AnimaModelsManager::*CreateModelString)(const Anima::AnimaString&) = &Anima::AnimaModelsManager::CreateModel;

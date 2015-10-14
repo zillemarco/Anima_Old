@@ -17,6 +17,13 @@
 #include "AnimaModel.h"
 #include "AnimaModelInstance.h"
 
+#include "AnimaCamerasManager.h"
+#include "AnimaLightsManager.h"
+#include "AnimaMeshesManager.h"
+#include "AnimaMeshInstancesManager.h"
+#include "AnimaModelsManager.h"
+#include "AnimaModelInstancesManager.h"
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaSceneObject::AnimaSceneObject(const AnimaString& name, AnimaDataGeneratorsManager* dataGeneratorsManager, AnimaAllocator* allocator)
@@ -93,7 +100,6 @@ ptree AnimaSceneObject::GetObjectTree(bool saveName) const
 		ptree childTree;
 		childTree.add("Child.Type", childType);
 		childTree.add("Child.Name", child);
-		childrenTree.add_child("Child.Value", child->GetObjectTree(true));
 	}
 	
 	tree.add_child("AnimaSceneObject.Children", childrenTree);
@@ -102,7 +108,7 @@ ptree AnimaSceneObject::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaSceneObject::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaSceneObject::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
@@ -115,66 +121,16 @@ bool AnimaSceneObject::ReadObject(const ptree& objectTree, bool readName)
 		{
 			if(child.first == "Child")
 			{
-				AnimaString name = child.second.get<AnimaString>("Name");
-				AnimaString type = child.second.get<AnimaString>("Type");
-				
-				if(type == ANIMA_CLASS_NAME(AnimaCamera))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaThirdPersonCamera))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaLight))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaDirectionalLight))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaHemisphereLight))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaPointLight))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaSpotLight))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaMesh))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaMeshInstance))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaModel))
-				{
-					
-				}
-				else if(type == ANIMA_CLASS_NAME(AnimaModelInstance))
-				{
-					
-				}
-				else
-				{
-					AnimaLogger::LogMessageFormat("WARNING - Unrecognized child type, named '%s', while reading a scene object named '%s'", name.c_str(), GetName().c_str());
-				}
+				AnimaSceneObjectChildrenReadData readData;
+				readData._name = child.second.get<AnimaString>("Name");
+				readData._type = child.second.get<AnimaString>("Type");
+
+				_childrenReadData.push_back(readData);
 			}
 		}
 		
 		ptree mappedValuesTree = objectTree.get_child("AnimaSceneObject.MappedValues");
-		return AnimaMappedValues::ReadObject(mappedValuesTree, false);
+		return AnimaMappedValues::ReadObject(mappedValuesTree, scene, false);
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{
@@ -186,6 +142,78 @@ bool AnimaSceneObject::ReadObject(const ptree& objectTree, bool readName)
 		AnimaLogger::LogMessageFormat("ERROR - Error parsing scene object: %s", exception.what());
 		return false;
 	}
+}
+
+bool AnimaSceneObject::TranslateChildrenData(AnimaScene* scene)
+{
+	if (scene == nullptr)
+		return false;
+
+	for (auto& childData : _childrenReadData)
+	{
+		AnimaSceneObject* child = nullptr;
+		if (childData._type == ANIMA_CLASS_NAME(AnimaCamera))
+		{
+			child = scene->GetCamerasManager()->GetCameraFromName(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
+		{
+			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaFirstPersonCamera>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaThirdPersonCamera))
+		{
+			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaThirdPersonCamera>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaLight))
+		{
+			child = scene->GetLightsManager()->GetLightFromName(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaDirectionalLight))
+		{
+			child = scene->GetLightsManager()->GetLightOfTypeFromName<AnimaDirectionalLight>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaHemisphereLight))
+		{
+			child = scene->GetLightsManager()->GetLightOfTypeFromName<AnimaHemisphereLight>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaPointLight))
+		{
+			child = scene->GetLightsManager()->GetLightOfTypeFromName<AnimaPointLight>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaSpotLight))
+		{
+			child = scene->GetLightsManager()->GetLightOfTypeFromName<AnimaSpotLight>(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaMesh))
+		{
+			child = scene->GetMeshesManager()->GetMeshFromName(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaMeshInstance))
+		{
+			child = scene->GetMeshInstancesManager()->GetMeshInstanceFromName(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaModel))
+		{
+			child = scene->GetModelsManager()->GetModelFromName(childData._name);
+		}
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaModelInstance))
+		{
+			child = scene->GetModelInstancesManager()->GetModelInstanceFromName(childData._name);
+		}
+
+		if (child != nullptr)
+		{
+			this->AddChild(child);
+		}
+		else
+		{
+			AnimaLogger::LogMessageFormat("WARNING - Unrecognized child type, named '%s', while reading a scene object named '%s'. Child type is '%s'", childData._name.c_str(), GetName().c_str(), childData._type.c_str());
+		}
+	}
+
+	_childrenReadData.clear();
+
+	return true;
 }
 
 void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)

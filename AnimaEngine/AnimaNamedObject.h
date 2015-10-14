@@ -23,6 +23,7 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 using ptree = boost::property_tree::ptree;
+class AnimaScene;
 
 #define DECLARE_ANIMA_CLASS(class_name)		public:																		\
 												static AnimaString _sGetClassName() { return AnimaString(#class_name); }
@@ -54,9 +55,9 @@ public:
 	virtual AnimaString GetObjectAsXML() const;
 	virtual ptree GetObjectTree(bool saveName = true) const;
 	
-	virtual bool ReadObject(const AnimaString& sourcePath);
-	virtual bool ReadObjectFromXML(const AnimaString& xml);
-	virtual bool ReadObject(const ptree& objectTree, bool readName = true);
+	virtual bool ReadObject(const AnimaString& sourcePath, AnimaScene* scene);
+	virtual bool ReadObjectFromXML(const AnimaString& xml, AnimaScene* scene);
+	virtual bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true);
 	
 	virtual AnimaString GetSavingDirectory() const { return _savingDirectory; };
 	

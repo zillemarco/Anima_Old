@@ -146,16 +146,16 @@ ptree AnimaNamedObject::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaNamedObject::ReadObject(const AnimaString& sourcePath)
+bool AnimaNamedObject::ReadObject(const AnimaString& sourcePath, AnimaScene* scene)
 {
 	std::ifstream fileStream(sourcePath);
 	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 	fileStream.close();
 	
-	return ReadObject(xml);
+	return ReadObject(xml, scene);
 }
 
-bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml)
+bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml, AnimaScene* scene)
 {
 	try
 	{
@@ -163,7 +163,7 @@ bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml)
 		std::stringstream ss(xml);
 		boost::property_tree::read_xml(ss, pt);
 		
-		return ReadObject(pt);
+		return ReadObject(pt, scene);
 	}
 	catch (boost::property_tree::ptree_error& exception)
 	{
@@ -172,7 +172,7 @@ bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml)
 	}
 }
 
-bool AnimaNamedObject::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaNamedObject::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{

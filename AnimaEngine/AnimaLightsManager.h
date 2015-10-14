@@ -47,6 +47,7 @@ public:
 	AnimaMappedArray<AnimaHemisphereLight*>* GetHemishpereLights();
 
 	template<class T> AnimaMappedArray<AnimaLight*>* GetLightsOfType();
+	template<class T> AnimaLight* GetLightOfTypeFromName(const AnimaString& name);
 	template<class T> T* CreateLight(const AnimaString& name);
 		
 	void ClearLights();
@@ -74,6 +75,12 @@ template<class T>
 AnimaMappedArray<AnimaLight*>* AnimaLightsManager::GetLightsOfType()
 {
 	return _lights.GetMappedArrayArrayOfType<T*>();
+}
+
+template<class T>
+AnimaLight* AnimaLightsManager::GetLightOfTypeFromName(const AnimaString& name)
+{
+	return _lights.GetWithNameAndType<T*>(name);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

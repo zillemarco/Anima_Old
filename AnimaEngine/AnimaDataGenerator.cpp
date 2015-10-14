@@ -86,7 +86,7 @@ ptree AnimaDataGenerator::GetObjectTree(bool saveName) const
 	return tree;
 }
 
-bool AnimaDataGenerator::ReadObject(const ptree& objectTree, bool readName)
+bool AnimaDataGenerator::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
 {
 	try
 	{
