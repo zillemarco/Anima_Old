@@ -11,8 +11,8 @@
 					<Target>2D</Target>
 					<Format>RGB</Format>
 					<InternalFormat>RGB8</InternalFormat>
-					<!--<File>D:\Git\Anima\AnimaEngine\data\textures\legno_1.dds</File>-->
-					<File>/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures/legno_1.dds</File>
+					<File>D:\Git\Anima\AnimaEngineDemo\Scene\textures\legno_1.dds</File>
+					<!--<File>/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures/legno_1.dds</File>-->
 				</AnimaTexture>
 			</Value>
 		</Property>		
@@ -25,8 +25,8 @@
 					<Target>2D</Target>
 					<Format>RGB</Format>
 					<InternalFormat>RGB8</InternalFormat>
-					<!--<File>D:\Git\Anima\AnimaEngine\data\textures\legno_1_norm.dds</File>-->
-					<File>/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures/legno_1_norm.dds</File>
+					<File>D:\Git\Anima\AnimaEngineDemo\Scene\textures\legno_1_norm.dds</File>
+					<!--<File>/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures/legno_1_norm.dds</File>-->
 				</AnimaTexture>
 			</Value>
 		</Property>

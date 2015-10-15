@@ -246,55 +246,20 @@ void AnimaMeshesManager::SaveMeshToFile(AnimaMesh* mesh, const AnimaString& dest
 	if (mesh == nullptr)
 		return;
 
+	namespace fs = boost::filesystem;
+
 	AnimaString saveFileName = destinationPath;
-	if(createFinalPath)
+
+	if (createFinalPath)
 	{
-		namespace fs = boost::filesystem;
 		fs::path firstPart(destinationPath);
 		fs::path secondPart(mesh->GetName() + ".amesh");
 		fs::path completePath = firstPart / secondPart;
-		
+
 		saveFileName = completePath.string();
 	}
-	
-	using boost::property_tree::ptree;
-	ptree pt;
 
-	// Salvo il nome della mesh come attributo
-	pt.put("AnimaMesh.<xmlattr>.name", mesh->GetName());
-
-	// Se la mesh ha un materiale oppure ha il nome di un materiale lo salvo come attributo della mesh
-	AnimaString materialName = "";
-	if (mesh->GetMaterial() != nullptr)
-		materialName = mesh->GetMaterial()->GetName();
-	pt.put("AnimaMesh.<xmlattr>.material", materialName);
-
-	// Salvo i dati grafici
-	pt.add("AnimaMesh.Vertices", *mesh->GetVertices());
-	pt.add("AnimaMesh.Normals", *mesh->GetNormals());
-	pt.add("AnimaMesh.TextureCoords", *mesh->GetTextureCoords());
-	pt.add("AnimaMesh.Tangents", *mesh->GetTangents());
-	pt.add("AnimaMesh.Bitangents", *mesh->GetBitangents());
-	pt.add("AnimaMesh.BoneWeights", *mesh->GetBoneWeights());
-	pt.add("AnimaMesh.BoneIDs", *mesh->GetBoneIDs());
-
-	// Salvo la lista di indici delle face
-	AnimaArray<AUint> indexes;
-	mesh->GetFacesIndicesArray(&indexes);
-	pt.add("AnimaMesh.Indexes", indexes);
-
-	// Salvo la lista di normali delle face
-	AnimaArray<AnimaVertex3f> facesNormals;
-	mesh->GetFacesNormalsArray(&facesNormals);
-	pt.add("AnimaMesh.FacesNormals", facesNormals);
-
-	// Salvo i dati di posizionamento della mesh
-	pt.add("AnimaMesh.SpaceData.Position", mesh->GetPosition());
-	pt.add("AnimaMesh.SpaceData.Translation", mesh->GetTransformation()->GetTranslation());
-	pt.add("AnimaMesh.SpaceData.Rotation", mesh->GetTransformation()->GetRotation());
-	pt.add("AnimaMesh.SpaceData.Scale", mesh->GetTransformation()->GetScale());
-
-	boost::property_tree::write_xml(saveFileName, pt, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+	mesh->SaveObject(saveFileName);
 }
 
 AnimaMesh* AnimaMeshesManager::LoadMeshFromFile(const AnimaString& meshFilePath)
@@ -316,12 +281,15 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 	std::stringstream ss(meshXmlDefinition);
 	boost::property_tree::read_xml(ss, pt);
 
-	AnimaString name = pt.get<AnimaString>("AnimaMesh.<xmlattr>.name");
+	AnimaString name = pt.get<AnimaString>("AnimaMesh.Name");
 
 	mesh = CreateMesh(name);
 
 	if (mesh)
 	{
+#if !defined SAVE_SCENE
+		mesh->ReadObject(pt, false);
+#else		
 		mesh->SetVertices(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Vertices"));
 		mesh->SetNormals(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Normals"));
 		mesh->SetTextureCoords(pt.get<AnimaArray<AnimaVertex2f> >("AnimaMesh.TextureCoords"));
@@ -357,6 +325,7 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 		AnimaString materialName = pt.get<AnimaString>("AnimaMesh.<xmlattr>.material");
 		if (!materialName.empty())
 			mesh->SetMaterial(_materialsManager->GetMaterialFromName(materialName));
+#endif
 	}
 
 	return mesh;

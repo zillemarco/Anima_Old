@@ -15,6 +15,7 @@
 #include "AnimaRenderer.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaScene.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -282,6 +283,98 @@ bool AnimaMesh::operator==(const AnimaMesh& other)
 bool AnimaMesh::operator!=(const AnimaMesh& other)
 {
 	return true;
+}
+
+ptree AnimaMesh::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+
+	if (saveName)
+		tree.add("AnimaMesh.Name", GetName());
+
+	AnimaString materialName = "";
+	if (_material != nullptr)
+		materialName = _material->GetName();
+
+	tree.put("AnimaMesh.Material", materialName);
+	tree.add("AnimaMesh.Vertices", _vertices);
+	tree.add("AnimaMesh.Normals", _normals);
+	tree.add("AnimaMesh.TextureCoords", _textureCoords);
+	tree.add("AnimaMesh.Tangents", _tangents);
+	tree.add("AnimaMesh.Bitangents", _bitangents);
+	tree.add("AnimaMesh.BoneWeights", _boneWeights);
+	tree.add("AnimaMesh.BoneIDs", _boneIDs);
+
+	AnimaArray<AUint> indexes;
+	GetFacesIndicesArray(&indexes);
+	tree.add("AnimaMesh.Indexes", indexes);
+
+	AnimaArray<AnimaVertex3f> facesNormals;
+	GetFacesNormalsArray(&facesNormals);
+	tree.add("AnimaMesh.FacesNormals", facesNormals);
+
+	tree.add_child("AnimaMesh.SceneObject", AnimaSceneObject::GetObjectTree(false));
+
+	return tree;
+}
+
+bool AnimaMesh::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaMesh.Name"));
+		
+		AnimaString materialName = objectTree.get<AnimaString>("AnimaMesh.Material", "");
+		_vertices = objectTree.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Vertices", AnimaArray<AnimaVertex3f>());
+		_normals = objectTree.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Normals", AnimaArray<AnimaVertex3f>());
+		_textureCoords = objectTree.get<AnimaArray<AnimaVertex2f> >("AnimaMesh.TextureCoords", AnimaArray<AnimaVertex2f>());
+		_tangents = objectTree.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Tangents", AnimaArray<AnimaVertex3f>());
+		_bitangents = objectTree.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Bitangents", AnimaArray<AnimaVertex3f>());
+		_boneWeights = objectTree.get<AnimaArray<AnimaVertex4f> >("AnimaMesh.BoneWeights", AnimaArray<AnimaVertex4f>());
+		_boneIDs = objectTree.get<AnimaArray<AnimaVertex4f> >("AnimaMesh.BoneIDs", AnimaArray<AnimaVertex4f>());
+
+		AnimaArray<AUint> indexes = objectTree.get<AnimaArray<AUint> >("AnimaMesh.Indexes", AnimaArray<AUint>());
+		AnimaArray<AnimaVertex3f> facesNormals = objectTree.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.FacesNormals", AnimaArray<AnimaVertex3f>());
+
+		AInt indexesCount = indexes.size();
+		AInt facesNormalsCount = facesNormals.size();
+
+		bool hasFacesNormal = (facesNormalsCount == indexesCount % 3);
+
+		for (AInt i = 0; i < indexesCount; i += 3)
+		{
+			AnimaFace face;
+			face.SetIndexes(indexes[i], indexes[i + 1], indexes[i + 2]);
+
+			if (hasFacesNormal)
+				face.SetNormal(facesNormals[i % 3]);
+
+			AddFace(face);
+		}
+
+		if (!materialName.empty())
+			_material = scene->GetMaterialsManager()->GetMaterialFromName(materialName);
+
+		ptree sceneObjectTree = objectTree.get_child("AnimaMesh.SceneObject");
+		if (AnimaMappedValues::ReadObject(sceneObjectTree, scene, false))
+		{
+			SetPosition(GetPosition());
+			return true;
+		}
+		
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaMesh::ClearAll()

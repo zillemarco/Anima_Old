@@ -40,12 +40,8 @@
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
-#define DATA_PATH				"data"
-//#define DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
-#define SHADERS_PATH			DATA_PATH "/shaders/"
-#define DEFERRED_SHADERS_START	"Deferred/"
-#define PRIMITIVE_SHADERS_START "Primitive/"
-#define FILTERS_SHADERS_START	"Filters/"
+//#define DATA_PATH				"data"
+#define DATA_PATH				"D:/Git/Anima/AnimaEngineDemo/Scene"
 
 #define ANIMA_ENGINE_DEMO_NAME "AnimaEngineDemo"
 const char* szWindowClass = ANIMA_ENGINE_DEMO_NAME;
@@ -66,6 +62,10 @@ bool _shouldClose = false;
 
 int lastXPos = 0;
 int lastYPos = 0;
+
+float camSpeed = 1.0f;
+float camSpeedInc = 0.5f;
+float camSpeedMax = 10.0f;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -134,32 +134,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'w':
 			case 'W':
 			{
-				_camera->Move(_camera->GetForward(), 2.0);
+				_camera->Move(_camera->GetForward(), camSpeed);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 				break;
 			}
 			case 's':
 			case 'S':
 			{
-				_camera->Move(_camera->GetForward(), -2.0);
+				_camera->Move(_camera->GetForward(), -camSpeed);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 				break;
 			}
 			case 'd':
 			case 'D':
 			{
-				_camera->Move(_camera->GetRight(), 2.0);
+				_camera->Move(_camera->GetRight(), camSpeed);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 				break;
 			}
 			case 'a':
 			case 'A':
 			{
-				_camera->Move(_camera->GetRight(), -2.0);
+				_camera->Move(_camera->GetRight(), -camSpeed);
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 				break;
 			}
 			case 'p':
 			case 'P':
 			{
 				float val = _pbrMaterial->GetFloat("Metallic");
-				val = max(0.0f, val - inc);
+				val = fmax(0.0f, val - inc);
 				_pbrMaterial->SetFloat("Metallic", val);
 				break;
 			}
@@ -167,7 +171,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'M':
 			{
 				float val = _pbrMaterial->GetFloat("Metallic");
-				val = min(1.0f, val + inc);
+				val = fmin(1.0f, val + inc);
 				_pbrMaterial->SetFloat("Metallic", val);
 				break;
 			}
@@ -175,7 +179,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'X':
 			{
 				float val = _pbrMaterial->GetFloat("Specular");
-				val = max(0.0f, val - inc);
+				val = fmax(0.0f, val - inc);
 				_pbrMaterial->SetFloat("Specular", val);
 				break;
 			}
@@ -183,7 +187,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'Z':
 			{
 				float val = _pbrMaterial->GetFloat("Specular");
-				val = min(1.0f, val + inc);
+				val = fmin(1.0f, val + inc);
 				_pbrMaterial->SetFloat("Specular", val);
 				break;
 			}
@@ -191,7 +195,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'V':
 			{
 				float val = _renderer->GetFloat("BlurSize");
-				val = max(0.0f, val - (inc / 1000.0));
+				val = fmax(0.0f, val - (inc / 1000.0));
 				_renderer->SetFloat("BlurSize", val);
 				printf("%f\n", val);
 				break;
@@ -200,7 +204,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'B':
 			{
 				float val = _renderer->GetFloat("BlurSize");
-				val = min(0.5f, val + (inc / 1000.0));
+				val = fmin(0.5f, val + (inc / 1000.0));
 				_renderer->SetFloat("BlurSize", val);
 				printf("%f\n", val);
 				break;
@@ -209,7 +213,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'L':
 			{
 				float val = _renderer->GetFloat("BrightnessThreshold");
-				val = max(0.0f, val - inc);
+				val = fmax(0.0f, val - inc);
 				_renderer->SetFloat("BrightnessThreshold", val);
 				printf("%f\n", val);
 				break;
@@ -218,7 +222,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'K':
 			{
 				float val = _renderer->GetFloat("BrightnessThreshold");
-				val = min(1.0f, val + inc);
+				val = fmin(1.0f, val + inc);
 				_renderer->SetFloat("BrightnessThreshold", val);
 				printf("%f\n", val);
 				break;
@@ -227,7 +231,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'H':
 			{
 				float val = _renderer->GetFloat("BloomBlurScale");
-				val = max(0.0f, val - (inc / 1000.0));
+				val = fmax(0.0f, val - (inc / 1000.0));
 				_renderer->SetFloat("BloomBlurScale", val);
 				printf("%f\n", val);
 				break;
@@ -236,7 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case 'G':
 			{
 				float val = _renderer->GetFloat("BloomBlurScale");
-				val = min(0.5f, val + (inc / 1000.0));
+				val = fmin(0.5f, val + (inc / 1000.0));
 				_renderer->SetFloat("BloomBlurScale", val);
 				printf("%f\n", val);
 				break;
@@ -244,29 +248,59 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case '+':
 			{
 				float val = _pbrMaterial->GetFloat("Roughness");
-				val = min(1.0f, val + inc);
+				val = fmin(1.0f, val + inc);
 				_pbrMaterial->SetFloat("Roughness", val);
 				break;
 			}
 			case '-':
 			{
 				float val = _pbrMaterial->GetFloat("Roughness");
-				val = max(0.0f, val - inc);
+				val = fmax(0.0f, val - inc);
 				_pbrMaterial->SetFloat("Roughness", val);
 				break;
 			}
 			case '*':
 			{
 				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-				val = min(1.0f, val + inc);
+				val = fmin(1.0f, val + inc);
 				_pbrMaterial->SetFloat("ReflectionIntensity", val);
 				break;
 			}
 			case '/':
 			{
 				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-				val = max(0.0f, val - inc);
+				val = fmax(0.0f, val - inc);
 				_pbrMaterial->SetFloat("ReflectionIntensity", val);
+				break;
+			}
+			case '1':
+			{
+				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("oro");
+				break;
+			}
+			case '2':
+			{
+				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("rame");
+				break;
+			}
+			case '3':
+			{
+				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("gomma");
+				break;
+			}
+			case '4':
+			{
+				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("legno");
+				break;
+			}
+			case '5':
+			{
+				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("floor-material");
+				break;
+			}
+			case '0':
+			{
+				_renderer->SetBoolean("ApplyFXAA", !(_renderer->GetBoolean("ApplyFXAA")));
 				break;
 			}
 			}
@@ -431,100 +465,32 @@ bool InitEngine()
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 
 	// Creazione della scena
-	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
+#if defined SAVE_SCENE
+	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);	
+#else
+	_engine.GetScenesManager()->LoadScenes("C:/Users/Marco/Desktop/Scene");
+
+	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
+#endif
+
 	if (!_scene)
 		return false;
-
+	
 	Anima::AnimaString dataPath = DATA_PATH;
-	Anima::AnimaString shadersPartsPath = dataPath + "/shaders/Parts";
-	Anima::AnimaString shadersIncludesPath = dataPath + "/shaders/Includes";
-	Anima::AnimaString shadersPath = SHADERS_PATH;
 	Anima::AnimaString materialsPath = dataPath + "/materials";
 	Anima::AnimaString modelPath = dataPath + "/models/";
-	Anima::AnimaString modelName = "";
+	Anima::AnimaString modelName = "material2.3ds";
 	Anima::AnimaString materialName = "legno";
+	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
+	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 
-	int numInstances = 1;
-	float degOffset = 0.0f;
-	float span = M_PI * 2.0 / numInstances;
-	float raggio = 50.0;
-	float scale = 5.0;
-	float rx = 0.0;
-	float ry = 0.0;
-
-	int scelta = 0;
-	printf("\nScegliere il modello da caricare:\n");
-	printf("\t- 0: materia2.3ds\n");
-	printf("\t- 1: matTester.obj\n");
-	printf("\t- 2: sponza.obj\n");
-	printf("\t- 3: cubo.3ds\n");
-	printf("\t- 4: busto.obj\n");
-	printf("Inserisci la tua scelta: ");
-	std::cin >> scelta;
-
-	switch (scelta)
-	{
-	case 1:		
-		modelName = "matTester.obj";
-		scale = 5.0;
-		rx = 0.0;
-		ry = 180.0;
-		break;
-	case 2:		
-		modelName = "sponza.obj";
-		scale = 0.1;
-		rx = 0.0;
-		ry = 0.0;
-		break;
-	case 3:
-		modelName = "cubo.3ds";
-		scale = 20.0;
-		rx = 0.0;
-		ry = 0.0;
-		break;
-	case 4:
-		modelName = "busto.obj";
-		scale = 100.0;
-		rx = 0.0;
-		ry = 0.0;
-		break;
-	case 0:
-	default:	
-		modelName = "material2.3ds";
-		scale = 20.0;
-		rx = -90.0;
-		ry = 0.0;
-		break;
-	}
-
-	printf("\nScegliere il materiale da applicare:\n");
-	printf("\t- 0: oro\n");
-	printf("\t- 1: rame\n");
-	printf("\t- 2: cromo\n");
-	printf("\t- 3: gomma\n");
-	printf("\t- 4: legno\n");
-	printf("Inserisci la tua scelta: ");
-	std::cin >> scelta;
-
-	switch (scelta)
-	{
-	case 1:		materialName = "rame";	break;
-	case 2:		materialName = "cromo";	break;
-	case 3:		materialName = "gomma";	break;
-	case 4:		materialName = "legno";	break;
-	case 0:
-	default:	materialName = "oro";	break;
-	}
-		
-	//// Caricamento degli shader
-	//if (!_renderer->InitializeShaders(shadersPath, shadersPartsPath, shadersIncludesPath))
-	//	return false;
-			
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
+#if defined SAVE_SCENE
 	if (!materialsManager->LoadMaterials(materialsPath))
 		return false;
+#endif
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
@@ -532,54 +498,112 @@ bool InitEngine()
 	if (!_camera)
 		return false;
 	
-	_model = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath + modelName, ANIMA_ENGINE_DEMO_MODEL_NAME);
+#if defined SAVE_SCENE
+	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
+	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+#endif
+
+	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
 	if (!_model)
 		return false;
 
-	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
-	
-	_floorModel = _scene->GetModelsManager()->LoadModelFromExternalFile(modelPath + "base.3ds", "floorModel");
+	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
 	if (!_floorModel)
 		return false;
-
-	//_floorModel = _scene->GetModelsManager()->CreateModel("floorModel");
-	//Anima::AnimaMesh* floorModelMesh = _scene->GetMeshesManager()->CreateMesh("floorModelMesh");
-	//floorModelMesh->MakePlane();
-	//floorModelMesh->SetParentObject(_floorModel);
-	//_floorModel->AddMesh(floorModelMesh);
 	
-	Anima::AnimaModelInstance* floorModelInstance = modelInstancesManager->CreateInstance("floorModelInstance", _floorModel);	
+	// Creo le istanze del pavimento e imposto i loro materiali
 	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
 
-	floorModelInstance->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance->GetTransformation()->SetRotationYDeg(-90);
-	//floorModelInstance->GetTransformation()->SetScale(0.1, 0, 0.1);
-	floorModelInstance->GetAllMeshes(&floorModelInstanceMeshes);
+	Anima::AnimaModelInstance* floorModelInstance1 = modelInstancesManager->CreateInstance("floorModelInstance1", _floorModel);
+	Anima::AnimaModelInstance* floorModelInstance2 = modelInstancesManager->CreateInstance("floorModelInstance2", _floorModel);
+	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
+	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
+
+	floorModelInstance1->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
+	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
 
 	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-		
-	for (int i = 0; i < numInstances; i++)
-	{
-		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
-		Anima::AnimaModelInstance* modelInstance = modelInstancesManager->CreateInstance(name, _model);
-		Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
 
-		modelInstance->GetAllMeshes(&modelInstanceMeshes);
+	floorModelInstanceMeshes.clear();
+	floorModelInstance2->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance2->GetTransformation()->TranslateX(300);
+	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
+	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
 
-		for (int j = 0; j < modelInstanceMeshes.size(); j++)
-			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName(materialName));
+	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-		if (numInstances > 1)
-			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
+	floorModelInstanceMeshes.clear();
+	floorModelInstance3->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance3->GetTransformation()->TranslateZ(300);
+	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
+	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
 
-		modelInstance->GetTransformation()->RotateYDeg(ry);
-		modelInstance->GetTransformation()->RotateXDeg(rx);
-		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
+	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-		degOffset += span;
-	}
+	floorModelInstanceMeshes.clear();
+	floorModelInstance4->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance4->GetTransformation()->TranslateX(300);
+	floorModelInstance4->GetTransformation()->TranslateZ(300);
+	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
+	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
+	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
+
+	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+
+	// Creo le istanze degli oggetti applicando i materiali
+	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+
+	Anima::AnimaModelInstance* modelInstanceOro = modelInstancesManager->CreateInstance("modelInstanceOro", _model);
+	Anima::AnimaModelInstance* modelInstanceRame = modelInstancesManager->CreateInstance("modelInstanceRame", _model);
+	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
+	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
+
+	modelInstanceOro->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
+	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
+	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
+
+	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
+
+	modelInstanceMeshes.clear();
+	modelInstanceRame->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceRame->GetTransformation()->TranslateX(300);
+	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
+	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
+	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
+
+	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
+
+	modelInstanceMeshes.clear();
+	modelInstanceGomma->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceGomma->GetTransformation()->TranslateZ(300);
+	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
+	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
+	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
+
+	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
+
+	modelInstanceMeshes.clear();
+	modelInstanceLegno->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceLegno->GetTransformation()->TranslateX(300);
+	modelInstanceLegno->GetTransformation()->TranslateZ(300);
+	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
+	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
+	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
+
+	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
 
 	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 0.0, -1.0);
 	_camera->Activate();
@@ -766,11 +790,18 @@ bool InitEngine()
 		}
 	}
 
+#if defined SAVE_SCENE
 	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+#else
+	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
 	textureSkyBox->Load();
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
-
+#endif
 	_renderer->CheckPrograms(_scene);
+
+#if defined SAVE_SCENE
+	_engine.GetScenesManager()->SaveSceneToFile(_scene, "C:/Users/Marco/Desktop/Scene", true);
+#endif
 	
 	return true;
 }

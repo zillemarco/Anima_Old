@@ -72,7 +72,11 @@ public:
 
 	bool operator==(const AnimaMesh& other);
 	bool operator!=(const AnimaMesh& other);
-	
+
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+
 public:
 	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial = true);
 

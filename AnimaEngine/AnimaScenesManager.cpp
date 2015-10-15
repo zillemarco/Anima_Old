@@ -144,27 +144,27 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			{
 				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: materials path not specified");
 			}
-//			
-//			if(!meshesPath.empty())
-//			{
-//				if(!scene->GetMeshesManager()->LoadMeshes(meshesPath))
-//					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading meshes: couldn't load meshes at path '%s'", meshesPath.c_str());
-//			}
-//			else
-//			{
-//				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: meshes path not specified");
-//			}
-//			
-//			if(!modelsPath.empty())
-//			{
-//				if(!scene->GetModelsManager()->LoadModels(modelsPath))
-//					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading models: couldn't load models at path '%s'", modelsPath.c_str());
-//			}
-//			else
-//			{
-//				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: models path not specified");
-//			}
-//			
+			
+			if(!meshesPath.empty())
+			{
+				if(!scene->GetMeshesManager()->LoadMeshes(meshesPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading meshes: couldn't load meshes at path '%s'", meshesPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: meshes path not specified");
+			}
+			
+			if(!modelsPath.empty())
+			{
+				if(!scene->GetModelsManager()->LoadModels(modelsPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading models: couldn't load models at path '%s'", modelsPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: models path not specified");
+			}
+			
 //			if(!camerasPath.empty())
 //			{
 //				if(!scene->GetCamerasManager()->LoadCameras(camerasPath))

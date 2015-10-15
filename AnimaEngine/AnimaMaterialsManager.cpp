@@ -423,48 +423,50 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 
 	if (material)
 	{
+#if !defined SAVE_SCENE
 		material->ReadObject(pt, false);
-		
-//		for (auto& prop : pt.get_child("AnimaMaterial.Properties"))
-//		{
-//			if (prop.first == "Property")
-//			{
-//				AnimaString propName = prop.second.get<AnimaString>("Name");
-//				AnimaString propType = prop.second.get<AnimaString>("Type");
-//
-//				if (propType.compare("color") == 0 || propType.compare("vector") == 0)
-//					material->SetColor(propName.c_str(), prop.second.get<AnimaVertex4f>("Value"));
-//				else if (propType.compare("float") == 0)
-//					material->SetFloat(propName.c_str(), prop.second.get<AFloat>("Value"));
-//				else if (propType.compare("bool") == 0)
-//					material->SetBoolean(propName.c_str(), prop.second.get<bool>("Value"));
-//				else if (propType.compare("texture") == 0)
-//				{
-//					AnimaTexture* texture = nullptr;
-//					
-//					AnimaString textureName = prop.second.get<AnimaString>("TextureName", "");
-//					if(!textureName.empty())
-//					{
-//						texture = _texturesManager->GetTextureFromName(textureName);
-//					}
-//					else
-//					{
-//						texture = _texturesManager->LoadTextureFromXml(prop.second.get_child("Value"));
-//					}
-//					
-//					material->SetTexture(propName.c_str(), texture);
-//				}
-//			}
-//		}
-//
-//		for (auto& shader : pt.get_child("AnimaMaterial.Shaders"))
-//		{
-//			if (shader.first == "Shader")
-//			{
-//				AnimaString shaderName = shader.second.get<AnimaString>("Name");
-//				material->AddShader(shaderName);
-//			}
-//		}
+#else		
+		for (auto& prop : pt.get_child("AnimaMaterial.Properties"))
+		{
+			if (prop.first == "Property")
+			{
+				AnimaString propName = prop.second.get<AnimaString>("Name");
+				AnimaString propType = prop.second.get<AnimaString>("Type");
+
+				if (propType.compare("color") == 0 || propType.compare("vector") == 0)
+					material->SetColor(propName.c_str(), prop.second.get<AnimaVertex4f>("Value"));
+				else if (propType.compare("float") == 0)
+					material->SetFloat(propName.c_str(), prop.second.get<AFloat>("Value"));
+				else if (propType.compare("bool") == 0)
+					material->SetBoolean(propName.c_str(), prop.second.get<bool>("Value"));
+				else if (propType.compare("texture") == 0)
+				{
+					AnimaTexture* texture = nullptr;
+					
+					AnimaString textureName = prop.second.get<AnimaString>("TextureName", "");
+					if(!textureName.empty())
+					{
+						texture = _texturesManager->GetTextureFromName(textureName);
+					}
+					else
+					{
+						texture = _texturesManager->LoadTextureFromXml(prop.second.get_child("Value"));
+					}
+					
+					material->SetTexture(propName.c_str(), texture);
+				}
+			}
+		}
+
+		for (auto& shader : pt.get_child("AnimaMaterial.Shaders"))
+		{
+			if (shader.first == "Shader")
+			{
+				AnimaString shaderName = shader.second.get<AnimaString>("Name");
+				material->AddShader(shaderName);
+			}
+		}
+#endif
 	}
 
 	return material;
@@ -495,80 +497,6 @@ void AnimaMaterialsManager::SaveMaterialToFile(AnimaMaterial* material, const An
 	}
 	
 	material->SaveObject(saveFileName);
-	
-//	using boost::property_tree::ptree;
-//	ptree materialTree;
-//	
-//	materialTree.add("AnimaMaterial.Name", material->GetName());
-//	
-//	ptree propertiesTree;
-//	
-//	boost::unordered_map<AnimaString, AnimaTextureGenerator*, AnimaStringHasher>* texturesMap = material->GetTextures();
-//	for (auto& pair : *texturesMap)
-//	{
-//		ptree propertyTree;
-//		propertyTree.add("Name", AnimaMappedValues::ExtractName(pair.first));
-//		propertyTree.add("Type", "texture");
-//		propertyTree.add("TextureName", pair.second->GetTexture()->GetName());
-//		
-//		propertiesTree.add_child("Property", propertyTree);
-//	}
-//	
-//	boost::unordered_map<AnimaString, AnimaColorGenerator*, AnimaStringHasher>* colorsMap = material->GetColors();
-//	for (auto& pair : *colorsMap)
-//	{
-//		ptree propertyTree;
-//		propertyTree.add("Name", AnimaMappedValues::ExtractName(pair.first));
-//		propertyTree.add("Type", "color");
-//		propertyTree.add("Value", pair.second->GetColor4f());
-//		
-//		propertiesTree.add_child("Property", propertyTree);
-//	}
-//	
-//	boost::unordered_map<AnimaString, AnimaVectorGenerator*, AnimaStringHasher>* vectorsMap = material->GetVectors();
-//	for (auto& pair : *vectorsMap)
-//	{
-//		ptree propertyTree;
-//		propertyTree.add("Name", AnimaMappedValues::ExtractName(pair.first));
-//		propertyTree.add("Type", "vector");
-//		propertyTree.add("Value", pair.second->GetVector4f());
-//		
-//		propertiesTree.add_child("Property", propertyTree);
-//	}
-//	
-//	boost::unordered_map<AnimaString, AFloat, AnimaStringHasher>* floatsMap = material->GetFloats();
-//	for (auto& pair : *floatsMap)
-//	{
-//		ptree propertyTree;
-//		propertyTree.add("Name", AnimaMappedValues::ExtractName(pair.first));
-//		propertyTree.add("Type", "float");
-//		propertyTree.add("Value", pair.second);
-//		
-//		propertiesTree.add_child("Property", propertyTree);
-//	}
-//	
-//	boost::unordered_map<AnimaString, bool, AnimaStringHasher>* booleansMap = material->GetBooleans();
-//	for (auto& pair : *booleansMap)
-//	{
-//		ptree propertyTree;
-//		propertyTree.add("Name", AnimaMappedValues::ExtractName(pair.first));
-//		propertyTree.add("Type", "bool");
-//		propertyTree.add("Value", pair.second);
-//		
-//		propertiesTree.add_child("Property", propertyTree);
-//	}
-//	
-//	ptree shadersTree;
-//	AInt shadersCount = material->GetShadersCount();
-//	for(AInt i = 0; i < shadersCount; i++)
-//	{
-//		shadersTree.add("Name", material->GetShaderName(i));
-//	}
-//	
-//	materialTree.add_child("AnimaMaterial.Properties", propertiesTree);
-//	materialTree.add_child("AnimaMaterial.Shaders", shadersTree);
-//	
-//	boost::property_tree::write_xml(saveFileName, materialTree, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 }
 
 void AnimaMaterialsManager::SaveMaterials(const AnimaString& destinationPath)
