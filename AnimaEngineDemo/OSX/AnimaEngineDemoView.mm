@@ -522,9 +522,12 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 	
 	// Creazione della scena
-
-//	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);	
+#if defined SAVE_SCENE
+	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
+#else
 	_engine.GetScenesManager()->LoadScenes("/Users/marco/Desktop/Scene");
+	
+#endif
 	
 	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
 
@@ -539,85 +542,13 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
 	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 	
-	int nufminstances = 1;
-	float degOffset = 0.0f;
-	float span = M_PI * 2.0 / nufminstances;
-	float raggio = 50.0;
-	float scale = 5.0;
-	float rx = 0.0;
-	float ry = 0.0;
-	
-	int scelta = 0;
-	printf("\nScegliere il modello da caricare:\n");
-	printf("\t- 0: materia2.3ds\n");
-	printf("\t- 1: matTester.obj\n");
-	printf("\t- 2: sponza.obj\n");
-	printf("\t- 3: cubo.3ds\n");
-	printf("\t- 4: busto.obj\n");
-	printf("Inserisci la tua scelta: ");
-	//std::cin >> scelta;
-	scelta = 0;
-	
-	switch (scelta)
-	{
-		case 1:
-			modelName = "matTester.obj";
-			scale = 5.0;
-			rx = 0.0;
-			ry = 180.0;
-			break;
-		case 2:
-			modelName = "sponza.obj";
-			scale = 0.1;
-			rx = 0.0;
-			ry = 0.0;
-			break;
-		case 3:
-			modelName = "cubo.3ds";
-			scale = 20.0;
-			rx = 0.0;
-			ry = 0.0;
-			break;
-		case 4:
-			modelName = "busto.obj";
-			scale = 100.0;
-			rx = 0.0;
-			ry = 0.0;
-			break;
-		case 0:
-		default:
-			modelName = "material2.3ds";
-			scale = 20.0;
-			rx = -90.0;
-			ry = 0.0;
-			break;
-	}
-	
-	printf("\nScegliere il materiale da applicare:\n");
-	printf("\t- 0: oro\n");
-	printf("\t- 1: rame\n");
-	printf("\t- 2: cromo\n");
-	printf("\t- 3: gomma\n");
-	printf("\t- 4: legno\n");
-	printf("Inserisci la tua scelta: ");
-	//std::cin >> scelta;
-	scelta = 0;
-	
-	switch (scelta)
-	{
-		case 1:		materialName = "rame";	break;
-		case 2:		materialName = "cromo";	break;
-		case 3:		materialName = "gomma";	break;
-		case 4:		materialName = "legno";	break;
-		case 0:
-		default:	materialName = "oro";	break;
-	}
-		
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
-//	if (!materialsManager->LoadMaterials(materialsPath))
-//		return false;
+#if defined SAVE_SCENE
+	if (!materialsManager->LoadMaterials(materialsPath))
+		return false;
+#endif
 	
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
@@ -625,8 +556,10 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (!_camera)
 		return false;
 	
+#if defined SAVE_SCENE
 	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
 	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+#endif
 	
 	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
 	if (!_model)
@@ -871,14 +804,18 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		}
 	}
 	
-	//Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+#if defined SAVE_SCENE
+	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+#else
 	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
 	textureSkyBox->Load();
+#endif
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
-	
 	_renderer->CheckPrograms(_scene);
 	
-//	_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
+#if defined SAVE_SCENE
+	_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
+#endif
 	
 	return true;
 }

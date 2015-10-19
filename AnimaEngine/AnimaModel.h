@@ -74,6 +74,9 @@ public:
 	AnimaVertex3f GetBoundingBoxCenter() const;
 
 	void GetAllMeshes(AnimaArray<AnimaMesh*> *meshes);
+	
+	virtual void SetTopLevelModel(bool topLevelModel) { _topLevelModel = topLevelModel; }
+	virtual bool IsTopLevelModel() const { return _topLevelModel; }
 
 protected:
 	const char* GetShaderPrefix() { return "MOD"; }
@@ -89,6 +92,8 @@ protected:
 	AnimaVertex3f	_boundingBoxMin;
 	AnimaVertex3f	_boundingBoxMax;
 	AnimaVertex3f	_boundingBoxCenter;
+	
+	bool _topLevelModel;
 
 	AnimaMappedArray<AnimaMesh*> _meshes;
 	AnimaMappedArray<AnimaMeshBoneInfo*> _meshesBonesInfo;

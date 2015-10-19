@@ -196,7 +196,7 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaModel))
 		{
-			child = scene->GetModelsManager()->GetModelFromName(childData._name);
+			child = scene->GetModelsManager()->GetModelFromName(childData._name, false);
 		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaModelInstance))
 		{

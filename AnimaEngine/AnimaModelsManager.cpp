@@ -62,7 +62,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromExternalFile(const AnimaString& mod
 	{
 		AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = _meshesManager->GetLastMeshesBonesInfo();
 
-		AnimaArray<AnimaString>* meshesName = _meshesManager->GetLastMeshesIndexMap();		
+		AnimaArray<AnimaString>* meshesName = _meshesManager->GetLastMeshesIndexMap();
 		newTopLevelModel = LoadModelFromScene(scene, scene->mRootNode, meshesName, name);
 						
 		newTopLevelModel->SetOriginFileName(modelPath);
@@ -85,7 +85,13 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 		newModelName = modelName;
 	else
 		newModelName = sceneNode->mName.C_Str();
-
+	
+	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
+	AnimaString originalName = newModelName;
+	AInt index = 0;
+	while (_models.Contains(newModelName) != -1)
+		newModelName = FormatString("%s_%d", originalName.c_str(), index);
+	
 	animationNodeName = sceneNode->mName.C_Str();
 
 	AnimaModel* currentModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), newModelName, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
@@ -122,31 +128,45 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	return currentModel;
 }
 
-AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name)
+AnimaModel* AnimaModelsManager::CreateModel(const AnimaString& name, bool topLevelModel)
 {
-	AInt index = _topLevelModels.Contains(name);
+	AInt index = _models.Contains(name);
 	if (index >= 0)
 		return nullptr;
 
 	AnimaModel* newModel = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
+	newModel->SetTopLevelModel(topLevelModel);
+	
 	_models.Add(name, newModel);
-	_topLevelModels.Add(name, newModel);
+	
+	if(topLevelModel)
+		_topLevelModels.Add(name, newModel);
+
 	return newModel;
 }
 
-AInt AnimaModelsManager::GetModelsCount()
+AInt AnimaModelsManager::GetModelsCount(bool topLevelModels)
 {
-	return _topLevelModels.GetSize();
+	if(topLevelModels)
+		return _topLevelModels.GetSize();
+	else
+		return _models.GetSize();
 }
 
-AnimaModel* AnimaModelsManager::GetModel(AInt index)
+AnimaModel* AnimaModelsManager::GetModel(AInt index, bool topLevelModel)
 {
-	return _topLevelModels[index];
+	if(topLevelModel)
+		return _topLevelModels[index];
+	else
+		return _models[index];
 }
 
-AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name)
+AnimaModel* AnimaModelsManager::GetModelFromName(const AnimaString& name, bool topLevelModel)
 {
-	return _topLevelModels[name];
+	if(topLevelModel)
+		return _topLevelModels[name];
+	else
+		return _models[name];
 }
 
 void AnimaModelsManager::ClearModels()
@@ -183,8 +203,18 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 	boost::property_tree::read_xml(ss, pt);
 
 	AnimaString name = pt.get<AnimaString>("AnimaModel.Name");
-
-	model = CreateModel(name);
+	bool topLevelModel = pt.get<bool>("AnimaModel.TopLevelModel", false);
+	
+	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
+	AnimaString originalName = name;
+	AInt index = 0;
+	while (_models.Contains(name) != -1)
+		name = FormatString("%s_%d", originalName.c_str(), index);
+	
+	if(name != originalName)
+		AnimaLogger::LogMessageFormat("WARNING - Error reading a model. A model named '%s' already existex so it's been renamed to '%s'", originalName.c_str(), name.c_str());
+	
+	model = CreateModel(name, topLevelModel);
 
 	if (model)
 	{
@@ -259,6 +289,13 @@ AnimaModel* AnimaModelsManager::LoadModelFromTree(boost::property_tree::ptree* t
 	AnimaModel* model = nullptr;
 
 	AnimaString name = tree->get<AnimaString>("AnimaModel.Name");
+	
+	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
+	AnimaString originalName = name;
+	AInt index = 0;
+	while (_models.Contains(name) != -1)
+		name = FormatString("%s_%d", originalName.c_str(), index);
+	
 	model = AnimaAllocatorNamespace::AllocateNew<AnimaModel>(*(_scene->GetModelsAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetModelsAllocator());
 	_models.Add(name, model);
 

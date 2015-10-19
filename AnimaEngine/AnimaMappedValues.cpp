@@ -1245,7 +1245,7 @@ bool AnimaMappedValues::ReadObject(const ptree& objectTree, AnimaScene* scene, b
 							
 							if(generator)
 							{
-								if(!generator->ReadObject(generatorTree, false))
+								if(!generator->ReadObject(generatorTree, scene, false))
 									return false;
 								generator->SetGeneratedFromMappedValues(true);
 								
@@ -1272,7 +1272,7 @@ bool AnimaMappedValues::ReadObject(const ptree& objectTree, AnimaScene* scene, b
 							
 							if(generator)
 							{
-								if(!generator->ReadObject(generatorTree, false))
+								if(!generator->ReadObject(generatorTree, scene, false))
 									return false;
 								generator->SetGeneratedFromMappedValues(true);
 								
@@ -1299,7 +1299,7 @@ bool AnimaMappedValues::ReadObject(const ptree& objectTree, AnimaScene* scene, b
 							
 							if(generator)
 							{
-								if(!generator->ReadObject(generatorTree, false))
+								if(!generator->ReadObject(generatorTree, scene, false))
 									return false;
 								generator->SetGeneratedFromMappedValues(true);
 								

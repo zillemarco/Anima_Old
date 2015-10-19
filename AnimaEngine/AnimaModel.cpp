@@ -28,6 +28,7 @@ AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* data
 	IMPLEMENT_ANIMA_CLASS(AnimaModel);
 	_material = nullptr;
 	_activeAnimation = -1;
+	_topLevelModel = false;
 }
 
 AnimaModel::AnimaModel(const AnimaModel& src)
@@ -41,6 +42,7 @@ AnimaModel::AnimaModel(const AnimaModel& src)
 {
 	_material = src._material;
 	_activeAnimation = -1;
+	_topLevelModel = src._topLevelModel;
 
 }
 
@@ -55,6 +57,7 @@ AnimaModel::AnimaModel(AnimaModel&& src)
 {
 	_material = src._material;
 	_activeAnimation = -1;
+	_topLevelModel = src._topLevelModel;
 }
 
 AnimaModel::~AnimaModel()
@@ -72,6 +75,7 @@ AnimaModel& AnimaModel::operator=(const AnimaModel& src)
 		_materialName = src._materialName;
 		_animationNodeName = src._animationNodeName;
 		_originFileName = src._originFileName;
+		_topLevelModel = src._topLevelModel;
 
 		_meshes = src._meshes;
 
@@ -96,6 +100,7 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 		_originFileName = src._originFileName;
 		_animationNodeName = src._animationNodeName;
 		_meshes = src._meshes;
+		_topLevelModel = src._topLevelModel;
 
 		ClearMeshesBonesInfo();
 		SetMeshesBonesInfo(&src._meshesBonesInfo);
@@ -120,6 +125,7 @@ ptree AnimaModel::GetObjectTree(bool saveName) const
 	else
 		materialName = _materialName;
 
+	tree.add("AnimaModel.TopLevelModel", IsTopLevelModel());
 	tree.add("AnimaModel.Material", materialName);
 	tree.add("AnimaModel.AnimationNodeName", _animationNodeName);
 
@@ -154,6 +160,7 @@ bool AnimaModel::ReadObject(const ptree& objectTree, AnimaScene* scene, bool rea
 
 		_materialName = objectTree.get<AnimaString>("AnimaModel.Material", "");
 		_animationNodeName = objectTree.get<AnimaString>("AnimaModel.AnimationNodeName", "");
+		SetTopLevelModel(objectTree.get<bool>("AnimaModel.TopLevelModel", false));
 
 		if (!_materialName.empty())
 			_material = scene->GetMaterialsManager()->GetMaterialFromName(_materialName);
@@ -244,6 +251,7 @@ AnimaMaterial* AnimaModel::GetMaterial()
 
 AInt AnimaModel::AddMesh(AnimaMesh* mesh)
 {
+	mesh->SetParentObject(this);
 	return _meshes.Add(mesh->GetName(), mesh);
 }
 

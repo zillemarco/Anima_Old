@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaModel>
 	<Name>AnimaEngineDemoModel</Name>
+	<TopLevelModel>True</TopLevelModel>
 	<Meshes/>
 	<SpaceData>
 		<Position>0.000000;0.000000;0.000000</Position>

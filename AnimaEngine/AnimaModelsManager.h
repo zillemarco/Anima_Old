@@ -37,17 +37,17 @@ public:
 	~AnimaModelsManager();
 	
 public:
-	AnimaModel* CreateModel(const AnimaString& name);
+	AnimaModel* CreateModel(const AnimaString& name, bool topLevelModel = true);
 
 	AnimaModel* LoadModelFromFile(const AnimaString& filePath);
 	AnimaModel* LoadModelFromXml(const AnimaString& modelXmlDefinition);
 	AnimaModel* LoadModelFromExternalFile(const AnimaString& modelPath, const AnimaString& name);
 	bool LoadModels(const AnimaString& modelsPath);
 	
-	AInt GetModelsCount();
+	AInt GetModelsCount(bool topLevelModels = true);
 
-	AnimaModel* GetModel(AInt index);
-	AnimaModel* GetModelFromName(const AnimaString& name);
+	AnimaModel* GetModel(AInt index, bool topLevelModel = true);
+	AnimaModel* GetModelFromName(const AnimaString& name, bool topLevelModel = true);
 	
 	void ClearModels();
 	
