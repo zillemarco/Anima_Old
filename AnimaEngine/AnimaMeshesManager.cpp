@@ -281,14 +281,18 @@ AnimaMesh* AnimaMeshesManager::LoadMeshFromXml(const AnimaString& meshXmlDefinit
 	std::stringstream ss(meshXmlDefinition);
 	boost::property_tree::read_xml(ss, pt);
 
+#if !defined SAVE_SCENE
 	AnimaString name = pt.get<AnimaString>("AnimaMesh.Name");
+#else
+	AnimaString name = pt.get<AnimaString>("AnimaMesh.<xmlattr>.name");
+#endif
 
 	mesh = CreateMesh(name);
 
 	if (mesh)
 	{
 #if !defined SAVE_SCENE
-		mesh->ReadObject(pt, false);
+		mesh->ReadObject(pt, _scene, false);
 #else		
 		mesh->SetVertices(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Vertices"));
 		mesh->SetNormals(pt.get<AnimaArray<AnimaVertex3f> >("AnimaMesh.Normals"));
@@ -358,6 +362,15 @@ void AnimaMeshesManager::SaveMeshes(const AnimaString& destinationPath)
 	{
 		SaveMeshToFile(_meshes[i], destinationPath, true);
 	}
+}
+
+bool AnimaMeshesManager::FinalizeObjectsAfterRead()
+{
+	AInt count = _meshes.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_meshes[i]->FinalizeAfterRead(_scene);
+
+	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

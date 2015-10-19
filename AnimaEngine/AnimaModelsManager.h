@@ -55,6 +55,8 @@ public:
 	void SaveModelToFile(AnimaModel* model, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveModels(const AnimaString& destinationPath);
 
+	bool FinalizeObjectsAfterRead();
+
 private:
 	AnimaModel* LoadModelFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* meshesMap, const AnimaString& modelName);
 

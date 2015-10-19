@@ -835,7 +835,7 @@ AnimaTexture* AnimaTexturesManager::LoadTextureFromXml(const boost::property_tre
 	if (texture)
 	{
 #if !defined SAVE_SCENE
-		texture->ReadObject(xmlTree, false);
+		texture->ReadObject(xmlTree, _scene, false);
 #else
 		
 		AnimaTextureTarget target;
@@ -1282,6 +1282,15 @@ void AnimaTexturesManager::SaveTextures(const AnimaString& destinationPath)
 	{
 		SaveTextureToFile(_textures[i], destinationPath, true);
 	}
+}
+
+bool AnimaTexturesManager::FinalizeObjectsAfterRead()
+{
+	AInt count = _textures.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_textures[i]->FinalizeAfterRead(_scene);
+
+	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

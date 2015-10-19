@@ -37,6 +37,10 @@ public:
 	AnimaModel& operator=(AnimaModel&& src);
 
 public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+
+public:
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();
 

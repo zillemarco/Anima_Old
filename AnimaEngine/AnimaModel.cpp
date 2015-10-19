@@ -7,6 +7,10 @@
 //
 
 #include "AnimaModel.h"
+#include "AnimaScene.h"
+#include "AnimaMaterialsManager.h"
+#include "AnimaMeshesManager.h"
+#include "AnimaAnimationsManager.h"
 
 #ifndef min
 #	define min(a, b) (a > b ? b : a)
@@ -101,6 +105,130 @@ AnimaModel& AnimaModel::operator=(AnimaModel&& src)
 	}
 	
 	return *this;
+}
+
+ptree AnimaModel::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+
+	if (saveName)
+		tree.add("AnimaModel.Name", GetName());
+
+	AnimaString materialName = "";
+	if (_material != nullptr)
+		materialName = _material->GetName();
+	else
+		materialName = _materialName;
+
+	tree.add("AnimaModel.Material", materialName);
+	tree.add("AnimaModel.AnimationNodeName", _animationNodeName);
+
+	ptree meshesTree;
+	AInt count = _meshes.GetSize();
+	for (AInt i = 0; i < count; i++)
+		meshesTree.add("Mesh", _meshes[i]->GetName());
+	tree.add_child("AnimaModel.Meshes", meshesTree);
+
+	ptree meshesBonesInfoTree;
+	count = _meshesBonesInfo.GetSize();
+	for (AInt i = 0; i < count; i++)
+		meshesBonesInfoTree.add_child("BoneInfo", _meshesBonesInfo[i]->GetObjectTree());
+	tree.add_child("AnimaModel.MeshesBonesInfo", meshesBonesInfoTree);
+
+	ptree animationsTree;
+	for (auto& animation : _animations)
+		animationsTree.add("Animation", animation->GetName());
+	tree.add_child("AnimaModel.Animations", animationsTree);
+
+	tree.add_child("AnimaModel.SceneObject", AnimaSceneObject::GetObjectTree(false));
+
+	return tree;
+}
+
+bool AnimaModel::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaModel.Name"));
+
+		_materialName = objectTree.get<AnimaString>("AnimaModel.Material", "");
+		_animationNodeName = objectTree.get<AnimaString>("AnimaModel.AnimationNodeName", "");
+
+		if (!_materialName.empty())
+			_material = scene->GetMaterialsManager()->GetMaterialFromName(_materialName);
+		
+		for (auto& meshData : objectTree.get_child("AnimaModel.Meshes"))
+		{
+			if (meshData.first == "Mesh")
+			{
+				AnimaString meshName = meshData.second.get_value<AnimaString>("");
+				if (meshName.empty())
+					AnimaLogger::LogMessageFormat("WARNING - Error reading a model called '%s': found a mesh without name", GetName().c_str());
+				else
+				{
+					AnimaMesh* mesh = scene->GetMeshesManager()->GetMeshFromName(meshName);
+					if (mesh == nullptr)
+						AnimaLogger::LogMessageFormat("WARNING - Error reading a model called '%s': model has a mesh named '%s' bot the mesh doesn't exists", GetName().c_str(), meshName.c_str());
+					else
+						AddMesh(mesh);
+				}
+			}
+		}
+
+		for (auto& boneInfoData : objectTree.get_child("AnimaModel.MeshesBonesInfo"))
+		{
+			if (boneInfoData.first == "BoneInfo")
+			{
+				AnimaString meshBoneInfoName = boneInfoData.second.get<AnimaString>("AnimaMeshBoneInfo.Name", "");
+				if (meshBoneInfoName.empty())
+					AnimaLogger::LogMessageFormat("WARNING - Error reading a model called '%s': found a mesh bone data without name", GetName().c_str());
+				else
+				{
+					AnimaMeshBoneInfo* meshBoneInfo = AnimaAllocatorNamespace::AllocateNew<AnimaMeshBoneInfo>(*_allocator, meshBoneInfoName, _allocator);
+					if (meshBoneInfo->ReadObject(boneInfoData.second, scene, false))
+						_meshesBonesInfo.Add(meshBoneInfoName, meshBoneInfo);
+				}
+			}
+		}
+
+		for (auto& animationData : objectTree.get_child("AnimaModel.Animations"))
+		{
+			if (animationData.first == "Animation")
+			{
+				AnimaString animationName = animationData.second.get_value<AnimaString>("");
+				if (animationName.empty())
+					AnimaLogger::LogMessageFormat("WARNING - Error reading a model called '%s': found an animation without name", GetName().c_str());
+				else
+				{
+					AnimaAnimation* animation = scene->GetAnimationsManager()->GetAnimationFromName(animationName);
+					if (animation == nullptr)
+						AnimaLogger::LogMessageFormat("WARNING - Error reading a model called '%s': model has an animation named '%s' bot the animation doesn't exists", GetName().c_str(), animationName.c_str());
+					else
+						AddAnimation(animation);
+				}
+			}
+		}
+
+		ptree sceneObjectTree = objectTree.get_child("AnimaModel.SceneObject");
+		if (AnimaSceneObject::ReadObject(sceneObjectTree, scene, false))
+		{
+			SetPosition(GetPosition());
+			return true;
+		}
+
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing model: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaModel::SetMaterial(AnimaMaterial* material)

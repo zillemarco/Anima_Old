@@ -188,6 +188,9 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 
 	if (model)
 	{
+#if !defined SAVE_SCENE
+		model->ReadObject(pt, _scene, false);
+#else		
 		try
 		{
 			for (auto& meshData : pt.get_child("AnimaModel.Meshes"))
@@ -242,6 +245,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 		model->GetTransformation()->SetTranslation(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Translation"));
 		model->GetTransformation()->SetRotation(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Rotation"));
 		model->GetTransformation()->SetScale(pt.get<AnimaVertex3f>("AnimaModel.SpaceData.Scale"));
+#endif
 	}
 
 	return model;
@@ -326,21 +330,21 @@ void AnimaModelsManager::SaveModelToFile(AnimaModel* model, const AnimaString& d
 {
 	if (model == nullptr)
 		return;
-	
+
+	namespace fs = boost::filesystem;
+
 	AnimaString saveFileName = destinationPath;
-	if(createFinalPath)
+
+	if (createFinalPath)
 	{
-		namespace fs = boost::filesystem;
 		fs::path firstPart(destinationPath);
 		fs::path secondPart(model->GetName() + ".amodel");
 		fs::path completePath = firstPart / secondPart;
-		
+
 		saveFileName = completePath.string();
 	}
-	
-	using boost::property_tree::ptree;
 
-	boost::property_tree::write_xml(saveFileName, GetModelTree(model), std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
+	model->SaveObject(saveFileName);
 }
 
 boost::property_tree::ptree AnimaModelsManager::GetModelTree(AnimaModel* model)
@@ -400,11 +404,20 @@ bool AnimaModelsManager::LoadModels(const AnimaString& modelsPath)
 
 void AnimaModelsManager::SaveModels(const AnimaString& destinationPath)
 {
-	AInt count = _topLevelModels.GetSize();
+	AInt count = _models.GetSize();
 	for(AInt i = 0; i < count; i++)
 	{
-		SaveModelToFile(_topLevelModels[i], destinationPath, true);
+		SaveModelToFile(_models[i], destinationPath, true);
 	}
+}
+
+bool AnimaModelsManager::FinalizeObjectsAfterRead()
+{
+	AInt count = _models.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_models[i]->FinalizeAfterRead(_scene);
+
+	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

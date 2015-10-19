@@ -357,7 +357,7 @@ bool AnimaMesh::ReadObject(const ptree& objectTree, AnimaScene* scene, bool read
 			_material = scene->GetMaterialsManager()->GetMaterialFromName(materialName);
 
 		ptree sceneObjectTree = objectTree.get_child("AnimaMesh.SceneObject");
-		if (AnimaMappedValues::ReadObject(sceneObjectTree, scene, false))
+		if (AnimaSceneObject::ReadObject(sceneObjectTree, scene, false))
 		{
 			SetPosition(GetPosition());
 			return true;

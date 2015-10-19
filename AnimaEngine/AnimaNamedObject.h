@@ -58,6 +58,8 @@ public:
 	virtual bool ReadObject(const AnimaString& sourcePath, AnimaScene* scene);
 	virtual bool ReadObjectFromXML(const AnimaString& xml, AnimaScene* scene);
 	virtual bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true);
+
+	virtual bool FinalizeAfterRead(AnimaScene* scene);
 	
 	virtual AnimaString GetSavingDirectory() const { return _savingDirectory; };
 	

@@ -57,6 +57,8 @@ public:
 	void SaveMeshToFile(AnimaMesh* mesh, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveMeshes(const AnimaString& destinationPath);
 
+	bool FinalizeObjectsAfterRead();
+
 protected:
 	void ClearMeshes();
 

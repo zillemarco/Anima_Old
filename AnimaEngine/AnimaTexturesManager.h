@@ -310,6 +310,8 @@ public:
 	void SaveTextureToFile(const AnimaString& textureName, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveTextureToFile(AnimaTexture* texture, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveTextures(const AnimaString& destinationPath);
+
+	bool FinalizeObjectsAfterRead();
 	
 private:
 	void ClearTextures();

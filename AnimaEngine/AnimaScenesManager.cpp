@@ -194,6 +194,14 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 //			{
 //				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: animations path not specified");
 //			}
+
+			scene->GetTexturesManager()->FinalizeObjectsAfterRead();
+			scene->GetMaterialsManager()->FinalizeObjectsAfterRead();
+			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
+			scene->GetModelsManager()->FinalizeObjectsAfterRead();
+			//	scene->GetCamerasManager()->FinalizeObjectsAfterRead();
+			//	scene->GetLightsManager()->FinalizeObjectsAfterRead();
+			//	scene->GetAnimationsManager()->FinalizeObjectsAfterRead();
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{

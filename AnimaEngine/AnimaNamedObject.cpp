@@ -193,4 +193,9 @@ bool AnimaNamedObject::ReadObject(const ptree& objectTree, AnimaScene* scene, bo
 	return true;
 }
 
+bool AnimaNamedObject::FinalizeAfterRead(AnimaScene* scene)
+{
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

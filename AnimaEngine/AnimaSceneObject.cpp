@@ -98,8 +98,10 @@ ptree AnimaSceneObject::GetObjectTree(bool saveName) const
 		AnimaString childType = child->_GetClassName();
 		
 		ptree childTree;
-		childTree.add("Child.Type", childType);
-		childTree.add("Child.Name", child);
+		childTree.add("Type", childType);
+		childTree.add("Name", child->GetName());
+
+		childrenTree.add_child("Child", childTree);
 	}
 	
 	tree.add_child("AnimaSceneObject.Children", childrenTree);
@@ -115,7 +117,7 @@ bool AnimaSceneObject::ReadObject(const ptree& objectTree, AnimaScene* scene, bo
 		if(readName)
 			SetName(objectTree.get<AnimaString>("AnimaSceneObject.Name"));
 		
-		_transformation.ReadObject(objectTree.get_child("AnimaSceneObject.Transformaton"));
+		_transformation.ReadObject(objectTree.get_child("AnimaSceneObject.Transformation"));
 		
 		for(auto& child : objectTree.get_child("AnimaSceneObject.Children"))
 		{
@@ -144,7 +146,7 @@ bool AnimaSceneObject::ReadObject(const ptree& objectTree, AnimaScene* scene, bo
 	}
 }
 
-bool AnimaSceneObject::TranslateChildrenData(AnimaScene* scene)
+bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 {
 	if (scene == nullptr)
 		return false;

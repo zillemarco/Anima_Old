@@ -424,7 +424,7 @@ AnimaMaterial* AnimaMaterialsManager::LoadMaterialFromXml(const AnimaString& mat
 	if (material)
 	{
 #if !defined SAVE_SCENE
-		material->ReadObject(pt, false);
+		material->ReadObject(pt, _scene, false);
 #else		
 		for (auto& prop : pt.get_child("AnimaMaterial.Properties"))
 		{
@@ -506,6 +506,15 @@ void AnimaMaterialsManager::SaveMaterials(const AnimaString& destinationPath)
 	{
 		SaveMaterialToFile(_materials[i], destinationPath, true);
 	}
+}
+
+bool AnimaMaterialsManager::FinalizeObjectsAfterRead()
+{
+	AInt count = _materials.GetSize();
+	for (AInt i = 0; i < count; i++)
+		_materials[i]->FinalizeAfterRead(_scene);
+
+	return true;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

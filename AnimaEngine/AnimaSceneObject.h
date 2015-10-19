@@ -51,6 +51,7 @@ public:
 public:
 	ptree GetObjectTree(bool saveName = true) const override;
 	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	bool FinalizeAfterRead(AnimaScene* scene) override;
 	
 public:
 	virtual void SetPosition(const AnimaVertex3f& position);
@@ -81,8 +82,6 @@ public:
 protected:
 	virtual void UpdateChildrenTransformation();
 
-	virtual bool TranslateChildrenData(AnimaScene* scene);
-	
 protected:
 	AnimaTransformation _transformation;
 

@@ -51,6 +51,8 @@ public:
 	void SaveMaterialToFile(AnimaMaterial* material, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveMaterials(const AnimaString& destinationPath);
 
+	bool FinalizeObjectsAfterRead();
+
 public:
 	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);
 	AnimaArray<AnimaString>* GetLastMaterialsIndexMap();
