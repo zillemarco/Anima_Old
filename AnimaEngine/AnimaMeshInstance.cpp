@@ -11,6 +11,7 @@
 #include "AnimaRenderer.h"
 #include "AnimaScene.h"
 #include "AnimaMaterialsManager.h"
+#include "AnimaMeshesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -29,8 +30,8 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
 	, _materialName(src._materialName)
 	, _meshName(src._meshName)
 	, _shadersNames(src._shadersNames)
-	, _shaderProgramName(src._shaderProgramName)
 	, _shaderProgram(src._shaderProgram)
+	, _shaderProgramName(src._shaderProgramName)
 {
 	_material = src._material;
 	_mesh = src._mesh;
@@ -41,8 +42,8 @@ AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
 	, _materialName(src._materialName)
 	, _meshName(src._meshName)
 	, _shadersNames(src._shadersNames)
-	, _shaderProgramName(src._shaderProgramName)
 	, _shaderProgram(src._shaderProgram)
+	, _shaderProgramName(src._shaderProgramName)
 {
 	_material = src._material;
 	_mesh = src._mesh;
@@ -90,6 +91,101 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(AnimaMeshInstance&& src)
 	}
 	
 	return *this;
+}
+
+ptree AnimaMeshInstance::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaMeshInstance.Name", GetName());
+	
+	AnimaString materialName = _materialName;
+	if (materialName.empty() && _material != nullptr)
+		materialName = _material->GetName();
+	tree.put("AnimaMeshInstance.Material", materialName);
+	
+	AnimaString meshName = _meshName;
+	if(meshName.empty() && _mesh != nullptr)
+		meshName = _mesh->GetName();
+	tree.put("AnimaMeshInstance.MeshName", meshName);
+	
+	ptree shadersNamesTree;
+	for(auto& shaderName : _shadersNames)
+		shadersNamesTree.add("ShaderName", shaderName);
+	tree.add_child("AnimaMeshInstance.ShaderNames", shadersNamesTree);
+	
+	tree.add_child("AnimaMeshInstance.SceneObject", AnimaSceneObject::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaMeshInstance::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaMeshInstance.Name"));
+		
+		_materialName = objectTree.get<AnimaString>("AnimaMeshInstance.Material", "");
+		_meshName = objectTree.get<AnimaString>("AnimaMeshInstance.MeshName", "");
+		
+		if (!_materialName.empty())
+		{
+			_material = scene->GetMaterialsManager()->GetMaterialFromName(_materialName);
+			if(_material == nullptr)
+			{
+				AnimaLogger::LogMessageFormat("WARNING - Error reading mesh instance named '%s': this mesh instance has material named '%s' but this material can't be found", GetName().c_str(), _materialName.c_str());
+			}
+		}
+		else
+		{
+			AnimaLogger::LogMessageFormat("WARNING - Error reading mesh instance named '%s': this mesh instance has a blank material name", GetName().c_str());
+		}
+		
+		if (!_meshName.empty())
+		{
+			_mesh = scene->GetMeshesManager()->GetMeshFromName(_meshName);
+			if(_mesh != nullptr)
+				_mesh->AddInstance(this);
+			else
+			{
+				AnimaLogger::LogMessageFormat("WARNING - Error reading mesh instance named '%s': this mesh instance is derived from a mesh named '%s' but this mesh can't be found, so this instance won't be rendered", GetName().c_str(), _meshName.c_str());
+			}
+		}
+		else
+		{
+			AnimaLogger::LogMessageFormat("WARNING - Error reading mesh instance named '%s': this mesh instance has a blank source mesh name so this instance won't be rendered", GetName().c_str());
+		}
+		
+		for(auto& shadersName : objectTree.get_child("AnimaMeshInstance.ShaderNames"))
+		{
+			if(shadersName.first == "ShaderName")
+			{
+				AnimaString shaderName = shadersName.second.get_value<AnimaString>("");
+				_shadersNames.push_back(shaderName);
+			}
+		}
+		
+		ptree sceneObjectTree = objectTree.get_child("AnimaMeshInstance.SceneObject");
+		if (AnimaSceneObject::ReadObject(sceneObjectTree, scene, false))
+		{
+			SetPosition(GetPosition());
+			return true;
+		}
+		
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh instance: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh instance: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaMeshInstance::SetMaterial(AnimaMaterial* material)

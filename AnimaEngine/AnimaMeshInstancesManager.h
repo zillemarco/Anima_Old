@@ -40,6 +40,16 @@ public:
 
 	AnimaMeshInstance* GetMeshInstance(AInt index);
 	AnimaMeshInstance* GetMeshInstanceFromName(const AnimaString& name);
+	
+	AnimaMeshInstance* LoadMeshInstanceFromFile(const AnimaString& filePath);
+	AnimaMeshInstance* LoadMeshInstanceFromXml(const AnimaString& meshXmlDefinition);
+	bool LoadMeshesInstances(const AnimaString& meshesInstancesPath);
+	
+	void SaveMeshInstanceToFile(const AnimaString& meshInstanceName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMeshInstanceToFile(AnimaMeshInstance* meshInstance, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveMeshesInstances(const AnimaString& destinationPath);
+	
+	bool FinalizeObjectsAfterRead();
 
 protected:
 	AnimaMeshInstance* CreateEmptyInstance(const AnimaString& instanceName);
@@ -52,7 +62,7 @@ private:
 	AnimaScene*			_scene;
 	AnimaMeshesManager* _meshesManager;
 
-	AnimaMappedArray<AnimaMeshInstance*> _meshIntances;
+	AnimaMappedArray<AnimaMeshInstance*> _meshInstances;
 
 	AnimaArray<AnimaMeshInstance*> _lastInstancesFromModel;
 };

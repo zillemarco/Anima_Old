@@ -9,6 +9,7 @@
 #include "AnimaFirstPersonCamera.h"
 #include "AnimaMath.h"
 #include "AnimaCamerasManager.h"
+#include "AnimaXmlTranslators.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -69,6 +70,40 @@ AnimaFirstPersonCamera& AnimaFirstPersonCamera::operator=(AnimaFirstPersonCamera
 {
 	AnimaCamera::operator=(src);
 	return *this;
+}
+
+ptree AnimaFirstPersonCamera::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaFirstPersonCamera.Name", GetName());
+	
+	tree.add_child("AnimaFirstPersonCamera.Camera", AnimaCamera::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaFirstPersonCamera::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaFirstPersonCamera.Name"));
+		
+		ptree cameraTree = objectTree.get_child("AnimaFirstPersonCamera.Camera");
+		return AnimaCamera::ReadObject(cameraTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing first person camera: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing first person camera: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaFirstPersonCamera::Zoom(AFloat amount)

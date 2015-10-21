@@ -15,6 +15,8 @@
 #include "AnimaCamerasManager.h"
 #include "AnimaLightsManager.h"
 #include "AnimaTexturesManager.h"
+#include "AnimaMeshInstancesManager.h"
+#include "AnimaModelInstancesManager.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -121,6 +123,8 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			AnimaString materialsPath = pt.get<AnimaString>("AnimaScene.MaterialsPath", "");
 			AnimaString modelsPath = pt.get<AnimaString>("AnimaScene.ModelsPath", "");
 			AnimaString meshesPath = pt.get<AnimaString>("AnimaScene.MeshesPath", "");
+			AnimaString modelsInstancesPath = pt.get<AnimaString>("AnimaScene.ModelsInstancesPath", "");
+			AnimaString meshesInstancesPath = pt.get<AnimaString>("AnimaScene.MeshesInstancesPath", "");
 			AnimaString camerasPath = pt.get<AnimaString>("AnimaScene.CamerasPath", "");
 			AnimaString lightsPath = pt.get<AnimaString>("AnimaScene.LightsPath", "");
 			AnimaString animationsPath = pt.get<AnimaString>("AnimaScene.AnimationsPath", "");
@@ -165,16 +169,36 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: models path not specified");
 			}
 			
-//			if(!camerasPath.empty())
-//			{
-//				if(!scene->GetCamerasManager()->LoadCameras(camerasPath))
-//					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading cameras: couldn't load cameras at path '%s'", camerasPath.c_str());
-//			}
-//			else
-//			{
-//				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: cameras path not specified");
-//			}
-//			
+			if(!meshesInstancesPath.empty())
+			{
+				if(!scene->GetMeshInstancesManager()->LoadMeshesInstances(meshesInstancesPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading meshes instances: couldn't load meshes instances at path '%s'", meshesInstancesPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: meshes instances path not specified");
+			}
+			
+			if(!modelsInstancesPath.empty())
+			{
+				if(!scene->GetModelInstancesManager()->LoadModelsInstances(modelsInstancesPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading models instances: couldn't load models instances at path '%s'", modelsInstancesPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: models instances path not specified");
+			}
+			
+			if(!camerasPath.empty())
+			{
+				if(!scene->GetCamerasManager()->LoadCameras(camerasPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading cameras: couldn't load cameras at path '%s'", camerasPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: cameras path not specified");
+			}
+			
 //			if(!lightsPath.empty())
 //			{
 //				if(!scene->GetLightsManager()->LoadLights(lightsPath))
@@ -199,7 +223,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			scene->GetMaterialsManager()->FinalizeObjectsAfterRead();
 			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
 			scene->GetModelsManager()->FinalizeObjectsAfterRead();
-			//	scene->GetCamerasManager()->FinalizeObjectsAfterRead();
+			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
+			scene->GetModelInstancesManager()->FinalizeObjectsAfterRead();
+			scene->GetCamerasManager()->FinalizeObjectsAfterRead();
 			//	scene->GetLightsManager()->FinalizeObjectsAfterRead();
 			//	scene->GetAnimationsManager()->FinalizeObjectsAfterRead();
 		}
@@ -249,6 +275,8 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	AnimaString materialsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-materials")).string();
 	AnimaString modelsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-models")).string();
 	AnimaString meshesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-meshes")).string();
+	AnimaString modelsInstancesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-modelsInstances")).string();
+	AnimaString meshesInstancesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-meshesInstances")).string();
 	AnimaString camerasPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-cameras")).string();
 	AnimaString lightsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-lights")).string();
 	AnimaString animationsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-animations")).string();
@@ -261,6 +289,8 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	sceneTree.add("AnimaScene.MaterialsPath", materialsPath);
 	sceneTree.add("AnimaScene.ModelsPath", modelsPath);
 	sceneTree.add("AnimaScene.MeshesPath", meshesPath);
+	sceneTree.add("AnimaScene.ModelsInstancesPath", modelsInstancesPath);
+	sceneTree.add("AnimaScene.MeshesInstancesPath", meshesInstancesPath);
 	sceneTree.add("AnimaScene.CamerasPath", camerasPath);
 	sceneTree.add("AnimaScene.LightsPath", lightsPath);
 	sceneTree.add("AnimaScene.AnimationsPath", animationsPath);
@@ -271,6 +301,8 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	fs::create_directory(fs::path(materialsPath));
 	fs::create_directory(fs::path(modelsPath));
 	fs::create_directory(fs::path(meshesPath));
+	fs::create_directory(fs::path(modelsInstancesPath));
+	fs::create_directory(fs::path(meshesInstancesPath));
 	fs::create_directory(fs::path(camerasPath));
 	fs::create_directory(fs::path(lightsPath));
 	fs::create_directory(fs::path(animationsPath));
@@ -279,7 +311,9 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	scene->GetMaterialsManager()->SaveMaterials(materialsPath);
 	scene->GetMeshesManager()->SaveMeshes(meshesPath);
 	scene->GetModelsManager()->SaveModels(modelsPath);
-//	scene->GetCamerasManager()->SaveCameras(camerasPath);
+	scene->GetMeshInstancesManager()->SaveMeshesInstances(meshesInstancesPath);
+	scene->GetModelInstancesManager()->SaveModelsInstances(modelsInstancesPath);
+	scene->GetCamerasManager()->SaveCameras(camerasPath);
 //	scene->GetLightsManager()->SaveLights(lightsPath);
 //	scene->GetAnimationsManager()->SaveAnimations(animationsPath);
 }

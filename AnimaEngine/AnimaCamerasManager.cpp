@@ -161,4 +161,125 @@ AnimaTypeMappedArray<AnimaCamera*>* AnimaCamerasManager::GetCameras()
 	return &_cameras;
 }
 
+
+AnimaCamera* AnimaCamerasManager::LoadCameraFromFile(const AnimaString& filePath)
+{
+	std::ifstream fileStream(filePath);
+	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+	fileStream.close();
+	
+	return LoadCameraFromXml(xml);
+}
+
+AnimaCamera* AnimaCamerasManager::LoadCameraFromXml(const AnimaString& cameraXmlDefinition)
+{
+	AnimaCamera* camera = nullptr;
+	
+	using boost::property_tree::ptree;
+	ptree pt;
+	
+	std::stringstream ss(cameraXmlDefinition);
+	boost::property_tree::read_xml(ss, pt);
+	
+	AnimaString cameraTypeName = "";
+	
+	if(pt.get_optional<AnimaString>(ANIMA_CLASS_NAME(AnimaFirstPersonCamera) + ".Name"))
+		cameraTypeName = ANIMA_CLASS_NAME(AnimaFirstPersonCamera);
+	else if(pt.get_optional<AnimaString>(ANIMA_CLASS_NAME(AnimaThirdPersonCamera) + ".Name"))
+		cameraTypeName = ANIMA_CLASS_NAME(AnimaThirdPersonCamera);
+	
+	if(cameraTypeName.empty())
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error reading a camera. Engine was unable to recognize the camera type.");
+		return nullptr;
+	}
+	
+	AnimaString name = pt.get<AnimaString>(cameraTypeName + ".Name");
+	
+	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
+	AnimaString originalName = name;
+	AInt index = 0;
+	while (_cameras.Contains(name) != nullptr)
+		name = FormatString("%s_%d", originalName.c_str(), index);
+	
+	if(name != originalName)
+		AnimaLogger::LogMessageFormat("WARNING - Error reading a camera. A camera named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
+
+	if(cameraTypeName == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
+		camera = CreateFirstPersonCamera(name);
+	else if(cameraTypeName == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
+		camera = CreateThirdPersonCamera(name);
+	
+	if (camera)
+	{
+		camera->ReadObject(pt, _scene, false);
+	}
+	
+	return camera;
+}
+
+bool AnimaCamerasManager::LoadCameras(const AnimaString& camerasPath)
+{
+	namespace fs = boost::filesystem;
+	fs::path directory(camerasPath);
+	
+	if (fs::exists(directory) && fs::is_directory(directory))
+	{
+		fs::directory_iterator endIterator;
+		for (fs::directory_iterator directoryIterator(directory); directoryIterator != endIterator; directoryIterator++)
+		{
+			if (directoryIterator->path().extension().string() == ".acamera")
+			{
+				if(LoadCameraFromFile(directoryIterator->path().string()) == nullptr)
+					return false;
+			}
+		}
+	}
+	return true;
+}
+
+void AnimaCamerasManager::SaveCameraToFile(const AnimaString& cameraName, const AnimaString& destinationPath, bool createFinalPath)
+{
+	AnimaCamera* camera = _cameras.GetWithName(cameraName);
+	SaveCameraToFile(camera, destinationPath, createFinalPath);
+}
+
+void AnimaCamerasManager::SaveCameraToFile(AnimaCamera* camera, const AnimaString& destinationPath, bool createFinalPath)
+{
+	if (camera == nullptr)
+		return;
+	
+	namespace fs = boost::filesystem;
+	
+	AnimaString saveFileName = destinationPath;
+	
+	if (createFinalPath)
+	{
+		fs::path firstPart(destinationPath);
+		fs::path secondPart(camera->GetName() + ".acamera");
+		fs::path completePath = firstPart / secondPart;
+		
+		saveFileName = completePath.string();
+	}
+	
+	camera->SaveObject(saveFileName);
+}
+
+void AnimaCamerasManager::SaveCameras(const AnimaString& destinationPath)
+{
+	AInt count = _cameras.GetTotalSize();
+	for(AInt i = 0; i < count; i++)
+	{
+		SaveCameraToFile(_cameras.GetWithIndex(i), destinationPath, true);
+	}
+}
+
+bool AnimaCamerasManager::FinalizeObjectsAfterRead()
+{
+	AInt count = _cameras.GetTotalSize();
+	for(AInt i = 0; i < count; i++)
+		_cameras.GetWithIndex(i)->FinalizeAfterRead(_scene);
+	return true;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

@@ -23,6 +23,7 @@
 #include "AnimaArray.h"
 #include "AnimaMatrix.h"
 #include "AnimaTexture.h"
+#include "AnimaCamera.h"
 
 struct AnimaXmlVertex2Translator
 {
@@ -507,6 +508,7 @@ struct AnimaXmlShaderDataTypeTranslator
 		case Anima::TEXTURECUBE_ARRAY:	return Anima::AnimaString("TEXTURECUBE_ARRAY"); break;
 		case Anima::TEXTURE3D:			return Anima::AnimaString("TEXTURE3D"); break;
 		case Anima::TEXTURE3D_ARRAY:	return Anima::AnimaString("TEXTURE3D_ARRAY"); break;
+		case Anima::NONE:				return Anima::AnimaString("NONE"); break;
 		}
 
 		return Anima::AnimaString("NONE");
@@ -541,6 +543,7 @@ struct AnimaXmlTextureTargetTranslator
 		case Anima::TEXTURE_TARGET_CUBE:	return Anima::AnimaString("CUBE"); break;
 		case Anima::TEXTURE_TARGET_2D:		return Anima::AnimaString("2D"); break;
 		case Anima::TEXTURE_TARGET_3D:		return Anima::AnimaString("3D"); break;
+		case Anima::TEXTURE_TARGET_NONE:	return Anima::AnimaString("NONE"); break;
 		}
 
 		return boost::optional<internal_type>(boost::none);
@@ -1030,6 +1033,38 @@ struct AnimaXmlTextureInternalFormatTranslator
 	}
 };
 
+struct AnimaXmlCameraProjectionType
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaCameraProjectionType external_type;
+	
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+			
+			if (iequals(str, "PERSPECTIVE"))	return Anima::PERSPECTIVE;
+			else if (iequals(str, "ORTHO"))		return Anima::ORTHO;
+			
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+	
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+			case Anima::PERSPECTIVE:	return Anima::AnimaString("PERSPECTIVE"); break;
+			case Anima::ORTHO:			return Anima::AnimaString("ORTHO"); break;
+		}
+		
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
 namespace boost 
 {
 	namespace property_tree
@@ -1122,6 +1157,11 @@ namespace boost
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaTextureAttachment>
 		{
 			typedef AnimaXmlTextureAttachmentTranslator type;
+		};
+		
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaCameraProjectionType>
+		{
+			typedef AnimaXmlCameraProjectionType type;
 		};
 	}
 }

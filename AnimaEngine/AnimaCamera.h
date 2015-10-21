@@ -20,15 +20,16 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaCamerasManager;
 
+enum AnimaCameraProjectionType {
+	PERSPECTIVE,
+	ORTHO
+};
+
 class ANIMA_ENGINE_EXPORT AnimaCamera : public AnimaSceneObject
 {
 	DECLARE_ANIMA_CLASS(AnimaCamera);
 
 public:
-	enum AnimaCameraProjectionType {
-		PERSPECTIVE,
-		ORTHO
-	};
 
 protected:
 	AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* camerasManager, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
@@ -40,6 +41,10 @@ public:
 
 	AnimaCamera& operator=(const AnimaCamera& src);
 	AnimaCamera& operator=(AnimaCamera&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 
 public:
 	AnimaVertex3f GetPosition();

@@ -33,6 +33,10 @@ public:
 	AnimaFirstPersonCamera& operator=(AnimaFirstPersonCamera&& src);
 	
 public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
+public:
 	void Zoom(AFloat amount) override;
 	void Move(const AnimaVertex3f& direction, AFloat amount) override;
 	void Move(const AFloat& xDirection, const AFloat& yDirection, const AFloat& zDirection, AFloat amount) override;

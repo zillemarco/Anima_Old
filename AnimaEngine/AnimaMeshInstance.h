@@ -36,6 +36,10 @@ public:
 	
 	AnimaMeshInstance& operator=(const AnimaMeshInstance& src);
 	AnimaMeshInstance& operator=(AnimaMeshInstance&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 
 public:
 	void Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial = true);
@@ -58,7 +62,7 @@ public:
 	AnimaString GetShaderProgramName() const;
 
 protected:
-	const char* GetShaderPrefix() { return "MOD"; }
+	const char* GetShaderPrefix() override { return "MOD"; }
 	
 	void SetMesh(AnimaMesh* mesh);
 

@@ -79,9 +79,9 @@ public:
 	virtual bool IsTopLevelModel() const { return _topLevelModel; }
 
 protected:
-	const char* GetShaderPrefix() { return "MOD"; }
+	const char* GetShaderPrefix() override { return "MOD"; }
 	
-	virtual void UpdateChildrenTransformation();
+	void UpdateChildrenTransformation() override;
 
 protected:
 	AnimaMaterial*	_material;

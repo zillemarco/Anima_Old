@@ -41,11 +41,11 @@ AnimaShader::AnimaShader(AnimaShader&& src)
 	: AnimaNamedObject(src)
 	, _type(src._type)
 	, _text(src._text)
-	, _id(src._id)
-	, _compiled(src._compiled)
 	, _data(src._data)
 	, _staticGroupData(src._staticGroupData)
 	, _dynamicGroupData(src._dynamicGroupData)
+	, _id(src._id)
+	, _compiled(src._compiled)
 {
 	src._id = 0;
 	src._compiled = false;

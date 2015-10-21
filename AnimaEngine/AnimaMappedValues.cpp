@@ -10,6 +10,7 @@
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaScene.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -485,7 +486,7 @@ void AnimaMappedValues::SetVector(const AnimaString& propertyName, AnimaVectorGe
 {
 	AnimaString pName = _uniqueName + propertyName;
 	if (_vectorsMap.find(pName) == _vectorsMap.end())
-		AddVector(pName, value);
+		AddVector(propertyName, value);
 	else
 		_vectorsMap[pName] = value;
 }
@@ -1195,6 +1196,25 @@ ptree AnimaMappedValues::GetObjectTree(bool saveName) const
 		propertiesTree.add_child("Property", propertyTree);
 	}
 	
+	for (auto& pair : _matricesMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "matrix");
+		propertyTree.add("Value", pair.second);
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
+	
+	for (auto& pair : _integersMap)
+	{
+		ptree propertyTree;
+		propertyTree.add("Name", ExtractName(pair.first));
+		propertyTree.add("Type", "integer");
+		propertyTree.add("Value", pair.second);
+		
+		propertiesTree.add_child("Property", propertyTree);
+	}
 	
 	tree.add_child("AnimaMappedValues.Properties", propertiesTree);
 	
@@ -1226,6 +1246,16 @@ bool AnimaMappedValues::ReadObject(const ptree& objectTree, AnimaScene* scene, b
 				{
 					AFloat value = property.second.get<AFloat>("Value");
 					SetFloat(name, value);
+				}
+				else if(type == "integer")
+				{
+					AInt value = property.second.get<AInt>("Value");
+					SetInteger(name, value);
+				}
+				else if(type == "matrix")
+				{
+					AnimaMatrix value = property.second.get<AnimaMatrix>("Value");
+					SetMatrix(name, value);
 				}
 				else if(type == "vector")
 				{

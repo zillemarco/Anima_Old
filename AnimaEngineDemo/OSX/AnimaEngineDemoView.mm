@@ -65,6 +65,8 @@ float camSpeed = 1.0f;
 float camSpeedInc = 0.5f;
 float camSpeedMax = 10.0f;
 
+bool sceneSaved = false;
+
 @implementation AnimaEngineDemoView
 {
 	CVDisplayLinkRef displayLink;
@@ -526,7 +528,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
 #else
 	_engine.GetScenesManager()->LoadScenes("/Users/marco/Desktop/Scene");
-	
 #endif
 	
 	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
@@ -552,15 +553,22 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
+#if defined SAVE_SCENE
 	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
+#else
+	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+#endif
+	
+	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 	
 #if defined SAVE_SCENE
 	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
 	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
 #endif
 	
+#if defined SAVE_SCENE
 	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
 	if (!_model)
 		return false;
@@ -568,8 +576,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
 	if (!_floorModel)
 		return false;
-	
-	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
 	
 	// Creo le istanze del pavimento e imposto i loro materiali
 	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
@@ -664,30 +670,10 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	for (int j = 0; j < modelInstanceMeshes.size(); j++)
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
-
-	
-//	for (int i = 0; i < numInstances; i++)
-//	{
-//		Anima::AnimaString name = Anima::FormatString("modelInstance-%d", i);
-//		Anima::AnimaModelInstance* modelInstance = modelInstancesManager->CreateInstance(name, _model);
-//		Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
-//		
-//		modelInstance->GetAllMeshes(&modelInstanceMeshes);
-//		
-//		for (int j = 0; j < modelInstanceMeshes.size(); j++)
-//			modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName(materialName));
-//		
-//		if (nufminstances > 1)
-//			modelInstance->GetTransformation()->SetTranslation(cos(degOffset) * raggio, 0, sin(degOffset) * raggio);
-//		
-//		modelInstance->GetTransformation()->RotateYDeg(ry);
-//		modelInstance->GetTransformation()->RotateXDeg(rx);
-//		modelInstance->GetTransformation()->SetScale(scale, scale, scale);
-//		
-//		degOffset += span;
-//	}
 	
 	_camera->LookAt(-350.0, 100.0, 150.0, 1.0, -0.2, 0.0);
+#endif
+	
 	_camera->Activate();
 	
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
@@ -813,10 +799,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
 	_renderer->CheckPrograms(_scene);
 	
-#if defined SAVE_SCENE
-	_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
-#endif
-	
 	return true;
 }
 
@@ -835,6 +817,14 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	{
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
+	}
+	
+	if(!sceneSaved)
+	{
+#if defined SAVE_SCENE
+		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
+#endif
+		sceneSaved = true;
 	}
 }
 

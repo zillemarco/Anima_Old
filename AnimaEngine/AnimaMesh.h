@@ -260,7 +260,7 @@ public:
 protected:
 	AInt GetNextFaceContainingVertex(AInt start, AInt vertexIndex) const;
 
-	const char* GetShaderPrefix() { return "MOD"; }
+	const char* GetShaderPrefix() override { return "MOD"; }
 
 protected:
 	// Dati struttura

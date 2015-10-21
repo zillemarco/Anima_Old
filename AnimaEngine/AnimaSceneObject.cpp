@@ -200,7 +200,7 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaModelInstance))
 		{
-			child = scene->GetModelInstancesManager()->GetModelInstanceFromName(childData._name);
+			child = scene->GetModelInstancesManager()->GetModelInstanceFromName(childData._name, false);
 		}
 
 		if (child != nullptr)
@@ -214,6 +214,10 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 	}
 
 	_childrenReadData.clear();
+	
+	// Dopo aver collegato tutti i figli devo anche aggiornare le loro trasformazioni visto che vengono salvate in locale
+	// e devono venir composte con quelle del padre
+	UpdateChildrenTransformation();
 
 	return true;
 }

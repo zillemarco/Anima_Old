@@ -40,7 +40,7 @@ public:
 	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 	
 public:
-	virtual const char* GetShaderPrefix() { return "MAT"; }
+	const char* GetShaderPrefix() override { return "MAT"; }
 
 protected:
 	AnimaArray<AnimaString> _shadersNames;

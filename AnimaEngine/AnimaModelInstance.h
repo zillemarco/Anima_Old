@@ -37,8 +37,13 @@ public:
 	AnimaModelInstance& operator=(const AnimaModelInstance& src);
 	AnimaModelInstance& operator=(AnimaModelInstance&& src);
 	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
 protected:
 	void SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes);
+	void AddMesh(AnimaMeshInstance* mesh);
 	void SetModel(AnimaModel* model);
 
 public:
@@ -48,16 +53,21 @@ public:
 
 	void GetAllMeshes(AnimaArray<AnimaMeshInstance*> *meshes);
 
-	AnimaModel* GetModel() const;
+	AnimaModel* GetModel();
+	
+	virtual void SetTopLevelModel(bool topLevelModel) { _topLevelModel = topLevelModel; }
+	virtual bool IsTopLevelModel() const { return _topLevelModel; }
 
 protected:
-	const char* GetShaderPrefix() { return "MOD"; }
+	const char* GetShaderPrefix() override { return "MOD"; }
 
-	virtual void UpdateChildrenTransformation();
+	void UpdateChildrenTransformation() override;
 
 protected:
 	AnimaModel* _model;
 	AnimaString _modelName;
+	
+	bool _topLevelModel;
 
 	AnimaArray<AnimaMeshInstance*> _meshes;
 };

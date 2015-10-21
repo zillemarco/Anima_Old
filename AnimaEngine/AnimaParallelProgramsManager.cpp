@@ -296,7 +296,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 		AInt error = CL_SUCCESS;
 		_cpuContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error = CL_SUCCESS)
+		if (error == CL_SUCCESS)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create CPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;
@@ -323,7 +323,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 		AInt error = CL_SUCCESS;
 		_gpuContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error = CL_SUCCESS)
+		if (error == CL_SUCCESS)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create GPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;
@@ -350,7 +350,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 		AInt error = CL_SUCCESS;
 		_defaultContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error = CL_SUCCESS)
+		if (error == CL_SUCCESS)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create DEFAULT context", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;
@@ -377,7 +377,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 		AInt error = CL_SUCCESS;
 		_acceleratorContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error = CL_SUCCESS)
+		if (error == CL_SUCCESS)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create ACCELERATOR context", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;
@@ -404,7 +404,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 		AInt error = CL_SUCCESS;
 		_allContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error = CL_SUCCESS)
+		if (error == CL_SUCCESS)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create ALL context", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;

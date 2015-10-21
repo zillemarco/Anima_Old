@@ -9,6 +9,7 @@
 #include "AnimaCamera.h"
 #include "AnimaMath.h"
 #include "AnimaCamerasManager.h"
+#include "AnimaXmlTranslators.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -159,6 +160,72 @@ AnimaCamera& AnimaCamera::operator=(AnimaCamera&& src)
 	}
 
 	return *this;
+}
+
+ptree AnimaCamera::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaCamera.Name", GetName());
+	
+	tree.add("AnimaCamera.XAxis", _xAxis);
+	tree.add("AnimaCamera.YAxis", _yAxis);
+	tree.add("AnimaCamera.ZAxis", _zAxis);
+	tree.add("AnimaCamera.WorldXAxis", _worldXAxis);
+	tree.add("AnimaCamera.WorldYAxis", _worldYAxis);
+	tree.add("AnimaCamera.WorldZAxis", _worldZAxis);
+	tree.add("AnimaCamera.FOV", _fov);
+	tree.add("AnimaCamera.ZNear", _zNear);
+	tree.add("AnimaCamera.ZFar", _zFar);
+	tree.add("AnimaCamera.ProjectionType", _projectionType);
+	
+	tree.add_child("AnimaCamera.SceneObject", AnimaSceneObject::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaCamera::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaCamera.Name"));
+		
+		_projectionType = objectTree.get<AnimaCameraProjectionType>("AnimaCamera.ProjectionType", PERSPECTIVE);
+		_xAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.XAxis", AnimaVertex3f(1.0f, 0.0f, 0.0f));
+		_yAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.YAxis", AnimaVertex3f(0.0f, 1.0f, 0.0f));
+		_zAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.ZAxis", AnimaVertex3f(0.0f, 0.0f, 1.0f));
+		_worldXAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.WorldXAxis", AnimaVertex3f(1.0f, 0.0f, 0.0f));
+		_worldYAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.WorldYAxis", AnimaVertex3f(0.0f, 1.0f, 0.0f));
+		_worldZAxis = objectTree.get<AnimaVertex3f>("AnimaCamera.WorldZAxis", AnimaVertex3f(0.0f, 0.0f, 1.0f));
+		_fov = objectTree.get<AFloat>("AnimaCamera.FOV", 60.0f);
+		_zNear = objectTree.get<AFloat>("AnimaCamera.ZNear", 0.1f);
+		_zFar = objectTree.get<AFloat>("AnimaCamera.ZFar", 1000.0f);
+		
+		ptree sceneObjectTree = objectTree.get_child("AnimaCamera.SceneObject");
+		if (AnimaSceneObject::ReadObject(sceneObjectTree, scene, false))
+		{
+			SetPosition(GetVector3f("Position"));
+			_viewMatrix = GetMatrix("ViewMatrix");
+			_projectionMatrix = GetMatrix("ProjectionMatrix");
+			_projectionViewMatrix = GetMatrix("ProjectionViewMatrix");
+			_inverseProjectionViewMatrix = GetMatrix("InverseProjectionViewMatrix");
+			return true;
+		}
+		
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing camera: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing camera: %s", exception.what());
+		return false;
+	}
 }
 
 AnimaVertex3f AnimaCamera::GetPosition()

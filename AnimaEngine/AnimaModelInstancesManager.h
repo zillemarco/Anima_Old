@@ -33,26 +33,36 @@ public:
 
 public:
 	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, AnimaModel* srcModel);
-	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcModelName);
+	AnimaModelInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcModelName, bool topLevelModel = true);
 
-	AInt GetModelInstancesCount();
+	AInt GetModelInstancesCount(bool topLevelModels = true);
 
-	AnimaModelInstance* GetModelInstance(AInt index);
-	AnimaModelInstance* GetModelInstanceFromName(const AnimaString& name);
+	AnimaModelInstance* GetModelInstance(AInt index, bool topLevelModel = true);
+	AnimaModelInstance* GetModelInstanceFromName(const AnimaString& name, bool topLevelModel = true);
+	
+	AnimaModelInstance* LoadModelInstanceFromFile(const AnimaString& filePath);
+	AnimaModelInstance* LoadModelInstanceFromXml(const AnimaString& modelXmlDefinition);
+	bool LoadModelsInstances(const AnimaString& modelsInstancesPath);
+	
+	void SaveModelInstanceToFile(const AnimaString& modelInstanceName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveModelInstanceToFile(AnimaModelInstance* modelInstance, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveModelsInstances(const AnimaString& destinationPath);
+	
+	bool FinalizeObjectsAfterRead();
 
 public:
 	void ClearInstances();
 
 protected:
 	AnimaModelInstance* CreateInstanceFromModel(const AnimaString& instanceName, AnimaModel* srcModel, bool useSrcModelName = false);
-	AnimaModelInstance* CreateEmptyInstance(const AnimaString& instanceName);
+	AnimaModelInstance* CreateEmptyInstance(const AnimaString& instanceName, bool topLevelModel = false);
 		
 private:
 	AnimaScene*			_scene;
 	AnimaModelsManager*	_modelsManager;
 	AnimaMeshInstancesManager* _meshInstancesManager;
 
-	AnimaMappedArray<AnimaModelInstance*>	_modelIntances;
+	AnimaMappedArray<AnimaModelInstance*>	_modelInstances;
 	AnimaMappedArray<AnimaModelInstance*>	_topLevelModelInstances;
 };
 

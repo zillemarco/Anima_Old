@@ -9,6 +9,7 @@
 #include "AnimaThirdPersonCamera.h"
 #include "AnimaMath.h"
 #include "AnimaCamerasManager.h"
+#include "AnimaXmlTranslators.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -74,6 +75,44 @@ AnimaThirdPersonCamera& AnimaThirdPersonCamera::operator=(AnimaThirdPersonCamera
 	}
 
 	return *this;
+}
+
+ptree AnimaThirdPersonCamera::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaThirdPersonCamera.Name", GetName());
+	
+	tree.add("AnimaThirdPersonCamera.Target", _target);
+	
+	tree.add_child("AnimaThirdPersonCamera.Camera", AnimaCamera::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaThirdPersonCamera::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaThirdPersonCamera.Name"));
+		
+		_target = objectTree.get<AnimaVertex3f>("AnimaThirdPersonCamera.Target", AnimaVertex3f(0.0f));
+		
+		ptree cameraTree = objectTree.get_child("AnimaThirdPersonCamera.Camera");
+		return AnimaCamera::ReadObject(cameraTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing third person camera: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing third person camera: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaThirdPersonCamera::Zoom(AFloat amount)

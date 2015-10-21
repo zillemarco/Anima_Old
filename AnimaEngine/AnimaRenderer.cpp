@@ -695,7 +695,6 @@ void AnimaRenderer::Render()
 
 void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
 {
-	AnimaShaderProgram* originalProgram = program;
 	if (!useInstances || mesh->GetInstancesCount() == 0)
 	{
 		AnimaTransformation* meshTransfomation = mesh->GetTransformation();
@@ -768,8 +767,6 @@ void AnimaRenderer::BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMe
 
 	AnimaFrustum* frustum = camera->GetFrustum();
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
-	AnimaShadersManager* shadersManager = _scene->GetShadersManager();
-	AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 
 	AInt meshesCount = meshesManager->GetMeshesCount();
 	for (AInt i = 0; i < meshesCount; i++)
@@ -832,7 +829,7 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 	if (programs == nullptr || camera == nullptr || _scene == nullptr)
 		return;
 
-	AnimaFrustum* frustum = camera->GetFrustum();
+//	AnimaFrustum* frustum = camera->GetFrustum();
 	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
 
 	AInt meshesCount = meshesManager->GetMeshesCount();
@@ -1089,7 +1086,6 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 {
 	ANIMA_FRAME_PUSH("Prepare pass");
 
-	AnimaShadersManager* shadersManager = renderer->_scene->GetShadersManager();
 	AnimaCamerasManager* camerasManager = renderer->_scene->GetCamerasManager();
 
 	AnimaCamera* camera = camerasManager->GetActiveCamera();
@@ -2385,8 +2381,6 @@ void AnimaRenderer::CheckPrograms(AnimaScene* scene)
 
 		AnimaRendererDrawableMesh drawableMesh;
 		drawableMesh.SetMesh(mesh);
-
-		AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances = drawableMesh.GetDrawableMeshInstances();
 
 		AInt instancesCount = mesh->GetInstancesCount();
 		for (AInt j = 0; j < instancesCount; j++)

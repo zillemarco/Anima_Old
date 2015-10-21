@@ -212,7 +212,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromXml(const AnimaString& modelXmlDefi
 		name = FormatString("%s_%d", originalName.c_str(), index);
 	
 	if(name != originalName)
-		AnimaLogger::LogMessageFormat("WARNING - Error reading a model. A model named '%s' already existex so it's been renamed to '%s'", originalName.c_str(), name.c_str());
+		AnimaLogger::LogMessageFormat("WARNING - Error reading a model. A model named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
 	
 	model = CreateModel(name, topLevelModel);
 

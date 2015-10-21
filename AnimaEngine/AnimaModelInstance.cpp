@@ -7,6 +7,8 @@
 //
 
 #include "AnimaModelInstance.h"
+#include "AnimaModelsManager.h"
+#include "AnimaMeshInstancesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -15,6 +17,7 @@ AnimaModelInstance::AnimaModelInstance(const AnimaString& name, AnimaDataGenerat
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaModelInstance);
 	_model = nullptr;
+	_topLevelModel = false;
 }
 
 AnimaModelInstance::AnimaModelInstance(const AnimaModelInstance& src)
@@ -23,6 +26,7 @@ AnimaModelInstance::AnimaModelInstance(const AnimaModelInstance& src)
 	, _meshes(src._meshes)
 {
 	_model = src._model;
+	_topLevelModel = src._topLevelModel;
 }
 
 AnimaModelInstance::AnimaModelInstance(AnimaModelInstance&& src)
@@ -31,6 +35,7 @@ AnimaModelInstance::AnimaModelInstance(AnimaModelInstance&& src)
 	, _meshes(src._meshes)
 {
 	_model = src._model;
+	_topLevelModel = src._topLevelModel;
 }
 
 AnimaModelInstance::~AnimaModelInstance()
@@ -46,6 +51,7 @@ AnimaModelInstance& AnimaModelInstance::operator=(const AnimaModelInstance& src)
 		_meshes = src._meshes;		
 		_model = src._model;
 		_modelName = src._modelName;
+		_topLevelModel = src._topLevelModel;
 	}
 	
 	return *this;
@@ -60,9 +66,91 @@ AnimaModelInstance& AnimaModelInstance::operator=(AnimaModelInstance&& src)
 		_meshes = src._meshes;
 		_model = src._model;
 		_modelName = src._modelName;
+		_topLevelModel = src._topLevelModel;
 	}
 	
 	return *this;
+}
+
+ptree AnimaModelInstance::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaModelInstance.Name", GetName());
+	
+	tree.add("AnimaModelInstance.TopLevelModel", IsTopLevelModel());
+	
+	AnimaString modelName = _modelName;
+	if(modelName.empty() && _model != nullptr)
+		modelName = _model->GetName();
+	tree.add("AnimaModelInstance.ModelName", modelName);
+	
+	ptree meshesTree;
+	AInt count = _meshes.size();
+	for (AInt i = 0; i < count; i++)
+		meshesTree.add("MeshInstance", _meshes[i]->GetName());
+	tree.add_child("AnimaModelInstance.MeshesInstances", meshesTree);
+	
+	tree.add_child("AnimaModelInstance.SceneObject", AnimaSceneObject::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaModelInstance::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaModelInstance.Name"));
+		
+		_modelName = objectTree.get<AnimaString>("AnimaModelInstance.ModelName", "");
+		SetTopLevelModel(objectTree.get<bool>("AnimaModelInstance.TopLevelModel", false));
+		
+		if (!_modelName.empty())
+			_model = scene->GetModelsManager()->GetModelFromName(_modelName, false);
+		else
+		{
+			AnimaLogger::LogMessageFormat("WARNING - Error reading a model instance named '%s'. The instance source model name isn't specified", GetName().c_str());
+		}
+		
+		for (auto& meshData : objectTree.get_child("AnimaModelInstance.MeshesInstances"))
+		{
+			if (meshData.first == "MeshInstance")
+			{
+				AnimaString meshInstanceName = meshData.second.get_value<AnimaString>("");
+				if (meshInstanceName.empty())
+					AnimaLogger::LogMessageFormat("WARNING - Error reading a model instance called '%s': found a mesh instance without name", GetName().c_str());
+				else
+				{
+					AnimaMeshInstance* meshInstance = scene->GetMeshInstancesManager()->GetMeshInstanceFromName(meshInstanceName);
+					if (meshInstance == nullptr)
+						AnimaLogger::LogMessageFormat("WARNING - Error reading a model instance called '%s': model instance has a mesh instance named '%s' bot the mesh instance doesn't exists", GetName().c_str(), meshInstanceName.c_str());
+					else
+						AddMesh(meshInstance);
+				}
+			}
+		}
+		
+		ptree sceneObjectTree = objectTree.get_child("AnimaModelInstance.SceneObject");
+		if (AnimaSceneObject::ReadObject(sceneObjectTree, scene, false))
+		{
+			SetPosition(GetPosition());
+			return true;
+		}
+		
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing model: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing mesh: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaModelInstance::SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes)
@@ -79,6 +167,12 @@ void AnimaModelInstance::SetMeshes(AnimaArray<AnimaMeshInstance*>* meshes)
 	}
 }
 
+void AnimaModelInstance::AddMesh(AnimaMeshInstance* mesh)
+{
+	mesh->SetParentObject(this);
+	_meshes.push_back(mesh);
+}
+
 AInt AnimaModelInstance::GetMeshesCount() const
 {
 	return _meshes.size();
@@ -92,6 +186,8 @@ AnimaMeshInstance* AnimaModelInstance::GetMesh(AInt index)
 void AnimaModelInstance::SetModel(AnimaModel* model)
 {
 	_model = model;
+	if(_model != nullptr)
+		_modelName = _model->GetName();
 }
 
 AnimaArray<AnimaMeshInstance*>* AnimaModelInstance::GetMeshes() const
@@ -99,7 +195,7 @@ AnimaArray<AnimaMeshInstance*>* AnimaModelInstance::GetMeshes() const
 	return (AnimaArray<AnimaMeshInstance*>*)&_meshes;
 }
 
-AnimaModel* AnimaModelInstance::GetModel() const
+AnimaModel* AnimaModelInstance::GetModel()
 {
 	return _model;
 }
