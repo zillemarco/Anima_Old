@@ -55,14 +55,6 @@ public:
 	AnimaCamera* LoadCameraFromXml(const AnimaString& cameraXmlDefinition);
 	bool LoadCameras(const AnimaString& camerasPath);
 	
-//	AnimaFirstPersonCamera* LoadFirstPersonCameraFromFile(const AnimaString& filePath);
-//	AnimaFirstPersonCamera* LoadFirstPersonCameraFromXml(const AnimaString& firstPersonCameraXmlDefinition);
-//	bool LoadFirstPersonCameras(const AnimaString& firstPersonCamerasPath);
-//	
-//	AnimaThirdPersonCamera* LoadThirdPersonCameraFromFile(const AnimaString& filePath);
-//	AnimaThirdPersonCamera* LoadThirdPersonCameraFromXml(const AnimaString& thirdPersonCameraXmlDefinition);
-//	bool LoadThirdPersonCameras(const AnimaString& thirdPersonCamerasPath);
-	
 	void SaveCameraToFile(const AnimaString& cameraName, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveCameraToFile(AnimaCamera* camera, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveCameras(const AnimaString& destinationPath);

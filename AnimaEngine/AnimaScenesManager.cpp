@@ -199,16 +199,16 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: cameras path not specified");
 			}
 			
-//			if(!lightsPath.empty())
-//			{
-//				if(!scene->GetLightsManager()->LoadLights(lightsPath))
-//					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading lights: couldn't load lights at path '%s'", lightsPath.c_str());
-//			}
-//			else
-//			{
-//				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: lights path not specified");
-//			}
-//			
+			if(!lightsPath.empty())
+			{
+				if(!scene->GetLightsManager()->LoadLights(lightsPath))
+					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading lights: couldn't load lights at path '%s'", lightsPath.c_str());
+			}
+			else
+			{
+				AnimaLogger::LogMessage("WARNING - AnimaScenesManager loading scene: lights path not specified");
+			}
+			
 //			if(!animationsPath.empty())
 //			{
 //				if(!scene->GetAnimationsManager()->LoadAnimations(animationsPath))
@@ -226,7 +226,7 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
 			scene->GetModelInstancesManager()->FinalizeObjectsAfterRead();
 			scene->GetCamerasManager()->FinalizeObjectsAfterRead();
-			//	scene->GetLightsManager()->FinalizeObjectsAfterRead();
+			scene->GetLightsManager()->FinalizeObjectsAfterRead();
 			//	scene->GetAnimationsManager()->FinalizeObjectsAfterRead();
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
@@ -314,7 +314,7 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	scene->GetMeshInstancesManager()->SaveMeshesInstances(meshesInstancesPath);
 	scene->GetModelInstancesManager()->SaveModelsInstances(modelsInstancesPath);
 	scene->GetCamerasManager()->SaveCameras(camerasPath);
-//	scene->GetLightsManager()->SaveLights(lightsPath);
+	scene->GetLightsManager()->SaveLights(lightsPath);
 //	scene->GetAnimationsManager()->SaveAnimations(animationsPath);
 }
 

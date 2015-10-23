@@ -40,6 +40,10 @@ public:
 
 	AnimaLight& operator=(const AnimaLight& src);
 	AnimaLight& operator=(AnimaLight&& src);
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 
 public:
 	virtual void SetColor(const AnimaColor3f& color);
@@ -100,6 +104,11 @@ public:
 	AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaDirectionalLight();
 	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
+public:
 	void SetDirection(const AnimaVertex3f& direction) override;
 	void SetDirection(AFloat x, AFloat y, AFloat z) override;
 	
@@ -127,7 +136,12 @@ class ANIMA_ENGINE_EXPORT AnimaPointLight : public AnimaLight
 public:
 	AnimaPointLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaPointLight();
-
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
+public:
 	void SetConstantAttenuation(AFloat attenuation) override;
 	void SetLinearAttenuation(AFloat attenuation) override;
 	void SetExponentAttenuation(AFloat attenuation) override;
@@ -160,7 +174,12 @@ class ANIMA_ENGINE_EXPORT AnimaSpotLight : public AnimaPointLight
 public:
 	AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaSpotLight();
-
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
+public:
 	void SetDirection(const AnimaVertex3f& position) override;
 	void SetDirection(AFloat x, AFloat y, AFloat z) override;
 	void SetCutoff(AFloat c) override;
@@ -194,7 +213,11 @@ class ANIMA_ENGINE_EXPORT AnimaHemisphereLight : public AnimaLight
 public:
 	AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* dataGeneratorManager, const AnimaString& name);
 	virtual ~AnimaHemisphereLight();
-
+	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
 public:
 	void SetSkyColor(const AnimaColor3f& color);
 	void SetSkyColor(AFloat r, AFloat g, AFloat b);

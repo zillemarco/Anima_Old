@@ -75,6 +75,40 @@ AnimaLight& AnimaLight::operator=(AnimaLight&& src)
 	return *this;
 }
 
+ptree AnimaLight::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaLight.Name", GetName());
+	
+	tree.add_child("AnimaLight.SceneObject", AnimaSceneObject::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaLight.Name"));
+		
+		ptree sceneObjectTree = objectTree.get_child("AnimaLight.SceneObject");
+		return AnimaSceneObject::ReadObject(sceneObjectTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing light: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing light: %s", exception.what());
+		return false;
+	}
+}
+
 void AnimaLight::UpdateLightMeshMatrix()
 {
 	AnimaLight::SetMatrix("LightMeshMatrix", AnimaMatrix());
@@ -223,6 +257,40 @@ AnimaDirectionalLight::~AnimaDirectionalLight()
 {
 }
 
+ptree AnimaDirectionalLight::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaDirectionalLight.Name", GetName());
+	
+	tree.add_child("AnimaDirectionalLight.Light", AnimaLight::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaDirectionalLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaDirectionalLight.Name"));
+		
+		ptree lightTree = objectTree.get_child("AnimaDirectionalLight.Light");
+		return AnimaLight::ReadObject(lightTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing directional light: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing directional light: %s", exception.what());
+		return false;
+	}
+}
+
 void AnimaDirectionalLight::UpdateLightMeshMatrix()
 {
 	AnimaLight::SetMatrix("LightMeshMatrix", AnimaMatrix::MakeRotationDeg(1.0f, 0.0, 0.0, 90.0));
@@ -339,6 +407,40 @@ AnimaPointLight::~AnimaPointLight()
 {
 }
 
+ptree AnimaPointLight::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaPointLight.Name", GetName());
+	
+	tree.add_child("AnimaPointLight.Light", AnimaLight::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaPointLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaPointLight.Name"));
+		
+		ptree lightTree = objectTree.get_child("AnimaPointLight.Light");
+		return AnimaLight::ReadObject(lightTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing point light: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing point light: %s", exception.what());
+		return false;
+	}
+}
+
 void AnimaPointLight::UpdateLightMeshMatrix()
 {
 	AFloat range = GetRange();
@@ -435,6 +537,40 @@ AnimaSpotLight::AnimaSpotLight(AnimaAllocator* allocator, AnimaDataGeneratorsMan
 
 AnimaSpotLight::~AnimaSpotLight()
 {
+}
+
+ptree AnimaSpotLight::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaSpotLight.Name", GetName());
+	
+	tree.add_child("AnimaSpotLight.PointLight", AnimaPointLight::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaSpotLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaSpotLight.Name"));
+		
+		ptree lightTree = objectTree.get_child("AnimaSpotLight.PointLight");
+		return AnimaPointLight::ReadObject(lightTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing spot light: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing spot light: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaSpotLight::UpdateLightMeshMatrix()
@@ -547,6 +683,40 @@ AnimaHemisphereLight::AnimaHemisphereLight(AnimaAllocator* allocator, AnimaDataG
 
 AnimaHemisphereLight::~AnimaHemisphereLight()
 {
+}
+
+ptree AnimaHemisphereLight::GetObjectTree(bool saveName) const
+{
+	ptree tree;
+	
+	if (saveName)
+		tree.add("AnimaHemisphereLight.Name", GetName());
+	
+	tree.add_child("AnimaHemisphereLight.Light", AnimaLight::GetObjectTree(false));
+	
+	return tree;
+}
+
+bool AnimaHemisphereLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName)
+{
+	try
+	{
+		if (readName)
+			SetName(objectTree.get<AnimaString>("AnimaHemisphereLight.Name"));
+		
+		ptree lightTree = objectTree.get_child("AnimaHemisphereLight.Light");
+		return AnimaLight::ReadObject(lightTree, scene, false);
+	}
+	catch (boost::property_tree::ptree_bad_path& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing hemisphere light: %s", exception.what());
+		return false;
+	}
+	catch (boost::property_tree::ptree_bad_data& exception)
+	{
+		AnimaLogger::LogMessageFormat("ERROR - Error parsing hemisphere light: %s", exception.what());
+		return false;
+	}
 }
 
 void AnimaHemisphereLight::UpdateLightMeshMatrix()

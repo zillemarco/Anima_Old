@@ -527,7 +527,11 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 #if defined SAVE_SCENE
 	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
 #else
+	
+	Anima::AnimaTimer timer;
 	_engine.GetScenesManager()->LoadScenes("/Users/marco/Desktop/Scene");
+	
+	printf("Loading scene time: %f sec\n", timer.Elapsed());
 #endif
 	
 	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
@@ -675,7 +679,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 #endif
 	
 	_camera->Activate();
+	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
+#if defined SAVE_SCENE
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
 	directionalLight->SetDirection(1.0, -1.0, -1.0);
 	directionalLight->SetColor(1.0, 1.0, 1.0);
@@ -689,8 +695,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	//pointLight1->SetLinearAttenuation(0.0);
 	//pointLight1->SetExponentAttenuation(0.0);
 	//pointLight1->SetRange(200);
-	
-	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+#endif
 	
 	_animationsManager = _scene->GetAnimationsManager();
 	

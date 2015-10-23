@@ -161,7 +161,6 @@ AnimaTypeMappedArray<AnimaCamera*>* AnimaCamerasManager::GetCameras()
 	return &_cameras;
 }
 
-
 AnimaCamera* AnimaCamerasManager::LoadCameraFromFile(const AnimaString& filePath)
 {
 	std::ifstream fileStream(filePath);

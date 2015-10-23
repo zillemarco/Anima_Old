@@ -211,6 +211,7 @@ bool AnimaCamera::ReadObject(const ptree& objectTree, AnimaScene* scene, bool re
 			_projectionMatrix = GetMatrix("ProjectionMatrix");
 			_projectionViewMatrix = GetMatrix("ProjectionViewMatrix");
 			_inverseProjectionViewMatrix = GetMatrix("InverseProjectionViewMatrix");
+			_frustum.ComputeFrustum(_projectionViewMatrix);
 			return true;
 		}
 		

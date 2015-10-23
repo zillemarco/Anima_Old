@@ -52,6 +52,16 @@ public:
 		
 	void ClearLights();
 	
+	AnimaLight* LoadLightFromFile(const AnimaString& filePath);
+	AnimaLight* LoadLightFromXml(const AnimaString& lightXmlDefinition);
+	bool LoadLights(const AnimaString& LightsPath);
+	
+	void SaveLightToFile(const AnimaString& lightName, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveLightToFile(AnimaLight* light, const AnimaString& destinationPath, bool createFinalPath = false);
+	void SaveLights(const AnimaString& destinationPath);
+	
+	bool FinalizeObjectsAfterRead();
+	
 private:
 	AnimaScene* _scene;
 	AnimaTypeMappedArray<AnimaLight*> _lights;
