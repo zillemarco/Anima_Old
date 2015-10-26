@@ -61,6 +61,8 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 
 	_programsBufferIndex = 0;
 	
+	_physicsDebugDrawer = new AnimaPhysicsDebugDrawer;
+	
 	InitializeShaders();
 }
 
@@ -91,6 +93,8 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
 	_engine = src._engine;
 
 	_programsBufferIndex = 0;
+	
+	_physicsDebugDrawer = src._physicsDebugDrawer;
 }
 
 AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
@@ -119,11 +123,19 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
 	_engine = src._engine;
 
 	_programsBufferIndex = 0;
+	
+	_physicsDebugDrawer = src._physicsDebugDrawer;
 }
 
 AnimaRenderer::~AnimaRenderer()
 {
 	Clear();
+	
+	if(_physicsDebugDrawer != nullptr)
+	{
+		delete _physicsDebugDrawer;
+		_physicsDebugDrawer = nullptr;
+	}
 }
 
 AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
@@ -156,6 +168,8 @@ AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
 		_engine = src._engine;
 
 		_programsBufferIndex = 0;
+		
+		_physicsDebugDrawer = src._physicsDebugDrawer;
 	}
 
 	return *this;
@@ -191,6 +205,8 @@ AnimaRenderer& AnimaRenderer::operator=(AnimaRenderer&& src)
 		_engine = src._engine;
 
 		_programsBufferIndex = 0;
+		
+		_physicsDebugDrawer = src._physicsDebugDrawer;
 	}
 
 	return *this;
@@ -660,6 +676,9 @@ void AnimaRenderer::Start(AnimaScene* scene)
 {
 	ANIMA_ASSERT(scene != nullptr);
 	_scene = scene;
+	
+	_physicsDebugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	_scene->GetPhysWorld()->setDebugDrawer(_physicsDebugDrawer);
 }
 
 void AnimaRenderer::Start()
@@ -1739,6 +1758,34 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	}
 
 	glDisable(GL_STENCIL_TEST);
+	
+	if(glGetError() != GL_NO_ERROR)
+	{
+		int i = 0;
+		i++;
+	}
+	
+	ANIMA_FRAME_PUSH("Depth copy");
+	prepassBuffer->BindAsReadingSource();
+	glBlitFramebuffer(0, 0, prepassBuffer->GetWidth(), prepassBuffer->GetHeight(), 0, 0, (AUint)size.x, (AUint)size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	
+	if(glGetError() != GL_NO_ERROR)
+	{
+		AnimaLogger::LogMessage("WARNING - Error copying depth buffer for physic debug draw");
+	}
+	
+	ANIMA_FRAME_POP();
+	
+	// Disegno il debug di Bullet
+	renderer->_scene->GetPhysWorld()->debugDrawWorld();
+	renderer->_physicsDebugDrawer->DrawDebugScene(renderer->_scene);
+	
+	
+	if(glGetError() != GL_NO_ERROR)
+	{
+		int i = 0;
+		i++;
+	}
 
 	renderer->Finish();
 }
@@ -2360,10 +2407,17 @@ bool AnimaRenderer::InitializeShaders()
 	AnimaShaderProgram* fxaaFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/fxaaFilter.asp");
 	if (!fxaaFilterProgram->Link())
 		return false;
+	
+	AnimaShaderProgram* physicsDebugProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/physicsDebug.asp");
+	if (!physicsDebugProgram->Link())
+		return false;
 
 	_defaultShaderProgram = prepareProgram;
 	shadersManager->SetDefaultFragmentShader(shadersManager->GetShaderFromName("base-material-pbr-fs-inst"));
 	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-mesh-vs-inst"));
+
+	if(_physicsDebugDrawer != nullptr)
+		_physicsDebugDrawer->SetupPrograms(_engine);
 	
 	return true;
 }

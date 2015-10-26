@@ -17,6 +17,7 @@
 #include "AnimaModelInstancesManager.h"
 #include "AnimaMeshInstancesManager.h"
 #include "AnimaAnimationsManager.h"
+#include "AnimaMeshInstance.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -38,8 +39,16 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	_materialsManager = nullptr;
 	_lightsManager = nullptr;
 	_animationsManager = nullptr;
+	
+	_physBroadphaseInterface = nullptr;
+	_physCollisionConfiguration = nullptr;
+	_physCollisionDispatcher = nullptr;
+	_physConstraintSolver = nullptr;
+	_physWorld = nullptr;
+	
+	_worldGravity = AnimaVertex3f(0.0f, -9.81f, 0.0f);
 
-	Initialize();
+	InitializeManagers();
 }
 
 AnimaScene::AnimaScene(const AnimaScene& src)
@@ -58,6 +67,14 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 	_materialsManager = src._materialsManager;
 	_lightsManager = src._lightsManager;
 	_animationsManager = src._animationsManager;
+	
+	_physBroadphaseInterface = src._physBroadphaseInterface;
+	_physCollisionConfiguration = src._physCollisionConfiguration;
+	_physCollisionDispatcher = src._physCollisionDispatcher;
+	_physConstraintSolver = src._physConstraintSolver;
+	_physWorld = src._physWorld;
+	
+	_worldGravity = src._worldGravity;
 }
 
 AnimaScene::AnimaScene(AnimaScene&& src)
@@ -76,18 +93,28 @@ AnimaScene::AnimaScene(AnimaScene&& src)
 	_materialsManager = src._materialsManager;
 	_lightsManager = src._lightsManager;
 	_animationsManager = src._animationsManager;
+	
+	_physBroadphaseInterface = src._physBroadphaseInterface;
+	_physCollisionConfiguration = src._physCollisionConfiguration;
+	_physCollisionDispatcher = src._physCollisionDispatcher;
+	_physConstraintSolver = src._physConstraintSolver;
+	_physWorld = src._physWorld;
+	
+	_worldGravity = src._worldGravity;
 }
 
 AnimaScene::~AnimaScene()
 {
-	Terminate();
+	TerminatePhysics();
+	TerminateManagers();
 }
 
 AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 {
 	if (this != &src)
 	{
-		Terminate();
+		TerminatePhysics();
+		TerminateManagers();
 		
 		AnimaNamedObject::operator=(src);
 
@@ -104,6 +131,14 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 		_materialsManager = src._materialsManager;
 		_lightsManager = src._lightsManager;
 		_animationsManager = src._animationsManager;
+		
+		_physBroadphaseInterface = src._physBroadphaseInterface;
+		_physCollisionConfiguration = src._physCollisionConfiguration;
+		_physCollisionDispatcher = src._physCollisionDispatcher;
+		_physConstraintSolver = src._physConstraintSolver;
+		_physWorld = src._physWorld;
+		
+		_worldGravity = src._worldGravity;
 	}
 	
 	return *this;
@@ -113,7 +148,8 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 {
 	if (this != &src)
 	{
-		Terminate();
+		TerminatePhysics();
+		TerminateManagers();
 		
 		AnimaNamedObject::operator=(src);
 
@@ -130,13 +166,23 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 		_materialsManager = src._materialsManager;
 		_lightsManager = src._lightsManager;
 		_animationsManager = src._animationsManager;
+		
+		_physBroadphaseInterface = src._physBroadphaseInterface;
+		_physCollisionConfiguration = src._physCollisionConfiguration;
+		_physCollisionDispatcher = src._physCollisionDispatcher;
+		_physConstraintSolver = src._physConstraintSolver;
+		_physWorld = src._physWorld;
+		
+		_worldGravity = src._worldGravity;
 	}
 	
 	return *this;
 }
 
-void AnimaScene::Initialize()
+void AnimaScene::InitializeManagers()
 {
+	TerminateManagers();
+	
 	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_engine->GetManagersAllocator(), this);
 	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_engine->GetManagersAllocator(), this);
 	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_engine->GetManagersAllocator(), this);
@@ -151,7 +197,7 @@ void AnimaScene::Initialize()
 	_modelInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstancesManager>(*_engine->GetManagersAllocator(), this, _modelsManager, _meshInstancesManager);
 }
 
-void AnimaScene::Terminate()
+void AnimaScene::TerminateManagers()
 {
 	if (_modelsManager != nullptr)
 	{
@@ -211,6 +257,68 @@ void AnimaScene::Terminate()
 	{
 		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _animationsManager);
 		_animationsManager = nullptr;
+	}
+}
+
+void AnimaScene::InitializePhysics()
+{
+	TerminatePhysics();
+	
+	_physCollisionConfiguration = new btDefaultCollisionConfiguration();
+	_physCollisionDispatcher = new btCollisionDispatcher(_physCollisionConfiguration);
+	_physBroadphaseInterface = (btBroadphaseInterface*)new btDbvtBroadphase();
+	_physConstraintSolver = (btConstraintSolver*)new btSequentialImpulseConstraintSolver;
+	_physWorld = new btDiscreteDynamicsWorld((btDispatcher*)_physCollisionDispatcher, _physBroadphaseInterface, _physConstraintSolver, _physCollisionConfiguration);
+	
+	_physWorld->setGravity(btVector3(_worldGravity.x, _worldGravity.y, _worldGravity.z));
+}
+
+void AnimaScene::TerminatePhysics()
+{
+	if(_physBroadphaseInterface != nullptr)
+	{
+		delete _physBroadphaseInterface;
+		_physBroadphaseInterface = nullptr;
+	}
+	
+	if(_physCollisionConfiguration != nullptr)
+	{
+		delete _physCollisionConfiguration;
+		_physCollisionConfiguration = nullptr;
+	}
+	
+	if(_physCollisionDispatcher != nullptr)
+	{
+		delete _physCollisionDispatcher;
+		_physCollisionDispatcher = nullptr;
+	}
+	
+	if(_physConstraintSolver != nullptr)
+	{
+		delete _physConstraintSolver;
+		_physConstraintSolver = nullptr;
+	}
+	
+	if(_physWorld != nullptr)
+	{
+		delete _physWorld;
+		_physWorld = nullptr;
+	}
+}
+
+void AnimaScene::InitializePhysicObjects()
+{
+	if(_physWorld != nullptr)
+	{
+		AInt count = _meshInstancesManager->GetMeshInstancesCount();
+		for(AInt i = 0; i < count; i++)
+		{
+			AnimaMeshInstance* instance = _meshInstancesManager->GetMeshInstance(i);
+			instance->InitializePhysicData();
+			
+			if(instance->GetPhysRigidBody() != nullptr)
+				_physWorld->addRigidBody(instance->GetPhysRigidBody());
+		}
 	}
 }
 

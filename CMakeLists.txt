@@ -214,10 +214,27 @@ if (WIN32)
 elseif(APPLE)
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/libassimp.3.1.1.dylib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.a)
+	set(AnimaEngine_DEP_BULLET 	${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet2FileLoader.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet3Collision.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet3Common.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet3Dynamics.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet3Geometry.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBullet3OpenCL_clew.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletCollision.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletDynamics.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletFileLoader.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletSoftBody.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletWorldImporter.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libBulletXmlWorldImporter.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libConvexDecomposition.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libGIMPACTUtils.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libHACD.a
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/MacOS/libLinearMath.a)
 endif()
 
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/OpenGL")
 list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Include")
+list(APPEND AnimaEngine_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Include")
 
 # Dipendenze da OpenCL
 list(APPEND AnimaEngine_INCLUDE_DIRS "${OCL_INCLUDE_DIR}")

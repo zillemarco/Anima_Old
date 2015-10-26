@@ -227,6 +227,8 @@ public:
 	 *	\author		Zille Marco
 	 */
 	AFloat GetTranslationZ();
+	
+	AnimaVertex3f GetCompleteTranslation() const;
 
 	void Rotate(const AnimaVertex3f& r);
 	void Rotate(AFloat rx, AFloat ry, AFloat rz);
@@ -252,6 +254,8 @@ public:
 	AFloat GetRotationX();
 	AFloat GetRotationY();
 	AFloat GetRotationZ();
+	
+	AnimaVertex3f GetCompleteRotation() const;
 
 	void Scale(const AnimaVertex3f& s);
 	void Scale(AFloat sx, AFloat sy, AFloat sz);
@@ -267,6 +271,7 @@ public:
 	AFloat GetScaleX();
 	AFloat GetScaleY();
 	AFloat GetScaleZ();
+	AnimaVertex3f GetCompleteScale() const;
 
 	void UpdateMatrix();
 	void SetTransformationMatrix(const AnimaMatrix& m);

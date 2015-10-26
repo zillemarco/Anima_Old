@@ -92,7 +92,7 @@ public:
 	void SetMaterial(AnimaMaterial* material);
 	AnimaMaterial* GetMaterial();
 	
-	void ComputeBoundingBox(bool updateRecursively);
+	void ComputeBoundingBox();
 	AnimaVertex3f GetBoundingBoxMin() const;
 	AnimaVertex3f GetBoundingBoxMax() const;
 	AnimaVertex3f GetBoundingBoxCenter() const;

@@ -1393,7 +1393,7 @@ AUint AnimaMesh::GetBoneIDsBufferObject()
 	return _boneIDsBufferObject;
 }
 
-void AnimaMesh::ComputeBoundingBox(bool updateRecursively)
+void AnimaMesh::ComputeBoundingBox()
 {
 	AInt verticesCount = _vertices.size();
 	if (verticesCount <= 0)

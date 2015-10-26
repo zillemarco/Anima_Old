@@ -39,6 +39,7 @@ public:
 public:
 	ptree GetObjectTree(bool saveName = true) const override;
 	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	bool FinalizeAfterRead(AnimaScene* scene) override;
 
 public:
 	void SetMaterial(AnimaMaterial* material);
@@ -100,6 +101,9 @@ protected:
 	
 	AnimaArray<AnimaAnimation*> _animations;
 	AInt _activeAnimation;
+	
+	btMotionState* _physMotionState;
+	btRigidBody* _physRigidBody;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

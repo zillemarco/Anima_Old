@@ -16,6 +16,8 @@
 #include "AnimaMappedArray.h"
 #include "AnimaNamedObject.h"
 
+#include <btBulletDynamicsCommon.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaCamerasManager;
@@ -44,9 +46,13 @@ public:
 	AnimaScene& operator=(AnimaScene&& src);
 
 public:
-	void Initialize();
-	void Terminate();
+	void InitializePhysics();
+	void TerminatePhysics();
 
+protected:
+	void InitializeManagers();
+	void TerminateManagers();
+	
 public:
 	inline AnimaEngine* GetEngine() { return _engine; }
 
@@ -76,6 +82,10 @@ public:
 	inline AnimaAllocator* GetDataGeneratorsAllocator()		{ return _engine->GetDataGeneratorsAllocator(); }
 	inline AnimaAllocator* GetAnimationsAllocator()			{ return _engine->GetAnimationsAllocator(); }
 	inline AnimaAllocator* GetParallelProgramsAllocator()	{ return _engine->GetParallelProgramsAllocator(); }
+	
+	inline btDiscreteDynamicsWorld* GetPhysWorld() { return _physWorld; }
+	
+	virtual void InitializePhysicObjects();
 
 protected:
 	AnimaEngine* _engine;
@@ -90,6 +100,14 @@ protected:
 	AnimaModelInstancesManager*	_modelInstancesManager;
 	AnimaMeshInstancesManager*	_meshInstancesManager;
 	AnimaAnimationsManager*		_animationsManager;
+	
+	btBroadphaseInterface* _physBroadphaseInterface;
+	btCollisionConfiguration* _physCollisionConfiguration;
+	btCollisionDispatcher* _physCollisionDispatcher;
+	btConstraintSolver* _physConstraintSolver;
+	btDiscreteDynamicsWorld* _physWorld;
+	
+	AnimaVertex3f _worldGravity;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

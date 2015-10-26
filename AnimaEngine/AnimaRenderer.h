@@ -19,6 +19,7 @@
 #include "AnimaModel.h"
 #include "AnimaModelInstance.h"
 #include "AnimaRendererDrawableMesh.h"
+#include "AnimaPhysicsDebugDrawer.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
@@ -236,6 +237,8 @@ protected:
 	AUint _programsBufferIndex;
 	
 	std::mutex _renderMutex;
+	
+	AnimaPhysicsDebugDrawer* _physicsDebugDrawer;
 	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AUint, AnimaStringHasher>			_textureSlotsMap;

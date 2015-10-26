@@ -22,6 +22,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShadersManager;
 class AnimaRenderer;
+class AnimaPhysicsDebugDrawer;
 
 enum AnimaShaderInfoType 
 {
@@ -79,6 +80,7 @@ public:
 	void ScanVariables();
 
 	void EnableInputs(AnimaMesh* mesh);
+	void EnableInputs(AnimaPhysicsDebugDrawer* drawer);
 	void EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();
 

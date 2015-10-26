@@ -220,7 +220,8 @@ void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer
 		break;
 	case Anima::TEXTURE2D:
 	case Anima::TEXTURECUBE:
-		UpdateValue(object->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
+		if(renderer != nullptr)
+			UpdateValue(object->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
 		break;
 	case Anima::TEXTURE2D_ARRAY:
 		break;
@@ -235,6 +236,9 @@ void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer
 
 void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
 {
+	if(renderer == nullptr)
+		return;
+	
 	AInt count = _nameParts.size();
 	if (count < 2)
 		return;

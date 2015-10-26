@@ -2,6 +2,7 @@
 #include "AnimaShadersManager.h"
 #include "AnimaLightsManager.h"
 #include "AnimaRenderer.h"
+#include "AnimaPhysicsDebugDrawer.h"
 #include <thread>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -502,6 +503,36 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 4, GL_FLOAT, GL_FALSE, 0, 0);
 			}
+		}
+	}
+}
+
+void AnimaShaderProgram::EnableInputs(AnimaPhysicsDebugDrawer* drawer)
+{
+	AUint vao = drawer->GetVertexArrayObject();
+	AUint verticesVBO = drawer->GetVerticesBufferObject();
+	AUint colorsVBO = drawer->GetColorsBufferObject();
+	
+	if(vao <= 0 || verticesVBO <= 0 || colorsVBO <= 0)
+		return;
+	
+	glBindVertexArray(vao);
+	
+	for (auto key : _inputs)
+	{
+		AnimaInputInfo info = key.second;
+		
+		if (info._name == "_position")
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+			glEnableVertexAttribArray(info._location);
+			glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+		else if (info._name == "_color")
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
+			glEnableVertexAttribArray(info._location);
+			glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		}
 	}
 }

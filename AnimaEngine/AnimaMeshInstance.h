@@ -18,6 +18,8 @@
 #include "AnimaMesh.h"
 #include "AnimaModel.h"
 
+#include <btBulletDynamicsCommon.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaMeshInstancesManager;
@@ -60,6 +62,12 @@ public:
 
 	void SetShaderProgramName(const AnimaString& shaderProgramName);
 	AnimaString GetShaderProgramName() const;
+	
+	inline btCollisionShape* GetPhysCollisionShape() { return _physCollisionShape; }
+	inline btMotionState* GetPhysMotionState() { return _physMotionState; }
+	inline btRigidBody* GetPhysRigidBody() { return _physRigidBody; }
+	
+	virtual void InitializePhysicData();
 
 protected:
 	const char* GetShaderPrefix() override { return "MOD"; }
@@ -78,6 +86,10 @@ protected:
 
 	AnimaShaderProgram* _shaderProgram;
 	AnimaString _shaderProgramName;
+	
+	btCollisionShape* _physCollisionShape;
+	btMotionState* _physMotionState;
+	btRigidBody* _physRigidBody;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

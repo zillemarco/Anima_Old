@@ -1,0 +1,6 @@
+Name: bullet
+Description: Bullet Continuous Collision Detection and Physics Library
+Requires:
+Version: 2.83
+Libs: -L/Users/marco/Documents/Progetti/Bullet_2.83/Installation/lib -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+Cflags:  -I/Users/marco/Documents/Progetti/Bullet_2.83/Installation/include/bullet -I/Users/marco/Documents/Progetti/Bullet_2.83/Installation/include

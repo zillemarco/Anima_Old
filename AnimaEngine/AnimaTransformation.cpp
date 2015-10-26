@@ -663,4 +663,46 @@ void AnimaTransformation::SetParentObject(AnimaSceneObject* parentObject)
 	_parentObject = parentObject;
 }
 
+AnimaVertex3f AnimaTransformation::GetCompleteTranslation() const
+{
+	AnimaVertex3f completeTranslation = _translation;
+	
+	if(_parentObject != nullptr)
+	{
+		AnimaSceneObject* parentObjectParent = _parentObject->GetParentObject();
+		if(parentObjectParent)
+			completeTranslation += parentObjectParent->GetTransformation()->GetCompleteTranslation();
+	}
+	
+	return completeTranslation;
+}
+
+AnimaVertex3f AnimaTransformation::GetCompleteRotation() const
+{
+	AnimaVertex3f completeRotation = _rotation;
+	
+	if(_parentObject != nullptr)
+	{
+		AnimaSceneObject* parentObjectParent = _parentObject->GetParentObject();
+		if(parentObjectParent)
+			completeRotation += parentObjectParent->GetTransformation()->GetCompleteRotation();
+	}
+	
+	return completeRotation;
+}
+
+AnimaVertex3f AnimaTransformation::GetCompleteScale() const
+{
+	AnimaVertex3f completeScale = _scale;
+	
+	if(_parentObject != nullptr)
+	{
+		AnimaSceneObject* parentObjectParent = _parentObject->GetParentObject();
+		if(parentObjectParent)
+			completeScale *= parentObjectParent->GetTransformation()->GetCompleteScale();
+	}
+	
+	return completeScale;
+}
+
 END_ANIMA_ENGINE_NAMESPACE

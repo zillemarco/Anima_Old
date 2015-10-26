@@ -61,6 +61,8 @@ Anima::AnimaMaterial* _pbrMaterial;
 int lastXPos = 0;
 int lastYPos = 0;
 
+bool mouseMoved = false;
+
 float camSpeed = 1.0f;
 float camSpeedInc = 0.5f;
 float camSpeedMax = 10.0f;
@@ -231,6 +233,76 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	lastXPos = pt.x;
 	lastYPos = pt.y;
+	
+	mouseMoved = false;
+}
+
+- (void) mouseUp:(NSEvent *)theEvent
+{
+	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+	
+	if(mouseMoved == false && _scene != nullptr && _camera != nullptr)
+	{
+		NSRect rc = [self bounds];
+		
+		Anima::AnimaVertex4f lRayStart_NDC(((float)pt.x/(float)rc.size.width  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
+										   ((float)pt.y/(float)rc.size.height - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
+										   -1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
+										   1.0f
+										   );
+		
+		Anima::AnimaVertex4f lRayEnd_NDC(((float)pt.x/(float)rc.size.width  - 0.5f) * 2.0f,
+										 ((float)pt.y/(float)rc.size.height - 0.5f) * 2.0f,
+										 0.0,
+										 1.0f
+										 );
+		
+		Anima::AnimaMatrix inversePVM = _camera->GetInversedProjectionViewMatrix();
+		
+		Anima::AnimaVertex4f lRayStart_world = inversePVM * lRayStart_NDC;
+		Anima::AnimaVertex4f lRayEnd_world = inversePVM * lRayEnd_NDC;
+		
+		lRayStart_world /= lRayStart_world.w;
+		lRayEnd_world /= lRayEnd_world.w;
+		
+		Anima::AnimaVertex3f dir(lRayEnd_world - lRayStart_world);
+		dir.Normalize();
+		
+		Anima::AFloat temp = dir.y;
+		dir.y = dir.z;
+		dir.z = temp;
+		
+		temp = lRayStart_world.y;
+		lRayStart_world.y = lRayStart_world.z;
+		lRayStart_world.z = temp;
+		
+		Anima::AnimaVertex3f origin = lRayStart_world;
+		
+		btCollisionWorld::AllHitsRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+		
+		btDynamicsWorld* world = _scene->GetPhysWorld();
+		
+		world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+		
+//		printf("Origin: %.3f; %.3f; %.3f\n", origin.x, origin.y, origin.z);
+//		printf("Direction: %.3f; %.3f; %.3f\n", dir.x, dir.y, dir.z);
+	
+		if(RayCallback.hasHit())
+		{
+			int hitCount = RayCallback.m_collisionObjects.size();
+			for(int i = 0; i < hitCount; i++)
+			{
+			
+				Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObjects.at(i)->getUserPointer();
+				_pbrMaterial = instance->GetMaterial();
+				printf("Picked material named '%s'\n", instance->GetName().c_str());
+			}
+		}
+		else
+		{
+			printf("Picked nothing\n");
+		}
+	}
 }
 
 - (void) rightMouseDown:(NSEvent *)theEvent
@@ -255,6 +327,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	lastXPos = pt.x;
 	lastYPos = pt.y;
+	
+	mouseMoved = true;
 }
 
 - (void) rightMouseDragged:(NSEvent *)theEvent
@@ -527,17 +601,16 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 #if defined SAVE_SCENE
 	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
 #else
-	
-	Anima::AnimaTimer timer;
 	_engine.GetScenesManager()->LoadScenes("/Users/marco/Desktop/Scene");
-	
-	printf("Loading scene time: %f sec\n", timer.Elapsed());
 #endif
 	
 	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
 
 	if (!_scene)
 		return false;
+	
+	_scene->InitializePhysics();
+	_scene->InitializePhysicObjects();
 	
 	Anima::AnimaString dataPath = DATA_PATH;
 	Anima::AnimaString materialsPath = dataPath + "/materials";

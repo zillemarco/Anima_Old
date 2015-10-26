@@ -223,7 +223,7 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			scene->GetMaterialsManager()->FinalizeObjectsAfterRead();
 			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
 			scene->GetModelsManager()->FinalizeObjectsAfterRead();
-			scene->GetMeshesManager()->FinalizeObjectsAfterRead();
+			scene->GetMeshInstancesManager()->FinalizeObjectsAfterRead();
 			scene->GetModelInstancesManager()->FinalizeObjectsAfterRead();
 			scene->GetCamerasManager()->FinalizeObjectsAfterRead();
 			scene->GetLightsManager()->FinalizeObjectsAfterRead();

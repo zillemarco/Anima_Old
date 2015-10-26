@@ -88,7 +88,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaRandom.h
 					AnimaParallelProgram.h
 					AnimaParallelProgramsManager.h
-					AnimaTools.h)
+					AnimaTools.h
+					AnimaPhysicsDebugDrawer.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -158,7 +159,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaRandom.cpp
 					AnimaParallelProgram.cpp
 					AnimaParallelProgramsManager.cpp
-					AnimaTools.cpp)
+					AnimaTools.cpp
+					AnimaPhysicsDebugDrawer.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -209,6 +211,7 @@ source_group(Engine\\Scene\\Data\\Objects\\Lights FILES AnimaLight.h AnimaLight.
 source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp AnimaShaderData.h AnimaShaderData.cpp AnimaShaderInclude.h AnimaShaderInclude.cpp AnimaShaderGroupData.h AnimaShaderGroupData.cpp)
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)
 source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
+source_group(Engine\\Scene\\Physics\\Debug FILES AnimaPhysicsDebugDrawer.h AnimaPhysicsDebugDrawer.cpp)
 source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp AnimaTextureGenerator.h AnimaTextureGenerator.cpp)
 source_group("Engine\\Parallel Programming" FILES AnimaParallelProgram.cpp AnimaParallelProgram.h)
 
@@ -273,6 +276,7 @@ target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_ASSIMP})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_GLEW})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_OPENCL})
+target_link_libraries(${PROJECT_NAME} ${AnimaEngine_DEP_BULLET})
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_BOOST_LIBS})
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)

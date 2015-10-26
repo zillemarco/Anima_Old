@@ -12,6 +12,7 @@
 #include "AnimaScene.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaMeshesManager.h"
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -23,6 +24,10 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGenerator
 	_mesh = nullptr;
 	_shaderProgramName = "";
 	_shaderProgram = nullptr;
+	
+	_physCollisionShape = nullptr;
+	_physMotionState = nullptr;
+	_physRigidBody = nullptr;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
@@ -35,6 +40,9 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
 {
 	_material = src._material;
 	_mesh = src._mesh;
+	_physCollisionShape = src._physCollisionShape;
+	_physMotionState = src._physMotionState;
+	_physRigidBody = src._physRigidBody;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
@@ -47,10 +55,30 @@ AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
 {
 	_material = src._material;
 	_mesh = src._mesh;
+	_physCollisionShape = src._physCollisionShape;
+	_physMotionState = src._physMotionState;
+	_physRigidBody = src._physRigidBody;
 }
 
 AnimaMeshInstance::~AnimaMeshInstance()
 {
+	if(_physRigidBody == nullptr)
+	{
+		delete _physRigidBody;
+		_physRigidBody = nullptr;
+	}
+	
+	if(_physMotionState == nullptr)
+	{
+		delete _physMotionState;
+		_physMotionState = nullptr;
+	}
+	
+	if(_physCollisionShape == nullptr)
+	{
+		delete _physCollisionShape;
+		_physCollisionShape = nullptr;
+	}
 }
 
 AnimaMeshInstance& AnimaMeshInstance::operator=(const AnimaMeshInstance& src)
@@ -68,6 +96,9 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(const AnimaMeshInstance& src)
 		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
 		_shaderProgram = src._shaderProgram;
+		_physCollisionShape = src._physCollisionShape;
+		_physMotionState = src._physMotionState;
+		_physRigidBody = src._physRigidBody;
 	}
 	
 	return *this;
@@ -88,6 +119,9 @@ AnimaMeshInstance& AnimaMeshInstance::operator=(AnimaMeshInstance&& src)
 		_shadersNames = src._shadersNames;
 		_shaderProgramName = src._shaderProgramName;
 		_shaderProgram = src._shaderProgram;
+		_physCollisionShape = src._physCollisionShape;
+		_physMotionState = src._physMotionState;
+		_physRigidBody = src._physRigidBody;
 	}
 	
 	return *this;
@@ -298,6 +332,78 @@ void AnimaMeshInstance::SetShaderProgramName(const AnimaString& shaderProgramNam
 AnimaString AnimaMeshInstance::GetShaderProgramName() const
 {
 	return _shaderProgramName;
+}
+
+void AnimaMeshInstance::InitializePhysicData()
+{
+	if(_mesh)
+	{
+		_mesh->ComputeBoundingBox();
+		
+		AnimaVertex3f rotationVector = _transformation.GetCompleteRotation();
+		AnimaVertex3f positionVector = _transformation.GetCompleteTranslation() + GetPosition();
+		AnimaVertex3f scaleVector = _transformation.GetCompleteScale();
+		
+		AFloat temp = rotationVector.y;
+		rotationVector.y = rotationVector.z;
+		rotationVector.z = temp;
+		
+		btQuaternion xRot(btVector3(1.0, 0.0, 0.0), rotationVector.x);
+		btQuaternion yRot(btVector3(0.0, 1.0, 0.0), rotationVector.y);
+		btQuaternion zRot(btVector3(0.0, 0.0, 1.0), rotationVector.z);
+		
+		btQuaternion rot = xRot * yRot * zRot;
+		
+		if(_physCollisionShape == nullptr)
+		{
+			btConvexHullShape* tempShape = new btConvexHullShape();
+			
+			AInt count = _mesh->GetVerticesCount();
+			for(AInt i = 0; i < count; i++)
+			{
+				AnimaVertex3f vertex = _mesh->GetVertex(i);
+				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+			}
+			
+//			btShapeHull* hull = new btShapeHull(tempShape);
+//			btScalar margin = tempShape->getMargin();
+//			hull->buildHull(margin);
+			
+//			_physCollisionShape = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
+			_physCollisionShape = tempShape;
+			
+//			delete hull;
+//			hull = nullptr;
+			
+//			delete tempShape;
+//			tempShape = nullptr;
+		}
+	
+		if(_physMotionState == nullptr)
+			_physMotionState = new btDefaultMotionState(btTransform(rot, btVector3(positionVector.x, positionVector.y, positionVector.z)));
+		
+		if(_physRigidBody == nullptr)
+		{
+			if(_physMotionState != nullptr && _physCollisionShape)
+			{
+				_physCollisionShape->setLocalScaling(btVector3(scaleVector.x, scaleVector.y, scaleVector.z));
+				
+				// Il primo argomento è la massa e l'ultimo l'inerzia
+				btRigidBody::btRigidBodyConstructionInfo ci(0.0, _physMotionState, _physCollisionShape, btVector3(0.0f, 0.0f, 0.0f));
+				
+				_physRigidBody = new btRigidBody(ci);
+				_physRigidBody->setUserPointer(this);
+			}
+		}
+		else
+		{
+			btTransform worldTransform;
+			_physRigidBody->getMotionState()->getWorldTransform(worldTransform);
+			worldTransform.setOrigin(btVector3(positionVector.x, positionVector.y, positionVector.z));
+			worldTransform.setRotation(rot);
+			_physRigidBody->getMotionState()->setWorldTransform(worldTransform);
+		}
+	}
 }
 
 END_ANIMA_ENGINE_NAMESPACE
