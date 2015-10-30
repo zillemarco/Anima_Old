@@ -59,6 +59,9 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
 bool _shouldClose = false;
+bool sceneSaved = false;
+
+bool mouseMoved = false;
 
 int lastXPos = 0;
 int lastYPos = 0;
@@ -309,6 +312,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
 	}
+	case WM_LBUTTONUP:
+	{
+		int xPos = GET_X_LPARAM(lParam);
+		int yPos = GET_Y_LPARAM(lParam);
+
+		GetClientRect()
+
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
 	case WM_CREATE:
 	{
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
@@ -494,15 +506,20 @@ bool InitEngine()
 
 	// Creazione di una telecamera
 	_camerasManager = _scene->GetCamerasManager();
+#if defined SAVE_SCENE
 	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
 	if (!_camera)
 		return false;
+#else
+	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+#endif
 	
 #if defined SAVE_SCENE
 	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
 	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
 #endif
 
+#if defined SAVE_SCENE
 	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
 	if (!_model)
 		return false;
@@ -605,19 +622,17 @@ bool InitEngine()
 	for (int j = 0; j < modelInstanceMeshes.size(); j++)
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
 
-	_camera->LookAt(0.0, 40.0, 250.0, 0.0, 0.0, -1.0);
+	_camera->LookAt(-350.0, 100.0, 150.0, 1.0, -0.2, 0.0);
+#endif
+
 	_camera->Activate();
 
+#if defined SAVE_SCENE
 	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
 	directionalLight->SetDirection(-1.0, -1.0, -1.0);
 	directionalLight->SetColor(1.0, 1.0, 1.0);
 	directionalLight->SetIntensity(1.0);
-
-	//Anima::AnimaDirectionalLight* directionalLight2 = _scene->GetLightsManager()->CreateDirectionalLight("light-01");
-	//directionalLight2->SetDirection(1.0, -1.0, 1.0);
-	//directionalLight2->SetColor(1.0, 1.0, 1.0);
-	//directionalLight2->SetIntensity(1.0);
-
+	
 	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
 	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
 	//pointLight1->SetColor(1.0, 0.0, 0.0);
@@ -626,71 +641,7 @@ bool InitEngine()
 	//pointLight1->SetLinearAttenuation(0.0);
 	//pointLight1->SetExponentAttenuation(0.0);
 	//pointLight1->SetRange(200);
-
-	//Anima::AnimaPointLight* pointLight2 = _scene->GetLightsManager()->CreatePointLight("light-2");
-	//pointLight2->SetPosition(0.0, 20.0, 40.0);
-	//pointLight2->SetColor(0.0, 1.0, 0.0);
-	//pointLight2->SetIntensity(1.0);
-	//pointLight2->SetConstantAttenuation(1.0);
-	//pointLight2->SetLinearAttenuation(0.0);
-	//pointLight2->SetExponentAttenuation(0.0);
-	//pointLight2->SetRange(200);
-
-	//Anima::AnimaPointLight* pointLight3 = _scene->GetLightsManager()->CreatePointLight("light-3");
-	//pointLight3->SetPosition(40.0, 20.0, 0.0);
-	//pointLight3->SetColor(1.0, 0.0, 1.0);
-	//pointLight3->SetIntensity(1.0);
-	//pointLight3->SetConstantAttenuation(1.0);
-	//pointLight3->SetLinearAttenuation(0.0);
-	//pointLight3->SetExponentAttenuation(0.0);
-	//pointLight3->SetRange(200);
-
-	//Anima::AnimaPointLight* pointLight4 = _scene->GetLightsManager()->CreatePointLight("light-4");
-	//pointLight4->SetPosition(0.0, 20.0, -40.0);
-	//pointLight4->SetColor(1.0, 0.0, 1.0);
-	//pointLight4->SetIntensity(1.0);
-	//pointLight4->SetConstantAttenuation(1.0);
-	//pointLight4->SetLinearAttenuation(0.0);
-	//pointLight4->SetExponentAttenuation(0.0);
-	//pointLight4->SetRange(200);
-
-	//Anima::AnimaPointLight* pointLight5 = _scene->GetLightsManager()->CreatePointLight("light-5");
-	//pointLight5->SetPosition(-40.0, 20.0, -40.0);
-	//pointLight5->SetColor(1.0, 0.5, 1.0);
-	//pointLight5->SetIntensity(1.0);
-	//pointLight5->SetConstantAttenuation(1.0);
-	//pointLight5->SetLinearAttenuation(0.0);
-	//pointLight5->SetExponentAttenuation(0.0);
-	//pointLight5->SetRange(200);
-	//
-	//Anima::AnimaPointLight* pointLight6 = _scene->GetLightsManager()->CreatePointLight("light-6");
-	//pointLight6->SetPosition(40.0, 20.0, -40.0);
-	//pointLight6->SetColor(1.0, 0.0, 0.5);
-	//pointLight6->SetIntensity(1.0);
-	//pointLight6->SetConstantAttenuation(1.0);
-	//pointLight6->SetLinearAttenuation(0.0);
-	//pointLight6->SetExponentAttenuation(0.0);
-	//pointLight6->SetRange(200);
-	//
-	//Anima::AnimaPointLight* pointLight7 = _scene->GetLightsManager()->CreatePointLight("light-7");
-	//pointLight7->SetPosition(40.0, 20.0, 40.0);
-	//pointLight7->SetColor(1.0, 1.0, .0);
-	//pointLight7->SetIntensity(1.0);
-	//pointLight7->SetConstantAttenuation(1.0);
-	//pointLight7->SetLinearAttenuation(0.0);
-	//pointLight7->SetExponentAttenuation(0.0);
-	//pointLight7->SetRange(200);
-
-	//Anima::AnimaPointLight* pointLight8 = _scene->GetLightsManager()->CreatePointLight("light-8");
-	//pointLight8->SetPosition(-40.0, 20.0, 40.0);
-	//pointLight8->SetColor(1.0, 1.0, 1.0);
-	//pointLight8->SetIntensity(1.0);
-	//pointLight8->SetConstantAttenuation(1.0);
-	//pointLight8->SetLinearAttenuation(0.0);
-	//pointLight8->SetExponentAttenuation(0.0);
-	//pointLight8->SetRange(200);
-
-	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+#endif
 
 	_animationsManager = _scene->GetAnimationsManager();
 
@@ -795,14 +746,10 @@ bool InitEngine()
 #else
 	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
 	textureSkyBox->Load();
+#endif
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
-#endif
 	_renderer->CheckPrograms(_scene);
-
-#if defined SAVE_SCENE
-	_engine.GetScenesManager()->SaveSceneToFile(_scene, "C:/Users/Marco/Desktop/Scene", true);
-#endif
-	
+		
 	return true;
 }
 
@@ -819,6 +766,14 @@ void SetViewport(int w, int h)
 		std::cout << "Resize: " << w << " x " << h << std::endl;
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
+	}
+	
+	if (!sceneSaved)
+	{
+#if defined SAVE_SCENE
+		_engine.GetScenesManager()->SaveSceneToFile(_scene, "C:/Users/Marco/Desktop/Scene", true);
+#endif
+		sceneSaved = true;
 	}
 }
 

@@ -211,6 +211,16 @@ set(ANIMA_EDITOR_NAME AnimaEditor)
 if (WIN32)	
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/assimp.lib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/glew32.lib)
+	set(AnimaEngine_DEP_BULLET 	${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet2FileLoader.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet3Collision.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet3Common.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet3Dynamics.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet3Geometry.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/Bullet3OpenCL_clew.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/BulletCollision.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/BulletDynamics.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/BulletSoftBody.lib
+								${PROJECT_SOURCE_DIR}/Dependencies/Bullet/Lib/Win/LinearMath.lib)
 elseif(APPLE)
 	set(AnimaEngine_DEP_ASSIMP ${PROJECT_SOURCE_DIR}/Dependencies/Assimp/Lib/libassimp.3.1.1.dylib)
 	set(AnimaEngine_DEP_GLEW ${PROJECT_SOURCE_DIR}/Dependencies/OpenGL/Lib/libGLEW.a)

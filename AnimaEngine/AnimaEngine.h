@@ -20,7 +20,7 @@
 #define PATH_MAX MAX_PATH
 #endif
 
-//#define SAVE_SCENE
+#define SAVE_SCENE
 
 #define _ANIMA_ENGINE_REQUIRE_INIT()					\
     if (!Anima::AnimaEngine::IsInitialized())				\
