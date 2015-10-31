@@ -92,7 +92,12 @@ bool AnimaFirstPersonCamera::ReadObject(const ptree& objectTree, AnimaScene* sce
 			SetName(objectTree.get<AnimaString>("AnimaFirstPersonCamera.Name"));
 		
 		ptree cameraTree = objectTree.get_child("AnimaFirstPersonCamera.Camera");
-		return AnimaCamera::ReadObject(cameraTree, scene, false);
+		if(AnimaCamera::ReadObject(cameraTree, scene, false))
+		{
+			LookAt(GetPosition(), GetForward());
+			return true;
+		}
+		return false;
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

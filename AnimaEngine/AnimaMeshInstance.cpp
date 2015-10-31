@@ -344,43 +344,53 @@ void AnimaMeshInstance::InitializePhysicData()
 		AnimaVertex3f positionVector = _transformation.GetCompleteTranslation() + GetPosition();
 		AnimaVertex3f scaleVector = _transformation.GetCompleteScale();
 		
-		AFloat temp = rotationVector.y;
-		rotationVector.y = rotationVector.z;
-		rotationVector.z = temp;
+		AnimaQuaternion xRot(AnimaVertex3f(1.0, 0.0, 0.0), rotationVector.x);
+		AnimaQuaternion yRot(AnimaVertex3f(0.0, 1.0, 0.0), rotationVector.y);
+		AnimaQuaternion zRot(AnimaVertex3f(0.0, 0.0, 1.0), rotationVector.z);
+		AnimaQuaternion rot = zRot * yRot * xRot;
 		
-		btQuaternion xRot(btVector3(1.0, 0.0, 0.0), rotationVector.x);
-		btQuaternion yRot(btVector3(0.0, 1.0, 0.0), rotationVector.y);
-		btQuaternion zRot(btVector3(0.0, 0.0, 1.0), rotationVector.z);
+		AnimaMatrix rm = AnimaMatrix::MakeRotationXRad(rotationVector.x) * AnimaMatrix::MakeRotationZRad(rotationVector.y) * AnimaMatrix::MakeRotationXRad(rotationVector.z);
+		AnimaQuaternion tmp(rm);
 		
-		btQuaternion rot = xRot * yRot * zRot;
+		AnimaMatrix qm = tmp.GetMatrix();
+		AnimaQuaternion tmp2(qm);
+		
 		
 		if(_physCollisionShape == nullptr)
 		{
 			btConvexHullShape* tempShape = new btConvexHullShape();
 			
-			AInt count = _mesh->GetVerticesCount();
+			AInt count = _mesh->GetFacesCount();
 			for(AInt i = 0; i < count; i++)
 			{
-				AnimaVertex3f vertex = _mesh->GetVertex(i);
+				AnimaFace face = _mesh->GetFace(i);
+				
+				AnimaVertex3f vertex = _mesh->GetVertex(face.GetIndex(0));
+				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+
+				vertex = _mesh->GetVertex(face.GetIndex(1));
+				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+				
+				vertex = _mesh->GetVertex(face.GetIndex(2));
 				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
 			}
 			
 //			btShapeHull* hull = new btShapeHull(tempShape);
 //			btScalar margin = tempShape->getMargin();
 //			hull->buildHull(margin);
-			
+//			
 //			_physCollisionShape = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
 			_physCollisionShape = tempShape;
 			
 //			delete hull;
 //			hull = nullptr;
-			
+//			
 //			delete tempShape;
 //			tempShape = nullptr;
 		}
 	
 		if(_physMotionState == nullptr)
-			_physMotionState = new btDefaultMotionState(btTransform(rot, btVector3(positionVector.x, positionVector.y, positionVector.z)));
+			_physMotionState = new btDefaultMotionState(btTransform(btQuaternion(rot.x, rot.y, rot.z, rot.w), btVector3(positionVector.x, positionVector.y, positionVector.z)));
 		
 		if(_physRigidBody == nullptr)
 		{
@@ -388,8 +398,14 @@ void AnimaMeshInstance::InitializePhysicData()
 			{
 				_physCollisionShape->setLocalScaling(btVector3(scaleVector.x, scaleVector.y, scaleVector.z));
 				
+				AFloat massa = GetAncestorObject()->GetFloat("Mass");
+				btVector3 localInertia(0.0f, 0.0f, 0.0f);
+				
+				if(massa > 0.0f)
+					_physCollisionShape->calculateLocalInertia(massa, localInertia);
+				
 				// Il primo argomento è la massa e l'ultimo l'inerzia
-				btRigidBody::btRigidBodyConstructionInfo ci(0.0, _physMotionState, _physCollisionShape, btVector3(0.0f, 0.0f, 0.0f));
+				btRigidBody::btRigidBodyConstructionInfo ci(massa, _physMotionState, _physCollisionShape, localInertia);
 				
 				_physRigidBody = new btRigidBody(ci);
 				_physRigidBody->setUserPointer(this);
@@ -400,7 +416,7 @@ void AnimaMeshInstance::InitializePhysicData()
 			btTransform worldTransform;
 			_physRigidBody->getMotionState()->getWorldTransform(worldTransform);
 			worldTransform.setOrigin(btVector3(positionVector.x, positionVector.y, positionVector.z));
-			worldTransform.setRotation(rot);
+			worldTransform.setRotation(btQuaternion(rot.x, rot.y, rot.z, rot.w));
 			_physRigidBody->getMotionState()->setWorldTransform(worldTransform);
 		}
 	}

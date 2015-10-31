@@ -51,7 +51,7 @@ public:
 	
 	AnimaTypeMappedArray<AnimaDataGenerator*>* GetDataGeneratorsTypeMappedArray();
 	
-	void UpdateValues();
+	void UpdateValues(AFloat elapsedTime);
 
 private:
 	void ClearGenerators();

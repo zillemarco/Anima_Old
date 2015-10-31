@@ -91,7 +91,7 @@ bool AnimaDataGeneratorsManager::RemoveGenerator(AnimaDataGenerator* generator)
 	return RemoveGenerator(generator->GetName());
 }
 
-void AnimaDataGeneratorsManager::UpdateValues()
+void AnimaDataGeneratorsManager::UpdateValues(AFloat elapsedTime)
 {
 	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaDataGenerator*>*, AnimaStringHasher>* dataGeneratorsMap = _dataGenerators.GetArraysMap();
 	for (auto dataGeneratorsPair : (*dataGeneratorsMap))

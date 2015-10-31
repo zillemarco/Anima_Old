@@ -101,7 +101,12 @@ bool AnimaThirdPersonCamera::ReadObject(const ptree& objectTree, AnimaScene* sce
 		_target = objectTree.get<AnimaVertex3f>("AnimaThirdPersonCamera.Target", AnimaVertex3f(0.0f));
 		
 		ptree cameraTree = objectTree.get_child("AnimaThirdPersonCamera.Camera");
-		return AnimaCamera::ReadObject(cameraTree, scene, false);
+		if(AnimaCamera::ReadObject(cameraTree, scene, false))
+		{
+			LookAt(GetPosition(), GetTarget());
+			return true;
+		}
+		return false;
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{

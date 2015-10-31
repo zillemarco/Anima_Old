@@ -15,6 +15,7 @@
 #include "AnimaEngine.h"
 #include "AnimaMappedArray.h"
 #include "AnimaNamedObject.h"
+#include "AnimaTimer.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -46,6 +47,21 @@ public:
 	AnimaScene& operator=(AnimaScene&& src);
 
 public:
+	/*
+	 *	\brief	Avvia la scena. In pratica avvia il timer usato per il calcolo di animazioni, simulazione fisica, ecc...
+	 *	\detail	Avvia la scena. In pratica avvia il timer usato per il calcolo di animazioni, simulazione fisica, ecc...
+	 *	\author	Zille Marco
+	 *	\sa _timer
+	 */
+	void StartScene();
+	
+	/*
+	 *	\brief	Fa avanzare la simulazione della scena
+	 *	\detail	Fa avanzare la simulazione della scena
+	 *	\author	Zille Marco
+	 */
+	void StepScene();
+	
 	void InitializePhysics();
 	void TerminatePhysics();
 
@@ -86,6 +102,8 @@ public:
 	inline btDiscreteDynamicsWorld* GetPhysWorld() { return _physWorld; }
 	
 	virtual void InitializePhysicObjects();
+	
+	bool IsRunning() const { return _isRunning; }
 
 protected:
 	AnimaEngine* _engine;
@@ -101,13 +119,16 @@ protected:
 	AnimaMeshInstancesManager*	_meshInstancesManager;
 	AnimaAnimationsManager*		_animationsManager;
 	
+	AnimaVertex3f _worldGravity;	/*!< Indica la gravità presente nel nella scena (mondo). Di default è (0, -9.81, 0) che è la gravità sulla Terra */
+	AnimaTimer _timer;				/*!< Timer usato per i calcoli di animazioni, simulazioni fisiche, ecc... */
+	AFloat _totalSceneTime;			/*!< Indica il tempo totale passato dall'avvio della scena */
+	bool _isRunning;				/*!< Indica se la scena è stata avviata */
+	
 	btBroadphaseInterface* _physBroadphaseInterface;
 	btCollisionConfiguration* _physCollisionConfiguration;
 	btCollisionDispatcher* _physCollisionDispatcher;
 	btConstraintSolver* _physConstraintSolver;
 	btDiscreteDynamicsWorld* _physWorld;
-	
-	AnimaVertex3f _worldGravity;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

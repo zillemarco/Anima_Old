@@ -61,6 +61,7 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 
 	_programsBufferIndex = 0;
 	
+	DisablePhysicsDebugDrawing();
 	_physicsDebugDrawer = new AnimaPhysicsDebugDrawer;
 	
 	InitializeShaders();
@@ -677,8 +678,11 @@ void AnimaRenderer::Start(AnimaScene* scene)
 	ANIMA_ASSERT(scene != nullptr);
 	_scene = scene;
 	
-	_physicsDebugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	_scene->GetPhysWorld()->setDebugDrawer(_physicsDebugDrawer);
+	if(IsPhysicsDebugDrawingEnabled())
+	{
+		_physicsDebugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+		_scene->GetPhysWorld()->setDebugDrawer(_physicsDebugDrawer);
+	}
 }
 
 void AnimaRenderer::Start()
@@ -1117,9 +1121,10 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 	renderer->Start();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearColor(backColor.r, backColor.g, backColor.b, backColor.a);
+	
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-
+	
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_ALWAYS, 1, 1);
 	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
@@ -1759,32 +1764,16 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 
 	glDisable(GL_STENCIL_TEST);
 	
-	if(glGetError() != GL_NO_ERROR)
+	if(renderer->IsPhysicsDebugDrawingEnabled())
 	{
-		int i = 0;
-		i++;
-	}
+		ANIMA_FRAME_PUSH("Depth copy");
+		prepassBuffer->BindAsReadingSource();
+		glBlitFramebuffer(0, 0, prepassBuffer->GetWidth(), prepassBuffer->GetHeight(), 0, 0, (AUint)size.x, (AUint)size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		ANIMA_FRAME_POP();
 	
-	ANIMA_FRAME_PUSH("Depth copy");
-	prepassBuffer->BindAsReadingSource();
-	glBlitFramebuffer(0, 0, prepassBuffer->GetWidth(), prepassBuffer->GetHeight(), 0, 0, (AUint)size.x, (AUint)size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	
-	if(glGetError() != GL_NO_ERROR)
-	{
-		AnimaLogger::LogMessage("WARNING - Error copying depth buffer for physic debug draw");
-	}
-	
-	ANIMA_FRAME_POP();
-	
-	// Disegno il debug di Bullet
-	renderer->_scene->GetPhysWorld()->debugDrawWorld();
-	renderer->_physicsDebugDrawer->DrawDebugScene(renderer->_scene);
-	
-	
-	if(glGetError() != GL_NO_ERROR)
-	{
-		int i = 0;
-		i++;
+		// Disegno il debug di Bullet
+		renderer->_scene->GetPhysWorld()->debugDrawWorld();
+		renderer->_physicsDebugDrawer->DrawDebugScene(renderer->_scene);
 	}
 
 	renderer->Finish();

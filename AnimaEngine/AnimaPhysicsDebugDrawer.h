@@ -41,12 +41,28 @@ public:
 	AUint GetVerticesBufferObject() const { return _verticesBufferObject; }
 	AUint GetColorsBufferObject() const { return _colorsBufferObject; }
 	
+	void AddConstantPoint(const AnimaVertex3f& point, const AnimaColor3f& color);
+	void AddConstantLine(const AnimaVertex3f& from, const AnimaVertex3f& to, const AnimaColor3f& color);
+	
 protected:
 	AFloat* GetFloatVertices() const;
 	AUint GetFloatVerticesCount() const;
-	
 	AFloat* GetFloatColors() const;
 	AUint GetFloatColorsCount() const;
+	
+	AFloat* GetPointsFloatVertices() const;
+	AUint GetPointsFloatVerticesCount() const;
+	AFloat* GetPointsFloatColors() const;
+	AUint GetPointsFloatColorsCount() const;
+	
+	AFloat* GetLinesFloatVertices() const;
+	AUint GetLinesFloatVerticesCount() const;
+	AFloat* GetLinesFloatColors() const;
+	AUint GetLinesFloatColorsCount() const;
+	
+	void DrawPhysics(AnimaScene* scene);
+	void DrawConstantPoints(AnimaScene* scene);
+	void DrawConstantLines(AnimaScene* scene);
 	
 protected:
 	int _debugMode;
@@ -54,7 +70,12 @@ protected:
 	AnimaShaderProgram* _shaderProgram;
 	
 	AnimaArray<AnimaVertex3f> _vertices;
-	AnimaArray<AnimaVertex3f> _colors;
+	AnimaArray<AnimaColor3f> _colors;
+	
+	AnimaArray<AnimaVertex3f> _constantPoints;
+	AnimaArray<AnimaColor3f> _constantPointsColors;
+	AnimaArray<AnimaVertex3f> _constantLines;
+	AnimaArray<AnimaColor3f> _constantLinesColors;
 	
 	AUint _vertexArrayObject;
 	AUint _verticesBufferObject;

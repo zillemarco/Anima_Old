@@ -47,6 +47,8 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	_physWorld = nullptr;
 	
 	_worldGravity = AnimaVertex3f(0.0f, -9.81f, 0.0f);
+	_totalSceneTime = 0.0;
+	_isRunning = false;
 
 	InitializeManagers();
 }
@@ -75,6 +77,8 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 	_physWorld = src._physWorld;
 	
 	_worldGravity = src._worldGravity;
+	_totalSceneTime = src._totalSceneTime;
+	_isRunning = src._isRunning;
 }
 
 AnimaScene::AnimaScene(AnimaScene&& src)
@@ -101,6 +105,8 @@ AnimaScene::AnimaScene(AnimaScene&& src)
 	_physWorld = src._physWorld;
 	
 	_worldGravity = src._worldGravity;
+	_totalSceneTime = src._totalSceneTime;
+	_isRunning = src._isRunning;
 }
 
 AnimaScene::~AnimaScene()
@@ -139,6 +145,8 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 		_physWorld = src._physWorld;
 		
 		_worldGravity = src._worldGravity;
+		_totalSceneTime = src._totalSceneTime;
+		_isRunning = src._isRunning;
 	}
 	
 	return *this;
@@ -174,6 +182,8 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 		_physWorld = src._physWorld;
 		
 		_worldGravity = src._worldGravity;
+		_totalSceneTime = src._totalSceneTime;
+		_isRunning = src._isRunning;
 	}
 	
 	return *this;
@@ -320,6 +330,35 @@ void AnimaScene::InitializePhysicObjects()
 				_physWorld->addRigidBody(instance->GetPhysRigidBody());
 		}
 	}
+}
+
+void AnimaScene::StartScene()
+{
+	_timer.Reset();
+	_totalSceneTime = 0.0f;
+	_isRunning = true;
+}
+
+void AnimaScene::StepScene()
+{
+	// Calcolo il tempo trascorso dall'ultimo step e anche il tempo totale di animazione della scena
+	AFloat elapsedTime = (AFloat)_timer.Elapsed();
+	_totalSceneTime += elapsedTime;
+	
+	// Riavvio il timer in modo da calcolare il tempo trascorso alla prossima chiamata di StepScene
+	_timer.Reset();
+	
+	// Se è stata inizializzata la simulazione fisica allora la faccio avanzare
+	if(_physWorld != nullptr)
+		_physWorld->stepSimulation(btScalar(elapsedTime));
+	
+	// Faccio avanzare i generatori di valori
+	if(_dataGeneratorsManager != nullptr)
+		_dataGeneratorsManager->UpdateValues(elapsedTime);
+	
+//	AInt count = _meshInstancesManager->GetMeshInstancesCount();
+//	for(AInt i = 0; i < count; i++)
+//		_meshInstancesManager->GetMeshInstance(i)->GetTransformation()->UpdateMatrix();
 }
 
 END_ANIMA_ENGINE_NAMESPACE

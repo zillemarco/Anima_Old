@@ -674,6 +674,24 @@ void AnimaMatrix::LookAt(const AnimaVertex3f &position, const AnimaVertex3f &for
 {
 	SetIdentity();
 	
+//	tvec3<T, P> const f(normalize(center - eye));
+//	tvec3<T, P> const s(normalize(cross(f, up)));
+//	tvec3<T, P> const u(cross(s, f));
+//	
+//	tmat4x4<T, P> Result(1);
+//	Result[0][0] = s.x;
+//	Result[1][0] = s.y;
+//	Result[2][0] = s.z;
+//	Result[0][1] = u.x;
+//	Result[1][1] = u.y;
+//	Result[2][1] = u.z;
+//	Result[0][2] =-f.x;
+//	Result[1][2] =-f.y;
+//	Result[2][2] =-f.z;
+//	Result[3][0] =-dot(s, eye);
+//	Result[3][1] =-dot(u, eye);
+//	Result[3][2] = dot(f, eye);
+	
 	AnimaVertex3f f, s, u;
 
 	f = forward.Normalized();			// asse z
@@ -691,8 +709,12 @@ void AnimaMatrix::LookAt(const AnimaVertex3f &position, const AnimaVertex3f &for
 	m[2] = -f.vec[0];
 	m[6] = -f.vec[1];
 	m[10] = -f.vec[2];
+	
+	m[12] = -(s * position);
+	m[13] = -(u * position);
+	m[14] = (f * position);
 
-	Translate(-position);
+	//Translate(-position);
 }
 
 void AnimaMatrix::LookAt(AFloat xPosition, AFloat yPosition, AFloat zPosition, AFloat xForward, AFloat yForward, AFloat zForward, AFloat xUp, AFloat yUp, AFloat zUp)
@@ -717,20 +739,39 @@ AnimaMatrix AnimaMatrix::MakeLookAt(AFloat xPosition, AFloat yPosition, AFloat z
 void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar)
 {
 	SetIdentity();
+	
+//	T const tanHalfFovy = tan(fovy / static_cast<T>(2));
+//	
+//	tmat4x4<T, defaultp> Result(static_cast<T>(0));
+//	Result[0][0] = static_cast<T>(1) / (aspect * tanHalfFovy);
+//	Result[1][1] = static_cast<T>(1) / (tanHalfFovy);
+//	Result[2][2] = - (zFar + zNear) / (zFar - zNear);
+//	Result[2][3] = - static_cast<T>(1);
+//	Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
 
-	float radians = (fov * 0.5f) * (float)M_PI / 180.0f;
-	float sine = sinf(radians);
 
-	if (sine == 0.0f)
-		return;
+//	float radians = (fov * 0.5f) * (float)M_PI / 180.0f;
+//	float sine = sinf(radians);
+//
+//	if (sine == 0.0f)
+//		return;
+//
+//	float cotan = cosf(radians) / sine;
+//	float clip = zFar - zNear;
+//
+//	m[0] = cotan / aspect;	m[1] = 0.0f;	m[2] = 0.0f;							m[3] = 0.0f;
+//	m[4] = 0.0f;			m[5] = cotan;	m[6] = 0.0f;							m[7] = 0.0f;
+//	m[8] = 0.0f;			m[9] = 0.0f;	m[10] = -(zNear + zFar) / clip;			m[11] = -1.0f;
+//	m[12] = 0.0f;			m[13] = 0.0f;	m[14] = -(2.0f * zNear * zFar) / clip;	m[15] = 0.0f;
 
-	float cotan = cosf(radians) / sine;
+	AFloat fovYRad = (fov * 0.5f) * (float)M_PI / 180.0f;
+	AFloat tanHalfFovy = tan(fovYRad / 2.0f);
 	float clip = zFar - zNear;
-
-	m[0] = cotan / aspect;	m[1] = 0.0f;	m[2] = 0.0f;							m[3] = 0.0f;
-	m[4] = 0.0f;			m[5] = cotan;	m[6] = 0.0f;							m[7] = 0.0f;
-	m[8] = 0.0f;			m[9] = 0.0f;	m[10] = -(zNear + zFar) / clip;			m[11] = -1.0f;
-	m[12] = 0.0f;			m[13] = 0.0f;	m[14] = -(2.0f * zNear * zFar) / clip;	m[15] = 0.0f;
+	
+	m[0] = 1.0f / (aspect * tanHalfFovy);	m[1] = 0.0f;				m[2] = 0.0f;							m[3] = 0.0f;
+	m[4] = 0.0f;							m[5] = 1.0f / tanHalfFovy;	m[6] = 0.0f;							m[7] = 0.0f;
+	m[8] = 0.0f;							m[9] = 0.0f;				m[10] = -(zNear + zFar) / clip;			m[11] = -1.0f;
+	m[12] = 0.0f;							m[13] = 0.0f;				m[14] = -(2.0f * zNear * zFar) / clip;	m[15] = 0.0f;
 }
 
 AnimaMatrix AnimaMatrix::MakePerspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zFar)

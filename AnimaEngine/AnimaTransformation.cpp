@@ -9,6 +9,7 @@
 #include "AnimaTransformation.h"
 #include "AnimaMath.h"
 #include "AnimaSceneObject.h"
+#include "AnimaMeshInstance.h"
 #include "AnimaXmlTranslators.h"
 
 #define _USE_MATH_DEFINES
@@ -116,8 +117,13 @@ ptree AnimaTransformation::GetObjectTree() const
 	tree.add("AnimaTransformation.Traslation", _translation);
 	tree.add("AnimaTransformation.Rotation", _rotation);
 	tree.add("AnimaTransformation.Scale", _scale);
-	tree.add("AnimaTransformation.TransformationMatrix", _transformationMatrix);
-	tree.add("AnimaTransformation.NormalMatrix", _normalMatrix);
+
+	//	Non salvo più anche le matrici di trasfomazione della mesh e delle normali perchè le ricalcolo dai dati di
+	//	traslazione, rotaione e scala
+	//
+	//	tree.add("AnimaTransformation.TransformationMatrix", _transformationMatrix);
+	//	tree.add("AnimaTransformation.NormalMatrix", _normalMatrix);
+	
 	tree.add("AnimaTransformation.ModelNodeTransformationMatrix", _modelNodeTransformationMatrix);
 	
 	return tree;
@@ -130,9 +136,16 @@ bool AnimaTransformation::ReadObject(const ptree& objectTree)
 		_translation = objectTree.get<AnimaVertex3f>("AnimaTransformation.Traslation", AnimaVertex3f(0.0f));
 		_rotation = objectTree.get<AnimaVertex3f>("AnimaTransformation.Rotation", AnimaVertex3f(0.0f));
 		_scale = objectTree.get<AnimaVertex3f>("AnimaTransformation.Scale", AnimaVertex3f(1.0f));
-		_transformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
-		_normalMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		
+		//	Non leggo più anche le matrici di trasfomazione della mesh e delle normali perchè le ricalcolo dai dati di
+		//	traslazione, rotaione e scala
+		//
+		//	_transformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		//	_normalMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		
 		_modelNodeTransformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		
+		UpdateMatrix();
 	}
 	catch (boost::property_tree::ptree_bad_path& exception)
 	{
@@ -465,10 +478,31 @@ AFloat AnimaTransformation::GetScaleZ()
 
 void AnimaTransformation::UpdateMatrix()
 {
-	AnimaMatrix translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
-	AnimaMatrix rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * (AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x));
+	AnimaMatrix translationMatrix;
+	AnimaMatrix rotationMatrix;
+	
+//	if(_parentObject && _parentObject->IsOfClass(ANIMA_CLASS_NAME(AnimaMeshInstance)) && ((AnimaMeshInstance*)_parentObject)->GetPhysRigidBody())
+//	{
+//		btTransform transform;
+//		((AnimaMeshInstance*)_parentObject)->GetPhysRigidBody()->getMotionState()->getWorldTransform(transform);
+//		
+//		btVector3 origin = transform.getOrigin();
+//		btQuaternion rot = transform.getRotation();
+//		
+//		AnimaVertex3f translation(origin.x(), origin.y(), origin.z());
+//		AnimaQuaternion rotation(rot.x(), rot.y(), rot.z(), rot.w());
+//		
+//		translationMatrix = AnimaMatrix::MakeTranslation(translation.x, translation.y, translation.z);
+//		rotationMatrix = rotation.GetMatrix();
+//	}
+//	else
+//	{
+		translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
+		rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * (AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x));
+//	}
+	
 	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
-
+	
 	_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 	_normalMatrix = rotationMatrix;
 

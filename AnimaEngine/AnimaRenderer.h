@@ -214,6 +214,12 @@ public:
 	void InsertRenderPassFunction(AnimaRenderPassFunc function, AInt index) { _renderPassesFunction.insert(_renderPassesFunction.begin() + index, function); }
 	void RemoveRenderPassFunction(AInt index) { _renderPassesFunction.erase(_renderPassesFunction.begin() + index); }
 
+	AnimaPhysicsDebugDrawer* GetPhysicsDebugDrawer() { return _physicsDebugDrawer; }
+	
+	void EnablePhysicsDebugDrawing() { SetBoolean("PhysicsDebugDrawingEnabled", true); }
+	void DisablePhysicsDebugDrawing() { SetBoolean("PhysicsDebugDrawingEnabled", false); }
+	bool IsPhysicsDebugDrawingEnabled() { return GetBoolean("PhysicsDebugDrawingEnabled"); }
+	
 protected:
 	AnimaAllocator* _allocator;
 	AnimaScene*		_scene;
@@ -226,7 +232,7 @@ protected:
 	//AUint _vertexArrayObject;
 	//AUint _verticesBufferObject;
 	//AUint _indexesBufferObject;
-
+	
 	AnimaModel* _lastUpdatedModel;
 	AnimaModelInstance* _lastUpdatedModelInstance;
 

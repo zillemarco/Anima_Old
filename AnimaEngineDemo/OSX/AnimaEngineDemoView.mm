@@ -23,6 +23,7 @@
 #include <AnimaLightsManager.h>
 #include <AnimaTexturesManager.h>
 #include <AnimaParallelProgramsManager.h>
+#include <AnimaPhysicsDebugDrawer.h>
 
 #include <AnimaScene.h>
 #include <AnimaModel.h>
@@ -58,8 +59,8 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
 
-int lastXPos = 0;
-int lastYPos = 0;
+float lastXPos = 0;
+float lastYPos = 0;
 
 bool mouseMoved = false;
 
@@ -243,60 +244,35 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	if(mouseMoved == false && _scene != nullptr && _camera != nullptr)
 	{
+		// La cavolo di finestra mi torna il punto cliccato traslato di +55 in Y, probabilmente per colpa della barra del titolo -.-
+		pt.y -= 55.0f;
+		
 		NSRect rc = [self bounds];
+		Anima::AnimaVertex3f origin = _camera->GetPosition();
+		Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f(pt.x, pt.y), (int)rc.size.width, (int)rc.size.height);
+		Anima::AnimaVertex3f dir = (end - origin).Normalized();
+		dir *= 1000.0f;
 		
-		Anima::AnimaVertex4f lRayStart_NDC(((float)pt.x/(float)rc.size.width  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
-										   ((float)pt.y/(float)rc.size.height - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
-										   -1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
-										   1.0f
-										   );
-		
-		Anima::AnimaVertex4f lRayEnd_NDC(((float)pt.x/(float)rc.size.width  - 0.5f) * 2.0f,
-										 ((float)pt.y/(float)rc.size.height - 0.5f) * 2.0f,
-										 0.0,
-										 1.0f
-										 );
-		
-		Anima::AnimaMatrix inversePVM = _camera->GetInversedProjectionViewMatrix();
-		
-		Anima::AnimaVertex4f lRayStart_world = inversePVM * lRayStart_NDC;
-		Anima::AnimaVertex4f lRayEnd_world = inversePVM * lRayEnd_NDC;
-		
-		lRayStart_world /= lRayStart_world.w;
-		lRayEnd_world /= lRayEnd_world.w;
-		
-		Anima::AnimaVertex3f dir(lRayEnd_world - lRayStart_world);
-		dir.Normalize();
-		
-		Anima::AFloat temp = dir.y;
-		dir.y = dir.z;
-		dir.z = temp;
-		
-		temp = lRayStart_world.y;
-		lRayStart_world.y = lRayStart_world.z;
-		lRayStart_world.z = temp;
-		
-		Anima::AnimaVertex3f origin = lRayStart_world;
-		
-		btCollisionWorld::AllHitsRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+		btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
 		
 		btDynamicsWorld* world = _scene->GetPhysWorld();
 		
 		world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
 		
-//		printf("Origin: %.3f; %.3f; %.3f\n", origin.x, origin.y, origin.z);
-//		printf("Direction: %.3f; %.3f; %.3f\n", dir.x, dir.y, dir.z);
-	
 		if(RayCallback.hasHit())
 		{
-			int hitCount = RayCallback.m_collisionObjects.size();
-			for(int i = 0; i < hitCount; i++)
-			{
+			Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+			_pbrMaterial = instance->GetMaterial();
 			
-				Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObjects.at(i)->getUserPointer();
-				_pbrMaterial = instance->GetMaterial();
-				printf("Picked material named '%s'\n", instance->GetName().c_str());
-			}
+			Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
+
+			NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+			
+			NSAlert* alert = [[NSAlert alloc] init];
+			[alert addButtonWithTitle:@"OK"];
+			[alert setMessageText:message];
+			[alert setAlertStyle:NSCriticalAlertStyle];
+			[alert beginSheetModalForWindow:[self window] completionHandler:nil];
 		}
 		else
 		{
@@ -317,11 +293,11 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 {
 	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	
-	int xDelta = lastXPos - pt.x;
-	int yDelta = lastYPos - pt.y;
+	float xDelta = lastXPos - pt.x;
+	float yDelta = lastYPos - pt.y;
 	
-	_camera->Move(_camera->GetRight(), ((float)xDelta) / 3.0f);
-	_camera->Move(_camera->GetUp(), ((float)yDelta) / 3.0f);
+	_camera->Move(_camera->GetRight(), xDelta / 300.0f);
+	_camera->Move(_camera->GetUp(), yDelta / 300.0f);
 
 	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
@@ -335,11 +311,11 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 {
 	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
 	
-	int xDelta = lastXPos - pt.x;
-	int yDelta = lastYPos - pt.y;
+	float xDelta = lastXPos - pt.x;
+	float yDelta = lastYPos - pt.y;
 	
-	_camera->RotateXDeg((float)yDelta);
-	_camera->RotateYDeg((float)xDelta);
+	_camera->RotateXDeg(yDelta);
+	_camera->RotateYDeg(xDelta);
 	
 	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
@@ -877,6 +853,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
 	_renderer->CheckPrograms(_scene);
 	
+	Anima::AnimaPhysicsDebugDrawer* debugDrawer = _renderer->GetPhysicsDebugDrawer();
+	debugDrawer->AddConstantPoint(Anima::AnimaVertex3f(0.0, 0.0, 0.0), Anima::AnimaColor3f(1.0, 1.0, 0.0));
+	
 	return true;
 }
 
@@ -885,7 +864,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 1000.0f);
+		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.01f, 10.0f);
 	}
 	
 	if(_scene)
@@ -910,8 +889,13 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 {
 	if(_renderer && _scene)
 	{
+//		if(!_scene->IsRunning())
+//			_scene->StartScene();
+		
 		_renderer->Start(_scene);
 		_renderer->Render();
+		
+//		_scene->StepScene();
 	}
 }
 
