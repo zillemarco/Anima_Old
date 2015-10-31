@@ -317,7 +317,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		int xPos = GET_X_LPARAM(lParam);
 		int yPos = GET_Y_LPARAM(lParam);
 
-		GetClientRect()
+		//GetClientRect()
 
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
