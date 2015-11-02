@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -1160,6 +1160,8 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 		if (supportsInstance)
 		{
+			renderer->_programsBufferIndex = 0;
+
 			for (auto& programMesh : programData._meshes)
 			{
 				ANIMA_FRAME_PUSH("SetupProgramDataInstancedStaticBuffers");
@@ -1199,7 +1201,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				ANIMA_FRAME_POP();
 				
 				program->SyncBuffers(renderer->_programsBufferIndex);
-				glFlush();
+				renderer->_programsBufferIndex = (renderer->_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
 			}
 		}
 		else
@@ -1210,6 +1212,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 			
 			AInt materialsOffset = 0;
 			AInt instancesOffset = 0;
+			renderer->_programsBufferIndex = 0;
 
 			for (auto& programMaterial : programData._materials)
 			{
@@ -1240,7 +1243,8 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 #endif
 
 					program->SyncBuffers(renderer->_programsBufferIndex);
-					glFlush();
+
+					renderer->_programsBufferIndex = (renderer->_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
 
 					instancesOffset++;
 				}
@@ -1608,6 +1612,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 
 	if (supportsInstance)
 	{
+		_programsBufferIndex = 0;
 		for (auto& programMesh : meshInstances)
 		{
 			ANIMA_FRAME_PUSH("SetupShadowMapInstancedStaticBuffers");
@@ -1639,12 +1644,13 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			ANIMA_FRAME_POP();
 
 			program->SyncBuffers(_programsBufferIndex);
-			glFlush();
+			_programsBufferIndex = (_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
 		}
 	}
 	else
 	{
 		AInt instancesOffset = 0;
+		_programsBufferIndex = 0;
 
 		for (auto& programMesh : meshInstances)
 		{
@@ -1674,7 +1680,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 #endif
 
 				program->SyncBuffers(_programsBufferIndex);
-				glFlush();
+				_programsBufferIndex = (_programsBufferIndex + 1) % AnimaShaderGroupData::GetMaxBuffersCount();
 
 				instancesOffset++;
 			}

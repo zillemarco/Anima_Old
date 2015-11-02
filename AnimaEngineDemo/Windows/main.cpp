@@ -41,7 +41,11 @@
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
 //#define DATA_PATH				"data"
-#define DATA_PATH				"D:/Git/Anima/AnimaEngineDemo/Scene"
+#if defined SAVE_SCENE
+	#define DATA_PATH				"D:/Git/Anima/AnimaEngineDemo/Scene"
+#else
+	#define DATA_PATH				"D:/Git/Anima/AnimaEngineDemo/SceneUff"
+#endif
 
 #define ANIMA_ENGINE_DEMO_NAME "AnimaEngineDemo"
 const char* szWindowClass = ANIMA_ENGINE_DEMO_NAME;
@@ -92,6 +96,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_MOUSEMOVE:
 	{
+		mouseMoved = true;
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
 
 		int xPos = GET_X_LPARAM(lParam);
@@ -110,8 +115,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (wParam == MK_LBUTTON)
 			{
-				_camera->Move(1.0, 0.0, 0.0, ((float)xDelta) / 100.0f);
-				_camera->Move(0.0, 1.0, 0.0, ((float)-yDelta) / 100.0f);
+				_camera->Move(_camera->GetRight(), ((float)xDelta) / 100.0f);
+				_camera->Move(_camera->GetUp(), ((float)-yDelta) / 100.0f);
 				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 			}
 			else if (wParam == MK_RBUTTON)
@@ -312,12 +317,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
 	}
+	case WM_LBUTTONDOWN:
+	{
+		mouseMoved = false;
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+		break;
+	}
 	case WM_LBUTTONUP:
 	{
 		int xPos = GET_X_LPARAM(lParam);
 		int yPos = GET_Y_LPARAM(lParam);
+		
+		if (mouseMoved == false && _scene != nullptr && _camera != nullptr)
+		{
+			RECT rc;
+			GetClientRect(hWnd, &rc);
 
-		//GetClientRect()
+			Anima::AnimaString str = Anima::FormatString("PT: %d, %d\nSIZE: %d, %d", xPos, yPos, rc.right - rc.left, rc.bottom - rc.top);
+			MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
+
+			Anima::AnimaVertex3f origin = _camera->GetPosition();
+			Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f((float)xPos, (float)yPos), rc.right - rc.left, rc.bottom - rc.top);
+			Anima::AnimaVertex3f dir = (end - origin).Normalized();
+			dir *= 1000.0f;
+
+			btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+
+			btDynamicsWorld* world = _scene->GetPhysWorld();
+
+			world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+
+			if (RayCallback.hasHit())
+			{
+				Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+				_pbrMaterial = instance->GetMaterial();
+
+				Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
+				MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
+			}
+			else
+			{
+				printf("Picked nothing\n");
+			}
+		}
 
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
@@ -476,18 +518,6 @@ bool InitEngine()
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 
-	// Creazione della scena
-#if defined SAVE_SCENE
-	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);	
-#else
-	_engine.GetScenesManager()->LoadScenes("C:/Users/Marco/Desktop/Scene");
-
-	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
-#endif
-
-	if (!_scene)
-		return false;
-	
 	Anima::AnimaString dataPath = DATA_PATH;
 	Anima::AnimaString materialsPath = dataPath + "/materials";
 	Anima::AnimaString modelPath = dataPath + "/models/";
@@ -496,6 +526,21 @@ bool InitEngine()
 	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
 	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 
+	// Creazione della scena
+#if defined SAVE_SCENE
+	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);	
+#else
+	_engine.GetScenesManager()->LoadScenes(dataPath);
+
+	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
+#endif
+
+	if (!_scene)
+		return false;
+
+	_scene->InitializePhysics();
+	//_scene->InitializePhysicObjects();
+	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
@@ -536,7 +581,7 @@ bool InitEngine()
 	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
 	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
 
-	floorModelInstance1->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
 	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
 	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
@@ -545,8 +590,8 @@ bool InitEngine()
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	floorModelInstanceMeshes.clear();
-	floorModelInstance2->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance2->GetTransformation()->TranslateX(300);
+	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance2->GetTransformation()->TranslateX(3);
 	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
 	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
@@ -555,8 +600,8 @@ bool InitEngine()
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	floorModelInstanceMeshes.clear();
-	floorModelInstance3->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance3->GetTransformation()->TranslateZ(300);
+	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance3->GetTransformation()->TranslateZ(3);
 	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
 	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
@@ -565,9 +610,9 @@ bool InitEngine()
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	floorModelInstanceMeshes.clear();
-	floorModelInstance4->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance4->GetTransformation()->TranslateX(300);
-	floorModelInstance4->GetTransformation()->TranslateZ(300);
+	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance4->GetTransformation()->TranslateX(3);
+	floorModelInstance4->GetTransformation()->TranslateZ(3);
 	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
 	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
@@ -583,7 +628,7 @@ bool InitEngine()
 	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
 	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
 
-	modelInstanceOro->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
 	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
 	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
@@ -592,8 +637,8 @@ bool InitEngine()
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
 
 	modelInstanceMeshes.clear();
-	modelInstanceRame->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceRame->GetTransformation()->TranslateX(300);
+	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceRame->GetTransformation()->TranslateX(3);
 	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
 	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
@@ -602,8 +647,8 @@ bool InitEngine()
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
 
 	modelInstanceMeshes.clear();
-	modelInstanceGomma->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceGomma->GetTransformation()->TranslateZ(300);
+	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceGomma->GetTransformation()->TranslateZ(3);
 	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
 	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
@@ -612,9 +657,9 @@ bool InitEngine()
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
 
 	modelInstanceMeshes.clear();
-	modelInstanceLegno->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceLegno->GetTransformation()->TranslateX(300);
-	modelInstanceLegno->GetTransformation()->TranslateZ(300);
+	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceLegno->GetTransformation()->TranslateX(3);
+	modelInstanceLegno->GetTransformation()->TranslateZ(3);
 	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
 	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
@@ -622,7 +667,7 @@ bool InitEngine()
 	for (int j = 0; j < modelInstanceMeshes.size(); j++)
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
 
-	_camera->LookAt(-350.0, 100.0, 150.0, 1.0, -0.2, 0.0);
+	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
 #endif
 
 	_camera->Activate();
@@ -659,7 +704,7 @@ bool InitEngine()
 	Anima::AnimaTextureInternalFormat internalFormat;
 	Anima::AnimaTextureTarget target;
 
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
 		Anima::AnimaTexture* texture = _renderer->GetTexture("EnvironmentMap");
 		if (texture != nullptr)
@@ -699,7 +744,7 @@ bool InitEngine()
 		}
 	}
 
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
 		Anima::AnimaTexture* texture = _renderer->GetTexture("IrradianceMap");
 		if (texture != nullptr)
@@ -758,12 +803,14 @@ void SetViewport(int w, int h)
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(45.0f, size, 0.1f, 1000.0f);
+		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.01f, 10.0f);
 	}
+
+	if (_scene)
+		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 
 	if (_renderer)
 	{
-		std::cout << "Resize: " << w << " x " << h << std::endl;
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
 	}
@@ -783,8 +830,16 @@ void UpdateFrame()
 	{
 		_gc->MakeCurrent();
 
-		_renderer->Start(_scene);
-		_renderer->Render();
+		if (_renderer && _scene)
+		{
+			//if(!_scene->IsRunning())
+			//	_scene->StartScene();
+
+			_renderer->Start(_scene);
+			_renderer->Render();
+
+			//_scene->StepScene();
+		}
 
 		_gc->SwapBuffers();
 	}

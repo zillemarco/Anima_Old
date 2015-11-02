@@ -22,6 +22,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -96,13 +98,15 @@ AnimaScene* AnimaScenesManager::LoadSceneFromFile(const AnimaString& sceneFilePa
 	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 	fileStream.close();
 	
-	return LoadSceneFromXml(xml);
+	return LoadSceneFromXml(xml, boost::filesystem::path(sceneFilePath).parent_path().string());
 }
 
-AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefinition)
+AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefinition, const AnimaString& sceneFoldersPath)
 {
 	AnimaScene* scene = nullptr;
 	
+	namespace fs = boost::filesystem;
+	using boost::algorithm::iequals;
 	using boost::property_tree::ptree;
 	ptree pt;
 	
@@ -119,18 +123,30 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 	{
 		try
 		{
-			AnimaString texturesPath = pt.get<AnimaString>("AnimaScene.TexturesPath", "");
-			AnimaString materialsPath = pt.get<AnimaString>("AnimaScene.MaterialsPath", "");
-			AnimaString modelsPath = pt.get<AnimaString>("AnimaScene.ModelsPath", "");
-			AnimaString meshesPath = pt.get<AnimaString>("AnimaScene.MeshesPath", "");
-			AnimaString modelsInstancesPath = pt.get<AnimaString>("AnimaScene.ModelsInstancesPath", "");
-			AnimaString meshesInstancesPath = pt.get<AnimaString>("AnimaScene.MeshesInstancesPath", "");
-			AnimaString camerasPath = pt.get<AnimaString>("AnimaScene.CamerasPath", "");
-			AnimaString lightsPath = pt.get<AnimaString>("AnimaScene.LightsPath", "");
-			AnimaString animationsPath = pt.get<AnimaString>("AnimaScene.AnimationsPath", "");
+			AnimaString texturesPath = pt.get<AnimaString>("AnimaScene.TexturesPath.Value", "");
+			AnimaString texturesType = pt.get<AnimaString>("AnimaScene.TexturesPath.Type", "absolute");
+			AnimaString materialsPath = pt.get<AnimaString>("AnimaScene.MaterialsPath.Value", "");
+			AnimaString materialsType = pt.get<AnimaString>("AnimaScene.MaterialsPath.Type", "absolute");
+			AnimaString modelsPath = pt.get<AnimaString>("AnimaScene.ModelsPath.Value", "");
+			AnimaString modelsType = pt.get<AnimaString>("AnimaScene.ModelsPath.Type", "absolute");
+			AnimaString meshesPath = pt.get<AnimaString>("AnimaScene.MeshesPath.Value", "");
+			AnimaString meshesType = pt.get<AnimaString>("AnimaScene.MeshesPath.Type", "absolute");
+			AnimaString modelsInstancesPath = pt.get<AnimaString>("AnimaScene.ModelsInstancesPath.Value", "");
+			AnimaString modelsInstancesType = pt.get<AnimaString>("AnimaScene.ModelsInstancesPath.Type", "absolute");
+			AnimaString meshesInstancesPath = pt.get<AnimaString>("AnimaScene.MeshesInstancesPath.Value", "");
+			AnimaString meshesInstancesType = pt.get<AnimaString>("AnimaScene.MeshesInstancesPath.Type", "absolute");
+			AnimaString camerasPath = pt.get<AnimaString>("AnimaScene.CamerasPath.Value", "");
+			AnimaString camerasType = pt.get<AnimaString>("AnimaScene.CamerasPath.Type", "absolute");
+			AnimaString lightsPath = pt.get<AnimaString>("AnimaScene.LightsPath.Value", "");
+			AnimaString lightsType = pt.get<AnimaString>("AnimaScene.LightsPath.Type", "absolute");
+			AnimaString animationsPath = pt.get<AnimaString>("AnimaScene.AnimationsPath.Value", "");
+			AnimaString animationsType = pt.get<AnimaString>("AnimaScene.AnimationsPath.Type", "absolute");
 			
 			if(!texturesPath.empty())
 			{
+				if (iequals(texturesType, "relative"))
+					texturesPath = (fs::path(sceneFoldersPath) / fs::path(texturesPath)).string();
+
 				if(!scene->GetTexturesManager()->LoadTextures(texturesPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading textures: couldn't load textures at path '%s'", texturesPath.c_str());
 			}
@@ -141,6 +157,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!materialsPath.empty())
 			{
+				if (iequals(materialsType, "relative"))
+					materialsPath = (fs::path(sceneFoldersPath) / fs::path(materialsPath)).string();
+
 				if(!scene->GetMaterialsManager()->LoadMaterials(materialsPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading materials: couldn't load materials at path '%s'", materialsPath.c_str());
 			}
@@ -151,6 +170,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!meshesPath.empty())
 			{
+				if (iequals(meshesType, "relative"))
+					meshesPath = (fs::path(sceneFoldersPath) / fs::path(meshesPath)).string();
+
 				if(!scene->GetMeshesManager()->LoadMeshes(meshesPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading meshes: couldn't load meshes at path '%s'", meshesPath.c_str());
 			}
@@ -161,6 +183,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!modelsPath.empty())
 			{
+				if (iequals(modelsType, "relative"))
+					modelsPath = (fs::path(sceneFoldersPath) / fs::path(modelsPath)).string();
+
 				if(!scene->GetModelsManager()->LoadModels(modelsPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading models: couldn't load models at path '%s'", modelsPath.c_str());
 			}
@@ -171,6 +196,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!meshesInstancesPath.empty())
 			{
+				if (iequals(meshesInstancesType, "relative"))
+					meshesInstancesPath = (fs::path(sceneFoldersPath) / fs::path(meshesInstancesPath)).string();
+
 				if(!scene->GetMeshInstancesManager()->LoadMeshesInstances(meshesInstancesPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading meshes instances: couldn't load meshes instances at path '%s'", meshesInstancesPath.c_str());
 			}
@@ -181,6 +209,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!modelsInstancesPath.empty())
 			{
+				if (iequals(modelsInstancesType, "relative"))
+					modelsInstancesPath = (fs::path(sceneFoldersPath) / fs::path(modelsInstancesPath)).string();
+
 				if(!scene->GetModelInstancesManager()->LoadModelsInstances(modelsInstancesPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading models instances: couldn't load models instances at path '%s'", modelsInstancesPath.c_str());
 			}
@@ -191,6 +222,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!camerasPath.empty())
 			{
+				if (iequals(camerasType, "relative"))
+					camerasPath = (fs::path(sceneFoldersPath) / fs::path(camerasPath)).string();
+
 				if(!scene->GetCamerasManager()->LoadCameras(camerasPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading cameras: couldn't load cameras at path '%s'", camerasPath.c_str());
 			}
@@ -201,6 +235,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 			if(!lightsPath.empty())
 			{
+				if (iequals(lightsType, "relative"))
+					lightsPath = (fs::path(sceneFoldersPath) / fs::path(lightsPath)).string();
+
 				if(!scene->GetLightsManager()->LoadLights(lightsPath))
 					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading lights: couldn't load lights at path '%s'", lightsPath.c_str());
 			}
@@ -211,6 +248,9 @@ AnimaScene* AnimaScenesManager::LoadSceneFromXml(const AnimaString& sceneXmlDefi
 			
 //			if(!animationsPath.empty())
 //			{
+//				if (iequals(animationsType, "relative"))
+//					animationsPath = (fs::path(sceneFoldersPath) / fs::path(animationsPath)).string();
+//
 //				if(!scene->GetAnimationsManager()->LoadAnimations(animationsPath))
 //					AnimaLogger::LogMessageFormat("WARNING - AnimaScenesManager loading animations: couldn't load animations at path '%s'", animationsPath.c_str());
 //			}
@@ -271,15 +311,15 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	
 	AnimaString saveDirectory = fs::path(saveFileName).parent_path().string();
 	
-	AnimaString texturesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-textures")).string();
-	AnimaString materialsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-materials")).string();
-	AnimaString modelsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-models")).string();
-	AnimaString meshesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-meshes")).string();
-	AnimaString modelsInstancesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-modelsInstances")).string();
-	AnimaString meshesInstancesPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-meshesInstances")).string();
-	AnimaString camerasPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-cameras")).string();
-	AnimaString lightsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-lights")).string();
-	AnimaString animationsPath = (fs::path(saveDirectory) / fs::path(scene->GetName() + "-animations")).string();
+	AnimaString texturesPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-textures")).string();
+	AnimaString materialsPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-materials")).string();
+	AnimaString modelsPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-models")).string();
+	AnimaString meshesPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-meshes")).string();
+	AnimaString modelsInstancesPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-modelsInstances")).string();
+	AnimaString meshesInstancesPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-meshesInstances")).string();
+	AnimaString camerasPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-cameras")).string();
+	AnimaString lightsPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-lights")).string();
+	AnimaString animationsPath = (/*fs::path(saveDirectory) / */fs::path(scene->GetName() + "-animations")).string();
 	
 	using boost::property_tree::ptree;
 	ptree sceneTree;
@@ -297,15 +337,15 @@ void AnimaScenesManager::SaveSceneToFile(AnimaScene* scene, const AnimaString& d
 	
 	boost::property_tree::write_xml(saveFileName, sceneTree, std::locale(), boost::property_tree::xml_writer_make_settings<ptree::key_type>('\t', 1));
 	
-	fs::create_directory(fs::path(texturesPath));
-	fs::create_directory(fs::path(materialsPath));
-	fs::create_directory(fs::path(modelsPath));
-	fs::create_directory(fs::path(meshesPath));
-	fs::create_directory(fs::path(modelsInstancesPath));
-	fs::create_directory(fs::path(meshesInstancesPath));
-	fs::create_directory(fs::path(camerasPath));
-	fs::create_directory(fs::path(lightsPath));
-	fs::create_directory(fs::path(animationsPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(texturesPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(materialsPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(modelsPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(meshesPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(modelsInstancesPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(meshesInstancesPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(camerasPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(lightsPath));
+	fs::create_directory(fs::path(saveDirectory) / fs::path(animationsPath));
 	
 	scene->GetTexturesManager()->SaveTextures(texturesPath);
 	scene->GetMaterialsManager()->SaveMaterials(materialsPath);

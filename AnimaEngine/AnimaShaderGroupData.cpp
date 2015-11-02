@@ -168,20 +168,6 @@ bool AnimaShaderGroupData::Create()
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
-//	for (AUint i = 0; i < s_maxBuffersCount; i++)
-//	{
-//		// Attivo il buffer
-//		glBindBuffer(GL_UNIFORM_BUFFER, _ubos[i]);
-//
-//		// Alloco la memoria del buffer
-//		glBufferData(GL_UNIFORM_BUFFER, _bufferDataSize * _bufferLength, nullptr, GL_STREAM_DRAW);
-//
-//		_fences[i] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-//
-//		if (glGetError() != GL_NO_ERROR)
-//			return false;
-//	}
-
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	_created = true;
 
@@ -282,12 +268,11 @@ bool AnimaShaderGroupData::BindForUpdate(AUint bufferIndex)
 	if (!_created)
 		return false;
 
-#if defined MAP_BUFFERS
-	
+#if defined MAP_BUFFERS	
 	if(_fences[bufferIndex] != nullptr)
 	{
 		ANIMA_FRAME_PUSH("Client Wait Sync");
-		AUint result = glClientWaitSync(_fences[bufferIndex], 0, BUFFERS_UPDATE_TIMEOUT);
+		AUint result = glClientWaitSync(_fences[bufferIndex], GL_SYNC_FLUSH_COMMANDS_BIT, BUFFERS_UPDATE_TIMEOUT);
 		while (result == GL_TIMEOUT_EXPIRED || result == GL_WAIT_FAILED)
 			result = glClientWaitSync(_fences[bufferIndex], 0, BUFFERS_UPDATE_TIMEOUT);
 		ANIMA_FRAME_POP();

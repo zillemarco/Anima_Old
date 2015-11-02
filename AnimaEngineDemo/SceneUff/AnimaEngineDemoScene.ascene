@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnimaScene>
+	<Name>AnimaEngineDemoScene</Name>
+	<TexturesPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-textures</Value>
+	</TexturesPath>
+	<MaterialsPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-materials</Value>
+	</MaterialsPath>
+	<ModelsPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-models</Value>
+	</ModelsPath>
+	<MeshesPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-meshes</Value>
+	</MeshesPath>
+	<ModelsInstancesPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-modelsInstances</Value>
+	</ModelsInstancesPath>
+	<MeshesInstancesPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-meshesInstances</Value>
+	</MeshesInstancesPath>
+	<CamerasPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-cameras</Value>
+	</CamerasPath>
+	<LightsPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-lights</Value>
+	</LightsPath>
+	<AnimationsPath>
+		<Type>relative</Type>
+		<Value>AnimaEngineDemoScene-animations</Value>
+	</AnimationsPath>
+</AnimaScene>

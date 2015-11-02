@@ -33,7 +33,7 @@ public:
 	
 	bool LoadScenes(const AnimaString& scenesPath);
 	AnimaScene* LoadSceneFromFile(const AnimaString& sceneFilePath);
-	AnimaScene* LoadSceneFromXml(const AnimaString& sceneXmlDefinition);
+	AnimaScene* LoadSceneFromXml(const AnimaString& sceneXmlDefinition, const AnimaString& sceneFoldersPath);
 	
 	void SaveSceneToFile(const AnimaString& sceneName, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveSceneToFile(AnimaScene* scene, const AnimaString& destinationPath, bool createFinalPath = false);
