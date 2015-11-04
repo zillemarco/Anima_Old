@@ -22,6 +22,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaScenesManager
 {
+	friend AnimaScene;
+	
 public:
 	AnimaScenesManager(AnimaEngine* engine);
 	~AnimaScenesManager();
@@ -39,12 +41,19 @@ public:
 	void SaveSceneToFile(AnimaScene* scene, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveScenes(const AnimaString& destinationPath);
 	
+	AnimaScene* GetActiveScene();
+	
 private:
 	void ClearScenes();
+	
+	void NotifySceneActivation(AnimaScene* scene);
+	void NotifySceneDeactivation(AnimaScene* scene);
 	
 private:
 	AnimaEngine* _engine;
 	AnimaMappedArray<AnimaScene*> _scenes;
+	
+	AnimaScene* _activeScene;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

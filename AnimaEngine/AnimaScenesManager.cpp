@@ -30,6 +30,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaScenesManager::AnimaScenesManager(AnimaEngine* engine)
 {
 	_engine = engine;
+	_activeScene = nullptr;
 }
 
 AnimaScenesManager::~AnimaScenesManager()
@@ -59,6 +60,54 @@ void AnimaScenesManager::ClearScenes()
 	}
 	
 	_scenes.RemoveAll();
+}
+
+void AnimaScenesManager::NotifySceneActivation(AnimaScene* scene)
+{
+	if(_activeScene != nullptr)
+		_activeScene->Deactivate();
+	_activeScene = scene;
+}
+
+void AnimaScenesManager::NotifySceneDeactivation(AnimaScene* scene)
+{
+	_activeScene = nullptr;
+}
+
+AnimaScene* AnimaScenesManager::GetActiveScene()
+{
+	// Ciclo per trovare una scena attiva
+	// _activeScene non dovrebbe mai essere null quindi il più delle volte il ciclo non viene nemmeno eseguito
+	AnimaScene* firstScene = nullptr;
+	if(_activeScene == nullptr)
+	{
+		AInt count = _scenes.GetSize();
+		for (AInt i = 0; i < count && _activeScene == nullptr; i++)
+		{
+			AnimaScene* scene = _scenes[i];
+			
+			if(firstScene == nullptr)
+				firstScene = scene;
+			
+			if(scene->IsActive())
+				firstScene = scene;
+		}
+	}
+	
+	// Se ho trovato la scena attiva, torno il suo puntatore
+	if (_activeScene != nullptr)
+		return _activeScene;
+	
+	// Se anche dopo il ciclo non si è trovata una scena attiva ed esiste almeno una scena
+	// attivo quella scena e torno _activeScene che verrà aggiornato da NotifySceneActivation
+	if(_activeScene == nullptr && firstScene != nullptr)
+	{
+		firstScene->Activate();
+		return _activeScene;
+	}
+	
+	// Se non esistono nemmeno camere, ovviamente, torno null
+	return nullptr;
 }
 
 AnimaScene* AnimaScenesManager::GetScene(AUint index)

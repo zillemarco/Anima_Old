@@ -18,6 +18,7 @@
 #include "AnimaMeshInstancesManager.h"
 #include "AnimaAnimationsManager.h"
 #include "AnimaMeshInstance.h"
+#include "AnimaScenesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -330,6 +331,22 @@ void AnimaScene::InitializePhysicObjects()
 				_physWorld->addRigidBody(instance->GetPhysRigidBody());
 		}
 	}
+}
+
+void AnimaScene::Activate()
+{
+	_active = true;
+	
+	if (_engine != nullptr && _engine->GetScenesManager() != nullptr)
+		_engine->GetScenesManager()->NotifySceneActivation(this);
+}
+
+void AnimaScene::Deactivate()
+{
+	_active = false;
+	
+	if (_engine != nullptr && _engine->GetScenesManager() != nullptr)
+		_engine->GetScenesManager()->NotifySceneDeactivation(this);
 }
 
 void AnimaScene::StartScene()

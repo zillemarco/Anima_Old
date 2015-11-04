@@ -89,7 +89,10 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaParallelProgram.h
 					AnimaParallelProgramsManager.h
 					AnimaTools.h
-					AnimaPhysicsDebugDrawer.h)
+					AnimaPhysicsDebugDrawer.h
+					IAnimaInteractor.h
+					IAnimaEvents.h
+					AnimaMouseInteractor.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -160,15 +163,17 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaParallelProgram.cpp
 					AnimaParallelProgramsManager.cpp
 					AnimaTools.cpp
-					AnimaPhysicsDebugDrawer.cpp)
+					AnimaPhysicsDebugDrawer.cpp
+					IAnimaInteractor.cpp
+					IAnimaEvents.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm)
 	else()
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp AnimaMouseInteractor.cpp)
 	endif()
 	
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
@@ -176,9 +181,9 @@ else()
 	set(AnimaEngineCore_HEADERS	${common_HEADERS})
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm)
 	else()
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp AnimaMouseInteractor.cpp)
 	endif()
 
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
@@ -186,8 +191,10 @@ endif()
 
 if(APPLE)
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.mm)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm)
 else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp)
 endif()
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h AnimaTools.h AnimaTools.cpp)
@@ -201,6 +208,10 @@ source_group(Engine\\DataStructures\\Objects FILES AnimaNamedObject.h AnimaNamed
 source_group(Engine\\DataStructures\\Strings FILES AnimaString.h AnimaString.cpp)
 source_group(Engine\\DataStructures\\Transformations FILES AnimaTransformation.h AnimaTransformation.cpp)
 source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h AnimaVertex.cpp AnimaFace.h AnimaFace.cpp AnimaMatrix.h AnimaMatrix.cpp AnimaMath.h AnimaMath.cpp AnimaFrustum.h AnimaFrustum.cpp AnimaGBuffer.h AnimaGBuffer.cpp AnimaQuaternion.h AnimaQuaternion.cpp)
+
+source_group(Engine\\Interfaces FILES IAnimaInteractor.h IAnimaInteractor.cpp IAnimaEvents.h IAnimaEvents.cpp)
+
+source_group(Engine\\Interactors FILES AnimaMouseInteractor.h)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)

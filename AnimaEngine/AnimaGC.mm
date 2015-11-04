@@ -484,7 +484,7 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 	
 	newGC->MakeCurrent();
 	InitializeGLEWExtensions();
-
+		
 	return newGC;
 }
 

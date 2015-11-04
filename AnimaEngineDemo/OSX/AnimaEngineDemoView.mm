@@ -38,13 +38,15 @@
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
+#include <AnimaMouseInteractor.h>
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
 #define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
 
 //#define DATA_PATH				"data"
-#define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene"
+//#define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene"
+#define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff"
 
 Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
@@ -58,6 +60,8 @@ Anima::AnimaEngine _engine;
 Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
+
+Anima::AnimaMouseInteractor mouseInteractor;
 
 float lastXPos = 0;
 float lastYPos = 0;
@@ -161,6 +165,107 @@ bool sceneSaved = false;
 				// Activate the display link
 				CVDisplayLinkStart(displayLink);
 			}
+			
+			if(mouseInteractor.Install((long)self, &_engine))
+			{
+//				mouseInteractor.SetEventHandler("onMouseMoved", [] (Anima::AnimaEventArgs* args) {
+//					
+//					Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
+//					Anima::AnimaString str = Anima::FormatString("Mouse moved at %.0f:%.0f\n", point.x, point.y);
+//					
+//					printf("%s", str.c_str());
+//				});
+				mouseInteractor.SetEventHandler("onLeftMouseDragged", [&] (Anima::AnimaEventArgs* args) {
+
+					Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
+					delta /= 300.0f;
+					
+					_camera->Move(_camera->GetRight(), delta.x);
+					_camera->Move(_camera->GetUp(), delta.y);
+					
+					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+					
+				});
+				mouseInteractor.SetEventHandler("onRightMouseDragged", [] (Anima::AnimaEventArgs* args) {
+					
+					Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
+					Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+					
+					if(engine)
+					{
+						Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+						Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+						
+						if(scene)
+						{
+							Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+							Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+							
+							if(camera)
+							{
+								camera->RotateXDeg(delta.y);
+								camera->RotateYDeg(delta.x);
+								
+								scene->GetLightsManager()->UpdateLightsMatrix(camera);
+							}
+						}
+					}
+				});
+				mouseInteractor.SetEventHandler("onLeftMouseClick", [] (Anima::AnimaEventArgs* args) {
+					
+					Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
+					Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
+					NSView* view = (NSView*)((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetWindowId();
+					point.y -= 55.0f;
+					
+					Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+					
+					if(engine)
+					{
+						Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+						Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+						
+						if(scene)
+						{
+							Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+							Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+							
+							if(camera)
+							{
+								Anima::AnimaVertex3f origin = camera->GetPosition();
+								Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point, (int)size.x, (int)size.y);
+								Anima::AnimaVertex3f dir = (end - origin).Normalized();
+								dir *= 1000.0f;
+								
+								btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+								
+								btDynamicsWorld* world = scene->GetPhysWorld();
+								
+								world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+								
+								if(RayCallback.hasHit())
+								{
+									Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+									
+									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", instance->GetMaterial()->GetName().c_str());
+									
+									NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+									
+									NSAlert* alert = [[NSAlert alloc] init];
+									[alert addButtonWithTitle:@"OK"];
+									[alert setMessageText:message];
+									[alert setAlertStyle:NSCriticalAlertStyle];
+									[alert beginSheetModalForWindow:[view window] completionHandler:nil];
+								}
+								else
+								{
+									printf("Picked nothing\n");
+								}
+							}
+						}
+					}
+				});
+			}
 		}
 	}
 	
@@ -227,102 +332,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		gc->MakeCurrent();
 	}
 }
-
-- (void) mouseDown:(NSEvent *)theEvent
-{
-	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	lastXPos = pt.x;
-	lastYPos = pt.y;
-	
-	mouseMoved = false;
-}
-
-- (void) mouseUp:(NSEvent *)theEvent
-{
-	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	if(mouseMoved == false && _scene != nullptr && _camera != nullptr)
-	{
-		// La cavolo di finestra mi torna il punto cliccato traslato di +55 in Y, probabilmente per colpa della barra del titolo -.-
-		pt.y -= 55.0f;
-		
-		NSRect rc = [self bounds];
-		Anima::AnimaVertex3f origin = _camera->GetPosition();
-		Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f(pt.x, pt.y), (int)rc.size.width, (int)rc.size.height);
-		Anima::AnimaVertex3f dir = (end - origin).Normalized();
-		dir *= 1000.0f;
-		
-		btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
-		
-		btDynamicsWorld* world = _scene->GetPhysWorld();
-		
-		world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
-		
-		if(RayCallback.hasHit())
-		{
-			Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
-			_pbrMaterial = instance->GetMaterial();
-			
-			Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
-
-			NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
-			
-			NSAlert* alert = [[NSAlert alloc] init];
-			[alert addButtonWithTitle:@"OK"];
-			[alert setMessageText:message];
-			[alert setAlertStyle:NSCriticalAlertStyle];
-			[alert beginSheetModalForWindow:[self window] completionHandler:nil];
-		}
-		else
-		{
-			printf("Picked nothing\n");
-		}
-	}
-}
-
-- (void) rightMouseDown:(NSEvent *)theEvent
-{
-	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	lastXPos = pt.x;
-	lastYPos = pt.y;
-}
-
-- (void) mouseDragged:(NSEvent *)theEvent
-{
-	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	float xDelta = lastXPos - pt.x;
-	float yDelta = lastYPos - pt.y;
-	
-	_camera->Move(_camera->GetRight(), xDelta / 300.0f);
-	_camera->Move(_camera->GetUp(), yDelta / 300.0f);
-
-	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	
-	lastXPos = pt.x;
-	lastYPos = pt.y;
-	
-	mouseMoved = true;
-}
-
-- (void) rightMouseDragged:(NSEvent *)theEvent
-{
-	NSPoint pt = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-	
-	float xDelta = lastXPos - pt.x;
-	float yDelta = lastYPos - pt.y;
-	
-	_camera->RotateXDeg(yDelta);
-	_camera->RotateYDeg(xDelta);
-	
-	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	
-	lastXPos = pt.x;
-	lastYPos = pt.y;
-}
-
 - (void) keyUp:(NSEvent *)theEvent
 {
 	camSpeed = 1.0f;
@@ -573,11 +582,19 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 	
+	Anima::AnimaString dataPath = DATA_PATH;
+	Anima::AnimaString materialsPath = dataPath + "/materials";
+	Anima::AnimaString modelPath = dataPath + "/models/";
+	Anima::AnimaString modelName = "";
+	Anima::AnimaString materialName = "legno";
+	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
+	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
+	
 	// Creazione della scena
 #if defined SAVE_SCENE
 	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
 #else
-	_engine.GetScenesManager()->LoadScenes("/Users/marco/Desktop/Scene");
+	_engine.GetScenesManager()->LoadScenes(dataPath);
 #endif
 	
 	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
@@ -587,14 +604,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	_scene->InitializePhysics();
 	_scene->InitializePhysicObjects();
-	
-	Anima::AnimaString dataPath = DATA_PATH;
-	Anima::AnimaString materialsPath = dataPath + "/materials";
-	Anima::AnimaString modelPath = dataPath + "/models/";
-	Anima::AnimaString modelName = "";
-	Anima::AnimaString materialName = "legno";
-	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
-	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
@@ -762,7 +771,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	Anima::AnimaTextureInternalFormat internalFormat;
 	Anima::AnimaTextureTarget target;
 	
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
 		Anima::AnimaTexture* texture = _renderer->GetTexture("EnvironmentMap");
 		if (texture != nullptr)
@@ -802,7 +811,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		}
 	}
 	
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
+	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
 	{
 		Anima::AnimaTexture* texture = _renderer->GetTexture("IrradianceMap");
 		if (texture != nullptr)
@@ -845,7 +854,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	}
 	
 #if defined SAVE_SCENE
-	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
 #else
 	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
 	textureSkyBox->Load();

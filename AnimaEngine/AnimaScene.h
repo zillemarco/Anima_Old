@@ -64,6 +64,8 @@ public:
 	
 	void InitializePhysics();
 	void TerminatePhysics();
+	
+	bool IsActive() { return _active; }
 
 protected:
 	void InitializeManagers();
@@ -104,9 +106,14 @@ public:
 	virtual void InitializePhysicObjects();
 	
 	bool IsRunning() const { return _isRunning; }
+	
+	void Activate();
+	void Deactivate();
 
 protected:
 	AnimaEngine* _engine;
+	
+	bool _active;
 
 	AnimaLightsManager*			_lightsManager;
 	AnimaCamerasManager*		_camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */

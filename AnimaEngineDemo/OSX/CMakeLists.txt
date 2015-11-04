@@ -32,7 +32,7 @@ set(CMAKE_CXX_FLAGS "-x objective-c++")
 set(CMAKE_Co_FLAGS "-x objective-c++")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST Info.plist)
-set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
+#set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
 
 target_link_libraries(${PROJECT_NAME} AnimaEngine)
 target_link_libraries(${PROJECT_NAME} ${AnimaEngine_LIBRARIES})
