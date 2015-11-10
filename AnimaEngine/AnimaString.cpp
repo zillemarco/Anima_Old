@@ -34,7 +34,7 @@ AnimaString MakeRandonString(AInt length)
 	return str;
 }
 
-AnimaString FormatString(const AnimaString& format, ...)
+AnimaString FormatString(AnimaString format, ...)
 {
 	int final_n, n = ((int)format.size()) * 2; /* Reserve two times as much as the length of the fmt_str */
 	AnimaString str;
@@ -57,7 +57,7 @@ AnimaString FormatString(const AnimaString& format, ...)
 	return AnimaString(formatted.get());
 }
 
-AnimaString FormatString(const AnimaString& format, va_list params)
+AnimaString FormatString(AnimaString format, va_list params)
 {
 	int final_n, n = ((int)format.size()) * 2; /* Reserve two times as much as the length of the fmt_str */
 	AnimaString str;

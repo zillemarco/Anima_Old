@@ -23,11 +23,15 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
-	: AnimaNamedObject(name, nullptr)
+	: AnimaMappedValues(nullptr, nullptr, name)
 {
+	// Ovviamente il motore passato non può essere null
+	ANIMA_ASSERT(engine != nullptr);
+	
 	IMPLEMENT_ANIMA_CLASS(AnimaScene);
 	
 	_engine = engine;
+	_allocator = _engine->GetScenesAllocator();
 	
 	_modelsManager = nullptr;
 	_meshesManager = nullptr;
@@ -36,7 +40,7 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	
 	_camerasManager = nullptr;
 	_texturesManager = nullptr;
-	_dataGeneratorsManager = nullptr;
+//	_dataGeneratorManager = nullptr;
 	_materialsManager = nullptr;
 	_lightsManager = nullptr;
 	_animationsManager = nullptr;
@@ -55,7 +59,7 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 }
 
 AnimaScene::AnimaScene(const AnimaScene& src)
-	: AnimaNamedObject(src)
+	: AnimaMappedValues(src)
 {
 	_engine = src._engine;
 
@@ -66,7 +70,7 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 
 	_camerasManager = src._camerasManager;
 	_texturesManager = src._texturesManager;
-	_dataGeneratorsManager = src._dataGeneratorsManager;
+//	_dataGeneratorManager = src._dataGeneratorManager;
 	_materialsManager = src._materialsManager;
 	_lightsManager = src._lightsManager;
 	_animationsManager = src._animationsManager;
@@ -83,7 +87,7 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 }
 
 AnimaScene::AnimaScene(AnimaScene&& src)
-	: AnimaNamedObject(src)
+	: AnimaMappedValues(src)
 {
 	_engine = src._engine;
 
@@ -94,7 +98,7 @@ AnimaScene::AnimaScene(AnimaScene&& src)
 
 	_camerasManager = src._camerasManager;
 	_texturesManager = src._texturesManager;
-	_dataGeneratorsManager = src._dataGeneratorsManager;
+//	_dataGeneratorManager = src._dataGeneratorManager;
 	_materialsManager = src._materialsManager;
 	_lightsManager = src._lightsManager;
 	_animationsManager = src._animationsManager;
@@ -123,7 +127,7 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 		TerminatePhysics();
 		TerminateManagers();
 		
-		AnimaNamedObject::operator=(src);
+		AnimaMappedValues::operator=(src);
 
 		_engine = src._engine;
 
@@ -134,7 +138,7 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
-		_dataGeneratorsManager = src._dataGeneratorsManager;
+//		_dataGeneratorManager = src._dataGeneratorManager;
 		_materialsManager = src._materialsManager;
 		_lightsManager = src._lightsManager;
 		_animationsManager = src._animationsManager;
@@ -160,7 +164,7 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 		TerminatePhysics();
 		TerminateManagers();
 		
-		AnimaNamedObject::operator=(src);
+		AnimaMappedValues::operator=(src);
 
 		_engine = src._engine;
 
@@ -171,7 +175,7 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
-		_dataGeneratorsManager = src._dataGeneratorsManager;
+//		_dataGeneratorManager = src._dataGeneratorManager;
 		_materialsManager = src._materialsManager;
 		_lightsManager = src._lightsManager;
 		_animationsManager = src._animationsManager;
@@ -196,7 +200,7 @@ void AnimaScene::InitializeManagers()
 	
 	_camerasManager = AnimaAllocatorNamespace::AllocateNew<AnimaCamerasManager>(*_engine->GetManagersAllocator(), this);
 	_texturesManager = AnimaAllocatorNamespace::AllocateNew<AnimaTexturesManager>(*_engine->GetManagersAllocator(), this);
-	_dataGeneratorsManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_engine->GetManagersAllocator(), this);
+	_dataGeneratorManager = AnimaAllocatorNamespace::AllocateNew<AnimaDataGeneratorsManager>(*_engine->GetManagersAllocator(), this);
 	_lightsManager = AnimaAllocatorNamespace::AllocateNew<AnimaLightsManager>(*_engine->GetManagersAllocator(), this);
 
 	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_engine->GetManagersAllocator(), this, _texturesManager);
@@ -252,10 +256,10 @@ void AnimaScene::TerminateManagers()
 		_lightsManager = nullptr;
 	}
 
-	if (_dataGeneratorsManager != nullptr)
+	if (_dataGeneratorManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _dataGeneratorsManager);
-		_dataGeneratorsManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _dataGeneratorManager);
+		_dataGeneratorManager = nullptr;
 	}
 
 	if (_materialsManager != nullptr)
@@ -370,8 +374,8 @@ void AnimaScene::StepScene()
 		_physWorld->stepSimulation(btScalar(elapsedTime));
 	
 	// Faccio avanzare i generatori di valori
-	if(_dataGeneratorsManager != nullptr)
-		_dataGeneratorsManager->UpdateValues(elapsedTime);
+	if(_dataGeneratorManager != nullptr)
+		_dataGeneratorManager->UpdateValues(elapsedTime);
 	
 	AInt count = _meshInstancesManager->GetMeshInstancesCount();
 	for(AInt i = 0; i < count; i++)

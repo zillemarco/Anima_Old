@@ -12,10 +12,8 @@
 #include "AnimaEngine.h"
 #include "AnimaVertex.h"
 #include "AnimaTypes.h"
-#include "AnimaEngine.h"
-#include "AnimaMappedArray.h"
-#include "AnimaNamedObject.h"
 #include "AnimaTimer.h"
+#include "AnimaMappedValues.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -33,7 +31,7 @@ class AnimaModelInstancesManager;
 class AnimaMeshInstancesManager;
 class AnimaParallelProgramsManager;
 
-class ANIMA_ENGINE_EXPORT AnimaScene : public AnimaNamedObject
+class ANIMA_ENGINE_EXPORT AnimaScene : public AnimaMappedValues
 {
 	DECLARE_ANIMA_CLASS(AnimaScene);
 	
@@ -66,6 +64,8 @@ public:
 	void TerminatePhysics();
 	
 	bool IsActive() { return _active; }
+	
+	const char* GetShaderPrefix() override { return "SCE"; }
 
 protected:
 	void InitializeManagers();
@@ -81,7 +81,7 @@ public:
 	inline AnimaShadersManager* GetShadersManager()						{ return _engine->GetShadersManager(); }
 	inline AnimaCamerasManager* GetCamerasManager()						{ return _camerasManager; }
 	inline AnimaTexturesManager* GetTexturesManager()					{ return _texturesManager; }
-	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()		{ return _dataGeneratorsManager; }
+	inline AnimaDataGeneratorsManager* GetDataGeneratorsManager()		{ return _dataGeneratorManager; }
 	inline AnimaMaterialsManager* GetMaterialsManager()					{ return _materialsManager; }
 	inline AnimaLightsManager* GetLightsManager()						{ return _lightsManager; }
 	inline AnimaAnimationsManager* GetAnimationsManager()				{ return _animationsManager; }
@@ -119,7 +119,7 @@ protected:
 	AnimaCamerasManager*		_camerasManager;				/*!< Gestore di tutte le telecamere appartenenti all'istanza corrente di AnimaEngine */
 	AnimaTexturesManager*		_texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
 	AnimaMaterialsManager*		_materialsManager;
-	AnimaDataGeneratorsManager* _dataGeneratorsManager;
+//	AnimaDataGeneratorsManager* _dataGeneratorManager;
 	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
 	AnimaMeshesManager*			_meshesManager;
 	AnimaModelInstancesManager*	_modelInstancesManager;

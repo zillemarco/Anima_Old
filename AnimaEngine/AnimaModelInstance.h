@@ -20,6 +20,7 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaScene;
 class AnimaModelInstancesManager;
 
 class ANIMA_ENGINE_EXPORT AnimaModelInstance : public AnimaSceneObject

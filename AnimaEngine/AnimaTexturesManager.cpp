@@ -9,6 +9,7 @@
 #include "AnimaTexturesManager.h"
 #include "AnimaXmlTranslators.h"
 #include "AnimaTools.h"
+#include "AnimaScene.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>

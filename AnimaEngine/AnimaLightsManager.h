@@ -19,9 +19,10 @@
 #include "AnimaCamera.h"
 #include "AnimaMappedArray.h"
 #include "AnimaTypeMappedArray.h"
-#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaLightsManager
 {
@@ -48,8 +49,7 @@ public:
 
 	template<class T> AnimaMappedArray<AnimaLight*>* GetLightsOfType();
 	template<class T> AnimaLight* GetLightOfTypeFromName(const AnimaString& name);
-	template<class T> T* CreateLight(const AnimaString& name);
-		
+	
 	void ClearLights();
 	
 	AnimaLight* LoadLightFromFile(const AnimaString& filePath);
@@ -66,20 +66,6 @@ private:
 	AnimaScene* _scene;
 	AnimaTypeMappedArray<AnimaLight*> _lights;
 };
-
-template<class T> 
-T* AnimaLightsManager::CreateLight(const AnimaString& name)
-{
-	AnimaLight* light = _lights.Contains(name);
-	if (light != nullptr)
-		return nullptr;
-
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newLight = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
-	_lights.Add<T*>(name, newLight);
-
-	return newLight;
-}
 
 template<class T> 
 AnimaMappedArray<AnimaLight*>* AnimaLightsManager::GetLightsOfType()

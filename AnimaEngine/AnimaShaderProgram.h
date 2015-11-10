@@ -11,7 +11,6 @@
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
-#include "AnimaScene.h"
 #include "AnimaNamedObject.h"
 #include "AnimaShaderData.h"
 #include "AnimaShaderGroupData.h"
@@ -23,6 +22,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class AnimaShadersManager;
 class AnimaRenderer;
 class AnimaPhysicsDebugDrawer;
+class AnimaScene;
 
 enum AnimaShaderInfoType 
 {

@@ -15,7 +15,6 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaMappedArray.h"
-#include "AnimaArray.h"
 #include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE

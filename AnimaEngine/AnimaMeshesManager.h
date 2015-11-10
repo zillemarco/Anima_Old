@@ -24,6 +24,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaScene;
+
 #pragma warning (disable: 4251)
 typedef boost::unordered_map<AnimaString, AUint, AnimaStringHasher> BoneNameMap;
 #pragma warning (default: 4251)

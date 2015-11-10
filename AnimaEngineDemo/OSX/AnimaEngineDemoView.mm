@@ -38,7 +38,8 @@
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
-#include <AnimaMouseInteractor.h>
+#include <AnimaDefaultMouseInteractor.h>
+#include <AnimaKeyboardInteractor.h>
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
@@ -47,6 +48,9 @@
 //#define DATA_PATH				"data"
 //#define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene"
 #define DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff"
+
+#include <mutex>
+std::mutex mutex;
 
 Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
@@ -61,16 +65,17 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
 
-Anima::AnimaMouseInteractor mouseInteractor;
+Anima::AnimaDefaultMouseInteractor mouseInteractor;
+Anima::AnimaKeyboardInteractor keyboardInteractor;
 
 float lastXPos = 0;
 float lastYPos = 0;
 
 bool mouseMoved = false;
 
-float camSpeed = 1.0f;
-float camSpeedInc = 0.5f;
-float camSpeedMax = 10.0f;
+float camSpeed = 0.1f;
+float camSpeedInc = 0.01f;
+float camSpeedMax = 1.0f;
 
 bool sceneSaved = false;
 
@@ -100,16 +105,19 @@ bool sceneSaved = false;
 {
 	CVDisplayLinkRelease(displayLink);
 	[[NSNotificationCenter defaultCenter] removeObserver: self];
+	[super dealloc];
 }
 
 - (void) update
 {
+	mutex.lock();
 	if(gc != NULL)
 	{
 		gc->MakeCurrent();
 		[self drawScene];
 		gc->SwapBuffers();
 	}
+	mutex.unlock();
 }
 
 - (bool) prepareWithContextConfig: (Anima::AnimaGCContextConfig)context frameBufferConfig: (Anima::AnimaGCFrameBufferConfig)frameBuffer
@@ -168,57 +176,14 @@ bool sceneSaved = false;
 			
 			if(mouseInteractor.Install((long)self, &_engine))
 			{
-//				mouseInteractor.SetEventHandler("onMouseMoved", [] (Anima::AnimaEventArgs* args) {
-//					
-//					Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
-//					Anima::AnimaString str = Anima::FormatString("Mouse moved at %.0f:%.0f\n", point.x, point.y);
-//					
-//					printf("%s", str.c_str());
-//				});
-				mouseInteractor.SetEventHandler("onLeftMouseDragged", [&] (Anima::AnimaEventArgs* args) {
-
-					Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
-					delta /= 300.0f;
-					
-					_camera->Move(_camera->GetRight(), delta.x);
-					_camera->Move(_camera->GetUp(), delta.y);
-					
-					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-					
-				});
-				mouseInteractor.SetEventHandler("onRightMouseDragged", [] (Anima::AnimaEventArgs* args) {
-					
-					Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
-					Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
-					
-					if(engine)
-					{
-						Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
-						Anima::AnimaScene* scene = scenesManager->GetActiveScene();
-						
-						if(scene)
-						{
-							Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-							Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-							
-							if(camera)
-							{
-								camera->RotateXDeg(delta.y);
-								camera->RotateYDeg(delta.x);
-								
-								scene->GetLightsManager()->UpdateLightsMatrix(camera);
-							}
-						}
-					}
-				});
-				mouseInteractor.SetEventHandler("onLeftMouseClick", [] (Anima::AnimaEventArgs* args) {
+				mouseInteractor.SetEventHandler("onLeftMouseClick", [&] (Anima::AnimaEventArgs* args) {
 					
 					Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
 					Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
-					NSView* view = (NSView*)((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetWindowId();
-					point.y -= 55.0f;
 					
+					NSView* view = (NSView*)((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetWindowId();
 					Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+					NSRect rc = [view bounds];
 					
 					if(engine)
 					{
@@ -232,10 +197,24 @@ bool sceneSaved = false;
 							
 							if(camera)
 							{
+								Anima::AnimaVertex4f startNDC((point.x / rc.size.width - 0.5) * 2.0, (point.y / rc.size.height - 0.5) * 2.0, -1.0, 1.0);
+								Anima::AnimaVertex4f endNDC((point.x / rc.size.width - 0.5) * 2.0, (point.y / rc.size.height - 0.5) * 2.0, 1.0, 1.0);
+								
+								Anima::AnimaMatrix inversePV = camera->GetInversedProjectionViewMatrix();
+								
+								Anima::AnimaVertex4f startWorld = inversePV * startNDC;
+								startWorld /= startWorld.w;
+								Anima::AnimaVertex4f endWorld = inversePV * endNDC;
+								endWorld /= endWorld.w;
+								
 								Anima::AnimaVertex3f origin = camera->GetPosition();
-								Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point, (int)size.x, (int)size.y);
-								Anima::AnimaVertex3f dir = (end - origin).Normalized();
-								dir *= 1000.0f;
+								Anima::AnimaVertex3f end = endWorld;
+								Anima::AnimaVertex3f dir = end - origin;
+//								dir *= 1000.0f;
+								
+								_renderer->GetPhysicsDebugDrawer()->AddConstantPoint(end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
+								_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
+								_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, dir, Anima::AnimaColor3f(0.0, 0.0, 1.0));
 								
 								btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
 								
@@ -246,6 +225,11 @@ bool sceneSaved = false;
 								if(RayCallback.hasHit())
 								{
 									Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+									
+									Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
+									
+									_renderer->GetPhysicsDebugDrawer()->AddConstantPoint(contactPoint, Anima::AnimaColor3f(1.0, 0.0, 0.0));
+									_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, contactPoint, Anima::AnimaColor3f(1.0, 0.0, 0.0));
 									
 									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", instance->GetMaterial()->GetName().c_str());
 									
@@ -261,6 +245,184 @@ bool sceneSaved = false;
 								{
 									printf("Picked nothing\n");
 								}
+							}
+						}
+					}
+				});
+			}
+			
+			if(keyboardInteractor.Install((long)self, &_engine))
+			{
+				keyboardInteractor.SetEventHandler("onKeyDown", [&] (Anima::AnimaEventArgs* args) {
+					
+					if (_pbrMaterial != nullptr)
+					{
+						float inc = 0.02f;
+						camSpeed = fmin(camSpeed + camSpeedInc, camSpeedMax);
+						switch (((Anima::AnimaKeyboardEventArgs*)args)->GetKey())
+						{
+							case Anima::AnimaKeyboardKey::AKK_W:
+							{
+								_camera->Move(_camera->GetForward(), camSpeed);
+								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_S:
+							{
+								_camera->Move(_camera->GetForward(), -camSpeed);
+								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_D:
+							{
+								_camera->Move(_camera->GetRight(), camSpeed);
+								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_A:
+							{
+								_camera->Move(_camera->GetRight(), -camSpeed);
+								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_P:
+							{
+								float val = _pbrMaterial->GetFloat("Metallic");
+								val = fmax(0.0f, val - inc);
+								_pbrMaterial->SetFloat("Metallic", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_M:
+							{
+								float val = _pbrMaterial->GetFloat("Metallic");
+								val = fmin(1.0f, val + inc);
+								_pbrMaterial->SetFloat("Metallic", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_X:
+							{
+								float val = _pbrMaterial->GetFloat("Specular");
+								val = fmax(0.0f, val - inc);
+								_pbrMaterial->SetFloat("Specular", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_Z:
+							{
+								float val = _pbrMaterial->GetFloat("Specular");
+								val = fmin(1.0f, val + inc);
+								_pbrMaterial->SetFloat("Specular", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_V:
+							{
+								float val = _renderer->GetFloat("BlurSize");
+								val = fmax(0.0f, val - (inc / 1000.0));
+								_renderer->SetFloat("BlurSize", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_B:
+							{
+								float val = _renderer->GetFloat("BlurSize");
+								val = fmin(0.5f, val + (inc / 1000.0));
+								_renderer->SetFloat("BlurSize", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_L:
+							{
+								float val = _renderer->GetFloat("BrightnessThreshold");
+								val = fmax(0.0f, val - inc);
+								_renderer->SetFloat("BrightnessThreshold", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_K:
+							{
+								float val = _renderer->GetFloat("BrightnessThreshold");
+								val = fmin(1.0f, val + inc);
+								_renderer->SetFloat("BrightnessThreshold", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_H:
+							{
+								float val = _renderer->GetFloat("BloomBlurScale");
+								val = fmax(0.0f, val - (inc / 1000.0));
+								_renderer->SetFloat("BloomBlurScale", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_G:
+							{
+								float val = _renderer->GetFloat("BloomBlurScale");
+								val = fmin(0.5f, val + (inc / 1000.0));
+								_renderer->SetFloat("BloomBlurScale", val);
+								printf("%f\n", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_RIGHT_BRACKET:
+							{
+								if(((Anima::AnimaKeyboardEventArgs*)args)->GetModifiers() & (Anima::AInt)Anima::AnimaKeyboardModifier::AKM_SHIFT)
+								{
+									float val = _pbrMaterial->GetFloat("ReflectionIntensity");
+									val = fmin(1.0f, val + inc);
+									_pbrMaterial->SetFloat("ReflectionIntensity", val);
+								}
+								else
+								{
+									float val = _pbrMaterial->GetFloat("Roughness");
+									val = fmin(1.0f, val + inc);
+									_pbrMaterial->SetFloat("Roughness", val);
+								}
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_SLASH:
+							{
+								float val = _pbrMaterial->GetFloat("Roughness");
+								val = fmax(0.0f, val - inc);
+								_pbrMaterial->SetFloat("Roughness", val);
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_7:
+							{
+								if(((Anima::AnimaKeyboardEventArgs*)args)->GetModifiers() & (Anima::AInt)Anima::AnimaKeyboardModifier::AKM_SHIFT)
+								{
+									float val = _pbrMaterial->GetFloat("ReflectionIntensity");
+									val = fmax(0.0f, val - inc);
+									_pbrMaterial->SetFloat("ReflectionIntensity", val);
+								}
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_1:
+							{
+								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("oro");
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_2:
+							{
+								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("rame");
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_3:
+							{
+								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("gomma");
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_4:
+							{
+								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("legno");
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_5:
+							{
+								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("floor-material");
+								break;
+							}
+							case Anima::AnimaKeyboardKey::AKK_6:
+							{
+								_renderer->SetBoolean("ApplyFXAA", !(_renderer->GetBoolean("ApplyFXAA")));
+								break;
 							}
 						}
 					}
@@ -334,203 +496,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 }
 - (void) keyUp:(NSEvent *)theEvent
 {
-	camSpeed = 1.0f;
-}
-
-- (void) keyDown:(NSEvent *)theEvent
-{
-	NSString *theArrow = [theEvent charactersIgnoringModifiers];
-	unichar keyChar = 0;
-	if ( [theArrow length] == 0 )
-		return;
-	
-	if ( [theArrow length] == 1 )
-	{
-		keyChar = [theArrow characterAtIndex:0];
-		
-		if (_pbrMaterial != nullptr)
-		{
-			float inc = 0.02f;
-			camSpeed = fmin(camSpeed + camSpeedInc, camSpeedMax);
-			switch (keyChar)
-			{
-				case 'w':
-				case 'W':
-				{
-					_camera->Move(_camera->GetForward(), camSpeed);
-					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-					break;
-				}
-				case 's':
-				case 'S':
-				{
-					_camera->Move(_camera->GetForward(), -camSpeed);
-					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-					break;
-				}
-				case 'd':
-				case 'D':
-				{
-					_camera->Move(_camera->GetRight(), camSpeed);
-					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-					break;
-				}
-				case 'a':
-				case 'A':
-				{
-					_camera->Move(_camera->GetRight(), -camSpeed);
-					_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-					break;
-				}
-				case 'p':
-				case 'P':
-				{
-					float val = _pbrMaterial->GetFloat("Metallic");
-					val = fmax(0.0f, val - inc);
-					_pbrMaterial->SetFloat("Metallic", val);
-					break;
-				}
-				case 'm':
-				case 'M':
-				{
-					float val = _pbrMaterial->GetFloat("Metallic");
-					val = fmin(1.0f, val + inc);
-					_pbrMaterial->SetFloat("Metallic", val);
-					break;
-				}
-				case 'x':
-				case 'X':
-				{
-					float val = _pbrMaterial->GetFloat("Specular");
-					val = fmax(0.0f, val - inc);
-					_pbrMaterial->SetFloat("Specular", val);
-					break;
-				}
-				case 'z':
-				case 'Z':
-				{
-					float val = _pbrMaterial->GetFloat("Specular");
-					val = fmin(1.0f, val + inc);
-					_pbrMaterial->SetFloat("Specular", val);
-					break;
-				}
-				case 'v':
-				case 'V':
-				{
-					float val = _renderer->GetFloat("BlurSize");
-					val = fmax(0.0f, val - (inc / 1000.0));
-					_renderer->SetFloat("BlurSize", val);
-					printf("%f\n", val);
-					break;
-				}
-				case 'b':
-				case 'B':
-				{
-					float val = _renderer->GetFloat("BlurSize");
-					val = fmin(0.5f, val + (inc / 1000.0));
-					_renderer->SetFloat("BlurSize", val);
-					printf("%f\n", val);
-					break;
-				}
-				case 'l':
-				case 'L':
-				{
-					float val = _renderer->GetFloat("BrightnessThreshold");
-					val = fmax(0.0f, val - inc);
-					_renderer->SetFloat("BrightnessThreshold", val);
-					printf("%f\n", val);
-					break;
-				}
-				case 'k':
-				case 'K':
-				{
-					float val = _renderer->GetFloat("BrightnessThreshold");
-					val = fmin(1.0f, val + inc);
-					_renderer->SetFloat("BrightnessThreshold", val);
-					printf("%f\n", val);
-					break;
-				}
-				case 'h':
-				case 'H':
-				{
-					float val = _renderer->GetFloat("BloomBlurScale");
-					val = fmax(0.0f, val - (inc / 1000.0));
-					_renderer->SetFloat("BloomBlurScale", val);
-					printf("%f\n", val);
-					break;
-				}
-				case 'g':
-				case 'G':
-				{
-					float val = _renderer->GetFloat("BloomBlurScale");
-					val = fmin(0.5f, val + (inc / 1000.0));
-					_renderer->SetFloat("BloomBlurScale", val);
-					printf("%f\n", val);
-					break;
-				}
-				case '+':
-				{
-					float val = _pbrMaterial->GetFloat("Roughness");
-					val = fmin(1.0f, val + inc);
-					_pbrMaterial->SetFloat("Roughness", val);
-					break;
-				}
-				case '-':
-				{
-					float val = _pbrMaterial->GetFloat("Roughness");
-					val = fmax(0.0f, val - inc);
-					_pbrMaterial->SetFloat("Roughness", val);
-					break;
-				}
-				case '*':
-				{
-					float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-					val = fmin(1.0f, val + inc);
-					_pbrMaterial->SetFloat("ReflectionIntensity", val);
-					break;
-				}
-				case '/':
-				{
-					float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-					val = fmax(0.0f, val - inc);
-					_pbrMaterial->SetFloat("ReflectionIntensity", val);
-					break;
-				}
-				case '1':
-				{
-					_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("oro");
-					break;
-				}
-				case '2':
-				{
-					_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("rame");
-					break;
-				}
-				case '3':
-				{
-					_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("gomma");
-					break;
-				}
-				case '4':
-				{
-					_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("legno");
-					break;
-				}
-				case '5':
-				{
-					_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("floor-material");
-					break;
-				}
-				case '0':
-				{
-					_renderer->SetBoolean("ApplyFXAA", !(_renderer->GetBoolean("ApplyFXAA")));
-					break;
-				}
-			}
-		}
-		[super keyDown:theEvent];
-	}
-	[super keyDown:theEvent];
+	camSpeed = 0.01f;
 }
 
 -(void) viewDidMoveToWindow
@@ -586,7 +552,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	Anima::AnimaString materialsPath = dataPath + "/materials";
 	Anima::AnimaString modelPath = dataPath + "/models/";
 	Anima::AnimaString modelName = "";
-	Anima::AnimaString materialName = "legno";
+	Anima::AnimaString materialName = "oro";
 	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
 	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
 	
@@ -647,7 +613,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
 	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
 	
-	floorModelInstance1->GetTransformation()->SetScale(60, 60, 60);
+	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
 	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
 	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
@@ -656,8 +622,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	floorModelInstanceMeshes.clear();
-	floorModelInstance2->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance2->GetTransformation()->TranslateX(300);
+	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance2->GetTransformation()->TranslateX(3);
 	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
 	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
@@ -666,8 +632,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 	
 	floorModelInstanceMeshes.clear();
-	floorModelInstance3->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance3->GetTransformation()->TranslateZ(300);
+	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance3->GetTransformation()->TranslateZ(3);
 	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
 	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
@@ -676,9 +642,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	floorModelInstanceMeshes.clear();
-	floorModelInstance4->GetTransformation()->SetScale(60, 60, 60);
-	floorModelInstance4->GetTransformation()->TranslateX(300);
-	floorModelInstance4->GetTransformation()->TranslateZ(300);
+	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorModelInstance4->GetTransformation()->TranslateX(3);
+	floorModelInstance4->GetTransformation()->TranslateZ(3);
 	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
 	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
 	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
@@ -694,7 +660,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
 	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
 	
-	modelInstanceOro->GetTransformation()->SetScale(20, 20, 20);
+	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
 	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
 	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
@@ -703,8 +669,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
 	
 	modelInstanceMeshes.clear();
-	modelInstanceRame->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceRame->GetTransformation()->TranslateX(300);
+	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceRame->GetTransformation()->TranslateX(3);
 	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
 	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
@@ -713,8 +679,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
 	
 	modelInstanceMeshes.clear();
-	modelInstanceGomma->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceGomma->GetTransformation()->TranslateZ(300);
+	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceGomma->GetTransformation()->TranslateZ(3);
 	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
 	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
@@ -723,9 +689,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
 
 	modelInstanceMeshes.clear();
-	modelInstanceLegno->GetTransformation()->SetScale(20, 20, 20);
-	modelInstanceLegno->GetTransformation()->TranslateX(300);
-	modelInstanceLegno->GetTransformation()->TranslateZ(300);
+	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	modelInstanceLegno->GetTransformation()->TranslateX(3);
+	modelInstanceLegno->GetTransformation()->TranslateZ(3);
 	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
 	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
 	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
@@ -733,7 +699,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	for (int j = 0; j < modelInstanceMeshes.size(); j++)
 		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
 	
-	_camera->LookAt(-350.0, 100.0, 150.0, 1.0, -0.2, 0.0);
+	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
 #endif
 	
 	_camera->Activate();
@@ -862,9 +828,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_renderer->SetTexture("SkyBox", textureSkyBox, false);
 	_renderer->CheckPrograms(_scene);
 	
-	Anima::AnimaPhysicsDebugDrawer* debugDrawer = _renderer->GetPhysicsDebugDrawer();
-	debugDrawer->AddConstantPoint(Anima::AnimaVertex3f(0.0, 0.0, 0.0), Anima::AnimaColor3f(1.0, 1.0, 0.0));
-	
 	return true;
 }
 
@@ -873,7 +836,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.01f, 10.0f);
+		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 100.0f);
 	}
 	
 	if(_scene)
@@ -888,7 +851,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if(!sceneSaved)
 	{
 #if defined SAVE_SCENE
-		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
+//		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
 #endif
 		sceneSaved = true;
 	}
@@ -898,13 +861,13 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 {
 	if(_renderer && _scene)
 	{
-//		if(!_scene->IsRunning())
-//			_scene->StartScene();
+		if(!_scene->IsRunning())
+			_scene->StartScene();
 		
 		_renderer->Start(_scene);
 		_renderer->Render();
 		
-//		_scene->StepScene();
+		_scene->StepScene();
 	}
 }
 

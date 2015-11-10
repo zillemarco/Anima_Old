@@ -61,7 +61,7 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 
 	_programsBufferIndex = 0;
 	
-	DisablePhysicsDebugDrawing();
+	EnablePhysicsDebugDrawing();
 	_physicsDebugDrawer = new AnimaPhysicsDebugDrawer;
 	
 	InitializeShaders();
@@ -396,7 +396,7 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
 		}
 
-		AUint divisore = 8;
+		AUint divisore = 2;
 
 		AnimaTexture* bloomTexture = GetTexture("BloomMap");
 		if (bloomTexture != nullptr)

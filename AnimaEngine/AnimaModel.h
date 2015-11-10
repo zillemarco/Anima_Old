@@ -18,6 +18,8 @@
 #include "AnimaMesh.h"
 #include "AnimaAnimation.h"
 
+#include <btBulletDynamicsCommon.h>
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaModel : public AnimaSceneObject

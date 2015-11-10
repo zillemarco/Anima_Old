@@ -108,9 +108,9 @@ void AnimaPhysicsDebugDrawer::DrawDebugScene(AnimaScene* scene)
 		return;
 	}
 	
-	//DrawPhysics(scene);
-	//DrawConstantPoints(scene);
-	//DrawConstantLines(scene);
+//	DrawPhysics(scene);
+	DrawConstantPoints(scene);
+	DrawConstantLines(scene);
 }
 
 void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)

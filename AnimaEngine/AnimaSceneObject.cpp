@@ -16,6 +16,7 @@
 #include "AnimaMeshInstance.h"
 #include "AnimaModel.h"
 #include "AnimaModelInstance.h"
+#include "AnimaScene.h"
 
 #include "AnimaCamerasManager.h"
 #include "AnimaLightsManager.h"

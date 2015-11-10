@@ -401,31 +401,18 @@ AnimaFrustum* AnimaCamera::GetFrustum()
 	return &_frustum;
 }
 
-AnimaVertex2f AnimaCamera::WorldPointToScreenPoint(const AnimaVertex3f& worldPoint, const AInt& screenWidth, const AInt& screenHeight) const
+AnimaVertex2f AnimaCamera::WorldPointToScreenPoint(const AnimaVertex3f& worldPoint) const
 {
 	AnimaVertex3f point = _projectionViewMatrix * worldPoint;
-	AFloat screenX = (roundf(point.x + 1.0f) / 2.0f) * (AFloat)screenWidth;
-	AFloat screenY = (roundf(1.0f - point.y) / 2.0f) * (AFloat)screenHeight;
+	AFloat screenX = (roundf(point.x + 1.0f) / 2.0f) * _windowSize.x;
+	AFloat screenY = (roundf(1.0f - point.y) / 2.0f) * _windowSize.y;
 	
 	return AnimaVertex2f(screenX, screenY);
 }
 
-AnimaVertex3f AnimaCamera::ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint, const AInt& screenWidth, const AInt& screenHeight) const
+AnimaVertex3f AnimaCamera::ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint) const
 {
-	AnimaVertex2f screenSize((AFloat)screenWidth, (AFloat)screenHeight);
-	AnimaVertex4f viewport(0.0f, 0.0f, (AFloat)screenWidth, (AFloat)screenHeight);
-	
-//	tmat4x4<T, P> Inverse = inverse(proj * model);
-//	
-//	tvec4<T, P> tmp = tvec4<T, P>(win, T(1));
-//	tmp.x = (tmp.x - T(viewport[0])) / T(viewport[2]);
-//	tmp.y = (tmp.y - T(viewport[1])) / T(viewport[3]);
-//	tmp = tmp * T(2) - T(1);
-//	
-//	tvec4<T, P> obj = Inverse * tmp;
-//	obj /= obj.w;
-//	
-//	return tvec3<T, P>(obj);
+	AnimaVertex4f viewport(0.0f, 0.0f, _windowSize.x, _windowSize.y);
 
 	AnimaVertex4f tmp(screenPoint, 0.0f, 1.0f);
 	tmp.x = (tmp.x - viewport.x) / viewport.z;
@@ -435,42 +422,7 @@ AnimaVertex3f AnimaCamera::ScreenPointToWorldPoint(const AnimaVertex2f& screenPo
 	AnimaVertex4f obj = _inverseProjectionViewMatrix * tmp;
 	obj /= obj.w;
 	
-	return AnimaVertex3f(obj);	
-	
-//	AnimaMatrix inverseView = _viewMatrix.Inversed();
-//	
-//	AFloat aspect = (AFloat)screenWidth / (AFloat)screenHeight;
-//	AFloat screenW2 = (AFloat)screenWidth / 2.0f;
-//	AFloat screenH2 = (AFloat)screenHeight / 2.0f;
-//	
-//	AFloat dx = tanf(_fov * 0.5f) * (screenPoint.x / screenW2 - 1.0f) / aspect;
-//	AFloat dy = tanf(_fov * 0.5f) * (1.0f - screenPoint.y / screenH2);
-//	
-//	AnimaVertex3f p1 = AnimaVertex3f(dx * _zNear, dy * _zNear, _zNear);
-//	AnimaVertex3f p2 = AnimaVertex3f(dx * _zFar, dy * _zFar, _zFar);
-//	
-//	p1 = inverseView * p1;
-//	p2 = inverseView * p2;
-//	
-//	return (p2 - p1).Normalized();
-	
-//	AnimaVertex3f point;
-//	
-//	// Normalizzo le coordinate dello schermo tra [-1, 1]
-//	point.x = (((screenPoint.x * 2.0f) / screenWidth) - 1.0f);
-//	point.y = (((screenPoint.y * 2.0f) / screenHeight) - 1.0f);
-//	point.z = 1.0f;
-//	
-//	// Proietto il punto sul piano distante della camera
-//	point.x /= _projectionMatrix.m[0];
-//	point.y /= _projectionMatrix.m[5];
-//	point *= _zFar;
-//	
-//	AnimaMatrix inverseView = _viewMatrix.Inversed();
-//	
-//	point = inverseView * point;
-//	
-//	return point;
+	return AnimaVertex3f(obj);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

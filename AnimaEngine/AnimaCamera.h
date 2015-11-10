@@ -94,8 +94,8 @@ public:
 
 	const char* GetShaderPrefix() override { return "CAM"; }
 	
-	AnimaVertex2f WorldPointToScreenPoint(const AnimaVertex3f& worldPoint, const AInt& screenWidth, const AInt& screenHeight) const;
-	AnimaVertex3f ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint, const AInt& screenWidth, const AInt& screenHeight) const;
+	AnimaVertex2f WorldPointToScreenPoint(const AnimaVertex3f& worldPoint) const;
+	AnimaVertex3f ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint) const;
 		
 protected:
 	AnimaVertex3f _position;

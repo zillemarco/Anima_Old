@@ -659,14 +659,14 @@
         </menu>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="vXe-u2-J1q">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <rect key="contentRect" x="144" y="30" width="1024" height="768"/>
+            <rect key="contentRect" x="144" y="30" width="850" height="650"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1280" height="800"/>
             <view key="contentView" id="vCU-US-zLU">
-                <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                <rect key="frame" x="0.0" y="0.0" width="850" height="650"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FML-zP-mni" customClass="AnimaEngineDemoView">
-                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                        <rect key="frame" x="25" y="25" width="800" height="600"/>
                         <animations/>
                     </customView>
                 </subviews>

@@ -8,6 +8,7 @@
 
 #include "AnimaMeshesManager.h"
 #include "AnimaXmlTranslators.h"
+#include "AnimaScene.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -77,6 +78,8 @@ bool AnimaMeshesManager::LoadMeshesFromModel(const aiScene* scene, const AnimaSt
 			int numeroIndiciFaccia = face->mNumIndices;
 			if (numeroIndiciFaccia == 3)
 				facce.push_back(AnimaFace(face->mIndices[0], face->mIndices[1], face->mIndices[2]));
+			else
+				AnimaLogger::LogMessageFormat("\tFace with %d vertices", numeroIndiciFaccia);
 		}
 		newMesh->SetFaces(facce);
 

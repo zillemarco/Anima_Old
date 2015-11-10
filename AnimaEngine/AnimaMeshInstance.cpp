@@ -349,12 +349,6 @@ void AnimaMeshInstance::InitializePhysicData()
 		AnimaQuaternion zRot(AnimaVertex3f(0.0, 0.0, 1.0), rotationVector.z);
 		AnimaQuaternion rot = zRot * yRot * xRot;
 		
-		AnimaMatrix rm = AnimaMatrix::MakeRotationXRad(rotationVector.x) * AnimaMatrix::MakeRotationZRad(rotationVector.y) * AnimaMatrix::MakeRotationXRad(rotationVector.z);
-		AnimaQuaternion tmp(rm);
-		
-		AnimaMatrix qm = tmp.GetMatrix();
-		AnimaQuaternion tmp2(qm);
-		
 		if(_physCollisionShape == nullptr)
 		{
 			btConvexHullShape* tempShape = new btConvexHullShape();

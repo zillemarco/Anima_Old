@@ -7,6 +7,7 @@
 //
 
 #include "AnimaDataGeneratorsManager.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -24,12 +25,30 @@ AnimaDataGeneratorsManager::~AnimaDataGeneratorsManager()
 
 AnimaColorGenerator* AnimaDataGeneratorsManager::CreateColorGenerator(const AnimaString& name)
 {
-	return CreateDataGenerator<AnimaColorGenerator>(name);
+	AnimaDataGenerator* dataGenerator = _dataGenerators.Contains(name);
+	if (dataGenerator != nullptr)
+		return nullptr;
+	
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+	ANIMA_ASSERT(allocator != nullptr);
+	AnimaColorGenerator* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaColorGenerator>(*allocator, name, allocator);
+	_dataGenerators.Add<AnimaColorGenerator*>(name, newDataGenerator);
+	
+	return newDataGenerator;
 }
 
 AnimaVectorGenerator* AnimaDataGeneratorsManager::CreateVectorGenerator(const AnimaString& name)
 {
-	return CreateDataGenerator<AnimaVectorGenerator>(name);
+	AnimaDataGenerator* dataGenerator = _dataGenerators.Contains(name);
+	if (dataGenerator != nullptr)
+		return nullptr;
+	
+	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
+	ANIMA_ASSERT(allocator != nullptr);
+	AnimaVectorGenerator* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<AnimaVectorGenerator>(*allocator, name, allocator);
+	_dataGenerators.Add<AnimaVectorGenerator*>(name, newDataGenerator);
+	
+	return newDataGenerator;
 }
 
 AnimaTextureGenerator* AnimaDataGeneratorsManager::CreateTextureGenerator(const AnimaString& name)
