@@ -33,6 +33,7 @@
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
+#include <AnimaMouseInteractor.h>
 
 #include "main.h"
 
@@ -62,6 +63,9 @@ Anima::AnimaEngine _engine;
 Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
+
+Anima::AnimaMouseInteractor mouseInteractor;
+
 bool _shouldClose = false;
 bool sceneSaved = false;
 
@@ -99,35 +103,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		mouseMoved = true;
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
 
-		int xPos = GET_X_LPARAM(lParam);
-		int yPos = GET_Y_LPARAM(lParam);
+	//	int xPos = GET_X_LPARAM(lParam);
+	//	int yPos = GET_Y_LPARAM(lParam);
 
-		int xDelta = lastXPos - xPos;
-		int yDelta = lastYPos - yPos;
+	//	int xDelta = lastXPos - xPos;
+	//	int yDelta = lastYPos - yPos;
 
-		if (_camera != nullptr)
-		{
-			if (wParam == MK_MBUTTON)
-			{
-				_camera->RotateXDeg((float)-yDelta);
-				_camera->RotateYDeg((float)xDelta);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-			}
-			else if (wParam == MK_LBUTTON)
-			{
-				_camera->Move(_camera->GetRight(), ((float)xDelta) / 100.0f);
-				_camera->Move(_camera->GetUp(), ((float)-yDelta) / 100.0f);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-			}
-			else if (wParam == MK_RBUTTON)
-			{
-				_camera->Zoom((float)xDelta);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-			}
-		}
+	//	if (_camera != nullptr)
+	//	{
+	//		if (wParam == MK_MBUTTON)
+	//		{
+	//			_camera->RotateXDeg((float)-yDelta);
+	//			_camera->RotateYDeg((float)xDelta);
+	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+	//		}
+	//		else if (wParam == MK_LBUTTON)
+	//		{
+	//			_camera->Move(_camera->GetRight(), ((float)xDelta) / 100.0f);
+	//			_camera->Move(_camera->GetUp(), ((float)-yDelta) / 100.0f);
+	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+	//		}
+	//		else if (wParam == MK_RBUTTON)
+	//		{
+	//			_camera->Zoom((float)xDelta);
+	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+	//		}
+	//	}
 
-		lastXPos = xPos;
-		lastYPos = yPos;
+	//	lastXPos = xPos;
+	//	lastYPos = yPos;
 
 		return result;
 		break;
@@ -317,52 +321,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
 	}
-	case WM_LBUTTONDOWN:
-	{
-		mouseMoved = false;
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-		break;
-	}
-	case WM_LBUTTONUP:
-	{
-		int xPos = GET_X_LPARAM(lParam);
-		int yPos = GET_Y_LPARAM(lParam);
-		
-		if (mouseMoved == false && _scene != nullptr && _camera != nullptr)
-		{
-			RECT rc;
-			GetClientRect(hWnd, &rc);
+	//case WM_LBUTTONDOWN:
+	//{
+	//	mouseMoved = false;
+	//	return DefWindowProc(hWnd, msg, wParam, lParam);
+	//	break;
+	//}
+	//case WM_LBUTTONUP:
+	//{
+	//	int xPos = GET_X_LPARAM(lParam);
+	//	int yPos = GET_Y_LPARAM(lParam);
+	//	
+	//	if (mouseMoved == false && _scene != nullptr && _camera != nullptr)
+	//	{
+	//		RECT rc;
+	//		GetClientRect(hWnd, &rc);
 
-			Anima::AnimaString str = Anima::FormatString("PT: %d, %d\nSIZE: %d, %d", xPos, yPos, rc.right - rc.left, rc.bottom - rc.top);
-			MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
+	//		Anima::AnimaString str = Anima::FormatString("PT: %d, %d\nSIZE: %d, %d", xPos, yPos, rc.right - rc.left, rc.bottom - rc.top);
+	//		MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
 
-			Anima::AnimaVertex3f origin = _camera->GetPosition();
-			Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f((float)xPos, (float)yPos), rc.right - rc.left, rc.bottom - rc.top);
-			Anima::AnimaVertex3f dir = (end - origin).Normalized();
-			dir *= 1000.0f;
+	//		Anima::AnimaVertex3f origin = _camera->GetPosition();
+	//		Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f((float)xPos, (float)yPos), rc.right - rc.left, rc.bottom - rc.top);
+	//		Anima::AnimaVertex3f dir = (end - origin).Normalized();
+	//		dir *= 1000.0f;
 
-			btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+	//		btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
 
-			btDynamicsWorld* world = _scene->GetPhysWorld();
+	//		btDynamicsWorld* world = _scene->GetPhysWorld();
 
-			world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+	//		world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
 
-			if (RayCallback.hasHit())
-			{
-				Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
-				_pbrMaterial = instance->GetMaterial();
+	//		if (RayCallback.hasHit())
+	//		{
+	//			Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+	//			_pbrMaterial = instance->GetMaterial();
 
-				Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
-				MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
-			}
-			else
-			{
-				printf("Picked nothing\n");
-			}
-		}
+	//			Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
+	//			MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
+	//		}
+	//		else
+	//		{
+	//			printf("Picked nothing\n");
+	//		}
+	//	}
 
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-	}
+	//	return DefWindowProc(hWnd, msg, wParam, lParam);
+	//}
 	case WM_CREATE:
 	{
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
@@ -383,7 +387,96 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		if (!InitEngine())
 			return -1;
-		
+
+		if (mouseInteractor.Install((long)hWnd, &_engine))
+		{
+			mouseInteractor.SetEventHandler("onLeftMouseDragged", [&](Anima::AnimaEventArgs* args) {
+
+				Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
+				delta /= 300.0f;
+
+				_camera->Move(_camera->GetRight(), delta.x);
+				_camera->Move(_camera->GetUp(), delta.y);
+
+				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+
+			});
+			mouseInteractor.SetEventHandler("onRightMouseDragged", [](Anima::AnimaEventArgs* args) {
+
+				Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
+				Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+
+				if (engine)
+				{
+					Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+					Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+
+					if (scene)
+					{
+						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+
+						if (camera)
+						{
+							camera->RotateXDeg(delta.y);
+							camera->RotateYDeg(delta.x);
+
+							scene->GetLightsManager()->UpdateLightsMatrix(camera);
+						}
+					}
+				}
+			});
+			mouseInteractor.SetEventHandler("onLeftMouseClick", [&](Anima::AnimaEventArgs* args) {
+
+				Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
+				Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
+				
+				Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+
+				if (engine)
+				{
+					Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+					Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+
+					if (scene)
+					{
+						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+
+						if (camera)
+						{
+							Anima::AnimaVertex3f origin = camera->GetPosition();
+							Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point, (int)size.x, (int)size.y);
+							Anima::AnimaVertex3f dir = (end - origin).Normalized();
+							dir *= 10.0f;
+							
+							Anima::AnimaPhysicsDebugDrawer* drawer = _renderer->GetPhysicsDebugDrawer();
+							drawer->AddConstantPoint(end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
+
+							btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+
+							btDynamicsWorld* world = scene->GetPhysWorld();
+
+							world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+
+							if (RayCallback.hasHit())
+							{
+								Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+
+								Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", instance->GetMaterial()->GetName().c_str());
+
+								MessageBox(NULL, str.c_str(), "Picked object", MB_OK);
+							}
+							else
+							{
+								printf("Picked nothing\n");
+							}
+						}
+					}
+				}
+			});
+		}
+
 		return result;
 		break;
 	}
@@ -475,7 +568,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (elapsed >= 100.0)
 		{
 			Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
-			SetWindowText(hWnd, title.c_str());
+			//SetWindowText(hWnd, title.c_str());
 			FPS = 0;
 			elapsed = 0.0;
 			_fpsTimer.Reset();
@@ -539,7 +632,7 @@ bool InitEngine()
 		return false;
 
 	_scene->InitializePhysics();
-	//_scene->InitializePhysicObjects();
+	_scene->InitializePhysicObjects();
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();

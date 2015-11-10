@@ -17,6 +17,11 @@
 
 #include <boost/unordered_map.hpp>
 
+#if defined WIN32
+#	include <Windows.h>
+#	include <Windowsx.h>
+#endif
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class ANIMA_ENGINE_EXPORT AnimaMouseEventArgs : public AnimaEventArgs
@@ -79,6 +84,9 @@ public:
 	
 private:
 #if defined WIN32
+	static LRESULT CALLBACK WindowsProcCallback(int nCode, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK MessageProcCallback(int nCode, WPARAM wParam, LPARAM lParam);
+	static void HandleMessage(HWND hWnd, AUint message, WPARAM wParam, LPARAM lParam, AnimaMouseInteractor* interactor);
 #else
 	static void MouseMovedCallback(AnimaMouseInteractor* interactor, NSEvent* event);
 	static void LeftMouseDraggedCallback(AnimaMouseInteractor* interactor, NSEvent* event);
@@ -100,6 +108,9 @@ protected:
 	AnimaArray<AnimaEventInfo> _supportedEvents;
 	
 #if defined WIN32
+	static boost::unordered_map<long, AnimaMouseInteractor*> _installedInteractors;
+	HHOOK _windowsProcHook;
+	HHOOK _messageProcHook;
 #else
 	id _mouseMovedMonitor;
 	id _leftMouseDraggedMonitor;

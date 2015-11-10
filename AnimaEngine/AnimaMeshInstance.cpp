@@ -355,7 +355,6 @@ void AnimaMeshInstance::InitializePhysicData()
 		AnimaMatrix qm = tmp.GetMatrix();
 		AnimaQuaternion tmp2(qm);
 		
-		
 		if(_physCollisionShape == nullptr)
 		{
 			btConvexHullShape* tempShape = new btConvexHullShape();

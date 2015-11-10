@@ -373,9 +373,9 @@ void AnimaScene::StepScene()
 	if(_dataGeneratorsManager != nullptr)
 		_dataGeneratorsManager->UpdateValues(elapsedTime);
 	
-//	AInt count = _meshInstancesManager->GetMeshInstancesCount();
-//	for(AInt i = 0; i < count; i++)
-//		_meshInstancesManager->GetMeshInstance(i)->GetTransformation()->UpdateMatrix();
+	AInt count = _meshInstancesManager->GetMeshInstancesCount();
+	for(AInt i = 0; i < count; i++)
+		_meshInstancesManager->GetMeshInstance(i)->GetTransformation()->UpdateMatrix();
 }
 
 END_ANIMA_ENGINE_NAMESPACE
