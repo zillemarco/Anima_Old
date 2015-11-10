@@ -8,6 +8,7 @@
 
 #include "AnimaAnimationsManager.h"
 #include "AnimaTimer.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

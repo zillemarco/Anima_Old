@@ -92,7 +92,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaPhysicsDebugDrawer.h
 					IAnimaInteractor.h
 					IAnimaEvents.h
-					AnimaMouseInteractor.h)
+					AnimaMouseInteractor.h
+					AnimaKeyboardInteractor.h
+					AnimaDefaultMouseInteractor.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -165,13 +167,14 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaTools.cpp
 					AnimaPhysicsDebugDrawer.cpp
 					IAnimaInteractor.cpp
-					IAnimaEvents.cpp)
+					IAnimaEvents.cpp
+					AnimaDefaultMouseInteractor.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 	else()
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp AnimaMouseInteractor.cpp)
 	endif()
@@ -181,7 +184,7 @@ else()
 	set(AnimaEngineCore_HEADERS	${common_HEADERS})
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 	else()
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp AnimaMouseInteractor.cpp)
 	endif()
@@ -191,10 +194,10 @@ endif()
 
 if(APPLE)
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.mm)
-	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
-	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp AnimaKeyboardInteractor.mm)
 endif()
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h AnimaTools.h AnimaTools.cpp)
@@ -211,7 +214,7 @@ source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h Ani
 
 source_group(Engine\\Interfaces FILES IAnimaInteractor.h IAnimaInteractor.cpp IAnimaEvents.h IAnimaEvents.cpp)
 
-source_group(Engine\\Interactors FILES AnimaMouseInteractor.h)
+source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultMouseInteractor.h AnimaDefaultMouseInteractor.cpp)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)

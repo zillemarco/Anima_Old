@@ -16,11 +16,12 @@
 #include "AnimaString.h"
 #include "AnimaTexture.h"
 #include "AnimaMappedArray.h"
-#include "AnimaScene.h"
 
 #include <boost/property_tree/ptree.hpp>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaScene;
 
 struct AnimaTGAHeader {
 	GLubyte Header[12];

@@ -3,6 +3,7 @@
 #include "AnimaLightsManager.h"
 #include "AnimaRenderer.h"
 #include "AnimaPhysicsDebugDrawer.h"
+#include "AnimaScene.h"
 #include <thread>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE

@@ -11,6 +11,7 @@
 #include "AnimaTexturesManager.h"
 #include "AnimaTimer.h"
 #include "AnimaXmlTranslators.h"
+#include "AnimaScene.h"
 
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -51,6 +52,8 @@ AnimaModel* AnimaModelsManager::LoadModelFromExternalFile(const AnimaString& mod
 		return nullptr;
 	
 	AnimaModel* newTopLevelModel = nullptr;
+	
+	AnimaLogger::LogMessageFormat("Loading %s", name.c_str());
 
 	//_materialsManager->LoadMaterialsFromModel(scene, name);
 	//AnimaArray<AnimaString>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
@@ -90,7 +93,7 @@ AnimaModel* AnimaModelsManager::LoadModelFromScene(const aiScene* scene, const a
 	AnimaString originalName = newModelName;
 	AInt index = 0;
 	while (_models.Contains(newModelName) != -1)
-		newModelName = FormatString("%s_%d", originalName.c_str(), index);
+		newModelName = FormatString("%s_%d", originalName.c_str(), index++);
 	
 	animationNodeName = sceneNode->mName.C_Str();
 

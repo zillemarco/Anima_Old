@@ -7,6 +7,7 @@
 //
 
 #include "AnimaCamerasManager.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -24,12 +25,28 @@ AnimaCamerasManager::~AnimaCamerasManager()
 
 AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const AnimaString& name)
 {
-	return CreateCamera<AnimaFirstPersonCamera>(name);
+	AnimaCamera* camera = _cameras.Contains(name);
+	if (camera != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaFirstPersonCamera* newCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
+	_cameras.Add<AnimaFirstPersonCamera*>(name, newCamera);
+	
+	return newCamera;
 }
 
 AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const AnimaString& name)
 {
-	return CreateCamera<AnimaThirdPersonCamera>(name);
+	AnimaCamera* camera = _cameras.Contains(name);
+	if (camera != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaThirdPersonCamera* newCamera = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
+	_cameras.Add<AnimaThirdPersonCamera*>(name, newCamera);
+	
+	return newCamera;
 }
 
 void AnimaCamerasManager::ClearCameras()

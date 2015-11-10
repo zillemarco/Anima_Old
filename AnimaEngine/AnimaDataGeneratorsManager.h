@@ -21,20 +21,18 @@
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaTypeMappedArray.h"
-#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaEngine;
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaDataGeneratorsManager
 {
 public:
 	AnimaDataGeneratorsManager(AnimaScene* scene, AnimaEngine* engine = nullptr);
 	~AnimaDataGeneratorsManager();
-	
-	template<class T> T* CreateDataGenerator(const AnimaString& name);
-	
+		
 	template<class T> AnimaArray<AnimaDataGenerator*>* GetDataGeneratorsArrayOfType();
 	template<class T> T* GetDataGeneratorOfTypeFromName(const AnimaString& name);
 	
@@ -62,21 +60,6 @@ private:
 
 	AnimaTypeMappedArray<AnimaDataGenerator*> _dataGenerators;
 };
-
-template<class T>
-T* AnimaDataGeneratorsManager::CreateDataGenerator(const AnimaString& name)
-{
-	AnimaDataGenerator* dataGenerator = _dataGenerators.Contains(name);
-	if (dataGenerator != nullptr)
-		return nullptr;
-
-	AnimaAllocator* allocator = _scene == nullptr ? _engine->GetDataGeneratorsAllocator() : _scene->GetDataGeneratorsAllocator();
-	ANIMA_ASSERT(allocator != nullptr);
-	T* newDataGenerator = AnimaAllocatorNamespace::AllocateNew<T>(*allocator, name, allocator);
-	_dataGenerators.Add<T*>(name, newDataGenerator);
-	
-	return newDataGenerator;
-}
 
 template<class T>
 AnimaArray<AnimaDataGenerator*>* AnimaDataGeneratorsManager::GetDataGeneratorsArrayOfType()

@@ -7,6 +7,7 @@
 //
 
 #include "AnimaMouseInteractor.h"
+#include "AnimaKeyboardInteractor.h"
 #include "AnimaVertex.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -75,7 +76,7 @@ AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
 
 AnimaMouseInteractor::~AnimaMouseInteractor()
 {
-	
+	Remove();
 }
 
 AnimaMouseInteractor& AnimaMouseInteractor::operator=(const AnimaMouseInteractor& src)
@@ -260,6 +261,7 @@ void AnimaMouseInteractor::LeftMouseDraggedCallback(AnimaMouseInteractor* intera
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -279,7 +281,7 @@ void AnimaMouseInteractor::LeftMouseDraggedCallback(AnimaMouseInteractor* intera
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, delta);
+		AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, modifiers, delta);
 		interactor->LaunchEvent("onLeftMouseDragged", args);
 		
 		delete args;
@@ -292,6 +294,7 @@ void AnimaMouseInteractor::RightMouseDraggedCallback(AnimaMouseInteractor* inter
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -311,7 +314,7 @@ void AnimaMouseInteractor::RightMouseDraggedCallback(AnimaMouseInteractor* inter
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, delta);
+		AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, modifiers, delta);
 		interactor->LaunchEvent("onRightMouseDragged", args);
 		
 		delete args;
@@ -324,6 +327,7 @@ void AnimaMouseInteractor::LeftMouseDownCallback(AnimaMouseInteractor* interacto
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -342,7 +346,7 @@ void AnimaMouseInteractor::LeftMouseDownCallback(AnimaMouseInteractor* interacto
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 		interactor->LaunchEvent("onLeftMouseDown", args);
 		
 		delete args;
@@ -355,6 +359,7 @@ void AnimaMouseInteractor::RightMouseDownCallback(AnimaMouseInteractor* interact
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -373,7 +378,7 @@ void AnimaMouseInteractor::RightMouseDownCallback(AnimaMouseInteractor* interact
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 		interactor->LaunchEvent("onRightMouseDown", args);
 		
 		delete args;
@@ -386,6 +391,7 @@ void AnimaMouseInteractor::LeftMouseUpCallback(AnimaMouseInteractor* interactor,
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -403,7 +409,7 @@ void AnimaMouseInteractor::LeftMouseUpCallback(AnimaMouseInteractor* interactor,
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 		interactor->LaunchEvent("onLeftMouseUp", argsUp);
 		
 		delete argsUp;
@@ -411,7 +417,7 @@ void AnimaMouseInteractor::LeftMouseUpCallback(AnimaMouseInteractor* interactor,
 		
 		if(interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 			interactor->LaunchEvent("onLeftMouseClick", argsClick);
 			
 			delete argsClick;
@@ -425,6 +431,7 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 	if(interactor == nullptr || event == nullptr || interactor->_windowId == 0)
 		return;
 	
+	AInt modifiers = TranslateFlags([event modifierFlags]);
 	NSView* view = (NSView*)interactor->_windowId;
 	NSPoint point = [event locationInWindow];
 	NSRect rect = [view bounds];
@@ -442,7 +449,7 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 	// Lancio il messaggio solo se in punto è dentro la finestra
 	if(NSPointInRect(point, rect))
 	{
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 		interactor->LaunchEvent("onRightMouseUp", argsUp);
 		
 		delete argsUp;
@@ -450,7 +457,7 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 		
 		if(interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, modifiers);
 			interactor->LaunchEvent("onRightMouseClick", argsClick);
 			
 			delete argsClick;

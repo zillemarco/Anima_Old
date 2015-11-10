@@ -44,23 +44,28 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 typedef void(*AnimaGCGLproc)(void);
 
+/*!
+ *	\brief		Struttura dati utilizzata per contenere le informazioni da utilizzare per creare il buffer di rendering per il contesto che si vuole creare
+ *	\details	Struttura dati utilizzata per contenere le informazioni da utilizzare per creare il buffer di rendering per il contesto che si vuole creare
+ *	\author		Zille Marco
+ */
 struct ANIMA_ENGINE_EXPORT AnimaGCFrameBufferConfig
 {
-	AInt _redBits;
-	AInt _greenBits;
-	AInt _blueBits;
-	AInt _alphaBits;
-	AInt _depthBits;
-	AInt _stencilBits;
-	AInt _accumRedBits;
-	AInt _accumGreenBits;
-	AInt _accumBlueBits;
-	AInt _accumAlphaBits;
-	AInt _auxBuffers;
-	bool _stereo;
-	AInt _samples;
-	bool _sRGB;
-	bool _doublebuffer;
+	AInt _redBits;			/*!< Numero di bit da utilizzare nel buffer di rendering per il canale rosso. Di default vale 8 */
+	AInt _greenBits;		/*!< Numero di bit da utilizzare nel buffer di rendering per il canale verde. Di default vale 8 */
+	AInt _blueBits;			/*!< Numero di bit da utilizzare nel buffer di rendering per il canale blu. Di default vale 8 */
+	AInt _alphaBits;		/*!< Numero di bit da utilizzare nel buffer di rendering per il canale alpha. Di default vale 8 */
+	AInt _depthBits;		/*!< Numero di bit da utilizzare nel buffer di rendering per la profondita'. Di default vale 24 */
+	AInt _stencilBits;		/*!< Numero di bit da utilizzare nel buffer di rendering per lo stencil. Di default vale 8 */
+	AInt _accumRedBits;		/*!< Di default vale 0 */
+	AInt _accumGreenBits;	/*!< Di default vale 0 */
+	AInt _accumBlueBits;	/*!< Di default vale 0 */
+	AInt _accumAlphaBits;	/*!< Di default vale 0 */
+	AInt _auxBuffers;		/*!< Di default vale 0 */
+	bool _stereo;			/*!< Indica se il buffer di rendering ha capacita' stereo. Di default vale false */
+	AInt _samples;			/*!< Numero di campioni che fa il buffer di rendering. Di default vale 0 */
+	bool _sRGB;				/*!< Indica se i colori nel buffer di rendering sono da rappresentare in spazio lineare. Di default vale false */
+	bool _doublebuffer;		/*!< Indica se il buffer di rendering deve utilizzare il double buffering. Di default vale true */
 
 	#if defined WIN32
 		AInt _wgl;
@@ -69,14 +74,15 @@ struct ANIMA_ENGINE_EXPORT AnimaGCFrameBufferConfig
 
 struct ANIMA_ENGINE_EXPORT AnimaGCContextConfig
 {
-	AInt _api;
-	AInt _major;
-	AInt _minor;
-	bool _forward;
-	bool _debug;
-	AInt _profile;
-	AInt _robustness;
-	AInt _release;
+	AInt _api;			/*!< Indica che API utilizzare per il rendering. Di default vale ANIMAGC_OPENGL_API ed e' l'unico valore accettato */
+	AInt _major;		/*!< Indica la versione maggiore dell'API da utilizzare. Di default vale 4 */
+	AInt _minor;		/*!< Indica la versione minore dell'API da utilizzare. Di default vale 1 */
+	bool _forward;		/*!< Indica se il contesto deve venir creato con compatibilita' di poter utilizzare funzioni avanzate di OpenGL. Questo flag e' utilizzato solo se il valore di _api e' ANIMAGC_OPENGL_API. Di default vale true */
+	bool _debug;		/*!< Indica se il contesto deve venir creato con funzionalità di debug avanzate. Utilizzato solo per contesti OpenGL. Di default vale false */
+	AInt _profile;		/*!< Indica con che profilo deve venir creato il contesto, nel caso si voglia creare un contesto con retro-compatibilita' di OpenGL. Di default vale ANIMAGC_OPENGL_CORE_PROFILE. I valori
+							 accettati sono ANIMAGC_OPENGL_ANY_PROFILE, ANIMAGC_OPENGL_CORE_PROFILE e ANIMAGC_OPENGL_COMPAT_PROFILE */
+	AInt _robustness;	/*!< Di default vale ANIMAGC_NO_ROBUSTNESS. I valori accettati sono ANIMAGC_NO_ROBUSTNESS, ANIMAGC_NO_RESET_NOTIFICATION e ANIMAGC_LOSE_CONTEXT_ON_RESET */
+	AInt _release;		/*!< Di default vale ANIMAGC_ANY_RELEASE_BEHAVIOR. I valori accettati sono ANIMAGC_ANY_RELEASE_BEHAVIOR, ANIMAGC_RELEASE_BEHAVIOR_FLUSH e ANIMAGC_RELEASE_BEHAVIOR_NONE */
 };
 
 /*!
@@ -87,34 +93,126 @@ struct ANIMA_ENGINE_EXPORT AnimaGCContextConfig
 class ANIMA_ENGINE_EXPORT AnimaGC
 {
 protected:
+	/*!
+	 *	\brief		Costruttore di AnimaGC
+	 *	\details	Costruttore di AnimaGC. Messo protetto perche' non si può istanziare un contesto di rendering direttamente ma si deve
+					utilizzare la funzione CreateContext()
+	 *	\author		Zille Marco
+	 */
 	AnimaGC();
 
 public:
+	/*!
+	 *	\brief		Distruttore di AnimaGC
+	 *	\details	Distruttore di AnimaGC
+	 *	\author		Zille Marco
+	 */
 	~AnimaGC();
 
 public:
+	/*!
+	 *	\brief		Rende attivo il contesto grafico
+	 *	\details	Rende attivo il contesto grafico in modo che le operazioni di rendering che vengono effettuare dal momento successivo
+					questa chiamata vengano applicate a questo contesto, finche' non viene reso attivo un altro contesto
+	 *	\author		Zille Marco
+	 */
 	void MakeCurrent();
+	
+	/*!
+	 *	\brief		Fa lo swap dei buffer per aggiornare l'immagine visibile nella finestra che contiene il contesto
+	 *	\details	Fa lo swap dei buffer per aggiornare l'immagine visibile nella finestra che contiene il contesto swappando il
+					back-buffer, che contiene l'immagine aggiornata, con il front-buffer, che attualmente non contiene piu' un'immagine
+					aggiornata
+	 *	\author		Zille Marco
+	 */
 	void SwapBuffers();
-
+	
+	/*!
+	 *	\brief		Effettua la 'pulitura' del buffer di disegno utilizzando un colore specificato dai parametri r,g,b,a
+	 *	\details	Effettua la 'pulitura' del buffer di disegno utilizzando un colore specificato dai parametri r,g,b,a. I valori di
+					r,g,b,a devono essere contenuti nell'intevallo [0-1]
+	 *	\param[in]	r Valore del canale rosso da utilizzare per 'pulire' il buffer
+	 *	\param[in]	g Valore del canale verde da utilizzare per 'pulire' il buffer
+	 *	\param[in]	b Valore del canale blu da utilizzare per 'pulire' il buffer
+	 *	\param[in]	a Valore del canale alpha da utilizzare per 'pulire' il buffer
+	 *	\author		Zille Marco
+	 */
 	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
 
 public:
+	/*!
+	 *	\brief		Crea un nuovo contesto grafico
+	 *	\details	Crea un nuovo contesto grafico dato l'ID di una finestra e le informazioni per creare il contesto. I sistemi MacOS
+					sono supportati ma solo se utilizzano Cocoa Framework
+	 *	\param[in]	windowId		ID della finestra su cui si vuole creare il contesto. Per Windows questo e' il valore dell'HWND della finestra
+									mentre per MacOS questo e' il valore dell'NSView* della finestra.
+	 *	\param[in]	ctxconfig		Informazioni riguardo a come creare il contesto
+	 *	\param[in]	fbconfig		Informazioni riguardo a come creare il buffer di rendering
+	 *	\param[in]	vSyncEnabled	Indica se abilitare oppure no il V-Sync per il contesto creato
+	 *	\return		Se i valori in input sono accettabili e si riesce a creare il contesto allora torna un puntatore al un nuovo
+					contesto di rendering appena creato, se invece la creazione del contesto fallisce viene tornato nullptr
+	 *	\author		Zille Marco
+	 */
 	static AnimaGC* CreateContext(long windowId, AnimaGCContextConfig ctxconfig, AnimaGCFrameBufferConfig fbconfig, bool vSyncEnabled = true);
+	
+	/*!
+	 *	\brief		Distrugge il contesto grafico dato in input
+	 *	\details	Distrugge il contesto grafico dato in input
+	 *	\param[in]	context	Contesto grafico da distruggere
+	 *	\author		Zille Marco
+	 */
 	static void DestroyContext(AnimaGC* context);
 	static void SetSwapInterval(AInt interval);
-
+	
+	/*!
+	 *	\brief		Torna un'istanza di AnimaGCContextConfig inizializzata con i valori di default del contesto per creare un contesto grafico
+	 *	\details	Torna un'istanza di AnimaGCContextConfig inizializzata con i valori di default del contesto per creare un contesto grafico
+	 *	\return		Istanza di AnimaGCContextConfig inizializzata con dei valori di default del contesto per creare un contesto grafico
+	 *	\author		Zille Marco
+	 */
 	static AnimaGCContextConfig GetDefaultContextConfig();
+	
+	/*!
+	 *	\brief		Torna un'istanza di AnimaGCFrameBufferConfig inizializzata con i valori di default del buffer di rendering per creare un contesto grafico
+	 *	\details	Torna un'istanza di AnimaGCFrameBufferConfig inizializzata con i valori di default del buffer di rendering per creare un contesto grafico
+	 *	\return		Istanza di AnimaGCFrameBufferConfig inizializzata con dei valori di default del buffer di rendering per creare un contesto grafico
+	 *	\author		Zille Marco
+	 */
 	static AnimaGCFrameBufferConfig GetDefaultFrameBufferConfig();
 	
+	/*!
+	 *	\brief		Carica la libreria GLEW utilizzata come interfaccia per le funzioni di OpenGL
+	 *	\details	Carica la libreria GLEW utilizzata come interfaccia per le funzioni di OpenGL
+	 *	\return		True se il caricamento della librerira va a buon fine, false altrimenti
+	 *	\author		Zille Marco
+	 */
 	static bool InitializeGLEWExtensions();
 
 protected:
+	/*!
+	 *	\brief		Controlla se l'estensione cercata e' contenuta nella lista di estensioni attualmente supportate
+	 *	\details	Controlla se l'estensione cercata e' contenuta nella lista di estensioni attualmente supportate
+	 *	\param[in]	string		Nome dell'estensione che si vuole controllare
+	 *	\param[in]	extension	Array di caratteri contenente i valori delle estensioni attualmente supportate
+	 *	\return		True se l'estensione cercata e' contenuta nella lista di estensioni attualmente supportate, false altrimenti
+	 *	\author		Zille Marco
+	 */
 	static bool StringInExtensionString(const char* string, const GLubyte* extensions);
+	
+	/*!
+	 *	\brief		Cerca la configurazione del buffer di rendering piu' somigliante ad una lista di configurazioni di buffer di rendering passate
+	 *	\details	Cerca la configurazione del buffer di rendering piu' somigliante ad una lista di configurazioni di buffer di rendering passate
+	 *	\param[in]	desired			Configurazione del buffer di rendering originale, quella che si vorrebbe ottenere
+	 *	\param[in]	alternatives	Array di configurazioni del buffer di rendering possibili con cui viene confrontata la configurazione del buffer di rendering originale
+	 *	\param[in]	count			Numero di elementi contenuti in alternatives
+	 *	\return		Valore della configurazione del buffer di rendering piu' simile a desired
+	 *	\author		Zille Marco
+	 */
 	static const AnimaGCFrameBufferConfig* ChooseFrameBufferConfig(const AnimaGCFrameBufferConfig* desired, const AnimaGCFrameBufferConfig* alternatives, unsigned int count);
 	
 protected:
-	static bool _GLEWExtensionsLoaded;
-	static bool _contextAPIsInitialized;
+	static bool _GLEWExtensionsLoaded;		/*!< Indica se la libreria GLEW e' stata caricata correttamente */
+	static bool _contextAPIsInitialized;	/*!< Indica se le API del contesto sono state inizializzate correttamente */
 
 #ifdef _WIN32
 	public:

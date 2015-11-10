@@ -16,13 +16,14 @@
 #include "AnimaString.h"
 #include "AnimaArray.h"
 #include "AnimaMappedArray.h"
-#include "AnimaScene.h"
 #include "AnimaAnimation.h"
 
 #include <assimp/scene.h>
 #include <assimp/vector3.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaAnimationsManager
 {

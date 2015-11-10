@@ -18,8 +18,8 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 typedef std::string AnimaString;
 
 ANIMA_ENGINE_EXPORT AnimaString MakeRandonString(AInt length);
-ANIMA_ENGINE_EXPORT AnimaString FormatString(const AnimaString& format, ...);
-ANIMA_ENGINE_EXPORT AnimaString FormatString(const AnimaString& format, va_list params);
+ANIMA_ENGINE_EXPORT AnimaString FormatString(AnimaString format, ...);
+ANIMA_ENGINE_EXPORT AnimaString FormatString(AnimaString format, va_list params);
 
 //class AnimaAllocator;
 //

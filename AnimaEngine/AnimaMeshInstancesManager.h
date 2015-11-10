@@ -24,6 +24,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaScene;
+
 class ANIMA_ENGINE_EXPORT AnimaMeshInstancesManager
 {
 public:

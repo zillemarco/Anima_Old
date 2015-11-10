@@ -22,27 +22,30 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMouseEventArgs : public AnimaEventArgs
 {
 public:
-	AnimaMouseEventArgs(IAnimaEvents* sourceEvent, AnimaVertex2f point, AnimaVertex2f windowSize)
+	AnimaMouseEventArgs(IAnimaEvents* sourceEvent, AnimaVertex2f point, AnimaVertex2f windowSize, AInt modifiers)
 		: AnimaEventArgs(sourceEvent)
 	{
 		_point = point;
 		_windowSize = windowSize;
+		_modifiers = modifiers;
 	}
 	
 public:
 	AnimaVertex2f GetPoint() const { return _point; }
 	AnimaVertex2f GetWindowSize() const { return _windowSize; }
+	AInt GetModifiers() const { return _modifiers; }
 	
 private:
 	AnimaVertex2f _point;
 	AnimaVertex2f _windowSize;
+	AInt _modifiers;
 };
 
 class ANIMA_ENGINE_EXPORT AnimaMouseDraggedEventArgs : public AnimaMouseEventArgs
 {
 public:
-	AnimaMouseDraggedEventArgs(IAnimaEvents* sourceEvent, AnimaVertex2f point, AnimaVertex2f windowSize, AnimaVertex2f delta)
-		: AnimaMouseEventArgs(sourceEvent, point, windowSize)
+	AnimaMouseDraggedEventArgs(IAnimaEvents* sourceEvent, AnimaVertex2f point, AnimaVertex2f windowSize, AInt modifiers, AnimaVertex2f delta)
+		: AnimaMouseEventArgs(sourceEvent, point, windowSize, modifiers)
 	{
 		_delta = delta;
 	}

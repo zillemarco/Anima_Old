@@ -9,6 +9,7 @@
 #include "AnimaModelInstance.h"
 #include "AnimaModelsManager.h"
 #include "AnimaMeshInstancesManager.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

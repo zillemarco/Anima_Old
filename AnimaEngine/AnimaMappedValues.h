@@ -16,7 +16,6 @@
 #include "AnimaColorGenerator.h"
 #include "AnimaVectorGenerator.h"
 #include "AnimaTextureGenerator.h"
-#include "AnimaDataGeneratorsManager.h"
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaMatrix.h"
@@ -27,6 +26,7 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaShaderProgram;
 class AnimaScene;
+class AnimaDataGeneratorsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaMappedValues : public AnimaNamedObject
 {

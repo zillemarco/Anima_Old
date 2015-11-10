@@ -10,8 +10,8 @@
 			<WorldYAxis>0.000000;1.000000;0.000000</WorldYAxis>
 			<WorldZAxis>0.000000;0.000000;1.000000</WorldZAxis>
 			<FOV>90</FOV>
-			<ZNear>0.00999999978</ZNear>
-			<ZFar>10</ZFar>
+			<ZNear>0.1</ZNear>
+			<ZFar>100</ZFar>
 			<ProjectionType>PERSPECTIVE</ProjectionType>
 			<SceneObject>
 				<AnimaSceneObject>
@@ -33,7 +33,7 @@
 									<Value>
 										<AnimaVectorGenerator>
 											<Name>Position.valueGenerator</Name>
-											<Vector>-3.500000;1.000000;1.500000;1.000000</Vector>
+											<Vector>-35.00000;10.000000;15.00000;1.000000</Vector>
 											<DataGenerator>
 												<AnimaDataGenerator>
 													<CanUpdateValue>true</CanUpdateValue>

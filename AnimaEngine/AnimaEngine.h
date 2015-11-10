@@ -22,28 +22,6 @@
 
 //#define SAVE_SCENE
 
-#define _ANIMA_ENGINE_REQUIRE_INIT()					\
-    if (!Anima::AnimaEngine::IsInitialized())				\
-		{													\
-		/*_glfwInputError(GLFW_NOT_INITIALIZED, NULL);*/	\
-		return;												\
-		}
-
-#define _ANIMA_ENGINE_REQUIRE_INIT_OR_RETURN(x)		\
-    if (!Anima::AnimaEngine::IsInitialized())				\
-		{													\
-        /*_glfwInputError(GLFW_NOT_INITIALIZED, NULL);*/	\
-        return x;											\
-		}
-
-#define _ANIMA_ENGINE_SWAP_POINTERS(x, y, type)	\
-		{												\
-        void* t;										\
-        t = (void*)x;									\
-        x = y;											\
-        y = (type)t;									\
-		}
-
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaScenesManager;
@@ -193,8 +171,8 @@ private:
 	void TerminateManagers();
 
 private:
-	static bool _animaEngineInitialized;					/*!< Flag per indicare se AnimaEngine è stato inizializzato con successo */
-	static int	_animaEngineCount;							/*!< Contatore di istanze di AnimaEngine */
+	static bool _animaEngineInitialized;			/*!< Flag per indicare se AnimaEngine è stato inizializzato con successo */
+	static int	_animaEngineCount;					/*!< Contatore di istanze di AnimaEngine */
 
 	static bool _usedExternal;						/*!< Flag che indica se AnimaEngine  utilizzato all'interno di un altro programma */
 
@@ -333,7 +311,14 @@ public:
 		ANIMA_ASSERT(_dataGeneratorsAllocator != nullptr);
 		return _dataGeneratorsAllocator;
 	}
-
+	
+	/*!
+	 *	\brief		Torna l'allocator dei programmi GPGPU. Usato dalle classi AnimaParallelProgramsManager e AnimaParallelProgram
+	 *	\details	Torna l'allocator dei programmi GPGPU. Usato dalle classi AnimaParallelProgramsManager e AnimaParallelProgram
+	 *	\return		Il valore di _dataGeneratorsAllocator
+	 *	\sa			_dataGeneratorsAllocator, AnimaAllocator
+	 *	\author		Zille Marco
+	 */
 	inline AnimaAllocator* GetParallelProgramsAllocator() {
 		ANIMA_ASSERT(_parallelProgramsAllocator != nullptr);
 		return _parallelProgramsAllocator;
@@ -401,8 +386,8 @@ public:
 	
 	/*!
 	 *	\brief		Torna il manager dei generatori di dati di AnimaEngine
-	 *	\details	Torna il manager dei generatori di dati di AnimaEngine. In genere un generatore di dati  legato ad una scene ma, in alcuni casi
-					(come ad esempio per i generatori di dati usati nella classe AnimaRenderer e derivate che non sono legati ad una scena), pu˜ essere necessatio
+	 *	\details	Torna il manager dei generatori di dati di AnimaEngine. In genere un generatore di dati  legato ad una scena ma, in alcuni casi
+					come ad esempio per i generatori di dati usati nella classe AnimaRenderer e derivate, che non sono legati ad una scena, pu˜ essere necessatio
 					avere a disposizione un manager dei generatori di dati generico.
 	 *	\return		Il valore di _dataGeneratorsManager
 	 *	\sa			_dataGeneratorsManager
@@ -412,7 +397,14 @@ public:
 		ANIMA_ASSERT(_dataGeneratorsManager != nullptr);
 		return _dataGeneratorsManager;
 	}
-
+	
+	/*!
+	 *	\brief		Torna il manager dei programmi GPGPU utilizzati da AnimaEngine
+	 *	\details	Torna il manager dei programmi GPGPU utilizzati da AnimaEngine
+	 *	\return		Il valore di _parallelProgramsManager
+	 *	\sa			_parallelProgramsManager
+	 *	\author		Zille Marco
+	 */
 	inline AnimaParallelProgramsManager* GetParallelProgramsManager() {
 		ANIMA_ASSERT(_parallelProgramsManager != nullptr);
 		return _parallelProgramsManager;

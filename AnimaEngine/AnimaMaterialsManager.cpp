@@ -9,6 +9,7 @@
 #include "AnimaMaterialsManager.h"
 #include "AnimaXmlTranslators.h"
 #include "AnimaShadersManager.h"
+#include "AnimaScene.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>

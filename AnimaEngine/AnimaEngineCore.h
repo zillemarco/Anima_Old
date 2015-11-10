@@ -23,9 +23,6 @@
 #define BEGIN_ANIMA_ENGINE_NAMESPACE namespace Anima {
 #define END_ANIMA_ENGINE_NAMESPACE }
 
-extern "C" ANIMA_ENGINE_EXPORT bool __anima_get_working_dir(char* dest, int length);
-#define ANIMA_WORKING_DIR(dest, len)	__anima_get_working_dir(dest, len)
-
 #if defined _MSC_VER
 #	define ANIMA_ENGINE_ALIGN_OF(a)	__alignof(a)
 #else

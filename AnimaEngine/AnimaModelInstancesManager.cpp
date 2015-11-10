@@ -10,6 +10,7 @@
 #include "AnimaMaterialsManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaTimer.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

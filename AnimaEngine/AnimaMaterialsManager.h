@@ -19,12 +19,13 @@
 #include "AnimaMappedArray.h"
 #include "AnimaTypeMappedArray.h"
 #include "AnimaTexturesManager.h"
-#include "AnimaScene.h"
 
 #include <assimp/scene.h>
 #include <assimp/vector3.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaMaterialsManager
 {

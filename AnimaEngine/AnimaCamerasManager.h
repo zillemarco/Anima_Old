@@ -20,9 +20,10 @@
 #include "AnimaTypeMappedArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
-#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
+
+class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 {
@@ -33,8 +34,6 @@ class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 public:
 	AnimaCamerasManager(AnimaScene* scene);
 	~AnimaCamerasManager();
-	
-	template<class T> T* CreateCamera(const AnimaString& name);
 	
 	template<class T> AnimaArray<AnimaCamera*>* GetCamerasArrayOfType();
 	template<class T> AnimaCamera* GetCameraOfTypeFromName(const AnimaString& name);
@@ -73,20 +72,6 @@ private:
 	
 	AnimaCamera*	_activeCamera;
 };
-
-template<class T>
-T* AnimaCamerasManager::CreateCamera(const AnimaString& name)
-{
-	AnimaCamera* camera = _cameras.Contains(name);
-	if (camera != nullptr)
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	T* newCamera = AnimaAllocatorNamespace::AllocateNew<T>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
-	_cameras.Add<T*>(name, newCamera);
-	
-	return newCamera;
-}
 
 template<class T>
 AnimaArray<AnimaCamera*>* AnimaCamerasManager::GetCamerasArrayOfType()

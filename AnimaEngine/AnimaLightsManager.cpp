@@ -7,6 +7,7 @@
 //
 
 #include "AnimaLightsManager.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -23,22 +24,54 @@ AnimaLightsManager::~AnimaLightsManager()
 
 AnimaDirectionalLight* AnimaLightsManager::CreateDirectionalLight(const AnimaString& name)
 {
-	return CreateLight<AnimaDirectionalLight>(name);
+	AnimaLight* light = _lights.Contains(name);
+	if (light != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaDirectionalLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaDirectionalLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_lights.Add<AnimaDirectionalLight*>(name, newLight);
+	
+	return newLight;
 }
 
 AnimaPointLight* AnimaLightsManager::CreatePointLight(const AnimaString& name)
 {
-	return CreateLight<AnimaPointLight>(name);
+	AnimaLight* light = _lights.Contains(name);
+	if (light != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaPointLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaPointLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_lights.Add<AnimaPointLight*>(name, newLight);
+	
+	return newLight;
 }
 
 AnimaSpotLight* AnimaLightsManager::CreateSpotLight(const AnimaString& name)
 {
-	return CreateLight<AnimaSpotLight>(name);
+	AnimaLight* light = _lights.Contains(name);
+	if (light != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaSpotLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaSpotLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_lights.Add<AnimaSpotLight*>(name, newLight);
+	
+	return newLight;
 }
 
 AnimaHemisphereLight* AnimaLightsManager::CreateHemisphereLight(const AnimaString& name)
 {
-	return CreateLight<AnimaHemisphereLight>(name);
+	AnimaLight* light = _lights.Contains(name);
+	if (light != nullptr)
+		return nullptr;
+	
+	ANIMA_ASSERT(_scene != nullptr);
+	AnimaHemisphereLight* newLight = AnimaAllocatorNamespace::AllocateNew<AnimaHemisphereLight>(*(_scene->GetLightsAllocator()), _scene->GetLightsAllocator(), _scene->GetDataGeneratorsManager(), name);
+	_lights.Add<AnimaHemisphereLight*>(name, newLight);
+	
+	return newLight;
 }
 
 void AnimaLightsManager::ClearLights()
