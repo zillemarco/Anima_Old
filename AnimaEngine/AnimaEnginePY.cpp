@@ -101,8 +101,8 @@ Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramString)(co
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*GetProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::GetProgramFromName;
 void (Anima::AnimaShadersManager::*SetActiveProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::SetActiveProgramFromName;
 
-Anima::AnimaFirstPersonCamera* (Anima::AnimaCamerasManager::*CreateFirstPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaFirstPersonCamera>;
-Anima::AnimaThirdPersonCamera* (Anima::AnimaCamerasManager::*CreateThirdPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateCamera <Anima::AnimaThirdPersonCamera>;
+Anima::AnimaFirstPersonCamera* (Anima::AnimaCamerasManager::*CreateFirstPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateFirstPersonCamera;
+Anima::AnimaThirdPersonCamera* (Anima::AnimaCamerasManager::*CreateThirdPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateThirdPersonCamera;
 Anima::AnimaCamera* (Anima::AnimaCamerasManager::*GetCameraFromNameString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::GetCameraFromName;
 
 void (Anima::AnimaCamera::*AnimaCameraSetPositionVector)(const Anima::AnimaVertex3f&) = &Anima::AnimaCamera::SetPosition;

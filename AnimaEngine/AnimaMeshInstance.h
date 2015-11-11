@@ -90,6 +90,10 @@ protected:
 	btCollisionShape* _physCollisionShape;
 	btMotionState* _physMotionState;
 	btRigidBody* _physRigidBody;
+
+	AnimaArray<AInt> _indices;
+	AnimaArray<AFloat> _vertices;
+	btTriangleIndexVertexArray* _meshInterface;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

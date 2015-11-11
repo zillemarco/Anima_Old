@@ -414,7 +414,7 @@ AnimaVertex3f AnimaCamera::ScreenPointToWorldPoint(const AnimaVertex2f& screenPo
 {
 	AnimaVertex4f viewport(0.0f, 0.0f, _windowSize.x, _windowSize.y);
 
-	AnimaVertex4f tmp(screenPoint, 0.0f, 1.0f);
+	AnimaVertex4f tmp(screenPoint, 1.0f, 1.0f);
 	tmp.x = (tmp.x - viewport.x) / viewport.z;
 	tmp.y = (tmp.y - viewport.y) / viewport.w;
 	tmp = (tmp * 2.0f) - 1.0f;

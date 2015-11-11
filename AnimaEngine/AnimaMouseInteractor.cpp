@@ -327,7 +327,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if ((wParam & MK_LBUTTON) == MK_LBUTTON)
 		{
-			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, delta);
+			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, 0, delta);
 			interactor->LaunchEvent("onLeftMouseDragged", args);
 
 			delete args;
@@ -335,7 +335,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		}
 		else if ((wParam & MK_RBUTTON) == MK_RBUTTON)
 		{
-			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, delta);
+			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, 0, delta);
 			interactor->LaunchEvent("onRightMouseDragged", args);
 
 			delete args;
@@ -358,7 +358,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		interactor->_lastMousePosition = pt;
 		interactor->_mouseMoved = false;
 
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, 0);
 		interactor->LaunchEvent("onLeftMouseDown", args);
 
 		delete args;
@@ -380,7 +380,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		interactor->_lastMousePosition = pt;
 		interactor->_mouseMoved = false;
 
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, 0);
 		interactor->LaunchEvent("onRightMouseDown", args);
 
 		delete args;
@@ -401,7 +401,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		interactor->_lastMousePosition = pt;
 
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, 0);
 		interactor->LaunchEvent("onLeftMouseUp", argsUp);
 
 		delete argsUp;
@@ -409,7 +409,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if (interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, 0);
 			interactor->LaunchEvent("onLeftMouseClick", argsClick);
 
 			delete argsClick;
@@ -431,7 +431,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		interactor->_lastMousePosition = pt;
 
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, 0);
 		interactor->LaunchEvent("onRightMouseUp", argsUp);
 
 		delete argsUp;
@@ -439,7 +439,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if (interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, 0);
 			interactor->LaunchEvent("onRightMouseClick", argsClick);
 
 			delete argsClick;

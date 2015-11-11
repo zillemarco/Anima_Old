@@ -98,44 +98,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return result;
 		break;
 	}
-	case WM_MOUSEMOVE:
-	{
-		mouseMoved = true;
-		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
-
-	//	int xPos = GET_X_LPARAM(lParam);
-	//	int yPos = GET_Y_LPARAM(lParam);
-
-	//	int xDelta = lastXPos - xPos;
-	//	int yDelta = lastYPos - yPos;
-
-	//	if (_camera != nullptr)
-	//	{
-	//		if (wParam == MK_MBUTTON)
-	//		{
-	//			_camera->RotateXDeg((float)-yDelta);
-	//			_camera->RotateYDeg((float)xDelta);
-	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	//		}
-	//		else if (wParam == MK_LBUTTON)
-	//		{
-	//			_camera->Move(_camera->GetRight(), ((float)xDelta) / 100.0f);
-	//			_camera->Move(_camera->GetUp(), ((float)-yDelta) / 100.0f);
-	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	//		}
-	//		else if (wParam == MK_RBUTTON)
-	//		{
-	//			_camera->Zoom((float)xDelta);
-	//			_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	//		}
-	//	}
-
-	//	lastXPos = xPos;
-	//	lastYPos = yPos;
-
-		return result;
-		break;
-	}
 	case WM_CHAR:
 	{
 		if (_pbrMaterial != nullptr)
@@ -446,12 +408,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						if (camera)
 						{
 							Anima::AnimaVertex3f origin = camera->GetPosition();
-							Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point, (int)size.x, (int)size.y);
+							Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point);
 							Anima::AnimaVertex3f dir = (end - origin).Normalized();
-							dir *= 10.0f;
+							dir *= 1000.0f;
 							
 							Anima::AnimaPhysicsDebugDrawer* drawer = _renderer->GetPhysicsDebugDrawer();
-							drawer->AddConstantPoint(end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
+							drawer->AddConstantLine(origin, end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
 
 							btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
 
@@ -568,7 +530,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (elapsed >= 100.0)
 		{
 			Anima::AnimaString title = Anima::FormatString("AnimaEngineDemo - FPS: %d", FPS);
-			//SetWindowText(hWnd, title.c_str());
+			SetWindowText(hWnd, title.c_str());
 			FPS = 0;
 			elapsed = 0.0;
 			_fpsTimer.Reset();
@@ -896,7 +858,7 @@ void SetViewport(int w, int h)
 	if (_camerasManager)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.01f, 10.0f);
+		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 100.0f);
 	}
 
 	if (_scene)
@@ -925,13 +887,13 @@ void UpdateFrame()
 
 		if (_renderer && _scene)
 		{
-			//if(!_scene->IsRunning())
-			//	_scene->StartScene();
+			if(!_scene->IsRunning())
+				_scene->StartScene();
 
 			_renderer->Start(_scene);
 			_renderer->Render();
 
-			//_scene->StepScene();
+			_scene->StepScene();
 		}
 
 		_gc->SwapBuffers();

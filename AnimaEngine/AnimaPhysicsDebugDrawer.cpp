@@ -18,9 +18,11 @@ AnimaPhysicsDebugDrawer::AnimaPhysicsDebugDrawer()
 	_debugMode = 0;
 	_shaderProgram = nullptr;
 	
-	_vertexArrayObject = 0;
-	_verticesBufferObject = 0;
-	_colorsBufferObject = 0;
+	_bufferIndex = 0;
+
+	_vertexArrayObject.resize(3, 0);
+	_verticesBufferObject.resize(3, 0);
+	_colorsBufferObject.resize(3, 0);
 }
 
 AnimaPhysicsDebugDrawer::~AnimaPhysicsDebugDrawer()
@@ -108,9 +110,14 @@ void AnimaPhysicsDebugDrawer::DrawDebugScene(AnimaScene* scene)
 		return;
 	}
 	
-//	DrawPhysics(scene);
+	DrawPhysics(scene);
 	DrawConstantPoints(scene);
 	DrawConstantLines(scene);
+	
+	_bufferIndex = (_bufferIndex + 1) % 3;
+
+	_colors.clear();
+	_vertices.clear();
 }
 
 void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)
@@ -127,10 +134,10 @@ void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)
 	}
 	else
 	{
-		if(_vertexArrayObject <= 0)
+		if(_vertexArrayObject[_bufferIndex] <= 0)
 		{
-			glGenVertexArrays(1, &_vertexArrayObject);
-			if (_vertexArrayObject <= 0)
+			glGenVertexArrays(1, &_vertexArrayObject[_bufferIndex]);
+			if (_vertexArrayObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create the VAO");
 				
@@ -141,10 +148,10 @@ void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)
 			}
 		}
 		
-		if(_verticesBufferObject <= 0)
+		if(_verticesBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_verticesBufferObject);
-			if (_verticesBufferObject <= 0)
+			glGenBuffers(1, &_verticesBufferObject[_bufferIndex]);
+			if (_verticesBufferObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create vertices buffer");
 				
@@ -155,10 +162,10 @@ void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)
 			}
 		}
 		
-		if(_colorsBufferObject <= 0)
+		if(_colorsBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_colorsBufferObject);
-			if (_colorsBufferObject <= 0)
+			glGenBuffers(1, &_colorsBufferObject[_bufferIndex]);
+			if (_colorsBufferObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create colors buffer");
 				
@@ -169,17 +176,17 @@ void AnimaPhysicsDebugDrawer::DrawPhysics(AnimaScene* scene)
 			}
 		}
 		
-		glBindVertexArray(_vertexArrayObject);
+		glBindVertexArray(_vertexArrayObject[_bufferIndex]);
 		
 		AFloat* vertices = GetFloatVertices();
-		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatVerticesCount(), vertices, GL_STATIC_DRAW);
 		
 		delete [] vertices;
 		vertices = nullptr;
 		
 		AFloat* colors = GetFloatColors();
-		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetFloatColorsCount(), colors, GL_STATIC_DRAW);
 		
 		delete [] colors;
@@ -218,10 +225,10 @@ void AnimaPhysicsDebugDrawer::DrawConstantPoints(AnimaScene* scene)
 	}
 	else
 	{
-		if(_vertexArrayObject <= 0)
+		if(_vertexArrayObject[_bufferIndex] <= 0)
 		{
-			glGenVertexArrays(1, &_vertexArrayObject);
-			if (_vertexArrayObject <= 0)
+			glGenVertexArrays(1, &_vertexArrayObject[_bufferIndex]);
+			if (_vertexArrayObject[_bufferIndex] <= 0)
 			{
 				glPointSize(pointSize);
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create the points VAO");
@@ -229,10 +236,10 @@ void AnimaPhysicsDebugDrawer::DrawConstantPoints(AnimaScene* scene)
 			}
 		}
 		
-		if(_verticesBufferObject <= 0)
+		if(_verticesBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_verticesBufferObject);
-			if (_verticesBufferObject <= 0)
+			glGenBuffers(1, &_verticesBufferObject[_bufferIndex]);
+			if (_verticesBufferObject[_bufferIndex] <= 0)
 			{
 				glPointSize(pointSize);
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create points vertices buffer");
@@ -240,10 +247,10 @@ void AnimaPhysicsDebugDrawer::DrawConstantPoints(AnimaScene* scene)
 			}
 		}
 		
-		if(_colorsBufferObject <= 0)
+		if(_colorsBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_colorsBufferObject);
-			if (_colorsBufferObject <= 0)
+			glGenBuffers(1, &_colorsBufferObject[_bufferIndex]);
+			if (_colorsBufferObject[_bufferIndex] <= 0)
 			{
 				glPointSize(pointSize);
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create points colors buffer");
@@ -251,17 +258,17 @@ void AnimaPhysicsDebugDrawer::DrawConstantPoints(AnimaScene* scene)
 			}
 		}
 		
-		glBindVertexArray(_vertexArrayObject);
+		glBindVertexArray(_vertexArrayObject[_bufferIndex]);
 		
 		AFloat* vertices = GetPointsFloatVertices();
-		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetPointsFloatVerticesCount(), vertices, GL_STATIC_DRAW);
 		
 		delete [] vertices;
 		vertices = nullptr;
 		
 		AFloat* colors = GetPointsFloatColors();
-		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetPointsFloatColorsCount(), colors, GL_STATIC_DRAW);
 		
 		delete [] colors;
@@ -291,47 +298,47 @@ void AnimaPhysicsDebugDrawer::DrawConstantLines(AnimaScene* scene)
 		return;
 	else
 	{
-		if(_vertexArrayObject <= 0)
+		if(_vertexArrayObject[_bufferIndex] <= 0)
 		{
-			glGenVertexArrays(1, &_vertexArrayObject);
-			if (_vertexArrayObject <= 0)
+			glGenVertexArrays(1, &_vertexArrayObject[_bufferIndex]);
+			if (_vertexArrayObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create the lines VAO");
 				return;
 			}
 		}
 		
-		if(_verticesBufferObject <= 0)
+		if(_verticesBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_verticesBufferObject);
-			if (_verticesBufferObject <= 0)
+			glGenBuffers(1, &_verticesBufferObject[_bufferIndex]);
+			if (_verticesBufferObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create lines vertices buffer");
 				return;
 			}
 		}
 		
-		if(_colorsBufferObject <= 0)
+		if(_colorsBufferObject[_bufferIndex] <= 0)
 		{
-			glGenBuffers(1, &_colorsBufferObject);
-			if (_colorsBufferObject <= 0)
+			glGenBuffers(1, &_colorsBufferObject[_bufferIndex]);
+			if (_colorsBufferObject[_bufferIndex] <= 0)
 			{
 				AnimaLogger::LogMessage("PHYSICS DEBUG ERROR - Unable to create lines colors buffer");
 				return;
 			}
 		}
 		
-		glBindVertexArray(_vertexArrayObject);
+		glBindVertexArray(_vertexArrayObject[_bufferIndex]);
 		
 		AFloat* vertices = GetLinesFloatVertices();
-		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _verticesBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetLinesFloatVerticesCount(), vertices, GL_STATIC_DRAW);
 		
 		delete [] vertices;
 		vertices = nullptr;
 		
 		AFloat* colors = GetLinesFloatColors();
-		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, _colorsBufferObject[_bufferIndex]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(AFloat) * GetLinesFloatColorsCount(), colors, GL_STATIC_DRAW);
 		
 		delete [] colors;

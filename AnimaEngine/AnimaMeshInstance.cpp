@@ -28,6 +28,7 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGenerator
 	_physCollisionShape = nullptr;
 	_physMotionState = nullptr;
 	_physRigidBody = nullptr;
+	_meshInterface = nullptr;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)
@@ -62,22 +63,28 @@ AnimaMeshInstance::AnimaMeshInstance(AnimaMeshInstance&& src)
 
 AnimaMeshInstance::~AnimaMeshInstance()
 {
-	if(_physRigidBody == nullptr)
+	if(_physRigidBody != nullptr)
 	{
 		delete _physRigidBody;
 		_physRigidBody = nullptr;
 	}
 	
-	if(_physMotionState == nullptr)
+	if(_physMotionState != nullptr)
 	{
 		delete _physMotionState;
 		_physMotionState = nullptr;
 	}
 	
-	if(_physCollisionShape == nullptr)
+	if(_physCollisionShape != nullptr)
 	{
 		delete _physCollisionShape;
 		_physCollisionShape = nullptr;
+	}
+
+	if (_meshInterface != nullptr)
+	{
+		delete _meshInterface;
+		_meshInterface = nullptr;
 	}
 }
 
@@ -351,35 +358,84 @@ void AnimaMeshInstance::InitializePhysicData()
 		
 		if(_physCollisionShape == nullptr)
 		{
-			btConvexHullShape* tempShape = new btConvexHullShape();
+			//btConvexHullShape* tempShape = new btConvexHullShape();
 			
-			AInt count = _mesh->GetFacesCount();
-			for(AInt i = 0; i < count; i++)
+			//AInt count = _mesh->GetFacesCount();
+			//for(AInt i = 0; i < count; i++)
+			//{
+			//	AnimaFace face = _mesh->GetFace(i);
+			//	
+			//	AnimaVertex3f vertex = _mesh->GetVertex(face.GetIndex(0));
+			//	tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+
+			//	vertex = _mesh->GetVertex(face.GetIndex(1));
+			//	tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+			//	
+			//	vertex = _mesh->GetVertex(face.GetIndex(2));
+			//	tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+			//}
+
+			//btShapeHull* hull = new btShapeHull(tempShape);
+			//btScalar margin = tempShape->getMargin();
+			//hull->buildHull(margin);
+
+			//_physCollisionShape = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
+			////_physCollisionShape = tempShape;
+
+			//delete hull;
+			//hull = nullptr;
+
+			//delete tempShape;
+			//tempShape = nullptr;
+
+			_indices.clear();
+			_vertices.clear();
+
+			AInt facesCount = _mesh->GetFacesCount();
+			for (AInt i = 0; i < facesCount; i++)
 			{
 				AnimaFace face = _mesh->GetFace(i);
-				
-				AnimaVertex3f vertex = _mesh->GetVertex(face.GetIndex(0));
-				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
 
-				vertex = _mesh->GetVertex(face.GetIndex(1));
-				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
-				
-				vertex = _mesh->GetVertex(face.GetIndex(2));
-				tempShape->addPoint(btVector3(vertex.x, vertex.y, vertex.z));
+				_indices.push_back(face.GetIndex(0));
+				_indices.push_back(face.GetIndex(1));
+				_indices.push_back(face.GetIndex(2));
 			}
-			
-//			btShapeHull* hull = new btShapeHull(tempShape);
-//			btScalar margin = tempShape->getMargin();
-//			hull->buildHull(margin);
-//			
-//			_physCollisionShape = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
-			_physCollisionShape = tempShape;
-			
-//			delete hull;
-//			hull = nullptr;
-//			
-//			delete tempShape;
-//			tempShape = nullptr;
+			AInt verticesCount = _mesh->GetVerticesCount();
+			for (AInt i = 0; i < verticesCount; i++)
+			{
+				AnimaVertex3f v = _mesh->GetVertex(i);
+				_vertices.push_back(v.x);
+				_vertices.push_back(v.y);
+				_vertices.push_back(v.z);
+			}
+
+			btIndexedMesh im;
+			im.m_vertexBase = (const AUchar*)&_vertices[0];
+			im.m_vertexStride = sizeof(AFloat) * 3;
+			im.m_numVertices = _vertices.size();
+			im.m_triangleIndexBase = (const AUchar*)&_indices[0];
+			im.m_triangleIndexStride = sizeof(AInt) * 3;
+			im.m_numTriangles = facesCount;
+			im.m_indexType = PHY_INTEGER;
+			im.m_vertexType = PHY_FLOAT;
+
+			_meshInterface = new btTriangleIndexVertexArray();
+			_meshInterface->addIndexedMesh(im);
+
+			//_physCollisionShape = new btConvexTriangleMeshShape(_meshInterface);
+			btConvexTriangleMeshShape* tempShape = new btConvexTriangleMeshShape(_meshInterface);
+
+			btShapeHull* hull = new btShapeHull(tempShape);
+			btScalar margin = tempShape->getMargin();
+			hull->buildHull(margin);
+
+			_physCollisionShape = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
+
+			delete hull;
+			hull = nullptr;
+
+			delete tempShape;
+			tempShape = nullptr;
 		}
 	
 		if(_physMotionState == nullptr)

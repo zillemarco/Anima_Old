@@ -37,9 +37,9 @@ public:
 	void SetupPrograms(AnimaEngine* engine);
 	void DrawDebugScene(AnimaScene* scene);
 	
-	AUint GetVertexArrayObject() const { return _vertexArrayObject; }
-	AUint GetVerticesBufferObject() const { return _verticesBufferObject; }
-	AUint GetColorsBufferObject() const { return _colorsBufferObject; }
+	AUint GetVertexArrayObject() const { return _vertexArrayObject[_bufferIndex]; }
+	AUint GetVerticesBufferObject() const { return _verticesBufferObject[_bufferIndex]; }
+	AUint GetColorsBufferObject() const { return _colorsBufferObject[_bufferIndex]; }
 	
 	void AddConstantPoint(const AnimaVertex3f& point, const AnimaColor3f& color);
 	void AddConstantLine(const AnimaVertex3f& from, const AnimaVertex3f& to, const AnimaColor3f& color);
@@ -77,9 +77,11 @@ protected:
 	AnimaArray<AnimaVertex3f> _constantLines;
 	AnimaArray<AnimaColor3f> _constantLinesColors;
 	
-	AUint _vertexArrayObject;
-	AUint _verticesBufferObject;
-	AUint _colorsBufferObject;
+	AUint _bufferIndex;
+
+	AnimaArray<AUint> _vertexArrayObject;
+	AnimaArray<AUint> _verticesBufferObject;
+	AnimaArray<AUint> _colorsBufferObject;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

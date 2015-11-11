@@ -54,7 +54,7 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 		SetEventHandler("onLeftMouseDragged", [] (AnimaEventArgs* args) {			
 			AnimaVertex2f delta = ((AnimaMouseDraggedEventArgs*)args)->GetDelta();
 			AnimaEngine* engine = ((AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
-			bool rotate = ((AnimaMouseDraggedEventArgs*)args)->GetModifiers() & (AInt)AnimaKeyboardModifier::AKM_SUPER;
+			bool rotate = false; // ((AnimaMouseDraggedEventArgs*)args)->GetModifiers() & (AInt)AnimaKeyboardModifier::AKM_SUPER;
 			
 			if(engine)
 			{
