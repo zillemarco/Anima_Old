@@ -13,6 +13,12 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+const AFloat AnimaMath::PI = M_PI;
+const AFloat AnimaMath::HALF_PI = AnimaMath::PI / 2.0f;
+const AFloat AnimaMath::QUARTER_PI = AnimaMath::PI / 4.0f;
+const AFloat AnimaMath::TWO_PI = AnimaMath::PI * 2.0f;
+const AFloat AnimaMath::EPSILON = 1e-6f;
+
 AnimaQuaternion AnimaMath::QuaternionMulQuaternion(const AnimaQuaternion& q1, const AnimaQuaternion& q2)
 {
 	float w = q1.vec[3] * q2.vec[3] - q1.vec[0] * q2.vec[0] - q1.vec[1] * q2.vec[1] - q1.vec[2] * q2.vec[2];

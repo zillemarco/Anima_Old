@@ -14,6 +14,8 @@
 #include "AnimaTypes.h"
 #include "AnimaTimer.h"
 #include "AnimaMappedValues.h"
+#include "AnimaMouseInteractor.h"
+#include "AnimaKeyboardInteractor.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -103,6 +105,12 @@ public:
 	
 	inline btDiscreteDynamicsWorld* GetPhysWorld() { return _physWorld; }
 	
+	inline void SetMouseInteractor(AnimaMouseInteractor* mouseInteractor) { _mouseInteractor = mouseInteractor; }
+	inline AnimaMouseInteractor* GetMouseInteractor() { return _mouseInteractor; }
+	
+	inline void SetKeyboardInteractor(AnimaKeyboardInteractor* keyboardInteractor) { _keyboardInteractor = keyboardInteractor; }
+	inline AnimaKeyboardInteractor* GetKeyboardInteractor() { return _keyboardInteractor; }
+	
 	virtual void InitializePhysicObjects();
 	
 	bool IsRunning() const { return _isRunning; }
@@ -136,6 +144,9 @@ protected:
 	btCollisionDispatcher* _physCollisionDispatcher;
 	btConstraintSolver* _physConstraintSolver;
 	btDiscreteDynamicsWorld* _physWorld;
+	
+	AnimaMouseInteractor* _mouseInteractor;
+	AnimaKeyboardInteractor* _keyboardInteractor;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

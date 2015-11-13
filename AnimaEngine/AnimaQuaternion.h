@@ -54,6 +54,8 @@ public:
 
 	void Set(const AFloat x, const AFloat y, const AFloat z, const AFloat w);
 
+	void FromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll);
+	void FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
 	void FromAxisAndAngleRad(const AnimaVertex3f& axis, AFloat rad);
 	void FromAxisAndAngleDeg(const AnimaVertex3f& axis, AFloat deg);
 	void FromAxisAndAngleRad(const AFloat axis[3], AFloat rad);

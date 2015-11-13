@@ -9,6 +9,7 @@
 #include "AnimaMouseInteractor.h"
 #include "AnimaKeyboardInteractor.h"
 #include "AnimaVertex.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -36,7 +37,8 @@ AnimaMouseInteractor::AnimaMouseInteractor()
 		{"onRightMouseDragged", ""},
 		{"onRightMouseDown",	""},
 		{"onRightMouseUp",		""},
-		{"onRightMouseClick",	""}
+		{"onRightMouseClick",	""},
+		{"onUpdateScene",		""}
 	};
 }
 
@@ -464,6 +466,16 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 			argsClick = nullptr;
 		}
 	}
+}
+
+void AnimaMouseInteractor::UpdateScene(AnimaScene* scene, AFloat elapsedTime)
+{
+	AnimaEventArgs* args = new AnimaUpdateSceneEventArgs(this, scene, elapsedTime);
+	
+	LaunchEvent("onUpdateScene", args);
+	
+	delete args;
+	args = nullptr;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -51,6 +51,9 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	_physConstraintSolver = nullptr;
 	_physWorld = nullptr;
 	
+	_mouseInteractor = nullptr;
+	_keyboardInteractor = nullptr;
+	
 	_worldGravity = AnimaVertex3f(0.0f, -9.81f, 0.0f);
 	_totalSceneTime = 0.0;
 	_isRunning = false;
@@ -369,6 +372,12 @@ void AnimaScene::StepScene()
 	// Riavvio il timer in modo da calcolare il tempo trascorso alla prossima chiamata di StepScene
 	_timer.Reset();
 	
+	if(_keyboardInteractor != nullptr)
+		_keyboardInteractor->UpdateScene(this, elapsedTime);
+	
+	if(_mouseInteractor != nullptr)
+		_mouseInteractor->UpdateScene(this, elapsedTime);
+	
 	// Se è stata inizializzata la simulazione fisica allora la faccio avanzare
 	if(_physWorld != nullptr)
 		_physWorld->stepSimulation(btScalar(elapsedTime));
@@ -380,6 +389,10 @@ void AnimaScene::StepScene()
 	AInt count = _meshInstancesManager->GetMeshInstancesCount();
 	for(AInt i = 0; i < count; i++)
 		_meshInstancesManager->GetMeshInstance(i)->GetTransformation()->UpdateMatrix();
+	
+	_camerasManager->UpdateCameras(elapsedTime);
+	
+	_lightsManager->UpdateLightsMatrix(_camerasManager->GetActiveCamera());
 }
 
 END_ANIMA_ENGINE_NAMESPACE

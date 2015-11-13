@@ -19,6 +19,7 @@ public:
 		//	8[31]	9[32]	10[33]	11[34]
 		//	12[41]	13[42]	14[43]	15[44]
 		float m[16];
+		float vecM[4][4];
 		struct
 		{
 			float x[4];
@@ -72,7 +73,7 @@ public:
 	void TransposeSSE();
 	AnimaMatrix Transposed() const;
 	AnimaMatrix TransposedSSE() const;
-
+	
 	void Inverse();
 	void InverseSSE();
 	AnimaMatrix Inversed() const;
@@ -133,6 +134,11 @@ public:
 	void RotateZDeg(AFloat deg);
 	static AnimaMatrix MakeRotationZRad(AFloat rad);
 	static AnimaMatrix MakeRotationZDeg(AFloat deg);
+	
+	void FromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll);
+	void FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
+	static AnimaMatrix MakeFromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll);
+	static AnimaMatrix MakeFromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll);
 
 	AnimaVertex3f GetRotationAxes() const;
 

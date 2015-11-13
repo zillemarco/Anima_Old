@@ -79,6 +79,13 @@ float camSpeedMax = 1.0f;
 
 bool sceneSaved = false;
 
+bool moveForwardsPressed = false;
+bool moveBackwardsPressed = false;
+bool moveRightPressed = false;
+bool moveLeftPressed = false;
+bool moveUpPressed = false;
+bool moveDownPressed = false;
+
 @implementation AnimaEngineDemoView
 {
 	CVDisplayLinkRef displayLink;
@@ -183,7 +190,6 @@ bool sceneSaved = false;
 					
 					NSView* view = (NSView*)((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetWindowId();
 					Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
-					NSRect rc = [view bounds];
 					
 					if(engine)
 					{
@@ -197,41 +203,21 @@ bool sceneSaved = false;
 							
 							if(camera)
 							{
-								Anima::AnimaVertex4f startNDC((point.x / rc.size.width - 0.5) * 2.0, (point.y / rc.size.height - 0.5) * 2.0, -1.0, 1.0);
-								Anima::AnimaVertex4f endNDC((point.x / rc.size.width - 0.5) * 2.0, (point.y / rc.size.height - 0.5) * 2.0, 1.0, 1.0);
-								
-								Anima::AnimaMatrix inversePV = camera->GetInversedProjectionViewMatrix();
-								
-								Anima::AnimaVertex4f startWorld = inversePV * startNDC;
-								startWorld /= startWorld.w;
-								Anima::AnimaVertex4f endWorld = inversePV * endNDC;
-								endWorld /= endWorld.w;
-								
 								Anima::AnimaVertex3f origin = camera->GetPosition();
-								Anima::AnimaVertex3f end = endWorld;
-								Anima::AnimaVertex3f dir = end - origin;
-//								dir *= 1000.0f;
+								Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point);
 								
-								_renderer->GetPhysicsDebugDrawer()->AddConstantPoint(end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
-								_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
-								_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, dir, Anima::AnimaColor3f(0.0, 0.0, 1.0));
-								
-								btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+								btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z));
 								
 								btDynamicsWorld* world = scene->GetPhysWorld();
 								
-								world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+								world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z), RayCallback);
 								
 								if(RayCallback.hasHit())
 								{
 									Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
-									
 									Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
 									
-									_renderer->GetPhysicsDebugDrawer()->AddConstantPoint(contactPoint, Anima::AnimaColor3f(1.0, 0.0, 0.0));
-									_renderer->GetPhysicsDebugDrawer()->AddConstantLine(origin, contactPoint, Anima::AnimaColor3f(1.0, 0.0, 0.0));
-									
-									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", instance->GetMaterial()->GetName().c_str());
+									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
 									
 									NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
 									
@@ -253,177 +239,111 @@ bool sceneSaved = false;
 			
 			if(keyboardInteractor.Install((long)self, &_engine))
 			{
-				keyboardInteractor.SetEventHandler("onKeyDown", [&] (Anima::AnimaEventArgs* args) {
+				keyboardInteractor.SetEventHandler("onUpdateScene", [&] (Anima::AnimaEventArgs* args) {
+					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
+					Anima::AnimaKeyboardStatusMap keyboardStatus = ((Anima::AnimaKeyboardInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetKeyboardStatus();
 					
-					if (_pbrMaterial != nullptr)
+					if(scene)
 					{
-						float inc = 0.02f;
-						camSpeed = fmin(camSpeed + camSpeedInc, camSpeedMax);
-						switch (((Anima::AnimaKeyboardEventArgs*)args)->GetKey())
+						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+						
+						if(camera)
 						{
-							case Anima::AnimaKeyboardKey::AKK_W:
+							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
+							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_W])
 							{
-								_camera->Move(_camera->GetForward(), camSpeed);
-								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_S:
-							{
-								_camera->Move(_camera->GetForward(), -camSpeed);
-								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_D:
-							{
-								_camera->Move(_camera->GetRight(), camSpeed);
-								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_A:
-							{
-								_camera->Move(_camera->GetRight(), -camSpeed);
-								_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_P:
-							{
-								float val = _pbrMaterial->GetFloat("Metallic");
-								val = fmax(0.0f, val - inc);
-								_pbrMaterial->SetFloat("Metallic", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_M:
-							{
-								float val = _pbrMaterial->GetFloat("Metallic");
-								val = fmin(1.0f, val + inc);
-								_pbrMaterial->SetFloat("Metallic", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_X:
-							{
-								float val = _pbrMaterial->GetFloat("Specular");
-								val = fmax(0.0f, val - inc);
-								_pbrMaterial->SetFloat("Specular", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_Z:
-							{
-								float val = _pbrMaterial->GetFloat("Specular");
-								val = fmin(1.0f, val + inc);
-								_pbrMaterial->SetFloat("Specular", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_V:
-							{
-								float val = _renderer->GetFloat("BlurSize");
-								val = fmax(0.0f, val - (inc / 1000.0));
-								_renderer->SetFloat("BlurSize", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_B:
-							{
-								float val = _renderer->GetFloat("BlurSize");
-								val = fmin(0.5f, val + (inc / 1000.0));
-								_renderer->SetFloat("BlurSize", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_L:
-							{
-								float val = _renderer->GetFloat("BrightnessThreshold");
-								val = fmax(0.0f, val - inc);
-								_renderer->SetFloat("BrightnessThreshold", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_K:
-							{
-								float val = _renderer->GetFloat("BrightnessThreshold");
-								val = fmin(1.0f, val + inc);
-								_renderer->SetFloat("BrightnessThreshold", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_H:
-							{
-								float val = _renderer->GetFloat("BloomBlurScale");
-								val = fmax(0.0f, val - (inc / 1000.0));
-								_renderer->SetFloat("BloomBlurScale", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_G:
-							{
-								float val = _renderer->GetFloat("BloomBlurScale");
-								val = fmin(0.5f, val + (inc / 1000.0));
-								_renderer->SetFloat("BloomBlurScale", val);
-								printf("%f\n", val);
-								break;
-							}
-							case Anima::AnimaKeyboardKey::AKK_RIGHT_BRACKET:
-							{
-								if(((Anima::AnimaKeyboardEventArgs*)args)->GetModifiers() & (Anima::AInt)Anima::AnimaKeyboardModifier::AKM_SHIFT)
+								if (!moveForwardsPressed)
 								{
-									float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-									val = fmin(1.0f, val + inc);
-									_pbrMaterial->SetFloat("ReflectionIntensity", val);
+									moveForwardsPressed = true;
+									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
 								}
-								else
+									
+								direction.z += 1.0f;
+							}
+							else
+							{
+								moveForwardsPressed = false;
+							}
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_S])
+							{
+								if (!moveBackwardsPressed)
 								{
-									float val = _pbrMaterial->GetFloat("Roughness");
-									val = fmin(1.0f, val + inc);
-									_pbrMaterial->SetFloat("Roughness", val);
+									moveBackwardsPressed = true;
+									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
 								}
-								break;
+							
+								direction.z -= 1.0f;
 							}
-							case Anima::AnimaKeyboardKey::AKK_SLASH:
+							else
 							{
-								float val = _pbrMaterial->GetFloat("Roughness");
-								val = fmax(0.0f, val - inc);
-								_pbrMaterial->SetFloat("Roughness", val);
-								break;
+								moveBackwardsPressed = false;
 							}
-							case Anima::AnimaKeyboardKey::AKK_7:
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_D])
 							{
-								if(((Anima::AnimaKeyboardEventArgs*)args)->GetModifiers() & (Anima::AInt)Anima::AnimaKeyboardModifier::AKM_SHIFT)
+								if (!moveRightPressed)
 								{
-									float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-									val = fmax(0.0f, val - inc);
-									_pbrMaterial->SetFloat("ReflectionIntensity", val);
+									moveRightPressed = true;
+									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
 								}
-								break;
+								
+								direction.x += 1.0f;
 							}
-							case Anima::AnimaKeyboardKey::AKK_1:
+							else
 							{
-								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("oro");
-								break;
+								moveRightPressed = false;
 							}
-							case Anima::AnimaKeyboardKey::AKK_2:
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_A])
 							{
-								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("rame");
-								break;
+								if (!moveLeftPressed)
+								{
+									moveLeftPressed = true;
+									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
+								}
+									
+								direction.x -= 1.0f;
 							}
-							case Anima::AnimaKeyboardKey::AKK_3:
+							else
 							{
-								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("gomma");
-								break;
+								moveLeftPressed = false;
 							}
-							case Anima::AnimaKeyboardKey::AKK_4:
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_E])
 							{
-								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("legno");
-								break;
+								if (!moveUpPressed)
+								{
+									moveUpPressed = true;
+									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+								}
+								
+								direction.y += 1.0f;
 							}
-							case Anima::AnimaKeyboardKey::AKK_5:
+							else
 							{
-								_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("floor-material");
-								break;
+								moveUpPressed = false;
 							}
-							case Anima::AnimaKeyboardKey::AKK_6:
+								
+							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_Q])
 							{
-								_renderer->SetBoolean("ApplyFXAA", !(_renderer->GetBoolean("ApplyFXAA")));
-								break;
+								if (!moveDownPressed)
+								{
+									moveDownPressed = true;
+									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+								}
+								
+								direction.y -= 1.0f;
 							}
+							else
+							{
+								moveDownPressed = false;
+							}
+								
+							camera->SetUpdateData(direction);
 						}
 					}
 				});
@@ -493,10 +413,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		
 		gc->MakeCurrent();
 	}
-}
-- (void) keyUp:(NSEvent *)theEvent
-{
-	camSpeed = 0.01f;
 }
 
 -(void) viewDidMoveToWindow
@@ -571,6 +487,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_scene->InitializePhysics();
 	_scene->InitializePhysicObjects();
 	
+	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
 	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
@@ -587,6 +505,8 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		return false;
 #else
 	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	if (!_camera)
+		return false;
 #endif
 	
 	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);

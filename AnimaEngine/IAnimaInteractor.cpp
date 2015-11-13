@@ -7,6 +7,7 @@
 //
 
 #include "IAnimaInteractor.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

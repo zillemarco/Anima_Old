@@ -159,14 +159,14 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 		{
 			child = scene->GetCamerasManager()->GetCameraFromName(childData._name);
 		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
-		{
-			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaFirstPersonCamera>(childData._name);
-		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaThirdPersonCamera))
-		{
-			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaThirdPersonCamera>(childData._name);
-		}
+//		else if (childData._type == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
+//		{
+//			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaFirstPersonCamera>(childData._name);
+//		}
+//		else if (childData._type == ANIMA_CLASS_NAME(AnimaThirdPersonCamera))
+//		{
+//			child = scene->GetCamerasManager()->GetCameraOfTypeFromName<AnimaThirdPersonCamera>(childData._name);
+//		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaLight))
 		{
 			child = scene->GetLightsManager()->GetLightFromName(childData._name);
@@ -231,8 +231,8 @@ void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)
 
 void AnimaSceneObject::SetPosition(AFloat x, AFloat y, AFloat z)
 {
-	AnimaMappedValues::SetVector("Position", x, y, z);
-	_transformation.Translate(x, y, z);
+	AnimaVertex3f position(x, y, z);
+	SetPosition(position);
 }
 
 void AnimaSceneObject::SetParentObject(AnimaSceneObject* parentObject)

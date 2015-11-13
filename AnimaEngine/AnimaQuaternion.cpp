@@ -118,19 +118,13 @@ AnimaVertex3f AnimaQuaternion::operator*(const AnimaVertex3f& v) const
 }
 
 AnimaQuaternion& AnimaQuaternion::operator*=(const AnimaQuaternion& p)
-{
-	float vp[3];
-
-	vp[0] = w * p.x + x * p.w + y * p.z - z * p.y;
-	vp[1] = w * p.y - x * p.z + y * p.w + z * p.x;
-	vp[2] = w * p.z + x * p.y - y * p.x + z * p.w;
-
-	w = w * p.w - (x * p.x + y * p.y + z * p.z);
-
-	x = vp[0];
-	y = vp[1];
-	z = vp[2];
-
+{	
+	AnimaQuaternion tmp((w * p.x) + (x * p.w) - (y * p.z) + (z * p.y),
+						(w * p.y) + (x * p.z) + (y * p.w) - (z * p.x),
+						(w * p.z) - (x * p.y) + (y * p.x) + (z * p.w),
+						(w * p.w) - (x * p.x) - (y * p.y) - (z * p.z));
+	
+	*this = tmp;
 	return *this;
 }
 
@@ -161,14 +155,25 @@ void AnimaQuaternion::Set(const AFloat x, const AFloat y, const AFloat z, const 
 	this->w = w;
 }
 
+void AnimaQuaternion::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
+{
+	FromHeadPitchRollRad(AnimaMath::DegToRad(head), AnimaMath::DegToRad(pitch), AnimaMath::DegToRad(roll));
+}
+
+void AnimaQuaternion::FromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll)
+{
+	FromMatrix(AnimaMatrix::MakeFromHeadPitchRollRad(head, pitch, roll));
+}
+
 void AnimaQuaternion::FromAxisAndAngleRad(const AnimaVertex3f& axis, AFloat rad)
 {
 	rad *= 0.5f;
+	AFloat s = sinf(rad);
+	
 	w = cosf(rad);
-	float sr = sinf(rad);
-	x = axis.vec[0] * sr;
-	y = axis.vec[1] * sr;
-	z = axis.vec[2] * sr;
+	x = axis.vec[0] * s;
+	y = axis.vec[1] * s;
+	z = axis.vec[2] * s;
 }
 
 void AnimaQuaternion::FromAxisAndAngleDeg(const AnimaVertex3f& axis, AFloat deg)
@@ -178,12 +183,7 @@ void AnimaQuaternion::FromAxisAndAngleDeg(const AnimaVertex3f& axis, AFloat deg)
 
 void AnimaQuaternion::FromAxisAndAngleRad(const AFloat axis[3], AFloat rad)
 {
-	rad *= 0.5f;
-	w = cosf(rad);
-	float sr = sinf(rad);
-	x = axis[0] * sr;
-	y = axis[1] * sr;
-	z = axis[2] * sr;
+	FromAxisAndAngleRad(AnimaVertex3f(axis[0], axis[1], axis[2]), rad);
 }
 
 void AnimaQuaternion::FromAxisAndAngleDeg(const AFloat axis[3], AFloat deg)
@@ -193,37 +193,52 @@ void AnimaQuaternion::FromAxisAndAngleDeg(const AFloat axis[3], AFloat deg)
 
 void AnimaQuaternion::FromMatrix(const AnimaMatrix& mat)
 {
-	w = 1.0f + mat.m[0] + mat.m[5] + mat.m[10];
-	if (w <= 0.0f)
-		SetIdentity();
+	AFloat s = 0.0f;
+	AFloat q[4] = {0.0f};
+	AFloat trace = mat.vecM[0][0] + mat.vecM[1][1] + mat.vecM[2][2];
+	
+	if (trace > 0.0f)
+	{
+		s = sqrtf(trace + 1.0f);
+		q[3] = s * 0.5f;
+		s = 0.5f / s;
+		q[0] = (mat.vecM[1][2] - mat.vecM[2][1]) * s;
+		q[1] = (mat.vecM[2][0] - mat.vecM[0][2]) * s;
+		q[2] = (mat.vecM[0][1] - mat.vecM[1][0]) * s;
+	}
 	else
 	{
-		w = sqrt(w) * 0.5f;
-		float invW4 = 0.25f / w;
-		x = (mat.m[9] - mat.m[6]) * invW4;
-		y = (mat.m[2] - mat.m[8]) * invW4;
-		z = (mat.m[4] - mat.m[1]) * invW4;
+		AInt nxt[3] = {1, 2, 0};
+		AInt i = 0, j = 0, k = 0;
+		
+		if (mat.vecM[1][1] > mat.vecM[0][0])
+			i = 1;
+		
+		if (mat.vecM[2][2] > mat.vecM[i][i])
+			i = 2;
+		
+		j = nxt[i];
+		k = nxt[j];
+		s = sqrtf((mat.vecM[i][i] - (mat.vecM[j][j] + mat.vecM[k][k])) + 1.0f);
+		
+		q[i] = s * 0.5f;
+		s = 0.5f / s;
+		q[3] = (mat.vecM[j][k] - mat.vecM[k][j]) * s;
+		q[j] = (mat.vecM[i][j] + mat.vecM[j][i]) * s;
+		q[k] = (mat.vecM[i][k] + mat.vecM[k][i]) * s;
 	}
+	
+	x = q[0], y = q[1], z = q[2], w = q[3];
 }
 
 void AnimaQuaternion::FromMatrix(const AFloat mat[16])
 {
-	w = 1.0f + mat[0] + mat[5] + mat[10];
-	if (w <= 0.0f)
-		SetIdentity();
-	else
-	{
-		w = sqrt(w) * 0.5f;
-		float invW4 = 0.25f / w;
-		x = (mat[9] - mat[6]) * invW4;
-		y = (mat[2] - mat[8]) * invW4;
-		z = (mat[4] - mat[1]) * invW4;
-	}
+	return FromMatrix(AnimaMatrix(mat));
 }
 
 AnimaMatrix AnimaQuaternion::GetMatrix() const
 {
-	float x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
+	AFloat x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
 	x2 = x + x;
 	y2 = y + y;
 	z2 = z + z;
@@ -260,7 +275,7 @@ AnimaMatrix AnimaQuaternion::GetMatrix() const
 
 void AnimaQuaternion::GetMatrix(AFloat mat[16]) const
 {
-	float x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
+	AFloat x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
 	x2 = x + x;
 	y2 = y + y;
 	z2 = z + z;
@@ -293,7 +308,7 @@ void AnimaQuaternion::GetMatrix(AFloat mat[16]) const
 
 AnimaMatrix AnimaQuaternion::GetMatrix4x3() const
 {
-	float x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
+	AFloat x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
 	x2 = x + x;
 	y2 = y + y;
 	z2 = z + z;
@@ -326,7 +341,7 @@ AnimaMatrix AnimaQuaternion::GetMatrix4x3() const
 
 void AnimaQuaternion::GetMatrix4x3(AFloat mat[12]) const
 {
-	float x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
+	AFloat x2, y2, z2, xx, yy, zz, xy, yz, xz, wx, wy, wz;
 	x2 = x + x;
 	y2 = y + y;
 	z2 = z + z;
@@ -363,7 +378,7 @@ void AnimaQuaternion::SetIdentity()
 
 void AnimaQuaternion::Slerp(const AnimaQuaternion& q, const AFloat c)
 {
-	float omega, cosfomega, sinfomega, k1, k2;
+	AFloat omega, cosfomega, sinfomega, k1, k2;
 	AnimaQuaternion q2;
 	cosfomega = x * q.x + y * q.y + z * q.z + w * q.w;
 	if (cosfomega < 0)
@@ -398,39 +413,9 @@ void AnimaQuaternion::Slerp(const AnimaQuaternion& q, const AFloat c)
 
 AnimaQuaternion AnimaQuaternion::Slerped(const AnimaQuaternion& q, const AFloat c) const
 {
-	float omega, cosfomega, sinfomega, k1, k2;
-	AnimaQuaternion q2, q3;
-	cosfomega = x * q.x + y * q.y + z * q.z + w * q.w;
-	if (cosfomega < 0)
-	{
-		cosfomega = -cosfomega;
-		q2.x = -q.x;
-		q2.y = -q.y;
-		q2.z = -q.z;
-		q2.w = -q.w;
-	}
-	else
-		q2 = q;
-
-	if (1 - cosfomega > .000001f)
-	{
-		omega = acosf(cosfomega);
-		sinfomega = sinf(omega);
-		k1 = sinf((1 - c) * omega) / sinfomega;
-		k2 = sinf(c * omega) / sinfomega;
-	}
-	else
-	{
-		k1 = 1 - c;
-		k2 = c;
-	}
-
-	q3.x = x * k1 + q2.x * k2;
-	q3.y = y * k1 + q2.y * k2;
-	q3.z = z * k1 + q2.z * k2;
-	q3.w = w * k1 + q2.w * k2;
-
-	return q3;
+	AnimaQuaternion v = *this;
+	v.Slerp(q, c);
+	return v;
 }
 
 void AnimaQuaternion::Conjugate()
@@ -448,21 +433,17 @@ AnimaQuaternion AnimaQuaternion::Conjugated() const
 void AnimaQuaternion::Inverse()
 {
 	Conjugate();
-	float invmag2 = 1.0f / Magnitude2();
-	x *= invmag2;
-	y *= invmag2;
-	z *= invmag2;
-	w *= invmag2;
+	AFloat invMag = 1.0f / Magnitude();
+	x *= invMag;
+	y *= invMag;
+	z *= invMag;
+	w *= invMag;
 }
 
 AnimaQuaternion AnimaQuaternion::Inversed() const
 {
-	AnimaQuaternion q = Conjugated();
-	float invmag2 = 1.0f / Magnitude2();
-	q.x *= invmag2;
-	q.y *= invmag2;
-	q.z *= invmag2;
-	q.w *= invmag2;
+	AnimaQuaternion q = *this;
+	q.Inverse();
 	return q;
 }
 
@@ -478,40 +459,31 @@ AFloat AnimaQuaternion::Magnitude2() const
 
 void AnimaQuaternion::Normalize()
 {
-	float mag = Magnitude();
+	AFloat mag = Magnitude();
 	
 	if (mag < 0.000001f)
 		return;
 
-	float invmag = 1.0f / mag;
-	x *= invmag;
-	y *= invmag;
-	z *= invmag;
-	w *= invmag;
+	AFloat invMag = 1.0f / mag;
+	x *= invMag;
+	y *= invMag;
+	z *= invMag;
+	w *= invMag;
 }
 
 AnimaQuaternion AnimaQuaternion::Normalized() const
 {
-	float mag = Magnitude();
-	if (mag < .000001f)
-		return *this;
-	float invmag = 1.0f / mag;
-
 	AnimaQuaternion q(*this);
-	q.x *= invmag;
-	q.y *= invmag;
-	q.z *= invmag;
-	q.w *= invmag;
-
+	q.Inverse();
 	return q;
 }
 
 void AnimaQuaternion::Scale(const AFloat s)
 {
 	w *= s;
-	float s1 = sqrt(1.0f - w * w);
-	float s2 = sqrt(x * x + y * y + z * z);
-	float s3 = s1 / s2;
+	AFloat s1 = sqrt(1.0f - w * w);
+	AFloat s2 = sqrt(x * x + y * y + z * z);
+	AFloat s3 = s1 / s2;
 	if (s2 < 0.00001f)
 	{
 		x = 0.0f;
@@ -529,24 +501,7 @@ void AnimaQuaternion::Scale(const AFloat s)
 AnimaQuaternion AnimaQuaternion::Scaled(const AFloat s) const
 {
 	AnimaQuaternion q(*this);
-
-	q.w *= s;
-	float s1 = sqrt(1.0f - q.w * q.w);
-	float s2 = sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
-	float s3 = s1 / s2;
-	if (s2 < 0.00001f)
-	{
-		q.x = 0.0f;
-		q.y = 0.0f;
-		q.z = 0.0f;
-	}
-	else
-	{
-		q.x *= s3;
-		q.y *= s3;
-		q.z *= s3;
-	}
-
+	q.Scale(s);
 	return q;
 }
 

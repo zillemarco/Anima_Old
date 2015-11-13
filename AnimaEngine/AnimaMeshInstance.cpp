@@ -354,7 +354,7 @@ void AnimaMeshInstance::InitializePhysicData()
 		AnimaQuaternion xRot(AnimaVertex3f(1.0, 0.0, 0.0), rotationVector.x);
 		AnimaQuaternion yRot(AnimaVertex3f(0.0, 1.0, 0.0), rotationVector.y);
 		AnimaQuaternion zRot(AnimaVertex3f(0.0, 0.0, 1.0), rotationVector.z);
-		AnimaQuaternion rot = zRot * yRot * xRot;
+		AnimaQuaternion rot = xRot * yRot * zRot;
 		
 		if(_physCollisionShape == nullptr)
 		{

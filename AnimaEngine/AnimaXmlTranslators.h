@@ -148,6 +148,48 @@ struct AnimaXmlVertex4Translator
 	}
 };
 
+struct AnimaXmlQuaternionTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaQuaternion external_type;
+	
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			Anima::AnimaString inputString;
+			if (str[str.length() - 1] == ';')
+				inputString = str.substr(0, str.length() - 1);
+			else
+				inputString = str;
+			
+			std::vector<Anima::AnimaString> elements;
+			boost::split(elements, inputString, boost::is_any_of(";"));
+			
+			Anima::AnimaQuaternion quaternion;
+			
+			size_t elementsSize = elements.size();
+			
+			if (elementsSize != 4)
+				return boost::optional<external_type>(boost::none);
+			
+			quaternion.x = (Anima::AFloat)atof(elements[0].c_str());
+			quaternion.y = (Anima::AFloat)atof(elements[1].c_str());
+			quaternion.z = (Anima::AFloat)atof(elements[2].c_str());
+			quaternion.w = (Anima::AFloat)atof(elements[3].c_str());
+			
+			return quaternion;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+	
+	boost::optional<internal_type> put_value(const external_type& quaternion)
+	{
+		return std::to_string(quaternion.x) + ";" + std::to_string(quaternion.y) + ";" + std::to_string(quaternion.z) + ";" + std::to_string(quaternion.w);
+	}
+};
+
 struct AnimaXmlMatrixTranslator
 {
 	typedef Anima::AnimaString internal_type;
@@ -1033,7 +1075,7 @@ struct AnimaXmlTextureInternalFormatTranslator
 	}
 };
 
-struct AnimaXmlCameraProjectionType
+struct AnimaXmlCameraProjectionTypeTranslator
 {
 	typedef Anima::AnimaString internal_type;
 	typedef Anima::AnimaCameraProjectionType external_type;
@@ -1044,8 +1086,8 @@ struct AnimaXmlCameraProjectionType
 		{
 			using boost::algorithm::iequals;
 			
-			if (iequals(str, "PERSPECTIVE"))	return Anima::PERSPECTIVE;
-			else if (iequals(str, "ORTHO"))		return Anima::ORTHO;
+			if (iequals(str, "PERSPECTIVE"))		return Anima::ACPT_PERSPECTIVE;
+			else if (iequals(str, "ORTHOGRAPHIC"))	return Anima::ACPT_ORTHOGRAPHIC;
 			
 			return boost::optional<external_type>(boost::none);
 		}
@@ -1057,8 +1099,44 @@ struct AnimaXmlCameraProjectionType
 	{
 		switch (type)
 		{
-			case Anima::PERSPECTIVE:	return Anima::AnimaString("PERSPECTIVE"); break;
-			case Anima::ORTHO:			return Anima::AnimaString("ORTHO"); break;
+			case Anima::ACPT_PERSPECTIVE:	return Anima::AnimaString("PERSPECTIVE"); break;
+			case Anima::ACPT_ORTHOGRAPHIC:	return Anima::AnimaString("ORTHOGRAPHIC"); break;
+		}
+		
+		return boost::optional<internal_type>(boost::none);
+	}
+};
+
+struct AnimaXmlCameraTypeTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaCameraType external_type;
+	
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+			
+			if (iequals(str, "FIRST_PERSON"))	return Anima::ACT_FIRST_PERSON;
+			else if (iequals(str, "SPECTATOR"))	return Anima::ACT_SPECTATOR;
+			else if (iequals(str, "ORBIT"))		return Anima::ACT_ORBIT;
+			else if (iequals(str, "FLIGHT"))	return Anima::ACT_FLIGHT;
+			
+			return boost::optional<external_type>(boost::none);
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+	
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+			case Anima::ACT_FIRST_PERSON:	return Anima::AnimaString("FIRST_PERSON"); break;
+			case Anima::ACT_SPECTATOR:		return Anima::AnimaString("SPECTATOR"); break;
+			case Anima::ACT_ORBIT:			return Anima::AnimaString("ORBIT"); break;
+			case Anima::ACT_FLIGHT:			return Anima::AnimaString("FLIGHT"); break;
 		}
 		
 		return boost::optional<internal_type>(boost::none);
@@ -1161,7 +1239,17 @@ namespace boost
 		
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaCameraProjectionType>
 		{
-			typedef AnimaXmlCameraProjectionType type;
+			typedef AnimaXmlCameraProjectionTypeTranslator type;
+		};
+		
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaCameraType>
+		{
+			typedef AnimaXmlCameraTypeTranslator type;
+		};
+		
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaQuaternion>
+		{
+			typedef AnimaXmlQuaternionTranslator type;
 		};
 	}
 }

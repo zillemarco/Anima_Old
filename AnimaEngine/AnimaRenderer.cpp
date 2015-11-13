@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -61,7 +61,7 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 
 	_programsBufferIndex = 0;
 	
-	EnablePhysicsDebugDrawing();
+	DisablePhysicsDebugDrawing();
 	_physicsDebugDrawer = new AnimaPhysicsDebugDrawer;
 	
 	InitializeShaders();
@@ -532,9 +532,7 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	//
 	// Inizializzazione della camera di supporto
 	//
-	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*_allocator, _allocator, nullptr, _engine->GetDataGeneratorsManager(), AnimaString("$$filterCamera$$"));
-	_filterCamera->SetProjectionMatrix(AnimaMatrix());
-	_filterCamera->SetViewMatrix(AnimaMatrix());
+	_filterCamera = AnimaAllocatorNamespace::AllocateNew<AnimaCamera>(*_allocator, _allocator, nullptr, _engine->GetDataGeneratorsManager(), AnimaString("$$filterCamera$$"));
 	_filterCamera->SetPosition(0.0f, 0.0f, 0.0f);
 
 	//glGenVertexArrays(1, &_vertexArrayObject);

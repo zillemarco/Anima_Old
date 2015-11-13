@@ -15,9 +15,6 @@
 #include "AnimaEngine.h"
 #include "AnimaString.h"
 #include "AnimaCamera.h"
-#include "AnimaFirstPersonCamera.h"
-#include "AnimaThirdPersonCamera.h"
-#include "AnimaTypeMappedArray.h"
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
 
@@ -28,24 +25,17 @@ class AnimaScene;
 class ANIMA_ENGINE_EXPORT AnimaCamerasManager
 {
 	friend AnimaCamera;
-	friend AnimaFirstPersonCamera;
-	friend AnimaThirdPersonCamera;
 	
 public:
 	AnimaCamerasManager(AnimaScene* scene);
 	~AnimaCamerasManager();
 	
-	template<class T> AnimaArray<AnimaCamera*>* GetCamerasArrayOfType();
-	template<class T> AnimaCamera* GetCameraOfTypeFromName(const AnimaString& name);
-	
-	AnimaFirstPersonCamera* CreateFirstPersonCamera(const AnimaString& name);
-	AnimaThirdPersonCamera* CreateThirdPersonCamera(const AnimaString& name);
+	AnimaCamera* CreateCamera(const AnimaString& name);
 	
 	AnimaCamera* GetActiveCamera();
 	AnimaCamera* GetCameraFromName(const AnimaString& name);
 	
-	AInt GetTotalCamerasCount();
-	AnimaTypeMappedArray<AnimaCamera*>* GetCameras();
+	AInt GetCamerasCount();
 
 	void UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar);
 	void UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar);
@@ -60,6 +50,8 @@ public:
 	
 	bool FinalizeObjectsAfterRead();
 	
+	void UpdateCameras(AFloat elapsedTime);
+	
 private:
 	void ClearCameras();
 	
@@ -68,22 +60,10 @@ private:
 	
 private:
 	AnimaScene* _scene;
-	AnimaTypeMappedArray<AnimaCamera*> _cameras;
+	AnimaMappedArray<AnimaCamera*> _cameras;
 	
 	AnimaCamera*	_activeCamera;
 };
-
-template<class T>
-AnimaArray<AnimaCamera*>* AnimaCamerasManager::GetCamerasArrayOfType()
-{
-	return _cameras.GetMappedArrayArrayOfType<T*>();
-}
-
-template<class T>
-AnimaCamera* AnimaCamerasManager::GetCameraOfTypeFromName(const AnimaString& name)
-{
-	return _cameras.GetWithNameAndType<T*>(name);
-}
 
 END_ANIMA_ENGINE_NAMESPACE
 

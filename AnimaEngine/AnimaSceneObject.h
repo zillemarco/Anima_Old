@@ -54,10 +54,8 @@ public:
 	bool FinalizeAfterRead(AnimaScene* scene) override;
 	
 public:
-	virtual void SetPosition(const AnimaVertex3f& position);
-
-public:
 	virtual AnimaVertex3f GetPosition();
+	virtual void SetPosition(const AnimaVertex3f& position);
 	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
 
 	virtual void SetParentObject(AnimaSceneObject* parentObject);

@@ -26,6 +26,15 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 class ANIMA_ENGINE_EXPORT AnimaMath
 {
 public:
+	static const AFloat PI;
+	static const AFloat HALF_PI;
+	static const AFloat QUARTER_PI;
+	static const AFloat TWO_PI;
+	static const AFloat EPSILON;
+	
+	static AFloat RadToDeg(AFloat rad) { return (rad * 180.0f) / PI; }
+	static AFloat DegToRad(AFloat deg) { return (deg * PI) / 180.0f; }
+	static bool CloseEnough(AFloat a, AFloat b) { return fabsf((a - b) / ((b == 0.0f) ? 1.0f : b)) < EPSILON; }
 	
 	/*!
 	 *	\brief		Moltiplicazione di un quaternione q1 per un quaternione q2

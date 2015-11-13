@@ -12,7 +12,6 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 AnimaCamerasManager::AnimaCamerasManager(AnimaScene* scene)
-: _cameras(scene->GetEngine()->GetCamerasAllocator())
 {
 	_scene = scene;
 	_activeCamera = nullptr;
@@ -23,45 +22,26 @@ AnimaCamerasManager::~AnimaCamerasManager()
 	ClearCameras();
 }
 
-AnimaFirstPersonCamera* AnimaCamerasManager::CreateFirstPersonCamera(const AnimaString& name)
+AnimaCamera* AnimaCamerasManager::CreateCamera(const AnimaString& name)
 {
-	AnimaCamera* camera = _cameras.Contains(name);
-	if (camera != nullptr)
+	if(_cameras.Contains(name) >= 0)
 		return nullptr;
 	
 	ANIMA_ASSERT(_scene != nullptr);
-	AnimaFirstPersonCamera* newCamera = AnimaAllocatorNamespace::AllocateNew<AnimaFirstPersonCamera>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
-	_cameras.Add<AnimaFirstPersonCamera*>(name, newCamera);
-	
-	return newCamera;
-}
-
-AnimaThirdPersonCamera* AnimaCamerasManager::CreateThirdPersonCamera(const AnimaString& name)
-{
-	AnimaCamera* camera = _cameras.Contains(name);
-	if (camera != nullptr)
-		return nullptr;
-	
-	ANIMA_ASSERT(_scene != nullptr);
-	AnimaThirdPersonCamera* newCamera = AnimaAllocatorNamespace::AllocateNew<AnimaThirdPersonCamera>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
-	_cameras.Add<AnimaThirdPersonCamera*>(name, newCamera);
+	AnimaCamera* newCamera = AnimaAllocatorNamespace::AllocateNew<AnimaCamera>(*(_scene->GetCamerasAllocator()), _scene->GetCamerasAllocator(), this, _scene->GetDataGeneratorsManager(), name);
+	_cameras.Add(name, newCamera);
 	
 	return newCamera;
 }
 
 void AnimaCamerasManager::ClearCameras()
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
-	for (auto camerasPair : (*camerasMap))
+	AInt count = _cameras.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
-		AInt count = camerasArray->GetSize();
-		for (AInt i = 0; i < count; i++)
-		{
-			AnimaCamera* camera = (*camerasArray)[i];
-			AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetCamerasAllocator()), camera);
-			camera = nullptr;
-		}
+		AnimaCamera* camera = _cameras[i];
+		AnimaAllocatorNamespace::DeallocateObject(*(_scene->GetCamerasAllocator()), camera);
+		camera = nullptr;
 	}
 	
 	_cameras.RemoveAll();
@@ -86,24 +66,16 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 	AnimaCamera* firstCamera = nullptr;
 	if(_activeCamera == nullptr)
 	{
-		boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
-		for (auto camerasPair : (*camerasMap))
+		AInt count = _cameras.GetSize();
+		for (AInt i = 0; i < count && _activeCamera == nullptr; i++)
 		{
-			AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
-			AInt count = camerasArray->GetSize();
-			for (AInt i = 0; i < count && _activeCamera == nullptr; i++)
-			{
-				AnimaCamera* camera = (*camerasArray)[i];
+			AnimaCamera* camera = _cameras[i];
 				
-				if(firstCamera == nullptr)
-					firstCamera = camera;
+			if(firstCamera == nullptr)
+				firstCamera = camera;
 				
-				if(camera->IsActive())
-					_activeCamera = camera;
-			}
-			
-			if(_activeCamera != nullptr)
-				break;
+			if(camera->IsActive())
+				_activeCamera = camera;
 		}
 	}
 	
@@ -125,57 +97,36 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 
 void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar)
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
-	for (auto camerasPair : (*camerasMap))
+	AInt count = _cameras.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
-		AInt count = camerasArray->GetSize();
-		for (AInt i = 0; i < count; i++)
-		{
-			AnimaCamera* camera = (*camerasArray)[i];
+		AnimaCamera* camera = _cameras[i];
 			
-			if(camera->IsPerspectiveProjectionType())
-				camera->CalculateProjectionMatrix(fov, size, zNear, zFar);
-		}
+		if(camera->IsPerspectiveProjectionType())
+			camera->CalculateProjectionMatrix(fov, size, zNear, zFar);
 	}
 }
 
 void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar)
 {
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
-	for (auto camerasPair : (*camerasMap))
+	AInt count = _cameras.GetSize();
+	for (AInt i = 0; i < count; i++)
 	{
-		AnimaMappedArray<AnimaCamera*>* camerasArray = camerasPair.second;
-		AInt count = camerasArray->GetSize();
-		for (AInt i = 0; i < count; i++)
-		{
-			AnimaCamera* camera = (*camerasArray)[i];
-			
-			if(camera->IsOrthoProjectionType())
-				camera->CalculateProjectionMatrix(left, right, bottom, top, zNear, zFar);
-		}
+		AnimaCamera* camera = _cameras[i];
+		
+		if(camera->IsOrthographicProjectionType())
+			camera->CalculateProjectionMatrix(left, right, bottom, top, zNear, zFar);
 	}
 }
 
 AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)
 {
-	return _cameras.GetWithName(name);
+	return _cameras[name];
 }
 
-AInt AnimaCamerasManager::GetTotalCamerasCount()
+AInt AnimaCamerasManager::GetCamerasCount()
 {
-	AInt count = 0;
-	
-	boost::unordered_map<AnimaString, AnimaMappedArray<AnimaCamera*>*, AnimaStringHasher>* camerasMap = _cameras.GetArraysMap();
-	for (auto camerasPair : (*camerasMap))
-		count += camerasPair.second->GetSize();
-	
-	return count;
-}
-
-AnimaTypeMappedArray<AnimaCamera*>* AnimaCamerasManager::GetCameras()
-{
-	return &_cameras;
+	return _cameras.GetSize();
 }
 
 AnimaCamera* AnimaCamerasManager::LoadCameraFromFile(const AnimaString& filePath)
@@ -197,34 +148,18 @@ AnimaCamera* AnimaCamerasManager::LoadCameraFromXml(const AnimaString& cameraXml
 	std::stringstream ss(cameraXmlDefinition);
 	boost::property_tree::read_xml(ss, pt);
 	
-	AnimaString cameraTypeName = "";
-	
-	if(pt.get_optional<AnimaString>(ANIMA_CLASS_NAME(AnimaFirstPersonCamera) + ".Name"))
-		cameraTypeName = ANIMA_CLASS_NAME(AnimaFirstPersonCamera);
-	else if(pt.get_optional<AnimaString>(ANIMA_CLASS_NAME(AnimaThirdPersonCamera) + ".Name"))
-		cameraTypeName = ANIMA_CLASS_NAME(AnimaThirdPersonCamera);
-	
-	if(cameraTypeName.empty())
-	{
-		AnimaLogger::LogMessageFormat("ERROR - Error reading a camera. Engine was unable to recognize the camera type.");
-		return nullptr;
-	}
-	
-	AnimaString name = pt.get<AnimaString>(cameraTypeName + ".Name");
+	AnimaString name = pt.get<AnimaString>("AnimaCamera.Name");
 	
 	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
 	AnimaString originalName = name;
 	AInt index = 0;
-	while (_cameras.Contains(name) != nullptr)
+	while (_cameras.Contains(name) >= 0)
 		name = FormatString("%s_%d", originalName.c_str(), index);
 	
 	if(name != originalName)
 		AnimaLogger::LogMessageFormat("WARNING - Error reading a camera. A camera named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
 
-	if(cameraTypeName == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
-		camera = CreateFirstPersonCamera(name);
-	else if(cameraTypeName == ANIMA_CLASS_NAME(AnimaFirstPersonCamera))
-		camera = CreateThirdPersonCamera(name);
+	camera = CreateCamera(name);
 	
 	if (camera)
 	{
@@ -283,19 +218,26 @@ void AnimaCamerasManager::SaveCameraToFile(AnimaCamera* camera, const AnimaStrin
 
 void AnimaCamerasManager::SaveCameras(const AnimaString& destinationPath)
 {
-	AInt count = _cameras.GetTotalSize();
+	AInt count = _cameras.GetSize();
 	for(AInt i = 0; i < count; i++)
 	{
-		SaveCameraToFile(_cameras.GetWithIndex(i), destinationPath, true);
+		SaveCameraToFile(_cameras[i], destinationPath, true);
 	}
 }
 
 bool AnimaCamerasManager::FinalizeObjectsAfterRead()
 {
-	AInt count = _cameras.GetTotalSize();
+	AInt count = _cameras.GetSize();
 	for(AInt i = 0; i < count; i++)
-		_cameras.GetWithIndex(i)->FinalizeAfterRead(_scene);
+		_cameras[i]->FinalizeAfterRead(_scene);
 	return true;
+}
+
+void AnimaCamerasManager::UpdateCameras(AFloat elapsedTime)
+{
+	AInt count = _cameras.GetSize();
+	for(AInt i = 0; i < count; i++)
+		_cameras[i]->UpdatePosition(elapsedTime);
 }
 
 END_ANIMA_ENGINE_NAMESPACE

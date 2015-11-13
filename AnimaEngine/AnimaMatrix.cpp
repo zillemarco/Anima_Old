@@ -749,7 +749,6 @@ void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zF
 //	Result[2][3] = - static_cast<T>(1);
 //	Result[3][2] = - (static_cast<T>(2) * zFar * zNear) / (zFar - zNear);
 
-
 //	float radians = (fov * 0.5f) * (float)M_PI / 180.0f;
 //	float sine = sinf(radians);
 //
@@ -764,8 +763,8 @@ void AnimaMatrix::Perspective(AFloat fov, AFloat aspect, AFloat zNear, AFloat zF
 //	m[8] = 0.0f;			m[9] = 0.0f;	m[10] = -(zNear + zFar) / clip;			m[11] = -1.0f;
 //	m[12] = 0.0f;			m[13] = 0.0f;	m[14] = -(2.0f * zNear * zFar) / clip;	m[15] = 0.0f;
 
-	AFloat fovYRad = (fov * 0.5f) * (float)M_PI / 180.0f;
-	AFloat tanHalfFovy = tan(fovYRad / 2.0f);
+	AFloat fovYRad = (fov * 0.5f) * (AFloat)M_PI / 180.0f;
+	AFloat tanHalfFovy = tanf(fovYRad / 2.0f);
 	float clip = zFar - zNear;
 	
 	m[0] = 1.0f / (aspect * tanHalfFovy);	m[1] = 0.0f;				m[2] = 0.0f;							m[3] = 0.0f;
@@ -1107,6 +1106,51 @@ AnimaMatrix AnimaMatrix::MakeRotationZDeg(AFloat deg)
 {
 	AnimaMatrix m;
 	m.RotateZRad(deg * (AFloat)M_PI / 180.0f);
+	return m;
+}
+
+void AnimaMatrix::FromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll)
+{
+	SetIdentity();
+	
+	float cosH = cosf(head);
+	float cosP = cosf(pitch);
+	float cosR = cosf(roll);
+	float sinH = sinf(head);
+	float sinP = sinf(pitch);
+	float sinR = sinf(roll);
+	
+	vecM[0][0] = cosR * cosH - sinR * sinP * sinH;
+	vecM[0][1] = sinR * cosH + cosR * sinP * sinH;
+	vecM[0][2] = -cosP * sinH;
+	
+	vecM[1][0] = -sinR * cosP;
+	vecM[1][1] = cosR * cosP;
+	vecM[1][2] = sinP;
+	
+	vecM[2][0] = cosR * sinH + sinR * sinP * cosH;
+	vecM[2][1] = sinR * sinH - cosR * sinP * cosH;
+	vecM[2][2] = cosP * cosH;
+}
+
+void AnimaMatrix::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
+{
+	FromHeadPitchRollDeg(AnimaMath::DegToRad(head), AnimaMath::DegToRad(pitch), AnimaMath::DegToRad(roll));
+}
+
+AnimaMatrix AnimaMatrix::MakeFromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll)
+{
+	AnimaMatrix m;
+	m.FromHeadPitchRollRad(head, pitch, roll);
+	
+	return m;
+}
+
+AnimaMatrix AnimaMatrix::MakeFromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
+{
+	AnimaMatrix m;
+	m.FromHeadPitchRollRad(AnimaMath::DegToRad(head), AnimaMath::DegToRad(pitch), AnimaMath::DegToRad(roll));
+	
 	return m;
 }
 

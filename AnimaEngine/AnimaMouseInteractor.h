@@ -24,6 +24,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+class AnimaScene;
+
 class ANIMA_ENGINE_EXPORT AnimaMouseEventArgs : public AnimaEventArgs
 {
 public:
@@ -76,6 +78,7 @@ public:
 public:
 	bool Install(long windowId, AnimaEngine* engine) override;
 	bool Remove() override;
+	void UpdateScene(AnimaScene* scene, AFloat elapsedTime) override;
 	
 	bool SetEventHandler(const AnimaString& eventName, std::function<void (AnimaEventArgs* eventArgs)> handler) override;
 	bool LaunchEvent(const AnimaString& eventName, AnimaEventArgs* eventArgs) const override;

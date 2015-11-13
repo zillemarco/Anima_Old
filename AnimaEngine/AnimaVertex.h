@@ -15,6 +15,7 @@
 #include "AnimaAllocators.h"
 #include "AnimaAssert.h"
 #include "AnimaEngine.h"
+#include <xmmintrin.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -180,6 +181,7 @@ class ANIMA_ENGINE_EXPORT AnimaVertex4f
 public:
 	union
 	{
+		__m128 sseVec;
 		AFloat vec[4];
 		struct
 		{

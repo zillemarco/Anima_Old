@@ -8,6 +8,7 @@
 
 #include "AnimaKeyboardInteractor.h"
 #include "AnimaVertex.h"
+#include "AnimaScene.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -21,8 +22,133 @@ AnimaKeyboardInteractor::AnimaKeyboardInteractor()
 	_keyUpMonitor = nullptr;
 	
 	_supportedEvents = {
-		{"onKeyDown",	""},
-		{"onKeyUp",		""}
+		{"onKeyDown",		""},
+		{"onKeyUp",			""},
+		{"onUpdateScene",	""}
+	};
+	
+	_keyboardStatusMap = {
+		{ AnimaKeyboardKey::AKK_UNKNOWN			, false },
+		{ AnimaKeyboardKey::AKK_SPACE			, false },
+		{ AnimaKeyboardKey::AKK_APOSTROPHE		, false },
+		{ AnimaKeyboardKey::AKK_COMMA			, false },
+		{ AnimaKeyboardKey::AKK_MINUS			, false },
+		{ AnimaKeyboardKey::AKK_PERIOD			, false },
+		{ AnimaKeyboardKey::AKK_SLASH			, false },
+		{ AnimaKeyboardKey::AKK_0 				, false },
+		{ AnimaKeyboardKey::AKK_1 				, false },
+		{ AnimaKeyboardKey::AKK_2 				, false },
+		{ AnimaKeyboardKey::AKK_3 				, false },
+		{ AnimaKeyboardKey::AKK_4 				, false },
+		{ AnimaKeyboardKey::AKK_5 				, false },
+		{ AnimaKeyboardKey::AKK_6 				, false },
+		{ AnimaKeyboardKey::AKK_7 				, false },
+		{ AnimaKeyboardKey::AKK_8				, false },
+		{ AnimaKeyboardKey::AKK_9				, false },
+		{ AnimaKeyboardKey::AKK_SEMICOLON		, false },
+		{ AnimaKeyboardKey::AKK_EQUAL			, false },
+		{ AnimaKeyboardKey::AKK_A				, false },
+		{ AnimaKeyboardKey::AKK_B				, false },
+		{ AnimaKeyboardKey::AKK_C				, false },
+		{ AnimaKeyboardKey::AKK_D				, false },
+		{ AnimaKeyboardKey::AKK_E				, false },
+		{ AnimaKeyboardKey::AKK_F				, false },
+		{ AnimaKeyboardKey::AKK_G				, false },
+		{ AnimaKeyboardKey::AKK_H				, false },
+		{ AnimaKeyboardKey::AKK_I				, false },
+		{ AnimaKeyboardKey::AKK_J				, false },
+		{ AnimaKeyboardKey::AKK_K				, false },
+		{ AnimaKeyboardKey::AKK_L				, false },
+		{ AnimaKeyboardKey::AKK_M				, false },
+		{ AnimaKeyboardKey::AKK_N				, false },
+		{ AnimaKeyboardKey::AKK_O				, false },
+		{ AnimaKeyboardKey::AKK_P				, false },
+		{ AnimaKeyboardKey::AKK_Q				, false },
+		{ AnimaKeyboardKey::AKK_R				, false },
+		{ AnimaKeyboardKey::AKK_S				, false },
+		{ AnimaKeyboardKey::AKK_T				, false },
+		{ AnimaKeyboardKey::AKK_U				, false },
+		{ AnimaKeyboardKey::AKK_V				, false },
+		{ AnimaKeyboardKey::AKK_W				, false },
+		{ AnimaKeyboardKey::AKK_X				, false },
+		{ AnimaKeyboardKey::AKK_Y				, false },
+		{ AnimaKeyboardKey::AKK_Z				, false },
+		{ AnimaKeyboardKey::AKK_LEFT_BRACKET	, false },
+		{ AnimaKeyboardKey::AKK_BACKSLASH		, false },
+		{ AnimaKeyboardKey::AKK_RIGHT_BRACKET	, false },
+		{ AnimaKeyboardKey::AKK_GRAVE_ACCENT	, false },
+		{ AnimaKeyboardKey::AKK_WORLD_1			, false },
+		{ AnimaKeyboardKey::AKK_WORLD_2			, false },
+		{ AnimaKeyboardKey::AKK_ESCAPE			, false },
+		{ AnimaKeyboardKey::AKK_ENTER			, false },
+		{ AnimaKeyboardKey::AKK_TAB				, false },
+		{ AnimaKeyboardKey::AKK_BACKSPACE		, false },
+		{ AnimaKeyboardKey::AKK_INSERT			, false },
+		{ AnimaKeyboardKey::AKK_DELETE			, false },
+		{ AnimaKeyboardKey::AKK_RIGHT			, false },
+		{ AnimaKeyboardKey::AKK_LEFT			, false },
+		{ AnimaKeyboardKey::AKK_DOWN			, false },
+		{ AnimaKeyboardKey::AKK_UP				, false },
+		{ AnimaKeyboardKey::AKK_PAGE_UP			, false },
+		{ AnimaKeyboardKey::AKK_PAGE_DOWN		, false },
+		{ AnimaKeyboardKey::AKK_HOME			, false },
+		{ AnimaKeyboardKey::AKK_END				, false },
+		{ AnimaKeyboardKey::AKK_CAPS_LOCK		, false },
+		{ AnimaKeyboardKey::AKK_SCROLL_LOCK		, false },
+		{ AnimaKeyboardKey::AKK_NUM_LOCK		, false },
+		{ AnimaKeyboardKey::AKK_PRINT_SCREEN	, false },
+		{ AnimaKeyboardKey::AKK_PAUSE			, false },
+		{ AnimaKeyboardKey::AKK_F1				, false },
+		{ AnimaKeyboardKey::AKK_F2				, false },
+		{ AnimaKeyboardKey::AKK_F3				, false },
+		{ AnimaKeyboardKey::AKK_F4				, false },
+		{ AnimaKeyboardKey::AKK_F5				, false },
+		{ AnimaKeyboardKey::AKK_F6				, false },
+		{ AnimaKeyboardKey::AKK_F7				, false },
+		{ AnimaKeyboardKey::AKK_F8				, false },
+		{ AnimaKeyboardKey::AKK_F9				, false },
+		{ AnimaKeyboardKey::AKK_F10				, false },
+		{ AnimaKeyboardKey::AKK_F11				, false },
+		{ AnimaKeyboardKey::AKK_F12				, false },
+		{ AnimaKeyboardKey::AKK_F13				, false },
+		{ AnimaKeyboardKey::AKK_F14				, false },
+		{ AnimaKeyboardKey::AKK_F15				, false },
+		{ AnimaKeyboardKey::AKK_F16				, false },
+		{ AnimaKeyboardKey::AKK_F17				, false },
+		{ AnimaKeyboardKey::AKK_F18				, false },
+		{ AnimaKeyboardKey::AKK_F19				, false },
+		{ AnimaKeyboardKey::AKK_F20				, false },
+		{ AnimaKeyboardKey::AKK_F21				, false },
+		{ AnimaKeyboardKey::AKK_F22				, false },
+		{ AnimaKeyboardKey::AKK_F23				, false },
+		{ AnimaKeyboardKey::AKK_F24				, false },
+		{ AnimaKeyboardKey::AKK_F25				, false },
+		{ AnimaKeyboardKey::AKK_KP_0			, false },
+		{ AnimaKeyboardKey::AKK_KP_1			, false },
+		{ AnimaKeyboardKey::AKK_KP_2			, false },
+		{ AnimaKeyboardKey::AKK_KP_3			, false },
+		{ AnimaKeyboardKey::AKK_KP_4			, false },
+		{ AnimaKeyboardKey::AKK_KP_5			, false },
+		{ AnimaKeyboardKey::AKK_KP_6			, false },
+		{ AnimaKeyboardKey::AKK_KP_7			, false },
+		{ AnimaKeyboardKey::AKK_KP_8			, false },
+		{ AnimaKeyboardKey::AKK_KP_9			, false },
+		{ AnimaKeyboardKey::AKK_KP_DECIMAL		, false },
+		{ AnimaKeyboardKey::AKK_KP_DIVIDE		, false },
+		{ AnimaKeyboardKey::AKK_KP_MULTIPLY		, false },
+		{ AnimaKeyboardKey::AKK_KP_SUBTRACT		, false },
+		{ AnimaKeyboardKey::AKK_KP_ADD			, false },
+		{ AnimaKeyboardKey::AKK_KP_ENTER		, false },
+		{ AnimaKeyboardKey::AKK_KP_EQUAL		, false },
+		{ AnimaKeyboardKey::AKK_LEFT_SHIFT		, false },
+		{ AnimaKeyboardKey::AKK_LEFT_CONTROL	, false },
+		{ AnimaKeyboardKey::AKK_LEFT_ALT		, false },
+		{ AnimaKeyboardKey::AKK_LEFT_SUPER		, false },
+		{ AnimaKeyboardKey::AKK_RIGHT_SHIFT		, false },
+		{ AnimaKeyboardKey::AKK_RIGHT_CONTROL	, false },
+		{ AnimaKeyboardKey::AKK_RIGHT_ALT		, false },
+		{ AnimaKeyboardKey::AKK_RIGHT_SUPER		, false },
+		{ AnimaKeyboardKey::AKK_MENU			, false }
 	};
 }
 
@@ -34,6 +160,8 @@ AnimaKeyboardInteractor::AnimaKeyboardInteractor(const AnimaKeyboardInteractor& 
 	
 	_keyDownMonitor = src._keyDownMonitor;
 	_keyUpMonitor = src._keyUpMonitor;
+	
+	_keyboardStatusMap = src._keyboardStatusMap;
 }
 
 AnimaKeyboardInteractor::AnimaKeyboardInteractor(AnimaKeyboardInteractor&& src)
@@ -44,6 +172,8 @@ AnimaKeyboardInteractor::AnimaKeyboardInteractor(AnimaKeyboardInteractor&& src)
 	
 	_keyDownMonitor = src._keyDownMonitor;
 	_keyUpMonitor = src._keyUpMonitor;
+	
+	_keyboardStatusMap = src._keyboardStatusMap;
 }
 
 AnimaKeyboardInteractor::~AnimaKeyboardInteractor()
@@ -61,6 +191,8 @@ AnimaKeyboardInteractor& AnimaKeyboardInteractor::operator=(const AnimaKeyboardI
 		
 		_keyDownMonitor = src._keyDownMonitor;
 		_keyUpMonitor = src._keyUpMonitor;
+		
+		_keyboardStatusMap = src._keyboardStatusMap;
 	}
 	
 	return *this;
@@ -76,6 +208,8 @@ AnimaKeyboardInteractor& AnimaKeyboardInteractor::operator=(AnimaKeyboardInterac
 		
 		_keyDownMonitor = src._keyDownMonitor;
 		_keyUpMonitor = src._keyUpMonitor;
+		
+		_keyboardStatusMap = src._keyboardStatusMap;
 	}
 	
 	return *this;
@@ -162,7 +296,9 @@ void AnimaKeyboardInteractor::KeyDownCallback(AnimaKeyboardInteractor* interacto
 	AnimaKeyboardKey key = TranslateKey([event keyCode]);
 	AInt modifiers = TranslateFlags([event modifierFlags]);
 	
-	AnimaEventArgs* args = new AnimaKeyboardEventArgs(interactor, key, modifiers);
+	interactor->_keyboardStatusMap[key] = true;
+	
+	AnimaEventArgs* args = new AnimaKeyboardEventArgs(interactor, key, modifiers, interactor->_keyboardStatusMap);
 	interactor->LaunchEvent("onKeyDown", args);
 	
 	delete args;
@@ -174,14 +310,16 @@ void AnimaKeyboardInteractor::KeyUpCallback(AnimaKeyboardInteractor* interactor,
 	AnimaKeyboardKey key = TranslateKey([event keyCode]);
 	AInt modifiers = TranslateFlags([event modifierFlags]);
 	
-	AnimaEventArgs* args = new AnimaKeyboardEventArgs(interactor, key, modifiers);
+	interactor->_keyboardStatusMap[key] = false;
+	
+	AnimaEventArgs* args = new AnimaKeyboardEventArgs(interactor, key, modifiers, interactor->_keyboardStatusMap);
 	interactor->LaunchEvent("onKeyUp", args);
 	
 	delete args;
 	args = nullptr;
 }
 
-AInt TranslateFlags(NSUInteger flags)
+AInt TranslateFlags(AUint flags)
 {
 	AInt mods = 0;
 	
@@ -329,13 +467,23 @@ AnimaKeyboardKey TranslateKey(AUint key)
 		/* 7c */ AnimaKeyboardKey::AKK_RIGHT,
 		/* 7d */ AnimaKeyboardKey::AKK_DOWN,
 		/* 7e */ AnimaKeyboardKey::AKK_UP,
-		/* 7f */ AnimaKeyboardKey::AKK_UNKNOWN,
+		/* 7f */ AnimaKeyboardKey::AKK_UNKNOWN
 	};
 	
 	if (key >= 128)
 		return AnimaKeyboardKey::AKK_UNKNOWN;
 	
 	return table[key];
+}
+
+void AnimaKeyboardInteractor::UpdateScene(AnimaScene* scene, AFloat elapsedTime)
+{
+	AnimaEventArgs* args = new AnimaUpdateSceneEventArgs(this, scene, elapsedTime);
+	
+	LaunchEvent("onUpdateScene", args);
+	
+	delete args;
+	args = nullptr;
 }
 
 END_ANIMA_ENGINE_NAMESPACE
