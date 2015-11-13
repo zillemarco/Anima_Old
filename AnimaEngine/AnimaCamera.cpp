@@ -12,6 +12,14 @@
 #include "AnimaXmlTranslators.h"
 #include "AnimaMath.h"
 
+#if defined min
+#	undef min
+#endif
+
+#if defined max
+#	undef max
+#endif
+
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 const AnimaVertex3f AnimaCamera::DEFAULT_ACCELERATION(40.0f, 40.0f, 40.0f);

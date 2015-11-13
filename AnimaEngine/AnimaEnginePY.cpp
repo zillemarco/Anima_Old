@@ -101,28 +101,8 @@ Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*CreateProgramString)(co
 Anima::AnimaShaderProgram* (Anima::AnimaShadersManager::*GetProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::GetProgramFromName;
 void (Anima::AnimaShadersManager::*SetActiveProgramFromNameString)(const Anima::AnimaString&) = &Anima::AnimaShadersManager::SetActiveProgramFromName;
 
-Anima::AnimaFirstPersonCamera* (Anima::AnimaCamerasManager::*CreateFirstPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateFirstPersonCamera;
-Anima::AnimaThirdPersonCamera* (Anima::AnimaCamerasManager::*CreateThirdPersonCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateThirdPersonCamera;
+Anima::AnimaCamera* (Anima::AnimaCamerasManager::*CreateCameraString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::CreateCamera;
 Anima::AnimaCamera* (Anima::AnimaCamerasManager::*GetCameraFromNameString)(const Anima::AnimaString&) = &Anima::AnimaCamerasManager::GetCameraFromName;
-
-void (Anima::AnimaCamera::*AnimaCameraSetPositionVector)(const Anima::AnimaVertex3f&) = &Anima::AnimaCamera::SetPosition;
-void (Anima::AnimaCamera::*AnimaCameraSetPositionFloat)(const Anima::AFloat&, const Anima::AFloat&, const Anima::AFloat&) = &Anima::AnimaCamera::SetPosition;
-void (Anima::AnimaCamera::*AnimaCameraMoveVector)(const Anima::AnimaVertex3f&, Anima::AFloat) = &Anima::AnimaCamera::Move;
-void (Anima::AnimaCamera::*AnimaCameraMoveFloat)(const Anima::AFloat&, const Anima::AFloat&, const Anima::AFloat&, Anima::AFloat) = &Anima::AnimaCamera::Move;
-void (Anima::AnimaCamera::*AnimaCameraLookAtVector)(const Anima::AnimaVertex3f&, const Anima::AnimaVertex3f&) = &Anima::AnimaCamera::LookAt;
-void (Anima::AnimaCamera::*AnimaCameraLookAtFloat)(Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaCamera::LookAt;
-void (Anima::AnimaCamera::*AnimaCameraCalculatePerspectiveProjectionMatrix)(Anima::AFloat, const Anima::AnimaVertex2f&, Anima::AFloat, Anima::AFloat) = &Anima::AnimaCamera::CalculateProjectionMatrix;
-void (Anima::AnimaCamera::*AnimaCameraCalculateOrthographicProjectionMatrix)(Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaCamera::CalculateProjectionMatrix;
-
-void (Anima::AnimaFirstPersonCamera::*AnimaFirstPersonCameraMoveVector)(const Anima::AnimaVertex3f&, Anima::AFloat) = &Anima::AnimaFirstPersonCamera::Move;
-void (Anima::AnimaFirstPersonCamera::*AnimaFirstPersonCameraMoveFloat)(const Anima::AFloat&, const Anima::AFloat&, const Anima::AFloat&, Anima::AFloat) = &Anima::AnimaFirstPersonCamera::Move;
-void (Anima::AnimaFirstPersonCamera::*AnimaFirstPersonCameraLookAtVector)(const Anima::AnimaVertex3f&, const Anima::AnimaVertex3f&) = &Anima::AnimaFirstPersonCamera::LookAt;
-void (Anima::AnimaFirstPersonCamera::*AnimaFirstPersonCameraLookAtFloat)(Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaFirstPersonCamera::LookAt;
-
-void (Anima::AnimaThirdPersonCamera::*AnimaThirdPersonCameraMoveVector)(const Anima::AnimaVertex3f&, Anima::AFloat) = &Anima::AnimaThirdPersonCamera::Move;
-void (Anima::AnimaThirdPersonCamera::*AnimaThirdPersonCameraMoveFloat)(const Anima::AFloat&, const Anima::AFloat&, const Anima::AFloat&, Anima::AFloat) = &Anima::AnimaThirdPersonCamera::Move;
-void (Anima::AnimaThirdPersonCamera::*AnimaThirdPersonCameraLookAtVector)(const Anima::AnimaVertex3f&, const Anima::AnimaVertex3f&) = &Anima::AnimaThirdPersonCamera::LookAt;
-void (Anima::AnimaThirdPersonCamera::*AnimaThirdPersonCameraLookAtFloat)(Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaThirdPersonCamera::LookAt;
 
 BOOST_PYTHON_MODULE(AnimaEngine)
 {
@@ -285,78 +265,36 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 
 	// AnimaCamerasManager
 	class_<Anima::AnimaCamerasManager>("AnimaCamerasManager", no_init)
-		.def("CreateFirstPersonCamera", CreateFirstPersonCameraString, return_value_policy<reference_existing_object>())
-		.def("CreateThirdPersonCamera", CreateThirdPersonCameraString, return_value_policy<reference_existing_object>())
+		.def("CreateCamera", CreateCameraString, return_value_policy<reference_existing_object>())
 		.def("GetActiveCamera", &Anima::AnimaCamerasManager::GetActiveCamera, return_value_policy<reference_existing_object>())
 		.def("GetCameraFromName", GetCameraFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetTotalCamerasCount", &Anima::AnimaCamerasManager::GetTotalCamerasCount)
-		.def("GetCameras", &Anima::AnimaCamerasManager::GetCameras, return_value_policy<reference_existing_object>())
+		.def("GetCamerasCount", &Anima::AnimaCamerasManager::GetCamerasCount)
 		.def("UpdatePerspectiveCameras", &Anima::AnimaCamerasManager::UpdatePerspectiveCameras)
 		.def("UpdateOrthoCameras", &Anima::AnimaCamerasManager::UpdateOrthoCameras);
 
-	// AnimaCamera
-	class_<Anima::AnimaCamera, boost::noncopyable>("AnimaCamera", no_init)
-		.def("GetPosition", &Anima::AnimaCamera::GetPosition)
-		.def("SetPosition", AnimaCameraSetPositionVector)
-		.def("SetPosition", AnimaCameraSetPositionFloat)
-		.def("GetUp", &Anima::AnimaCamera::GetUp)
-		.def("GetForward", &Anima::AnimaCamera::GetForward)
-		.def("GetLeft", &Anima::AnimaCamera::GetLeft)
-		.def("GetRight", &Anima::AnimaCamera::GetRight)
-		.def("IsActive", &Anima::AnimaCamera::IsActive)
-		.def("Zoom", pure_virtual(&Anima::AnimaCamera::Zoom))
-		.def("Move", pure_virtual(AnimaCameraMoveVector))
-		.def("Move", pure_virtual(AnimaCameraMoveFloat))
-		.def("RotateX", pure_virtual(&Anima::AnimaCamera::RotateX))
-		.def("RotateXDeg", pure_virtual(&Anima::AnimaCamera::RotateXDeg))
-		.def("RotateY", pure_virtual(&Anima::AnimaCamera::RotateY))
-		.def("RotateYDeg", pure_virtual(&Anima::AnimaCamera::RotateYDeg))
-		.def("LookAt", pure_virtual(AnimaCameraLookAtVector))
-		.def("LookAt", pure_virtual(AnimaCameraLookAtFloat))
-		.def("CalculateViewMatrix", pure_virtual(&Anima::AnimaCamera::CalculateViewMatrix))
-		.def("SetViewMatrix", &Anima::AnimaCamera::SetViewMatrix)
-		.def("GetViewMatrix", &Anima::AnimaCamera::GetViewMatrix)
-		.def("CalculateProjectionMatrix", AnimaCameraCalculatePerspectiveProjectionMatrix)
-		.def("CalculateProjectionMatrix", AnimaCameraCalculateOrthographicProjectionMatrix)
-		.def("SetProjectionMatrix", &Anima::AnimaCamera::SetProjectionMatrix)
-		.def("GetProjectionMatrix", &Anima::AnimaCamera::GetProjectionMatrix)
-		.def("GetProjectionViewMatrix", &Anima::AnimaCamera::GetProjectionViewMatrix)
-		.def("GetInversedProjectionViewMatrix", &Anima::AnimaCamera::GetInversedProjectionViewMatrix)
-		.def("Activate", &Anima::AnimaCamera::Activate)
-		.def("Deactivate", &Anima::AnimaCamera::Deactivate)
-		.def("IsPerspectiveProjectionType", &Anima::AnimaCamera::IsPerspectiveProjectionType)
-		.def("IsOrthoProjectionType", &Anima::AnimaCamera::IsOrthoProjectionType)
-		.def("GetFrustum", &Anima::AnimaCamera::GetFrustum, return_value_policy<reference_existing_object>());
+	//// AnimaCamera
+	//class_<Anima::AnimaCamera, boost::noncopyable>("AnimaCamera", no_init)
+	//	.def("GetPosition", &Anima::AnimaCamera::GetPosition)
+	//	.def("SetPosition", AnimaCameraSetPositionVector)
+	//	.def("SetPosition", AnimaCameraSetPositionFloat)
+	//	.def("IsActive", &Anima::AnimaCamera::IsActive)
+	//	.def("Zoom", pure_virtual(&Anima::AnimaCamera::Zoom))
+	//	.def("Move", pure_virtual(AnimaCameraMoveVector))
+	//	.def("Move", pure_virtual(AnimaCameraMoveFloat))
+	//	.def("LookAt", pure_virtual(AnimaCameraLookAtVector))
+	//	.def("LookAt", pure_virtual(AnimaCameraLookAtFloat))
+	//	.def("GetViewMatrix", &Anima::AnimaCamera::GetViewMatrix)
+	//	.def("CalculateProjectionMatrix", AnimaCameraCalculatePerspectiveProjectionMatrix)
+	//	.def("CalculateProjectionMatrix", AnimaCameraCalculateOrthographicProjectionMatrix)
+	//	.def("GetProjectionMatrix", &Anima::AnimaCamera::GetProjectionMatrix)
+	//	.def("GetProjectionViewMatrix", &Anima::AnimaCamera::GetProjectionViewMatrix)
+	//	.def("GetInversedProjectionViewMatrix", &Anima::AnimaCamera::GetInversedProjectionViewMatrix)
+	//	.def("Activate", &Anima::AnimaCamera::Activate)
+	//	.def("Deactivate", &Anima::AnimaCamera::Deactivate)
+	//	.def("IsPerspectiveProjectionType", &Anima::AnimaCamera::IsPerspectiveProjectionType)
+	//	.def("IsOrthoProjectionType", &Anima::AnimaCamera::IsOrthographicProjectionType)
+	//	.def("GetFrustum", &Anima::AnimaCamera::GetFrustum, return_value_policy<reference_existing_object>());
 
-	// AnimaFirstPersonCamera
-	class_<Anima::AnimaFirstPersonCamera, bases<Anima::AnimaCamera> >("AnimaFirstPersonCamera", no_init)
-		.def("Zoom", &Anima::AnimaFirstPersonCamera::Zoom)
-		.def("Move", AnimaFirstPersonCameraMoveVector)
-		.def("Move", AnimaFirstPersonCameraMoveFloat)
-		.def("RotateX", &Anima::AnimaFirstPersonCamera::RotateX)
-		.def("RotateXDeg", &Anima::AnimaFirstPersonCamera::RotateXDeg)
-		.def("RotateY", &Anima::AnimaFirstPersonCamera::RotateY)
-		.def("RotateYDeg", &Anima::AnimaFirstPersonCamera::RotateYDeg)
-		.def("LookAt", AnimaFirstPersonCameraLookAtVector)
-		.def("LookAt", AnimaFirstPersonCameraLookAtFloat)
-		.def("CalculateViewMatrix", &Anima::AnimaFirstPersonCamera::CalculateViewMatrix);
-
-	// AnimaThirdPersonCamera
-	class_<Anima::AnimaThirdPersonCamera, bases<Anima::AnimaCamera> >("AnimaThirdPersonCamera", no_init)
-		.def("GetTarget", &Anima::AnimaThirdPersonCamera::GetTarget)
-		.def("GetDistance", &Anima::AnimaThirdPersonCamera::GetDistance)
-		.def("SetDistance", &Anima::AnimaThirdPersonCamera::SetDistance)
-		.def("Zoom", &Anima::AnimaThirdPersonCamera::Zoom)
-		.def("Move", AnimaThirdPersonCameraMoveVector)
-		.def("Move", AnimaThirdPersonCameraMoveFloat)
-		.def("RotateX", &Anima::AnimaThirdPersonCamera::RotateX)
-		.def("RotateXDeg", &Anima::AnimaThirdPersonCamera::RotateXDeg)
-		.def("RotateY", &Anima::AnimaThirdPersonCamera::RotateY)
-		.def("RotateYDeg", &Anima::AnimaThirdPersonCamera::RotateYDeg)
-		.def("LookAt", AnimaThirdPersonCameraLookAtVector)
-		.def("LookAt", AnimaThirdPersonCameraLookAtFloat)
-		.def("CalculateViewMatrix", &Anima::AnimaThirdPersonCamera::CalculateViewMatrix);
-	
 	// AnimaGC
 	class_<Anima::AnimaGC>("AnimaGC", no_init)
 		.def("CreateContext", &Anima::AnimaGC::CreateContext, return_value_policy<manage_new_object>())

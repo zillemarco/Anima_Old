@@ -33,7 +33,8 @@
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
-#include <AnimaMouseInteractor.h>
+#include <AnimaDefaultMouseInteractor.h>
+#include <AnimaKeyboardInteractor.h>
 
 #include "main.h"
 
@@ -64,7 +65,8 @@ Anima::AnimaTimer _timer;
 Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
 
-Anima::AnimaMouseInteractor mouseInteractor;
+Anima::AnimaDefaultMouseInteractor mouseInteractor;
+Anima::AnimaKeyboardInteractor keyboardInteractor;
 
 bool _shouldClose = false;
 bool sceneSaved = false;
@@ -77,6 +79,13 @@ int lastYPos = 0;
 float camSpeed = 1.0f;
 float camSpeedInc = 0.5f;
 float camSpeedMax = 10.0f;
+
+bool moveForwardsPressed = false;
+bool moveBackwardsPressed = false;
+bool moveRightPressed = false;
+bool moveLeftPressed = false;
+bool moveUpPressed = false;
+bool moveDownPressed = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -98,237 +107,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return result;
 		break;
 	}
-	case WM_CHAR:
-	{
-		if (_pbrMaterial != nullptr)
-		{
-			float inc = 0.02f;
-			switch (wParam)
-			{
-			case 'w':
-			case 'W':
-			{
-				_camera->Move(_camera->GetForward(), camSpeed);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-				break;
-			}
-			case 's':
-			case 'S':
-			{
-				_camera->Move(_camera->GetForward(), -camSpeed);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-				break;
-			}
-			case 'd':
-			case 'D':
-			{
-				_camera->Move(_camera->GetRight(), camSpeed);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-				break;
-			}
-			case 'a':
-			case 'A':
-			{
-				_camera->Move(_camera->GetRight(), -camSpeed);
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-				break;
-			}
-			case 'p':
-			case 'P':
-			{
-				float val = _pbrMaterial->GetFloat("Metallic");
-				val = fmax(0.0f, val - inc);
-				_pbrMaterial->SetFloat("Metallic", val);
-				break;
-			}
-			case 'm':
-			case 'M':
-			{
-				float val = _pbrMaterial->GetFloat("Metallic");
-				val = fmin(1.0f, val + inc);
-				_pbrMaterial->SetFloat("Metallic", val);
-				break;
-			}
-			case 'x':
-			case 'X':
-			{
-				float val = _pbrMaterial->GetFloat("Specular");
-				val = fmax(0.0f, val - inc);
-				_pbrMaterial->SetFloat("Specular", val);
-				break;
-			}
-			case 'z':
-			case 'Z':
-			{
-				float val = _pbrMaterial->GetFloat("Specular");
-				val = fmin(1.0f, val + inc);
-				_pbrMaterial->SetFloat("Specular", val);
-				break;
-			}
-			case 'v':
-			case 'V':
-			{
-				float val = _renderer->GetFloat("BlurSize");
-				val = fmax(0.0f, val - (inc / 1000.0));
-				_renderer->SetFloat("BlurSize", val);
-				printf("%f\n", val);
-				break;
-			}
-			case 'b':
-			case 'B':
-			{
-				float val = _renderer->GetFloat("BlurSize");
-				val = fmin(0.5f, val + (inc / 1000.0));
-				_renderer->SetFloat("BlurSize", val);
-				printf("%f\n", val);
-				break;
-			}
-			case 'l':
-			case 'L':
-			{
-				float val = _renderer->GetFloat("BrightnessThreshold");
-				val = fmax(0.0f, val - inc);
-				_renderer->SetFloat("BrightnessThreshold", val);
-				printf("%f\n", val);
-				break;
-			}
-			case 'k':
-			case 'K':
-			{
-				float val = _renderer->GetFloat("BrightnessThreshold");
-				val = fmin(1.0f, val + inc);
-				_renderer->SetFloat("BrightnessThreshold", val);
-				printf("%f\n", val);
-				break;
-			}
-			case 'h':
-			case 'H':
-			{
-				float val = _renderer->GetFloat("BloomBlurScale");
-				val = fmax(0.0f, val - (inc / 1000.0));
-				_renderer->SetFloat("BloomBlurScale", val);
-				printf("%f\n", val);
-				break;
-			}
-			case 'g':
-			case 'G':
-			{
-				float val = _renderer->GetFloat("BloomBlurScale");
-				val = fmin(0.5f, val + (inc / 1000.0));
-				_renderer->SetFloat("BloomBlurScale", val);
-				printf("%f\n", val);
-				break;
-			}
-			case '+':
-			{
-				float val = _pbrMaterial->GetFloat("Roughness");
-				val = fmin(1.0f, val + inc);
-				_pbrMaterial->SetFloat("Roughness", val);
-				break;
-			}
-			case '-':
-			{
-				float val = _pbrMaterial->GetFloat("Roughness");
-				val = fmax(0.0f, val - inc);
-				_pbrMaterial->SetFloat("Roughness", val);
-				break;
-			}
-			case '*':
-			{
-				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-				val = fmin(1.0f, val + inc);
-				_pbrMaterial->SetFloat("ReflectionIntensity", val);
-				break;
-			}
-			case '/':
-			{
-				float val = _pbrMaterial->GetFloat("ReflectionIntensity");
-				val = fmax(0.0f, val - inc);
-				_pbrMaterial->SetFloat("ReflectionIntensity", val);
-				break;
-			}
-			case '1':
-			{
-				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("oro");
-				break;
-			}
-			case '2':
-			{
-				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("rame");
-				break;
-			}
-			case '3':
-			{
-				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("gomma");
-				break;
-			}
-			case '4':
-			{
-				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("legno");
-				break;
-			}
-			case '5':
-			{
-				_pbrMaterial = _scene->GetMaterialsManager()->GetMaterialFromName("floor-material");
-				break;
-			}
-			case '0':
-			{
-				_renderer->SetBoolean("ApplyFXAA", !(_renderer->GetBoolean("ApplyFXAA")));
-				break;
-			}
-			}
-		}
-
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-		break;
-	}
-	//case WM_LBUTTONDOWN:
-	//{
-	//	mouseMoved = false;
-	//	return DefWindowProc(hWnd, msg, wParam, lParam);
-	//	break;
-	//}
-	//case WM_LBUTTONUP:
-	//{
-	//	int xPos = GET_X_LPARAM(lParam);
-	//	int yPos = GET_Y_LPARAM(lParam);
-	//	
-	//	if (mouseMoved == false && _scene != nullptr && _camera != nullptr)
-	//	{
-	//		RECT rc;
-	//		GetClientRect(hWnd, &rc);
-
-	//		Anima::AnimaString str = Anima::FormatString("PT: %d, %d\nSIZE: %d, %d", xPos, yPos, rc.right - rc.left, rc.bottom - rc.top);
-	//		MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
-
-	//		Anima::AnimaVertex3f origin = _camera->GetPosition();
-	//		Anima::AnimaVertex3f end = _camera->ScreenPointToWorldPoint(Anima::AnimaVertex2f((float)xPos, (float)yPos), rc.right - rc.left, rc.bottom - rc.top);
-	//		Anima::AnimaVertex3f dir = (end - origin).Normalized();
-	//		dir *= 1000.0f;
-
-	//		btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
-
-	//		btDynamicsWorld* world = _scene->GetPhysWorld();
-
-	//		world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
-
-	//		if (RayCallback.hasHit())
-	//		{
-	//			Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
-	//			_pbrMaterial = instance->GetMaterial();
-
-	//			Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", _pbrMaterial->GetName().c_str());
-	//			MessageBox(hWnd, str.c_str(), "AnimaEngineDemo", MB_OK);
-	//		}
-	//		else
-	//		{
-	//			printf("Picked nothing\n");
-	//		}
-	//	}
-
-	//	return DefWindowProc(hWnd, msg, wParam, lParam);
-	//}
 	case WM_CREATE:
 	{
 		LRESULT result = DefWindowProc(hWnd, msg, wParam, lParam);
@@ -352,47 +130,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		if (mouseInteractor.Install((long)hWnd, &_engine))
 		{
-			mouseInteractor.SetEventHandler("onLeftMouseDragged", [&](Anima::AnimaEventArgs* args) {
-
-				Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
-				delta /= 300.0f;
-
-				_camera->Move(_camera->GetRight(), delta.x);
-				_camera->Move(_camera->GetUp(), delta.y);
-
-				_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-
-			});
-			mouseInteractor.SetEventHandler("onRightMouseDragged", [](Anima::AnimaEventArgs* args) {
-
-				Anima::AnimaVertex2f delta = ((Anima::AnimaMouseDraggedEventArgs*)args)->GetDelta();
-				Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
-
-				if (engine)
-				{
-					Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
-					Anima::AnimaScene* scene = scenesManager->GetActiveScene();
-
-					if (scene)
-					{
-						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-
-						if (camera)
-						{
-							camera->RotateXDeg(delta.y);
-							camera->RotateYDeg(delta.x);
-
-							scene->GetLightsManager()->UpdateLightsMatrix(camera);
-						}
-					}
-				}
-			});
 			mouseInteractor.SetEventHandler("onLeftMouseClick", [&](Anima::AnimaEventArgs* args) {
 
 				Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
 				Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
-				
+
 				Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
 
 				if (engine)
@@ -409,31 +151,139 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						{
 							Anima::AnimaVertex3f origin = camera->GetPosition();
 							Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point);
-							Anima::AnimaVertex3f dir = (end - origin).Normalized();
-							dir *= 1000.0f;
-							
-							Anima::AnimaPhysicsDebugDrawer* drawer = _renderer->GetPhysicsDebugDrawer();
-							drawer->AddConstantLine(origin, end, Anima::AnimaColor3f(0.0, 1.0, 0.0));
 
-							btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z));
+							btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z));
 
 							btDynamicsWorld* world = scene->GetPhysWorld();
 
-							world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(dir.x, dir.y, dir.z), RayCallback);
+							world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z), RayCallback);
 
 							if (RayCallback.hasHit())
 							{
 								Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+								Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
 
-								Anima::AnimaString str = Anima::FormatString("Picked material named '%s'\n", instance->GetMaterial()->GetName().c_str());
+								Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
 
-								MessageBox(NULL, str.c_str(), "Picked object", MB_OK);
+								MessageBox(NULL, str.c_str(), "Picking", MB_OK);
 							}
 							else
 							{
 								printf("Picked nothing\n");
 							}
 						}
+					}
+				}
+			});
+		}
+
+		if (keyboardInteractor.Install((long)hWnd, &_engine))
+		{
+			keyboardInteractor.SetEventHandler("onUpdateScene", [&](Anima::AnimaEventArgs* args) {
+				Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
+				Anima::AnimaKeyboardStatusMap keyboardStatus = ((Anima::AnimaKeyboardInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetKeyboardStatus();
+
+				if (scene)
+				{
+					Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+					Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+
+					if (camera)
+					{
+						Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
+						Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_W])
+						{
+							if (!moveForwardsPressed)
+							{
+								moveForwardsPressed = true;
+								camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
+							}
+
+							direction.z += 1.0f;
+						}
+						else
+						{
+							moveForwardsPressed = false;
+						}
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_S])
+						{
+							if (!moveBackwardsPressed)
+							{
+								moveBackwardsPressed = true;
+								camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
+							}
+
+							direction.z -= 1.0f;
+						}
+						else
+						{
+							moveBackwardsPressed = false;
+						}
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_D])
+						{
+							if (!moveRightPressed)
+							{
+								moveRightPressed = true;
+								camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
+							}
+
+							direction.x += 1.0f;
+						}
+						else
+						{
+							moveRightPressed = false;
+						}
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_A])
+						{
+							if (!moveLeftPressed)
+							{
+								moveLeftPressed = true;
+								camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
+							}
+
+							direction.x -= 1.0f;
+						}
+						else
+						{
+							moveLeftPressed = false;
+						}
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_E])
+						{
+							if (!moveUpPressed)
+							{
+								moveUpPressed = true;
+								camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+							}
+
+							direction.y += 1.0f;
+						}
+						else
+						{
+							moveUpPressed = false;
+						}
+
+						if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_Q])
+						{
+							if (!moveDownPressed)
+							{
+								moveDownPressed = true;
+								camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+							}
+
+							direction.y -= 1.0f;
+						}
+						else
+						{
+							moveDownPressed = false;
+						}
+
+						camera->SetUpdateData(direction);
 					}
 				}
 			});
@@ -595,6 +445,8 @@ bool InitEngine()
 
 	_scene->InitializePhysics();
 	_scene->InitializePhysicObjects();
+
+	_scene->SetKeyboardInteractor(&keyboardInteractor);
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();

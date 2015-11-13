@@ -156,8 +156,13 @@ enum class AnimaKeyboardKey : AInt
 	AKK_LAST			= AKK_MENU
 };
 
-AInt TranslateFlags(AUint flags);
-AnimaKeyboardKey TranslateKey(AUint key);
+#if defined WIN32
+	AInt TranslateFlags();
+	AnimaKeyboardKey TranslateKey(WPARAM wParam, LPARAM lParam);
+#else
+	AInt TranslateFlags(AUint flags);
+	AnimaKeyboardKey TranslateKey(AUint key);
+#endif
 
 typedef boost::unordered_map<AnimaKeyboardKey, bool> AnimaKeyboardStatusMap;
 
@@ -210,6 +215,9 @@ public:
 	
 private:
 #if defined WIN32
+	static LRESULT CALLBACK WindowsProcCallback(int nCode, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK MessageProcCallback(int nCode, WPARAM wParam, LPARAM lParam);
+	static void HandleMessage(HWND hWnd, AUint message, WPARAM wParam, LPARAM lParam, AnimaKeyboardInteractor* interactor);
 #else
 	static void KeyDownCallback(AnimaKeyboardInteractor* interactor, NSEvent* event);
 	static void KeyUpCallback(AnimaKeyboardInteractor* interactor, NSEvent* event);
@@ -223,6 +231,9 @@ protected:
 	AnimaArray<AnimaEventInfo> _supportedEvents;
 	
 #if defined WIN32
+	static boost::unordered_map<long, AnimaKeyboardInteractor*> _installedInteractors;
+	HHOOK _windowsProcHook;
+	HHOOK _messageProcHook;
 #else
 	id _keyDownMonitor;
 	id _keyUpMonitor;

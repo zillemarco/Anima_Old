@@ -41,8 +41,6 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaShaderProgram.h
 					AnimaQuaternion.h
 					AnimaCamera.h
-					AnimaFirstPersonCamera.h
-					AnimaThirdPersonCamera.h
 					AnimaCamerasManager.h
 					AnimaTexturesManager.h
 					AnimaTexture.h
@@ -118,8 +116,6 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaShaderProgram.cpp
 					AnimaQuaternion.cpp
 					AnimaCamera.cpp
-					AnimaFirstPersonCamera.cpp
-					AnimaThirdPersonCamera.cpp
 					AnimaCamerasManager.cpp
 					AnimaTexturesManager.cpp
 					AnimaTexture.cpp
@@ -176,7 +172,7 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	if(APPLE)
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 	else()
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp AnimaMouseInteractor.cpp)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
 	endif()
 	
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
@@ -186,7 +182,7 @@ else()
 	if(APPLE)
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 	else()
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp AnimaMouseInteractor.cpp)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
 	endif()
 
 	source_group(Engine FILES AnimaEngine.h AnimaEngine.cpp AnimaEngineConfig.h AnimaEngineCore.h AnimaEngineCore.cpp AnimaEnginePY.cpp AnimaEnginePY.h)
@@ -197,7 +193,7 @@ if(APPLE)
 	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
 else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
-	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp AnimaKeyboardInteractor.mm)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
 endif()
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h AnimaTools.h AnimaTools.cpp)
@@ -219,7 +215,7 @@ source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInter
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)
 source_group(Engine\\Scene\\Data\\Animations FILES AnimaAnimation.cpp AnimaAnimation.h)
-source_group(Engine\\Scene\\Data\\Objects\\Cameras FILES AnimaCamera.h AnimaFirstPersonCamera.h AnimaThirdPersonCamera.h AnimaCamera.cpp AnimaFirstPersonCamera.cpp AnimaThirdPersonCamera.cpp)
+source_group(Engine\\Scene\\Data\\Objects\\Cameras FILES AnimaCamera.h AnimaCamera.cpp)
 source_group(Engine\\Scene\\Data\\Objects\\Graphics FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp AnimaModel.h AnimaModel.cpp AnimaModelInstance.h AnimaModelInstance.cpp AnimaMeshInstance.h AnimaMeshInstance.cpp)
 source_group(Engine\\Scene\\Data\\Objects\\Lights FILES AnimaLight.h AnimaLight.cpp)
 source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp AnimaShaderData.h AnimaShaderData.cpp AnimaShaderInclude.h AnimaShaderInclude.cpp AnimaShaderGroupData.h AnimaShaderGroupData.cpp)

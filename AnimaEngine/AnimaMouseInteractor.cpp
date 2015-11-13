@@ -7,72 +7,12 @@
 //
 
 #include "AnimaMouseInteractor.h"
+#include "AnimaKeyboardInteractor.h"
 #include "AnimaLogger.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#if _MSC_VER >= 1300    // for VC 7.0
-	// from ATL 7.0 sources
-	#ifndef _delayimp_h
-		extern "C" IMAGE_DOS_HEADER __ImageBase;
-	#endif
-#endif
-
-HMODULE GetCurrentModule()
-{
-#if _MSC_VER < 1300    // earlier than .NET compiler (VC 6.0)
-
-	// Here's a trick that will get you the handle of the module
-	// you're running in without any a-priori knowledge:
-	// http://www.dotnet247.com/247reference/msgs/13/65259.aspx
-
-	MEMORY_BASIC_INFORMATION mbi;
-	static int dummy;
-	VirtualQuery(&dummy, &mbi, sizeof(mbi));
-
-	return reinterpret_cast<HMODULE>(mbi.AllocationBase);
-
-#else    // VC 7.0
-
-	// from ATL 7.0 sources
-	return reinterpret_cast<HMODULE>(&__ImageBase);
-#endif
-}
-
-
 boost::unordered_map<long, AnimaMouseInteractor*> AnimaMouseInteractor::_installedInteractors;
-
-AnimaString FetchLastErrorMessage(DWORD dwError, AnimaString& strMessage)
-{
-	LPVOID lpMsgBuf = NULL;
-
-	// Search for the message description in the std windows
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		dwError,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-		(LPTSTR)&lpMsgBuf,
-		0,
-		NULL);
-
-	if (lpMsgBuf != NULL)
-	{
-		strMessage = (LPCTSTR)lpMsgBuf;
-		LocalFree(lpMsgBuf);
-	}
-	else
-	{
-		if (dwError)
-		{
-			//strMessage.Format("Communications Error Number (%d)", dwError);
-		}
-
-	}
-
-	return strMessage;
-}
 
 AnimaMouseInteractor::AnimaMouseInteractor()
 {
@@ -92,7 +32,8 @@ AnimaMouseInteractor::AnimaMouseInteractor()
 			{ "onRightMouseDragged", "" },
 			{ "onRightMouseDown", "" },
 			{ "onRightMouseUp", "" },
-			{ "onRightMouseClick", "" }
+			{ "onRightMouseClick", "" },
+			{"onUpdateScene", ""}
 	};
 }
 
@@ -120,7 +61,7 @@ AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
 
 AnimaMouseInteractor::~AnimaMouseInteractor()
 {
-
+	Remove();
 }
 
 AnimaMouseInteractor& AnimaMouseInteractor::operator=(const AnimaMouseInteractor& src)
@@ -201,6 +142,9 @@ bool AnimaMouseInteractor::Remove()
 	auto interactor = _installedInteractors.find(_windowId);
 	if (interactor != _installedInteractors.end())
 		_installedInteractors.erase(interactor);
+
+	UnhookWindowsHook(WH_CALLWNDPROC, WindowsProcCallback);
+	UnhookWindowsHook(WH_GETMESSAGE, MessageProcCallback);
 
 	_windowId = 0;
 	_installed = false;
@@ -327,7 +271,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if ((wParam & MK_LBUTTON) == MK_LBUTTON)
 		{
-			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, 0, delta);
+			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, TranslateFlags(), delta);
 			interactor->LaunchEvent("onLeftMouseDragged", args);
 
 			delete args;
@@ -335,7 +279,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		}
 		else if ((wParam & MK_RBUTTON) == MK_RBUTTON)
 		{
-			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, 0, delta);
+			AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, TranslateFlags(), delta);
 			interactor->LaunchEvent("onRightMouseDragged", args);
 
 			delete args;
@@ -358,7 +302,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		interactor->_lastMousePosition = pt;
 		interactor->_mouseMoved = false;
 
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, 0);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 		interactor->LaunchEvent("onLeftMouseDown", args);
 
 		delete args;
@@ -380,7 +324,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		interactor->_lastMousePosition = pt;
 		interactor->_mouseMoved = false;
 
-		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, 0);
+		AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 		interactor->LaunchEvent("onRightMouseDown", args);
 
 		delete args;
@@ -401,7 +345,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		interactor->_lastMousePosition = pt;
 
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, 0);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 		interactor->LaunchEvent("onLeftMouseUp", argsUp);
 
 		delete argsUp;
@@ -409,7 +353,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if (interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, 0);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onLeftMouseClick", argsClick);
 
 			delete argsClick;
@@ -431,7 +375,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		interactor->_lastMousePosition = pt;
 
-		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, 0);
+		AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 		interactor->LaunchEvent("onRightMouseUp", argsUp);
 
 		delete argsUp;
@@ -439,7 +383,7 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 
 		if (interactor->_mouseMoved == false)
 		{
-			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, 0);
+			AnimaEventArgs* argsClick = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onRightMouseClick", argsClick);
 
 			delete argsClick;
@@ -449,6 +393,16 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		break;
 	}
 	}
+}
+
+void AnimaMouseInteractor::UpdateScene(AnimaScene* scene, AFloat elapsedTime)
+{
+	AnimaEventArgs* args = new AnimaUpdateSceneEventArgs(this, scene, elapsedTime);
+
+	LaunchEvent("onUpdateScene", args);
+
+	delete args;
+	args = nullptr;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

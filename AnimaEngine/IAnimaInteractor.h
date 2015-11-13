@@ -14,6 +14,11 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+#if defined WIN32
+#include <Windows.h>
+HMODULE GetCurrentModule();
+#endif
+
 class AnimaScene;
 
 class ANIMA_ENGINE_EXPORT AnimaUpdateSceneEventArgs : public AnimaEventArgs
@@ -34,7 +39,6 @@ private:
 	AnimaScene* _scene;
 	AFloat _elapsedTime;
 };
-
 
 class ANIMA_ENGINE_EXPORT IAnimaInteractor
 {
