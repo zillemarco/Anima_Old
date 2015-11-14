@@ -575,10 +575,7 @@ void AnimaCamera::UpdatePosition(AFloat elapsedTime)
 		
 		if (_updateDirection.z == 0.0f && AnimaMath::CloseEnough(_currentVelocity.z, 0.0f))
 			displacement.z = 0.0f;
-		
-		AnimaLogger::LogMessageFormat("Velocity: %.3f:%.3f:%.3f", _currentVelocity.x, _currentVelocity.y, _currentVelocity.z);
-		AnimaLogger::LogMessageFormat("Displacemente: %.3f:%.3f:%.3f", displacement.x, displacement.y, displacement.z);
-		
+				
 		Move(displacement.x, displacement.y, displacement.z);
 	}
 	

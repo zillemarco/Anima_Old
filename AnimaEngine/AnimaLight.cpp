@@ -34,6 +34,7 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 	ComputeLightMatrix(nullptr);
 	UpdateLightMeshMatrix();
 
+	SetExtension(AnimaVertex3f(1.0f, 1.0f, 1.0f));
 	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
 	AnimaSceneObject::SetFloat("Intensity", 1.0f);
 	AnimaSceneObject::SetBoolean("CastShadows", false);
@@ -107,6 +108,16 @@ bool AnimaLight::ReadObject(const ptree& objectTree, AnimaScene* scene, bool rea
 		AnimaLogger::LogMessageFormat("ERROR - Error parsing light: %s", exception.what());
 		return false;
 	}
+}
+
+void AnimaLight::SetExtension(const AnimaVertex3f& extension)
+{
+	AnimaSceneObject::SetVector("Extension", extension);
+}
+
+AnimaVertex3f AnimaLight::GetExtension() const
+{
+	return AnimaSceneObject::GetVector3f("Extension");
 }
 
 void AnimaLight::UpdateLightMeshMatrix()
@@ -249,6 +260,8 @@ AnimaDirectionalLight::AnimaDirectionalLight(AnimaAllocator* allocator, AnimaDat
 	AnimaLight::SetFloat("ShadowMapBias", 1.0f / 1024.0f);
 	AnimaLight::SetBoolean("CastShadows", true);
 
+	SetExtension(AnimaVertex3f(100.0f, 100.0f, 100.0f));
+
 	ComputeLightMatrix(nullptr);
 	UpdateLightMeshMatrix();
 }
@@ -318,46 +331,49 @@ void AnimaDirectionalLight::ComputeLightMatrix(AnimaCamera* activeCamera)
 	if (activeCamera == nullptr)
 		return;
 
-	AnimaFrustum* cameraFrustum = activeCamera->GetFrustum();
+	//AnimaFrustum* cameraFrustum = activeCamera->GetFrustum();
 
-	AnimaVertex3f direction = GetDirection();												// asse z
-	AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();	// asse y
-	AnimaVertex3f perpVec2 = (direction ^ perpVec1).Normalized();							// asse x
+	//AnimaVertex3f direction = GetDirection();												// asse z
+	//AnimaVertex3f perpVec1 = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();	// asse y
+	//AnimaVertex3f perpVec2 = (direction ^ perpVec1).Normalized();							// asse x
 
-	AnimaMatrix rotMat;	
-	rotMat.m[0] = perpVec2.x;	rotMat.m[1] = perpVec1.x;	rotMat.m[2] =	direction.x;
-	rotMat.m[4] = perpVec2.y;	rotMat.m[5] = perpVec1.y;	rotMat.m[6] =	direction.y;
-	rotMat.m[8] = perpVec2.z;	rotMat.m[9] = perpVec1.z;	rotMat.m[10] =	direction.z;
+	//AnimaMatrix rotMat;	
+	//rotMat.m[0] = perpVec2.x;	rotMat.m[1] = perpVec1.x;	rotMat.m[2] =	direction.x;
+	//rotMat.m[4] = perpVec2.y;	rotMat.m[5] = perpVec1.y;	rotMat.m[6] =	direction.y;
+	//rotMat.m[8] = perpVec2.z;	rotMat.m[9] = perpVec1.z;	rotMat.m[10] =	direction.z;
+	//
+	//AnimaVertex3f frustumVertices[8];
+	//cameraFrustum->GetFrustumVertices(frustumVertices);
+	//
+	//for (AInt i = 0; i < 8; i++)
+	//	frustumVertices[i] = rotMat * frustumVertices[i];
+
+	//AnimaVertex3f minV = frustumVertices[0], maxV = frustumVertices[0];
+	//for (AInt i = 1; i < 8; i++)
+	//{
+	//	minV.x = min(minV.x, frustumVertices[i].x);
+	//	minV.y = min(minV.y, frustumVertices[i].y);
+	//	minV.z = min(minV.z, frustumVertices[i].z);
+	//	maxV.x = max(maxV.x, frustumVertices[i].x);
+	//	maxV.y = max(maxV.y, frustumVertices[i].y);
+	//	maxV.z = max(maxV.z, frustumVertices[i].z);
+	//}
+
+	//AnimaVertex3f extends = maxV - minV;
+	//extends *= 0.5f;
 	
-	AnimaVertex3f frustumVertices[8];
-	cameraFrustum->GetFrustumVertices(frustumVertices);
-	
-	for (AInt i = 0; i < 8; i++)
-		frustumVertices[i] = rotMat * frustumVertices[i];
-
-	AnimaVertex3f minV = frustumVertices[0], maxV = frustumVertices[0];
-	for (AInt i = 1; i < 8; i++)
-	{
-		minV.x = min(minV.x, frustumVertices[i].x);
-		minV.y = min(minV.y, frustumVertices[i].y);
-		minV.z = min(minV.z, frustumVertices[i].z);
-		maxV.x = max(maxV.x, frustumVertices[i].x);
-		maxV.y = max(maxV.y, frustumVertices[i].y);
-		maxV.z = max(maxV.z, frustumVertices[i].z);
-	}
-
-	AnimaVertex3f extends = maxV - minV;
-	extends *= 0.5f;
-	
-	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(cameraFrustum->GetBoundingBoxCenter(), direction, perpVec1);
-	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extends.x, extends.x, -extends.y, extends.y, -extends.z, extends.z);
-	AnimaMatrix projectionViewMatrix = projectionMatrix * viewMatrix;
-
-	//AnimaVertex3f extends(200.0f, 200.0f, 200.0f);
-	//AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(AnimaVertex3f(0.0f, 0.0f, 0.0f), direction, perpVec1);
+	//AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(cameraFrustum->GetBoundingBoxCenter(), direction, perpVec1);
 	//AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extends.x, extends.x, -extends.y, extends.y, -extends.z, extends.z);
 	//AnimaMatrix projectionViewMatrix = projectionMatrix * viewMatrix;
 
+	AnimaVertex3f direction = GetDirection();											// asse z
+	AnimaVertex3f yAxis = (direction ^ AnimaVertex3f(0.0f, 0.0f, 1.0f)).Normalized();	// asse y
+	AnimaVertex3f extension = GetExtension();
+
+	AnimaMatrix viewMatrix = AnimaMatrix::MakeLookAt(activeCamera->GetPosition(), direction, yAxis);
+	AnimaMatrix projectionMatrix = AnimaMatrix::MakeOrtho(-extension.x, extension.x, -extension.y, extension.y, -extension.z, extension.z);
+	AnimaMatrix projectionViewMatrix = projectionMatrix * viewMatrix;
+	
 	AnimaSceneObject::SetMatrix("ViewMatrix", viewMatrix);
 	AnimaSceneObject::SetMatrix("ProjectionMatrix", projectionMatrix);
 	AnimaSceneObject::SetMatrix("ProjectionViewMatrix", projectionViewMatrix);

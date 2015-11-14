@@ -64,6 +64,9 @@ public:
 	virtual AFloat GetLinearAttenuation();
 	virtual AFloat GetExponentAttenuation();
 
+	virtual void SetExtension(const AnimaVertex3f& extension);
+	virtual AnimaVertex3f GetExtension() const;
+
 	virtual void SetRange(AFloat range);
 	virtual AFloat GetRange();
 
@@ -71,10 +74,7 @@ public:
 	virtual AFloat GetCutoff();
 
 	virtual void ComputeLightMatrix(AnimaCamera* activeCamera);
-
-	//AnimaTexture* GetShadowTexture();
-	//AnimaTexture* GetTempShadowTexture();
-
+	
 	virtual AnimaMatrix GetViewMatrix();
 	virtual AnimaMatrix GetProjectionMatrix();
 	virtual AnimaMatrix GetProjectionViewMatrix();

@@ -396,7 +396,7 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 			SetTexture("DILShadowMap", directionalLightShadowMapTexture);
 		}
 
-		AUint divisore = 2;
+		AUint divisore = 8;
 
 		AnimaTexture* bloomTexture = GetTexture("BloomMap");
 		if (bloomTexture != nullptr)
@@ -1451,22 +1451,26 @@ void AnimaRenderer::BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>*
 		for (AInt j = 0; j < instancesCount; j++)
 		{
 			AnimaMeshInstance* instance = mesh->GetInstance(j);
-			AnimaMesh* mesh = instance->GetMesh();
 
-			AInt meshInstancesIndex = FindMeshInstances(meshes, mesh);
-			if (meshInstancesIndex >= 0)
-			{
-				AnimaRendererMeshInstances* meshInstances = &meshes->at(meshInstancesIndex);
-				meshInstances->_instances.push_back(instance);
-			}
-			else
-			{
-				AnimaRendererMeshInstances meshInstances;
-				meshInstances._mesh = mesh;
-				meshInstances._instances.push_back(instance);
+			//if (instance->GetBoolean("CastShadows"))
+			//{
+				AnimaMesh* mesh = instance->GetMesh();
 
-				meshes->push_back(meshInstances);
-			}
+				AInt meshInstancesIndex = FindMeshInstances(meshes, mesh);
+				if (meshInstancesIndex >= 0)
+				{
+					AnimaRendererMeshInstances* meshInstances = &meshes->at(meshInstancesIndex);
+					meshInstances->_instances.push_back(instance);
+				}
+				else
+				{
+					AnimaRendererMeshInstances meshInstances;
+					meshInstances._mesh = mesh;
+					meshInstances._instances.push_back(instance);
+
+					meshes->push_back(meshInstances);
+				}
+			//}
 		}
 	}
 }
