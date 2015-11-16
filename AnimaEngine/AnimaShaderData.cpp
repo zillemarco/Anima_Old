@@ -3,6 +3,7 @@
 #include "AnimaRenderer.h"
 #include "AnimaMappedValues.h"
 #include "AnimaGBuffer.h"
+#include "AnimaLogger.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -10,14 +11,18 @@ AnimaShaderData::AnimaShaderData(const AnimaString& name)
 	: AnimaNamedObject(name, nullptr)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaShaderData);
-
+	
+	_type = ASDT_NONE;
+	_sourceObject = ASDSO_NODE;
+	_slotName = "";
+	_associatedWith = "";
+	
 	_arraySize = 0;
-	_type = NONE;
 	_offset = -1;
 	_arrayStride = -1;
 	_matrixStride = -1;
 
-	DivideName();
+//	DivideName();
 }
 
 AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
@@ -25,8 +30,12 @@ AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
 {
 	_locations = src._locations;
 	_arraySize = src._arraySize;
-	_nameParts = src._nameParts;
+//	_nameParts = src._nameParts;
+	
 	_type = src._type;
+	_sourceObject = src._sourceObject;
+	_slotName = src._slotName;
+	_associatedWith = src._associatedWith;
 
 	_offset = src._offset;
 	_arrayStride = src._arrayStride;
@@ -38,8 +47,12 @@ AnimaShaderData::AnimaShaderData(AnimaShaderData&& src)
 {
 	_locations = src._locations;
 	_arraySize = src._arraySize;
-	_nameParts = src._nameParts;
+//	_nameParts = src._nameParts;
+	
 	_type = src._type;
+	_sourceObject = src._sourceObject;
+	_slotName = src._slotName;
+	_associatedWith = src._associatedWith;
 
 	_offset = src._offset;
 	_arrayStride = src._arrayStride;
@@ -58,8 +71,12 @@ AnimaShaderData& AnimaShaderData::operator=(const AnimaShaderData& src)
 
 		_locations = src._locations;
 		_arraySize = src._arraySize;
-		_nameParts = src._nameParts;
+//		_nameParts = src._nameParts;
+		
 		_type = src._type;
+		_sourceObject = src._sourceObject;
+		_slotName = src._slotName;
+		_associatedWith = src._associatedWith;
 
 		_offset = src._offset;
 		_arrayStride = src._arrayStride;
@@ -77,8 +94,12 @@ AnimaShaderData& AnimaShaderData::operator=(AnimaShaderData&& src)
 
 		_locations = src._locations;
 		_arraySize = src._arraySize;
-		_nameParts = src._nameParts;
+//		_nameParts = src._nameParts;
+		
 		_type = src._type;
+		_sourceObject = src._sourceObject;
+		_slotName = src._slotName;
+		_associatedWith = src._associatedWith;
 
 		_offset = src._offset;
 		_arrayStride = src._arrayStride;
@@ -106,7 +127,7 @@ void AnimaShaderData::SetName(const AnimaString& name)
 {
 	AnimaNamedObject::SetName(name);
 
-	DivideName();
+//	DivideName();
 }
 
 void AnimaShaderData::Analize(AnimaShaderProgram* program)
@@ -116,7 +137,8 @@ void AnimaShaderData::Analize(AnimaShaderProgram* program)
 
 	if (_arraySize == 0)
 	{
-		AInt location = glGetUniformLocation(program->GetID(), _name.c_str());
+		AnimaString aw = AssociatedWith();
+		AInt location = glGetUniformLocation(program->GetID(), aw.c_str());
 
 		if (location < 0)
 			printf("[AnimaShaderData] Error looking for data location on program:\n\t- Program name: %s\n\t- Data name: %s\n", program->GetName().c_str(), _name.c_str());
@@ -129,9 +151,9 @@ void AnimaShaderData::Analize(AnimaShaderProgram* program)
 		AnimaString tmpName;
 		for (AInt i = 0; i < _arraySize; i++)
 		{
-			tmpName = FormatString("%s[%d]", _name.c_str(), i);
+			tmpName = FormatString("%s[%d]", AssociatedWith().c_str(), i);
 
-			location = glGetUniformLocation(program->GetID(), _name.c_str());
+			location = glGetUniformLocation(program->GetID(), tmpName.c_str());
 
 			if (location < 0)
 				printf("[AnimaShaderData] Error looking for data location on program:\n\t- Program name: %s\n\t- Data name: %s\n", program->GetName().c_str(), _name.c_str());
@@ -141,93 +163,93 @@ void AnimaShaderData::Analize(AnimaShaderProgram* program)
 	}
 }
 
-void AnimaShaderData::DivideName()
-{
-	AnimaString namePart1 = _name;
-	AnimaString namePart2 = "";
-
-	AInt pos = namePart1.find('_');
-	while (pos != -1)
-	{
-		namePart2 = namePart1.substr(0, pos);
-		namePart1 = namePart1.substr(pos + 1, namePart1.length());
-
-		if (!namePart2.empty())
-			_nameParts.push_back(namePart2);
-		pos = namePart1.find('_');
-	}
-
-	_nameParts.push_back(namePart1);
-}
+//void AnimaShaderData::DivideName()
+//{
+//	AnimaString namePart1 = _name;
+//	AnimaString namePart2 = "";
+//
+//	AInt pos = namePart1.find('_');
+//	while (pos != -1)
+//	{
+//		namePart2 = namePart1.substr(0, pos);
+//		namePart1 = namePart1.substr(pos + 1, namePart1.length());
+//
+//		if (!namePart2.empty())
+//			_nameParts.push_back(namePart2);
+//		pos = namePart1.find('_');
+//	}
+//
+//	_nameParts.push_back(namePart1);
+//}
 
 void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer)
 {
-	AInt count = _nameParts.size();
-	if (count != 2)
-		return;
+//	AInt count = _nameParts.size();
+//	if (count != 2)
+//		return;
 
-	AnimaString propertyName = _nameParts[1];
-
+	AnimaString propertyName = GetName();
+	
 	switch (_type)
 	{
-	case Anima::FLOAT:
+	case Anima::ASDT_FLOAT:
 		UpdateValue(object->GetFloat(propertyName));
 		break;
-	case Anima::FLOAT_ARRAY:
+	case Anima::ASDT_FLOAT_ARRAY:
 		break;
-	case Anima::FLOAT2:
+	case Anima::ASDT_FLOAT2:
 		UpdateValue(object->GetVector2f(propertyName));
 		break;
-	case Anima::FLOAT2_ARRAY:
+	case Anima::ASDT_FLOAT2_ARRAY:
 		break;
-	case Anima::FLOAT3:
+	case Anima::ASDT_FLOAT3:
 		if (object->HasColor(propertyName))
 			UpdateValue(object->GetColor3f(propertyName));
 		else
 			UpdateValue(object->GetVector3f(propertyName));
 		break;
-	case Anima::FLOAT3_ARRAY:
+	case Anima::ASDT_FLOAT3_ARRAY:
 		break;
-	case Anima::FLOAT4:
+	case Anima::ASDT_FLOAT4:
 		if (object->HasColor(propertyName))
 			UpdateValue(object->GetColor4f(propertyName));
 		else
 			UpdateValue(object->GetVector4f(propertyName));
 		break;
-	case Anima::FLOAT4_ARRAY:
+	case Anima::ASDT_FLOAT4_ARRAY:
 		break;
-	case Anima::MATRIX4x4:
+	case Anima::ASDT_MATRIX4x4:
 		UpdateValue(object->GetMatrix(propertyName));
 		break;
-	case Anima::MATRIX4x4_ARRAY:
+	case Anima::ASDT_MATRIX4x4_ARRAY:
 		UpdateValue(object->GetMatrixArray(propertyName));
 		break;
-	case Anima::MATRIX3x3:
+	case Anima::ASDT_MATRIX3x3:
 		UpdateValue(object->GetMatrix(propertyName));
 		break;
-	case Anima::MATRIX3x3_ARRAY:
+	case Anima::ASDT_MATRIX3x3_ARRAY:
 		UpdateValue(object->GetMatrixArray(propertyName));
 		break;
-	case Anima::INT:
+	case Anima::ASDT_INT:
 		UpdateValue(object->GetInteger(propertyName));
 		break;
-	case Anima::INT_ARRAY:
+	case Anima::ASDT_INT_ARRAY:
 		break;
-	case Anima::BOOL:
+	case Anima::ASDT_BOOL:
 		UpdateValue(object->GetBoolean(propertyName));
 		break;
-	case Anima::BOOL_ARRAY:
+	case Anima::ASDT_BOOL_ARRAY:
 		break;
-	case Anima::TEXTURE2D:
-	case Anima::TEXTURECUBE:
+	case Anima::ASDT_TEXTURE2D:
+	case Anima::ASDT_TEXTURECUBE:
 		if(renderer != nullptr)
 			UpdateValue(object->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
 		break;
-	case Anima::TEXTURE2D_ARRAY:
+	case Anima::ASDT_TEXTURE2D_ARRAY:
 		break;
-	case Anima::TEXTURE3D:
+	case Anima::ASDT_TEXTURE3D:
 		break;
-	case Anima::TEXTURE3D_ARRAY:
+	case Anima::ASDT_TEXTURE3D_ARRAY:
 		break;
 	default:
 		break;
@@ -239,73 +261,93 @@ void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
 	if(renderer == nullptr)
 		return;
 	
-	AInt count = _nameParts.size();
-	if (count < 2)
-		return;
-
-	AnimaString propertyName = _nameParts[1];
+//	AInt count = _nameParts.size();
+//	if (count < 2)
+//		return;
+//
+//	AnimaString propertyName = _nameParts[1];
+	AnimaString propertyName = GetName();
 
 	switch (_type)
 	{
-	case Anima::FLOAT:
+	case Anima::ASDT_FLOAT:
 		UpdateValue(renderer->GetFloat(propertyName));
 		break;
-	case Anima::FLOAT_ARRAY:
+	case Anima::ASDT_FLOAT_ARRAY:
 		break;
-	case Anima::FLOAT2:
+	case Anima::ASDT_FLOAT2:
 		UpdateValue(renderer->GetVector2f(propertyName));
 		break;
-	case Anima::FLOAT2_ARRAY:
+	case Anima::ASDT_FLOAT2_ARRAY:
 		break;
-	case Anima::FLOAT3:
+	case Anima::ASDT_FLOAT3:
 		UpdateValue(renderer->GetVector3f(propertyName));
 		break;
-	case Anima::FLOAT3_ARRAY:
+	case Anima::ASDT_FLOAT3_ARRAY:
 		break;
-	case Anima::FLOAT4:
+	case Anima::ASDT_FLOAT4:
 		UpdateValue(renderer->GetVector4f(propertyName));
 		break;
-	case Anima::FLOAT4_ARRAY:
+	case Anima::ASDT_FLOAT4_ARRAY:
 		break;
-	case Anima::MATRIX4x4:
+	case Anima::ASDT_MATRIX4x4:
 		break;
-	case Anima::MATRIX4x4_ARRAY:
+	case Anima::ASDT_MATRIX4x4_ARRAY:
 		break;
-	case Anima::MATRIX3x3:
+	case Anima::ASDT_MATRIX3x3:
 		break;
-	case Anima::MATRIX3x3_ARRAY:
+	case Anima::ASDT_MATRIX3x3_ARRAY:
 		break;
-	case Anima::INT:
+	case Anima::ASDT_INT:
 		UpdateValue(renderer->GetInteger(propertyName));
 		break;
-	case Anima::INT_ARRAY:
+	case Anima::ASDT_INT_ARRAY:
 		break;
-	case Anima::BOOL:
+	case Anima::ASDT_BOOL:
 		UpdateValue(renderer->GetBoolean(propertyName));
 		break;
-	case Anima::BOOL_ARRAY:
+	case Anima::ASDT_BOOL_ARRAY:
 		break;
-	case Anima::TEXTURE2D:
-	case Anima::TEXTURECUBE:
+	case Anima::ASDT_TEXTURE2D:
+	case Anima::ASDT_TEXTURECUBE:
 	{
-		if (_nameParts.size() == 4 && _nameParts[1] == GBUFFER_PREFIX)
+//		if (_nameParts.size() == 4 && _nameParts[1] == GBUFFER_PREFIX)
+//		{
+//			AnimaGBuffer* gBuffer = renderer->GetGBuffer(_nameParts[2]);
+//
+//			if (gBuffer != nullptr)
+//				UpdateValue(gBuffer->GetTexture(_nameParts[3]), renderer->GetTextureSlot(_nameParts[3]));
+//		}
+//		else
+//		{
+//			UpdateValue(renderer->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
+//		}
+		if(_sourceObject == AnimaShaderDataSourceObject::ASDSO_GBUFFER)
 		{
-			AnimaGBuffer* gBuffer = renderer->GetGBuffer(_nameParts[2]);
-
-			if (gBuffer != nullptr)
-				UpdateValue(gBuffer->GetTexture(_nameParts[3]), renderer->GetTextureSlot(_nameParts[3]));
+			if(_slotName.empty())
+			{
+				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. GBuffer slot name not set for GBuffer '%s'", propertyName.c_str());
+				return;
+			}
+			
+			AnimaGBuffer* gBuffer = renderer->GetGBuffer(propertyName);
+			if(gBuffer != nullptr)
+				UpdateValue(gBuffer->GetTexture(_slotName), renderer->GetTextureSlot(_slotName));
+			else
+				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. Cannot find GBuffer named '%s'", propertyName.c_str());
 		}
 		else
 		{
 			UpdateValue(renderer->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
 		}
+		
 		break;
 	}
-	case Anima::TEXTURE2D_ARRAY:
+	case Anima::ASDT_TEXTURE2D_ARRAY:
 		break;
-	case Anima::TEXTURE3D:
+	case Anima::ASDT_TEXTURE3D:
 		break;
-	case Anima::TEXTURE3D_ARRAY:
+	case Anima::ASDT_TEXTURE3D_ARRAY:
 		break;
 	default:
 		break;

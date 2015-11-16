@@ -7,18 +7,18 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="REN_GB_PrepassBuffer_DepthMap" type="TEXTURE2D" />
-				<Data name="REN_GB_PrepassBuffer_NormalMap" type="TEXTURE2D" />
-				<Data name="REN_GB_PrepassBuffer_SpecularMap" type="TEXTURE2D" />
-				<Data name="REN_InverseScreenSize" type="FLOAT2" />
-				<Data name="CAM_Position" type="FLOAT3" />
-				<Data name="PTL_Range" type="FLOAT" />
-				<Data name="PTL_Position" type="FLOAT3" />
-				<Data name="PTL_Color" type="FLOAT3" />
-				<Data name="PTL_Intensity" type="FLOAT" />
-				<Data name="PTL_ConstantAttenuation" type="FLOAT" />
-				<Data name="PTL_LinearAttenuation" type="FLOAT" />
-				<Data name="PTL_ExponentAttenuation" type="FLOAT" />
+				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="DepthMap" associatedWith="PrepassBuffer_DepthMap"/>
+				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="NormalMap" associatedWith="PrepassBuffer_NormalMap"/>
+				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="SpecularMap" associatedWith="PrepassBuffer_SpecularMap"/>
+				<Data propertyName="InverseScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
+				<Data propertyName="Position" type="FLOAT3" sourceObject="CAMERA" associatedWith="CameraPosition"/>
+				<Data propertyName="Range" type="FLOAT" sourceObject="LIGHT"/>
+				<Data propertyName="Position" type="FLOAT3" sourceObject="LIGHT" associatedWith="LightPosition"/>
+				<Data propertyName="Color" type="FLOAT3" sourceObject="LIGHT"/>
+				<Data propertyName="Intensity" type="FLOAT" sourceObject="LIGHT"/>
+				<Data propertyName="ConstantAttenuation" type="FLOAT" sourceObject="LIGHT"/>
+				<Data propertyName="LinearAttenuation" type="FLOAT" sourceObject="LIGHT"/>
+				<Data propertyName="ExponentAttenuation" type="FLOAT" sourceObject="LIGHT"/>
 			</Datas>
 			<Code>
 				<![CDATA[
@@ -27,43 +27,43 @@
 				in mat4 frag_inverseProjectionViewMatrix;
 				out vec4 FragColor[2];
 
-				uniform sampler2D REN_GB_PrepassBuffer_DepthMap;
-				uniform sampler2D REN_GB_PrepassBuffer_NormalMap;
-				uniform sampler2D REN_GB_PrepassBuffer_SpecularMap;
-				uniform vec2 REN_InverseScreenSize;
-				uniform vec3 CAM_Position;
+				uniform sampler2D PrepassBuffer_DepthMap;
+				uniform sampler2D PrepassBuffer_NormalMap;
+				uniform sampler2D PrepassBuffer_SpecularMap;
+				uniform vec2 InverseScreenSize;
+				uniform vec3 CameraPosition;
 
-				uniform float PTL_Range;
-				uniform vec3 PTL_Position;
-				uniform vec3 PTL_Color;
-				uniform float PTL_Intensity;
-				uniform float PTL_ConstantAttenuation;
-				uniform float PTL_LinearAttenuation;
-				uniform float PTL_ExponentAttenuation;
+				uniform float Range;
+				uniform vec3 LightPosition;
+				uniform vec3 Color;
+				uniform float Intensity;
+				uniform float ConstantAttenuation;
+				uniform float LinearAttenuation;
+				uniform float ExponentAttenuation;
 
 				void main()
 				{
-					vec3 pos 	= vec3((gl_FragCoord.x * REN_InverseScreenSize.x), (gl_FragCoord.y * REN_InverseScreenSize.y), 0.0f);
-					pos.z 		= texture(REN_GB_PrepassBuffer_DepthMap, pos.xy).r;
+					vec3 pos 	= vec3((gl_FragCoord.x * InverseScreenSize.x), (gl_FragCoord.y * InverseScreenSize.y), 0.0f);
+					pos.z 		= texture(PrepassBuffer_DepthMap, pos.xy).r;
 
-					vec3 normal 		= normalize(texture(REN_GB_PrepassBuffer_NormalMap, pos.xy).xyz * 2.0f - 1.0f);
-					vec4 speclarData 	= texture(REN_GB_PrepassBuffer_SpecularMap, pos.xy);
+					vec3 normal 		= normalize(texture(PrepassBuffer_NormalMap, pos.xy).xyz * 2.0f - 1.0f);
+					vec4 speclarData 	= texture(PrepassBuffer_SpecularMap, pos.xy);
 					vec4 clip 			= frag_inverseProjectionViewMatrix * vec4(pos * 2.0f - 1.0f, 1.0f);
 					pos 				= clip.xyz / clip.w;
 
-					float dist 	= length(PTL_Position - pos);
+					float dist 	= length(LightPosition - pos);
 
-					if(dist > PTL_Range)
+					if(dist > Range)
 					{
 						discard;
 					}
 
 					vec3 specularColor 	= speclarData.xyz;
 					float shininess 	= 1.0f / speclarData.a;
-					float atten 		= (PTL_ConstantAttenuation + PTL_LinearAttenuation * dist +  PTL_ExponentAttenuation * dist * dist + 0.00001);
+					float atten 		= (ConstantAttenuation + LinearAttenuation * dist + ExponentAttenuation * dist * dist + 0.00001);
 
-					vec3 incident 	= normalize(PTL_Position - pos);
-					vec3 viewDir 	= normalize(CAM_Position - pos);
+					vec3 incident 	= normalize(LightPosition - pos);
+					vec3 viewDir 	= normalize(CameraPosition - pos);
 					vec3 halfDir 	= normalize(incident + viewDir);
 
 					float lambert 	= clamp(dot(incident, normal), 0.0f, 1.0f);
@@ -71,8 +71,8 @@
 					float sFactor 	= pow(rFactor, shininess);
 					vec3 sColor 	= specularColor * sFactor;
 
-					FragColor[0] = vec4(PTL_Color * lambert * PTL_Intensity / atten, 1.0f);
-					FragColor[1] = vec4(PTL_Color * sColor * PTL_Intensity / atten, 1.0f);
+					FragColor[0] = vec4(Color * lambert * Intensity / atten, 1.0f);
+					FragColor[1] = vec4(Color * sColor * Intensity / atten, 1.0f);
 				}
 
 				]]>

@@ -82,6 +82,8 @@ AnimaCamera::AnimaCamera(AnimaAllocator* allocator, AnimaCamerasManager* cameras
 	
 	_active = false;
 	_camerasManager = camerasManager;
+	
+	_shaderSource = ASDSO_CAMERA;
 }
 
 AnimaCamera::AnimaCamera(const AnimaCamera& src)

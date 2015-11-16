@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -1003,11 +1003,11 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 		for (AInt i = 0; i < count; i++)
 		{
 			AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-			AnimaString groupDataName = groupData->GetName();
+			AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
 			groupData->BindForUpdate(_programsBufferIndex);
 			
-			if (groupDataName == "MAT")
+			if (sourceObject == ASDSO_MATERIAL)
 			{
 				AInt materialsCount = programData._materials.size();
 
@@ -1020,7 +1020,7 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 					groupData->UpdateValue(material, this, program, j);
 				}
 			}
-			else if (groupDataName == "MOD")
+			else if (sourceObject == ASDSO_GEOMETRY)
 			{
 				AInt instancesCount = 0;
 
@@ -1041,7 +1041,7 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 					}
 				}
 			}
-			else if (groupDataName == "CAM")
+			else if (sourceObject == ASDSO_CAMERA)
 			{
 				groupData->UpdateValue(camera, this, program, 0);
 			}
@@ -1057,13 +1057,13 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-		AnimaString groupDataName = groupData->GetName();
+		AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 		
 		ANIMA_FRAME_PUSH("bind for update");
 		groupData->BindForUpdate(_programsBufferIndex);
 		ANIMA_FRAME_POP();
 		
-		if (groupDataName == "MAT")
+		if (sourceObject == ASDSO_MATERIAL)
 		{
 			ANIMA_FRAME_PUSH("material update");
 			AInt instancesCount = meshInstances->_instances.size();
@@ -1079,7 +1079,7 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 			}
 			ANIMA_FRAME_POP();
 		}
-		else if (groupDataName == "MOD")
+		else if (sourceObject == ASDSO_GEOMETRY)
 		{
 			ANIMA_FRAME_PUSH("model update");
 			AInt instancesCount = meshInstances->_instances.size();
@@ -1090,7 +1090,7 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 			}
 			ANIMA_FRAME_POP();
 		}
-		else if (groupDataName == "CAM")
+		else if (sourceObject == ASDSO_CAMERA)
 		{
 			ANIMA_FRAME_PUSH("camera update");
 			groupData->UpdateValue(camera, this, program, 0);
@@ -1146,13 +1146,13 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 		for (AInt i = 0; i < staticGroupDataCount; i++)
 		{
 			AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-			AnimaString groupDataName = groupData->GetName();
+			AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
-			if (groupDataName == "MAT")
+			if (sourceObject == ASDSO_MATERIAL)
 				materialDataGroups.push_back(groupData);
-			else if (groupDataName == "MOD")
+			else if (sourceObject == ASDSO_GEOMETRY)
 				meshDataGroups.push_back(groupData);
-			else if (groupDataName == "CAM")
+			else if (sourceObject == ASDSO_CAMERA)
 				cameraDataGroups.push_back(groupData);
 		}
 
@@ -1484,11 +1484,11 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-		AnimaString groupDataName = groupData->GetName();
+		AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
 		groupData->BindForUpdate(_programsBufferIndex);
 
-		if (groupDataName == "MOD")
+		if (sourceObject == ASDSO_GEOMETRY)
 		{
 			AInt instancesCount = 0;
 
@@ -1509,7 +1509,7 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 				}
 			}
 		}
-		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+		if (sourceObject == ASDSO_LIGHT)
 		{
 			ANIMA_FRAME_PUSH("light update");
 			groupData->UpdateValue(light, this, program, 0);
@@ -1526,13 +1526,13 @@ void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* pro
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-		AnimaString groupDataName = groupData->GetName();
+		AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
 		ANIMA_FRAME_PUSH("bind for update");
 		groupData->BindForUpdate(_programsBufferIndex);
 		ANIMA_FRAME_POP();
 
-		if (groupDataName == "MOD")
+		if (sourceObject == ASDSO_GEOMETRY)
 		{
 			ANIMA_FRAME_PUSH("model update");
 			AInt instancesCount = meshInstances->_instances.size();
@@ -1543,7 +1543,7 @@ void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* pro
 			}
 			ANIMA_FRAME_POP();
 		}
-		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+		else if (sourceObject == ASDSO_LIGHT)
 		{
 			ANIMA_FRAME_PUSH("light update");
 			groupData->UpdateValue(light, this, program, 0);
@@ -1597,11 +1597,11 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	for (AInt i = 0; i < staticGroupDataCount; i++)
 	{
 		AnimaShaderGroupData* groupData = program->GetShaderStaticGroupData(i);
-		AnimaString groupDataName = groupData->GetName();
+		AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
-		if (groupDataName == "MOD")
+		if (sourceObject == ASDSO_GEOMETRY)
 			meshDataGroups.push_back(groupData);
-		else if (groupDataName == "LIG" || groupDataName == "DIL" || groupDataName == "PTL" || groupDataName == "SPL" || groupDataName == "HEM")
+		else if (sourceObject == ASDSO_LIGHT)
 			lightDataGroups.push_back(groupData);
 	}
 

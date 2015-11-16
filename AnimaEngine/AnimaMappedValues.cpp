@@ -19,6 +19,8 @@ AnimaMappedValues::AnimaMappedValues(AnimaAllocator* allocator, AnimaDataGenerat
 {
 	_dataGeneratorManager = dataGeneratorManager;
 	_uniqueName = MakeRandonString(15) + ".";
+	
+	_shaderSource = ASDSO_NONE;
 }
 
 AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
@@ -36,6 +38,8 @@ AnimaMappedValues::AnimaMappedValues(const AnimaMappedValues& src)
 	_matricesMap = src._matricesMap;
 	_vectorsArraysMap = src._vectorsArraysMap;
 	_matricesArraysMap = src._matricesArraysMap;
+	
+	_shaderSource = src._shaderSource;
 }
 
 AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
@@ -53,6 +57,8 @@ AnimaMappedValues::AnimaMappedValues(AnimaMappedValues&& src)
 	_matricesMap = src._matricesMap;
 	_vectorsArraysMap = src._vectorsArraysMap;
 	_matricesArraysMap = src._matricesArraysMap;
+	
+	_shaderSource = src._shaderSource;
 }
 
 AnimaMappedValues::~AnimaMappedValues()
@@ -104,6 +110,8 @@ void AnimaMappedValues::CopyData(const AnimaMappedValues& src)
 		CopyIntegers(src);
 		CopyBooleans(src);
 		CopyVectorsArrays(src);
+		
+		_shaderSource = src._shaderSource;
 	}
 }
 

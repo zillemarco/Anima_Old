@@ -340,84 +340,76 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 
 	if (shader)
 	{
-		AnimaString code = "";
-		try
-		{
-			code = xmlTree.get<AnimaString>("AnimaShader.Versions.Version.Code");
-		}
-		catch (boost::property_tree::ptree_bad_path& exception)
-		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
-		catch (boost::property_tree::ptree_bad_data& exception)
-		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
-		catch (boost::property_tree::ptree_error& exception)
-		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
-
+		AnimaString code = xmlTree.get<AnimaString>("AnimaShader.Versions.Version.Code", "");
+		
 		try
 		{
 			for (auto& prop : xmlTree.get_child("AnimaShader.Versions.Version.Datas"))
 			{
 				if (prop.first == "Data")
 				{
-					AnimaString dataName = prop.second.get<AnimaString>("<xmlattr>.name");
-					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type");
+					AnimaString dataName = prop.second.get<AnimaString>("<xmlattr>.propertyName", "");
+					AnimaString associatedWith = prop.second.get<AnimaString>("<xmlattr>.associatedWith", "");
+					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type", ASDT_NONE);
+					AnimaShaderDataSourceObject dataSource = prop.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
+					AnimaString slotName = prop.second.get<AnimaString>("<xmlattr>.slot", "");
 					AInt dataArraySize = prop.second.get<AInt>("<xmlattr>.size", 0);
-
+					
 					AnimaShaderData data(dataName);
-					data.SetArraySize(dataArraySize);
 					data.SetType(dataType);
-
+					data.SetSourceObject(dataSource, slotName);
+					data.SetAssociatedWith(associatedWith);
+					data.SetArraySize(dataArraySize);
+					
 					shader->AddShaderData(data);
 				}
 			}
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			//printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_error& exception)
 		{
-			printf("AnimaShadersManager program: error reading shader part\n\t- Shader part name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
+			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
-
+		
 		try
 		{
 			for (auto& groupProp : xmlTree.get_child("AnimaShader.Versions.Version.GroupsData"))
 			{
 				if (groupProp.first == "Group")
 				{
-					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.name");
+					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.groupName");
+					AnimaString associatedWith = groupProp.second.get<AnimaString>("<xmlattr>.associatedWith", "");
 					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic", true);
 					bool supportsInstance = groupProp.second.get<bool>("<xmlattr>.supportsInstance", false);
-
+					AnimaShaderDataSourceObject dataSource = groupProp.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
+					
 					AnimaShaderGroupData groupData(groupName, _engine->GetShadersAllocator());
+					groupData.SetSourceObject(dataSource);
+					groupData.SetAssociatedWith(associatedWith);
 					groupData.SetSupportsInstance(supportsInstance);
-
+					
 					for (auto& dataProp : groupProp.second.get_child("Datas"))
 					{
 						if (dataProp.first == "Data")
 						{
-							AnimaString dataName = dataProp.second.get<AnimaString>("<xmlattr>.name");
+							AnimaString dataName = dataProp.second.get<AnimaString>("<xmlattr>.propertyName");
 							AnimaShaderDataType dataType = dataProp.second.get<AnimaShaderDataType>("<xmlattr>.type");
 							AInt dataArraySize = dataProp.second.get<AInt>("<xmlattr>.size", 0);
-
+							
 							AnimaShaderData data(dataName);
 							data.SetArraySize(dataArraySize);
 							data.SetType(dataType);
-
+							
 							groupData.AddShaderData(data);
 						}
 					}
-
+					
 					if (dynamicGroup)
 						shader->AddShaderDynamicGroupData(groupData);
 					else
@@ -427,7 +419,6 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
@@ -437,7 +428,7 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 		{
 			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
-	
+		
 		shader->SetText(code.c_str());
 
 		if (type.compare("FS") == 0)
@@ -553,37 +544,26 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 
 	if (shaderInclude)
 	{
-		AnimaString code = "";
-		try
-		{
-			code = xmlTree.get<AnimaString>("AnimaShaderInclude.Versions.Version.Code");
-		}
-		catch (boost::property_tree::ptree_bad_path& exception)
-		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
-		catch (boost::property_tree::ptree_bad_data& exception)
-		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
-		catch (boost::property_tree::ptree_error& exception)
-		{
-			printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
-		}
+		AnimaString code = xmlTree.get<AnimaString>("AnimaShaderInclude.Versions.Version.Code", "");
 
 		try
 		{
-			for (auto& prop : xmlTree.get_child("AnimaShader.Versions.Version.Datas"))
+			for (auto& prop : xmlTree.get_child("AnimaShaderInclude.Versions.Version.Datas"))
 			{
 				if (prop.first == "Data")
 				{
-					AnimaString dataName = prop.second.get<AnimaString>("<xmlattr>.name");
-					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type");
+					AnimaString dataName = prop.second.get<AnimaString>("<xmlattr>.propertyName", "");
+					AnimaString associatedWith = prop.second.get<AnimaString>("<xmlattr>.associatedWith", "");
+					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type", ASDT_NONE);
+					AnimaShaderDataSourceObject dataSource = prop.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
+					AnimaString slotName = prop.second.get<AnimaString>("<xmlattr>.slot", "");
 					AInt dataArraySize = prop.second.get<AInt>("<xmlattr>.size", 0);
 
 					AnimaShaderData data(dataName);
-					data.SetArraySize(dataArraySize);
 					data.SetType(dataType);
+					data.SetSourceObject(dataSource, slotName);
+					data.SetAssociatedWith(associatedWith);
+					data.SetArraySize(dataArraySize);
 
 					shaderInclude->AddShaderData(data);
 				}
@@ -591,7 +571,6 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{
@@ -604,22 +583,26 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 
 		try
 		{
-			for (auto& groupProp : xmlTree.get_child("AnimaShader.Versions.Version.GroupsData"))
+			for (auto& groupProp : xmlTree.get_child("AnimaShaderInclude.Versions.Version.GroupsData"))
 			{
 				if (groupProp.first == "Group")
 				{
-					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.name");
+					AnimaString groupName = groupProp.second.get<AnimaString>("<xmlattr>.groupName");
+					AnimaString associatedWith = groupProp.second.get<AnimaString>("<xmlattr>.associatedWith", "");
 					bool dynamicGroup = groupProp.second.get<bool>("<xmlattr>.dynamic", true);
 					bool supportsInstance = groupProp.second.get<bool>("<xmlattr>.supportsInstance", false);
+					AnimaShaderDataSourceObject dataSource = groupProp.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
 					
 					AnimaShaderGroupData groupData(groupName, _engine->GetShadersAllocator());
+					groupData.SetSourceObject(dataSource);
+					groupData.SetAssociatedWith(associatedWith);
 					groupData.SetSupportsInstance(supportsInstance);
 					
 					for (auto& dataProp : groupProp.second.get_child("Datas"))
 					{
 						if (dataProp.first == "Data")
 						{
-							AnimaString dataName = dataProp.second.get<AnimaString>("<xmlattr>.name");
+							AnimaString dataName = dataProp.second.get<AnimaString>("<xmlattr>.propertyName");
 							AnimaShaderDataType dataType = dataProp.second.get<AnimaShaderDataType>("<xmlattr>.type");
 							AInt dataArraySize = dataProp.second.get<AInt>("<xmlattr>.size", 0);
 
@@ -640,7 +623,6 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 		}
 		catch (boost::property_tree::ptree_bad_path& exception)
 		{
-			//printf("AnimaShadersManager Error: error reading shader include\n\t- Shader include name: %s\n\t- Error: %s\n", name.c_str(), exception.what());
 		}
 		catch (boost::property_tree::ptree_bad_data& exception)
 		{

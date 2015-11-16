@@ -7,19 +7,19 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="REN_FilterMap" type="TEXTURE" />
-				<Data name="REN_ScreenSize" type="FLOAT2" />
+				<Data propertyName="FilterMap" type="TEXTURE" sourceObject="RENDERER"/>
+				<Data propertyName="ScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 			</Datas>
 			<Code>
 				<![CDATA[
 				#version 150 core
 
-				uniform sampler2D REN_FilterMap;
-				uniform vec2 REN_ScreenSize;
+				uniform sampler2D FilterMap;
+				uniform vec2 ScreenSize;
 
 				vec2 CalcTexCoord()
 				{
-				    return gl_FragCoord.xy / REN_ScreenSize;
+				    return gl_FragCoord.xy / ScreenSize;
 				}
 
 				out vec4 FragColor;
@@ -27,7 +27,7 @@
 				void main()
 				{
 				    vec2 TexCoord = CalcTexCoord();
-					vec3 Color = texture(REN_FilterMap, TexCoord).xyz;
+					vec3 Color = texture(FilterMap, TexCoord).xyz;
 
 					FragColor = vec4(Color, 1.0);
 				}			

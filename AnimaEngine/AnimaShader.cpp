@@ -177,7 +177,9 @@ bool AnimaShader::Compile()
 		char* infoLog = new char[maxLength];
 		glGetShaderInfoLog(_id, maxLength, &maxLength, &infoLog[0]);
 
-		printf("AnimaShader error compiling:\n%s\n", infoLog);
+		AnimaLogger::LogMessageFormat("ERROR - Error compiling shader:\n%s", infoLog);
+		
+		delete [] infoLog;
 
 		_compiled = false;
 	}

@@ -118,7 +118,6 @@ public:
 
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
-	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
 
@@ -154,7 +153,6 @@ public:
 	
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
-	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
 
@@ -189,7 +187,6 @@ public:
 	
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
-	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
 	
@@ -233,7 +230,6 @@ protected:
 public:
 	void UpdateCullFace(AnimaCamera* activeCamera) override;
 
-	const char* GetShaderPrefix() override;
 	const char* GetShaderName() override;
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
 };

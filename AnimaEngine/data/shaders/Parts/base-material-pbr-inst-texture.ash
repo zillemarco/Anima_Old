@@ -7,16 +7,16 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="MAT_AlbedoMap" type="TEXTURE2D" />
-				<Data name="MAT_NormalMap" type="TEXTURE2D" />
+				<Data propertyName="AlbedoMap" type="TEXTURE2D" sourceObject="MATERIAL"/>
+				<Data propertyName="NormalMap" type="TEXTURE2D" sourceObject="MATERIAL"/>
 			</Datas>
 			<GroupsData>
-				<Group name="MAT" dynamic="false" supportsInstance="true">
+				<Group groupName="MAT" dynamic="false" supportsInstance="true" sourceObject="MATERIAL">
 					<Datas>
-						<Data name="Specular" type="FLOAT_ARRAY" size="20"/>
-						<Data name="Roughness" type="FLOAT_ARRAY" size="20"/>
-						<Data name="Metallic" type="FLOAT_ARRAY" size="20"/>
-						<Data name="ReflectionIntensity" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Specular" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Roughness" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Metallic" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="ReflectionIntensity" type="FLOAT_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -36,14 +36,14 @@
 					float ReflectionIntensity[20];
 				};
 
-				uniform sampler2D MAT_AlbedoMap;
-				uniform sampler2D MAT_NormalMap;
+				uniform sampler2D AlbedoMap;
+				uniform sampler2D NormalMap;
 
 				out vec4 FragColor[4];
 
 				vec3 calcNormal(vec2 textureCoords)
 				{					
-					vec3 bumpNormal = texture(MAT_NormalMap, textureCoords).xyz;
+					vec3 bumpNormal = texture(NormalMap, textureCoords).xyz;
 					bumpNormal = 2.0 * bumpNormal - vec3(1.0, 1.0, 1.0);	
 					vec3 newNormal = frag_TBNMatrix * bumpNormal;
 					newNormal = normalize(newNormal);
@@ -53,7 +53,7 @@
 
 				void main()
 				{
-					vec3 albedoColor = texture(MAT_AlbedoMap, frag_textureCoord).rgb;
+					vec3 albedoColor = texture(AlbedoMap, frag_textureCoord).rgb;
 					vec3 normal = calcNormal(frag_textureCoord);
 					
 					// gamma correction

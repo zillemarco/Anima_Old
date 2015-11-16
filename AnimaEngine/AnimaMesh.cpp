@@ -117,6 +117,8 @@ AnimaMesh::AnimaMesh(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 
 	_materialName = "";
 	_shaderProgramName = "";
+	
+	_shaderSource = ASDSO_GEOMETRY;
 }
 
 AnimaMesh::AnimaMesh(const AnimaMesh& src)

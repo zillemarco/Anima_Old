@@ -39,9 +39,6 @@ public:
 	ptree GetObjectTree(bool saveName = true) const override;
 	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 	
-public:
-	const char* GetShaderPrefix() override { return "MAT"; }
-
 protected:
 	AnimaArray<AnimaString> _shadersNames;
 };

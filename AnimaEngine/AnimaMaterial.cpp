@@ -16,16 +16,8 @@ AnimaMaterial::AnimaMaterial(AnimaAllocator* allocator, AnimaDataGeneratorsManag
 	: AnimaMappedValues(allocator, dataGeneratorManager, name)
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaMaterial);
-	//AddShader("base-material-fs");
-
-//	SetInteger("FrontFace", GL_CCW);
-//	SetInteger("CullFace", GL_BACK);
-//
-//	SetColor("Albedo", 0.560f, 0.570f, 0.580f, 1.0f);
-//	SetFloat("Specular", 0.5f);
-//	SetFloat("Metallic", 0.0f);
-//	SetFloat("Roughness", 0.5f);
-//	SetFloat("ReflectionIntensity", 0.8f);
+	
+	_shaderSource = ASDSO_MATERIAL;
 }
 
 AnimaMaterial::AnimaMaterial(const AnimaMaterial& src)

@@ -495,30 +495,30 @@ struct AnimaXmlShaderDataTypeTranslator
 		{
 			using boost::algorithm::iequals;
 
-			if (iequals(str, "FLOAT"))					return Anima::FLOAT;
-			else if (iequals(str, "FLOAT_ARRAY"))		return Anima::FLOAT_ARRAY;
-			else if (iequals(str, "FLOAT2"))			return Anima::FLOAT2;
-			else if (iequals(str, "FLOAT2_ARRAY"))		return Anima::FLOAT2_ARRAY;
-			else if (iequals(str, "FLOAT3"))			return Anima::FLOAT3;
-			else if (iequals(str, "FLOAT3_ARRAY"))		return Anima::FLOAT3_ARRAY;
-			else if (iequals(str, "FLOAT4"))			return Anima::FLOAT4;
-			else if (iequals(str, "FLOAT4_ARRAY"))		return Anima::FLOAT4_ARRAY;
-			else if (iequals(str, "MATRIX4x4"))			return Anima::MATRIX4x4;
-			else if (iequals(str, "MATRIX4x4_ARRAY"))	return Anima::MATRIX4x4_ARRAY;
-			else if (iequals(str, "MATRIX3x3"))			return Anima::MATRIX3x3;
-			else if (iequals(str, "MATRIX3x3_ARRAY"))	return Anima::MATRIX3x3_ARRAY;
-			else if (iequals(str, "INT"))				return Anima::INT;
-			else if (iequals(str, "INT_ARRAY"))			return Anima::INT_ARRAY;
-			else if (iequals(str, "BOOL"))				return Anima::BOOL;
-			else if (iequals(str, "BOOL_ARRAY"))		return Anima::BOOL_ARRAY;
-			else if (iequals(str, "TEXTURE2D"))			return Anima::TEXTURE2D;
-			else if (iequals(str, "TEXTURE2D_ARRAY"))	return Anima::TEXTURE2D_ARRAY;
-			else if (iequals(str, "TEXTURECUBE"))		return Anima::TEXTURECUBE;
-			else if (iequals(str, "TEXTURECUBE_ARRAY"))	return Anima::TEXTURECUBE_ARRAY;
-			else if (iequals(str, "TEXTURE3D"))			return Anima::TEXTURE3D;
-			else if (iequals(str, "TEXTURE3D_ARRAY"))	return Anima::TEXTURE3D_ARRAY;
+			if (iequals(str, "FLOAT"))					return Anima::ASDT_FLOAT;
+			else if (iequals(str, "FLOAT_ARRAY"))		return Anima::ASDT_FLOAT_ARRAY;
+			else if (iequals(str, "FLOAT2"))			return Anima::ASDT_FLOAT2;
+			else if (iequals(str, "FLOAT2_ARRAY"))		return Anima::ASDT_FLOAT2_ARRAY;
+			else if (iequals(str, "FLOAT3"))			return Anima::ASDT_FLOAT3;
+			else if (iequals(str, "FLOAT3_ARRAY"))		return Anima::ASDT_FLOAT3_ARRAY;
+			else if (iequals(str, "FLOAT4"))			return Anima::ASDT_FLOAT4;
+			else if (iequals(str, "FLOAT4_ARRAY"))		return Anima::ASDT_FLOAT4_ARRAY;
+			else if (iequals(str, "MATRIX4x4"))			return Anima::ASDT_MATRIX4x4;
+			else if (iequals(str, "MATRIX4x4_ARRAY"))	return Anima::ASDT_MATRIX4x4_ARRAY;
+			else if (iequals(str, "MATRIX3x3"))			return Anima::ASDT_MATRIX3x3;
+			else if (iequals(str, "MATRIX3x3_ARRAY"))	return Anima::ASDT_MATRIX3x3_ARRAY;
+			else if (iequals(str, "INT"))				return Anima::ASDT_INT;
+			else if (iequals(str, "INT_ARRAY"))			return Anima::ASDT_INT_ARRAY;
+			else if (iequals(str, "BOOL"))				return Anima::ASDT_BOOL;
+			else if (iequals(str, "BOOL_ARRAY"))		return Anima::ASDT_BOOL_ARRAY;
+			else if (iequals(str, "TEXTURE2D"))			return Anima::ASDT_TEXTURE2D;
+			else if (iequals(str, "TEXTURE2D_ARRAY"))	return Anima::ASDT_TEXTURE2D_ARRAY;
+			else if (iequals(str, "TEXTURECUBE"))		return Anima::ASDT_TEXTURECUBE;
+			else if (iequals(str, "TEXTURECUBE_ARRAY"))	return Anima::ASDT_TEXTURECUBE_ARRAY;
+			else if (iequals(str, "TEXTURE3D"))			return Anima::ASDT_TEXTURE3D;
+			else if (iequals(str, "TEXTURE3D_ARRAY"))	return Anima::ASDT_TEXTURE3D_ARRAY;
 
-			return Anima::NONE;
+			return Anima::ASDT_NONE;
 		}
 		else
 			return boost::optional<external_type>(boost::none);
@@ -528,31 +528,75 @@ struct AnimaXmlShaderDataTypeTranslator
 	{
 		switch (type)
 		{
-		case Anima::FLOAT:				return Anima::AnimaString("FLOAT"); break;
-		case Anima::FLOAT_ARRAY:		return Anima::AnimaString("FLOAT_ARRAY"); break;
-		case Anima::FLOAT2:				return Anima::AnimaString("FLOAT2"); break;
-		case Anima::FLOAT2_ARRAY:		return Anima::AnimaString("FLOAT2_ARRAY"); break;
-		case Anima::FLOAT3:				return Anima::AnimaString("FLOAT3"); break;
-		case Anima::FLOAT3_ARRAY:		return Anima::AnimaString("FLOAT3_ARRAY"); break;
-		case Anima::FLOAT4:				return Anima::AnimaString("FLOAT4"); break;
-		case Anima::FLOAT4_ARRAY:		return Anima::AnimaString("FLOAT4_ARRAY"); break;
-		case Anima::MATRIX4x4:			return Anima::AnimaString("MATRIX4x4"); break;
-		case Anima::MATRIX4x4_ARRAY:	return Anima::AnimaString("MATRIX4x4_ARRAY"); break;
-		case Anima::MATRIX3x3:			return Anima::AnimaString("MATRIX3x3"); break;
-		case Anima::MATRIX3x3_ARRAY:	return Anima::AnimaString("MATRIX3x3_ARRAY"); break;
-		case Anima::INT:				return Anima::AnimaString("INT"); break;
-		case Anima::INT_ARRAY:			return Anima::AnimaString("INT_ARRAY"); break;
-		case Anima::BOOL:				return Anima::AnimaString("BOOL"); break;
-		case Anima::BOOL_ARRAY:			return Anima::AnimaString("BOOL_ARRAY"); break;
-		case Anima::TEXTURE2D:			return Anima::AnimaString("TEXTURE2D"); break;
-		case Anima::TEXTURE2D_ARRAY:	return Anima::AnimaString("TEXTURE2D_ARRAY"); break;
-		case Anima::TEXTURECUBE:		return Anima::AnimaString("TEXTURECUBE"); break;
-		case Anima::TEXTURECUBE_ARRAY:	return Anima::AnimaString("TEXTURECUBE_ARRAY"); break;
-		case Anima::TEXTURE3D:			return Anima::AnimaString("TEXTURE3D"); break;
-		case Anima::TEXTURE3D_ARRAY:	return Anima::AnimaString("TEXTURE3D_ARRAY"); break;
-		case Anima::NONE:				return Anima::AnimaString("NONE"); break;
+		case Anima::ASDT_FLOAT:				return Anima::AnimaString("FLOAT"); break;
+		case Anima::ASDT_FLOAT_ARRAY:		return Anima::AnimaString("FLOAT_ARRAY"); break;
+		case Anima::ASDT_FLOAT2:			return Anima::AnimaString("FLOAT2"); break;
+		case Anima::ASDT_FLOAT2_ARRAY:		return Anima::AnimaString("FLOAT2_ARRAY"); break;
+		case Anima::ASDT_FLOAT3:			return Anima::AnimaString("FLOAT3"); break;
+		case Anima::ASDT_FLOAT3_ARRAY:		return Anima::AnimaString("FLOAT3_ARRAY"); break;
+		case Anima::ASDT_FLOAT4:			return Anima::AnimaString("FLOAT4"); break;
+		case Anima::ASDT_FLOAT4_ARRAY:		return Anima::AnimaString("FLOAT4_ARRAY"); break;
+		case Anima::ASDT_MATRIX4x4:			return Anima::AnimaString("MATRIX4x4"); break;
+		case Anima::ASDT_MATRIX4x4_ARRAY:	return Anima::AnimaString("MATRIX4x4_ARRAY"); break;
+		case Anima::ASDT_MATRIX3x3:			return Anima::AnimaString("MATRIX3x3"); break;
+		case Anima::ASDT_MATRIX3x3_ARRAY:	return Anima::AnimaString("MATRIX3x3_ARRAY"); break;
+		case Anima::ASDT_INT:				return Anima::AnimaString("INT"); break;
+		case Anima::ASDT_INT_ARRAY:			return Anima::AnimaString("INT_ARRAY"); break;
+		case Anima::ASDT_BOOL:				return Anima::AnimaString("BOOL"); break;
+		case Anima::ASDT_BOOL_ARRAY:		return Anima::AnimaString("BOOL_ARRAY"); break;
+		case Anima::ASDT_TEXTURE2D:			return Anima::AnimaString("TEXTURE2D"); break;
+		case Anima::ASDT_TEXTURE2D_ARRAY:	return Anima::AnimaString("TEXTURE2D_ARRAY"); break;
+		case Anima::ASDT_TEXTURECUBE:		return Anima::AnimaString("TEXTURECUBE"); break;
+		case Anima::ASDT_TEXTURECUBE_ARRAY:	return Anima::AnimaString("TEXTURECUBE_ARRAY"); break;
+		case Anima::ASDT_TEXTURE3D:			return Anima::AnimaString("TEXTURE3D"); break;
+		case Anima::ASDT_TEXTURE3D_ARRAY:	return Anima::AnimaString("TEXTURE3D_ARRAY"); break;
+		case Anima::ASDT_NONE:				return Anima::AnimaString("NONE"); break;
 		}
 
+		return Anima::AnimaString("NONE");
+	}
+};
+
+struct AnimaXmlShaderDataSourceObjectTranslator
+{
+	typedef Anima::AnimaString internal_type;
+	typedef Anima::AnimaShaderDataSourceObject external_type;
+	
+	boost::optional<external_type> get_value(const internal_type& str)
+	{
+		if (!str.empty())
+		{
+			using boost::algorithm::iequals;
+			
+			if (iequals(str, "GEOMETRY"))		return Anima::ASDSO_GEOMETRY;
+			else if (iequals(str, "NODE"))		return Anima::ASDSO_NODE;
+			else if (iequals(str, "RENDERER"))	return Anima::ASDSO_RENDERER;
+			else if (iequals(str, "MATERIAL"))	return Anima::ASDSO_MATERIAL;
+			else if (iequals(str, "LIGHT"))		return Anima::ASDSO_LIGHT;
+			else if (iequals(str, "CAMERA"))	return Anima::ASDSO_CAMERA;
+			else if (iequals(str, "GBUFFER"))	return Anima::ASDSO_GBUFFER;
+			else if (iequals(str, "NONE"))		return Anima::ASDSO_NONE;
+			
+			return Anima::ASDSO_NONE;
+		}
+		else
+			return boost::optional<external_type>(boost::none);
+	}
+	
+	boost::optional<internal_type> put_value(const external_type& type)
+	{
+		switch (type)
+		{
+			case Anima::ASDSO_GEOMETRY:	return Anima::AnimaString("GEOMETRY"); break;
+			case Anima::ASDSO_NODE:		return Anima::AnimaString("NODE"); break;
+			case Anima::ASDSO_RENDERER:	return Anima::AnimaString("RENDERER"); break;
+			case Anima::ASDSO_LIGHT:	return Anima::AnimaString("LIGHT"); break;
+			case Anima::ASDSO_MATERIAL:	return Anima::AnimaString("MATERIAL"); break;
+			case Anima::ASDSO_CAMERA:	return Anima::AnimaString("CAMERA"); break;
+			case Anima::ASDSO_GBUFFER:	return Anima::AnimaString("GBUFFER"); break;
+			case Anima::ASDSO_NONE:		return Anima::AnimaString("NONE"); break;
+		}
+		
 		return Anima::AnimaString("NONE");
 	}
 };
@@ -1185,6 +1229,11 @@ namespace boost
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaShaderDataType >
 		{
 			typedef AnimaXmlShaderDataTypeTranslator type;
+		};
+		
+		template<> struct translator_between < Anima::AnimaString, Anima::AnimaShaderDataSourceObject >
+		{
+			typedef AnimaXmlShaderDataSourceObjectTranslator type;
 		};
 
 		template<> struct translator_between < Anima::AnimaString, Anima::AnimaArray<Anima::AnimaVertex2f> >

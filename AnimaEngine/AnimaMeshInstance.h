@@ -68,9 +68,6 @@ public:
 	inline btRigidBody* GetPhysRigidBody() { return _physRigidBody; }
 	
 	virtual void InitializePhysicData();
-
-protected:
-	const char* GetShaderPrefix() override { return "MOD"; }
 	
 	void SetMesh(AnimaMesh* mesh);
 

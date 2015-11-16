@@ -7,7 +7,7 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="CAM_ProjectionViewMatrix" type="MATRIX4x4" />
+				<Data propertyName="ProjectionViewMatrix" type="MATRIX4x4" sourceObject="CAMERA"/>
 			</Datas>
 			<Code>
 				<![CDATA[
@@ -16,13 +16,13 @@
 				in vec3 _position;
 				in vec3 _color;
 
-				uniform mat4 CAM_ProjectionViewMatrix;
+				uniform mat4 ProjectionViewMatrix;
 
 				out vec3 frag_color;
 
 				void main()
 				{          
-				    gl_Position = CAM_ProjectionViewMatrix * vec4(_position, 1.0);
+				    gl_Position = ProjectionViewMatrix * vec4(_position, 1.0);
 				    frag_color = _color;
 				}
 				]]>

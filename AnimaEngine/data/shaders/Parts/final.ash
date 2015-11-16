@@ -7,21 +7,21 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="REN_DiffuseMap" type="TEXTURE2D" />
-				<Data name="REN_BloomMap" type="TEXTURE2D" />
-				<Data name="REN_ScreenSize" type="FLOAT2" />
+				<Data propertyName="DiffuseMap" type="TEXTURE2D" sourceObject="RENDERER"/>
+				<Data propertyName="BloomMap" type="TEXTURE2D" sourceObject="RENDERER"/>
+				<Data propertyName="ScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 			</Datas>
 			<Code>
 				<![CDATA[
 				#version 150 core
 
-				uniform sampler2D REN_DiffuseMap;
-				uniform sampler2D REN_BloomMap;
-				uniform vec2 REN_ScreenSize;
+				uniform sampler2D DiffuseMap;
+				uniform sampler2D BloomMap;
+				uniform vec2 ScreenSize;
 
 				vec2 CalcTexCoord()
 				{
-				    return gl_FragCoord.xy / REN_ScreenSize;
+				    return gl_FragCoord.xy / ScreenSize;
 				}
 
 				out vec4 FragColor;
@@ -30,8 +30,8 @@
 				{
 					vec2 textureCoord = CalcTexCoord();
 
-					vec4 diffuse 	= texture(REN_DiffuseMap, textureCoord);
-					vec4 bloom 		= texture(REN_BloomMap, textureCoord);
+					vec4 diffuse 	= texture(DiffuseMap, textureCoord);
+					vec4 bloom 		= texture(BloomMap, textureCoord);
 
 					FragColor = diffuse + bloom;
 				}

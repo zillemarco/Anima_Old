@@ -7,13 +7,13 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<GroupsData>
-				<Group name="MAT" dynamic="false" supportsInstance="true">
+				<Group groupName="MAT" dynamic="false" supportsInstance="true" sourceObject="MATERIAL">
 					<Datas>
-						<Data name="Albedo" type="FLOAT4_ARRAY" size="20"/>
-						<Data name="Specular" type="FLOAT_ARRAY" size="20"/>
-						<Data name="Roughness" type="FLOAT_ARRAY" size="20"/>
-						<Data name="Metallic" type="FLOAT_ARRAY" size="20"/>
-						<Data name="ReflectionIntensity" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Albedo" type="FLOAT4_ARRAY" size="20"/>
+						<Data propertyName="Specular" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Roughness" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="Metallic" type="FLOAT_ARRAY" size="20"/>
+						<Data propertyName="ReflectionIntensity" type="FLOAT_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>

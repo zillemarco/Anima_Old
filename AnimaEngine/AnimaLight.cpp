@@ -38,6 +38,8 @@ AnimaLight::AnimaLight(AnimaAllocator* allocator, AnimaDataGeneratorsManager* da
 	AnimaSceneObject::SetColor("Color", 1.0f, 1.0f, 1.0f);
 	AnimaSceneObject::SetFloat("Intensity", 1.0f);
 	AnimaSceneObject::SetBoolean("CastShadows", false);
+	
+	_shaderSource = ASDSO_LIGHT;
 }
 
 AnimaLight::AnimaLight(const AnimaLight& src)
@@ -385,11 +387,6 @@ void AnimaDirectionalLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
 }
 
-const char* AnimaDirectionalLight::GetShaderPrefix()
-{
-	return "DIL";
-}
-
 const char* AnimaDirectionalLight::GetShaderName()
 {
 	return "directional-light";
@@ -518,11 +515,6 @@ void AnimaPointLight::UpdateCullFace(AnimaCamera* activeCamera)
 		glCullFace(GL_FRONT);
 	else
 		glCullFace(GL_BACK);
-}
-
-const char* AnimaPointLight::GetShaderPrefix()
-{
-	return "PTL";
 }
 
 const char* AnimaPointLight::GetShaderName()
@@ -663,11 +655,6 @@ void AnimaSpotLight::UpdateConeRotation()
 	UpdateLightMeshMatrix();
 }
 
-const char* AnimaSpotLight::GetShaderPrefix()
-{
-	return "SPL";
-}
-
 const char* AnimaSpotLight::GetShaderName()
 {
 	return "spot-light";
@@ -772,11 +759,6 @@ AnimaColor3f AnimaHemisphereLight::GetGroundColor()
 
 void AnimaHemisphereLight::UpdateCullFace(AnimaCamera* activeCamera)
 {
-}
-
-const char* AnimaHemisphereLight::GetShaderPrefix()
-{
-	return "HEL";
 }
 
 const char* AnimaHemisphereLight::GetShaderName()

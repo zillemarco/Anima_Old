@@ -7,13 +7,13 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="CAM_ProjectionViewMatrix" type="MATRIX4x4" />
+				<Data propertyName="ProjectionViewMatrix" type="MATRIX4x4" sourceObject="camera"/>
 			</Datas>
 			<GroupsData>
-				<Group name="MOD" dynamic="true">
+				<Group groupName="MOD" dynamic="true" sourceObject="GEOMETRY">
 					<Datas>
-						<Data name="AModelMatrix" type="MATRIX4x4" />
-						<Data name="ANormalMatrix" type="MATRIX4x4" />
+						<Data propertyName="AModelMatrix" type="MATRIX4x4" />
+						<Data propertyName="ANormalMatrix" type="MATRIX4x4" />
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -27,12 +27,12 @@
 				in vec3 _tangent;
 				in vec3 _bitangent;
 
-				uniform mat4 CAM_ProjectionViewMatrix;
+				uniform mat4 ProjectionViewMatrix;
 
 				layout(std140) uniform MOD
 				{
-					mat4 MOD_AModelMatrix;
-					mat4 MOD_ANormalMatrix;
+					mat4 AModelMatrix;
+					mat4 ANormalMatrix;
 				};
 
 				out vec2 frag_textureCoord;
@@ -42,12 +42,12 @@
 
 				void main()
 				{
-				    gl_Position = CAM_ProjectionViewMatrix *  MOD_AModelMatrix * vec4(_position, 1.0);
+				    gl_Position = ProjectionViewMatrix *  AModelMatrix * vec4(_position, 1.0);
 				    
-					frag_normal = normalize((MOD_ANormalMatrix * vec4(_normal, 0.0)).xyz);
-				    vec3 tangent = normalize((MOD_ANormalMatrix * vec4(_tangent, 0.0)).xyz);
-				    vec3 bitangent = normalize((MOD_ANormalMatrix * vec4(_bitangent, 0.0)).xyz);
-					frag_worldPosition = (MOD_AModelMatrix * vec4(_position, 1.0)).xyz;
+					frag_normal = normalize((ANormalMatrix * vec4(_normal, 0.0)).xyz);
+				    vec3 tangent = normalize((ANormalMatrix * vec4(_tangent, 0.0)).xyz);
+				    vec3 bitangent = normalize((ANormalMatrix * vec4(_bitangent, 0.0)).xyz);
+					frag_worldPosition = (AModelMatrix * vec4(_position, 1.0)).xyz;
 				    frag_textureCoord = _textureCoord;
 					frag_TBNMatrix = mat3(tangent, bitangent, frag_normal);
 				}

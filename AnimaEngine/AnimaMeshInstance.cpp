@@ -29,6 +29,8 @@ AnimaMeshInstance::AnimaMeshInstance(const AnimaString& name, AnimaDataGenerator
 	_physMotionState = nullptr;
 	_physRigidBody = nullptr;
 	_meshInterface = nullptr;
+	
+	_shaderSource = ASDSO_GEOMETRY;
 }
 
 AnimaMeshInstance::AnimaMeshInstance(const AnimaMeshInstance& src)

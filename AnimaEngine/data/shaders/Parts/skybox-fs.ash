@@ -7,7 +7,7 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="REN_SkyBox" type="TEXTURECUBE" />
+				<Data propertyName="SkyBox" type="TEXTURECUBE" sourceObject="RENDERER"/>
 			</Datas>
 			<Code>
 				<![CDATA[
@@ -16,11 +16,11 @@
 				in vec3 frag_textureCoord;
 				out vec4 FragColor;
 
-				uniform samplerCube REN_SkyBox;
+				uniform samplerCube SkyBox;
 
 				void main()
 				{
-				    vec4 color = texture(REN_SkyBox, frag_textureCoord);
+				    vec4 color = texture(SkyBox, frag_textureCoord);
 				    FragColor = color * 1.0f;
 				}
 				]]>

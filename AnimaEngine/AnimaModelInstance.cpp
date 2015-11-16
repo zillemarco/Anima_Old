@@ -19,6 +19,8 @@ AnimaModelInstance::AnimaModelInstance(const AnimaString& name, AnimaDataGenerat
 	IMPLEMENT_ANIMA_CLASS(AnimaModelInstance);
 	_model = nullptr;
 	_topLevelModel = false;
+	
+	_shaderSource = ASDSO_NODE;
 }
 
 AnimaModelInstance::AnimaModelInstance(const AnimaModelInstance& src)

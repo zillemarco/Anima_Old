@@ -7,8 +7,8 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="DIL_ProjectionViewMatrix" type="MATRIX4x4" />
-				<Data name="MOD_AModelMatrix" type="MATRIX4x4" />
+				<Data propertyName="ProjectionViewMatrix" type="MATRIX4x4" sourceObject="LIGHT"/>
+				<Data propertyName="MOD_AModelMatrix" type="MATRIX4x4" sourceObject="GEOMETRY"/>
 			</Datas>
 			<Code>
 				<![CDATA[
@@ -16,12 +16,12 @@
 
 				in vec3 _position;
 
-				uniform mat4 DIL_ProjectionViewMatrix;
-				uniform mat4 MOD_AModelMatrix;
+				uniform mat4 ProjectionViewMatrix;
+				uniform mat4 AModelMatrix;
 
 				void main()
 				{
-				    gl_Position = DIL_ProjectionViewMatrix * MOD_AModelMatrix * vec4(_position, 1.0);
+				    gl_Position = ProjectionViewMatrix * AModelMatrix * vec4(_position, 1.0);
 				}
 				]]>
 			</Code>

@@ -17,6 +17,8 @@ AnimaShaderGroupData::AnimaShaderGroupData(const AnimaString& name, AnimaAllocat
 
 	_ubos.resize(s_maxBuffersCount, 0);
 	_fences.resize(s_maxBuffersCount);
+	
+	_sourceObject = ASDSO_NONE;
 
 	_created = false;
 	_groupLocation = -1;
@@ -36,6 +38,8 @@ AnimaShaderGroupData::AnimaShaderGroupData(const AnimaShaderGroupData& src)
 	_ubos.resize(s_maxBuffersCount, 0);
 	_fences.resize(s_maxBuffersCount);
 
+	_sourceObject = src._sourceObject;
+	
 	_created = false;
 	_groupLocation = src._groupLocation;
 	_bindingPoint = src._bindingPoint;
@@ -53,7 +57,9 @@ AnimaShaderGroupData::AnimaShaderGroupData(AnimaShaderGroupData&& src)
 
 	_ubos.resize(s_maxBuffersCount, 0);
 	_fences.resize(s_maxBuffersCount);
-
+	
+	_sourceObject = src._sourceObject;
+	
 	_created = false;
 	_groupLocation = src._groupLocation;
 	_bindingPoint = src._bindingPoint;
@@ -84,7 +90,9 @@ AnimaShaderGroupData& AnimaShaderGroupData::operator=(const AnimaShaderGroupData
 		_needsResize = false;
 		_supportsInstance = src._supportsInstance;
 		_updateDataBuffer = nullptr;
-
+		
+		_sourceObject = src._sourceObject;
+		
 		_ubos.resize(s_maxBuffersCount, 0);
 		_fences.resize(s_maxBuffersCount);
 	}
@@ -108,7 +116,9 @@ AnimaShaderGroupData& AnimaShaderGroupData::operator=(AnimaShaderGroupData&& src
 		_needsResize = false;
 		_supportsInstance = src._supportsInstance;
 		_updateDataBuffer = nullptr;
-
+		
+		_sourceObject = src._sourceObject;
+		
 		_ubos.resize(s_maxBuffersCount, 0);
 		_fences.resize(s_maxBuffersCount);
 	}
@@ -135,7 +145,6 @@ AnimaShaderData* AnimaShaderGroupData::GetShaderData(const AInt& index)
 {
 	return &_data[index];
 }
-
 
 bool AnimaShaderGroupData::Create()
 {
@@ -179,7 +188,7 @@ void AnimaShaderGroupData::Analize(AnimaShaderProgram* program)
 	if (program == nullptr)
 		return;
 
-	_groupLocation = glGetUniformBlockIndex(program->GetID(), _name.c_str());
+	_groupLocation = glGetUniformBlockIndex(program->GetID(), AssociatedWith().c_str());
 	glGetActiveUniformBlockiv(program->GetID(), _groupLocation, GL_UNIFORM_BLOCK_DATA_SIZE, &_bufferDataSize);
 
 	AInt alignment = sizeof(AFloat);
@@ -346,12 +355,13 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 	for (AInt i = 0; i < dataCount; i++)
 	{
 		AnimaShaderData* data = &_data[i];
-		AnimaString propertyName = data->GetNamePart(0);
+//		AnimaString propertyName = data->GetNamePart(0);
+		AnimaString propertyName = data->GetName();
 		arraySize = data->GetArraySize();
 
 		switch (data->GetType())
 		{
-		case FLOAT:
+		case ASDT_FLOAT:
 		{
 			size = sizeof(AFloat);
 			AFloat val = object->GetFloat(propertyName);
@@ -363,11 +373,11 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT_ARRAY:
+		case ASDT_FLOAT_ARRAY:
 		{
 			break;
 		}
-		case FLOAT2:
+		case ASDT_FLOAT2:
 		{
 			size = sizeof(AFloat) * 2;
 #if defined MAP_BUFFERS
@@ -377,7 +387,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT2_ARRAY:
+		case ASDT_FLOAT2_ARRAY:
 		{
 			size = sizeof(AFloat) * 2 * arraySize;
 
@@ -410,7 +420,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT3:
+		case ASDT_FLOAT3:
 		{
 			size = sizeof(AFloat) * 4;
 #if defined MAP_BUFFERS
@@ -430,7 +440,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT3_ARRAY:
+		case ASDT_FLOAT3_ARRAY:
 		{
 			size = sizeof(AFloat) * 4 * arraySize;
 
@@ -469,7 +479,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT4:
+		case ASDT_FLOAT4:
 		{
 			size = sizeof(AFloat) * 4;
 #if defined MAP_BUFFERS
@@ -485,7 +495,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case FLOAT4_ARRAY:
+		case ASDT_FLOAT4_ARRAY:
 		{
 			size = sizeof(AFloat) * 4 * arraySize;
 
@@ -524,7 +534,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case MATRIX4x4:
+		case ASDT_MATRIX4x4:
 		{
 			size = sizeof(AFloat) * 16;
 #if defined MAP_BUFFERS
@@ -534,7 +544,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case MATRIX4x4_ARRAY:
+		case ASDT_MATRIX4x4_ARRAY:
 		{
 			size = sizeof(AFloat) * 16 * arraySize;
 
@@ -567,7 +577,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case MATRIX3x3:
+		case ASDT_MATRIX3x3:
 		{
 			size = sizeof(AFloat) * 16;
 #if defined MAP_BUFFERS
@@ -577,7 +587,7 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case MATRIX3x3_ARRAY:
+		case ASDT_MATRIX3x3_ARRAY:
 		{
 			size = sizeof(AFloat) * 16 * arraySize;
 			AnimaArray<AnimaMatrix>* vectorData = object->GetMatrixArray(propertyName);
@@ -609,19 +619,19 @@ void AnimaShaderGroupData::UpdateObjectValue(const AnimaMappedValues* object, An
 #endif
 			break;
 		}
-		case INT:
+		case ASDT_INT:
 		{
 			break;
 		}
-		case INT_ARRAY:
+		case ASDT_INT_ARRAY:
 		{
 			break;
 		}
-		case BOOL:
+		case ASDT_BOOL:
 		{
 			break;
 		}
-		case BOOL_ARRAY:
+		case ASDT_BOOL_ARRAY:
 		{
 			break;
 		}
@@ -648,18 +658,19 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 	for (AInt i = 0; i < dataCount; i++)
 	{
 		AnimaShaderData* data = &_data[i];
-		AnimaString propertyName = data->GetNamePart(0);
+//		AnimaString propertyName = data->GetNamePart(0);
+		AnimaString propertyName = data->GetName();
 		AInt dataOffset = data->GetOffset();
 		AUint singleDataSize = 0;
 
 		switch (data->GetType())
 		{
-		case FLOAT_ARRAY:		singleDataSize = sizeof(AFloat);		break;
-		case FLOAT2_ARRAY:		singleDataSize = sizeof(AFloat) * 2;	break;
-		case FLOAT3_ARRAY:
-		case FLOAT4_ARRAY:		singleDataSize = sizeof(AFloat) * 4;	break;
-		case MATRIX4x4_ARRAY:
-		case MATRIX3x3_ARRAY:	singleDataSize = sizeof(AFloat) * 16;	break;
+		case ASDT_FLOAT_ARRAY:		singleDataSize = sizeof(AFloat);		break;
+		case ASDT_FLOAT2_ARRAY:		singleDataSize = sizeof(AFloat) * 2;	break;
+		case ASDT_FLOAT3_ARRAY:
+		case ASDT_FLOAT4_ARRAY:		singleDataSize = sizeof(AFloat) * 4;	break;
+		case ASDT_MATRIX4x4_ARRAY:
+		case ASDT_MATRIX3x3_ARRAY:	singleDataSize = sizeof(AFloat) * 16;	break;
 		}
 
 		bufferOffset = data->GetArrayStride() * offset;
@@ -667,7 +678,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 		ANIMA_FRAME_PUSH("data update");
 		switch (data->GetType())
 		{
-		case FLOAT_ARRAY:
+		case ASDT_FLOAT_ARRAY:
 		{
 			AFloat val = object->GetFloat(propertyName);
 
@@ -678,7 +689,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 #endif
 			break;
 		}
-		case FLOAT2_ARRAY:
+		case ASDT_FLOAT2_ARRAY:
 		{
 #if defined MAP_BUFFERS
 			memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetVector2f(propertyName).vec, singleDataSize);
@@ -687,7 +698,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 #endif
 			break;
 		}
-		case FLOAT3_ARRAY:
+		case ASDT_FLOAT3_ARRAY:
 		{
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
@@ -706,7 +717,7 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 #endif
 			break;
 		}
-		case FLOAT4_ARRAY:
+		case ASDT_FLOAT4_ARRAY:
 		{
 #if defined MAP_BUFFERS
 			if (object->HasColor(propertyName))
@@ -721,8 +732,8 @@ void AnimaShaderGroupData::UpdateObjectInstanceValue(const AnimaMappedValues* ob
 #endif
 			break;
 		}
-		case MATRIX4x4_ARRAY:
-		case MATRIX3x3_ARRAY:
+		case ASDT_MATRIX4x4_ARRAY:
+		case ASDT_MATRIX3x3_ARRAY:
 		{
 #if defined MAP_BUFFERS
 			memcpy(_updateDataBuffer + dataOffset + bufferOffset, object->GetMatrix(propertyName).m, singleDataSize);

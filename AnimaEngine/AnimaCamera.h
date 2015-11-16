@@ -141,8 +141,6 @@ public:
 	AnimaVertex2f GetWindowSize();
 
 	AnimaFrustum* GetFrustum();
-
-	const char* GetShaderPrefix() override { return "CAM"; }
 	
 	AnimaVertex2f WorldPointToScreenPoint(const AnimaVertex3f& worldPoint) const;
 	AnimaVertex3f ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint) const;

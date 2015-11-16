@@ -21,6 +21,7 @@
 #include "AnimaMatrix.h"
 #include "AnimaNamedObject.h"
 #include <boost/unordered_map.hpp>
+#include "AnimaShaderData.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -52,9 +53,8 @@ public:
 	ptree GetObjectTree(bool saveName = true) const override;
 	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
 	
-public:
-	virtual const char* GetShaderPrefix() = 0;
-	
+	virtual AnimaShaderDataSourceObject GetShaderSource() const { return _shaderSource; }
+		
 public:
 	void AddTexture(const AnimaString& propertyName, AnimaTextureGenerator* value);
 	void AddTexture(const AnimaString& propertyName, AnimaTexture* value);
@@ -163,6 +163,8 @@ protected:
 	AnimaDataGeneratorsManager* _dataGeneratorManager;
 
 	AnimaString _uniqueName;
+	
+	AnimaShaderDataSourceObject _shaderSource;
 
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, AnimaTextureGenerator*, AnimaStringHasher> _texturesMap;

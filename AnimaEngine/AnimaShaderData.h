@@ -19,29 +19,40 @@ class AnimaMappedValues;
 class AnimaGBuffer;
 
 enum AnimaShaderDataType {
-	FLOAT,
-	FLOAT_ARRAY,
-	FLOAT2,
-	FLOAT2_ARRAY,
-	FLOAT3,
-	FLOAT3_ARRAY,
-	FLOAT4,
-	FLOAT4_ARRAY,
-	MATRIX4x4,
-	MATRIX4x4_ARRAY,
-	MATRIX3x3,
-	MATRIX3x3_ARRAY,
-	INT,
-	INT_ARRAY,
-	BOOL,
-	BOOL_ARRAY,
-	TEXTURE2D,
-	TEXTURE2D_ARRAY,
-	TEXTURE3D,
-	TEXTURE3D_ARRAY,
-	TEXTURECUBE,
-	TEXTURECUBE_ARRAY,
-	NONE
+	ASDT_FLOAT,
+	ASDT_FLOAT_ARRAY,
+	ASDT_FLOAT2,
+	ASDT_FLOAT2_ARRAY,
+	ASDT_FLOAT3,
+	ASDT_FLOAT3_ARRAY,
+	ASDT_FLOAT4,
+	ASDT_FLOAT4_ARRAY,
+	ASDT_MATRIX4x4,
+	ASDT_MATRIX4x4_ARRAY,
+	ASDT_MATRIX3x3,
+	ASDT_MATRIX3x3_ARRAY,
+	ASDT_INT,
+	ASDT_INT_ARRAY,
+	ASDT_BOOL,
+	ASDT_BOOL_ARRAY,
+	ASDT_TEXTURE2D,
+	ASDT_TEXTURE2D_ARRAY,
+	ASDT_TEXTURE3D,
+	ASDT_TEXTURE3D_ARRAY,
+	ASDT_TEXTURECUBE,
+	ASDT_TEXTURECUBE_ARRAY,
+	ASDT_NONE
+};
+
+enum AnimaShaderDataSourceObject {
+	ASDSO_GEOMETRY,
+	ASDSO_NODE,
+	ASDSO_RENDERER,
+	ASDSO_MATERIAL,
+	ASDSO_LIGHT,
+	ASDSO_GBUFFER,
+	ASDSO_CAMERA,
+	ASDSO_NONE
 };
 
 class ANIMA_ENGINE_EXPORT AnimaShaderData : public AnimaNamedObject
@@ -63,17 +74,21 @@ public:
 public:
 	void Analize(AnimaShaderProgram* program);
 
-	virtual void SetName(const AnimaString& name);
+	void SetName(const AnimaString& name) override;
 
 	void SetType(AnimaShaderDataType type) { _type = type; }
 	AnimaShaderDataType GetType() const { return _type; }
+	
+	void SetSourceObject(AnimaShaderDataSourceObject sourceObject, const AnimaString& slotName = "") { _sourceObject = sourceObject; _slotName = slotName; }
+	AnimaShaderDataSourceObject GetSourceObject() const { return _sourceObject; }
+	AnimaString GetSlotName() const { return _slotName; }
 
 	void SetArraySize(AInt size) { _arraySize = size; }
 	AInt GetArraySize() const { return _arraySize; }
 
-	AnimaString GetNamePart(AInt index) const { return _nameParts[index]; }
-	AnimaString GetPrefix() { return _nameParts[0]; }
-	AInt GetNamePartsCount() const { return _nameParts.size(); }
+//	AnimaString GetNamePart(AInt index) const { return _nameParts[index]; }
+//	AnimaString GetPrefix() { return _nameParts[0]; }
+//	AInt GetNamePartsCount() const { return _nameParts.size(); }
 
 	void SetOffset(AInt offset) { _offset = offset; }
 	AInt GetOffset() const { return _offset; }
@@ -83,7 +98,10 @@ public:
 
 	void SetMatrixStride(AInt matrixStride) { _matrixStride = matrixStride; }
 	AInt GetMatrixStride() const { return _matrixStride; }
-
+	
+	void SetAssociatedWith(const AnimaString& associatedWith) { _associatedWith = associatedWith; }
+	AnimaString AssociatedWith() const { return _associatedWith.empty() ? GetName() : _associatedWith; }
+	
 public:
 	void UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer);
 	void UpdateValue(AnimaRenderer* renderer);
@@ -105,14 +123,17 @@ public:
 	void UpdateValue(AnimaTexture* value, const AInt& slot);
 	void UpdateValue(AnimaArray<AnimaTexture*>& value, const AInt& slot);
 	
-protected:
-	void DivideName();
+//protected:
+//	void DivideName();
 
 protected:
-	AnimaArray<AnimaString> _nameParts;
+//	AnimaArray<AnimaString> _nameParts;
 	AnimaArray<AInt> _locations;
 	
 	AnimaShaderDataType _type;
+	AnimaShaderDataSourceObject _sourceObject;
+	AnimaString _slotName;
+	AnimaString _associatedWith;
 
 	AInt _arraySize;
 

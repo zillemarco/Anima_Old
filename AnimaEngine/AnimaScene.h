@@ -67,8 +67,6 @@ public:
 	
 	bool IsActive() { return _active; }
 	
-	const char* GetShaderPrefix() override { return "SCE"; }
-
 protected:
 	void InitializeManagers();
 	void TerminateManagers();

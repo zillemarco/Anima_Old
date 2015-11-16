@@ -75,8 +75,6 @@ public:
 	AnimaTransformation* GetTransformation();
 	AnimaTransformation GetTransformationCopy();
 
-	const char* GetShaderPrefix() override { return ""; }
-
 protected:
 	virtual void UpdateChildrenTransformation();
 

@@ -7,7 +7,7 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="DIL_LightMeshMatrix" type="MATRIX4x4" />
+				<Data propertyName="LightMeshMatrix" type="MATRIX4x4" sourceObject="LIGHT"/>
 			</Datas>
 			<Code>
 				<![CDATA[
@@ -15,11 +15,11 @@
 
 				in vec3 _position;
 
-				uniform mat4 DIL_LightMeshMatrix;
+				uniform mat4 LightMeshMatrix;
 
 				void main()
 				{          
-				    gl_Position = DIL_LightMeshMatrix * vec4(_position, 1.0);
+				    gl_Position = LightMeshMatrix * vec4(_position, 1.0);
 				}
 				]]>
 			</Code>

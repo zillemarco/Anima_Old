@@ -558,13 +558,13 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 	if (object == nullptr)
 		return;
 
-	const char* prefix = object->GetShaderPrefix();
+	AnimaShaderDataSourceObject source = object->GetShaderSource();
 
 	AInt count = _data.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderData* data = &_data[i];
-		if(data->GetPrefix() == prefix)
+		if(data->GetSourceObject() == source)
 			data->UpdateValue(object, renderingManager);
 	}
 	
@@ -572,7 +572,7 @@ void AnimaShaderProgram::UpdateMappedValuesObjectProperties(AnimaMappedValues* o
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderGroupData* groupData = &_dynamicGroupData[i];
-		if (groupData->GetName() == prefix)
+		if (groupData->GetSourceObject() == source)
 			groupData->UpdateValue(object, renderingManager, this);
 	}
 }
@@ -582,13 +582,11 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 	if (renderingManager == nullptr)
 		return;
 
-	const char* prefix = RENDERER_PREFIX;
-
 	AInt count = _data.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderData* data = &_data[i];
-		if(data->GetPrefix() == prefix)
+		if(data->GetSourceObject() == ASDSO_RENDERER)
 			data->UpdateValue(renderingManager);
 	}
 }

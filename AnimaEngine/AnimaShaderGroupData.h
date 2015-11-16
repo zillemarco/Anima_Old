@@ -57,7 +57,13 @@ public:
 	void SyncBuffers(AUint bufferIndex);
 
 	static AUint GetMaxBuffersCount() { return s_maxBuffersCount; }
-
+	
+	void SetSourceObject(AnimaShaderDataSourceObject sourceObject) { _sourceObject = sourceObject; }
+	AnimaShaderDataSourceObject GetSourceObject() const { return _sourceObject; }
+	
+	void SetAssociatedWith(const AnimaString& associatedWith) { _associatedWith = associatedWith; }
+	AnimaString AssociatedWith() const { return _associatedWith.empty() ? GetName() : _associatedWith; }
+	
 public:
 	void UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer, const AnimaShaderProgram* program, AUint offset = 0);
 	void UpdateValue(AnimaRenderer* renderer, const AnimaShaderProgram* program);
@@ -71,6 +77,9 @@ protected:
 	
 protected:
 	AnimaMappedArray<AnimaShaderData> _data;
+	AnimaShaderDataSourceObject _sourceObject;
+	
+	AnimaString _associatedWith;
 
 	AInt _groupLocation;
 	AInt _bufferDataSize;

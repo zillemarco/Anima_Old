@@ -7,12 +7,12 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="DIL_ProjectionViewMatrix" type="MATRIX4x4" />
+				<Data propertyName="ProjectionViewMatrix" type="MATRIX4x4" sourceObject="LIGHT"/>
 			</Datas>
 			<GroupsData>
-				<Group name="MOD" dynamic="false" supportsInstance="true">
+				<Group groupName="MOD" dynamic="false" supportsInstance="true" sourceObject="GEOMETRY">
 					<Datas>
-						<Data name="AModelMatrix" type="MATRIX4x4_ARRAY" size="20"/>
+						<Data propertyName="AModelMatrix" type="MATRIX4x4_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -22,7 +22,7 @@
 
 				in vec3 _position;
 
-				uniform mat4 DIL_ProjectionViewMatrix;
+				uniform mat4 ProjectionViewMatrix;
 				
 				layout(std140) uniform MOD
 				{
@@ -31,7 +31,7 @@
 
 				void main()
 				{
-				    gl_Position = DIL_ProjectionViewMatrix * AModelMatrix[gl_InstanceID] * vec4(_position, 1.0);
+				    gl_Position = ProjectionViewMatrix * AModelMatrix[gl_InstanceID] * vec4(_position, 1.0);
 				}
 				]]>
 			</Code>

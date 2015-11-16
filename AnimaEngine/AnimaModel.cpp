@@ -29,6 +29,8 @@ AnimaModel::AnimaModel(const AnimaString& name, AnimaDataGeneratorsManager* data
 	_material = nullptr;
 	_activeAnimation = -1;
 	_topLevelModel = false;
+	
+	_shaderSource = ASDSO_NODE;
 }
 
 AnimaModel::AnimaModel(const AnimaModel& src)
@@ -43,7 +45,6 @@ AnimaModel::AnimaModel(const AnimaModel& src)
 	_material = src._material;
 	_activeAnimation = -1;
 	_topLevelModel = src._topLevelModel;
-
 }
 
 AnimaModel::AnimaModel(AnimaModel&& src)

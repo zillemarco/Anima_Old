@@ -6,22 +6,22 @@
 			<Code>
 				<![CDATA[
 
-				float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
-				{
-					vec2 pixelPos = coords / texelSize + vec2(0.5f);
-					vec2 fractPart = fract(pixelPos);
-					vec2 startTexel = (pixelPos - fractPart) * texelSize;
-
-					float bl = step(compare, texture(shadowMap, startTexel).r + DIL_ShadowMapBias);
-					float br = step(compare, texture(shadowMap, startTexel + vec2(texelSize.x, 0.0f)).r + DIL_ShadowMapBias);
-					float tl = step(compare, texture(shadowMap, startTexel + vec2(0.0f, texelSize.t)).r + DIL_ShadowMapBias);
-					float tr = step(compare, texture(shadowMap, startTexel + texelSize).r + DIL_ShadowMapBias);
-
-					float mixA = mix(bl, tl, fractPart.y);
-					float mixB = mix(br, tr, fractPart.y);
-
-					return mix(mixA, mixB, fractPart.x);
-				}
+				//float ComputeShadowAmount(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
+				//{
+				//	vec2 pixelPos = coords / texelSize + vec2(0.5f);
+				//	vec2 fractPart = fract(pixelPos);
+				//	vec2 startTexel = (pixelPos - fractPart) * texelSize;
+				//
+				//	float bl = step(compare, texture(shadowMap, startTexel).r + ShadowMapBias);
+				//	float br = step(compare, texture(shadowMap, startTexel + vec2(texelSize.x, 0.0f)).r + ShadowMapBias);
+				//	float tl = step(compare, texture(shadowMap, startTexel + vec2(0.0f, texelSize.t)).r + ShadowMapBias);
+				//	float tr = step(compare, texture(shadowMap, startTexel + texelSize).r + ShadowMapBias);
+				//
+				//	float mixA = mix(bl, tl, fractPart.y);
+				//	float mixB = mix(br, tr, fractPart.y);
+				//	
+				//	return mix(mixA, mixB, fractPart.x);
+				//}
 
 				float linstep(float low, float high, float v)
 				{

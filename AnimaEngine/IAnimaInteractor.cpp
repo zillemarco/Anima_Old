@@ -11,6 +11,8 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
+#if defined WIN32
+
 #if _MSC_VER >= 1300    // for VC 7.0
 // from ATL 7.0 sources
 #ifndef _delayimp_h
@@ -38,5 +40,7 @@ HMODULE GetCurrentModule()
 	return reinterpret_cast<HMODULE>(&__ImageBase);
 #endif
 }
+
+#endif
 
 END_ANIMA_ENGINE_NAMESPACE

@@ -81,9 +81,7 @@ public:
 	virtual void SetTopLevelModel(bool topLevelModel) { _topLevelModel = topLevelModel; }
 	virtual bool IsTopLevelModel() const { return _topLevelModel; }
 
-protected:
-	const char* GetShaderPrefix() override { return "MOD"; }
-	
+protected:	
 	void UpdateChildrenTransformation() override;
 
 protected:

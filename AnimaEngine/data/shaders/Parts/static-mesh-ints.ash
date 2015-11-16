@@ -7,13 +7,13 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data name="CAM_ProjectionViewMatrix" type="MATRIX4x4" />
+				<Data propertyName="ProjectionViewMatrix" type="MATRIX4x4" sourceObject="CAMERA"/>
 			</Datas>
 			<GroupsData>
-				<Group name="MOD" dynamic="false" supportsInstance="true">
+				<Group groupName="MOD" dynamic="false" supportsInstance="true" sourceObject="GEOMETRY">
 					<Datas>
-						<Data name="AModelMatrix" type="MATRIX4x4_ARRAY" size="20"/>
-						<Data name="ANormalMatrix" type="MATRIX4x4_ARRAY" size="20"/>
+						<Data propertyName="AModelMatrix" type="MATRIX4x4_ARRAY" size="20"/>
+						<Data propertyName="ANormalMatrix" type="MATRIX4x4_ARRAY" size="20"/>
 					</Datas>
 				</Group>
 			</GroupsData>
@@ -27,7 +27,7 @@
 				in vec3 _tangent;
 				in vec3 _bitangent;
 
-				uniform mat4 CAM_ProjectionViewMatrix;
+				uniform mat4 ProjectionViewMatrix;
 
 				layout(std140) uniform MOD
 				{
@@ -44,7 +44,7 @@
 				{
 					frag_index = gl_InstanceID;
 
-				    gl_Position = CAM_ProjectionViewMatrix *  AModelMatrix[frag_index] * vec4(_position, 1.0);
+				    gl_Position = ProjectionViewMatrix *  AModelMatrix[frag_index] * vec4(_position, 1.0);
 				    
 					frag_normal = normalize((ANormalMatrix[frag_index] * vec4(_normal, 0.0)).xyz);
 				    vec3 tangent = normalize((ANormalMatrix[frag_index] * vec4(_tangent, 0.0)).xyz);
