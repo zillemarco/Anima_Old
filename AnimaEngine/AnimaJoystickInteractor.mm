@@ -225,6 +225,9 @@ bool AnimaJoystickInteractor::EventIsSupported(const AnimaString& eventName) con
 
 void AnimaJoystickInteractor::PollEvents()
 {
+	if(_joysticksInitialized == false)
+		return;
+
 	_pollMutex.lock();
 	
 	for (AInt joy = 0; joy <= (AInt)AnimaJoystickID::AJI_LAST; joy++)
@@ -399,6 +402,7 @@ bool AnimaJoystickInteractor::InitializeJoysticks()
 	// joysticks
 	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
 	
+	_joysticksInitialized = true;
 	return true;
 }
 
@@ -412,6 +416,8 @@ void AnimaJoystickInteractor::TerminateJoysticks()
 	
 	CFRelease(_managerRef);
 	_managerRef = nullptr;
+
+	_joysticksInitialized = false;
 }
 
 void AnimaJoystickInteractor::GetElementsCFArrayHandler(const void* value, void* parameter)

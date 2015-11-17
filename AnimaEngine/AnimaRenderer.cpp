@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE

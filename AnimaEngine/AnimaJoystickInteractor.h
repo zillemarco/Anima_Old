@@ -20,6 +20,13 @@
 #include <boost/thread.hpp>
 
 #if defined WIN32
+#	include <Windows.h>
+#	include <mmsystem.h>
+
+	typedef MMRESULT(WINAPI * JOYGETDEVCAPS_T)(UINT_PTR, LPJOYCAPS, UINT);
+	typedef MMRESULT(WINAPI * JOYGETPOS_T)(UINT, LPJOYINFO);
+	typedef MMRESULT(WINAPI * JOYGETPOSEX_T)(UINT, LPJOYINFOEX);
+	typedef UINT(WINAPI * JOYGETNUMDEVS_T)(void);
 #else
 #	include <IOKit/IOKitLib.h>
 #	include <IOKit/IOCFPlugIn.h>
@@ -52,8 +59,6 @@ enum class AnimaJoystickID : AInt
 	AJI_LAST	= AJI_16
 };
 
-#if defined WIN32
-#else
 class ANIMA_ENGINE_EXPORT AnimaJoystickDevice
 {
 	friend class AnimaJoystickInteractor;
@@ -76,17 +81,20 @@ public:
 private:
 	bool _present;
 	AnimaString _name;
-	
+
+#if !defined WIN32
 	IOHIDDeviceRef _deviceRef;
 	
 	CFMutableArrayRef _axisElements;
 	CFMutableArrayRef _buttonElements;
 	CFMutableArrayRef _hatElements;
+#endif
 	
 	AnimaArray<AFloat>	_axis;
 	AnimaArray<bool>	_buttons;
 };
 
+#if !defined WIN32
 typedef struct
 {
 	IOHIDElementRef elementRef;
@@ -217,21 +225,48 @@ protected:
 	boost::thread* _pollThread;
 	
 	AnimaArray<AnimaEventInfo> _supportedEvents;
-	
+
+	static AnimaJoystickDevice _joysticks[(AInt)AnimaJoystickID::AJI_LAST + 1];
 	static bool _joysticksInitialized;
-	static AInt _installedInteractorsCount;
 	
 	static AnimaJoystickInteractor _instance;
 	
 #if defined WIN32
+	static HINSTANCE _hWinmm;
+	static JOYGETDEVCAPS_T _joyGetDevCaps;
+	static JOYGETPOS_T _joyGetPos;
+	static JOYGETPOSEX_T _joyGetPosEx;
+	static JOYGETNUMDEVS_T _joyGetNumDevs;
 #else
 	static IOHIDManagerRef _managerRef;
-	static AnimaJoystickDevice _joysticks[(AInt)AnimaJoystickID::AJI_LAST + 1];
 #endif
 	
 #pragma warning (disable: 4251)
 	boost::unordered_map<AnimaString, std::function<void (AnimaEventArgs* eventArgs)>, AnimaStringHasher> _eventsMap;
 #pragma warning (default: 4251)
+
+public:
+	static const AInt AJ_XBOX_360_DEFAULT_A;
+	static const AInt AJ_XBOX_360_DEFAULT_B;
+	static const AInt AJ_XBOX_360_DEFAULT_X;
+	static const AInt AJ_XBOX_360_DEFAULT_Y;
+	static const AInt AJ_XBOX_360_DEFAULT_UP;
+	static const AInt AJ_XBOX_360_DEFAULT_DOWN;
+	static const AInt AJ_XBOX_360_DEFAULT_LEFT;
+	static const AInt AJ_XBOX_360_DEFAULT_RIGHT;
+	static const AInt AJ_XBOX_360_DEFAULT_BACK;
+	static const AInt AJ_XBOX_360_DEFAULT_START;
+	static const AInt AJ_XBOX_360_DEFAULT_LS_X;
+	static const AInt AJ_XBOX_360_DEFAULT_LS_Y;
+	static const AInt AJ_XBOX_360_DEFAULT_RS_X;
+	static const AInt AJ_XBOX_360_DEFAULT_RS_Y;
+	static const AInt AJ_XBOX_360_DEFAULT_LS_CLICK;
+	static const AInt AJ_XBOX_360_DEFAULT_RS_CLICK;
+	static const AInt AJ_XBOX_360_DEFAULT_LB;
+	static const AInt AJ_XBOX_360_DEFAULT_RB;
+	static const AInt AJ_XBOX_360_DEFAULT_LT;
+	static const AInt AJ_XBOX_360_DEFAULT_RT;
+	static const AInt AJ_XBOX_360_DEFAULT_XBOX;
 };
 
 END_ANIMA_ENGINE_NAMESPACE
