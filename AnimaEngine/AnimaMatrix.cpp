@@ -1135,7 +1135,7 @@ void AnimaMatrix::FromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll)
 
 void AnimaMatrix::FromHeadPitchRollDeg(AFloat head, AFloat pitch, AFloat roll)
 {
-	FromHeadPitchRollDeg(AnimaMath::DegToRad(head), AnimaMath::DegToRad(pitch), AnimaMath::DegToRad(roll));
+	FromHeadPitchRollRad(AnimaMath::DegToRad(head), AnimaMath::DegToRad(pitch), AnimaMath::DegToRad(roll));
 }
 
 AnimaMatrix AnimaMatrix::MakeFromHeadPitchRollRad(AFloat head, AFloat pitch, AFloat roll)
