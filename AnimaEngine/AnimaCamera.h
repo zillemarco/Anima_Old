@@ -144,7 +144,11 @@ public:
 	
 	AnimaVertex2f WorldPointToScreenPoint(const AnimaVertex3f& worldPoint) const;
 	AnimaVertex3f ScreenPointToWorldPoint(const AnimaVertex2f& screenPoint) const;
-		
+	
+public:
+	static AnimaVertex3f GetDefaultAcceleration() { return DEFAULT_ACCELERATION; }
+	static AnimaVertex3f GetDefaultMaximumVelocity() { return DEFAULT_MAXIMUM_VELOCITY; }
+	
 protected:
 	AnimaCameraType _cameraType;
 	AnimaCameraProjectionType _projectionType;

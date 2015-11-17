@@ -92,6 +92,7 @@ set(common_HEADERS	AnimaEngineCore.h
 					IAnimaEvents.h
 					AnimaMouseInteractor.h
 					AnimaKeyboardInteractor.h
+					AnimaJoystickInteractor.h
 					AnimaDefaultMouseInteractor.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
@@ -170,7 +171,7 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm AnimaJoystickInteractor.mm)
 	else()
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaEnginePY.cpp AnimaGC.cpp AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
 	endif()
@@ -180,7 +181,7 @@ else()
 	set(AnimaEngineCore_HEADERS	${common_HEADERS})
 
 	if(APPLE)
-		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
+		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.mm AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm AnimaJoystickInteractor.mm)
 	else()
 		set(AnimaEngineCore_SOURCES	${common_SOURCES} AnimaGC.cpp AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
 	endif()
@@ -190,7 +191,7 @@ endif()
 
 if(APPLE)
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.mm)
-	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm)
+	source_group(Engine\\Interactors FILES AnimaMouseInteractor.mm AnimaKeyboardInteractor.mm AnimaJoystickInteractor.mm)
 else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
 	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp)
@@ -210,7 +211,7 @@ source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h Ani
 
 source_group(Engine\\Interfaces FILES IAnimaInteractor.h IAnimaInteractor.cpp IAnimaEvents.h IAnimaEvents.cpp)
 
-source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultMouseInteractor.h AnimaDefaultMouseInteractor.cpp)
+source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultMouseInteractor.h AnimaDefaultMouseInteractor.cpp AnimaJoystickInteractor.h)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)

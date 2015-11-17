@@ -79,7 +79,7 @@ public:
 	void SetType(AnimaShaderDataType type) { _type = type; }
 	AnimaShaderDataType GetType() const { return _type; }
 	
-	void SetSourceObject(AnimaShaderDataSourceObject sourceObject, const AnimaString& slotName = "") { _sourceObject = sourceObject; _slotName = slotName; }
+	void SetSourceObject(AnimaShaderDataSourceObject sourceObject) { _sourceObject = sourceObject; }
 	AnimaShaderDataSourceObject GetSourceObject() const { return _sourceObject; }
 	AnimaString GetSlotName() const { return _slotName; }
 
@@ -123,8 +123,8 @@ public:
 	void UpdateValue(AnimaTexture* value, const AInt& slot);
 	void UpdateValue(AnimaArray<AnimaTexture*>& value, const AInt& slot);
 	
-//protected:
-//	void DivideName();
+protected:
+	void DivideName();
 
 protected:
 //	AnimaArray<AnimaString> _nameParts;
@@ -132,6 +132,7 @@ protected:
 	
 	AnimaShaderDataType _type;
 	AnimaShaderDataSourceObject _sourceObject;
+	AnimaString _gbufferName;
 	AnimaString _slotName;
 	AnimaString _associatedWith;
 

@@ -7,9 +7,9 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="DepthMap" associatedWith="PrepassBuffer_DepthMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="NormalMap" associatedWith="PrepassBuffer_NormalMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="SpecularMap" associatedWith="PrepassBuffer_SpecularMap"/>
+				<Data propertyName="PrepassBuffer.DepthMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_DepthMap"/>
+				<Data propertyName="PrepassBuffer.NormalMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_NormalMap"/>
+				<Data propertyName="PrepassBuffer.SpecularMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_SpecularMap"/>
 				<Data propertyName="InverseScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 				<Data propertyName="Position" type="FLOAT3" sourceObject="CAMERA" associatedWith="CameraPosition"/>
 				<Data propertyName="Range" type="FLOAT" sourceObject="LIGHT"/>

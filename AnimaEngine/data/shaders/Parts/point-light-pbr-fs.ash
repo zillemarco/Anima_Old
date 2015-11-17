@@ -7,10 +7,10 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="AlbedoMap" associatedWith="PrepassBuffer_AlbedoMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="DepthMap" associatedWith="PrepassBuffer_DepthMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="NormalMap" associatedWith="PrepassBuffer_NormalMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="SpecularMap" associatedWith="PrepassBuffer_SpecularMap"/>
+				<Data propertyName="PrepassBuffer.AlbedoMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_AlbedoMap"/>
+				<Data propertyName="PrepassBuffer.DepthMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_DepthMap"/>
+				<Data propertyName="PrepassBuffer.NormalMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_NormalMap"/>
+				<Data propertyName="PrepassBuffer.SpecularMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_SpecularMap"/>
 				<Data propertyName="EnvironmentMap" type="TEXTURECUBE" sourceObject="RENDERER"/>
 				<Data propertyName="IrradianceMap" type="TEXTURECUBE" sourceObject="RENDERER"/>
 				<Data propertyName="InverseScreenSize" type="FLOAT2" sourceObject="RENDERER"/>

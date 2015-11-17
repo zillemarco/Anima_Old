@@ -15,6 +15,7 @@ AnimaShaderData::AnimaShaderData(const AnimaString& name)
 	_type = ASDT_NONE;
 	_sourceObject = ASDSO_NODE;
 	_slotName = "";
+	_gbufferName = "";
 	_associatedWith = "";
 	
 	_arraySize = 0;
@@ -22,7 +23,7 @@ AnimaShaderData::AnimaShaderData(const AnimaString& name)
 	_arrayStride = -1;
 	_matrixStride = -1;
 
-//	DivideName();
+	DivideName();
 }
 
 AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
@@ -30,11 +31,11 @@ AnimaShaderData::AnimaShaderData(const AnimaShaderData& src)
 {
 	_locations = src._locations;
 	_arraySize = src._arraySize;
-//	_nameParts = src._nameParts;
 	
 	_type = src._type;
 	_sourceObject = src._sourceObject;
 	_slotName = src._slotName;
+	_gbufferName = src._gbufferName;
 	_associatedWith = src._associatedWith;
 
 	_offset = src._offset;
@@ -47,11 +48,11 @@ AnimaShaderData::AnimaShaderData(AnimaShaderData&& src)
 {
 	_locations = src._locations;
 	_arraySize = src._arraySize;
-//	_nameParts = src._nameParts;
 	
 	_type = src._type;
 	_sourceObject = src._sourceObject;
 	_slotName = src._slotName;
+	_gbufferName = src._gbufferName;
 	_associatedWith = src._associatedWith;
 
 	_offset = src._offset;
@@ -71,11 +72,11 @@ AnimaShaderData& AnimaShaderData::operator=(const AnimaShaderData& src)
 
 		_locations = src._locations;
 		_arraySize = src._arraySize;
-//		_nameParts = src._nameParts;
 		
 		_type = src._type;
 		_sourceObject = src._sourceObject;
 		_slotName = src._slotName;
+		_gbufferName = src._gbufferName;
 		_associatedWith = src._associatedWith;
 
 		_offset = src._offset;
@@ -94,11 +95,11 @@ AnimaShaderData& AnimaShaderData::operator=(AnimaShaderData&& src)
 
 		_locations = src._locations;
 		_arraySize = src._arraySize;
-//		_nameParts = src._nameParts;
 		
 		_type = src._type;
 		_sourceObject = src._sourceObject;
 		_slotName = src._slotName;
+		_gbufferName = src._gbufferName;
 		_associatedWith = src._associatedWith;
 
 		_offset = src._offset;
@@ -127,7 +128,7 @@ void AnimaShaderData::SetName(const AnimaString& name)
 {
 	AnimaNamedObject::SetName(name);
 
-//	DivideName();
+	DivideName();
 }
 
 void AnimaShaderData::Analize(AnimaShaderProgram* program)
@@ -163,31 +164,23 @@ void AnimaShaderData::Analize(AnimaShaderProgram* program)
 	}
 }
 
-//void AnimaShaderData::DivideName()
-//{
-//	AnimaString namePart1 = _name;
-//	AnimaString namePart2 = "";
-//
-//	AInt pos = namePart1.find('_');
-//	while (pos != -1)
-//	{
-//		namePart2 = namePart1.substr(0, pos);
-//		namePart1 = namePart1.substr(pos + 1, namePart1.length());
-//
-//		if (!namePart2.empty())
-//			_nameParts.push_back(namePart2);
-//		pos = namePart1.find('_');
-//	}
-//
-//	_nameParts.push_back(namePart1);
-//}
+void AnimaShaderData::DivideName()
+{
+	_slotName = "";
+	_gbufferName = "";
+	
+	AnimaString name = GetName();
+	
+	AInt pos = name.find('.');
+	if (pos != -1)
+	{
+		_gbufferName = name.substr(0, pos);
+		_slotName = name.substr(pos + 1, name.length());
+	}
+}
 
 void AnimaShaderData::UpdateValue(const AnimaMappedValues* object, AnimaRenderer* renderer)
 {
-//	AInt count = _nameParts.size();
-//	if (count != 2)
-//		return;
-
 	AnimaString propertyName = GetName();
 	
 	switch (_type)
@@ -261,11 +254,6 @@ void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
 	if(renderer == nullptr)
 		return;
 	
-//	AInt count = _nameParts.size();
-//	if (count < 2)
-//		return;
-//
-//	AnimaString propertyName = _nameParts[1];
 	AnimaString propertyName = GetName();
 
 	switch (_type)
@@ -311,30 +299,25 @@ void AnimaShaderData::UpdateValue(AnimaRenderer* renderer)
 	case Anima::ASDT_TEXTURE2D:
 	case Anima::ASDT_TEXTURECUBE:
 	{
-//		if (_nameParts.size() == 4 && _nameParts[1] == GBUFFER_PREFIX)
-//		{
-//			AnimaGBuffer* gBuffer = renderer->GetGBuffer(_nameParts[2]);
-//
-//			if (gBuffer != nullptr)
-//				UpdateValue(gBuffer->GetTexture(_nameParts[3]), renderer->GetTextureSlot(_nameParts[3]));
-//		}
-//		else
-//		{
-//			UpdateValue(renderer->GetTexture(propertyName), renderer->GetTextureSlot(propertyName));
-//		}
 		if(_sourceObject == AnimaShaderDataSourceObject::ASDSO_GBUFFER)
 		{
-			if(_slotName.empty())
+			if(_gbufferName.empty())
 			{
-				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. GBuffer slot name not set for GBuffer '%s'", propertyName.c_str());
+				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. GBuffer name not set for property '%s'", propertyName.c_str());
 				return;
 			}
 			
-			AnimaGBuffer* gBuffer = renderer->GetGBuffer(propertyName);
+			if(_slotName.empty())
+			{
+				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. GBuffer slot name not set for property '%s'", propertyName.c_str());
+				return;
+			}
+			
+			AnimaGBuffer* gBuffer = renderer->GetGBuffer(_gbufferName);
 			if(gBuffer != nullptr)
 				UpdateValue(gBuffer->GetTexture(_slotName), renderer->GetTextureSlot(_slotName));
 			else
-				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. Cannot find GBuffer named '%s'", propertyName.c_str());
+				AnimaLogger::LogMessageFormat("ERROR - Error updating shader data. Cannot find GBuffer named '%s'", _gbufferName.c_str());
 		}
 		else
 		{

@@ -586,7 +586,7 @@ void AnimaShaderProgram::UpdateRenderingManagerProperies(AnimaRenderer* renderin
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShaderData* data = &_data[i];
-		if(data->GetSourceObject() == ASDSO_RENDERER)
+		if(data->GetSourceObject() == ASDSO_RENDERER || data->GetSourceObject() == ASDSO_GBUFFER)
 			data->UpdateValue(renderingManager);
 	}
 }

@@ -40,6 +40,7 @@
 #include <AnimaRandom.h>
 #include <AnimaDefaultMouseInteractor.h>
 #include <AnimaKeyboardInteractor.h>
+#include <AnimaJoystickInteractor.h>
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
@@ -67,6 +68,7 @@ Anima::AnimaMaterial* _pbrMaterial;
 
 Anima::AnimaDefaultMouseInteractor mouseInteractor;
 Anima::AnimaKeyboardInteractor keyboardInteractor;
+Anima::AnimaJoystickInteractor* joystickInteractor = Anima::AnimaJoystickInteractor::GetInstance();
 
 float lastXPos = 0;
 float lastYPos = 0;
@@ -179,6 +181,92 @@ bool moveDownPressed = false;
 				
 				// Activate the display link
 				CVDisplayLinkStart(displayLink);
+			}
+			
+			if(joystickInteractor->Install(0, &_engine))
+			{
+				joystickInteractor->SetEventHandler("onButtonPressed", [](Anima::AnimaEventArgs* args) {
+					Anima::AnimaEngine* engine = ((Anima::AnimaJoystickInteractor*)args->GetSourceEvent())->GetEngine();
+					Anima::AnimaJoystickButtonEventArgs* buttonArgs = (Anima::AnimaJoystickButtonEventArgs*)args;
+					
+					if(buttonArgs->GetButtonId() == 7)
+					{
+						if(engine)
+						{
+							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+							
+							if(scene)
+							{
+								Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+								Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+								
+								if(camera)
+								{
+									Anima::AnimaCameraType type = camera->GetCameraType();
+									if(type == Anima::ACT_FIRST_PERSON || type == Anima::ACT_SPECTATOR)
+										camera->SetCameraType(Anima::ACT_FLIGHT);
+									else if(type == Anima::ACT_FLIGHT)
+										camera->SetCameraType(Anima::ACT_ORBIT);
+									else if(type == Anima::ACT_ORBIT)
+										camera->SetCameraType(Anima::ACT_FIRST_PERSON);
+								}
+							}
+						}
+					}
+				});				
+				joystickInteractor->SetEventHandler("onUpdateScene", [](Anima::AnimaEventArgs* args){
+					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
+					Anima::AnimaJoystickDevice* joystick = ((Anima::AnimaJoystickInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetJoystick(0);
+					
+					if(scene && joystick->IsPresent())
+					{
+						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+						
+						if(camera)
+						{
+							Anima::AnimaArray<Anima::AFloat> axis = joystick->GetAxis();
+							
+							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
+							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
+							
+							Anima::AnimaVertex3f maxVel = camera->GetDefaultMaximumVelocity();
+							
+							float rotationMultiplier = 15.0f;
+							float velocityMultiplier = 30.0f;
+							
+							if (axis[0] != 0.0f)
+							{
+								direction.x = axis[0] > 0.0f ? 1.0f : -1.0f;
+								maxVel.x = fabs(axis[0]) * velocityMultiplier;
+							}
+							
+							if (axis[1] != 0.0f)
+							{
+								direction.z = axis[1] > 0.0f ? -1.0f : 1.0f;
+								maxVel.z = fabs(axis[1]) * velocityMultiplier;
+							}
+							
+							camera->SetMaximumVelocity(maxVel);
+							
+							switch (camera->GetCameraType())
+							{
+								case Anima::ACT_FIRST_PERSON:
+								case Anima::ACT_SPECTATOR:
+									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, -axis[3] * rotationMultiplier, 0.0f);
+									break;
+								case Anima::ACT_FLIGHT:
+									camera->SmoothRotateDeg(0.0f, axis[3] * rotationMultiplier, -axis[2] * rotationMultiplier);
+									break;									
+								case Anima::ACT_ORBIT:
+									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, axis[3] * rotationMultiplier, 0.0f);
+									break;
+							}
+							camera->SetUpdateData(direction);
+						}
+					}
+				});
 			}
 			
 			if(mouseInteractor.Install((long)self, &_engine))
@@ -488,6 +576,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	_scene->InitializePhysicObjects();
 	
 	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	_scene->SetJoystickInteractor(joystickInteractor);
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();

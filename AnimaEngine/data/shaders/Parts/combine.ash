@@ -7,9 +7,9 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="AlbedoMap" associatedWith="PrepassBuffer_AlbedoMap"/>
-				<Data propertyName="LightsBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="EmissiveMap" associatedWith="LightsBuffer_EmissiveMap"/>
-				<Data propertyName="LightsBuffer" type="TEXTURE2D" sourceObject="GBUFFER" slot="SpecularMap" associatedWith="LightsBuffer_SpecularMap"/>
+				<Data propertyName="PrepassBuffer.AlbedoMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_AlbedoMap"/>
+				<Data propertyName="LightsBuffer.EmissiveMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="LightsBuffer_EmissiveMap"/>
+				<Data propertyName="LightsBuffer.SpecularMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="LightsBuffer_SpecularMap"/>
 				<Data propertyName="AmbientLight" type="FLOAT3" sourceObject="RENDERER"/>
 				<Data propertyName="ScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 			</Datas>

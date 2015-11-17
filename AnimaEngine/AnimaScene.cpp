@@ -53,6 +53,7 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	
 	_mouseInteractor = nullptr;
 	_keyboardInteractor = nullptr;
+	_joystickInteractor = nullptr;
 	
 	_worldGravity = AnimaVertex3f(0.0f, -9.81f, 0.0f);
 	_totalSceneTime = 0.0;
@@ -377,6 +378,9 @@ void AnimaScene::StepScene()
 	
 	if(_mouseInteractor != nullptr)
 		_mouseInteractor->UpdateScene(this, elapsedTime);
+	
+	if(_joystickInteractor != nullptr)
+		_joystickInteractor->UpdateScene(this, elapsedTime);
 	
 	// Se è stata inizializzata la simulazione fisica allora la faccio avanzare
 	if(_physWorld != nullptr)

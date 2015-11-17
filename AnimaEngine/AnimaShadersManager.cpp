@@ -352,12 +352,11 @@ AnimaShader* AnimaShadersManager::LoadShaderFromXml(const boost::property_tree::
 					AnimaString associatedWith = prop.second.get<AnimaString>("<xmlattr>.associatedWith", "");
 					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type", ASDT_NONE);
 					AnimaShaderDataSourceObject dataSource = prop.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
-					AnimaString slotName = prop.second.get<AnimaString>("<xmlattr>.slot", "");
 					AInt dataArraySize = prop.second.get<AInt>("<xmlattr>.size", 0);
 					
 					AnimaShaderData data(dataName);
 					data.SetType(dataType);
-					data.SetSourceObject(dataSource, slotName);
+					data.SetSourceObject(dataSource);
 					data.SetAssociatedWith(associatedWith);
 					data.SetArraySize(dataArraySize);
 					
@@ -556,12 +555,11 @@ AnimaShaderInclude* AnimaShadersManager::LoadShaderIncludeFromXml(const boost::p
 					AnimaString associatedWith = prop.second.get<AnimaString>("<xmlattr>.associatedWith", "");
 					AnimaShaderDataType dataType = prop.second.get<AnimaShaderDataType>("<xmlattr>.type", ASDT_NONE);
 					AnimaShaderDataSourceObject dataSource = prop.second.get<AnimaShaderDataSourceObject>("<xmlattr>.sourceObject", ASDSO_NONE);
-					AnimaString slotName = prop.second.get<AnimaString>("<xmlattr>.slot", "");
 					AInt dataArraySize = prop.second.get<AInt>("<xmlattr>.size", 0);
 
 					AnimaShaderData data(dataName);
 					data.SetType(dataType);
-					data.SetSourceObject(dataSource, slotName);
+					data.SetSourceObject(dataSource);
 					data.SetAssociatedWith(associatedWith);
 					data.SetArraySize(dataArraySize);
 

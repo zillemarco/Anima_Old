@@ -16,6 +16,7 @@
 #include "AnimaMappedValues.h"
 #include "AnimaMouseInteractor.h"
 #include "AnimaKeyboardInteractor.h"
+#include "AnimaJoystickInteractor.h"
 
 #include <btBulletDynamicsCommon.h>
 
@@ -109,6 +110,9 @@ public:
 	inline void SetKeyboardInteractor(AnimaKeyboardInteractor* keyboardInteractor) { _keyboardInteractor = keyboardInteractor; }
 	inline AnimaKeyboardInteractor* GetKeyboardInteractor() { return _keyboardInteractor; }
 	
+	inline void SetJoystickInteractor(AnimaJoystickInteractor* joystickInteractor) { _joystickInteractor = joystickInteractor; }
+	inline AnimaJoystickInteractor* GetJoystickInteractor() { return _joystickInteractor; }
+	
 	virtual void InitializePhysicObjects();
 	
 	bool IsRunning() const { return _isRunning; }
@@ -145,6 +149,7 @@ protected:
 	
 	AnimaMouseInteractor* _mouseInteractor;
 	AnimaKeyboardInteractor* _keyboardInteractor;
+	AnimaJoystickInteractor* _joystickInteractor;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

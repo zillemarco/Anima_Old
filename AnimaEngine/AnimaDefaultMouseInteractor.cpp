@@ -54,7 +54,6 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 		SetEventHandler("onLeftMouseDragged", [] (AnimaEventArgs* args) {			
 			AnimaVertex2f delta = ((AnimaMouseDraggedEventArgs*)args)->GetDelta();
 			AnimaEngine* engine = ((AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
-			bool rotate = false; // ((AnimaMouseDraggedEventArgs*)args)->GetModifiers() & (AInt)AnimaKeyboardModifier::AKM_SUPER;
 			
 			if(engine)
 			{
@@ -78,7 +77,6 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 								dy = -delta.y;
 								
 								camera->SmoothRotateDeg(dx, dy, 0.0f);
-//								g_camera.updatePosition(direction, elapsedTimeSec);
 								break;
 								
 							case ACT_FLIGHT:
@@ -86,12 +84,6 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 								dz = delta.x;
 								
 								camera->SmoothRotateDeg(0.0f, dy, dz);
-								
-//								if ((dx = -direction.x * CAMERA_SPEED_FLIGHT_YAW * elapsedTimeSec) != 0.0f)
-//									camera->rotate(dx, 0.0f, 0.0f);
-								
-//								direction.x = 0.0f; // ignore yaw motion when updating camera's velocity
-//								g_camera.updatePosition(direction, elapsedTimeSec);
 								break;
 								
 							case ACT_ORBIT:
@@ -99,31 +91,8 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 								dy = delta.y;
 								
 								camera->SmoothRotateDeg(dx, dy, 0.0f);
-								
-//								if (!camera->PreferTargetYAxisOrbiting())
-//								{
-//									if ((dz = direction.x * CAMERA_SPEED_ORBIT_ROLL * elapsedTimeSec) != 0.0f)
-//										camera->RotateDeg(0.0f, 0.0f, dz);
-//								}
-								
-//								if ((dz = -mouse.wheelPos()) != 0.0f)
-//									camera->Zoom(dz, camera->GetOrbitMinZoom(), camera->GetOrbitMaxZoom());
-								
 								break;
 						}
-						
-//						if(rotate == false)
-//						{
-//							delta /= 30.0f;
-//							
-////							camera->Move(camera->GetRight(), delta.x);
-////							camera->Move(camera->GetUp(), delta.y);
-//						}
-//						else
-//						{
-////							camera->RotateXDeg(delta.y);
-////							camera->RotateYDeg(delta.x);
-//						}
 					}
 				}
 			}

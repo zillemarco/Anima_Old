@@ -8,8 +8,8 @@
 			<MinVersion>3.3</MinVersion>
 			<Datas>
 				<Data propertyName="InverseProjectionViewMatrix" type="MATRIX4x4" sourceObect="CAMERA"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObect="GBUFFER" slot="DepthMap" associatedWith="PrepassBuffer_DepthMap"/>
-				<Data propertyName="PrepassBuffer" type="TEXTURE2D" sourceObect="GBUFFER" slot="NormalMap" associatedWith="PrepassBuffer_NormalMap"/>
+				<Data propertyName="PrepassBuffer.DepthMap" type="TEXTURE2D" sourceObect="GBUFFER" associatedWith="PrepassBuffer_DepthMap"/>
+				<Data propertyName="PrepassBuffer.NormalMap" type="TEXTURE2D" sourceObect="GBUFFER" associatedWith="PrepassBuffer_NormalMap"/>
 				<Data propertyName="InverseScreenSize" type="FLOAT2" sourceObect="RENDERER"/>
 				<Data propertyName="Position" type="FLOAT3" sourceObect="LIGHT"/>
 				<Data propertyName="SkyColor" type="FLOAT3" sourceObect="LIGHT"/>
