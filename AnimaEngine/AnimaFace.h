@@ -17,8 +17,8 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 /*!
- *	\brief		Classe che identifica una singola faccia di una mesh 3D
- *	\details	Classe che identifica una singola faccia di una mesh 3D. Viene caratterizzata da 3 indici 
+ *	\brief		Classe che identifica una singola faccia di una geometry 3D
+ *	\details	Classe che identifica una singola faccia di una geometry 3D. Viene caratterizzata da 3 indici 
 				(gli indici dei 3 vertici appartenente alla faccia) ed un vettore normale (alla faccia)
  *	\author		Zille Marco
  */

@@ -13,7 +13,7 @@
 #include "AnimaTypes.h"
 #include "AnimaEngine.h"
 #include "AnimaSceneObject.h"
-#include "AnimaMesh.h"
+#include "AnimaGeometry.h"
 #include "AnimaTexture.h"
 #include "AnimaCamera.h"
 #include "AnimaFrustum.h"
@@ -87,7 +87,7 @@ public:
 	virtual bool CreateShader(AnimaShadersManager* shadersManager) = 0;
 
 protected:
-	virtual void UpdateLightMeshMatrix();
+	virtual void UpdateLightGeometryMatrix();
 
 protected:
 	AnimaFrustum _frustum;
@@ -122,7 +122,7 @@ public:
 	bool CreateShader(AnimaShadersManager* shadersManager) override;
 
 protected:
-	void UpdateLightMeshMatrix() override;
+	void UpdateLightGeometryMatrix() override;
 };
 
 //----------------------------------------------------------------
@@ -159,7 +159,7 @@ public:
 	virtual void SetPosition(AFloat x, AFloat y, AFloat z);
 
 protected:
-	void UpdateLightMeshMatrix() override;
+	void UpdateLightGeometryMatrix() override;
 };
 
 //----------------------------------------------------------------
@@ -194,7 +194,7 @@ protected:
 	void UpdateConeRotation();
 
 protected:
-	void UpdateLightMeshMatrix() override;
+	void UpdateLightGeometryMatrix() override;
 	
 protected:
 	AnimaVertex3f _coneRotation;
@@ -225,7 +225,7 @@ public:
 	AnimaColor3f GetGroundColor();
 
 protected:
-	void UpdateLightMeshMatrix() override;
+	void UpdateLightGeometryMatrix() override;
 
 public:
 	void UpdateCullFace(AnimaCamera* activeCamera) override;

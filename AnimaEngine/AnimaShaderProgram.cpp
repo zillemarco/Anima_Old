@@ -437,9 +437,9 @@ void AnimaShaderProgram::EnableInput(const AnimaString& inputName, AInt size, AU
 	}
 }
 
-void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
+void AnimaShaderProgram::EnableInputs(AnimaGeometry* geometry)
 {
-	glBindVertexArray(mesh->GetVertexArrayObject());
+	glBindVertexArray(geometry->GetVertexArrayObject());
 
 	for (auto key : _inputs)
 	{
@@ -447,60 +447,60 @@ void AnimaShaderProgram::EnableInputs(AnimaMesh* mesh)
 
 		if (info._name == "_position")
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, mesh->GetVerticesBufferObject());
+			glBindBuffer(GL_ARRAY_BUFFER, geometry->GetVerticesBufferObject());
 			glEnableVertexAttribArray(info._location);
 			glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		}
 		else if (info._name == "_normal")
 		{
-			if (mesh->GetFloatVerticesNormalCount() > 0)
+			if (geometry->GetFloatVerticesNormalCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetNormalsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetNormalsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
 		else if (info._name == "_textureCoord")
 		{
-			if (mesh->GetFloatVerticesTextureCoordCount() > 0)
+			if (geometry->GetFloatVerticesTextureCoordCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTextureCoordsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetTextureCoordsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 2, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
 		else if (info._name == "_tangent")
 		{
-			if (mesh->GetFloatVerticesTangentsCount() > 0)
+			if (geometry->GetFloatVerticesTangentsCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetTangentsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetTangentsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
 		else if (info._name == "_bitangent")
 		{
-			if (mesh->GetFloatVerticesBitangentsCount() > 0)
+			if (geometry->GetFloatVerticesBitangentsCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBitangentsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetBitangentsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
 		else if (info._name == "_boneWeights")
 		{
-			if (mesh->GetBoneWeightsCount() > 0)
+			if (geometry->GetBoneWeightsCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneWeightsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetBoneWeightsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 4, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
 		else if (info._name == "_boneIDs")
 		{
-			if (mesh->GetBoneIDsCount() > 0)
+			if (geometry->GetBoneIDsCount() > 0)
 			{
-				glBindBuffer(GL_ARRAY_BUFFER, mesh->GetBoneIDsBufferObject());
+				glBindBuffer(GL_ARRAY_BUFFER, geometry->GetBoneIDsBufferObject());
 				glEnableVertexAttribArray(info._location);
 				glVertexAttribPointer(info._location, 4, GL_FLOAT, GL_FALSE, 0, 0);
 			}

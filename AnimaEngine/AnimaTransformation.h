@@ -278,15 +278,15 @@ public:
 	void SetTransformationMatrix(AFloat m[16]);
 	void SetNormalMatrix(const AnimaMatrix& m);
 	void SetNormalMatrix(AFloat m[16]);
-	void SetModelNodeTransformationMatrix(const AnimaMatrix& m);
-	void SetModelNodeTransformationMatrix(AFloat m[16]);
+	void SetAnimationGlobalInverseMatrix(const AnimaMatrix& m);
+	void SetAnimationGlobalInverseMatrix(AFloat m[16]);
 
 	AnimaMatrix	GetTransformationMatrix();
 	AnimaMatrix* GetPTransformationMatrix();
 	AnimaMatrix	GetNormalMatrix();
 	AnimaMatrix* GetPNormalMatrix();
-	AnimaMatrix	GetModelNodeTransformationMatrix();
-	AnimaMatrix* GetPTModelNoderansformationMatrix();
+	AnimaMatrix	GetAnimationGlobalInverseMatrix();
+	AnimaMatrix* GetPAnimationGlobalInverseMatrix();
 	
 	AnimaSceneObject* GetParentObject() const;
 	
@@ -306,7 +306,7 @@ protected:
 
 	AnimaMatrix _transformationMatrix;
 	AnimaMatrix _normalMatrix;
-	AnimaMatrix _modelNodeTransformationMatrix;
+	AnimaMatrix _animationGlobalIverseMatrix;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

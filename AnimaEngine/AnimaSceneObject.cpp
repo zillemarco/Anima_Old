@@ -12,18 +12,18 @@
 #include "AnimaFirstPersonCamera.h"
 #include "AnimaThirdPersonCamera.h"
 #include "AnimaLight.h"
-#include "AnimaMesh.h"
-#include "AnimaMeshInstance.h"
-#include "AnimaModel.h"
-#include "AnimaModelInstance.h"
+#include "AnimaGeometry.h"
+#include "AnimaGeometryInstance.h"
+#include "AnimaNode.h"
+#include "AnimaNodeInstance.h"
 #include "AnimaScene.h"
 
 #include "AnimaCamerasManager.h"
 #include "AnimaLightsManager.h"
-#include "AnimaMeshesManager.h"
-#include "AnimaMeshInstancesManager.h"
-#include "AnimaModelsManager.h"
-#include "AnimaModelInstancesManager.h"
+#include "AnimaGeometriesManager.h"
+#include "AnimaGeometryInstancesManager.h"
+#include "AnimaNodesManager.h"
+#include "AnimaNodeInstancesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -187,21 +187,21 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 		{
 			child = scene->GetLightsManager()->GetLightOfTypeFromName<AnimaSpotLight>(childData._name);
 		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaMesh))
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaGeometry))
 		{
-			child = scene->GetMeshesManager()->GetMeshFromName(childData._name);
+			child = scene->GetGeometriesManager()->GetGeometryFromName(childData._name);
 		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaMeshInstance))
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaGeometryInstance))
 		{
-			child = scene->GetMeshInstancesManager()->GetMeshInstanceFromName(childData._name);
+			child = scene->GetGeometryInstancesManager()->GetGeometryInstanceFromName(childData._name);
 		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaModel))
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaNode))
 		{
-			child = scene->GetModelsManager()->GetModelFromName(childData._name, false);
+			child = scene->GetNodesManager()->GetNodeFromName(childData._name, false);
 		}
-		else if (childData._type == ANIMA_CLASS_NAME(AnimaModelInstance))
+		else if (childData._type == ANIMA_CLASS_NAME(AnimaNodeInstance))
 		{
-			child = scene->GetModelInstancesManager()->GetModelInstanceFromName(childData._name, false);
+			child = scene->GetNodeInstancesManager()->GetNodeInstanceFromName(childData._name, false);
 		}
 
 		if (child != nullptr)

@@ -181,15 +181,15 @@ private:
 
 public:
 	/*!
-	 *	\brief		Torna l'allocator dei modelli 3D (classe AnimaModel)
-	 *	\details	Torna l'allocator dei modelli 3D (classe AnimaModel) effettuando anche un controllo che sia stato inizializzato
-	 *	\return		Il valore di _modelsAllocator
-	 *	\sa			_modelsAllocator, AnimaModel, AnimaAllocator
+	 *	\brief		Torna l'allocator dei nodeli 3D (classe AnimaNode)
+	 *	\details	Torna l'allocator dei nodeli 3D (classe AnimaNode) effettuando anche un controllo che sia stato inizializzato
+	 *	\return		Il valore di _nodesAllocator
+	 *	\sa			_nodesAllocator, AnimaNode, AnimaAllocator
 	 *	\author		Zille Marco
 	 */
-	inline AnimaAllocator* GetModelsAllocator() {
-		ANIMA_ASSERT(_modelsAllocator != nullptr);
-		return _modelsAllocator;
+	inline AnimaAllocator* GetNodesAllocator() {
+		ANIMA_ASSERT(_nodesAllocator != nullptr);
+		return _nodesAllocator;
 	}
 	
 	/*!
@@ -205,39 +205,39 @@ public:
 	}
 	
 	/*!
-	 *	\brief		Torna l'allocator delle mesh dei modelli 3D (classe AnimaMesh)
-	 *	\details	Torna l'allocator delle mesh dei modelli 3D (classe AnimaMesh) effettuando anche un controllo che sia stato inizializzato
-	 *	\return		Il valore di _meshesAllocator
-	 *	\sa			_meshesAllocator, AnimaAllocator
+	 *	\brief		Torna l'allocator delle geometry dei nodeli 3D (classe AnimaGeometry)
+	 *	\details	Torna l'allocator delle geometry dei nodeli 3D (classe AnimaGeometry) effettuando anche un controllo che sia stato inizializzato
+	 *	\return		Il valore di _geometriesAllocator
+	 *	\sa			_geometriesAllocator, AnimaAllocator
 	 *	\author		Zille Marco
 	 */
-	inline AnimaAllocator* GetMeshesAllocator() {
-		ANIMA_ASSERT(_meshesAllocator != nullptr);
-		return _meshesAllocator;
+	inline AnimaAllocator* GetGeometriesAllocator() {
+		ANIMA_ASSERT(_geometriesAllocator != nullptr);
+		return _geometriesAllocator;
 	}
 	
 	/*!
-	 *	\brief		Torna l'allocator delle istanze dei modelli 3D (classe AnimaModelInstance)
-	 *	\details	Torna l'allocator delle istanze dei modelli 3D (classe AnimaModelInstance) effettuando anche un controllo che sia stato inizializzato
-	 *	\return		Il valore di _modelInstancesAllocator
-	 *	\sa			_modelInstancesAllocator, AnimaAllocator
+	 *	\brief		Torna l'allocator delle istanze dei nodeli 3D (classe AnimaNodeInstance)
+	 *	\details	Torna l'allocator delle istanze dei nodeli 3D (classe AnimaNodeInstance) effettuando anche un controllo che sia stato inizializzato
+	 *	\return		Il valore di _nodeInstancesAllocator
+	 *	\sa			_nodeInstancesAllocator, AnimaAllocator
 	 *	\author		Zille Marco
 	 */
-	inline AnimaAllocator* GetModelInstancesAllocator() {
-		ANIMA_ASSERT(_modelInstancesAllocator != nullptr);
-		return _modelInstancesAllocator;
+	inline AnimaAllocator* GetNodeInstancesAllocator() {
+		ANIMA_ASSERT(_nodeInstancesAllocator != nullptr);
+		return _nodeInstancesAllocator;
 	}
 	
 	/*!
-	 *	\brief		Torna l'allocator delle istanze delle mesh dei modelli 3D (classe AnimaMesh)
-	 *	\details	Torna l'allocator delle istanze delle mesh dei modelli 3D (classe AnimaMesh) effettuando anche un controllo che sia stato inizializzato
-	 *	\return		Il valore di _meshInstancesAllocator
-	 *	\sa			_meshInstancesAllocator, AnimaAllocator
+	 *	\brief		Torna l'allocator delle istanze delle geometry dei nodeli 3D (classe AnimaGeometry)
+	 *	\details	Torna l'allocator delle istanze delle geometry dei nodeli 3D (classe AnimaGeometry) effettuando anche un controllo che sia stato inizializzato
+	 *	\return		Il valore di _geometryInstancesAllocator
+	 *	\sa			_geometryInstancesAllocator, AnimaAllocator
 	 *	\author		Zille Marco
 	 */
-	inline AnimaAllocator* GetMeshInstancesAllocator() {
-		ANIMA_ASSERT(_meshInstancesAllocator != nullptr);
-		return _meshInstancesAllocator;
+	inline AnimaAllocator* GetGeometryInstancesAllocator() {
+		ANIMA_ASSERT(_geometryInstancesAllocator != nullptr);
+		return _geometryInstancesAllocator;
 	}
 	
 	/*!
@@ -425,10 +425,10 @@ protected:
 	AnimaFreeListAllocator* _dataGeneratorsAllocator;	/*!< Allocator usato dalla classe AnimaDataGeneratorsManager, AnimaDataGenerator e derivate */
 	AnimaFreeListAllocator* _scenesAllocator;			/*!< Allocator usato dalla classe AnimaScenesManager e AnimaScene */
 	AnimaFreeListAllocator* _animationsAllocator;		/*!< Allocator usato dalla classe AnimaAnimationsManager e AnimaAnimation */
-	AnimaFreeListAllocator* _meshesAllocator;			/*!< Allocator usato dalla classe AnimaMeshesManager e AnimaMesh */
-	AnimaFreeListAllocator* _modelsAllocator;			/*!< Allocator usato dalla classe AnimaModelsManager e AnimaModel */
-	AnimaFreeListAllocator* _modelInstancesAllocator;	/*!< Allocator usato dalla classe AnimaModelInstancesManager e AnimaModelInstance */
-	AnimaFreeListAllocator* _meshInstancesAllocator;	/*!< Allocator usato dalla classe AnimaMeshInstancesManager e AnimaMeshInstance */
+	AnimaFreeListAllocator* _geometriesAllocator;			/*!< Allocator usato dalla classe AnimaGeometriesManager e AnimaGeometry */
+	AnimaFreeListAllocator* _nodesAllocator;			/*!< Allocator usato dalla classe AnimaNodesManager e AnimaNode */
+	AnimaFreeListAllocator* _nodeInstancesAllocator;	/*!< Allocator usato dalla classe AnimaNodeInstancesManager e AnimaNodeInstance */
+	AnimaFreeListAllocator* _geometryInstancesAllocator;	/*!< Allocator usato dalla classe AnimaGeometryInstancesManager e AnimaGeometryInstance */
 	AnimaFreeListAllocator* _parallelProgramsAllocator;	/*!< Allocator usato dalla classe AnimaParallelProgramsManager e AnimaParallelProgram */
 
 private:

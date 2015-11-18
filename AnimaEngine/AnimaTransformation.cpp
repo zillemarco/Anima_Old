@@ -9,7 +9,7 @@
 #include "AnimaTransformation.h"
 #include "AnimaMath.h"
 #include "AnimaSceneObject.h"
-#include "AnimaMeshInstance.h"
+#include "AnimaGeometryInstance.h"
 #include "AnimaXmlTranslators.h"
 
 #define _USE_MATH_DEFINES
@@ -27,7 +27,7 @@ AnimaTransformation::AnimaTransformation()
 
 	_transformationMatrix.SetIdentity();
 	_normalMatrix.SetIdentity();
-	_modelNodeTransformationMatrix.SetIdentity();
+	_animationGlobalIverseMatrix.SetIdentity();
 }
 
 AnimaTransformation::AnimaTransformation(const AnimaVertex3f& t, const AnimaVertex3f& r, const AnimaVertex3f& s)
@@ -36,7 +36,7 @@ AnimaTransformation::AnimaTransformation(const AnimaVertex3f& t, const AnimaVert
 	, _scale(s)
 {
 	_parentObject = nullptr;
-	_modelNodeTransformationMatrix.SetIdentity();
+	_animationGlobalIverseMatrix.SetIdentity();
 
 	UpdateMatrix();
 }
@@ -47,7 +47,7 @@ AnimaTransformation::AnimaTransformation(AFloat tx, AFloat ty, AFloat tz, AFloat
 	, _scale(sx, sy, sz)
 {
 	_parentObject = nullptr;
-	_modelNodeTransformationMatrix.SetIdentity();
+	_animationGlobalIverseMatrix.SetIdentity();
 
 	UpdateMatrix();
 }
@@ -58,7 +58,7 @@ AnimaTransformation::AnimaTransformation(const AnimaTransformation& src)
 	, _scale(src._scale)
 	, _transformationMatrix(src._transformationMatrix)
 	, _normalMatrix(src._normalMatrix)
-	, _modelNodeTransformationMatrix(src._modelNodeTransformationMatrix)
+	, _animationGlobalIverseMatrix(src._animationGlobalIverseMatrix)
 {
 	_parentObject = src._parentObject;
 }
@@ -69,7 +69,7 @@ AnimaTransformation::AnimaTransformation(AnimaTransformation&& src)
 	, _scale(src._scale)
 	, _transformationMatrix(src._transformationMatrix)
 	, _normalMatrix(src._normalMatrix)
-	, _modelNodeTransformationMatrix(src._modelNodeTransformationMatrix)
+	, _animationGlobalIverseMatrix(src._animationGlobalIverseMatrix)
 {
 	_parentObject = src._parentObject;
 }
@@ -87,7 +87,7 @@ AnimaTransformation& AnimaTransformation::operator=(const AnimaTransformation& s
 		_scale = src._scale;
 		_transformationMatrix = src._transformationMatrix;
 		_normalMatrix = src._normalMatrix;
-		_modelNodeTransformationMatrix = src._modelNodeTransformationMatrix;
+		_animationGlobalIverseMatrix = src._animationGlobalIverseMatrix;
 		_parentObject = src._parentObject;
 	}
 	
@@ -103,7 +103,7 @@ AnimaTransformation& AnimaTransformation::operator=(AnimaTransformation&& src)
 		_scale = src._scale;
 		_transformationMatrix = src._transformationMatrix;
 		_normalMatrix = src._normalMatrix;
-		_modelNodeTransformationMatrix = src._modelNodeTransformationMatrix;
+		_animationGlobalIverseMatrix = src._animationGlobalIverseMatrix;
 		_parentObject = src._parentObject;
 	}
 	
@@ -118,13 +118,13 @@ ptree AnimaTransformation::GetObjectTree() const
 	tree.add("AnimaTransformation.Rotation", _rotation);
 	tree.add("AnimaTransformation.Scale", _scale);
 
-	//	Non salvo più anche le matrici di trasfomazione della mesh e delle normali perchè le ricalcolo dai dati di
+	//	Non salvo più anche le matrici di trasfomazione della geometry e delle normali perchè le ricalcolo dai dati di
 	//	traslazione, rotaione e scala
 	//
 	//	tree.add("AnimaTransformation.TransformationMatrix", _transformationMatrix);
 	//	tree.add("AnimaTransformation.NormalMatrix", _normalMatrix);
 	
-	tree.add("AnimaTransformation.ModelNodeTransformationMatrix", _modelNodeTransformationMatrix);
+	tree.add("AnimaTransformation.AnimationGlobalInverseMatrix", _animationGlobalIverseMatrix);
 	
 	return tree;
 }
@@ -137,13 +137,13 @@ bool AnimaTransformation::ReadObject(const ptree& objectTree)
 		_rotation = objectTree.get<AnimaVertex3f>("AnimaTransformation.Rotation", AnimaVertex3f(0.0f));
 		_scale = objectTree.get<AnimaVertex3f>("AnimaTransformation.Scale", AnimaVertex3f(1.0f));
 		
-		//	Non leggo più anche le matrici di trasfomazione della mesh e delle normali perchè le ricalcolo dai dati di
+		//	Non leggo più anche le matrici di trasfomazione della geometry e delle normali perchè le ricalcolo dai dati di
 		//	traslazione, rotaione e scala
 		//
 		//	_transformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
 		//	_normalMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
 		
-		_modelNodeTransformationMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.Traslation", AnimaMatrix());
+		_animationGlobalIverseMatrix = objectTree.get<AnimaMatrix>("AnimaTransformation.AnimationGlobalInverseMatrix", AnimaMatrix());
 		
 		UpdateMatrix();
 	}
@@ -481,10 +481,10 @@ void AnimaTransformation::UpdateMatrix()
 	AnimaMatrix translationMatrix;
 	AnimaMatrix rotationMatrix;
 	
-//	if(_parentObject && _parentObject->IsOfClass(ANIMA_CLASS_NAME(AnimaMeshInstance)) && ((AnimaMeshInstance*)_parentObject)->GetPhysRigidBody())
+//	if(_parentObject && _parentObject->IsOfClass(ANIMA_CLASS_NAME(AnimaGeometryInstance)) && ((AnimaGeometryInstance*)_parentObject)->GetPhysRigidBody())
 //	{
 //		btTransform transform;
-//		((AnimaMeshInstance*)_parentObject)->GetPhysRigidBody()->getMotionState()->getWorldTransform(transform);
+//		((AnimaGeometryInstance*)_parentObject)->GetPhysRigidBody()->getMotionState()->getWorldTransform(transform);
 //		
 //		btVector3 origin = transform.getOrigin();
 //		btQuaternion rot = transform.getRotation();
@@ -500,7 +500,7 @@ void AnimaTransformation::UpdateMatrix()
 		translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
 		rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * (AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x));
 //	}
-	
+			
 	AnimaMatrix scaleMatrix = AnimaMatrix::MakeScale(_scale.x, _scale.y, _scale.z, 1.0f);
 	
 	_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
@@ -647,14 +647,14 @@ void AnimaTransformation::SetNormalMatrix(AFloat m[16])
 	}
 }
 
-void AnimaTransformation::SetModelNodeTransformationMatrix(const AnimaMatrix& m)
+void AnimaTransformation::SetAnimationGlobalInverseMatrix(const AnimaMatrix& m)
 {
-	_modelNodeTransformationMatrix = m;
+	_animationGlobalIverseMatrix = m;
 }
 
-void AnimaTransformation::SetModelNodeTransformationMatrix(AFloat m[16])
+void AnimaTransformation::SetAnimationGlobalInverseMatrix(AFloat m[16])
 {
-	_modelNodeTransformationMatrix.Fill(m);
+	_animationGlobalIverseMatrix.Fill(m);
 }
 
 AnimaMatrix AnimaTransformation::GetTransformationMatrix()
@@ -677,14 +677,14 @@ AnimaMatrix* AnimaTransformation::GetPNormalMatrix()
 	return &_normalMatrix;
 }
 
-AnimaMatrix	AnimaTransformation::GetModelNodeTransformationMatrix()
+AnimaMatrix	AnimaTransformation::GetAnimationGlobalInverseMatrix()
 {
-	return _modelNodeTransformationMatrix;
+	return _animationGlobalIverseMatrix;
 }
 
-AnimaMatrix* AnimaTransformation::GetPTModelNoderansformationMatrix()
+AnimaMatrix* AnimaTransformation::GetPAnimationGlobalInverseMatrix()
 {
-	return &_modelNodeTransformationMatrix;
+	return &_animationGlobalIverseMatrix;
 }
 
 AnimaSceneObject* AnimaTransformation::GetParentObject() const

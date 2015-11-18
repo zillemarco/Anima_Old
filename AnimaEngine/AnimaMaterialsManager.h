@@ -55,7 +55,7 @@ public:
 	bool FinalizeObjectsAfterRead();
 
 public:
-	bool LoadMaterialsFromModel(const aiScene* scene, const AnimaString& modelName);
+	bool LoadMaterialsFromNode(const aiScene* scene, const AnimaString& nodeName);
 	AnimaArray<AnimaString>* GetLastMaterialsIndexMap();
 	void ClearLastMaterialsIndexMap();
 	

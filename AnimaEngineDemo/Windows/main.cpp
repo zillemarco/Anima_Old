@@ -7,28 +7,28 @@
 // AnimaEngine includes
 #include <AnimaGC.h>
 #include <AnimaEngine.h>
-#include <AnimaModelsManager.h>
+#include <AnimaNodesManager.h>
 #include <AnimaScenesManager.h>
 #include <AnimaMaterialsManager.h>
 #include <AnimaShadersManager.h>
 #include <AnimaCamerasManager.h>
 #include <AnimaAnimationsManager.h>
-#include <AnimaModelInstancesManager.h>
+#include <AnimaNodeInstancesManager.h>
 #include <AnimaMaterialsManager.h>
-#include <AnimaMeshesManager.h>
+#include <AnimaGeometriesManager.h>
 #include <AnimaLightsManager.h>
 #include <AnimaTexturesManager.h>
 #include <AnimaParallelProgramsManager.h>
 
 #include <AnimaScene.h>
-#include <AnimaModel.h>
-#include <AnimaMesh.h>
+#include <AnimaNode.h>
+#include <AnimaGeometry.h>
 #include <AnimaShaderProgram.h>
 #include <AnimaRenderer.h>
 #include <AnimaFirstPersonCamera.h>
 #include <AnimaAnimation.h>
 #include <AnimaTimer.h>
-#include <AnimaModelInstance.h>
+#include <AnimaNodeInstance.h>
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
@@ -41,7 +41,7 @@
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
-#define ANIMA_ENGINE_DEMO_MODEL_NAME "AnimaEngineDemoModel"
+#define ANIMA_ENGINE_DEMO_NODES_NAME "AnimaEngineDemoNode"
 
 //#define DATA_PATH				"data"
 #if defined SAVE_SCENE
@@ -57,8 +57,8 @@ Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
 Anima::AnimaCamerasManager* _camerasManager = nullptr;
 Anima::AnimaCamera* _camera = nullptr;
-Anima::AnimaModel* _model = nullptr;
-Anima::AnimaModel* _floorModel = nullptr;
+Anima::AnimaNode* _node = nullptr;
+Anima::AnimaNode* _floorNode = nullptr;
 Anima::AnimaAnimationsManager* _animationsManager = nullptr;
 Anima::AnimaRenderer* _renderer = nullptr;
 Anima::AnimaEngine _engine;
@@ -258,7 +258,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 							if (RayCallback.hasHit())
 							{
-								Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+								Anima::AnimaGeometryInstance* instance = (Anima::AnimaGeometryInstance*)RayCallback.m_collisionObject->getUserPointer();
 								Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
 
 								Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
@@ -523,11 +523,11 @@ bool InitEngine()
 
 	Anima::AnimaString dataPath = DATA_PATH;
 	Anima::AnimaString materialsPath = dataPath + "/materials";
-	Anima::AnimaString modelPath = dataPath + "/models/";
-	Anima::AnimaString modelName = "material2.3ds";
+	Anima::AnimaString nodePath = dataPath + "/nodes/";
+	Anima::AnimaString nodeName = "material2.3ds";
 	Anima::AnimaString materialName = "legno";
-	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
-	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
+	Anima::AnimaString sceneNodesPath = nodePath + "scene_nodes/";
+	Anima::AnimaString sceneGeometriesPath = nodePath + "scene_nodes/";
 
 	// Creazione della scena
 #if defined SAVE_SCENE
@@ -549,7 +549,7 @@ bool InitEngine()
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
+	Anima::AnimaNodeInstancesManager* nodeInstancesManager = _scene->GetNodeInstancesManager();
 #if defined SAVE_SCENE
 	if (!materialsManager->LoadMaterials(materialsPath))
 		return false;
@@ -566,112 +566,112 @@ bool InitEngine()
 #endif
 	
 #if defined SAVE_SCENE
-	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
-	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+	_scene->GetGeometriesManager()->LoadGeometries(sceneGeometriesPath);
+	_scene->GetNodesManager()->LoadNodes(sceneNodesPath);
 #endif
 
 #if defined SAVE_SCENE
-	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
-	if (!_model)
+	_node = _scene->GetNodesManager()->GetNodeFromName("AnimaEngineDemoNode");
+	if (!_node)
 		return false;
 
-	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
-	if (!_floorModel)
+	_floorNode = _scene->GetNodesManager()->GetNodeFromName("floorNode");
+	if (!_floorNode)
 		return false;
 	
 	// Creo le istanze del pavimento e imposto i loro materiali
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
+	Anima::AnimaArray<Anima::AnimaGeometryInstance*> floorNodeInstanceGeometries;
 
-	Anima::AnimaModelInstance* floorModelInstance1 = modelInstancesManager->CreateInstance("floorModelInstance1", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance2 = modelInstancesManager->CreateInstance("floorModelInstance2", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
+	Anima::AnimaNodeInstance* floorNodeInstance1 = nodeInstancesManager->CreateInstance("floorNodeInstance1", _floorNode);
+	Anima::AnimaNodeInstance* floorNodeInstance2 = nodeInstancesManager->CreateInstance("floorNodeInstance2", _floorNode);
+	Anima::AnimaNodeInstance* floorNodeInstance3 = nodeInstancesManager->CreateInstance("floorNodeInstance3", _floorNode);
+	Anima::AnimaNodeInstance* floorNodeInstance4 = nodeInstancesManager->CreateInstance("floorNodeInstance4", _floorNode);
 
-	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
-	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
+	floorNodeInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorNodeInstance1->GetTransformation()->SetRotationXDeg(-90);
+	floorNodeInstance1->GetTransformation()->SetRotationYDeg(-90);
+	floorNodeInstance1->GetAllGeometries(&floorNodeInstanceGeometries);
 
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
+		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-	floorModelInstanceMeshes.clear();
-	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance2->GetTransformation()->TranslateX(3);
-	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
-	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
+	floorNodeInstanceGeometries.clear();
+	floorNodeInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorNodeInstance2->GetTransformation()->TranslateX(3);
+	floorNodeInstance2->GetTransformation()->SetRotationXDeg(-90);
+	floorNodeInstance2->GetTransformation()->SetRotationYDeg(-90);
+	floorNodeInstance2->GetAllGeometries(&floorNodeInstanceGeometries);
 
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
+		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-	floorModelInstanceMeshes.clear();
-	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance3->GetTransformation()->TranslateZ(3);
-	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
-	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
+	floorNodeInstanceGeometries.clear();
+	floorNodeInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorNodeInstance3->GetTransformation()->TranslateZ(3);
+	floorNodeInstance3->GetTransformation()->SetRotationXDeg(-90);
+	floorNodeInstance3->GetTransformation()->SetRotationYDeg(-270);
+	floorNodeInstance3->GetAllGeometries(&floorNodeInstanceGeometries);
 
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
+		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
-	floorModelInstanceMeshes.clear();
-	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance4->GetTransformation()->TranslateX(3);
-	floorModelInstance4->GetTransformation()->TranslateZ(3);
-	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
-	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
+	floorNodeInstanceGeometries.clear();
+	floorNodeInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	floorNodeInstance4->GetTransformation()->TranslateX(3);
+	floorNodeInstance4->GetTransformation()->TranslateZ(3);
+	floorNodeInstance4->GetTransformation()->SetRotationXDeg(-90);
+	floorNodeInstance4->GetTransformation()->SetRotationYDeg(-270);
+	floorNodeInstance4->GetAllGeometries(&floorNodeInstanceGeometries);
 
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
+		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
 
 	// Creo le istanze degli oggetti applicando i materiali
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+	Anima::AnimaArray<Anima::AnimaGeometryInstance*> nodeInstanceGeometries;
 
-	Anima::AnimaModelInstance* modelInstanceOro = modelInstancesManager->CreateInstance("modelInstanceOro", _model);
-	Anima::AnimaModelInstance* modelInstanceRame = modelInstancesManager->CreateInstance("modelInstanceRame", _model);
-	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
-	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
+	Anima::AnimaNodeInstance* nodeInstanceOro = nodeInstancesManager->CreateInstance("nodeInstanceOro", _node);
+	Anima::AnimaNodeInstance* nodeInstanceRame = nodeInstancesManager->CreateInstance("nodeInstanceRame", _node);
+	Anima::AnimaNodeInstance* nodeInstanceGomma = nodeInstancesManager->CreateInstance("nodeInstanceGomma", _node);
+	Anima::AnimaNodeInstance* nodeInstanceLegno = nodeInstancesManager->CreateInstance("nodeInstanceLegno", _node);
 
-	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
-	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
+	nodeInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	nodeInstanceOro->GetTransformation()->SetRotationXDeg(-90);
+	nodeInstanceOro->GetTransformation()->SetRotationYDeg(0);
+	nodeInstanceOro->GetAllGeometries(&nodeInstanceGeometries);
 
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
+	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
+		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
 
-	modelInstanceMeshes.clear();
-	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceRame->GetTransformation()->TranslateX(3);
-	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
-	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
+	nodeInstanceGeometries.clear();
+	nodeInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	nodeInstanceRame->GetTransformation()->TranslateX(3);
+	nodeInstanceRame->GetTransformation()->SetRotationXDeg(-90);
+	nodeInstanceRame->GetTransformation()->SetRotationYDeg(0);
+	nodeInstanceRame->GetAllGeometries(&nodeInstanceGeometries);
 
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
+	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
+		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
 
-	modelInstanceMeshes.clear();
-	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceGomma->GetTransformation()->TranslateZ(3);
-	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
-	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
+	nodeInstanceGeometries.clear();
+	nodeInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	nodeInstanceGomma->GetTransformation()->TranslateZ(3);
+	nodeInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
+	nodeInstanceGomma->GetTransformation()->SetRotationYDeg(180);
+	nodeInstanceGomma->GetAllGeometries(&nodeInstanceGeometries);
 
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
+	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
+		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
 
-	modelInstanceMeshes.clear();
-	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceLegno->GetTransformation()->TranslateX(3);
-	modelInstanceLegno->GetTransformation()->TranslateZ(3);
-	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
-	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
+	nodeInstanceGeometries.clear();
+	nodeInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	nodeInstanceLegno->GetTransformation()->TranslateX(3);
+	nodeInstanceLegno->GetTransformation()->TranslateZ(3);
+	nodeInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
+	nodeInstanceLegno->GetTransformation()->SetRotationYDeg(180);
+	nodeInstanceLegno->GetAllGeometries(&nodeInstanceGeometries);
 
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
+	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
+		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
 
 	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
 #endif

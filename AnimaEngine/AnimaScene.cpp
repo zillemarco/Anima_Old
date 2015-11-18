@@ -7,17 +7,17 @@
 //
 
 #include "AnimaScene.h"
-#include "AnimaModelsManager.h"
+#include "AnimaNodesManager.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaDataGeneratorsManager.h"
 #include "AnimaMaterialsManager.h"
 #include "AnimaLightsManager.h"
-#include "AnimaModelInstancesManager.h"
-#include "AnimaMeshInstancesManager.h"
+#include "AnimaNodeInstancesManager.h"
+#include "AnimaGeometryInstancesManager.h"
 #include "AnimaAnimationsManager.h"
-#include "AnimaMeshInstance.h"
+#include "AnimaGeometryInstance.h"
 #include "AnimaScenesManager.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -33,10 +33,10 @@ AnimaScene::AnimaScene(AnimaEngine* engine, const AnimaString& name)
 	_engine = engine;
 	_allocator = _engine->GetScenesAllocator();
 	
-	_modelsManager = nullptr;
-	_meshesManager = nullptr;
-	_modelInstancesManager = nullptr;
-	_meshInstancesManager = nullptr;
+	_nodesManager = nullptr;
+	_geometriesManager = nullptr;
+	_nodeInstancesManager = nullptr;
+	_geometryInstancesManager = nullptr;
 	
 	_camerasManager = nullptr;
 	_texturesManager = nullptr;
@@ -67,10 +67,10 @@ AnimaScene::AnimaScene(const AnimaScene& src)
 {
 	_engine = src._engine;
 
-	_modelsManager = src._modelsManager;
-	_meshesManager = src._meshesManager;
-	_modelInstancesManager = src._modelInstancesManager;
-	_meshInstancesManager = src._meshInstancesManager;
+	_nodesManager = src._nodesManager;
+	_geometriesManager = src._geometriesManager;
+	_nodeInstancesManager = src._nodeInstancesManager;
+	_geometryInstancesManager = src._geometryInstancesManager;
 
 	_camerasManager = src._camerasManager;
 	_texturesManager = src._texturesManager;
@@ -95,10 +95,10 @@ AnimaScene::AnimaScene(AnimaScene&& src)
 {
 	_engine = src._engine;
 
-	_modelsManager = src._modelsManager;
-	_meshesManager = src._meshesManager;
-	_modelInstancesManager = src._modelInstancesManager;
-	_meshInstancesManager = src._meshInstancesManager;
+	_nodesManager = src._nodesManager;
+	_geometriesManager = src._geometriesManager;
+	_nodeInstancesManager = src._nodeInstancesManager;
+	_geometryInstancesManager = src._geometryInstancesManager;
 
 	_camerasManager = src._camerasManager;
 	_texturesManager = src._texturesManager;
@@ -135,10 +135,10 @@ AnimaScene& AnimaScene::operator=(const AnimaScene& src)
 
 		_engine = src._engine;
 
-		_modelsManager = src._modelsManager;
-		_meshesManager = src._meshesManager;
-		_modelInstancesManager = src._modelInstancesManager;
-		_meshInstancesManager = src._meshInstancesManager;
+		_nodesManager = src._nodesManager;
+		_geometriesManager = src._geometriesManager;
+		_nodeInstancesManager = src._nodeInstancesManager;
+		_geometryInstancesManager = src._geometryInstancesManager;
 
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
@@ -172,10 +172,10 @@ AnimaScene& AnimaScene::operator=(AnimaScene&& src)
 
 		_engine = src._engine;
 
-		_modelsManager = src._modelsManager;
-		_meshesManager = src._meshesManager;
-		_modelInstancesManager = src._modelInstancesManager;
-		_meshInstancesManager = src._meshInstancesManager;
+		_nodesManager = src._nodesManager;
+		_geometriesManager = src._geometriesManager;
+		_nodeInstancesManager = src._nodeInstancesManager;
+		_geometryInstancesManager = src._geometryInstancesManager;
 
 		_camerasManager = src._camerasManager;
 		_texturesManager = src._texturesManager;
@@ -210,36 +210,36 @@ void AnimaScene::InitializeManagers()
 	_materialsManager = AnimaAllocatorNamespace::AllocateNew<AnimaMaterialsManager>(*_engine->GetManagersAllocator(), this, _texturesManager);
 	_animationsManager = AnimaAllocatorNamespace::AllocateNew<AnimaAnimationsManager>(*_engine->GetManagersAllocator(), this);
 	
-	_meshesManager = AnimaAllocatorNamespace::AllocateNew<AnimaMeshesManager>(*_engine->GetManagersAllocator(), this, _materialsManager);
-	_modelsManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelsManager>(*_engine->GetManagersAllocator(), this, _meshesManager, _materialsManager, _animationsManager);
-	_meshInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaMeshInstancesManager>(*_engine->GetManagersAllocator(), this, _meshesManager);
-	_modelInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaModelInstancesManager>(*_engine->GetManagersAllocator(), this, _modelsManager, _meshInstancesManager);
+	_geometriesManager = AnimaAllocatorNamespace::AllocateNew<AnimaGeometriesManager>(*_engine->GetManagersAllocator(), this, _materialsManager);
+	_nodesManager = AnimaAllocatorNamespace::AllocateNew<AnimaNodesManager>(*_engine->GetManagersAllocator(), this, _geometriesManager, _materialsManager, _animationsManager);
+	_geometryInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaGeometryInstancesManager>(*_engine->GetManagersAllocator(), this, _geometriesManager);
+	_nodeInstancesManager = AnimaAllocatorNamespace::AllocateNew<AnimaNodeInstancesManager>(*_engine->GetManagersAllocator(), this, _nodesManager, _geometryInstancesManager);
 }
 
 void AnimaScene::TerminateManagers()
 {
-	if (_modelsManager != nullptr)
+	if (_nodesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _modelsManager);
-		_modelsManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _nodesManager);
+		_nodesManager = nullptr;
 	}
 
-	if (_meshesManager != nullptr)
+	if (_geometriesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _meshesManager);
-		_meshesManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _geometriesManager);
+		_geometriesManager = nullptr;
 	}
 
-	if (_modelInstancesManager != nullptr)
+	if (_nodeInstancesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _modelInstancesManager);
-		_modelInstancesManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _nodeInstancesManager);
+		_nodeInstancesManager = nullptr;
 	}
 
-	if (_meshInstancesManager != nullptr)
+	if (_geometryInstancesManager != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _meshInstancesManager);
-		_meshInstancesManager = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_engine->GetManagersAllocator(), _geometryInstancesManager);
+		_geometryInstancesManager = nullptr;
 	}
 
 	if (_camerasManager != nullptr)
@@ -329,10 +329,10 @@ void AnimaScene::InitializePhysicObjects()
 {
 	if(_physWorld != nullptr)
 	{
-		AInt count = _meshInstancesManager->GetMeshInstancesCount();
+		AInt count = _geometryInstancesManager->GetGeometryInstancesCount();
 		for(AInt i = 0; i < count; i++)
 		{
-			AnimaMeshInstance* instance = _meshInstancesManager->GetMeshInstance(i);
+			AnimaGeometryInstance* instance = _geometryInstancesManager->GetGeometryInstance(i);
 			instance->InitializePhysicData();
 			
 			if(instance->GetPhysRigidBody() != nullptr)
@@ -390,9 +390,9 @@ void AnimaScene::StepScene()
 	if(_dataGeneratorManager != nullptr)
 		_dataGeneratorManager->UpdateValues(elapsedTime);
 	
-	AInt count = _meshInstancesManager->GetMeshInstancesCount();
+	AInt count = _geometryInstancesManager->GetGeometryInstancesCount();
 	for(AInt i = 0; i < count; i++)
-		_meshInstancesManager->GetMeshInstance(i)->GetTransformation()->UpdateMatrix();
+		_geometryInstancesManager->GetGeometryInstance(i)->GetTransformation()->UpdateMatrix();
 	
 	_camerasManager->UpdateCameras(elapsedTime);
 	

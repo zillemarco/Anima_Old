@@ -7,7 +7,7 @@
 #include "AnimaShader.h"
 #include "AnimaVertex.h"
 #include "AnimaMatrix.h"
-#include "AnimaMesh.h"
+#include "AnimaGeometry.h"
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaCamera.h"
@@ -79,7 +79,7 @@ public:
 public:
 	void ScanVariables();
 
-	void EnableInputs(AnimaMesh* mesh);
+	void EnableInputs(AnimaGeometry* geometry);
 	void EnableInputs(AnimaPhysicsDebugDrawer* drawer);
 	void EnableInput(const AnimaString& inputName, AInt size, AUint type, AUint buffer);
 	void DisableInputs();

@@ -15,7 +15,7 @@
 #include "AnimaTypes.h"
 #include "AnimaMappedArray.h"
 #include "AnimaMappedValues.h"
-#include "AnimaMesh.h"
+#include "AnimaGeometry.h"
 #include "AnimaNamedObject.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -24,11 +24,11 @@ class AnimaAnimationPositionKey;
 class AnimaAnimationRotationKey;
 class AnimaAnimationScalingKey;
 class AnimaAnimationNode;
-class AnimaModel;
+class AnimaNode;
 
 /*!
- *	\brief		Classe usata per memorizzare le informazioni su animazioni con scheletro e per poi applicarle ai modelli
- *	\details	Classe usata per memorizzare le informazioni su animazioni con scheletro e per poi applicarle ai modelli
+ *	\brief		Classe usata per memorizzare le informazioni su animazioni con scheletro e per poi applicarle ai nodeli
+ *	\details	Classe usata per memorizzare le informazioni su animazioni con scheletro e per poi applicarle ai nodeli
  *	\author		Zille Marco
  */
 class ANIMA_ENGINE_EXPORT AnimaAnimation : public AnimaNamedObject
@@ -85,26 +85,26 @@ public:
 	
 public:
 	/*!
-	 *	\brief		Funzione usata per calcolare le matrici di trasformazione per applicare l'animazione dal modello passato in input
-	 *	\details	Funzione usata per calcolare le matrici di trasformazione per applicare l'animazione dal modello passato in input
-	 *	\param[in]	model	Puntatore ad un'istanza della classe AnimaModel contenente i dati del modello a cui si vuole applicare l'animazione
-	 *	\param[in]	time	Indica il momento dell'animazione da applicare al modello
+	 *	\brief		Funzione usata per calcolare le matrici di trasformazione per applicare l'animazione dal nodelo passato in input
+	 *	\details	Funzione usata per calcolare le matrici di trasformazione per applicare l'animazione dal nodelo passato in input
+	 *	\param[in]	node	Puntatore ad un'istanza della classe AnimaNode contenente i dati del nodelo a cui si vuole applicare l'animazione
+	 *	\param[in]	time	Indica il momento dell'animazione da applicare al nodelo
 	 *	\author		Zille Marco
 	 */
-	void UpdateAnimation(AnimaModel* model, AFloat time);
+	void UpdateAnimation(AnimaNode* node, AFloat time);
 
 protected:
 	/*!
-	 *	\brief			Vera e propria funzione che si occupa di calcolare le matrici di trasformazione per applicare l'animazione ad un modello
-	 *	\details		Vera e propria funzione che si occupa di calcolare le matrici di trasformazione per applicare l'animazione ad un modello
-	 *	\param[in]		model				Puntatore ad un'istanza della classe AnimaModel contenente i dati del modello a cui si vuole applicare l'animazione
-	 *	\param[in]		animationTime		Indica il momento dell'animazione da applicare al modello
-	 *	\param[in]		parentMatrix		Matrice che indica la trasformazione applicata al modello padre di quello attuale (model)
-	 *	\param[in]		globalInverseMatrix	Matrice utilizzata per trasformare il modello attuale (model) nel sistema di riferimento del modello principale
-	 *	\param[in,out]	mesheBonesInfo		Array che alla fine del processo di calcolo dell'animazione conterrà tutte le matrici da applicare alle varie mesh del modello
+	 *	\brief			Vera e propria funzione che si occupa di calcolare le matrici di trasformazione per applicare l'animazione ad un nodelo
+	 *	\details		Vera e propria funzione che si occupa di calcolare le matrici di trasformazione per applicare l'animazione ad un nodelo
+	 *	\param[in]		node				Puntatore ad un'istanza della classe AnimaNode contenente i dati del nodelo a cui si vuole applicare l'animazione
+	 *	\param[in]		animationTime		Indica il momento dell'animazione da applicare al nodelo
+	 *	\param[in]		parentMatrix		Matrice che indica la trasformazione applicata al nodelo padre di quello attuale (node)
+	 *	\param[in]		globalInverseMatrix	Matrice utilizzata per trasformare il nodelo attuale (node) nel sistema di riferimento del nodelo principale
+	 *	\param[in,out]	geometryeBonesInfo		Array che alla fine del processo di calcolo dell'animazione conterrà tutte le matrici da applicare alle varie geometry del nodelo
 	 *	\author			Zille Marco
 	 */
-	void UpdateModelNodesAnimation(AnimaModel* model, AFloat animationTime, const AnimaMatrix& parentMatrix, const AnimaMatrix& globalInverseMatrix, AnimaMappedArray<AnimaMeshBoneInfo*>* mesheBonesInfo);
+	void UpdateNodeNodesAnimation(AnimaNode* node, AFloat animationTime, const AnimaMatrix& parentMatrix, const AnimaMatrix& globalInverseMatrix, AnimaMappedArray<AnimaGeometryBoneInfo*>* geometryeBonesInfo);
 
 public:
 	/*!

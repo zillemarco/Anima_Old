@@ -7,7 +7,7 @@
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
 #include "AnimaArray.h"
-#include "AnimaMesh.h"
+#include "AnimaGeometry.h"
 #include "AnimaMaterial.h"
 #include "AnimaLight.h"
 #include "AnimaShaderProgram.h"
@@ -15,10 +15,10 @@
 #include "AnimaGBuffer.h"
 #include "AnimaFrustum.h"
 #include "AnimaMatrix.h"
-#include "AnimaMeshInstance.h"
-#include "AnimaModel.h"
-#include "AnimaModelInstance.h"
-#include "AnimaRendererDrawableMesh.h"
+#include "AnimaGeometryInstance.h"
+#include "AnimaNode.h"
+#include "AnimaNodeInstance.h"
+#include "AnimaRendererDrawableGeometry.h"
 #include "AnimaPhysicsDebugDrawer.h"
 
 #include <boost/multi_index_container.hpp>
@@ -51,34 +51,34 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 //	void SetType(AUint type);
 //	AUint GetType();
 //	
-//	void SetModelMatrix(const AnimaMatrix& modelMatrix);
-//	AnimaMatrix GetModelMatrix();
+//	void SetNodeMatrix(const AnimaMatrix& nodeMatrix);
+//	AnimaMatrix GetNodeMatrix();
 //	
 //protected:
 //	AnimaArray<AnimaVertex3f>	_vertices;
 //	AnimaArray<AUint>			_indices;
 //	AnimaColor4f				_color;
 //	AUint						_type;
-//	AnimaMatrix					_modelMatrix;
+//	AnimaMatrix					_nodeMatrix;
 //};
 
 struct AnimaRendererMaterialInstances
 {
 	AnimaMaterial* _material;
-	AnimaArray<AnimaMeshInstance*> _instances;
+	AnimaArray<AnimaGeometryInstance*> _instances;
 };
 
-struct AnimaRendererMeshInstances
+struct AnimaRendererGeometryInstances
 {
-	AnimaMesh* _mesh;
-	AnimaArray<AnimaMeshInstance*> _instances;
+	AnimaGeometry* _geometry;
+	AnimaArray<AnimaGeometryInstance*> _instances;
 };
 
 struct AnimaRendererProgramData
 {
 	AnimaShaderProgram* _program;
 	AnimaArray<AnimaRendererMaterialInstances> _materials;	/*!< Usato se il programma NON supporta le istanze */
-	AnimaArray<AnimaRendererMeshInstances> _meshes;			/*!< Usato se il programma supporta le istanze */
+	AnimaArray<AnimaRendererGeometryInstances> _geometries;			/*!< Usato se il programma supporta le istanze */
 };
 
 class AnimaEngine;
@@ -107,8 +107,8 @@ public:
 	AnimaScene* GetActiveScene() { return _scene; }
 
 	virtual void Render();
-	//virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType);
-	virtual void UpdateModelsVisibility();
+	//virtual void AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix nodeMatrix, AUint primitiveType);
+	virtual void UpdateNodesVisibility();
 	
 public:
 	virtual void InitTextureSlots();
@@ -127,26 +127,26 @@ protected:
 	virtual void DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLights);
 	virtual void PointLightsPass(AnimaArray<AnimaLight*>* pointLights);
 	
-	virtual void DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
+	virtual void DrawGeometry(AnimaGeometry* geometry, AnimaShaderProgram* program, bool updateMaterial = true, bool forceDraw = false, AnimaFrustum* frustum = nullptr, bool useInstances = true);
 
-	void BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes, AnimaCamera* camera);
-	AInt FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances, AnimaShaderProgram* program);
+	void BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableGeometry>* drawableGeometries, AnimaCamera* camera);
+	AInt FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableGeometryInstances>* drawableGeometryInstances, AnimaShaderProgram* program);
 
 	// Funzioni usate dal prepare pass
 	void BuildProgramsData(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
 	AInt FindProgramData(AnimaArray<AnimaRendererProgramData>* programs, AnimaShaderProgram* program);
 
 	AInt FindMaterialInstances(AnimaArray<AnimaRendererMaterialInstances>* materials, AnimaMaterial* material);
-	AInt FindMeshInstances(AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaMesh* mesh);
+	AInt FindGeometryInstances(AnimaArray<AnimaRendererGeometryInstances>* geometries, AnimaGeometry* geometry);
 
 	void SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgramData>* programs, AnimaCamera* camera);
-	void SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaCamera* camera);
+	void SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererGeometryInstances* geometryInstances, AnimaCamera* camera);
 
 	// Funzioni usate da update shadow map pass
-	void BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>* meshes);
+	void BuildShadowMapGeometries(AnimaArray<AnimaRendererGeometryInstances>* geometries);
 
-	void SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaLight* light);
-	void SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaLight* light);
+	void SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererGeometryInstances>* geometries, AnimaLight* light);
+	void SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererGeometryInstances* geometryInstances, AnimaLight* light);
 
 protected:
 	static void PreparePass(AnimaRenderer* renderer);
@@ -169,10 +169,10 @@ protected:
 	void ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaGBuffer* dst);
 	void ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterProgram, AnimaGBuffer* src, AnimaTexture* dst);
 
-	void UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix);
+	void UpdateNodeVisibility(AnimaFrustum* frustum, AnimaGeometry* geometry, AnimaMatrix parentGeometryMatrix);
 
 protected:
-	template<class T> AnimaMesh* CreateMeshForLightType();
+	template<class T> AnimaGeometry* CreateGeometryForLightType();
 
 	void SetTextureSlot(AnimaString slotName, AUint value);	
 	void SetGBuffer(const AnimaString& name, AnimaGBuffer* value, bool deleteExistent = true);
@@ -225,7 +225,7 @@ protected:
 	AnimaScene*		_scene;
 	AnimaEngine*	_engine;
 
-	AnimaMesh*		_filterMesh;
+	AnimaGeometry*		_filterGeometry;
 	AnimaCamera*	_filterCamera;
 
 	//AnimaArray<AnimaPrimitiveData*> _primitives;
@@ -233,8 +233,8 @@ protected:
 	//AUint _verticesBufferObject;
 	//AUint _indexesBufferObject;
 	
-	AnimaModel* _lastUpdatedModel;
-	AnimaModelInstance* _lastUpdatedModelInstance;
+	AnimaNode* _lastUpdatedNode;
+	AnimaNodeInstance* _lastUpdatedNodeInstance;
 
 	AnimaArray<AnimaRenderPassFunc> _renderPassesFunction;
 
@@ -259,25 +259,25 @@ protected:
 	boost::unordered_map<AnimaString, AInt, AnimaStringHasher>		_integersMap;
 	boost::unordered_map<AnimaString, bool, AnimaStringHasher>		_booleansMap;
 
-	boost::unordered_map<AnimaString, AnimaMesh*, AnimaStringHasher>	_meshesMap;
+	boost::unordered_map<AnimaString, AnimaGeometry*, AnimaStringHasher>	_geometriesMap;
 #pragma warning (default: 4251)
 };
 
 template<class T> 
-AnimaMesh* AnimaRenderer::CreateMeshForLightType()
+AnimaGeometry* AnimaRenderer::CreateGeometryForLightType()
 {
 	AnimaString type = ANIMA_CLASS_NAME(T);
 
-	auto pair = _meshesMap.find(type);
-	if (pair != _meshesMap.end())
+	auto pair = _geometriesMap.find(type);
+	if (pair != _geometriesMap.end())
 		return pair->second;
 
-	AnimaString name = type + "_LIGHT_RENMESH";
+	AnimaString name = type + "_LIGHT_RENGEOMETRY";
 
-	AnimaMesh* lightMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
-	_meshesMap[type] = lightMesh;
+	AnimaGeometry* lightGeometry = AnimaAllocatorNamespace::AllocateNew<AnimaGeometry>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
+	_geometriesMap[type] = lightGeometry;
 
-	return lightMesh;
+	return lightGeometry;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

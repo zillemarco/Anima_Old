@@ -11,7 +11,7 @@ add_definitions(-DANIMA_ENGINE_EXPORT_ENABLED)
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 add_definitions(-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0)
 
-set(ANIMA_ENGINE_MODELS_PATH "${PROJECT_SOURCE_DIR}/data/models/")
+set(ANIMA_ENGINE_NODES_PATH "${PROJECT_SOURCE_DIR}/data/nodes/")
 set(ANIMA_ENGINE_SHADERS_PATH "${PROJECT_SOURCE_DIR}/data/shaders/")
 set(ANIMA_ENGINE_TEXTURES_PATH "${PROJECT_SOURCE_DIR}/data/textures/")
 
@@ -28,8 +28,8 @@ set(common_HEADERS	AnimaEngineCore.h
                     AnimaPoolAllocator.h
                     AnimaProxyAllocator.h
                     AnimaVertex.h
-                    AnimaModelsManager.h
-                    AnimaMesh.h
+                    AnimaNodesManager.h
+                    AnimaGeometry.h
                     AnimaFace.h
                     AnimaTimer.h
                     AnimaMaterial.h
@@ -58,18 +58,18 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaScenesManager.h
 					AnimaGBuffer.h
 					AnimaFPSTimer.h
-					AnimaMeshCreator.h
+					AnimaGeometryCreator.h
 					AnimaSceneObject.h
 					AnimaArray.h
 					AnimaFrustum.h
 					AnimaMappedArray.h
 					AnimaTypeMappedArray.h
-					AnimaMeshesManager.h
-					AnimaModelInstancesManager.h
-					AnimaModel.h
-					AnimaModelInstance.h
-					AnimaMeshInstance.h
-					AnimaMeshInstancesManager.h
+					AnimaGeometriesManager.h
+					AnimaNodeInstancesManager.h
+					AnimaNode.h
+					AnimaNodeInstance.h
+					AnimaGeometryInstance.h
+					AnimaGeometryInstancesManager.h
 					AnimaAnimation.h
 					AnimaAnimationsManager.h
 					AnimaNamedObject.h
@@ -78,8 +78,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMD5.h
 					AnimaTextureGenerator.h
 					AnimaShaderData.h
-					AnimaRendererDrawableMesh.h
-					AnimaRendererDrawableMeshInstances.h
+					AnimaRendererDrawableGeometry.h
+					AnimaRendererDrawableGeometryInstances.h
 					AnimaShaderInclude.h
 					AnimaShaderGroupData.h
 					AnimaLogger.h
@@ -104,8 +104,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
                     AnimaPoolAllocator.cpp
                     AnimaProxyAllocator.cpp
 					AnimaVertex.cpp
-                    AnimaModelsManager.cpp
-                    AnimaMesh.cpp
+                    AnimaNodesManager.cpp
+                    AnimaGeometry.cpp
                     AnimaFace.cpp
                     AnimaTimer.cpp
                     AnimaMaterial.cpp
@@ -134,18 +134,18 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaScenesManager.cpp
 					AnimaGBuffer.cpp
 					AnimaFPSTimer.cpp
-					AnimaMeshCreator.cpp
+					AnimaGeometryCreator.cpp
 					AnimaSceneObject.cpp
 					AnimaArray.cpp
 					AnimaFrustum.cpp
 					AnimaMappedArray.cpp
 					AnimaTypeMappedArray.cpp
-					AnimaMeshesManager.cpp
-					AnimaModelInstancesManager.cpp
-					AnimaModel.cpp
-					AnimaModelInstance.cpp
-					AnimaMeshInstance.cpp
-					AnimaMeshInstancesManager.cpp
+					AnimaGeometriesManager.cpp
+					AnimaNodeInstancesManager.cpp
+					AnimaNode.cpp
+					AnimaNodeInstance.cpp
+					AnimaGeometryInstance.cpp
+					AnimaGeometryInstancesManager.cpp
 					AnimaAnimation.cpp
 					AnimaAnimationsManager.cpp
 					AnimaNamedObject.cpp
@@ -153,8 +153,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaMD5.cpp
 					AnimaTextureGenerator.cpp
 					AnimaShaderData.cpp
-					AnimaRendererDrawableMesh.cpp
-					AnimaRendererDrawableMeshInstances.cpp
+					AnimaRendererDrawableGeometry.cpp
+					AnimaRendererDrawableGeometryInstances.cpp
 					AnimaShaderInclude.cpp
 					AnimaShaderGroupData.cpp
 					AnimaLogger.cpp
@@ -200,7 +200,7 @@ endif()
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h AnimaTools.h AnimaTools.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)
 
-source_group(Engine\\Managers FILES AnimaModelsManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaModelsManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaMeshesManager.h AnimaMeshesManager.cpp AnimaModelInstancesManager.h AnimaModelInstancesManager.cpp AnimaMeshInstancesManager.h AnimaMeshInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h AnimaParallelProgramsManager.h AnimaParallelProgramsManager.cpp)
+source_group(Engine\\Managers FILES AnimaNodesManager.h AnimaShadersManager.h AnimaCamerasManager.h AnimaTexturesManager.h AnimaDataGeneratorsManager.h AnimaMaterialsManager.h AnimaLightsManager.h AnimaScenesManager.h AnimaNodesManager.cpp AnimaShadersManager.cpp AnimaCamerasManager.cpp AnimaTexturesManager.cpp AnimaDataGeneratorsManager.cpp AnimaMaterialsManager.cpp AnimaLightsManager.cpp AnimaScenesManager.cpp AnimaGeometriesManager.h AnimaGeometriesManager.cpp AnimaNodeInstancesManager.h AnimaNodeInstancesManager.cpp AnimaGeometryInstancesManager.h AnimaGeometryInstancesManager.cpp AnimaAnimationsManager.cpp AnimaAnimationsManager.h AnimaParallelProgramsManager.h AnimaParallelProgramsManager.cpp)
 
 source_group(Engine\\DataStructures\\Arrays FILES AnimaArray.h AnimaMappedArray.h AnimaTypeMappedArray.h AnimaArray.cpp AnimaMappedArray.cpp AnimaTypeMappedArray.cpp)
 source_group(Engine\\DataStructures\\MappedValues FILES AnimaMappedValues.h AnimaMappedValues.cpp)
@@ -214,10 +214,10 @@ source_group(Engine\\Interfaces FILES IAnimaInteractor.h IAnimaInteractor.cpp IA
 source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultMouseInteractor.h AnimaDefaultMouseInteractor.cpp AnimaJoystickInteractor.h)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
-source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableMesh.h AnimaRendererDrawableMeshInstances.h AnimaRendererDrawableMesh.cpp AnimaRendererDrawableMeshInstances.cpp)
+source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableGeometry.h AnimaRendererDrawableGeometryInstances.h AnimaRendererDrawableGeometry.cpp AnimaRendererDrawableGeometryInstances.cpp)
 source_group(Engine\\Scene\\Data\\Animations FILES AnimaAnimation.cpp AnimaAnimation.h)
 source_group(Engine\\Scene\\Data\\Objects\\Cameras FILES AnimaCamera.h AnimaCamera.cpp)
-source_group(Engine\\Scene\\Data\\Objects\\Graphics FILES AnimaMesh.h AnimaMesh.cpp AnimaMeshCreator.h AnimaMeshCreator.cpp AnimaModel.h AnimaModel.cpp AnimaModelInstance.h AnimaModelInstance.cpp AnimaMeshInstance.h AnimaMeshInstance.cpp)
+source_group(Engine\\Scene\\Data\\Objects\\Graphics FILES AnimaGeometry.h AnimaGeometry.cpp AnimaGeometryCreator.h AnimaGeometryCreator.cpp AnimaNode.h AnimaNode.cpp AnimaNodeInstance.h AnimaNodeInstance.cpp AnimaGeometryInstance.h AnimaGeometryInstance.cpp)
 source_group(Engine\\Scene\\Data\\Objects\\Lights FILES AnimaLight.h AnimaLight.cpp)
 source_group(Engine\\Scene\\Data\\Shaders FILES AnimaShader.h AnimaShaderProgram.h AnimaShader.cpp AnimaShaderProgram.cpp AnimaShaderData.h AnimaShaderData.cpp AnimaShaderInclude.h AnimaShaderInclude.cpp AnimaShaderGroupData.h AnimaShaderGroupData.cpp)
 source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp)

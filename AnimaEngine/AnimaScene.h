@@ -28,10 +28,10 @@ class AnimaDataGeneratorsManager;
 class AnimaMaterialsManager;
 class AnimaLightsManager;
 class AnimaAnimationsManager;
-class AnimaModelsManager;
-class AnimaMeshesManager;
-class AnimaModelInstancesManager;
-class AnimaMeshInstancesManager;
+class AnimaNodesManager;
+class AnimaGeometriesManager;
+class AnimaNodeInstancesManager;
+class AnimaGeometryInstancesManager;
 class AnimaParallelProgramsManager;
 
 class ANIMA_ENGINE_EXPORT AnimaScene : public AnimaMappedValues
@@ -75,10 +75,10 @@ protected:
 public:
 	inline AnimaEngine* GetEngine() { return _engine; }
 
-	inline AnimaModelsManager* GetModelsManager()						{ return _modelsManager; }
-	inline AnimaMeshesManager* GetMeshesManager()						{ return _meshesManager; }
-	inline AnimaModelInstancesManager* GetModelInstancesManager()		{ return _modelInstancesManager; }
-	inline AnimaMeshInstancesManager* GetMeshInstancesManager()			{ return _meshInstancesManager; }
+	inline AnimaNodesManager* GetNodesManager()						{ return _nodesManager; }
+	inline AnimaGeometriesManager* GetGeometriesManager()						{ return _geometriesManager; }
+	inline AnimaNodeInstancesManager* GetNodeInstancesManager()		{ return _nodeInstancesManager; }
+	inline AnimaGeometryInstancesManager* GetGeometryInstancesManager()			{ return _geometryInstancesManager; }
 	inline AnimaShadersManager* GetShadersManager()						{ return _engine->GetShadersManager(); }
 	inline AnimaCamerasManager* GetCamerasManager()						{ return _camerasManager; }
 	inline AnimaTexturesManager* GetTexturesManager()					{ return _texturesManager; }
@@ -88,10 +88,10 @@ public:
 	inline AnimaAnimationsManager* GetAnimationsManager()				{ return _animationsManager; }
 	inline AnimaParallelProgramsManager* GetParallelProgramsManager()	{ return _engine->GetParallelProgramsManager(); }
 
-	inline AnimaAllocator* GetMeshesAllocator()				{ return _engine->GetMeshesAllocator(); }
-	inline AnimaAllocator* GetModelsAllocator()				{ return _engine->GetModelsAllocator(); }
-	inline AnimaAllocator* GetModelInstancesAllocator()		{ return _engine->GetModelInstancesAllocator(); }
-	inline AnimaAllocator* GetMeshInstancesAllocator()		{ return _engine->GetMeshInstancesAllocator(); }
+	inline AnimaAllocator* GetGeometriesAllocator()				{ return _engine->GetGeometriesAllocator(); }
+	inline AnimaAllocator* GetNodesAllocator()				{ return _engine->GetNodesAllocator(); }
+	inline AnimaAllocator* GetNodeInstancesAllocator()		{ return _engine->GetNodeInstancesAllocator(); }
+	inline AnimaAllocator* GetGeometryInstancesAllocator()		{ return _engine->GetGeometryInstancesAllocator(); }
 	inline AnimaAllocator* GetGenericAllocator()			{ return _engine->GetGenericAllocator(); }
 	inline AnimaAllocator* GetShadersAllocator()			{ return _engine->GetShadersAllocator(); }
 	inline AnimaAllocator* GetCamerasAllocator()			{ return _engine->GetCamerasAllocator(); }
@@ -130,10 +130,10 @@ protected:
 	AnimaTexturesManager*		_texturesManager;				/*!< Gestore di tutte le texture appartenenti all'istanza corrente di AnimaEngine */
 	AnimaMaterialsManager*		_materialsManager;
 //	AnimaDataGeneratorsManager* _dataGeneratorManager;
-	AnimaModelsManager*			_modelsManager;					/*!< Gestore di tutti i modelli dell'istanza corrente di AnimaEngine */
-	AnimaMeshesManager*			_meshesManager;
-	AnimaModelInstancesManager*	_modelInstancesManager;
-	AnimaMeshInstancesManager*	_meshInstancesManager;
+	AnimaNodesManager*			_nodesManager;					/*!< Gestore di tutti i nodeli dell'istanza corrente di AnimaEngine */
+	AnimaGeometriesManager*			_geometriesManager;
+	AnimaNodeInstancesManager*	_nodeInstancesManager;
+	AnimaGeometryInstancesManager*	_geometryInstancesManager;
 	AnimaAnimationsManager*		_animationsManager;
 	
 	AnimaVertex3f _worldGravity;	/*!< Indica la gravità presente nel nella scena (mondo). Di default è (0, -9.81, 0) che è la gravità sulla Terra */

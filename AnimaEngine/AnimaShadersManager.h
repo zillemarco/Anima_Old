@@ -15,8 +15,8 @@
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaMaterial;
-class AnimaMesh;
-class AnimaMeshInstance;
+class AnimaGeometry;
+class AnimaGeometryInstance;
 
 class ANIMA_ENGINE_EXPORT AnimaShadersManager
 {
@@ -66,26 +66,26 @@ public:
 	AnimaShaderInclude* CreateShaderInclude(const AnimaString& name);
 
 	/*!
-	 *	\brief		Crea un programma da una mesh ed il suo materiale
-	 *	\details	Crea un programma da una mesh ed il suo materiale. Recupera tutti gli shader associati alla mesh ed al materiale e li mette assieme
+	 *	\brief		Crea un programma da una geometry ed il suo materiale
+	 *	\details	Crea un programma da una geometry ed il suo materiale. Recupera tutti gli shader associati alla geometry ed al materiale e li mette assieme
 	 				creando un programma (nuovo se non già esistente) che utilizza quegli shader.
-	 *	\param[in]	mesh Mesh da cui andare a prendere gli shader
+	 *	\param[in]	geometry Geometry da cui andare a prendere gli shader
 	 *	\param[in]	material Materiale da cui andare a prendere gli shader
 	 *	\return		Puntatore al nuovo programma appena creato
 	 *	\author		Zille Marco
 	 */
-	AnimaShaderProgram* CreateProgram(AnimaMesh* mesh, const AnimaMaterial* material);
+	AnimaShaderProgram* CreateProgram(AnimaGeometry* geometry, const AnimaMaterial* material);
 
 	/*!
-	 *	\brief		Crea un programma dall'istanza di una mesh ed il suo materiale
-	 *	\details	Crea un programma dall'istanza di una mesh ed il suo materiale. Recupera tutti gli shader associati all'istanza ed al materiale e li mette assieme
+	 *	\brief		Crea un programma dall'istanza di una geometry ed il suo materiale
+	 *	\details	Crea un programma dall'istanza di una geometry ed il suo materiale. Recupera tutti gli shader associati all'istanza ed al materiale e li mette assieme
 	 				creando un programma (nuovo se non già esistente) che utilizza quegli shader.
-	 *	\param[in]	meshInstance Istanza da cui andare a prendere gli shader
+	 *	\param[in]	geometryInstance Istanza da cui andare a prendere gli shader
 	 *	\param[in]	material Materiale da cui andare a prendere gli shader
 	 *	\return		Puntatore al nuovo programma appena creato
 	 *	\author		Zille Marco
 	 */
-	AnimaShaderProgram* CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material);
+	AnimaShaderProgram* CreateProgram(AnimaGeometryInstance* geometryInstance, const AnimaMaterial* material);
 
 	/*!
 	 *	\brief		Crea un nuovo shader con il nome e del tipo passati ed imposta il suo codice

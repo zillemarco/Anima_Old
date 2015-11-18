@@ -1,6 +1,6 @@
 #include "AnimaShadersManager.h"
-#include "AnimaMesh.h"
-#include "AnimaMeshInstance.h"
+#include "AnimaGeometry.h"
+#include "AnimaGeometryInstance.h"
 #include "AnimaMaterial.h"
 #include "AnimaMD5.h"
 #include "AnimaShaderData.h"
@@ -177,18 +177,18 @@ AnimaShaderProgram* AnimaShadersManager::GetActiveProgram()
 	return _activeProgram;
 }
 
-AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const AnimaMaterial* material)
+AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaGeometry* geometry, const AnimaMaterial* material)
 {
-	AInt meshShadersCount = mesh != nullptr ? mesh->GetShadersCount() : 0;
+	AInt geometryShadersCount = geometry != nullptr ? geometry->GetShadersCount() : 0;
 	AInt materialShadersCount = material != nullptr ? material->GetShadersCount() : 0;
 
-	if (meshShadersCount <= 0 || materialShadersCount <= 0)
+	if (geometryShadersCount <= 0 || materialShadersCount <= 0)
 		return nullptr;
 
 	AnimaString str;
 
-	for (AInt ms = 0; ms < meshShadersCount; ms++)
-		str += mesh->GetShaderName(ms);
+	for (AInt ms = 0; ms < geometryShadersCount; ms++)
+		str += geometry->GetShaderName(ms);
 
 	for (AInt ms = 0; ms < materialShadersCount; ms++)
 		str += material->GetShaderName(ms);
@@ -199,30 +199,30 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMesh* mesh, const An
 	AnimaShaderProgram* program = CreateProgram(programName);
 	if (program)
 	{
-		for (AInt ms = 0; ms < meshShadersCount; ms++)
-			program->AddShader(GetShaderFromName(mesh->GetShaderName(ms)));
+		for (AInt ms = 0; ms < geometryShadersCount; ms++)
+			program->AddShader(GetShaderFromName(geometry->GetShaderName(ms)));
 
 		for (AInt ms = 0; ms < materialShadersCount; ms++)
 			program->AddShader(GetShaderFromName(material->GetShaderName(ms)));
 	}
 
-	mesh->SetShaderProgram(programName);
+	geometry->SetShaderProgram(programName);
 
 	return program;
 }
 
-AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshInstance, const AnimaMaterial* material)
+AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaGeometryInstance* geometryInstance, const AnimaMaterial* material)
 {
-	AInt meshShadersCount = meshInstance != nullptr ? meshInstance->GetShadersCount() : 0;
+	AInt geometryShadersCount = geometryInstance != nullptr ? geometryInstance->GetShadersCount() : 0;
 	AInt materialShadersCount = material != nullptr ? material->GetShadersCount() : 0;
 
-	if (meshShadersCount <= 0 && materialShadersCount <= 0)
+	if (geometryShadersCount <= 0 && materialShadersCount <= 0)
 		return nullptr;
 	
 	AnimaString str;
 
-	for (AInt ms = 0; ms < meshShadersCount; ms++)
-		str += meshInstance->GetShaderName(ms);
+	for (AInt ms = 0; ms < geometryShadersCount; ms++)
+		str += geometryInstance->GetShaderName(ms);
 
 	for (AInt ms = 0; ms < materialShadersCount; ms++)
 		str += material->GetShaderName(ms);
@@ -240,9 +240,9 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 			bool vertexFound = false;
 			bool fragmentFound = false;
 
-			for (AInt ms = 0; ms < meshShadersCount; ms++)
+			for (AInt ms = 0; ms < geometryShadersCount; ms++)
 			{
-				AnimaShader* shader = GetShaderFromName(meshInstance->GetShaderName(ms));
+				AnimaShader* shader = GetShaderFromName(geometryInstance->GetShaderName(ms));
 
 				if (shader->GetType() == FRAGMENT)
 					fragmentFound = true;
@@ -284,7 +284,7 @@ AnimaShaderProgram* AnimaShadersManager::CreateProgram(AnimaMeshInstance* meshIn
 		}
 	}
 
-	meshInstance->SetShaderProgram(program);
+	geometryInstance->SetShaderProgram(program);
 	return program;
 }
 

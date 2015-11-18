@@ -150,7 +150,7 @@ AnimaCamera* AnimaCamerasManager::LoadCameraFromXml(const AnimaString& cameraXml
 	
 	AnimaString name = pt.get<AnimaString>("AnimaCamera.Name");
 	
-	// Controllo che il nome del modello non esista già e se esiste gli aggiungo un indice
+	// Controllo che il nome del nodelo non esista già e se esiste gli aggiungo un indice
 	AnimaString originalName = name;
 	AInt index = 0;
 	while (_cameras.Contains(name) >= 0)

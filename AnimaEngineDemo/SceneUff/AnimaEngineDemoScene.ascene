@@ -9,22 +9,22 @@
 		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-materials</Value>
 	</MaterialsPath>
-	<ModelsPath>
+	<NodesPath>
 		<Type>relative</Type>
-		<Value>AnimaEngineDemoScene-models</Value>
-	</ModelsPath>
-	<MeshesPath>
+		<Value>AnimaEngineDemoScene-nodes</Value>
+	</NodesPath>
+	<GeometriesPath>
 		<Type>relative</Type>
-		<Value>AnimaEngineDemoScene-meshes</Value>
-	</MeshesPath>
-	<ModelsInstancesPath>
+		<Value>AnimaEngineDemoScene-geometries</Value>
+	</GeometriesPath>
+	<NodesInstancesPath>
 		<Type>relative</Type>
-		<Value>AnimaEngineDemoScene-modelsInstances</Value>
-	</ModelsInstancesPath>
-	<MeshesInstancesPath>
+		<Value>AnimaEngineDemoScene-nodesInstances</Value>
+	</NodesInstancesPath>
+	<GeometriesInstancesPath>
 		<Type>relative</Type>
-		<Value>AnimaEngineDemoScene-meshesInstances</Value>
-	</MeshesInstancesPath>
+		<Value>AnimaEngineDemoScene-geometriesInstances</Value>
+	</GeometriesInstancesPath>
 	<CamerasPath>
 		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-cameras</Value>

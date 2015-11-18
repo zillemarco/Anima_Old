@@ -4,7 +4,7 @@
 #include "AnimaShaderProgram.h"
 #include "AnimaTexture.h"
 #include "AnimaLight.h"
-#include "AnimaModelsManager.h"
+#include "AnimaNodesManager.h"
 #include "AnimaShadersManager.h"
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
@@ -15,7 +15,7 @@
 #include "AnimaMappedArray.h"
 #include "AnimaArray.h"
 #include "AnimaScene.h"
-#include "AnimaMeshCreator.h"
+#include "AnimaGeometryCreator.h"
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
@@ -32,14 +32,14 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	_scene = nullptr;
 
 	_filterCamera = nullptr;
-	_filterMesh = nullptr;
+	_filterGeometry = nullptr;
 	
 	//_indexesBufferObject = 0;
 	//_verticesBufferObject = 0;
 	//_vertexArrayObject = 0;
 
-	_lastUpdatedModel = nullptr;
-	_lastUpdatedModelInstance = nullptr;
+	_lastUpdatedNode = nullptr;
+	_lastUpdatedNodeInstance = nullptr;
 
 	InitTextureSlots();
 
@@ -84,7 +84,7 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 
-	_meshesMap = src._meshesMap;
+	_geometriesMap = src._geometriesMap;
 
 	//_indexesBufferObject = src._indexesBufferObject;
 	//_verticesBufferObject = src._verticesBufferObject;
@@ -114,7 +114,7 @@ AnimaRenderer::AnimaRenderer(AnimaRenderer&& src)
 	_integersMap = src._integersMap;
 	_booleansMap = src._booleansMap;
 
-	_meshesMap = src._meshesMap;
+	_geometriesMap = src._geometriesMap;
 
 	//_indexesBufferObject = src._indexesBufferObject;
 	//_verticesBufferObject = src._verticesBufferObject;
@@ -159,7 +159,7 @@ AnimaRenderer& AnimaRenderer::operator=(const AnimaRenderer& src)
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
 
-		_meshesMap = src._meshesMap;
+		_geometriesMap = src._geometriesMap;
 
 		//_indexesBufferObject = src._indexesBufferObject;
 		//_verticesBufferObject = src._verticesBufferObject;
@@ -196,7 +196,7 @@ AnimaRenderer& AnimaRenderer::operator=(AnimaRenderer&& src)
 		_integersMap = src._integersMap;
 		_booleansMap = src._booleansMap;
 
-		_meshesMap = src._meshesMap;
+		_geometriesMap = src._geometriesMap;
 
 		//_indexesBufferObject = src._indexesBufferObject;
 		//_verticesBufferObject = src._verticesBufferObject;
@@ -478,10 +478,10 @@ void AnimaRenderer::InitRenderingTargets(AInt screenWidth, AInt screenHeight)
 
 void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 {
-	if (_filterMesh != nullptr)
+	if (_filterGeometry != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterMesh);
-		_filterMesh = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterGeometry);
+		_filterGeometry = nullptr;
 	}
 
 	if (_filterCamera != nullptr)
@@ -505,29 +505,29 @@ void AnimaRenderer::InitRenderingUtilities(AInt screenWidth, AInt screenHeight)
 	SetVector("DILShadowMapTexelSize", AnimaVertex2f(1.0f / 1024.0f));
 	
 	//
-	// Inizializzazione delle mesh di supporto
+	// Inizializzazione delle geometry di supporto
 	//
-	AnimaString name = "filter_RENMESH";
-	_filterMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
-	_filterMesh->MakePlane();
-	_filterMesh->GetTransformation()->RotateXDeg(90.0f);
+	AnimaString name = "filter_RENGEOMETRY";
+	_filterGeometry = AnimaAllocatorNamespace::AllocateNew<AnimaGeometry>(*_allocator, name, _engine->GetDataGeneratorsManager(), _allocator);
+	_filterGeometry->MakePlane();
+	_filterGeometry->GetTransformation()->RotateXDeg(90.0f);
 
-	AnimaString nameSkyMesh = "skybox_RENMESH";
-	AnimaMesh* skyMesh = AnimaAllocatorNamespace::AllocateNew<AnimaMesh>(*_allocator, nameSkyMesh, _engine->GetDataGeneratorsManager(), _allocator);
-	skyMesh->MakeCube();
-	_meshesMap[nameSkyMesh] = skyMesh;
+	AnimaString nameSkyGeometry = "skybox_RENGEOMETRY";
+	AnimaGeometry* skyGeometry = AnimaAllocatorNamespace::AllocateNew<AnimaGeometry>(*_allocator, nameSkyGeometry, _engine->GetDataGeneratorsManager(), _allocator);
+	skyGeometry->MakeCube();
+	_geometriesMap[nameSkyGeometry] = skyGeometry;
 
-	AnimaMesh* ptlMesh = CreateMeshForLightType<AnimaPointLight>();
-	ptlMesh->MakeIcosahedralSphere(2);
+	AnimaGeometry* ptlGeometry = CreateGeometryForLightType<AnimaPointLight>();
+	ptlGeometry->MakeIcosahedralSphere(2);
 
-	AnimaMesh* dilMesh = CreateMeshForLightType<AnimaDirectionalLight>();
-	dilMesh->MakePlane();
+	AnimaGeometry* dilGeometry = CreateGeometryForLightType<AnimaDirectionalLight>();
+	dilGeometry->MakePlane();
 
-	AnimaMesh* helMesh = CreateMeshForLightType<AnimaHemisphereLight>();
-	helMesh->MakePlane();
+	AnimaGeometry* helGeometry = CreateGeometryForLightType<AnimaHemisphereLight>();
+	helGeometry->MakePlane();
 	
-	AnimaMesh* splMesh = CreateMeshForLightType<AnimaSpotLight>();
-	splMesh->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
+	AnimaGeometry* splGeometry = CreateGeometryForLightType<AnimaSpotLight>();
+	splGeometry->MakeCylinder(0.0f, -1.0f, 1.0f, 60);
 
 	//
 	// Inizializzazione della camera di supporto
@@ -558,8 +558,8 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	if (_filterMesh->NeedsBuffersUpdate())
-		_filterMesh->UpdateBuffers();
+	if (_filterGeometry->NeedsBuffersUpdate())
+		_filterGeometry->UpdateBuffers();
 
 	SetTexture("FilterMap", src, false);
 	SetVector("TextureSize", AnimaVertex2f((AFloat)src->GetWidth(), (AFloat)src->GetHeight()));
@@ -570,7 +570,7 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
-	_filterMesh->Draw(this, filterProgram, true, true, false);
+	_filterGeometry->Draw(this, filterProgram, true, true, false);
 
 	SetTexture("FilterMap", nullptr, false);
 }
@@ -591,8 +591,8 @@ void AnimaRenderer::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterPr
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	if (_filterMesh->NeedsBuffersUpdate())
-		_filterMesh->UpdateBuffers();
+	if (_filterGeometry->NeedsBuffersUpdate())
+		_filterGeometry->UpdateBuffers();
 
 	SetTexture("FilterMap", src, false);
 	SetVector("TextureSize", AnimaVertex2f((AFloat)src->GetWidth(), (AFloat)src->GetHeight()));
@@ -602,7 +602,7 @@ void AnimaRenderer::ApplyEffectFromTextureToGBuffer(AnimaShaderProgram* filterPr
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
-	_filterMesh->Draw(this, filterProgram, true, true, false);
+	_filterGeometry->Draw(this, filterProgram, true, true, false);
 
 	SetTexture("FilterMap", nullptr, false);
 }
@@ -625,8 +625,8 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	if (_filterMesh->NeedsBuffersUpdate())
-		_filterMesh->UpdateBuffers();
+	if (_filterGeometry->NeedsBuffersUpdate())
+		_filterGeometry->UpdateBuffers();
 
 	SetGBuffer("FilterBuffer", src, false);
 
@@ -635,7 +635,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToGBuffer(AnimaShaderProgram* filterPr
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
-	_filterMesh->Draw(this, filterProgram, true, true, false);
+	_filterGeometry->Draw(this, filterProgram, true, true, false);
 	
 	SetGBuffer("FilterBuffer", nullptr, false);
 }
@@ -656,8 +656,8 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	if (_filterMesh->NeedsBuffersUpdate())
-		_filterMesh->UpdateBuffers();
+	if (_filterGeometry->NeedsBuffersUpdate())
+		_filterGeometry->UpdateBuffers();
 
 	SetGBuffer("FilterBuffer", src, false);
 
@@ -666,7 +666,7 @@ void AnimaRenderer::ApplyEffectFromGBufferToTexture(AnimaShaderProgram* filterPr
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
 
-	_filterMesh->Draw(this, filterProgram, true, true, false);
+	_filterGeometry->Draw(this, filterProgram, true, true, false);
 
 	SetGBuffer("FilterBuffer", nullptr, false);
 }
@@ -688,8 +688,8 @@ void AnimaRenderer::Start()
 	ANIMA_ASSERT(_scene != nullptr);
 	_scene->GetShadersManager()->SetActiveProgram(nullptr);
 	
-	_lastUpdatedModel = nullptr;
-	_lastUpdatedModelInstance = nullptr;
+	_lastUpdatedNode = nullptr;
+	_lastUpdatedNodeInstance = nullptr;
 }
 
 void AnimaRenderer::Finish()
@@ -698,8 +698,8 @@ void AnimaRenderer::Finish()
 	_scene->GetShadersManager()->SetActiveProgram(nullptr);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	_lastUpdatedModel = nullptr;
-	_lastUpdatedModelInstance = nullptr;
+	_lastUpdatedNode = nullptr;
+	_lastUpdatedNodeInstance = nullptr;
 }
 
 void AnimaRenderer::Render()
@@ -714,65 +714,65 @@ void AnimaRenderer::Render()
 	_renderMutex.unlock();
 }
 
-void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
+void AnimaRenderer::DrawGeometry(AnimaGeometry* geometry, AnimaShaderProgram* program, bool updateMaterial, bool forceDraw, AnimaFrustum* frustum, bool useInstances)
 {
-	if (!useInstances || mesh->GetInstancesCount() == 0)
+	if (!useInstances || geometry->GetInstancesCount() == 0)
 	{
-		AnimaTransformation* meshTransfomation = mesh->GetTransformation();
+		AnimaTransformation* geometryTransfomation = geometry->GetTransformation();
 
 		if (!forceDraw)
 		{
-			if (frustum != nullptr && !frustum->SphereInFrustum(meshTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			if (frustum != nullptr && !frustum->SphereInFrustum(geometryTransfomation->GetTransformationMatrix() * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()))
 				return;
 		}
 
-		AnimaModel* meshParent = (AnimaModel*)mesh->GetParentObject()->GetAncestorObject();
-		if (meshParent != nullptr)
+		AnimaNode* geometryParent = (AnimaNode*)geometry->GetParentObject()->GetAncestorObject();
+		if (geometryParent != nullptr)
 		{
-			if (meshParent != _lastUpdatedModel)
+			if (geometryParent != _lastUpdatedNode)
 			{
-				_lastUpdatedModel = meshParent;
-				program->UpdateSceneObjectProperties(_lastUpdatedModel, this);
+				_lastUpdatedNode = geometryParent;
+				program->UpdateSceneObjectProperties(_lastUpdatedNode, this);
 			}
 		}
 
-		if (mesh->NeedsBuffersUpdate())
-			mesh->UpdateBuffers();
+		if (geometry->NeedsBuffersUpdate())
+			geometry->UpdateBuffers();
 
-		if (mesh->GetVertexArrayObject() <= 0)
+		if (geometry->GetVertexArrayObject() <= 0)
 			return;
 
-		mesh->Draw(this, program, true, true, updateMaterial);
+		geometry->Draw(this, program, true, true, updateMaterial);
 	}
 	else
 	{
-		if (mesh->NeedsBuffersUpdate())
-			mesh->UpdateBuffers();
+		if (geometry->NeedsBuffersUpdate())
+			geometry->UpdateBuffers();
 
-		if (mesh->GetVertexArrayObject() <= 0)
+		if (geometry->GetVertexArrayObject() <= 0)
 			return;
 
-		AInt instancesCount = mesh->GetInstancesCount();
+		AInt instancesCount = geometry->GetInstancesCount();
 		for (AInt i = 0; i < instancesCount; i++)
 		{
-			AnimaMeshInstance* instance = mesh->GetInstance(i);
+			AnimaGeometryInstance* instance = geometry->GetInstance(i);
 
 			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
 			if (!forceDraw)
 			{
-				if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+				if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()))
 				{
 					continue;
 				}
 			}
 
-			AnimaModelInstance* instanceParent = (AnimaModelInstance*)instance->GetParentObject()->GetAncestorObject();
+			AnimaNodeInstance* instanceParent = (AnimaNodeInstance*)instance->GetParentObject()->GetAncestorObject();
 			if (instanceParent != nullptr)
 			{
-				if (instanceParent != _lastUpdatedModelInstance)
+				if (instanceParent != _lastUpdatedNodeInstance)
 				{
-					_lastUpdatedModelInstance = instanceParent;
-					program->UpdateSceneObjectProperties(_lastUpdatedModelInstance, this);
+					_lastUpdatedNodeInstance = instanceParent;
+					program->UpdateSceneObjectProperties(_lastUpdatedNodeInstance, this);
 				}
 			}
 
@@ -781,64 +781,64 @@ void AnimaRenderer::DrawMesh(AnimaMesh* mesh, AnimaShaderProgram* program, bool 
 	}
 }
 
-void AnimaRenderer::BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableMesh>* drawableMeshes, AnimaCamera* camera)
+void AnimaRenderer::BuildDrawableObjectsArray(AnimaArray<AnimaRendererDrawableGeometry>* drawableGeometries, AnimaCamera* camera)
 {
-	if (drawableMeshes == nullptr || camera == nullptr || _scene == nullptr)
+	if (drawableGeometries == nullptr || camera == nullptr || _scene == nullptr)
 		return;
 
 	AnimaFrustum* frustum = camera->GetFrustum();
-	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	AnimaGeometriesManager* geometriesManager = _scene->GetGeometriesManager();
 
-	AInt meshesCount = meshesManager->GetMeshesCount();
-	for (AInt i = 0; i < meshesCount; i++)
+	AInt geometriesCount = geometriesManager->GetGeometriesCount();
+	for (AInt i = 0; i < geometriesCount; i++)
 	{
-		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		AnimaGeometry* geometry = geometriesManager->GetGeometry(i);
 
-		AnimaRendererDrawableMesh drawableMesh;
-		drawableMesh.SetMesh(mesh);
+		AnimaRendererDrawableGeometry drawableGeometry;
+		drawableGeometry.SetGeometry(geometry);
 
-		AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances = drawableMesh.GetDrawableMeshInstances();
+		AnimaArray<AnimaRendererDrawableGeometryInstances>* drawableGeometryInstances = drawableGeometry.GetDrawableGeometryInstances();
 
-		AInt instancesCount = mesh->GetInstancesCount();
+		AInt instancesCount = geometry->GetInstancesCount();
 		for (AInt j = 0; j < instancesCount; j++)
 		{
-			AnimaMeshInstance* instance = mesh->GetInstance(j);
+			AnimaGeometryInstance* instance = geometry->GetInstance(j);
 			
 			AnimaTransformation* instanceTransfomation = instance->GetTransformation();
-			if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()))
 				continue;
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
 			if (program == nullptr)
 				continue;
 
-			AInt index = FindDrawableObjecsFromProgram(drawableMeshInstances, program);
+			AInt index = FindDrawableObjecsFromProgram(drawableGeometryInstances, program);
 			if (index >= 0)
-				drawableMeshInstances->at(index).AddMeshInstance(instance);
+				drawableGeometryInstances->at(index).AddGeometryInstance(instance);
 			else
 			{
-				AnimaRendererDrawableMeshInstances newDrawableMeshInstances;
-				newDrawableMeshInstances.SetShaderProgram(program);
-				newDrawableMeshInstances.AddMeshInstance(instance);
+				AnimaRendererDrawableGeometryInstances newDrawableGeometryInstances;
+				newDrawableGeometryInstances.SetShaderProgram(program);
+				newDrawableGeometryInstances.AddGeometryInstance(instance);
 
-				drawableMeshInstances->push_back(newDrawableMeshInstances);
+				drawableGeometryInstances->push_back(newDrawableGeometryInstances);
 			}
 		}
 
-		if (drawableMeshInstances->size() > 0)
-			drawableMeshes->push_back(drawableMesh);
+		if (drawableGeometryInstances->size() > 0)
+			drawableGeometries->push_back(drawableGeometry);
 	}
 }
 
-AInt AnimaRenderer::FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableMeshInstances>* drawableMeshInstances, AnimaShaderProgram* program)
+AInt AnimaRenderer::FindDrawableObjecsFromProgram(AnimaArray<AnimaRendererDrawableGeometryInstances>* drawableGeometryInstances, AnimaShaderProgram* program)
 {
-	if (drawableMeshInstances == nullptr || program == nullptr)
+	if (drawableGeometryInstances == nullptr || program == nullptr)
 		return -1;
 
-	AInt count = drawableMeshInstances->size();
+	AInt count = drawableGeometryInstances->size();
 	for (AInt i = 0; i < count; i++)
 	{
-		if (drawableMeshInstances->at(i).GetShaderProgram() == program)
+		if (drawableGeometryInstances->at(i).GetShaderProgram() == program)
 			return i;
 	}
 
@@ -851,20 +851,20 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 		return;
 
 //	AnimaFrustum* frustum = camera->GetFrustum();
-	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	AnimaGeometriesManager* geometriesManager = _scene->GetGeometriesManager();
 
-	AInt meshesCount = meshesManager->GetMeshesCount();
-	for (AInt i = 0; i < meshesCount; i++)
+	AInt geometriesCount = geometriesManager->GetGeometriesCount();
+	for (AInt i = 0; i < geometriesCount; i++)
 	{
-		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		AnimaGeometry* geometry = geometriesManager->GetGeometry(i);
 
-		AInt instancesCount = mesh->GetInstancesCount();
+		AInt instancesCount = geometry->GetInstancesCount();
 		for (AInt j = 0; j < instancesCount; j++)
 		{
-			AnimaMeshInstance* instance = mesh->GetInstance(j);
+			AnimaGeometryInstance* instance = geometry->GetInstance(j);
 
 			//AnimaTransformation* instanceTransfomation = instance->GetTransformation();
-			//if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
+			//if (frustum != nullptr && !frustum->SphereInFrustum(instanceTransfomation->GetTransformationMatrix() * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()))
 			//	continue;
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
@@ -875,7 +875,7 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 			if (material == nullptr)
 				material = AnimaMaterialsManager::GetDefaultMaterial();
 
-			AnimaMesh* mesh = instance->GetMesh();
+			AnimaGeometry* geometry = instance->GetGeometry();
 
 			AInt programDataIndex = FindProgramData(programs, program);
 			if (programDataIndex >= 0)
@@ -884,19 +884,19 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 
 				if (program->CanSupportInstance())
 				{
-					AInt meshInstancesIndex = FindMeshInstances(&programData->_meshes, mesh);
-					if (meshInstancesIndex >= 0)
+					AInt geometryInstancesIndex = FindGeometryInstances(&programData->_geometries, geometry);
+					if (geometryInstancesIndex >= 0)
 					{
-						AnimaRendererMeshInstances* meshInstances = &programData->_meshes.at(meshInstancesIndex);
-						meshInstances->_instances.push_back(instance);
+						AnimaRendererGeometryInstances* geometryInstances = &programData->_geometries.at(geometryInstancesIndex);
+						geometryInstances->_instances.push_back(instance);
 					}
 					else
 					{
-						AnimaRendererMeshInstances meshInstances;
-						meshInstances._mesh = mesh;
-						meshInstances._instances.push_back(instance);
+						AnimaRendererGeometryInstances geometryInstances;
+						geometryInstances._geometry = geometry;
+						geometryInstances._instances.push_back(instance);
 
-						programData->_meshes.push_back(meshInstances);
+						programData->_geometries.push_back(geometryInstances);
 					}
 				}
 				else
@@ -924,11 +924,11 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 
 				if (program->CanSupportInstance())
 				{
-					AnimaRendererMeshInstances meshInstances;
-					meshInstances._mesh = mesh;
-					meshInstances._instances.push_back(instance);
+					AnimaRendererGeometryInstances geometryInstances;
+					geometryInstances._geometry = geometry;
+					geometryInstances._instances.push_back(instance);
 
-					programData._meshes.push_back(meshInstances);
+					programData._geometries.push_back(geometryInstances);
 				}
 				else
 				{
@@ -975,15 +975,15 @@ AInt AnimaRenderer::FindMaterialInstances(AnimaArray<AnimaRendererMaterialInstan
 	return -1;
 }
 
-AInt AnimaRenderer::FindMeshInstances(AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaMesh* mesh)
+AInt AnimaRenderer::FindGeometryInstances(AnimaArray<AnimaRendererGeometryInstances>* geometries, AnimaGeometry* geometry)
 {
-	if (meshes == nullptr || mesh == nullptr)
+	if (geometries == nullptr || geometry == nullptr)
 		return -1;
 
-	AInt count = meshes->size();
+	AInt count = geometries->size();
 	for (AInt i = 0; i < count; i++)
 	{
-		if (meshes->at(i)._mesh == mesh)
+		if (geometries->at(i)._geometry == geometry)
 			return i;
 	}
 
@@ -1051,7 +1051,7 @@ void AnimaRenderer::SetupProgramDataStaticBuffers(AnimaArray<AnimaRendererProgra
 	}
 }
 
-void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaCamera* camera)
+void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererGeometryInstances* geometryInstances, AnimaCamera* camera)
 {
 	AInt count = program->GetShaderStaticGroupDataCount();
 	for (AInt i = 0; i < count; i++)
@@ -1066,10 +1066,10 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 		if (sourceObject == ASDSO_MATERIAL)
 		{
 			ANIMA_FRAME_PUSH("material update");
-			AInt instancesCount = meshInstances->_instances.size();
+			AInt instancesCount = geometryInstances->_instances.size();
 			for (AInt j = 0; j < instancesCount; j++)
 			{
-				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+				AnimaGeometryInstance* instance = geometryInstances->_instances.at(j);
 
 				AnimaMaterial* material = instance->GetMaterial();
 				if (material == nullptr)
@@ -1081,11 +1081,11 @@ void AnimaRenderer::SetupProgramDataInstancedStaticBuffers(AnimaShaderProgram* p
 		}
 		else if (sourceObject == ASDSO_GEOMETRY)
 		{
-			ANIMA_FRAME_PUSH("model update");
-			AInt instancesCount = meshInstances->_instances.size();
+			ANIMA_FRAME_PUSH("node update");
+			AInt instancesCount = geometryInstances->_instances.size();
 			for (AInt j = 0; j < instancesCount; j++)
 			{
-				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+				AnimaGeometryInstance* instance = geometryInstances->_instances.at(j);
 				groupData->UpdateValue(instance, this, program, j);
 			}
 			ANIMA_FRAME_POP();
@@ -1139,7 +1139,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 		bool supportsInstance = program->CanSupportInstance();
 
 		AnimaArray<AnimaShaderGroupData*> materialDataGroups;
-		AnimaArray<AnimaShaderGroupData*> meshDataGroups;
+		AnimaArray<AnimaShaderGroupData*> geometryDataGroups;
 		AnimaArray<AnimaShaderGroupData*> cameraDataGroups;
 
 		AInt staticGroupDataCount = program->GetShaderStaticGroupDataCount();
@@ -1151,7 +1151,7 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 			if (sourceObject == ASDSO_MATERIAL)
 				materialDataGroups.push_back(groupData);
 			else if (sourceObject == ASDSO_GEOMETRY)
-				meshDataGroups.push_back(groupData);
+				geometryDataGroups.push_back(groupData);
 			else if (sourceObject == ASDSO_CAMERA)
 				cameraDataGroups.push_back(groupData);
 		}
@@ -1160,10 +1160,10 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 		{
 			renderer->_programsBufferIndex = 0;
 
-			for (auto& programMesh : programData._meshes)
+			for (auto& programGeometry : programData._geometries)
 			{
 				ANIMA_FRAME_PUSH("SetupProgramDataInstancedStaticBuffers");
-				renderer->SetupProgramDataInstancedStaticBuffers(program, &programMesh, camera);
+				renderer->SetupProgramDataInstancedStaticBuffers(program, &programGeometry, camera);
 				ANIMA_FRAME_POP();
 		
 				program->Use();
@@ -1171,28 +1171,28 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				ANIMA_FRAME_PUSH("Update normal uniforms");
 				program->UpdateSceneObjectProperties(camera, renderer);
 				program->UpdateRenderingManagerProperies(renderer);
-				program->UpdateMappedValuesObjectProperties(programMesh._instances[0]->GetMaterial(), renderer);
+				program->UpdateMappedValuesObjectProperties(programGeometry._instances[0]->GetMaterial(), renderer);
 				ANIMA_FRAME_POP();
 
 				ANIMA_FRAME_PUSH("Enable UBO");
 				for (auto& group : materialDataGroups)
 					group->Enable(renderer->_programsBufferIndex);
-				for (auto& group : meshDataGroups)
+				for (auto& group : geometryDataGroups)
 					group->Enable(renderer->_programsBufferIndex);
 				ANIMA_FRAME_POP();
 
-				AnimaMesh* mesh = programMesh._mesh;
-				if (mesh->NeedsBuffersUpdate())
-					mesh->UpdateBuffers();
+				AnimaGeometry* geometry = programGeometry._geometry;
+				if (geometry->NeedsBuffersUpdate())
+					geometry->UpdateBuffers();
 				
 				ANIMA_FRAME_PUSH("Draw");
 #if defined USE_VAOS
-				glBindVertexArray(mesh->GetVertexArrayObject());
+				glBindVertexArray(geometry->GetVertexArrayObject());
 #else
-				program->EnableInputs(mesh);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+				program->EnableInputs(geometry);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-				glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+				glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
 #if !defined USE_VAOS
 				program->DisableInputs();
 #endif
@@ -1219,23 +1219,23 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 
 				for (auto& instance : programMaterial._instances)
 				{
-					AnimaMesh* mesh = instance->GetMesh();
-					if (mesh->NeedsBuffersUpdate())
-						mesh->UpdateBuffers();
+					AnimaGeometry* geometry = instance->GetGeometry();
+					if (geometry->NeedsBuffersUpdate())
+						geometry->UpdateBuffers();
 
-					for (auto& group : meshDataGroups)
+					for (auto& group : geometryDataGroups)
 						group->EnableValue(instancesOffset, renderer->_programsBufferIndex);
 
 					program->UpdateMappedValuesObjectProperties(programMaterial._material, renderer);
 					program->UpdateSceneObjectProperties(instance, renderer);
 					
 #if defined USE_VAOS
-					glBindVertexArray(mesh->GetVertexArrayObject());
+					glBindVertexArray(geometry->GetVertexArrayObject());
 #else
-					program->EnableInputs(mesh);
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+					program->EnableInputs(geometry);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-					glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+					glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 #if !defined USE_VAOS
 					program->DisableInputs();
 #endif
@@ -1310,13 +1310,13 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
 	
 	AnimaString type = ANIMA_CLASS_NAME(AnimaDirectionalLight);
-	auto lightMeshPair = _meshesMap.find(type);
+	auto lightGeometryPair = _geometriesMap.find(type);
 	
-	ANIMA_ASSERT(lightMeshPair != _meshesMap.end());
+	ANIMA_ASSERT(lightGeometryPair != _geometriesMap.end());
 	ANIMA_ASSERT(directionalLights->at(0)->CreateShader(shadersManager));
 	
 	AnimaShaderProgram* program = shadersManager->GetProgramFromName(directionalLights->at(0)->GetShaderName());
-	AnimaMesh* mesh = lightMeshPair->second;
+	AnimaGeometry* geometry = lightGeometryPair->second;
 	
 	AnimaShaderProgram* activeProgram = nullptr;
 	AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
@@ -1347,14 +1347,14 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 			program->UpdateRenderingManagerProperies(this);
 		}
 		
-		if (mesh->NeedsBuffersUpdate())
-			mesh->UpdateBuffers();
+		if (geometry->NeedsBuffersUpdate())
+			geometry->UpdateBuffers();
 		
 		light->UpdateCullFace(activeCamera);
 		
 		program->UpdateSceneObjectProperties(light, this);
 		
-		mesh->Draw(this, program, true, true, false);
+		geometry->Draw(this, program, true, true, false);
 
 		glDisable(GL_STENCIL_TEST);
 
@@ -1370,13 +1370,13 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 	AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
 
 	AnimaString type = ANIMA_CLASS_NAME(AnimaPointLight);
-	auto lightMeshPair = _meshesMap.find(type);
+	auto lightGeometryPair = _geometriesMap.find(type);
 
-	ANIMA_ASSERT(lightMeshPair != _meshesMap.end());
+	ANIMA_ASSERT(lightGeometryPair != _geometriesMap.end());
 	ANIMA_ASSERT(pointLights->at(0)->CreateShader(shadersManager));
 
 	AnimaShaderProgram* program = shadersManager->GetProgramFromName(pointLights->at(0)->GetShaderName());
-	AnimaMesh* mesh = lightMeshPair->second;
+	AnimaGeometry* geometry = lightGeometryPair->second;
 
 	AnimaShaderProgram* activeProgram = nullptr;
 	AnimaCamera* activeCamera = camerasManager->GetActiveCamera();
@@ -1403,14 +1403,14 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 			program->UpdateRenderingManagerProperies(this);
 		}
 
-		if (mesh->NeedsBuffersUpdate())
-			mesh->UpdateBuffers();
+		if (geometry->NeedsBuffersUpdate())
+			geometry->UpdateBuffers();
 
 		light->UpdateCullFace(activeCamera);
 
 		program->UpdateSceneObjectProperties(light, this);
 
-		mesh->Draw(this, program, true, true, false);
+		geometry->Draw(this, program, true, true, false);
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -1424,9 +1424,9 @@ void AnimaRenderer::DirectionalLightShadowMap(AnimaRenderer* renderer)
 	AnimaLightsManager* lightsManager = renderer->_scene->GetLightsManager();
 	
 	AnimaString type = ANIMA_CLASS_NAME(AnimaDirectionalLight);
-	auto lightMeshPair = renderer->_meshesMap.find(type);
+	auto lightGeometryPair = renderer->_geometriesMap.find(type);
 	
-	ANIMA_ASSERT(lightMeshPair != renderer->_meshesMap.end());
+	ANIMA_ASSERT(lightGeometryPair != renderer->_geometriesMap.end());
 	AnimaDirectionalLight* light = (AnimaDirectionalLight*)lightsManager->GetLightFromName("light-0");
 	
 	if(light->GetBoolean("CastShadows"))
@@ -1435,47 +1435,47 @@ void AnimaRenderer::DirectionalLightShadowMap(AnimaRenderer* renderer)
 	ANIMA_FRAME_POP();
 }
 
-void AnimaRenderer::BuildShadowMapMeshes(AnimaArray<AnimaRendererMeshInstances>* meshes)
+void AnimaRenderer::BuildShadowMapGeometries(AnimaArray<AnimaRendererGeometryInstances>* geometries)
 {
-	if (meshes == nullptr || _scene == nullptr)
+	if (geometries == nullptr || _scene == nullptr)
 		return;
 
-	AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	AnimaGeometriesManager* geometriesManager = _scene->GetGeometriesManager();
 
-	AInt meshesCount = meshesManager->GetMeshesCount();
-	for (AInt i = 0; i < meshesCount; i++)
+	AInt geometriesCount = geometriesManager->GetGeometriesCount();
+	for (AInt i = 0; i < geometriesCount; i++)
 	{
-		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		AnimaGeometry* geometry = geometriesManager->GetGeometry(i);
 
-		AInt instancesCount = mesh->GetInstancesCount();
+		AInt instancesCount = geometry->GetInstancesCount();
 		for (AInt j = 0; j < instancesCount; j++)
 		{
-			AnimaMeshInstance* instance = mesh->GetInstance(j);
+			AnimaGeometryInstance* instance = geometry->GetInstance(j);
 
 			//if (instance->GetBoolean("CastShadows"))
 			//{
-				AnimaMesh* mesh = instance->GetMesh();
+				AnimaGeometry* geometry = instance->GetGeometry();
 
-				AInt meshInstancesIndex = FindMeshInstances(meshes, mesh);
-				if (meshInstancesIndex >= 0)
+				AInt geometryInstancesIndex = FindGeometryInstances(geometries, geometry);
+				if (geometryInstancesIndex >= 0)
 				{
-					AnimaRendererMeshInstances* meshInstances = &meshes->at(meshInstancesIndex);
-					meshInstances->_instances.push_back(instance);
+					AnimaRendererGeometryInstances* geometryInstances = &geometries->at(geometryInstancesIndex);
+					geometryInstances->_instances.push_back(instance);
 				}
 				else
 				{
-					AnimaRendererMeshInstances meshInstances;
-					meshInstances._mesh = mesh;
-					meshInstances._instances.push_back(instance);
+					AnimaRendererGeometryInstances geometryInstances;
+					geometryInstances._geometry = geometry;
+					geometryInstances._instances.push_back(instance);
 
-					meshes->push_back(meshInstances);
+					geometries->push_back(geometryInstances);
 				}
 			//}
 		}
 	}
 }
 
-void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererMeshInstances>* meshes, AnimaLight* light)
+void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, AnimaArray<AnimaRendererGeometryInstances>* geometries, AnimaLight* light)
 {
 	if (program->CanSupportInstance())
 		return;
@@ -1492,8 +1492,8 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 		{
 			AInt instancesCount = 0;
 
-			for (auto& meshInstances : (*meshes))
-				instancesCount += meshInstances._instances.size();
+			for (auto& geometryInstances : (*geometries))
+				instancesCount += geometryInstances._instances.size();
 
 			if (instancesCount <= 0)
 				continue;
@@ -1501,9 +1501,9 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 			groupData->SetBufferLength(instancesCount);
 
 			AInt instanceOffset = 0;
-			for (auto& meshInstances : (*meshes))
+			for (auto& geometryInstances : (*geometries))
 			{
-				for (auto& instance : meshInstances._instances)
+				for (auto& instance : geometryInstances._instances)
 				{
 					groupData->UpdateValue(instance, this, program, instanceOffset++);
 				}
@@ -1520,7 +1520,7 @@ void AnimaRenderer::SetupShadowMapStaticBuffers(AnimaShaderProgram* program, Ani
 	}
 }
 
-void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererMeshInstances* meshInstances, AnimaLight* light)
+void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* program, AnimaRendererGeometryInstances* geometryInstances, AnimaLight* light)
 {
 	AInt count = program->GetShaderStaticGroupDataCount();
 	for (AInt i = 0; i < count; i++)
@@ -1534,11 +1534,11 @@ void AnimaRenderer::SetupShadowMapInstancedStaticBuffers(AnimaShaderProgram* pro
 
 		if (sourceObject == ASDSO_GEOMETRY)
 		{
-			ANIMA_FRAME_PUSH("model update");
-			AInt instancesCount = meshInstances->_instances.size();
+			ANIMA_FRAME_PUSH("node update");
+			AInt instancesCount = geometryInstances->_instances.size();
 			for (AInt j = 0; j < instancesCount; j++)
 			{
-				AnimaMeshInstance* instance = meshInstances->_instances.at(j);
+				AnimaGeometryInstance* instance = geometryInstances->_instances.at(j);
 				groupData->UpdateValue(instance, this, program, j);
 			}
 			ANIMA_FRAME_POP();
@@ -1583,14 +1583,14 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	glDepthMask(GL_TRUE);
 
 	ANIMA_FRAME_PUSH("Build data");
-	AnimaArray<AnimaRendererMeshInstances> meshInstances;
-	BuildShadowMapMeshes(&meshInstances);
-	SetupShadowMapStaticBuffers(program, &meshInstances, light);
+	AnimaArray<AnimaRendererGeometryInstances> geometryInstances;
+	BuildShadowMapGeometries(&geometryInstances);
+	SetupShadowMapStaticBuffers(program, &geometryInstances, light);
 	ANIMA_FRAME_POP();
 	
 	bool supportsInstance = program->CanSupportInstance();
 
-	AnimaArray<AnimaShaderGroupData*> meshDataGroups;
+	AnimaArray<AnimaShaderGroupData*> geometryDataGroups;
 	AnimaArray<AnimaShaderGroupData*> lightDataGroups;
 
 	AInt staticGroupDataCount = program->GetShaderStaticGroupDataCount();
@@ -1600,7 +1600,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 		AnimaShaderDataSourceObject sourceObject = groupData->GetSourceObject();
 
 		if (sourceObject == ASDSO_GEOMETRY)
-			meshDataGroups.push_back(groupData);
+			geometryDataGroups.push_back(groupData);
 		else if (sourceObject == ASDSO_LIGHT)
 			lightDataGroups.push_back(groupData);
 	}
@@ -1615,31 +1615,31 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	if (supportsInstance)
 	{
 		_programsBufferIndex = 0;
-		for (auto& programMesh : meshInstances)
+		for (auto& programGeometry : geometryInstances)
 		{
 			ANIMA_FRAME_PUSH("SetupShadowMapInstancedStaticBuffers");
-			SetupShadowMapInstancedStaticBuffers(program, &programMesh, light);
+			SetupShadowMapInstancedStaticBuffers(program, &programGeometry, light);
 			ANIMA_FRAME_POP();
 			
 			ANIMA_FRAME_PUSH("Enable UBO");
-			for (auto& group : meshDataGroups)
+			for (auto& group : geometryDataGroups)
 				group->Enable(_programsBufferIndex);
 			for (auto& group : lightDataGroups)
 				group->Enable(_programsBufferIndex);
 			ANIMA_FRAME_POP();
 
-			AnimaMesh* mesh = programMesh._mesh;
-			if (mesh->NeedsBuffersUpdate())
-				mesh->UpdateBuffers();
+			AnimaGeometry* geometry = programGeometry._geometry;
+			if (geometry->NeedsBuffersUpdate())
+				geometry->UpdateBuffers();
 
 			ANIMA_FRAME_PUSH("Draw");
 #if defined USE_VAOS
-			glBindVertexArray(mesh->GetVertexArrayObject());
+			glBindVertexArray(geometry->GetVertexArrayObject());
 #else
-			program->EnableInputs(mesh);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+			program->EnableInputs(geometry);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-			glDrawElementsInstanced(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programMesh._instances.size());
+			glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
 #if !defined USE_VAOS
 			program->DisableInputs();
 #endif
@@ -1654,15 +1654,15 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 		AInt instancesOffset = 0;
 		_programsBufferIndex = 0;
 
-		for (auto& programMesh : meshInstances)
+		for (auto& programGeometry : geometryInstances)
 		{
-			for (auto& instance : programMesh._instances)
+			for (auto& instance : programGeometry._instances)
 			{
-				AnimaMesh* mesh = instance->GetMesh();
-				if (mesh->NeedsBuffersUpdate())
-					mesh->UpdateBuffers();
+				AnimaGeometry* geometry = instance->GetGeometry();
+				if (geometry->NeedsBuffersUpdate())
+					geometry->UpdateBuffers();
 
-				for (auto& group : meshDataGroups)
+				for (auto& group : geometryDataGroups)
 					group->EnableValue(instancesOffset, _programsBufferIndex);
 
 				for (auto& group : lightDataGroups)
@@ -1671,12 +1671,12 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 				program->UpdateSceneObjectProperties(instance, this);
 
 #if defined USE_VAOS
-				glBindVertexArray(mesh->GetVertexArrayObject());
+				glBindVertexArray(geometry->GetVertexArrayObject());
 #else
-				program->EnableInputs(mesh);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->GetIndexesBufferObject());
+				program->EnableInputs(geometry);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-				glDrawElements(GL_TRIANGLES, mesh->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 #if !defined USE_VAOS
 				program->DisableInputs();
 #endif
@@ -1734,17 +1734,17 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 		program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
 	}
 
-	if (renderer->_filterMesh->NeedsBuffersUpdate())
-		renderer->_filterMesh->UpdateBuffers();
+	if (renderer->_filterGeometry->NeedsBuffersUpdate())
+		renderer->_filterGeometry->UpdateBuffers();
 
 	program->UpdateRenderingManagerProperies(renderer);
-	renderer->_filterMesh->Draw(renderer, program, true, true, false);
+	renderer->_filterGeometry->Draw(renderer, program, true, true, false);
 
 	AnimaTexture* skyTexture = renderer->GetTexture("SkyBox");
 	if (skyTexture != nullptr)
 	{
-		AnimaMesh* skyMesh = renderer->_meshesMap["skybox_RENMESH"];
-		if (skyMesh != nullptr)
+		AnimaGeometry* skyGeometry = renderer->_geometriesMap["skybox_RENGEOMETRY"];
+		if (skyGeometry != nullptr)
 		{
 			AnimaShaderProgram* skyProgram = shadersManager->GetProgramFromName("skybox");
 			AnimaCamera* camera = renderer->_scene->GetCamerasManager()->GetActiveCamera();
@@ -1752,10 +1752,10 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 			skyProgram->Use();
 			skyProgram->UpdateSceneObjectProperties(camera, renderer);
 			
-			if (skyMesh->NeedsBuffersUpdate())
-				skyMesh->UpdateBuffers();
+			if (skyGeometry->NeedsBuffersUpdate())
+				skyGeometry->UpdateBuffers();
 
-			skyMesh->GetTransformation()->SetTranslation(camera->GetPosition());
+			skyGeometry->GetTransformation()->SetTranslation(camera->GetPosition());
 
 			skyProgram->UpdateRenderingManagerProperies(renderer);
 						
@@ -1764,7 +1764,7 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 
 			glCullFace(GL_FRONT);
 			glDisable(GL_DEPTH_TEST);
-			skyMesh->Draw(renderer, skyProgram, true, true, true);
+			skyGeometry->Draw(renderer, skyProgram, true, true, true);
 			glEnable(GL_DEPTH_TEST);
 			glCullFace(GL_BACK);
 		}
@@ -1840,11 +1840,11 @@ void AnimaRenderer::FinalPass(AnimaRenderer* renderer)
 		program->UpdateSceneObjectProperties(renderer->_filterCamera, renderer);
 	}
 
-	if (renderer->_filterMesh->NeedsBuffersUpdate())
-		renderer->_filterMesh->UpdateBuffers();
+	if (renderer->_filterGeometry->NeedsBuffersUpdate())
+		renderer->_filterGeometry->UpdateBuffers();
 
 	program->UpdateRenderingManagerProperies(renderer);
-	renderer->_filterMesh->Draw(renderer, program, true, true, false);
+	renderer->_filterGeometry->Draw(renderer, program, true, true, false);
 	
 	if(applyFxaa)
 	{
@@ -1856,7 +1856,7 @@ void AnimaRenderer::FinalPass(AnimaRenderer* renderer)
 void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 {
 	//AnimaLightsManager* lightsManager = _scene->GetLightsManager();
-	//AnimaMeshesManager* meshesManager = _scene->GetMeshesManager();
+	//AnimaGeometriesManager* geometriesManager = _scene->GetGeometriesManager();
 
 	//AnimaArray<AnimaLight*>* lights = lightsManager->GetLightsArrayOfType<AnimaDirectionalLight>();
 
@@ -1864,9 +1864,9 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 	//	return;
 
 	//AInt nLights = lights->size();
-	//AInt nMeshes = meshesManager->GetMeshesCount();
+	//AInt nGeometries = geometriesManager->GetGeometriesCount();
 
-	//if (nLights == 0 || nMeshes == 0)
+	//if (nLights == 0 || nGeometries == 0)
 	//	return;
 
 	//AnimaShaderProgram* activeProgram = _scene->GetShadersManager()->GetActiveProgram();
@@ -1889,70 +1889,70 @@ void AnimaRenderer::UpdateShadowMaps(AnimaShaderProgram* program)
 	//	program->UpdateSceneObjectProperties(light, this);
 	//	program->UpdateRenderingManagerProperies(this);
 
-	//	for (AInt j = 0; j < nMeshes; j++)
+	//	for (AInt j = 0; j < nGeometries; j++)
 	//	{
-	//		DrawMesh(meshesManager->GetMesh(j), program, false, true, nullptr, true);
-	//		//	AnimaMesh* innerModel = modelsManager->GetModel(j);
-	//		//	AnimaMatrix modelMatrix = innerModel->GetTransformation()->GetTransformationMatrix();
+	//		DrawGeometry(geometriesManager->GetGeometry(j), program, false, true, nullptr, true);
+	//		//	AnimaGeometry* innerNode = nodesManager->GetNode(j);
+	//		//	AnimaMatrix nodeMatrix = innerNode->GetTransformation()->GetTransformationMatrix();
 	//		//	
 	//		//	glCullFace(GL_FRONT);
-	//		//	DrawModelMesh(_scene, innerModel, program, modelMatrix, false, true);
+	//		//	DrawNodeGeometry(_scene, innerNode, program, nodeMatrix, false, true);
 	//		//	glCullFace(GL_BACK);
 	//		//	
-	//		//	AInt meshCount = innerModel->GetMeshesCount();
-	//		//	for (AInt i = 0; i < meshCount; i++)
+	//		//	AInt geometryCount = innerNode->GetGeometriesCount();
+	//		//	for (AInt i = 0; i < geometryCount; i++)
 	//		//	{
 	//		//		glCullFace(GL_FRONT);
-	//		//		DrawModelMesh(_scene, innerModel->GetMesh(i), program, modelMatrix, false, true);
+	//		//		DrawNodeGeometry(_scene, innerNode->GetGeometry(i), program, nodeMatrix, false, true);
 	//		//		glCullFace(GL_BACK);
 	//		//	}
 	//		//	
-	//		//	AInt childrenCount = innerModel->GetChildrenCount();
+	//		//	AInt childrenCount = innerNode->GetChildrenCount();
 	//		//	for (AInt i = 0; i < childrenCount; i++)
-	//		//		DrawModel(_scene, innerModel->GetChild(i), program, modelMatrix, false, true);
+	//		//		DrawNode(_scene, innerNode->GetChild(i), program, nodeMatrix, false, true);
 	//	}
 	//}
 }
 
-void AnimaRenderer::UpdateModelsVisibility()
+void AnimaRenderer::UpdateNodesVisibility()
 {
-//	Anima::AnimaModelsManager* modelsManager = _scene->GetModelsManager();
+//	Anima::AnimaNodesManager* nodesManager = _scene->GetNodesManager();
 //	Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
 //
 //	Anima::AnimaFrustum* frustum = camerasManager->GetActiveCamera()->GetFrustum();
 
-	//	for (int i = 0; i < modelsManager->GetModelsCount(); i++)
-	//		UpdateModelVisibility(frustum, modelsManager->GetModel(i), Anima::AnimaMatrix());
+	//	for (int i = 0; i < nodesManager->GetNodesCount(); i++)
+	//		UpdateNodeVisibility(frustum, nodesManager->GetNode(i), Anima::AnimaMatrix());
 }
 
-void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh, AnimaMatrix parentMeshMatrix)
+void AnimaRenderer::UpdateNodeVisibility(AnimaFrustum* frustum, AnimaGeometry* geometry, AnimaMatrix parentGeometryMatrix)
 {
-	AnimaMatrix modelMatrix = parentMeshMatrix * mesh->GetTransformation()->GetTransformationMatrix();
+	AnimaMatrix nodeMatrix = parentGeometryMatrix * geometry->GetTransformation()->GetTransformationMatrix();
 
-	if (mesh->GetVerticesCount() > 0)
+	if (geometry->GetVerticesCount() > 0)
 	{
-		if (frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()))
-			mesh->SetIsVisible(true);
+		if (frustum->SphereInFrustum(parentGeometryMatrix * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()))
+			geometry->SetIsVisible(true);
 		else
 		{
-			mesh->SetIsVisible(false);
+			geometry->SetIsVisible(false);
 			return;
 		}
 	}
 
-	//AInt meshCount = mesh->GetMeshesCount();
-	//for (AInt i = 0; i < meshCount; i++)
+	//AInt geometryCount = geometry->GetGeometriesCount();
+	//for (AInt i = 0; i < geometryCount; i++)
 	//{
-	//	AnimaMesh* subMesh = mesh->GetMesh(i);
-	//	subMesh->SetIsVisible(frustum->SphereInFrustum(parentMeshMatrix * mesh->GetBoundingBoxCenter(), (mesh->GetBoundingBoxMin() - mesh->GetBoundingBoxMax()).Length()));
+	//	AnimaGeometry* subGeometry = geometry->GetGeometry(i);
+	//	subGeometry->SetIsVisible(frustum->SphereInFrustum(parentGeometryMatrix * geometry->GetBoundingBoxCenter(), (geometry->GetBoundingBoxMin() - geometry->GetBoundingBoxMax()).Length()));
 	//}
 
-	//AInt childrenCount = mesh->GetChildrenCount();
+	//AInt childrenCount = geometry->GetChildrenCount();
 	//for (AInt i = 0; i < childrenCount; i++)
-	//	UpdateModelVisibility(frustum, mesh->GetChild(i), modelMatrix);
+	//	UpdateNodeVisibility(frustum, geometry->GetChild(i), nodeMatrix);
 }
 
-//void AnimaRenderer::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix modelMatrix, AUint primitiveType)
+//void AnimaRenderer::AddPrimitive(AnimaArray<AnimaVertex3f>* vertices, AnimaArray<AUint>* indices, AnimaColor4f color, AnimaMatrix nodeMatrix, AUint primitiveType)
 //{
 //	if (vertices == nullptr)
 //		return;
@@ -1961,7 +1961,7 @@ void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh
 //	primitive->SetIndices(indices);
 //	primitive->SetColor(color);
 //	primitive->SetType(primitiveType);
-//	primitive->SetModelMatrix(modelMatrix);
+//	primitive->SetNodeMatrix(nodeMatrix);
 //	
 //	_primitives.push_back(primitive);
 //}
@@ -1988,13 +1988,13 @@ void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh
 //	AnimaArray<AnimaVertex3f>* vertices = primitive->GetVertices();
 //	AnimaArray<AUint>* indices = primitive->GetIndices();
 //	AUint type = primitive->GetType();
-//	AnimaMatrix modelMatrix = primitive->GetModelMatrix();
+//	AnimaMatrix nodeMatrix = primitive->GetNodeMatrix();
 //	
 //	if (color.w < 1.0f)
 //		glEnable(GL_BLEND);
 //	
 //	program->SetUniform("_color", color);
-//	program->SetUniform("_modelMatrix", modelMatrix);
+//	program->SetUniform("_nodeMatrix", nodeMatrix);
 //	
 //	AInt nVertices = vertices->size();
 //	AInt nCoordinate = nVertices * 3;
@@ -2047,14 +2047,14 @@ void AnimaRenderer::UpdateModelVisibility(AnimaFrustum* frustum, AnimaMesh* mesh
 //	if(glGetError() != GL_NO_ERROR)
 //		return;
 //	
-//	if (_filterMesh->NeedsBuffersUpdate())
-//		_filterMesh->UpdateBuffers();
+//	if (_filterGeometry->NeedsBuffersUpdate())
+//		_filterGeometry->UpdateBuffers();
 //	
 //	program->Use();
 //	program->UpdateSceneObjectProperties(_filterCamera, this);
 //	program->UpdateRenderingManagerProperies(this);
 //
-//	_filterMesh->Draw(this, program, false);
+//	_filterGeometry->Draw(this, program, false);
 //}
 
 void AnimaRenderer::SetTexture(AnimaString propertyName, AnimaTexture* value, bool deleteExistent)
@@ -2278,13 +2278,13 @@ void AnimaRenderer::Clear()
 		_filterCamera = nullptr;
 	}
 
-	if (_filterMesh != nullptr)
+	if (_filterGeometry != nullptr)
 	{
-		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterMesh);
-		_filterMesh = nullptr;
+		AnimaAllocatorNamespace::DeallocateObject(*_allocator, _filterGeometry);
+		_filterGeometry = nullptr;
 	}
 	
-	for (auto& pair : _meshesMap)
+	for (auto& pair : _geometriesMap)
 	{
 		if (pair.second != nullptr)
 		{
@@ -2323,7 +2323,7 @@ void AnimaRenderer::Clear()
 	_integersMap.clear();
 	_booleansMap.clear();
 
-	_meshesMap.clear();
+	_geometriesMap.clear();
 	
 	//ClearPrimitives();
 
@@ -2343,8 +2343,7 @@ void AnimaRenderer::Clear()
 //}
 
 bool AnimaRenderer::InitializeShaders()
-{
-	
+{	
 	AnimaString shadersPartsPath = SHADERS_PATH "Parts";
 	AnimaString shadersIncludesPath = SHADERS_PATH "Includes";
 	AnimaString shadersPath = SHADERS_PATH;
@@ -2353,7 +2352,7 @@ bool AnimaRenderer::InitializeShaders()
 	shadersManager->LoadShadersIncludes(shadersIncludesPath);
 	shadersManager->LoadShadersParts(shadersPartsPath);
 
-	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-mesh-base-material-pbr-inst.asp");
+	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-geometry-base-material-pbr-inst.asp");
 	if (!prepareProgram->Link())
 		return false;
 
@@ -2411,7 +2410,7 @@ bool AnimaRenderer::InitializeShaders()
 
 	_defaultShaderProgram = prepareProgram;
 	shadersManager->SetDefaultFragmentShader(shadersManager->GetShaderFromName("base-material-pbr-fs-inst"));
-	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-mesh-vs-inst"));
+	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-geometry-vs-inst"));
 
 	if(_physicsDebugDrawer != nullptr)
 		_physicsDebugDrawer->SetupPrograms(_engine);
@@ -2421,22 +2420,22 @@ bool AnimaRenderer::InitializeShaders()
 
 void AnimaRenderer::CheckPrograms(AnimaScene* scene)
 {
-	AnimaMeshesManager* meshesManager = scene->GetMeshesManager();
+	AnimaGeometriesManager* geometriesManager = scene->GetGeometriesManager();
 	AnimaShadersManager* shadersManager = scene->GetShadersManager();
 	AnimaMaterialsManager* materialsManager = scene->GetMaterialsManager();
 
-	AInt meshesCount = meshesManager->GetMeshesCount();
-	for (AInt i = 0; i < meshesCount; i++)
+	AInt geometriesCount = geometriesManager->GetGeometriesCount();
+	for (AInt i = 0; i < geometriesCount; i++)
 	{
-		AnimaMesh* mesh = meshesManager->GetMesh(i);
+		AnimaGeometry* geometry = geometriesManager->GetGeometry(i);
 
-		AnimaRendererDrawableMesh drawableMesh;
-		drawableMesh.SetMesh(mesh);
+		AnimaRendererDrawableGeometry drawableGeometry;
+		drawableGeometry.SetGeometry(geometry);
 
-		AInt instancesCount = mesh->GetInstancesCount();
+		AInt instancesCount = geometry->GetInstancesCount();
 		for (AInt j = 0; j < instancesCount; j++)
 		{
-			AnimaMeshInstance* instance = mesh->GetInstance(j);
+			AnimaGeometryInstance* instance = geometry->GetInstance(j);
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
 			AnimaString programName = instance->GetShaderProgramName();
@@ -2550,14 +2549,14 @@ void AnimaRenderer::CheckPrograms(AnimaScene* scene)
 //	return _type;
 //}
 //
-//void AnimaPrimitiveData::SetModelMatrix(const AnimaMatrix& modelMatrix)
+//void AnimaPrimitiveData::SetNodeMatrix(const AnimaMatrix& nodeMatrix)
 //{
-//	_modelMatrix = modelMatrix;
+//	_nodeMatrix = nodeMatrix;
 //}
 //
-//AnimaMatrix AnimaPrimitiveData::GetModelMatrix()
+//AnimaMatrix AnimaPrimitiveData::GetNodeMatrix()
 //{
-//	return _modelMatrix;
+//	return _nodeMatrix;
 //}
 
 END_ANIMA_ENGINE_NAMESPACE

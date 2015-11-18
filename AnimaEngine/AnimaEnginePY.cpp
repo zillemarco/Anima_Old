@@ -11,11 +11,11 @@
 #include "AnimaShadersManager.h"
 #include "AnimaScenesManager.h"
 #include "AnimaDataGeneratorsManager.h"
-#include "AnimaModelsManager.h"
+#include "AnimaNodesManager.h"
 #include "AnimaLightsManager.h"
-#include "AnimaMeshesManager.h"
-#include "AnimaModelInstancesManager.h"
-#include "AnimaMeshInstancesManager.h"
+#include "AnimaGeometriesManager.h"
+#include "AnimaNodeInstancesManager.h"
+#include "AnimaGeometryInstancesManager.h"
 #include "AnimaCamerasManager.h"
 #include "AnimaTexturesManager.h"
 #include "AnimaMaterialsManager.h"
@@ -26,11 +26,11 @@
 #include "AnimaTimer.h"
 
 #include "AnimaScene.h"
-#include "AnimaModel.h"
+#include "AnimaNode.h"
 #include "AnimaAnimation.h"
-#include "AnimaMesh.h"
-#include "AnimaModelInstance.h"
-#include "AnimaMeshInstance.h"
+#include "AnimaGeometry.h"
+#include "AnimaNodeInstance.h"
+#include "AnimaGeometryInstance.h"
 #include "AnimaShader.h"
 #include "AnimaShaderProgram.h"
 #include "AnimaCamera.h"
@@ -82,15 +82,15 @@ Anima::AnimaScene* (Anima::AnimaScenesManager::*CreateSceneString)(const Anima::
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneInt)(Anima::AUint) = &Anima::AnimaScenesManager::GetScene;
 Anima::AnimaScene* (Anima::AnimaScenesManager::*GetSceneString)(const Anima::AnimaString&) = &Anima::AnimaScenesManager::GetSceneFromName;
 
-Anima::AnimaModel* (Anima::AnimaModelsManager::*LoadModelFromExternalFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaModelsManager::LoadModelFromExternalFile;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*CreateModelString)(const Anima::AnimaString&, bool) = &Anima::AnimaModelsManager::CreateModel;
-Anima::AnimaModel* (Anima::AnimaModelsManager::*GetModelFromNameString)(const Anima::AnimaString&, bool) = &Anima::AnimaModelsManager::GetModelFromName;
+Anima::AnimaNode* (Anima::AnimaNodesManager::*LoadNodeFromExternalFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaNodesManager::LoadNodeFromExternalFile;
+Anima::AnimaNode* (Anima::AnimaNodesManager::*CreateNodeString)(const Anima::AnimaString&, bool) = &Anima::AnimaNodesManager::CreateNode;
+Anima::AnimaNode* (Anima::AnimaNodesManager::*GetNodeFromNameString)(const Anima::AnimaString&, bool) = &Anima::AnimaNodesManager::GetNodeFromName;
 
 Anima::AnimaAnimation* (Anima::AnimaAnimationsManager::*GetAnimationFromNameString)(const Anima::AnimaString&) = &Anima::AnimaAnimationsManager::GetAnimationFromName;
 
-Anima::AnimaMesh* (Anima::AnimaModel::*GetMeshFromNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::GetMeshFromName;
-void (Anima::AnimaModel::*SetOriginFileNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::SetOriginFileName;
-void (Anima::AnimaModel::*SetAnimationNodeNameString)(const Anima::AnimaString&) = &Anima::AnimaModel::SetAnimationNodeName;
+Anima::AnimaGeometry* (Anima::AnimaNode::*GetGeometryFromNameString)(const Anima::AnimaString&) = &Anima::AnimaNode::GetGeometryFromName;
+void (Anima::AnimaNode::*SetOriginFileNameString)(const Anima::AnimaString&) = &Anima::AnimaNode::SetOriginFileName;
+void (Anima::AnimaNode::*SetAnimationNodeNameString)(const Anima::AnimaString&) = &Anima::AnimaNode::SetAnimationNodeName;
 
 void (Anima::AnimaRenderer::*RendererStart)(Anima::AnimaScene*) = &Anima::AnimaRenderer::Start;
 
@@ -114,11 +114,11 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	class_<Anima::AnimaEngine>("AnimaEngine")
 		.def("Initialize", &Anima::AnimaEngine::Initialize)
 		.def("Terminate", &Anima::AnimaEngine::Terminate)
-		.def("GetModelsAllocator", &Anima::AnimaEngine::GetModelsAllocator, return_value_policy<reference_existing_object>())
+		.def("GetNodesAllocator", &Anima::AnimaEngine::GetNodesAllocator, return_value_policy<reference_existing_object>())
 		.def("GetGenericAllocator", &Anima::AnimaEngine::GetGenericAllocator, return_value_policy<reference_existing_object>())
-		.def("GetMeshesAllocator", &Anima::AnimaEngine::GetMeshesAllocator, return_value_policy<reference_existing_object>())
-		.def("GetModelInstancesAllocator", &Anima::AnimaEngine::GetModelInstancesAllocator, return_value_policy<reference_existing_object>())
-		.def("GetMeshInstancesAllocator", &Anima::AnimaEngine::GetMeshInstancesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetGeometriesAllocator", &Anima::AnimaEngine::GetGeometriesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetNodeInstancesAllocator", &Anima::AnimaEngine::GetNodeInstancesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetGeometryInstancesAllocator", &Anima::AnimaEngine::GetGeometryInstancesAllocator, return_value_policy<reference_existing_object>())
 		//	Deprecato	.def("GetStringAllocator", &Anima::AnimaEngine::GetStringAllocator, return_value_policy<reference_existing_object>())
 		.def("GetShadersAllocator", &Anima::AnimaEngine::GetShadersAllocator, return_value_policy<reference_existing_object>())
 		.def("GetCamerasAllocator", &Anima::AnimaEngine::GetCamerasAllocator, return_value_policy<reference_existing_object>())
@@ -143,10 +143,10 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	// AnimaScene
 	class_<Anima::AnimaScene>("AnimaScene", no_init)
 		.def("GetEngine", &Anima::AnimaScene::GetEngine, return_value_policy<reference_existing_object>())
-		.def("GetModelsManager", &Anima::AnimaScene::GetModelsManager, return_value_policy<reference_existing_object>())
-		.def("GetMeshesManager", &Anima::AnimaScene::GetMeshesManager, return_value_policy<reference_existing_object>())
-		.def("GetModelInstancesManager", &Anima::AnimaScene::GetModelInstancesManager, return_value_policy<reference_existing_object>())
-		.def("GetMeshInstancesManager", &Anima::AnimaScene::GetMeshInstancesManager, return_value_policy<reference_existing_object>())
+		.def("GetNodesManager", &Anima::AnimaScene::GetNodesManager, return_value_policy<reference_existing_object>())
+		.def("GetGeometriesManager", &Anima::AnimaScene::GetGeometriesManager, return_value_policy<reference_existing_object>())
+		.def("GetNodeInstancesManager", &Anima::AnimaScene::GetNodeInstancesManager, return_value_policy<reference_existing_object>())
+		.def("GetGeometryInstancesManager", &Anima::AnimaScene::GetGeometryInstancesManager, return_value_policy<reference_existing_object>())
 		.def("GetShadersManager", &Anima::AnimaScene::GetShadersManager, return_value_policy<reference_existing_object>())
 		.def("GetCamerasManager", &Anima::AnimaScene::GetCamerasManager, return_value_policy<reference_existing_object>())
 		.def("GetTexturesManager", &Anima::AnimaScene::GetTexturesManager, return_value_policy<reference_existing_object>())
@@ -155,9 +155,9 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 		.def("GetLightsManager", &Anima::AnimaScene::GetLightsManager, return_value_policy<reference_existing_object>())
 		.def("GetEngine", &Anima::AnimaScene::GetEngine, return_value_policy<reference_existing_object>())
 		.def("GetAnimationsManager", &Anima::AnimaScene::GetAnimationsManager, return_value_policy<reference_existing_object>())
-		.def("GetMeshesAllocator", &Anima::AnimaScene::GetMeshesAllocator, return_value_policy<reference_existing_object>())
-		.def("GetModelInstancesAllocator", &Anima::AnimaScene::GetModelInstancesAllocator, return_value_policy<reference_existing_object>())
-		.def("GetMeshInstancesAllocator", &Anima::AnimaScene::GetMeshInstancesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetGeometriesAllocator", &Anima::AnimaScene::GetGeometriesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetNodeInstancesAllocator", &Anima::AnimaScene::GetNodeInstancesAllocator, return_value_policy<reference_existing_object>())
+		.def("GetGeometryInstancesAllocator", &Anima::AnimaScene::GetGeometryInstancesAllocator, return_value_policy<reference_existing_object>())
 		.def("GetShadersAllocator", &Anima::AnimaScene::GetShadersAllocator, return_value_policy<reference_existing_object>())
 		.def("GetCamerasAllocator", &Anima::AnimaScene::GetCamerasAllocator, return_value_policy<reference_existing_object>())
 		.def("GetTexturesAllocator", &Anima::AnimaScene::GetTexturesAllocator, return_value_policy<reference_existing_object>())
@@ -181,43 +181,42 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	class_<Anima::AnimaAnimation>("AnimaAnimation", no_init)
 		.def("UpdateAnimation", &Anima::AnimaAnimation::UpdateAnimation);
 	
-	// AnimaModelsManager
-	class_<Anima::AnimaModelsManager>("AnimaModelsManager", no_init)
-		.def("LoadModelFromExternalFile", LoadModelFromExternalFileStringString, return_value_policy<reference_existing_object>())
-		.def("CreateModel", CreateModelString, return_value_policy<reference_existing_object>())
-		.def("GetModelFromName", GetModelFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetModel", &Anima::AnimaModelsManager::GetModel, return_value_policy<reference_existing_object>())
-		.def("ClearModels", &Anima::AnimaModelsManager::ClearModels);
+	// AnimaNodesManager
+	class_<Anima::AnimaNodesManager>("AnimaNodesManager", no_init)
+		.def("LoadNodesFromExternalFile", LoadNodeFromExternalFileStringString, return_value_policy<reference_existing_object>())
+		.def("CreateNode", CreateNodeString, return_value_policy<reference_existing_object>())
+		.def("GetNodeFromName", GetNodeFromNameString, return_value_policy<reference_existing_object>())
+		.def("GetNode", &Anima::AnimaNodesManager::GetNode, return_value_policy<reference_existing_object>())
+		.def("ClearNodes", &Anima::AnimaNodesManager::ClearNodes);
 
-	// AnimaModel
-	class_<Anima::AnimaModel>("AnimaModel", init<const Anima::AnimaString&, Anima::AnimaDataGeneratorsManager*, Anima::AnimaAllocator*>())
-		.def("SetMaterial", &Anima::AnimaModel::SetMaterial)
-		.def("GetMaterial", &Anima::AnimaModel::GetMaterial, return_value_policy<reference_existing_object>())
-		.def("GetMeshesCount", &Anima::AnimaModel::GetMeshesCount)
-		.def("AddMesh", &Anima::AnimaModel::AddMesh)
-		.def("GetMesh", &Anima::AnimaModel::GetMesh, return_value_policy<reference_existing_object>())
-		.def("GetMeshFromName", GetMeshFromNameString, return_value_policy<reference_existing_object>())
-		.def("GetAnimationsCount", &Anima::AnimaModel::GetAnimationsCount)
-		.def("SetAnimations", &Anima::AnimaModel::SetAnimations)
-		.def("AddAnimation", &Anima::AnimaModel::AddAnimation)
-		.def("GetAnimation", &Anima::AnimaModel::GetAnimation, return_value_policy<reference_existing_object>())
+	// AnimaNode
+	class_<Anima::AnimaNode>("AnimaNode", init<const Anima::AnimaString&, Anima::AnimaDataGeneratorsManager*, Anima::AnimaAllocator*>())
+		.def("SetMaterial", &Anima::AnimaNode::SetMaterial)
+		.def("GetMaterial", &Anima::AnimaNode::GetMaterial, return_value_policy<reference_existing_object>())
+		.def("GetGeometriesCount", &Anima::AnimaNode::GetGeometriesCount)
+		.def("AddGeometry", &Anima::AnimaNode::AddGeometry)
+		.def("GetGeometry", &Anima::AnimaNode::GetGeometry, return_value_policy<reference_existing_object>())
+		.def("GetGeometryFromName", GetGeometryFromNameString, return_value_policy<reference_existing_object>())
+		.def("GetAnimationsCount", &Anima::AnimaNode::GetAnimationsCount)
+		.def("SetAnimations", &Anima::AnimaNode::SetAnimations)
+		.def("AddAnimation", &Anima::AnimaNode::AddAnimation)
+		.def("GetAnimation", &Anima::AnimaNode::GetAnimation, return_value_policy<reference_existing_object>())
 		.def("SetOriginFileName", SetOriginFileNameString)
-		.def("GetAnimaOriginFileName", &Anima::AnimaModel::GetAnimaOriginFileName)
+		.def("GetAnimaOriginFileName", &Anima::AnimaNode::GetAnimaOriginFileName)
 		.def("SetAnimationNodeName", SetAnimationNodeNameString)
-		.def("GetAnimaAnimationNodeName", &Anima::AnimaModel::GetAnimaAnimationNodeName)
-		.def("GetMeshesBonesInfo", &Anima::AnimaModel::GetMeshesBonesInfo, return_value_policy<reference_existing_object>())
-		.def("SetMeshesBonesInfo", &Anima::AnimaModel::SetMeshesBonesInfo)
-		.def("ClearMeshesBonesInfo", &Anima::AnimaModel::ClearMeshesBonesInfo)
-		.def("UpdateAnimation", &Anima::AnimaModel::UpdateAnimation)
-		.def("SetActiveAnimation", &Anima::AnimaModel::SetActiveAnimation)
-		.def("StopAnimation", &Anima::AnimaModel::StopAnimation);
+		.def("GetAnimaAnimationNodeName", &Anima::AnimaNode::GetAnimaAnimationNodeName)
+		.def("GetGeometriesBonesInfo", &Anima::AnimaNode::GetGeometriesBonesInfo, return_value_policy<reference_existing_object>())
+		.def("SetGeometriesBonesInfo", &Anima::AnimaNode::SetGeometriesBonesInfo)
+		.def("ClearGeometriesBonesInfo", &Anima::AnimaNode::ClearGeometriesBonesInfo)
+		.def("UpdateAnimation", &Anima::AnimaNode::UpdateAnimation)
+		.def("SetActiveAnimation", &Anima::AnimaNode::SetActiveAnimation)
+		.def("StopAnimation", &Anima::AnimaNode::StopAnimation);
 
 	// AnimaRenderer
 	class_<Anima::AnimaRenderer, boost::noncopyable>("AnimaRenderer", init<Anima::AnimaEngine*, Anima::AnimaAllocator*>())
 		.def("Start", RendererStart)
 		.def("DrawAll", &Anima::AnimaRenderer::Render)
 		//.def("AddPrimitive", &Anima::AnimaRenderer::AddPrimitive)
-		.def("UpdateModelsVisibility", &Anima::AnimaRenderer::UpdateModelsVisibility)
 		.def("InitTextureSlots", &Anima::AnimaRenderer::InitTextureSlots)
 		.def("InitRenderingTargets", &Anima::AnimaRenderer::InitRenderingTargets)
 		.def("InitRenderingUtilities", &Anima::AnimaRenderer::InitRenderingUtilities);

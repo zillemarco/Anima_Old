@@ -7,7 +7,7 @@
 //
 
 #include "AnimaAnimation.h"
-#include "AnimaModel.h"
+#include "AnimaNode.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -73,29 +73,29 @@ AnimaAnimation& AnimaAnimation::operator=(AnimaAnimation&& src)
 	return *this;
 }
 
-void AnimaAnimation::UpdateAnimation(AnimaModel* model, AFloat time)
+void AnimaAnimation::UpdateAnimation(AnimaNode* node, AFloat time)
 {
 	AFloat timeInTicks = time * _ticksPerSecond;
 	AFloat animationTime = fmod(timeInTicks, _duration);
 
-	AnimaMatrix globalInverseMatrix = model->GetTransformation()->GetModelNodeTransformationMatrix();
+	AnimaMatrix globalInverseMatrix = node->GetTransformation()->GetAnimationGlobalInverseMatrix();
 	globalInverseMatrix.Inverse();
 
-	AnimaMappedArray<AnimaMeshBoneInfo*>* meshesBonesInfo = model->GetMeshesBonesInfo();
-	UpdateModelNodesAnimation(model, animationTime, AnimaMatrix(), globalInverseMatrix, meshesBonesInfo);
+	AnimaMappedArray<AnimaGeometryBoneInfo*>* geometriesBonesInfo = node->GetGeometriesBonesInfo();
+	UpdateNodeNodesAnimation(node, animationTime, AnimaMatrix(), globalInverseMatrix, geometriesBonesInfo);
 
 	AnimaArray<AnimaMatrix> matrices;
-	AInt count = meshesBonesInfo->GetSize();
+	AInt count = geometriesBonesInfo->GetSize();
 	for (AInt i = 0; i < count; i++)
-		matrices.push_back(meshesBonesInfo->Get(i)->GetFinalTransformation());
+		matrices.push_back(geometriesBonesInfo->Get(i)->GetFinalTransformation());
 
-	model->SetMatrixArray("BonesTransformations", &matrices);
+	node->SetMatrixArray("BonesTransformations", &matrices);
 }
 
-void AnimaAnimation::UpdateModelNodesAnimation(AnimaModel* model, AFloat animationTime, const AnimaMatrix& parentMatrix, const AnimaMatrix& globalInverseMatrix, AnimaMappedArray<AnimaMeshBoneInfo*>* mesheBonesInfo)
+void AnimaAnimation::UpdateNodeNodesAnimation(AnimaNode* node, AFloat animationTime, const AnimaMatrix& parentMatrix, const AnimaMatrix& globalInverseMatrix, AnimaMappedArray<AnimaGeometryBoneInfo*>* geometryeBonesInfo)
 {
-	AnimaString animatioNodeName = model->GetAnimaAnimationNodeName();
-	AnimaMatrix nodeMatrix = model->GetTransformation()->GetModelNodeTransformationMatrix();
+	AnimaString animatioNodeName = node->GetAnimaAnimationNodeName();
+	AnimaMatrix nodeMatrix = node->GetTransformation()->GetAnimationGlobalInverseMatrix();
 	AnimaAnimationNode* animationNode = _animationNodes[animatioNodeName];
 
 	if (animationNode)
@@ -113,13 +113,13 @@ void AnimaAnimation::UpdateModelNodesAnimation(AnimaModel* model, AFloat animati
 
 	AnimaMatrix globalTransformation = parentMatrix * nodeMatrix;
 
-	AnimaMeshBoneInfo* info = mesheBonesInfo->GetWithName(animatioNodeName);
+	AnimaGeometryBoneInfo* info = geometryeBonesInfo->GetWithName(animatioNodeName);
 	if (info != nullptr)
 		info->SetFinalTransformation(globalInverseMatrix * globalTransformation * info->GetBoneOffset());
 
-	AInt childrenCount = model->GetChildrenCount();
+	AInt childrenCount = node->GetChildrenCount();
 	for (AInt nc = 0; nc < childrenCount; nc++)
-		UpdateModelNodesAnimation((AnimaModel*)model->GetChild(nc), animationTime, globalTransformation, globalInverseMatrix, mesheBonesInfo);
+		UpdateNodeNodesAnimation((AnimaNode*)node->GetChild(nc), animationTime, globalTransformation, globalInverseMatrix, geometryeBonesInfo);
 }
 
 AInt AnimaAnimation::GetAnimationNodesCount() const
