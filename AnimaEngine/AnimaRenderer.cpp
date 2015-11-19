@@ -1740,7 +1740,7 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 	program->UpdateRenderingManagerProperies(renderer);
 	renderer->_filterGeometry->Draw(renderer, program, true, true, false);
 
-	AnimaTexture* skyTexture = renderer->GetTexture("SkyBox");
+	AnimaTexture* skyTexture = renderer->_scene->GetTexture("SkyBox");
 	if (skyTexture != nullptr)
 	{
 		AnimaGeometry* skyGeometry = renderer->_geometriesMap["skybox_RENGEOMETRY"];
@@ -1757,6 +1757,7 @@ void AnimaRenderer::CombinePass(AnimaRenderer* renderer)
 
 			skyGeometry->GetTransformation()->SetTranslation(camera->GetPosition());
 
+			skyProgram->UpdateMappedValuesObjectProperties(renderer->_scene, renderer);
 			skyProgram->UpdateRenderingManagerProperies(renderer);
 						
 			glStencilFunc(GL_EQUAL, 0, 1);

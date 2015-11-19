@@ -17,6 +17,7 @@ AnimaNamedObject::AnimaNamedObject(const AnimaString& name, AnimaAllocator* allo
 
 	_name = name;
 	_savingDirectory = "";
+	_readingDirectory = "";
 }
 
 AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
@@ -26,6 +27,7 @@ AnimaNamedObject::AnimaNamedObject(const AnimaNamedObject& src)
 	, _derivedClassNames(src._derivedClassNames)
 {
 	_savingDirectory = "";
+	_readingDirectory = "";
 }
 
 AnimaNamedObject::AnimaNamedObject(AnimaNamedObject&& src)
@@ -35,6 +37,7 @@ AnimaNamedObject::AnimaNamedObject(AnimaNamedObject&& src)
 	, _derivedClassNames(src._derivedClassNames)
 {
 	_savingDirectory = "";
+	_readingDirectory = "";
 }
 
 AnimaNamedObject::~AnimaNamedObject()
@@ -51,6 +54,7 @@ AnimaNamedObject& AnimaNamedObject::operator=(const AnimaNamedObject& src)
 		_derivedClassNames = src._derivedClassNames;
 		
 		_savingDirectory = "";
+		_readingDirectory = "";
 	}
 
 	return *this;
@@ -66,6 +70,7 @@ AnimaNamedObject& AnimaNamedObject::operator=(AnimaNamedObject&& src)
 		_derivedClassNames = src._derivedClassNames;
 		
 		_savingDirectory = "";
+		_readingDirectory = "";
 	}
 
 	return *this;
@@ -148,11 +153,17 @@ ptree AnimaNamedObject::GetObjectTree(bool saveName) const
 
 bool AnimaNamedObject::ReadObject(const AnimaString& sourcePath, AnimaScene* scene)
 {
+	namespace fs = boost::filesystem;
+	
 	std::ifstream fileStream(sourcePath);
 	AnimaString xml((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 	fileStream.close();
 	
-	return ReadObject(xml, scene);
+	_readingDirectory = fs::path(sourcePath).parent_path().string();
+	bool rv = ReadObjectFromXML(xml, scene);
+	_readingDirectory = "";
+	
+	return rv;
 }
 
 bool AnimaNamedObject::ReadObjectFromXML(const AnimaString& xml, AnimaScene* scene)

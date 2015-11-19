@@ -68,6 +68,10 @@ public:
 	
 	bool IsActive() { return _active; }
 	
+public:
+	ptree GetObjectTree(bool saveName = true) const override;
+	bool ReadObject(const ptree& objectTree, AnimaScene* scene, bool readName = true) override;
+	
 protected:
 	void InitializeManagers();
 	void TerminateManagers();

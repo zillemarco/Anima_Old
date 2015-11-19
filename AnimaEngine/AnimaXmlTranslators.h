@@ -575,6 +575,7 @@ struct AnimaXmlShaderDataSourceObjectTranslator
 			else if (iequals(str, "LIGHT"))		return Anima::ASDSO_LIGHT;
 			else if (iequals(str, "CAMERA"))	return Anima::ASDSO_CAMERA;
 			else if (iequals(str, "GBUFFER"))	return Anima::ASDSO_GBUFFER;
+			else if (iequals(str, "SCENE"))		return Anima::ASDSO_SCENE;
 			else if (iequals(str, "NONE"))		return Anima::ASDSO_NONE;
 			
 			return Anima::ASDSO_NONE;
@@ -594,6 +595,7 @@ struct AnimaXmlShaderDataSourceObjectTranslator
 			case Anima::ASDSO_MATERIAL:	return Anima::AnimaString("MATERIAL"); break;
 			case Anima::ASDSO_CAMERA:	return Anima::AnimaString("CAMERA"); break;
 			case Anima::ASDSO_GBUFFER:	return Anima::AnimaString("GBUFFER"); break;
+			case Anima::ASDSO_SCENE:	return Anima::AnimaString("SCENE"); break;
 			case Anima::ASDSO_NONE:		return Anima::AnimaString("NONE"); break;
 		}
 		

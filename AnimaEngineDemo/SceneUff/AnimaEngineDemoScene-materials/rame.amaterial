@@ -21,14 +21,9 @@
 					</Value>
 				</Property>
 				<Property>
-					<Name>ReflectionIntensity</Name>
+					<Name>Specular</Name>
 					<Type>float</Type>
-					<Value>0.800000012</Value>
-				</Property>
-				<Property>
-					<Name>Metallic</Name>
-					<Type>float</Type>
-					<Value>1</Value>
+					<Value>0.5</Value>
 				</Property>
 				<Property>
 					<Name>Roughness</Name>
@@ -36,9 +31,14 @@
 					<Value>0.25</Value>
 				</Property>
 				<Property>
-					<Name>Specular</Name>
+					<Name>Metallic</Name>
 					<Type>float</Type>
-					<Value>0.5</Value>
+					<Value>1</Value>
+				</Property>
+				<Property>
+					<Name>ReflectionIntensity</Name>
+					<Type>float</Type>
+					<Value>0.800000012</Value>
 				</Property>
 				<Property>
 					<Name>TwoSided</Name>

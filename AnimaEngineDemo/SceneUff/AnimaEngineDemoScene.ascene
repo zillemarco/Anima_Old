@@ -2,39 +2,61 @@
 <AnimaScene>
 	<Name>AnimaEngineDemoScene</Name>
 	<TexturesPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-textures</Value>
+		<Type>relative</Type>
 	</TexturesPath>
 	<MaterialsPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-materials</Value>
+		<Type>relative</Type>
 	</MaterialsPath>
 	<NodesPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-nodes</Value>
+		<Type>relative</Type>
 	</NodesPath>
 	<GeometriesPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-geometries</Value>
+		<Type>relative</Type>
 	</GeometriesPath>
 	<NodesInstancesPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-nodesInstances</Value>
+		<Type>relative</Type>
 	</NodesInstancesPath>
 	<GeometriesInstancesPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-geometriesInstances</Value>
+		<Type>relative</Type>
 	</GeometriesInstancesPath>
 	<CamerasPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-cameras</Value>
+		<Type>relative</Type>
 	</CamerasPath>
 	<LightsPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-lights</Value>
+		<Type>relative</Type>
 	</LightsPath>
 	<AnimationsPath>
-		<Type>relative</Type>
 		<Value>AnimaEngineDemoScene-animations</Value>
+		<Type>relative</Type>
 	</AnimationsPath>
+	<MappedValues>
+		<AnimaMappedValues>
+			<Properties>
+				<Property>
+					<Name>SkyBox</Name>
+					<Type>texture</Type>
+					<Value>
+						<AnimaTextureGenerator>
+							<Name>SkyBox.valueGenerator</Name>
+							<TextureName>dds-skybox-texture</TextureName>
+							<DataGenerator>
+								<AnimaDataGenerator>
+									<CanUpdateValue>true</CanUpdateValue>
+								</AnimaDataGenerator>
+							</DataGenerator>
+						</AnimaTextureGenerator>
+					</Value>
+				</Property>
+			</Properties>
+			<NamedObject/>
+		</AnimaMappedValues>
+	</MappedValues>
 </AnimaScene>

@@ -63,6 +63,9 @@ public:
 	
 	virtual AnimaString GetSavingDirectory() const { return _savingDirectory; };
 	
+	virtual void SetReadingDirectory(const AnimaString& directory) { _readingDirectory = directory; }
+	virtual AnimaString GetReadingDirectory() const { return _readingDirectory; }
+	
 protected:
 	void _AddDerivedClassName(AnimaString derivedClassName);
 	void _SetClassName(AnimaString className);
@@ -79,6 +82,7 @@ protected:
 	AnimaArray<AnimaString> _derivedClassNames;
 	
 	AnimaString _savingDirectory;
+	AnimaString _readingDirectory;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

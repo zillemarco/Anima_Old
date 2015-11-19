@@ -7,7 +7,7 @@
 			<API>OGL</API>
 			<MinVersion>3.3</MinVersion>
 			<Datas>
-				<Data propertyName="SkyBox" type="TEXTURECUBE" sourceObject="RENDERER"/>
+				<Data propertyName="SkyBox" type="TEXTURECUBE" sourceObject="SCENE"/>
 			</Datas>
 			<Code>
 				<![CDATA[

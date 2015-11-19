@@ -52,6 +52,7 @@ enum AnimaShaderDataSourceObject {
 	ASDSO_LIGHT,
 	ASDSO_GBUFFER,
 	ASDSO_CAMERA,
+	ASDSO_SCENE,
 	ASDSO_NONE
 };
 

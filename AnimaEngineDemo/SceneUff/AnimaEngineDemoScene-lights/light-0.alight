@@ -10,7 +10,7 @@
 							<Traslation>0.000000;0.000000;0.000000</Traslation>
 							<Rotation>0.000000;0.000000;0.000000</Rotation>
 							<Scale>1.000000;1.000000;1.000000</Scale>
-							<ModelNodeTransformationMatrix>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</ModelNodeTransformationMatrix>
+							<AnimationGlobalInverseMatrix>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</AnimationGlobalInverseMatrix>
 						</AnimaTransformation>
 					</Transformation>
 					<Children/>
@@ -63,6 +63,21 @@
 									</Value>
 								</Property>
 								<Property>
+									<Name>Extension</Name>
+									<Type>vector</Type>
+									<Value>
+										<AnimaVectorGenerator>
+											<Name>Extension.valueGenerator</Name>
+											<Vector>100.000000;100.000000;100.000000;1.000000</Vector>
+											<DataGenerator>
+												<AnimaDataGenerator>
+													<CanUpdateValue>true</CanUpdateValue>
+												</AnimaDataGenerator>
+											</DataGenerator>
+										</AnimaVectorGenerator>
+									</Value>
+								</Property>
+								<Property>
 									<Name>ShadowMapBias</Name>
 									<Type>float</Type>
 									<Value>0.0009765625</Value>
@@ -78,24 +93,49 @@
 									<Value>true</Value>
 								</Property>
 								<Property>
-									<Name>LightMeshMatrix</Name>
+									<Name>ANormalMatrix</Name>
+									<Type>matrix</Type>
+									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
+								</Property>
+								<Property>
+									<Name>AModelMatrix</Name>
+									<Type>matrix</Type>
+									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
+								</Property>
+								<Property>
+									<Name>LightGeometryMatrix</Name>
 									<Type>matrix</Type>
 									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;-0.000000;1.000000;0.000000;0.000000;-1.000000;-0.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
 								</Property>
 								<Property>
 									<Name>ProjectionViewMatrix</Name>
 									<Type>matrix</Type>
-									<Value>-0.069956;-0.157289;0.097392;0.000000;0.069956;-0.157289;-0.097392;0.000000;-0.139912;0.000000;-0.097392;0.000000;0.403964;0.134061;-0.124135;1.000000</Value>
+									<Value>-0.004082;-0.007071;0.005774;0.000000;0.004082;-0.007071;-0.005774;0.000000;-0.008165;0.000000;-0.005774;0.000000;-0.061237;-0.176777;0.346410;1.000000</Value>
+								</Property>
+								<Property>
+									<Name>LightMeshMatrix</Name>
+									<Type>matrix</Type>
+									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;-0.000000;1.000000;0.000000;0.000000;-1.000000;-0.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
+								</Property>
+								<Property>
+									<Name>RModelMatrix</Name>
+									<Type>matrix</Type>
+									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
 								</Property>
 								<Property>
 									<Name>ProjectionMatrix</Name>
 									<Type>matrix</Type>
-									<Value>0.171357;0.000000;0.000000;0.000000;0.000000;0.222441;0.000000;0.000000;0.000000;0.000000;-0.168687;0.000000;-0.000000;-0.000000;-0.000000;1.000000</Value>
+									<Value>0.010000;0.000000;0.000000;0.000000;0.000000;0.010000;0.000000;0.000000;0.000000;0.000000;-0.010000;0.000000;-0.000000;-0.000000;-0.000000;1.000000</Value>
+								</Property>
+								<Property>
+									<Name>RNormalMatrix</Name>
+									<Type>matrix</Type>
+									<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
 								</Property>
 								<Property>
 									<Name>ViewMatrix</Name>
 									<Type>matrix</Type>
-									<Value>-0.408248;-0.707107;-0.577350;0.000000;0.408248;-0.707107;0.577350;0.000000;-0.816497;0.000000;0.577350;0.000000;2.357447;0.602683;0.735891;1.000000</Value>
+									<Value>-0.408248;-0.707107;-0.577350;0.000000;0.408248;-0.707107;0.577350;0.000000;-0.816497;0.000000;0.577350;0.000000;-6.123725;-17.677673;-34.641022;1.000000</Value>
 								</Property>
 							</Properties>
 							<NamedObject/>

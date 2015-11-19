@@ -834,11 +834,12 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 #if defined SAVE_SCENE
 	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	_scene->SetTexture("SkyBox", textureSkyBox);
 #else
 	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
-	textureSkyBox->Load();
 #endif
-	_renderer->SetTexture("SkyBox", textureSkyBox, false);
+	textureSkyBox->Load();
+	
 	_renderer->CheckPrograms(_scene);
 	
 	return true;
