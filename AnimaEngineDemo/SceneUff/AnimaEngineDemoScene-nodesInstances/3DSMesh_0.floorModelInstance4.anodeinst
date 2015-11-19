@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNodeInstance>
 	<Name>3DSMesh_0.floorModelInstance4</Name>
-	<TopLevelNode>false</TopLevelNode>
+	<IsAsset>false</IsAsset>
 	<NodeName>3DSMesh_0</NodeName>
 	<GeometriesInstances>
 		<GeometryInstance>floorModel.mesh0.instance3</GeometryInstance>

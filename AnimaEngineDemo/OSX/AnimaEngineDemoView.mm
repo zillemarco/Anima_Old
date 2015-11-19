@@ -11,36 +11,34 @@
 // AnimaEngine includes
 #include <AnimaGC.h>
 #include <AnimaEngine.h>
-#include <AnimaModelsManager.h>
+#include <AnimaNodesManager.h>
 #include <AnimaScenesManager.h>
 #include <AnimaMaterialsManager.h>
 #include <AnimaShadersManager.h>
 #include <AnimaCamerasManager.h>
 #include <AnimaAnimationsManager.h>
-#include <AnimaModelInstancesManager.h>
+#include <AnimaNodeInstancesManager.h>
 #include <AnimaMaterialsManager.h>
-#include <AnimaMeshesManager.h>
+#include <AnimaGeometriesManager.h>
 #include <AnimaLightsManager.h>
 #include <AnimaTexturesManager.h>
 #include <AnimaParallelProgramsManager.h>
 #include <AnimaPhysicsDebugDrawer.h>
 
 #include <AnimaScene.h>
-#include <AnimaModel.h>
-#include <AnimaMesh.h>
+#include <AnimaNode.h>
+#include <AnimaGeometry.h>
 #include <AnimaShaderProgram.h>
 #include <AnimaRenderer.h>
 #include <AnimaFirstPersonCamera.h>
 #include <AnimaAnimation.h>
 #include <AnimaTimer.h>
-#include <AnimaModelInstance.h>
+#include <AnimaNodeInstance.h>
 #include <AnimaMaterial.h>
 #include <AnimaLight.h>
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
-#include <AnimaDefaultMouseInteractor.h>
-#include <AnimaKeyboardInteractor.h>
-#include <AnimaJoystickInteractor.h>
+#include <AnimaDefaultInteractors.h>
 
 #define ANIMA_ENGINE_DEMO_SCENE_NAME "AnimaEngineDemoScene"
 #define ANIMA_ENGINE_DEMO_CAMERA_NAME "AnimaEngineDemoCamera"
@@ -57,8 +55,8 @@ Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
 Anima::AnimaCamerasManager* _camerasManager = nullptr;
 Anima::AnimaCamera* _camera = nullptr;
-Anima::AnimaModel* _model = nullptr;
-Anima::AnimaModel* _floorModel = nullptr;
+Anima::AnimaNode* _model = nullptr;
+Anima::AnimaNode* _floorModel = nullptr;
 Anima::AnimaAnimationsManager* _animationsManager = nullptr;
 Anima::AnimaRenderer* _renderer = nullptr;
 Anima::AnimaEngine _engine;
@@ -67,8 +65,8 @@ Anima::AnimaTimer _fpsTimer;
 Anima::AnimaMaterial* _pbrMaterial;
 
 Anima::AnimaDefaultMouseInteractor mouseInteractor;
-Anima::AnimaKeyboardInteractor keyboardInteractor;
-Anima::AnimaJoystickInteractor* joystickInteractor = Anima::AnimaJoystickInteractor::GetInstance();
+Anima::AnimaDefaultKeyboardInteractor keyboardInteractor;
+Anima::AnimaDefaultJoystickInteractor* joystickInteractor = (Anima::AnimaDefaultJoystickInteractor*)Anima::AnimaDefaultJoystickInteractor::GetInstance();
 
 float lastXPos = 0;
 float lastYPos = 0;
@@ -185,88 +183,94 @@ bool moveDownPressed = false;
 			
 			if(joystickInteractor->Install(0, &_engine))
 			{
-				joystickInteractor->SetEventHandler("onButtonPressed", [](Anima::AnimaEventArgs* args) {
-					Anima::AnimaEngine* engine = ((Anima::AnimaJoystickInteractor*)args->GetSourceEvent())->GetEngine();
-					Anima::AnimaJoystickButtonEventArgs* buttonArgs = (Anima::AnimaJoystickButtonEventArgs*)args;
-					
-					if(buttonArgs->GetButtonId() == 7)
-					{
-						if(engine)
-						{
-							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
-							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
-							
-							if(scene)
-							{
-								Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-								Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-								
-								if(camera)
-								{
-									Anima::AnimaCameraType type = camera->GetCameraType();
-									if(type == Anima::ACT_FIRST_PERSON || type == Anima::ACT_SPECTATOR)
-										camera->SetCameraType(Anima::ACT_FLIGHT);
-									else if(type == Anima::ACT_FLIGHT)
-										camera->SetCameraType(Anima::ACT_ORBIT);
-									else if(type == Anima::ACT_ORBIT)
-										camera->SetCameraType(Anima::ACT_FIRST_PERSON);
-								}
-							}
-						}
-					}
-				});				
-				joystickInteractor->SetEventHandler("onUpdateScene", [](Anima::AnimaEventArgs* args){
-					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
-					Anima::AnimaJoystickDevice* joystick = ((Anima::AnimaJoystickInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetJoystick(0);
-					
-					if(scene && joystick->IsPresent())
-					{
-						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-						
-						if(camera)
-						{
-							Anima::AnimaArray<Anima::AFloat> axis = joystick->GetAxis();
-							
-							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
-							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
-							
-							Anima::AnimaVertex3f maxVel = camera->GetDefaultMaximumVelocity();
-							
-							float rotationMultiplier = 15.0f;
-							float velocityMultiplier = 30.0f;
-							
-							if (axis[0] != 0.0f)
-							{
-								direction.x = axis[0] > 0.0f ? 1.0f : -1.0f;
-								maxVel.x = fabs(axis[0]) * velocityMultiplier;
-							}
-							
-							if (axis[1] != 0.0f)
-							{
-								direction.z = axis[1] > 0.0f ? -1.0f : 1.0f;
-								maxVel.z = fabs(axis[1]) * velocityMultiplier;
-							}
-							
-							camera->SetMaximumVelocity(maxVel);
-							
-							switch (camera->GetCameraType())
-							{
-								case Anima::ACT_FIRST_PERSON:
-								case Anima::ACT_SPECTATOR:
-									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, -axis[3] * rotationMultiplier, 0.0f);
-									break;
-								case Anima::ACT_FLIGHT:
-									camera->SmoothRotateDeg(0.0f, axis[3] * rotationMultiplier, -axis[2] * rotationMultiplier);
-									break;									
-								case Anima::ACT_ORBIT:
-									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, axis[3] * rotationMultiplier, 0.0f);
-									break;
-							}
-							camera->SetUpdateData(direction);
-						}
-					}
-				});
+//				joystickInteractor->SetEventHandler("onButtonPressed", [](Anima::AnimaEventArgs* args) {
+//					Anima::AnimaEngine* engine = ((Anima::AnimaJoystickInteractor*)args->GetSourceEvent())->GetEngine();
+//					Anima::AnimaJoystickButtonEventArgs* buttonArgs = (Anima::AnimaJoystickButtonEventArgs*)args;
+//					
+//					if (buttonArgs->GetButtonId() == 7)
+//					{
+//						if (engine)
+//						{
+//							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+//							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+//					
+//							if (scene)
+//							{
+//								Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+//								Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+//					
+//								if (camera)
+//								{
+//									Anima::AnimaCameraType type = camera->GetCameraType();
+//									if (type == Anima::ACT_FIRST_PERSON || type == Anima::ACT_SPECTATOR)
+//										camera->SetCameraType(Anima::ACT_FLIGHT);
+//									else if (type == Anima::ACT_FLIGHT)
+//										camera->SetCameraType(Anima::ACT_ORBIT);
+//									else if (type == Anima::ACT_ORBIT)
+//										camera->SetCameraType(Anima::ACT_FIRST_PERSON);
+//								}
+//							}
+//						}
+//					}
+//				});
+//				joystickInteractor->SetEventHandler("onAxisMoved", [](Anima::AnimaEventArgs* args) {
+//					Anima::AnimaJoystickAxisEventArgs* axisArgs = (Anima::AnimaJoystickAxisEventArgs*)args;
+//					
+//					printf("Moved axis %d: %f\n", axisArgs->GetAxisId(), axisArgs->GetAxisValue());
+//				});
+//				
+//				joystickInteractor->SetEventHandler("onUpdateScene", [](Anima::AnimaEventArgs* args){
+//					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
+//					Anima::AnimaJoystickDevice* joystick = ((Anima::AnimaJoystickInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetJoystick(0);
+//					
+//					if(scene && joystick->IsPresent())
+//					{
+//						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+//						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+//						
+//						if(camera)
+//						{
+//							Anima::AnimaArray<Anima::AFloat> axis = joystick->GetAxis();
+//							
+//							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
+//							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
+//							
+//							Anima::AnimaVertex3f maxVel = camera->GetDefaultMaximumVelocity();
+//							
+//							float rotationMultiplier = 15.0f;
+//							float velocityMultiplier = 30.0f;
+//							
+//							if (axis[0] != 0.0f)
+//							{
+//								direction.x = axis[0] > 0.0f ? 1.0f : -1.0f;
+//								maxVel.x = fabs(axis[0]) * velocityMultiplier;
+//							}
+//							
+//							if (axis[1] != 0.0f)
+//							{
+//								direction.z = axis[1] > 0.0f ? -1.0f : 1.0f;
+//								maxVel.z = fabs(axis[1]) * velocityMultiplier;
+//							}
+//							
+//							camera->SetMaximumVelocity(maxVel);
+//							
+//							switch (camera->GetCameraType())
+//							{
+//								case Anima::ACT_FIRST_PERSON:
+//								case Anima::ACT_SPECTATOR:
+//									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, -axis[3] * rotationMultiplier, 0.0f);
+//									break;
+//								case Anima::ACT_FLIGHT:
+//									camera->SmoothRotateDeg(0.0f, axis[3] * rotationMultiplier, -axis[2] * rotationMultiplier);
+//									break;									
+//								case Anima::ACT_ORBIT:
+//									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, axis[3] * rotationMultiplier, 0.0f);
+//									break;
+//							}
+//							camera->SetUpdateData(direction);
+//						}
+//					}
+//				});
 			}
 			
 			if(mouseInteractor.Install((long)self, &_engine))
@@ -302,7 +306,7 @@ bool moveDownPressed = false;
 								
 								if(RayCallback.hasHit())
 								{
-									Anima::AnimaMeshInstance* instance = (Anima::AnimaMeshInstance*)RayCallback.m_collisionObject->getUserPointer();
+									Anima::AnimaGeometryInstance* instance = (Anima::AnimaGeometryInstance*)RayCallback.m_collisionObject->getUserPointer();
 									Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
 									
 									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
@@ -327,114 +331,114 @@ bool moveDownPressed = false;
 			
 			if(keyboardInteractor.Install((long)self, &_engine))
 			{
-				keyboardInteractor.SetEventHandler("onUpdateScene", [&] (Anima::AnimaEventArgs* args) {
-					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
-					Anima::AnimaKeyboardStatusMap keyboardStatus = ((Anima::AnimaKeyboardInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetKeyboardStatus();
-					
-					if(scene)
-					{
-						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-						
-						if(camera)
-						{
-							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
-							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_W])
-							{
-								if (!moveForwardsPressed)
-								{
-									moveForwardsPressed = true;
-									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
-								}
-									
-								direction.z += 1.0f;
-							}
-							else
-							{
-								moveForwardsPressed = false;
-							}
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_S])
-							{
-								if (!moveBackwardsPressed)
-								{
-									moveBackwardsPressed = true;
-									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
-								}
-							
-								direction.z -= 1.0f;
-							}
-							else
-							{
-								moveBackwardsPressed = false;
-							}
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_D])
-							{
-								if (!moveRightPressed)
-								{
-									moveRightPressed = true;
-									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
-								}
-								
-								direction.x += 1.0f;
-							}
-							else
-							{
-								moveRightPressed = false;
-							}
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_A])
-							{
-								if (!moveLeftPressed)
-								{
-									moveLeftPressed = true;
-									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
-								}
-									
-								direction.x -= 1.0f;
-							}
-							else
-							{
-								moveLeftPressed = false;
-							}
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_E])
-							{
-								if (!moveUpPressed)
-								{
-									moveUpPressed = true;
-									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
-								}
-								
-								direction.y += 1.0f;
-							}
-							else
-							{
-								moveUpPressed = false;
-							}
-								
-							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_Q])
-							{
-								if (!moveDownPressed)
-								{
-									moveDownPressed = true;
-									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
-								}
-								
-								direction.y -= 1.0f;
-							}
-							else
-							{
-								moveDownPressed = false;
-							}
-								
-							camera->SetUpdateData(direction);
-						}
-					}
-				});
+//				keyboardInteractor.SetEventHandler("onUpdateScene", [&] (Anima::AnimaEventArgs* args) {
+//					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
+//					Anima::AnimaKeyboardStatusMap keyboardStatus = ((Anima::AnimaKeyboardInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetKeyboardStatus();
+//					
+//					if(scene)
+//					{
+//						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+//						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+//						
+//						if(camera)
+//						{
+//							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
+//							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_W])
+//							{
+//								if (!moveForwardsPressed)
+//								{
+//									moveForwardsPressed = true;
+//									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
+//								}
+//									
+//								direction.z += 1.0f;
+//							}
+//							else
+//							{
+//								moveForwardsPressed = false;
+//							}
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_S])
+//							{
+//								if (!moveBackwardsPressed)
+//								{
+//									moveBackwardsPressed = true;
+//									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
+//								}
+//							
+//								direction.z -= 1.0f;
+//							}
+//							else
+//							{
+//								moveBackwardsPressed = false;
+//							}
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_D])
+//							{
+//								if (!moveRightPressed)
+//								{
+//									moveRightPressed = true;
+//									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
+//								}
+//								
+//								direction.x += 1.0f;
+//							}
+//							else
+//							{
+//								moveRightPressed = false;
+//							}
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_A])
+//							{
+//								if (!moveLeftPressed)
+//								{
+//									moveLeftPressed = true;
+//									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
+//								}
+//									
+//								direction.x -= 1.0f;
+//							}
+//							else
+//							{
+//								moveLeftPressed = false;
+//							}
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_E])
+//							{
+//								if (!moveUpPressed)
+//								{
+//									moveUpPressed = true;
+//									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+//								}
+//								
+//								direction.y += 1.0f;
+//							}
+//							else
+//							{
+//								moveUpPressed = false;
+//							}
+//								
+//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_Q])
+//							{
+//								if (!moveDownPressed)
+//								{
+//									moveDownPressed = true;
+//									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
+//								}
+//								
+//								direction.y -= 1.0f;
+//							}
+//							else
+//							{
+//								moveDownPressed = false;
+//							}
+//								
+//							camera->SetUpdateData(direction);
+//						}
+//					}
+//				});
 			}
 		}
 	}
@@ -580,7 +584,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	// Caricamento dei materiali
 	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	Anima::AnimaModelInstancesManager* modelInstancesManager = _scene->GetModelInstancesManager();
+	Anima::AnimaNodeInstancesManager* modelInstancesManager = _scene->GetNodeInstancesManager();
 #if defined SAVE_SCENE
 	if (!materialsManager->LoadMaterials(materialsPath))
 		return false;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNode>
 	<Name>3DSMesh_0</Name>
-	<TopLevelNode>false</TopLevelNode>
+	<IsAsset>false</IsAsset>
 	<Material/>
 	<AnimationNodeName/>
 	<Geometries>

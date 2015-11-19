@@ -13,14 +13,33 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-#if defined WIN32
-#else
 IOHIDManagerRef AnimaJoystickInteractor::_managerRef = nullptr;
 AnimaJoystickDevice AnimaJoystickInteractor::_joysticks[];
-#endif
 
-AnimaJoystickInteractor AnimaJoystickInteractor::_instance;
+AnimaJoystickInteractor* AnimaJoystickInteractor::_instance = nullptr;
 bool AnimaJoystickInteractor::_joysticksInitialized = false;
+
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_UP			= 0;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_DOWN		= 1;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LEFT		= 2;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RIGHT		= 3;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_START		= 4;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_BACK		= 5;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LS_CLICK	= 6;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RS_CLICK	= 7;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LB			= 8;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RB			= 9;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_XBOX		= 10;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_A			= 11;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_B			= 12;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_X			= 13;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_Y			= 14;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LS_X		= 0;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LS_Y		= 1;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RS_X		= 2;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RS_Y		= 3;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_LT			= 4;
+const AInt AnimaJoystickInteractor::AJ_XBOX_360_DEFAULT_RT			= 5;
 
 void joystickPollThreadFunc(AnimaJoystickInteractor* interactor)
 {
@@ -119,7 +138,9 @@ AnimaJoystickDevice& AnimaJoystickDevice::operator=(AnimaJoystickDevice&& src)
 
 AnimaJoystickInteractor* AnimaJoystickInteractor::GetInstance()
 {
-	return &_instance;
+	if(_instance == nullptr)
+		_instance = new AnimaJoystickInteractor;
+	return _instance;
 }
 
 AnimaJoystickInteractor::AnimaJoystickInteractor()
@@ -153,15 +174,25 @@ AnimaJoystickInteractor::~AnimaJoystickInteractor()
 
 bool AnimaJoystickInteractor::Install(long windowId, AnimaEngine* engine)
 {
+	AnimaLogger::LogMessage("Installing joystick interactor...");
+	
 	if(_installed)
+	{
+		AnimaLogger::LogMessage("Joystick interactor already installed");
 		return true;
+	}
 	
 	if(InitializeJoysticks() == false)
+	{
+		AnimaLogger::LogMessage("Error installing joystick interactor");
 		return false;
+	}
 	
 	_engine = engine;
 	
 	_pollThread = new boost::thread(joystickPollThreadFunc, this);
+	
+	AnimaLogger::LogMessage("Joystick interactor installed succesfully");
 
 	_installed = true;
 	return true;
@@ -169,8 +200,13 @@ bool AnimaJoystickInteractor::Install(long windowId, AnimaEngine* engine)
 
 bool AnimaJoystickInteractor::Remove()
 {
+	AnimaLogger::LogMessage("Removing joystick interactor...");
+	
 	if(_installed == false)
-		return false;
+	{
+		AnimaLogger::LogMessage("Joystick interactor wasn't installed");
+		return true;
+	}
 	
 	TerminateJoysticks();
 	
@@ -180,6 +216,8 @@ bool AnimaJoystickInteractor::Remove()
 		delete _pollThread;
 		_pollThread = nullptr;
 	}
+	
+	AnimaLogger::LogMessage("Joystick interactor removed succesfully...");
 	
 	_installed = false;
 	return true;
@@ -289,7 +327,7 @@ void AnimaJoystickInteractor::PollEvents()
 			if(fabs(joystick->_axis[i]) <= _zeroThreshold)
 				joystick->_axis[i] = 0.0f;
 			
-			if(joystick->_axis[i] != 0.0f)
+			if(joystick->_axis[i] != 0.0f && joystick->_axis[i] != -1.0f)
 			{				
 				AnimaJoystickAxisEventArgs* args = new AnimaJoystickAxisEventArgs(this, joystick->_name, joy, joystick->_buttons, joystick->_axis, i, joystick->_axis[i]);
 				
@@ -418,6 +456,12 @@ void AnimaJoystickInteractor::TerminateJoysticks()
 	_managerRef = nullptr;
 
 	_joysticksInitialized = false;
+	
+	if(_instance != nullptr)
+	{
+		delete _instance;
+		_instance = nullptr;
+	}
 }
 
 void AnimaJoystickInteractor::GetElementsCFArrayHandler(const void* value, void* parameter)
@@ -519,8 +563,8 @@ void AnimaJoystickInteractor::RemoveJoystick(AnimaJoystickDevice* joystick)
 	
 	joystick->_axis.clear();
 	joystick->_buttons.clear();
-	
-	memset(joystick, 0, sizeof(AnimaJoystickDevice));
+	joystick->_present = false;
+	joystick->_name = "";
 }
 
 long AnimaJoystickInteractor::GetElementValue(AnimaJoystickDevice* joystick, AnimaJoystickElement* element)

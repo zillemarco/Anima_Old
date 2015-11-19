@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNode>
 	<Name>floorModel</Name>
-	<TopLevelNode>true</TopLevelNode>
+	<IsAsset>true</IsAsset>
 	<Material/>
 	<AnimationNodeName/>
 	<Geometries/>

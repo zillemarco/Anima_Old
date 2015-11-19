@@ -127,8 +127,13 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(AnimaMouseInteractor&& src
 
 bool AnimaMouseInteractor::Install(long windowId, AnimaEngine* engine)
 {
+	AnimaLogger::LogMessage("Installing mouse interactor...");
+	
 	if(_installed)
+	{
+		AnimaLogger::LogMessage("Mouse interactor already installed");
 		return true;
+	}
 	
 	_windowId = windowId;
 	_engine = engine;
@@ -168,14 +173,21 @@ bool AnimaMouseInteractor::Install(long windowId, AnimaEngine* engine)
 		return event;
 	}];
 	
+	AnimaLogger::LogMessage("Mouse interactor installed succesfully");
+	
 	_installed = true;
 	return true;
 }
 
 bool AnimaMouseInteractor::Remove()
 {
+	AnimaLogger::LogMessage("Removing mouse interactor...");
+	
 	if(_installed == false)
-		return false;
+	{
+		AnimaLogger::LogMessage("Mouse interactor wasn't installed");
+		return true;
+	}
 	
 	[NSEvent removeMonitor:_mouseMovedMonitor];
 	[NSEvent removeMonitor:_leftMouseDraggedMonitor];
@@ -186,6 +198,8 @@ bool AnimaMouseInteractor::Remove()
 	[NSEvent removeMonitor:_rightMouseUpMonitor];
 	
 	_windowId = 0;
+	
+	AnimaLogger::LogMessage("Mouse interactor removed succesfully");
 	
 	_installed = false;
 	return true;

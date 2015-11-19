@@ -39,9 +39,9 @@ AnimaNodesManager::~AnimaNodesManager()
 	ClearNodes();
 }
 
-AnimaNode* AnimaNodesManager::LoadNodeFromExternalFile(const AnimaString& nodePath, const AnimaString& name)
+AnimaNode* AnimaNodesManager::LoadAssetFromExternalFile(const AnimaString& nodePath, const AnimaString& name)
 {
-	AInt index = _topLevelNodes.Contains(name);
+	AInt index = _assets.Contains(name);
 	if (index >= 0)
 		return nullptr;
 	
@@ -51,7 +51,7 @@ AnimaNode* AnimaNodesManager::LoadNodeFromExternalFile(const AnimaString& nodePa
 	if (scene == nullptr)
 		return nullptr;
 	
-	AnimaNode* newTopLevelNode = nullptr;
+	AnimaNode* newAsset = nullptr;
 	
 	AnimaLogger::LogMessageFormat("Loading %s", name.c_str());
 
@@ -66,21 +66,21 @@ AnimaNode* AnimaNodesManager::LoadNodeFromExternalFile(const AnimaString& nodePa
 		AnimaMappedArray<AnimaGeometryBoneInfo*>* geometriesBonesInfo = _geometriesManager->GetLastGeometriesBonesInfo();
 
 		AnimaArray<AnimaString>* geometriesName = _geometriesManager->GetLastGeometriesIndexMap();
-		newTopLevelNode = LoadNodeFromScene(scene, scene->mRootNode, geometriesName, name);
+		newAsset = LoadAssetFromScene(scene, scene->mRootNode, geometriesName, name);
 						
-		newTopLevelNode->SetOriginFileName(nodePath);
-		newTopLevelNode->SetGeometriesBonesInfo(geometriesBonesInfo);
-		newTopLevelNode->SetAnimations(loadedAnimations->GetArray());
-		newTopLevelNode->GetTransformation()->SetAnimationGlobalInverseMatrix(AnimaMatrix());
+		newAsset->SetOriginFileName(nodePath);
+		newAsset->SetGeometriesBonesInfo(geometriesBonesInfo);
+		newAsset->SetAnimations(loadedAnimations->GetArray());
+		newAsset->GetTransformation()->SetAnimationGlobalInverseMatrix(AnimaMatrix());
 
-		_topLevelNodes.Add(name, newTopLevelNode);
+		_assets.Add(name, newAsset);
 	}
 
 	importer.FreeScene();
-	return newTopLevelNode;
+	return newAsset;
 }
 
-AnimaNode* AnimaNodesManager::LoadNodeFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* geometriesMap, const AnimaString& nodeName)
+AnimaNode* AnimaNodesManager::LoadAssetFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* geometriesMap, const AnimaString& nodeName)
 {
 	AnimaString newNodeName;
 	AnimaString animationNodeName;
@@ -124,52 +124,58 @@ AnimaNode* AnimaNodesManager::LoadNodeFromScene(const aiScene* scene, const aiNo
 
 	for (AUint n = 0; n < sceneNode->mNumChildren; n++)
 	{
-		AnimaNode* child = LoadNodeFromScene(scene, sceneNode->mChildren[n], geometriesMap, AnimaString());
+		AnimaNode* child = LoadAssetFromScene(scene, sceneNode->mChildren[n], geometriesMap, AnimaString());
 		currentNode->AddChild(child);
 	}
 
 	return currentNode;
 }
 
-AnimaNode* AnimaNodesManager::CreateNode(const AnimaString& name, bool topLevelNode)
+AnimaNode* AnimaNodesManager::CreateNode(const AnimaString& name, bool asset)
 {
 	AInt index = _nodes.Contains(name);
 	if (index >= 0)
 		return nullptr;
 
 	AnimaNode* newNode = AnimaAllocatorNamespace::AllocateNew<AnimaNode>(*(_scene->GetNodesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetNodesAllocator());
-	newNode->SetTopLevelNode(topLevelNode);
+	newNode->SetIsAsset(asset);
 	
 	_nodes.Add(name, newNode);
 	
-	if(topLevelNode)
-		_topLevelNodes.Add(name, newNode);
+	if(asset)
+		_assets.Add(name, newNode);
 
 	return newNode;
 }
 
-AInt AnimaNodesManager::GetNodesCount(bool topLevelNodes)
+AInt AnimaNodesManager::GetNodesCount() const
 {
-	if(topLevelNodes)
-		return _topLevelNodes.GetSize();
-	else
-		return _nodes.GetSize();
+	return _nodes.GetSize();
 }
 
-AnimaNode* AnimaNodesManager::GetNode(AInt index, bool topLevelNode)
+AInt AnimaNodesManager::GetAssetsCount() const
 {
-	if(topLevelNode)
-		return _topLevelNodes[index];
-	else
-		return _nodes[index];
+	return _assets.GetSize();
 }
 
-AnimaNode* AnimaNodesManager::GetNodeFromName(const AnimaString& name, bool topLevelNode)
+AnimaNode* AnimaNodesManager::GetNode(AInt index)
 {
-	if(topLevelNode)
-		return _topLevelNodes[name];
-	else
-		return _nodes[name];
+	return _nodes[index];
+}
+
+AnimaNode* AnimaNodesManager::GetAsset(AInt index)
+{
+	return _assets[index];
+}
+
+AnimaNode* AnimaNodesManager::GetNodeFromName(const AnimaString& name)
+{
+	return _nodes[name];
+}
+
+AnimaNode* AnimaNodesManager::GetAssetFromName(const AnimaString& name)
+{
+	return _assets[name];
 }
 
 void AnimaNodesManager::ClearNodes()
@@ -183,7 +189,7 @@ void AnimaNodesManager::ClearNodes()
 	}
 
 	_nodes.RemoveAll();
-	_topLevelNodes.RemoveAll();
+	_assets.RemoveAll();
 }
 
 AnimaNode* AnimaNodesManager::LoadNodeFromFile(const AnimaString& filePath)
@@ -206,7 +212,7 @@ AnimaNode* AnimaNodesManager::LoadNodeFromXml(const AnimaString& nodeXmlDefiniti
 	boost::property_tree::read_xml(ss, pt);
 
 	AnimaString name = pt.get<AnimaString>("AnimaNode.Name");
-	bool topLevelNode = pt.get<bool>("AnimaNode.TopLevelNode", false);
+	bool isAsset = pt.get<bool>("AnimaNode.IsAsset", false);
 	
 	// Controllo che il nome del nodelo non esista già e se esiste gli aggiungo un indice
 	AnimaString originalName = name;
@@ -217,7 +223,7 @@ AnimaNode* AnimaNodesManager::LoadNodeFromXml(const AnimaString& nodeXmlDefiniti
 	if(name != originalName)
 		AnimaLogger::LogMessageFormat("WARNING - Error reading a node. A node named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
 	
-	node = CreateNode(name, topLevelNode);
+	node = CreateNode(name, isAsset);
 
 	if (node)
 	{

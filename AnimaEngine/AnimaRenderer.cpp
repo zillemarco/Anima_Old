@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -2410,7 +2410,7 @@ bool AnimaRenderer::InitializeShaders()
 
 	_defaultShaderProgram = prepareProgram;
 	shadersManager->SetDefaultFragmentShader(shadersManager->GetShaderFromName("base-material-pbr-fs-inst"));
-	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-geometry-vs-inst"));
+	shadersManager->SetDefaultVertexShader(shadersManager->GetShaderFromName("static-mesh-vs-inst"));
 
 	if(_physicsDebugDrawer != nullptr)
 		_physicsDebugDrawer->SetupPrograms(_engine);

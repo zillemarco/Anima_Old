@@ -197,11 +197,11 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaNode))
 		{
-			child = scene->GetNodesManager()->GetNodeFromName(childData._name, false);
+			child = scene->GetNodesManager()->GetNodeFromName(childData._name);
 		}
 		else if (childData._type == ANIMA_CLASS_NAME(AnimaNodeInstance))
 		{
-			child = scene->GetNodeInstancesManager()->GetNodeInstanceFromName(childData._name, false);
+			child = scene->GetNodeInstancesManager()->GetNodeInstanceFromName(childData._name);
 		}
 
 		if (child != nullptr)

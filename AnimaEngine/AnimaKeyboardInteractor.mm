@@ -217,8 +217,13 @@ AnimaKeyboardInteractor& AnimaKeyboardInteractor::operator=(AnimaKeyboardInterac
 
 bool AnimaKeyboardInteractor::Install(long windowId, AnimaEngine* engine)
 {
+	AnimaLogger::LogMessage("Installing keyboard interactor...");
+	
 	if(_installed)
+	{
+		AnimaLogger::LogMessage("Keyboard interactor already installed");
 		return true;
+	}
 	
 	_windowId = windowId;
 	_engine = engine;
@@ -233,14 +238,21 @@ bool AnimaKeyboardInteractor::Install(long windowId, AnimaEngine* engine)
 		return event;
 	}];
 	
+	AnimaLogger::LogMessage("Keyboard interactor installed succesfully");
+	
 	_installed = true;
 	return true;
 }
 
 bool AnimaKeyboardInteractor::Remove()
 {
+	AnimaLogger::LogMessage("Removing keyboard interactor...");
+	
 	if(_installed == false)
-		return false;
+	{
+		AnimaLogger::LogMessage("Keyboard interactor wasn't installed");
+		return true;
+	}
 	
 	[NSEvent removeMonitor:_keyDownMonitor];
 	[NSEvent removeMonitor:_keyUpMonitor];
@@ -248,6 +260,8 @@ bool AnimaKeyboardInteractor::Remove()
 	_windowId = 0;
 	_keyDownMonitor = nullptr;
 	_keyUpMonitor = nullptr;
+	
+	AnimaLogger::LogMessage("Keyboard interactor removed succesfully");
 	
 	_installed = false;
 	return true;

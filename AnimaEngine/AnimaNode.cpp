@@ -28,7 +28,7 @@ AnimaNode::AnimaNode(const AnimaString& name, AnimaDataGeneratorsManager* dataGe
 	IMPLEMENT_ANIMA_CLASS(AnimaNode);
 	_material = nullptr;
 	_activeAnimation = -1;
-	_topLevelNode = false;
+	_isAsset = false;
 	
 	_shaderSource = ASDSO_NODE;
 }
@@ -44,7 +44,7 @@ AnimaNode::AnimaNode(const AnimaNode& src)
 {
 	_material = src._material;
 	_activeAnimation = -1;
-	_topLevelNode = src._topLevelNode;
+	_isAsset = src._isAsset;
 }
 
 AnimaNode::AnimaNode(AnimaNode&& src)
@@ -58,7 +58,7 @@ AnimaNode::AnimaNode(AnimaNode&& src)
 {
 	_material = src._material;
 	_activeAnimation = -1;
-	_topLevelNode = src._topLevelNode;
+	_isAsset = src._isAsset;
 }
 
 AnimaNode::~AnimaNode()
@@ -76,7 +76,7 @@ AnimaNode& AnimaNode::operator=(const AnimaNode& src)
 		_materialName = src._materialName;
 		_animationNodeName = src._animationNodeName;
 		_originFileName = src._originFileName;
-		_topLevelNode = src._topLevelNode;
+		_isAsset = src._isAsset;
 
 		_geometries = src._geometries;
 
@@ -101,7 +101,7 @@ AnimaNode& AnimaNode::operator=(AnimaNode&& src)
 		_originFileName = src._originFileName;
 		_animationNodeName = src._animationNodeName;
 		_geometries = src._geometries;
-		_topLevelNode = src._topLevelNode;
+		_isAsset = src._isAsset;
 
 		ClearGeometriesBonesInfo();
 		SetGeometriesBonesInfo(&src._geometriesBonesInfo);
@@ -126,7 +126,7 @@ ptree AnimaNode::GetObjectTree(bool saveName) const
 	else
 		materialName = _materialName;
 
-	tree.add("AnimaNode.TopLevelNode", IsTopLevelNode());
+	tree.add("AnimaNode.IsAsset", IsAsset());
 	tree.add("AnimaNode.Material", materialName);
 	tree.add("AnimaNode.AnimationNodeName", _animationNodeName);
 
@@ -161,7 +161,7 @@ bool AnimaNode::ReadObject(const ptree& objectTree, AnimaScene* scene, bool read
 
 		_materialName = objectTree.get<AnimaString>("AnimaNode.Material", "");
 		_animationNodeName = objectTree.get<AnimaString>("AnimaNode.AnimationNodeName", "");
-		SetTopLevelNode(objectTree.get<bool>("AnimaNode.TopLevelNode", false));
+		SetIsAsset(objectTree.get<bool>("AnimaNode.IsAsset", false));
 
 		if (!_materialName.empty())
 			_material = scene->GetMaterialsManager()->GetMaterialFromName(_materialName);

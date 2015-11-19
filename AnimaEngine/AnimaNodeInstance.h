@@ -56,8 +56,8 @@ public:
 
 	AnimaNode* GetNode();
 	
-	virtual void SetTopLevelNode(bool topLevelNode) { _topLevelNode = topLevelNode; }
-	virtual bool IsTopLevelNode() const { return _topLevelNode; }
+	virtual void SetIsAsset(bool isAsset) { _isAsset = isAsset; }
+	virtual bool IsAsset() const { return _isAsset; }
 
 protected:
 	void UpdateChildrenTransformation() override;
@@ -66,7 +66,7 @@ protected:
 	AnimaNode* _node;
 	AnimaString _nodeName;
 	
-	bool _topLevelNode;
+	bool _isAsset;
 
 	AnimaArray<AnimaGeometryInstance*> _geometries;
 };

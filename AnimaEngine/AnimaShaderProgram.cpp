@@ -279,7 +279,7 @@ bool AnimaShaderProgram::Link()
 		char* infoLog = new char[maxLength];
 		glGetProgramInfoLog(_id, maxLength, &maxLength, &infoLog[0]);
 
-		printf("AnimaShaderProgram error linking:\n%s\n", infoLog);
+		printf("AnimaShaderProgram error linking '%s':\n%s\n", GetName().c_str(), infoLog);
 
 		Delete();
 

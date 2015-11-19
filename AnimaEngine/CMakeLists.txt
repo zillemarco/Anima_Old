@@ -93,7 +93,7 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMouseInteractor.h
 					AnimaKeyboardInteractor.h
 					AnimaJoystickInteractor.h
-					AnimaDefaultMouseInteractor.h)
+					AnimaDefaultInteractors.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -165,7 +165,7 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaPhysicsDebugDrawer.cpp
 					IAnimaInteractor.cpp
 					IAnimaEvents.cpp
-					AnimaDefaultMouseInteractor.cpp)
+					AnimaDefaultInteractors.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -211,7 +211,7 @@ source_group("Engine\\DataStructures\\Graphics and Math" FILES AnimaVertex.h Ani
 
 source_group(Engine\\Interfaces FILES IAnimaInteractor.h IAnimaInteractor.cpp IAnimaEvents.h IAnimaEvents.cpp)
 
-source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultMouseInteractor.h AnimaDefaultMouseInteractor.cpp AnimaJoystickInteractor.h)
+source_group(Engine\\Interactors FILES AnimaMouseInteractor.h AnimaKeyboardInteractor.h AnimaDefaultInteractors.h AnimaDefaultInteractors.cpp AnimaJoystickInteractor.h)
 
 source_group(Engine\\Scene FILES AnimaSceneObject.h AnimaSceneObject.cpp AnimaScene.h AnimaScene.cpp)
 source_group(Engine\\Scene\\Rendering FILES AnimaRenderer.h AnimaRenderer.cpp AnimaRendererDrawableGeometry.h AnimaRendererDrawableGeometryInstances.h AnimaRendererDrawableGeometry.cpp AnimaRendererDrawableGeometryInstances.cpp)

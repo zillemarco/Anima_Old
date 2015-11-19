@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNodeInstance>
 	<Name>3DSMesh_1.modelInstanceLegno</Name>
-	<TopLevelNode>false</TopLevelNode>
+	<IsAsset>false</IsAsset>
 	<NodeName>3DSMesh_1</NodeName>
 	<GeometriesInstances>
 		<GeometryInstance>AnimaEngineDemoModel.mesh1.instance3</GeometryInstance>

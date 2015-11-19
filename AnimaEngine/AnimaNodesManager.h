@@ -39,17 +39,22 @@ public:
 	~AnimaNodesManager();
 	
 public:
-	AnimaNode* CreateNode(const AnimaString& name, bool topLevelNode = true);
-
+	AnimaNode* CreateNode(const AnimaString& name, bool asset = true);
+	
+	AnimaNode* LoadAssetFromExternalFile(const AnimaString& nodePath, const AnimaString& name);
+	
 	AnimaNode* LoadNodeFromFile(const AnimaString& filePath);
 	AnimaNode* LoadNodeFromXml(const AnimaString& nodeXmlDefinition);
-	AnimaNode* LoadNodeFromExternalFile(const AnimaString& nodePath, const AnimaString& name);
 	bool LoadNodes(const AnimaString& nodesPath);
 	
-	AInt GetNodesCount(bool topLevelNodes = true);
+	AInt GetNodesCount() const;
+	AInt GetAssetsCount() const;
 
-	AnimaNode* GetNode(AInt index, bool topLevelNode = true);
-	AnimaNode* GetNodeFromName(const AnimaString& name, bool topLevelNode = true);
+	AnimaNode* GetNode(AInt index);
+	AnimaNode* GetAsset(AInt index);
+	
+	AnimaNode* GetNodeFromName(const AnimaString& name);
+	AnimaNode* GetAssetFromName(const AnimaString& name);
 	
 	void ClearNodes();
 	
@@ -60,7 +65,7 @@ public:
 	bool FinalizeObjectsAfterRead();
 
 private:
-	AnimaNode* LoadNodeFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* geometriesMap, const AnimaString& nodeName);
+	AnimaNode* LoadAssetFromScene(const aiScene* scene, const aiNode* sceneNode, AnimaArray<AnimaString>* geometriesMap, const AnimaString& nodeName);
 
 	boost::property_tree::ptree GetNodeTree(AnimaNode* node);
 	AnimaNode* LoadNodeFromTree(boost::property_tree::ptree* tree);
@@ -73,7 +78,7 @@ private:
 	AnimaAnimationsManager* _animationsManager;
 
 	AnimaMappedArray<AnimaNode*>	_nodes;
-	AnimaMappedArray<AnimaNode*>	_topLevelNodes;
+	AnimaMappedArray<AnimaNode*>	_assets;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

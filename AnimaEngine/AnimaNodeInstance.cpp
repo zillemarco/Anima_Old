@@ -18,7 +18,7 @@ AnimaNodeInstance::AnimaNodeInstance(const AnimaString& name, AnimaDataGenerator
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaNodeInstance);
 	_node = nullptr;
-	_topLevelNode = false;
+	_isAsset = false;
 	
 	_shaderSource = ASDSO_NODE;
 }
@@ -29,7 +29,7 @@ AnimaNodeInstance::AnimaNodeInstance(const AnimaNodeInstance& src)
 	, _geometries(src._geometries)
 {
 	_node = src._node;
-	_topLevelNode = src._topLevelNode;
+	_isAsset = src._isAsset;
 }
 
 AnimaNodeInstance::AnimaNodeInstance(AnimaNodeInstance&& src)
@@ -38,7 +38,7 @@ AnimaNodeInstance::AnimaNodeInstance(AnimaNodeInstance&& src)
 	, _geometries(src._geometries)
 {
 	_node = src._node;
-	_topLevelNode = src._topLevelNode;
+	_isAsset = src._isAsset;
 }
 
 AnimaNodeInstance::~AnimaNodeInstance()
@@ -54,7 +54,7 @@ AnimaNodeInstance& AnimaNodeInstance::operator=(const AnimaNodeInstance& src)
 		_geometries = src._geometries;		
 		_node = src._node;
 		_nodeName = src._nodeName;
-		_topLevelNode = src._topLevelNode;
+		_isAsset = src._isAsset;
 	}
 	
 	return *this;
@@ -69,7 +69,7 @@ AnimaNodeInstance& AnimaNodeInstance::operator=(AnimaNodeInstance&& src)
 		_geometries = src._geometries;
 		_node = src._node;
 		_nodeName = src._nodeName;
-		_topLevelNode = src._topLevelNode;
+		_isAsset = src._isAsset;
 	}
 	
 	return *this;
@@ -82,7 +82,7 @@ ptree AnimaNodeInstance::GetObjectTree(bool saveName) const
 	if (saveName)
 		tree.add("AnimaNodeInstance.Name", GetName());
 	
-	tree.add("AnimaNodeInstance.TopLevelNode", IsTopLevelNode());
+	tree.add("AnimaNodeInstance.IsAsset", IsAsset());
 	
 	AnimaString nodeName = _nodeName;
 	if(nodeName.empty() && _node != nullptr)
@@ -108,10 +108,10 @@ bool AnimaNodeInstance::ReadObject(const ptree& objectTree, AnimaScene* scene, b
 			SetName(objectTree.get<AnimaString>("AnimaNodeInstance.Name"));
 		
 		_nodeName = objectTree.get<AnimaString>("AnimaNodeInstance.NodeName", "");
-		SetTopLevelNode(objectTree.get<bool>("AnimaNodeInstance.TopLevelNode", false));
+		SetIsAsset(objectTree.get<bool>("AnimaNodeInstance.IsAsset", false));
 		
 		if (!_nodeName.empty())
-			_node = scene->GetNodesManager()->GetNodeFromName(_nodeName, false);
+			_node = scene->GetNodesManager()->GetNodeFromName(_nodeName);
 		else
 		{
 			AnimaLogger::LogMessageFormat("WARNING - Error reading a node instance named '%s'. The instance source node name isn't specified", GetName().c_str());

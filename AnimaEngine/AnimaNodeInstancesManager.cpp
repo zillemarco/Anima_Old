@@ -32,21 +32,27 @@ AnimaNodeInstancesManager::~AnimaNodeInstancesManager()
 
 AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstance(const AnimaString& instanceName, AnimaNode* srcNode)
 {
-	AInt indexT = _topLevelNodeInstances.Contains(instanceName);
+	AInt indexT = _assetInstances.Contains(instanceName);
 	AInt indexM = _nodeInstances.Contains(instanceName);
 	if (indexT >= 0 || indexM >= 0)
 		return nullptr;
 
 	AnimaNodeInstance* nodeInstance = CreateInstanceFromNode(instanceName, srcNode);
-	nodeInstance->SetTopLevelNode(true);
-	_topLevelNodeInstances.Add(instanceName, nodeInstance);
+	nodeInstance->SetIsAsset(true);
+	_assetInstances.Add(instanceName, nodeInstance);
 
 	return nodeInstance;
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool topLevelNode)
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool asset)
 {
-	AnimaNode* srcNode = _nodesManager->GetNodeFromName(srcNodeName, topLevelNode);
+	AnimaNode* srcNode = nullptr;
+	
+	if(asset)
+		_nodesManager->GetAssetFromName(srcNodeName);
+	else
+		_nodesManager->GetNodeFromName(srcNodeName);
+	
 	if (srcNode == nullptr)
 		return nullptr;
 	return CreateInstance(instanceName, srcNode);
@@ -103,44 +109,50 @@ AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstanceFromNode(const Anima
 	return newInstance;
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::CreateEmptyInstance(const AnimaString& instanceName, bool topLevelNode)
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateEmptyInstance(const AnimaString& instanceName, bool asset)
 {
 	AInt index = _nodeInstances.Contains(instanceName);
 	if (index >= 0)
 		return nullptr;
 
 	AnimaNodeInstance* nodeInstance = AnimaAllocatorNamespace::AllocateNew<AnimaNodeInstance>(*(_scene->GetNodeInstancesAllocator()), instanceName, _scene->GetDataGeneratorsManager(), _scene->GetNodeInstancesAllocator());
-	nodeInstance->SetTopLevelNode(topLevelNode);
+	nodeInstance->SetIsAsset(asset);
 	
-	if(topLevelNode)
-		_topLevelNodeInstances.Add(instanceName, nodeInstance);
+	if(asset)
+		_assetInstances.Add(instanceName, nodeInstance);
 	_nodeInstances.Add(instanceName, nodeInstance);
 
 	return nodeInstance;
 }
 
-AInt AnimaNodeInstancesManager::GetNodeInstancesCount(bool topLevelNodes)
+AInt AnimaNodeInstancesManager::GetNodeInstancesCount() const
 {
-	if(topLevelNodes)
-		return _topLevelNodeInstances.GetSize();
-	else
-		return _nodeInstances.GetSize();
+	return _nodeInstances.GetSize();
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::GetNodeInstance(AInt index, bool topLevelNode)
+AInt AnimaNodeInstancesManager::GetAssetInstancesCount() const
 {
-	if(topLevelNode)
-		return _topLevelNodeInstances[index];
-	else
-		return _nodeInstances[index];
+	return _assetInstances.GetSize();
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::GetNodeInstanceFromName(const AnimaString& name, bool topLevelNode)
+AnimaNodeInstance* AnimaNodeInstancesManager::GetNodeInstance(AInt index)
 {
-	if(topLevelNode)
-		return _topLevelNodeInstances[name];
-	else
-		return _nodeInstances[name];
+	return _nodeInstances[index];
+}
+
+AnimaNodeInstance* AnimaNodeInstancesManager::GetAssetInstance(AInt index)
+{
+	return _assetInstances[index];
+}
+
+AnimaNodeInstance* AnimaNodeInstancesManager::GetNodeInstanceFromName(const AnimaString& name)
+{
+	return _nodeInstances[name];
+}
+
+AnimaNodeInstance* AnimaNodeInstancesManager::GetAssetInstanceFromName(const AnimaString& name)
+{
+	return _assetInstances[name];
 }
 
 void AnimaNodeInstancesManager::ClearInstances()
@@ -154,7 +166,7 @@ void AnimaNodeInstancesManager::ClearInstances()
 	}
 
 	_nodeInstances.RemoveAll();
-	_topLevelNodeInstances.RemoveAll();
+	_assetInstances.RemoveAll();
 }
 
 AnimaNodeInstance* AnimaNodeInstancesManager::LoadNodeInstanceFromFile(const AnimaString& filePath)
@@ -177,7 +189,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::LoadNodeInstanceFromXml(const Anim
 	boost::property_tree::read_xml(ss, pt);
 	
 	AnimaString name = pt.get<AnimaString>("AnimaNodeInstance.Name");
-	bool topLevelNode = pt.get<bool>("AnimaNodeInstance.TopLevelNode", false);
+	bool isAsset = pt.get<bool>("AnimaNodeInstance.IsAsset", false);
 	
 	// Controllo che il nome del nodelo non esista già e se esiste gli aggiungo un indice
 	AnimaString originalName = name;
@@ -188,7 +200,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::LoadNodeInstanceFromXml(const Anim
 	if(name != originalName)
 		AnimaLogger::LogMessageFormat("WARNING - Error reading a node instance. A node instance named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
 	
-	nodeInstance = CreateEmptyInstance(name, topLevelNode);
+	nodeInstance = CreateEmptyInstance(name, isAsset);
 	
 	if (nodeInstance)
 	{

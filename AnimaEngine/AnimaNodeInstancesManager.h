@@ -35,12 +35,16 @@ public:
 
 public:
 	AnimaNodeInstance* CreateInstance(const AnimaString& instanceName, AnimaNode* srcNode);
-	AnimaNodeInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool topLevelNode = true);
+	AnimaNodeInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool asset = true);
 
-	AInt GetNodeInstancesCount(bool topLevelNodes = true);
+	AInt GetNodeInstancesCount() const;
+	AInt GetAssetInstancesCount() const;
 
-	AnimaNodeInstance* GetNodeInstance(AInt index, bool topLevelNode = true);
-	AnimaNodeInstance* GetNodeInstanceFromName(const AnimaString& name, bool topLevelNode = true);
+	AnimaNodeInstance* GetNodeInstance(AInt index);
+	AnimaNodeInstance* GetAssetInstance(AInt index);
+	
+	AnimaNodeInstance* GetNodeInstanceFromName(const AnimaString& name);
+	AnimaNodeInstance* GetAssetInstanceFromName(const AnimaString& name);
 	
 	AnimaNodeInstance* LoadNodeInstanceFromFile(const AnimaString& filePath);
 	AnimaNodeInstance* LoadNodeInstanceFromXml(const AnimaString& nodeXmlDefinition);
@@ -57,7 +61,7 @@ public:
 
 protected:
 	AnimaNodeInstance* CreateInstanceFromNode(const AnimaString& instanceName, AnimaNode* srcNode, bool useSrcNodeName = false);
-	AnimaNodeInstance* CreateEmptyInstance(const AnimaString& instanceName, bool topLevelNode = false);
+	AnimaNodeInstance* CreateEmptyInstance(const AnimaString& instanceName, bool asset = false);
 		
 private:
 	AnimaScene*			_scene;
@@ -65,7 +69,7 @@ private:
 	AnimaGeometryInstancesManager* _geometryInstancesManager;
 
 	AnimaMappedArray<AnimaNodeInstance*>	_nodeInstances;
-	AnimaMappedArray<AnimaNodeInstance*>	_topLevelNodeInstances;
+	AnimaMappedArray<AnimaNodeInstance*>	_assetInstances;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

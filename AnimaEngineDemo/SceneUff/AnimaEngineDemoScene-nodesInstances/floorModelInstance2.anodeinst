@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNodeInstance>
 	<Name>floorModelInstance2</Name>
-	<TopLevelNode>true</TopLevelNode>
+	<IsAsset>true</IsAsset>
 	<NodeName>floorModel</NodeName>
 	<GeometriesInstances/>
 	<SceneObject>

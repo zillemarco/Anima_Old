@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNodeInstance>
 	<Name>3DSMesh_0_0.modelInstanceGomma</Name>
-	<TopLevelNode>false</TopLevelNode>
+	<IsAsset>false</IsAsset>
 	<NodeName>3DSMesh_0_0</NodeName>
 	<GeometriesInstances>
 		<GeometryInstance>AnimaEngineDemoModel.mesh0.instance2</GeometryInstance>

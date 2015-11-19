@@ -78,8 +78,8 @@ public:
 
 	void GetAllGeometries(AnimaArray<AnimaGeometry*> *geometries);
 	
-	virtual void SetTopLevelNode(bool topLevelNode) { _topLevelNode = topLevelNode; }
-	virtual bool IsTopLevelNode() const { return _topLevelNode; }
+	virtual void SetIsAsset(bool isAsset) { _isAsset = isAsset; }
+	virtual bool IsAsset() const { return _isAsset; }
 
 protected:	
 	void UpdateChildrenTransformation() override;
@@ -94,7 +94,7 @@ protected:
 	AnimaVertex3f	_boundingBoxMax;
 	AnimaVertex3f	_boundingBoxCenter;
 	
-	bool _topLevelNode;
+	bool _isAsset;
 
 	AnimaMappedArray<AnimaGeometry*> _geometries;
 	AnimaMappedArray<AnimaGeometryBoneInfo*> _geometriesBonesInfo;

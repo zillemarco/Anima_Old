@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnimaNodeInstance>
 	<Name>3DSMesh_2.modelInstanceOro</Name>
-	<TopLevelNode>false</TopLevelNode>
+	<IsAsset>false</IsAsset>
 	<NodeName>3DSMesh_2</NodeName>
 	<GeometriesInstances>
 		<GeometryInstance>AnimaEngineDemoModel.mesh2.instance0</GeometryInstance>

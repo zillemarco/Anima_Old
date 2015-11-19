@@ -229,7 +229,7 @@ protected:
 	static AnimaJoystickDevice _joysticks[(AInt)AnimaJoystickID::AJI_LAST + 1];
 	static bool _joysticksInitialized;
 	
-	static AnimaJoystickInteractor _instance;
+	static AnimaJoystickInteractor* _instance;
 	
 #if defined WIN32
 	static HINSTANCE _hWinmm;
