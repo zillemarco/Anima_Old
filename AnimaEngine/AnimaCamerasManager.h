@@ -32,13 +32,14 @@ public:
 	
 	AnimaCamera* CreateCamera(const AnimaString& name);
 	
-	AnimaCamera* GetActiveCamera();
+	AnimaCamera* GetCamera(AInt index);
 	AnimaCamera* GetCameraFromName(const AnimaString& name);
+	AnimaCamera* GetActiveCamera();
 	
 	AInt GetCamerasCount();
 
-	void UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar);
-	void UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar);
+	void UpdatePerspectiveCameras(AFloat fov, const AnimaVertex2f& size, AFloat zNear, AFloat zFar);
+	void UpdateOrthographicCameras(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar);
 	
 	AnimaCamera* LoadCameraFromFile(const AnimaString& filePath);
 	AnimaCamera* LoadCameraFromXml(const AnimaString& cameraXmlDefinition);

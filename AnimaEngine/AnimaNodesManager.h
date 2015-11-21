@@ -39,7 +39,8 @@ public:
 	~AnimaNodesManager();
 	
 public:
-	AnimaNode* CreateNode(const AnimaString& name, bool asset = true);
+	AnimaNode* CreateNode(const AnimaString& name);
+	AnimaNode* CreateAsset(const AnimaString& name);
 	
 	AnimaNode* LoadAssetFromExternalFile(const AnimaString& nodePath, const AnimaString& name);
 	
@@ -56,7 +57,7 @@ public:
 	AnimaNode* GetNodeFromName(const AnimaString& name);
 	AnimaNode* GetAssetFromName(const AnimaString& name);
 	
-	void ClearNodes();
+	void Clear();
 	
 	void SaveNodeToFile(const AnimaString& nodeName, const AnimaString& destinationPath, bool createFinalPath = false);
 	void SaveNodeToFile(AnimaNode* node, const AnimaString& destinationPath, bool createFinalPath = false);

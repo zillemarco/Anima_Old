@@ -42,11 +42,6 @@ public:
 
 	void UpdateLightsMatrix(AnimaCamera* activeCamera);
 
-	AnimaMappedArray<AnimaDirectionalLight*>* GetDirectionalLights();
-	AnimaMappedArray<AnimaPointLight*>* GetPointLights();
-	AnimaMappedArray<AnimaSpotLight*>* GetSpotLights();
-	AnimaMappedArray<AnimaHemisphereLight*>* GetHemishpereLights();
-
 	template<class T> AnimaMappedArray<AnimaLight*>* GetLightsOfType();
 	template<class T> AnimaLight* GetLightOfTypeFromName(const AnimaString& name);
 	

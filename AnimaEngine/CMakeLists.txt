@@ -248,8 +248,8 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 		set(PYTHON_INCLUDE_DIR "${ANIMA_ENGINE_PYTHON_ROOT_PATH}/include")
 	endif()
 	
-	find_package(PythonLibs)
-	include_directories(${PYTHON_INCLUDE_PATH})
+	find_package(PythonLibs REQUIRED)
+	include_directories(${PYTHON_INCLUDE_DIRS})
 endif()
 
 if(BUILD_SHARED_LIBS)

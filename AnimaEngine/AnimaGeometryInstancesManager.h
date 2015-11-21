@@ -33,10 +33,10 @@ public:
 	~AnimaGeometryInstancesManager();
 
 public:
-	AnimaGeometryInstance* CreateInstance(const AnimaString& instanceName, AnimaGeometry* srcGeometry);
-	AnimaGeometryInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcGeometryName);
+	AnimaGeometryInstance* CreateGeometryInstance(const AnimaString& instanceName, AnimaGeometry* srcGeometry);
+	AnimaGeometryInstance* CreateGeometryInstance(const AnimaString& instanceName, const AnimaString& srcGeometryName);
 
-	AnimaArray<AnimaGeometryInstance*>* CreateInstances(AnimaNode* srcNode);
+	AnimaArray<AnimaGeometryInstance*>* CreateInstancesFromNode(AnimaNode* srcNode);
 
 	AInt GetGeometryInstancesCount();
 

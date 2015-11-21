@@ -36,7 +36,7 @@ AnimaNodesManager::AnimaNodesManager(AnimaScene* scene, AnimaGeometriesManager* 
 
 AnimaNodesManager::~AnimaNodesManager()
 {
-	ClearNodes();
+	Clear();
 }
 
 AnimaNode* AnimaNodesManager::LoadAssetFromExternalFile(const AnimaString& nodePath, const AnimaString& name)
@@ -131,21 +131,33 @@ AnimaNode* AnimaNodesManager::LoadAssetFromScene(const aiScene* scene, const aiN
 	return currentNode;
 }
 
-AnimaNode* AnimaNodesManager::CreateNode(const AnimaString& name, bool asset)
+AnimaNode* AnimaNodesManager::CreateNode(const AnimaString& name)
 {
-	AInt index = _nodes.Contains(name);
-	if (index >= 0)
+	AInt indexT = _nodes.Contains(name);
+	AInt indexM = _assets.Contains(name);
+	if (indexT >= 0 || indexM >= 0)
 		return nullptr;
 
 	AnimaNode* newNode = AnimaAllocatorNamespace::AllocateNew<AnimaNode>(*(_scene->GetNodesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetNodesAllocator());
-	newNode->SetIsAsset(asset);
-	
 	_nodes.Add(name, newNode);
-	
-	if(asset)
-		_assets.Add(name, newNode);
 
 	return newNode;
+}
+
+AnimaNode* AnimaNodesManager::CreateAsset(const AnimaString& name)
+{
+	AInt indexT = _nodes.Contains(name);
+	AInt indexM = _assets.Contains(name);
+	if (indexT >= 0 || indexM >= 0)
+		return nullptr;
+	
+	AnimaNode* newAsset = AnimaAllocatorNamespace::AllocateNew<AnimaNode>(*(_scene->GetNodesAllocator()), name, _scene->GetDataGeneratorsManager(), _scene->GetNodesAllocator());
+	newAsset->SetIsAsset(true);
+	
+	_nodes.Add(name, newAsset);
+	_assets.Add(name, newAsset);
+	
+	return newAsset;
 }
 
 AInt AnimaNodesManager::GetNodesCount() const
@@ -178,7 +190,7 @@ AnimaNode* AnimaNodesManager::GetAssetFromName(const AnimaString& name)
 	return _assets[name];
 }
 
-void AnimaNodesManager::ClearNodes()
+void AnimaNodesManager::Clear()
 {
 	AInt count = _nodes.GetSize();
 	for (AInt i = 0; i < count; i++)
@@ -223,7 +235,10 @@ AnimaNode* AnimaNodesManager::LoadNodeFromXml(const AnimaString& nodeXmlDefiniti
 	if(name != originalName)
 		AnimaLogger::LogMessageFormat("WARNING - Error reading a node. A node named '%s' already existed so it's been renamed to '%s'", originalName.c_str(), name.c_str());
 	
-	node = CreateNode(name, isAsset);
+	if(isAsset)
+		node = CreateAsset(name);
+	else
+		node = CreateNode(name);
 
 	if (node)
 	{

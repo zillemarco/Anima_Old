@@ -29,7 +29,7 @@ AnimaGeometryInstancesManager::~AnimaGeometryInstancesManager()
 	ClearLastInstancesFromNode();
 }
 
-AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateInstance(const AnimaString& instanceName, AnimaGeometry* srcGeometry)
+AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateGeometryInstance(const AnimaString& instanceName, AnimaGeometry* srcGeometry)
 {
 	AInt index = _geometryInstances.Contains(instanceName);
 	if (index >= 0)
@@ -61,12 +61,12 @@ AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateInstance(const Anima
 	return geometryInstance;
 }
 
-AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcGeometryName)
+AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateGeometryInstance(const AnimaString& instanceName, const AnimaString& srcGeometryName)
 {
 	AnimaGeometry* srcGeometry = _geometriesManager->GetGeometryFromName(srcGeometryName);
 	if (srcGeometry == nullptr)
 		return nullptr;
-	return CreateInstance(instanceName, srcGeometry);
+	return CreateGeometryInstance(instanceName, srcGeometry);
 }
 
 AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateEmptyInstance(const AnimaString& instanceName)
@@ -81,7 +81,7 @@ AnimaGeometryInstance* AnimaGeometryInstancesManager::CreateEmptyInstance(const 
 	return geometryInstance;
 }
 
-AnimaArray<AnimaGeometryInstance*>* AnimaGeometryInstancesManager::CreateInstances(AnimaNode* srcNode)
+AnimaArray<AnimaGeometryInstance*>* AnimaGeometryInstancesManager::CreateInstancesFromNode(AnimaNode* srcNode)
 {
 	ClearLastInstancesFromNode();
 

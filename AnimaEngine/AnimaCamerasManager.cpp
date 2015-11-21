@@ -95,7 +95,7 @@ AnimaCamera* AnimaCamerasManager::GetActiveCamera()
 	return nullptr;
 }
 
-void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2f& size, float zNear, float zFar)
+void AnimaCamerasManager::UpdatePerspectiveCameras(AFloat fov, const AnimaVertex2f& size, AFloat zNear, AFloat zFar)
 {
 	AInt count = _cameras.GetSize();
 	for (AInt i = 0; i < count; i++)
@@ -107,7 +107,7 @@ void AnimaCamerasManager::UpdatePerspectiveCameras(float fov, const AnimaVertex2
 	}
 }
 
-void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bottom, float top, float zNear, float zFar)
+void AnimaCamerasManager::UpdateOrthographicCameras(AFloat left, AFloat right, AFloat bottom, AFloat top, AFloat zNear, AFloat zFar)
 {
 	AInt count = _cameras.GetSize();
 	for (AInt i = 0; i < count; i++)
@@ -117,6 +117,11 @@ void AnimaCamerasManager::UpdateOrthoCameras(float left, float right, float bott
 		if(camera->IsOrthographicProjectionType())
 			camera->CalculateProjectionMatrix(left, right, bottom, top, zNear, zFar);
 	}
+}
+
+AnimaCamera* AnimaCamerasManager::GetCamera(AInt index)
+{
+	return _cameras[index];
 }
 
 AnimaCamera* AnimaCamerasManager::GetCameraFromName(const AnimaString& name)

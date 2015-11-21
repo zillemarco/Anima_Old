@@ -30,32 +30,63 @@ AnimaNodeInstancesManager::~AnimaNodeInstancesManager()
 	ClearInstances();
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstance(const AnimaString& instanceName, AnimaNode* srcNode)
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateNodeInstance(const AnimaString& instanceName, AnimaNode* srcNode)
 {
-	AInt indexT = _assetInstances.Contains(instanceName);
-	AInt indexM = _nodeInstances.Contains(instanceName);
+	// Non posso creare istanze di asset con questa funzione, si deve utilizzare CreateAssetInstance
+	if(srcNode->IsAsset())
+		return nullptr;
+	
+	AInt indexT = _nodeInstances.Contains(instanceName);
+	AInt indexM = _assetInstances.Contains(instanceName);
+	
 	if (indexT >= 0 || indexM >= 0)
 		return nullptr;
 
 	AnimaNodeInstance* nodeInstance = CreateInstanceFromNode(instanceName, srcNode);
-	nodeInstance->SetIsAsset(true);
-	_assetInstances.Add(instanceName, nodeInstance);
+	_nodeInstances.Add(instanceName, nodeInstance);
 
 	return nodeInstance;
 }
 
-AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool asset)
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateNodeInstance(const AnimaString& instanceName, const AnimaString& srcNodeName)
 {
-	AnimaNode* srcNode = nullptr;
-	
-	if(asset)
-		_nodesManager->GetAssetFromName(srcNodeName);
-	else
-		_nodesManager->GetNodeFromName(srcNodeName);
+	AnimaNode* srcNode = _nodesManager->GetNodeFromName(srcNodeName);
 	
 	if (srcNode == nullptr)
 		return nullptr;
-	return CreateInstance(instanceName, srcNode);
+	
+	return CreateNodeInstance(instanceName, srcNode);
+}
+
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateAssetInstance(const AnimaString& instanceName, AnimaNode* srcAsset)
+{
+	// Non posso creare istanze di nodi con questa funzione, si deve utilizzare CreateNodeInstance
+	if(!srcAsset->IsAsset())
+		return nullptr;
+	
+	AInt indexT = _nodeInstances.Contains(instanceName);
+	AInt indexM = _assetInstances.Contains(instanceName);
+	
+	if (indexT >= 0 || indexM >= 0)
+		return nullptr;
+	
+	AnimaNodeInstance* assetInstance = CreateInstanceFromNode(instanceName, srcAsset);
+	assetInstance->SetIsAsset(true);
+	
+	_nodeInstances.Add(instanceName, assetInstance);
+	_assetInstances.Add(instanceName, assetInstance);
+	
+	return assetInstance;
+}
+
+AnimaNodeInstance* AnimaNodeInstancesManager::CreateAssetInstance(const AnimaString& instanceName, const AnimaString& srcAssetName)
+{
+	AnimaNode* srcAsset = _nodesManager->GetNodeFromName(srcAssetName);
+	
+	if (srcAsset == nullptr)
+		return nullptr;
+	
+	return CreateAssetInstance(instanceName, srcAsset);
 }
 
 AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstanceFromNode(const AnimaString& instanceName, AnimaNode* srcNode, bool useSrcNodeName)
@@ -94,7 +125,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstanceFromNode(const Anima
 	}
 
 	newInstance->CopyData(*srcNode);
-	newInstance->SetGeometries(_geometryInstancesManager->CreateInstances(srcNode));
+	newInstance->SetGeometries(_geometryInstancesManager->CreateInstancesFromNode(srcNode));
 	newInstance->SetNode(srcNode);
 
 	AInt childrenCount = srcNode->GetChildrenCount();

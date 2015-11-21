@@ -34,8 +34,11 @@ public:
 	~AnimaNodeInstancesManager();
 
 public:
-	AnimaNodeInstance* CreateInstance(const AnimaString& instanceName, AnimaNode* srcNode);
-	AnimaNodeInstance* CreateInstance(const AnimaString& instanceName, const AnimaString& srcNodeName, bool asset = true);
+	AnimaNodeInstance* CreateNodeInstance(const AnimaString& instanceName, AnimaNode* srcNode);
+	AnimaNodeInstance* CreateNodeInstance(const AnimaString& instanceName, const AnimaString& srcNodeName);
+	
+	AnimaNodeInstance* CreateAssetInstance(const AnimaString& instanceName, AnimaNode* srcAsset);
+	AnimaNodeInstance* CreateAssetInstance(const AnimaString& instanceName, const AnimaString& srcAssetName);
 
 	AInt GetNodeInstancesCount() const;
 	AInt GetAssetInstancesCount() const;
