@@ -13,7 +13,7 @@
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
-AnimaJoystickInteractor AnimaJoystickInteractor::_instance;
+AnimaJoystickInteractor* AnimaJoystickInteractor::_instance = nullptr;
 AnimaJoystickDevice AnimaJoystickInteractor::_joysticks[];
 bool AnimaJoystickInteractor::_joysticksInitialized = false;
 HINSTANCE AnimaJoystickInteractor::_hWinmm = nullptr;
@@ -127,7 +127,9 @@ AnimaJoystickDevice& AnimaJoystickDevice::operator=(AnimaJoystickDevice&& src)
 
 AnimaJoystickInteractor* AnimaJoystickInteractor::GetInstance()
 {
-	return &_instance;
+	if (_instance == nullptr)
+		_instance = new AnimaJoystickInteractor;
+	return _instance;
 }
 
 AnimaJoystickInteractor::AnimaJoystickInteractor()

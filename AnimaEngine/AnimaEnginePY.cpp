@@ -107,8 +107,57 @@ void (Anima::AnimaCamerasManager::*SaveCameraToFileWithCamera)(Anima::AnimaCamer
 void (Anima::AnimaLightsManager::*SaveLightToFileWithName)(const Anima::AnimaString&, const Anima::AnimaString&, bool) = &Anima::AnimaLightsManager::SaveLightToFile;
 void (Anima::AnimaLightsManager::*SaveLightToFileWithLight)(Anima::AnimaLight*, const Anima::AnimaString&, bool) = &Anima::AnimaLightsManager::SaveLightToFile;
 
+void (Anima::AnimaMaterialsManager::*SaveMaterialToFileWithName)(const Anima::AnimaString&, const Anima::AnimaString&, bool) = &Anima::AnimaMaterialsManager::SaveMaterialToFile;
+void (Anima::AnimaMaterialsManager::*SaveMaterialToFileWithMaterial)(Anima::AnimaMaterial*, const Anima::AnimaString&, bool) = &Anima::AnimaMaterialsManager::SaveMaterialToFile;
 
+Anima::AnimaTexture* (Anima::AnimaTexturesManager::*LoadTextureFromAnimaTextureFile)(const Anima::AnimaString&) = &Anima::AnimaTexturesManager::LoadTextureFromFile;
+Anima::AnimaTexture* (Anima::AnimaTexturesManager::*LoadTextureFromImageFile)(const Anima::AnimaString&, const Anima::AnimaString&) = &Anima::AnimaTexturesManager::LoadTextureFromFile;
+void (Anima::AnimaTexturesManager::*SaveTextureToFileWithName)(const Anima::AnimaString&, const Anima::AnimaString&, bool) = &Anima::AnimaTexturesManager::SaveTextureToFile;
+void (Anima::AnimaTexturesManager::*SaveTextureToFileWithTexture)(Anima::AnimaTexture*, const Anima::AnimaString&, bool) = &Anima::AnimaTexturesManager::SaveTextureToFile;
 
+bool (Anima::AnimaDataGeneratorsManager::*RemoveGeneratorWithName)(const Anima::AnimaString&) = &Anima::AnimaDataGeneratorsManager::RemoveGenerator;
+bool (Anima::AnimaDataGeneratorsManager::*RemoveGeneratorWithGenerator)(Anima::AnimaDataGenerator*) = &Anima::AnimaDataGeneratorsManager::RemoveGenerator;
+
+void (Anima::AnimaMappedValues::*AMV_AddTexture1)(const Anima::AnimaString&, Anima::AnimaTextureGenerator*) = &Anima::AnimaMappedValues::AddTexture;
+void (Anima::AnimaMappedValues::*AMV_AddTexture2)(const Anima::AnimaString&, Anima::AnimaTexture*) = &Anima::AnimaMappedValues::AddTexture;
+void (Anima::AnimaMappedValues::*AMV_SetTexture1)(const Anima::AnimaString&, Anima::AnimaTextureGenerator*) = &Anima::AnimaMappedValues::SetTexture;
+void (Anima::AnimaMappedValues::*AMV_SetTexture2)(const Anima::AnimaString&, Anima::AnimaTexture*) = &Anima::AnimaMappedValues::SetTexture;
+void (Anima::AnimaMappedValues::*AMV_AddColor1)(const Anima::AnimaString&, Anima::AnimaColorGenerator*) = &Anima::AnimaMappedValues::AddColor;
+void (Anima::AnimaMappedValues::*AMV_AddColor2)(const Anima::AnimaString&, Anima::AnimaColor3f) = &Anima::AnimaMappedValues::AddColor;
+void (Anima::AnimaMappedValues::*AMV_AddColor3)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::AddColor;
+void (Anima::AnimaMappedValues::*AMV_AddColor4)(const Anima::AnimaString&, Anima::AnimaColor4f) = &Anima::AnimaMappedValues::AddColor;
+void (Anima::AnimaMappedValues::*AMV_AddColor5)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::AddColor;
+void (Anima::AnimaMappedValues::*AMV_SetColor1)(const Anima::AnimaString&, Anima::AnimaColorGenerator*) = &Anima::AnimaMappedValues::SetColor;
+void (Anima::AnimaMappedValues::*AMV_SetColor2)(const Anima::AnimaString&, Anima::AnimaColor3f) = &Anima::AnimaMappedValues::SetColor;
+void (Anima::AnimaMappedValues::*AMV_SetColor3)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::SetColor;
+void (Anima::AnimaMappedValues::*AMV_SetColor4)(const Anima::AnimaString&, Anima::AnimaColor4f) = &Anima::AnimaMappedValues::SetColor;
+void (Anima::AnimaMappedValues::*AMV_SetColor5)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::SetColor;
+void (Anima::AnimaMappedValues::*AMV_AddVector1)(const Anima::AnimaString&, Anima::AnimaVectorGenerator*) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector2)(const Anima::AnimaString&, Anima::AnimaVertex2f) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector3)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector4)(const Anima::AnimaString&, Anima::AnimaVertex3f) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector5)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector6)(const Anima::AnimaString&, Anima::AnimaVertex4f) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_AddVector7)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::AddVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector1)(const Anima::AnimaString&, Anima::AnimaVectorGenerator*) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector2)(const Anima::AnimaString&, Anima::AnimaVertex2f) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector3)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector4)(const Anima::AnimaString&, Anima::AnimaVertex3f) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector5)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector6)(const Anima::AnimaString&, Anima::AnimaVertex4f) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_SetVector7)(const Anima::AnimaString&, Anima::AFloat, Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaMappedValues::SetVector;
+void (Anima::AnimaMappedValues::*AMV_AddVectorArray1)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVectorGenerator*>*) = &Anima::AnimaMappedValues::AddVectorArray;
+void (Anima::AnimaMappedValues::*AMV_AddVectorArray2)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex2f>*) = &Anima::AnimaMappedValues::AddVectorArray;
+void (Anima::AnimaMappedValues::*AMV_AddVectorArray3)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex3f>*) = &Anima::AnimaMappedValues::AddVectorArray;
+void (Anima::AnimaMappedValues::*AMV_AddVectorArray4)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex4f>*) = &Anima::AnimaMappedValues::AddVectorArray;
+void (Anima::AnimaMappedValues::*AMV_SetVectorArray1)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVectorGenerator*>*) = &Anima::AnimaMappedValues::SetVectorArray;
+void (Anima::AnimaMappedValues::*AMV_SetVectorArray2)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex2f>*) = &Anima::AnimaMappedValues::SetVectorArray;
+void (Anima::AnimaMappedValues::*AMV_SetVectorArray3)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex3f>*) = &Anima::AnimaMappedValues::SetVectorArray;
+void (Anima::AnimaMappedValues::*AMV_SetVectorArray4)(const Anima::AnimaString&, Anima::AnimaArray<Anima::AnimaVertex4f>*) = &Anima::AnimaMappedValues::SetVectorArray;
+void (Anima::AnimaMappedValues::*AMV_AddMatrix1)(const Anima::AnimaString&, const Anima::AnimaMatrix&) = &Anima::AnimaMappedValues::AddMatrix;
+void (Anima::AnimaMappedValues::*AMV_AddMatrix2)(const Anima::AnimaString&, Anima::AFloat[16]) = &Anima::AnimaMappedValues::AddMatrix;
+void (Anima::AnimaMappedValues::*AMV_SetMatrix1)(const Anima::AnimaString&, const Anima::AnimaMatrix&) = &Anima::AnimaMappedValues::SetMatrix;
+void (Anima::AnimaMappedValues::*AMV_SetMatrix2)(const Anima::AnimaString&, Anima::AFloat[16]) = &Anima::AnimaMappedValues::SetMatrix;
 
 
 
@@ -252,7 +301,133 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	.def("SaveLights", &Anima::AnimaLightsManager::SaveLights)
 	.def("UpdateLightsMatrix", &Anima::AnimaLightsManager::UpdateLightsMatrix)
 	;
-	
+
+	// AnimaMaterialsManager
+	class_<Anima::AnimaMaterialsManager>("AnimaMaterialsManager", no_init)
+	.def("CreateMaterial", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("GetDefaultMaterial", &Anima::AnimaMaterialsManager::GetDefaultMaterial, return_value_policy<reference_existing_object>())
+	.def("GetMaterial", &Anima::AnimaMaterialsManager::GetMaterial, return_value_policy<reference_existing_object>())
+	.def("GetMaterialFromName", &Anima::AnimaMaterialsManager::GetMaterialFromName, return_value_policy<reference_existing_object>())
+	.def("GetMaterials", &Anima::AnimaMaterialsManager::GetMaterials, return_value_policy<reference_existing_object>())
+	.def("GetMaterialsCount", &Anima::AnimaMaterialsManager::GetMaterialsCount)
+	.def("LoadMaterialFromFile", &Anima::AnimaMaterialsManager::LoadMaterialFromFile, return_value_policy<reference_existing_object>())
+	.def("LoadMaterialFromXml", &Anima::AnimaMaterialsManager::LoadMaterialFromXml, return_value_policy<reference_existing_object>())
+	.def("LoadMaterials", &Anima::AnimaMaterialsManager::LoadMaterials)
+	.def("SaveMaterialToFile", SaveMaterialToFileWithName)
+	.def("SaveMaterialToFile", SaveMaterialToFileWithMaterial)
+	.def("SaveMaterials", &Anima::AnimaMaterialsManager::SaveMaterials)
+	;
+
+	// AnimaTexturesManager
+	class_<Anima::AnimaTexturesManager>("AnimaTexturesManager", no_init)
+	.def("CreateTexture", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("CreateTexture", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("CreateTexture", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("CreateTexture", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("CreateTexture", &Anima::AnimaMaterialsManager::CreateMaterial, return_value_policy<reference_existing_object>())
+	.def("GetTexture", &Anima::AnimaTexturesManager::GetTexture, return_value_policy<reference_existing_object>())
+	.def("GetTextureFromName", &Anima::AnimaTexturesManager::GetTextureFromName, return_value_policy<reference_existing_object>())
+	.def("GetTexturesCount", &Anima::AnimaTexturesManager::GetTexturesCount)
+	.def("LoadTextureFromBMPFile", &Anima::AnimaTexturesManager::LoadTextureFromBMPFile, return_value_policy<reference_existing_object>())
+	.def("LoadTextureFromDDSFile", &Anima::AnimaTexturesManager::LoadTextureFromDDSFile, return_value_policy<reference_existing_object>())
+	.def("LoadTextureFromTGAFile", &Anima::AnimaTexturesManager::LoadTextureFromTGAFile, return_value_policy<reference_existing_object>())
+	.def("LoadTextureFromFile", LoadTextureFromAnimaTextureFile, return_value_policy<reference_existing_object>())
+	.def("LoadTextureFromFile", LoadTextureFromImageFile, return_value_policy<reference_existing_object>())
+	.def("LoadTextures", &Anima::AnimaTexturesManager::LoadTextures)
+	.def("SaveTextures", &Anima::AnimaTexturesManager::SaveTextures)
+	.def("SaveTextureToFile", SaveTextureToFileWithName)
+	.def("SaveTextureToFile", SaveTextureToFileWithTexture)
+	;
+
+	// AnimaDataGeneratorsManager
+	class_<Anima::AnimaDataGeneratorsManager>("AnimaDataGeneratorsManager", no_init)
+	.def("CreateColorGenerator", &Anima::AnimaDataGeneratorsManager::CreateColorGenerator, return_value_policy<reference_existing_object>())
+	.def("CreateTextureGenerator", &Anima::AnimaDataGeneratorsManager::CreateTextureGenerator, return_value_policy<reference_existing_object>())
+	.def("CreateVectorGenerator", &Anima::AnimaDataGeneratorsManager::CreateVectorGenerator, return_value_policy<reference_existing_object>())
+	.def("GetGenerator", &Anima::AnimaDataGeneratorsManager::GetGenerator, return_value_policy<reference_existing_object>())
+	.def("RemoveGenerator", RemoveGeneratorWithName)
+	.def("RemoveGenerator", RemoveGeneratorWithGenerator)
+	;
+
+	// AnimaNamedObject
+	class_<Anima::AnimaNamedObject>("AnimaNamedObject", init<const Anima::AnimaString&, Anima::AnimaAllocator*>())
+	.def("GetName", &Anima::AnimaNamedObject::GetName)
+	.def("SetName", &Anima::AnimaNamedObject::SetName)
+	;
+
+	// AnimaMappedValues
+	class_<Anima::AnimaMappedValues, bases<Anima::AnimaNamedObject> >("AnimaMappedValues", no_init)
+	.def("AddTexture", AMV_AddTexture1)
+	.def("AddTexture", AMV_AddTexture2)
+	.def("SetTexture", AMV_SetTexture1)
+	.def("SetTexture", AMV_SetTexture2)
+	.def("GetTexture", &Anima::AnimaMappedValues::GetTexture, return_value_policy<reference_existing_object>())
+	.def("HasTexture", &Anima::AnimaMappedValues::HasTexture)
+	.def("AddColor", AMV_AddColor1)
+	.def("AddColor", AMV_AddColor2)
+	.def("AddColor", AMV_AddColor3)
+	.def("AddColor", AMV_AddColor4)
+	.def("AddColor", AMV_AddColor5)
+	.def("SetColor", AMV_SetColor1)
+	.def("SetColor", AMV_SetColor2)
+	.def("SetColor", AMV_SetColor3)
+	.def("SetColor", AMV_SetColor4)
+	.def("SetColor", AMV_SetColor5)
+	.def("GetColor3f", &Anima::AnimaMappedValues::GetColor3f)
+	.def("GetColor4f", &Anima::AnimaMappedValues::GetColor4f)
+	.def("HasColor", &Anima::AnimaMappedValues::HasColor)
+	.def("AddVector", AMV_AddVector1)
+	.def("AddVector", AMV_AddVector2)
+	.def("AddVector", AMV_AddVector3)
+	.def("AddVector", AMV_AddVector4)
+	.def("AddVector", AMV_AddVector5)
+	.def("AddVector", AMV_AddVector6)
+	.def("AddVector", AMV_AddVector7)
+	.def("SetVector", AMV_SetVector1)
+	.def("SetVector", AMV_SetVector2)
+	.def("SetVector", AMV_SetVector3)
+	.def("SetVector", AMV_SetVector4)
+	.def("SetVector", AMV_SetVector5)
+	.def("SetVector", AMV_SetVector6)
+	.def("SetVector", AMV_SetVector7)
+	.def("GetVector2f", &Anima::AnimaMappedValues::GetVector2f)
+	.def("GetVector3f", &Anima::AnimaMappedValues::GetVector3f)
+	.def("GetVector4f", &Anima::AnimaMappedValues::GetVector4f)
+	.def("HasVector", &Anima::AnimaMappedValues::HasVector)
+	.def("AddVectorArray", AMV_AddVectorArray1)
+	.def("AddVectorArray", AMV_AddVectorArray2)
+	.def("AddVectorArray", AMV_AddVectorArray3)
+	.def("AddVectorArray", AMV_AddVectorArray4)
+	.def("SetVectorArray", AMV_SetVectorArray1)
+	.def("SetVectorArray", AMV_SetVectorArray2)
+	.def("SetVectorArray", AMV_SetVectorArray3)
+	.def("SetVectorArray", AMV_SetVectorArray4)
+	.def("GetVectorArray", &Anima::AnimaMappedValues::GetVectorArray, return_value_policy<reference_existing_object>())
+	.def("HasVectorArray", &Anima::AnimaMappedValues::HasVectorArray)
+	.def("AddFloat", &Anima::AnimaMappedValues::AddFloat)
+	.def("SetFloat", &Anima::AnimaMappedValues::SetFloat)
+	.def("GetFloat", &Anima::AnimaMappedValues::GetFloat)
+	.def("HasFloat", &Anima::AnimaMappedValues::HasFloat)
+	.def("AddBoolean", &Anima::AnimaMappedValues::AddBoolean)
+	.def("SetBoolean", &Anima::AnimaMappedValues::SetBoolean)
+	.def("GetBoolean", &Anima::AnimaMappedValues::GetBoolean)
+	.def("HasBoolean", &Anima::AnimaMappedValues::HasBoolean)
+	.def("AddInteger", &Anima::AnimaMappedValues::AddInteger)
+	.def("SetInteger", &Anima::AnimaMappedValues::SetInteger)
+	.def("GetInteger", &Anima::AnimaMappedValues::GetInteger)
+	.def("HasInteger", &Anima::AnimaMappedValues::HasInteger)
+	.def("AddMatrix", AMV_AddMatrix1)
+	.def("AddMatrix", AMV_AddMatrix2)
+	.def("SetMatrix", AMV_SetMatrix1)
+	.def("SetMatrix", AMV_SetMatrix2)
+	.def("GetMatrix", &Anima::AnimaMappedValues::GetMatrix)
+	.def("HasMatrix", &Anima::AnimaMappedValues::HasMatrix)
+	.def("AddMatrixArray", &Anima::AnimaMappedValues::AddMatrixArray)
+	.def("SetMatrixArray", &Anima::AnimaMappedValues::SetMatrixArray)
+	.def("GetMatrixArray", &Anima::AnimaMappedValues::GetMatrixArray, return_value_policy<reference_existing_object>())
+	.def("HasMatrixArray", &Anima::AnimaMappedValues::HasMatrixArray)
+	;
+		
 //	// AnimaScene
 //	class_<Anima::AnimaScene>("AnimaScene", no_init)
 //		.def("GetEngine", &Anima::AnimaScene::GetEngine, return_value_policy<reference_existing_object>())
