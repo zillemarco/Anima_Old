@@ -385,7 +385,7 @@ ptree AnimaTexture::GetObjectTree(bool saveName) const
 				
 				for(AUint mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
 				{
-					AnimaArray<AUchar>* data = GetDataAsArray(textureCubeIndex, mipIndex);
+					const AnimaArray<AUchar>* data = GetDataAsArray(textureCubeIndex, mipIndex);
 					
 					if(data != nullptr)
 					{
@@ -409,7 +409,7 @@ ptree AnimaTexture::GetObjectTree(bool saveName) const
 			
 			for(AInt mipIndex = 0; mipIndex < mipMapLevels; mipIndex++)
 			{
-				AnimaArray<AUchar>* data = GetDataAsArray(mipIndex);
+				const AnimaArray<AUchar>* data = GetDataAsArray(mipIndex);
 				
 				if(data != nullptr)
 				{
@@ -746,7 +746,7 @@ const AUchar* AnimaTexture::GetData(AUint surfaceIndex) const
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AUint surfaceIndex) const
+const AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 2D e l'array di buffer ha un solo elemento
 	if (_textureTarget == TEXTURE_TARGET_2D && _faces.size() == 1)
@@ -770,7 +770,7 @@ const AUchar* AnimaTexture::GetData(AnimaTextureCubeIndex index, AUint surfaceIn
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const
+const AnimaArray<AUchar>* AnimaTexture::GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const
 {
 	// Posso tornare il valore solamente se la texture è di tipo 3D e l'array di buffer ha sei elementi
 	if (_textureTarget == TEXTURE_TARGET_CUBE && _faces.size() == 6)
@@ -1571,7 +1571,7 @@ const AUchar* AnimaTextureSurface::GetData() const
 	return nullptr;
 }
 
-AnimaArray<AUchar>* AnimaTextureSurface::GetDataAsArray() const
+const AnimaArray<AUchar>* AnimaTextureSurface::GetDataAsArray() const
 {
 	return const_cast<AnimaArray<AUchar>*>(&_data);
 }

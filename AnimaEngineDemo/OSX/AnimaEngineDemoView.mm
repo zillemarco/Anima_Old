@@ -738,107 +738,16 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	_timer.Reset();
 	
+#if defined SAVE_SCENE
 	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
 	
-	Anima::AnimaArray<Anima::AnimaArray<Anima::AUchar> > data;
-	Anima::AUint width;
-	Anima::AUint height;
-	Anima::AUint depth;
-	Anima::AUint mipMapsCount;
-	Anima::AUint imagesCount;
-	Anima::AnimaTextureFormat format;
-	Anima::AnimaTextureInternalFormat internalFormat;
-	Anima::AnimaTextureTarget target;
+	Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	_scene->SetTexture("SkyBox", textureCube);
+	_scene->SetTexture("EnvironmentMap", textureCube);
 	
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
-	{
-		Anima::AnimaTexture* texture = _renderer->GetTexture("EnvironmentMap");
-		if (texture != nullptr)
-		{
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetDepth(depth);
-			
-			if (format != 0 && internalFormat != 0)
-			{
-				texture->SetFormat(format);
-				texture->SetInternalFormat(internalFormat);
-			}
-			
-			texture->SetTextureTarget(target);
-			texture->SetMipMapLevels(mipMapsCount);
-			
-			// Forzo ad avere come fminimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = fmax(mipMapsCount, 1);
-			
-			Anima::AInt offset = 0;
-			for (Anima::AUint i = 0; i < imagesCount; i++)
-			{
-				for (Anima::AUint j = 0; j < mipMapsCount; j++)
-				{
-					Anima::AUchar* buffer = &data[offset][0];
-					Anima::AUint bufferSize = data[offset].size();
-					
-					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
-					
-					offset++;
-				}
-			}
-			
-			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
-			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
-		}
-	}
-	
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
-	{
-		Anima::AnimaTexture* texture = _renderer->GetTexture("IrradianceMap");
-		if (texture != nullptr)
-		{
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetDepth(depth);
-			
-			if (format != 0 && internalFormat != 0)
-			{
-				texture->SetFormat(format);
-				texture->SetInternalFormat(internalFormat);
-			}
-			
-			texture->SetTextureTarget(target);
-			texture->SetMipMapLevels(mipMapsCount);
-			
-			// Forzo ad avere come fminimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = fmax(mipMapsCount, 1);
-			
-			texture->SetTextureTarget(target);
-			
-			Anima::AInt offset = 0;
-			for (Anima::AUint i = 0; i < imagesCount; i++)
-			{
-				for (Anima::AUint j = 0; j < mipMapsCount; j++)
-				{
-					Anima::AUchar* buffer = &data[offset][0];
-					Anima::AUint bufferSize = data[offset].size();
-					
-					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
-					
-					offset++;
-				}
-			}
-			
-			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
-			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
-		}
-	}
-	
-#if defined SAVE_SCENE
-	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
-	_scene->SetTexture("SkyBox", textureSkyBox);
-#else
-	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
+	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+	_scene->SetTexture("IrradianceMap", textureIrr);
 #endif
-	textureSkyBox->Load();
 	
 	_renderer->CheckPrograms(_scene);
 	

@@ -11,8 +11,8 @@
 				<Data propertyName="PrepassBuffer.DepthMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_DepthMap"/>
 				<Data propertyName="PrepassBuffer.NormalMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_NormalMap"/>
 				<Data propertyName="PrepassBuffer.SpecularMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="PrepassBuffer_SpecularMap"/>
-				<Data propertyName="EnvironmentMap" type="TEXTURECUBE" sourceObject="RENDERER"/>
-				<Data propertyName="IrradianceMap" type="TEXTURECUBE" sourceObject="RENDERER"/>
+				<Data propertyName="EnvironmentMap" type="TEXTURECUBE" sourceObject="SCENE"/>
+				<Data propertyName="IrradianceMap" type="TEXTURECUBE" sourceObject="SCENE"/>
 				<Data propertyName="InverseScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 				<Data propertyName="Position" type="FLOAT3" sourceObject="CAMERA" associatedWith="CameraPosition"/>
 				<Data propertyName="InverseProjectionViewMatrix" type="MATRIX4x4" sourceObject="CAMERA"/>

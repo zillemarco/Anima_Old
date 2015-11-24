@@ -463,7 +463,7 @@ AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromXml(const AnimaStr
 
 	std::stringstream ss(shaderProgramXmlDefinition);
 	boost::property_tree::read_xml(ss, pt);
-
+	
 	return LoadShaderProgramFromXml(pt);
 }
 
@@ -472,7 +472,7 @@ AnimaShaderProgram* AnimaShadersManager::LoadShaderProgramFromXml(const boost::p
 	AnimaShaderProgram* shaderProgram = nullptr;
 
 	AnimaString name = xmlTree.get<AnimaString>("AnimaShaderProgram.Name");
-
+	
 	shaderProgram = CreateProgram(name.c_str());
 
 	if (shaderProgram)

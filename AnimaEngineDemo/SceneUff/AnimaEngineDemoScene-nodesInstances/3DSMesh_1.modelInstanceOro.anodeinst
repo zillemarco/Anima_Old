@@ -36,12 +36,12 @@
 							</Value>
 						</Property>
 						<Property>
-							<Name>RModelMatrix</Name>
+							<Name>RNormalMatrix</Name>
 							<Type>matrix</Type>
 							<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
 						</Property>
 						<Property>
-							<Name>RNormalMatrix</Name>
+							<Name>RModelMatrix</Name>
 							<Type>matrix</Type>
 							<Value>1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000;0.000000;0.000000;0.000000;0.000000;1.000000</Value>
 						</Property>

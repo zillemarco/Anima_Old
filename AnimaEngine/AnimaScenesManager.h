@@ -29,6 +29,7 @@ public:
 	
 	AnimaScene* CreateScene(const AnimaString& name);
 
+	AInt GetScenesCount() const { return _scenes.GetSize(); }
 	AnimaScene* GetScene(AUint index);
 	AnimaScene* GetSceneFromName(const AnimaString& name);
 	

@@ -68,7 +68,7 @@ public:
 	void SetUpdateData(const AnimaVertex3f& direction) { _updateDirection = direction; }
 	
 	void SetAcceleration(const AnimaVertex3f &acceleration);
-	const AnimaVertex3f& GetAcceleration() const;
+	const AnimaVertex3f& GetAcceleration() const { return _acceleration; }
 	
 	void SetCameraType(AnimaCameraType type);
 	AnimaCameraType GetCameraType() const { return _cameraType; }
@@ -89,11 +89,11 @@ public:
 	void SetOrbitOffsetDistance(AFloat orbitOffsetDistance);
 	AFloat GetOrbitOffsetDistance() const { return _orbitOffsetDistance; }
 	
-	void SetOrbitPitchMaxDegrees(AFloat orbitPitchMaxDegrees);
-	AFloat GetOrbitPitchMaxDegrees() const;
-	
-	void SetOrbitPitchMinDegrees(AFloat orbitPitchMinDegrees);
-	AFloat GetOrbitPitchMinDegrees() const;
+//	void SetOrbitPitchMaxDegrees(AFloat orbitPitchMaxDegrees);
+//	AFloat GetOrbitPitchMaxDegrees() const;
+//	
+//	void SetOrbitPitchMinDegrees(AFloat orbitPitchMinDegrees);
+//	AFloat GetOrbitPitchMinDegrees() const;
 	
 	void SetOrientation(const AnimaQuaternion& oriantation);
 	const AnimaQuaternion& GetOrientation() const { return _orientation; }

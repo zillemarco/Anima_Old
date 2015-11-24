@@ -7,9 +7,11 @@ if AnimaEngine_Folder not in sys.path:
 
 import wx
 import MainFrame
+import AnimaEngine
 
 class AnimaEditorApp(wx.App):
     currentProject = None
+    engine = AnimaEngine.AnimaEngine()
 
     def __init__(self):
         wx.App.__init__(self, redirect = False)

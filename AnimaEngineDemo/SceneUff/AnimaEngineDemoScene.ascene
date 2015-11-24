@@ -41,6 +41,36 @@
 		<AnimaMappedValues>
 			<Properties>
 				<Property>
+					<Name>IrradianceMap</Name>
+					<Type>texture</Type>
+					<Value>
+						<AnimaTextureGenerator>
+							<Name>IrradianceMap.valueGenerator</Name>
+							<TextureName>dds-skybox-texture-irr</TextureName>
+							<DataGenerator>
+								<AnimaDataGenerator>
+									<CanUpdateValue>true</CanUpdateValue>
+								</AnimaDataGenerator>
+							</DataGenerator>
+						</AnimaTextureGenerator>
+					</Value>
+				</Property>
+				<Property>
+					<Name>EnvironmentMap</Name>
+					<Type>texture</Type>
+					<Value>
+						<AnimaTextureGenerator>
+							<Name>EnvironmentMap.valueGenerator</Name>
+							<TextureName>dds-skybox-texture</TextureName>
+							<DataGenerator>
+								<AnimaDataGenerator>
+									<CanUpdateValue>true</CanUpdateValue>
+								</AnimaDataGenerator>
+							</DataGenerator>
+						</AnimaTextureGenerator>
+					</Value>
+				</Property>
+				<Property>
 					<Name>SkyBox</Name>
 					<Type>texture</Type>
 					<Value>

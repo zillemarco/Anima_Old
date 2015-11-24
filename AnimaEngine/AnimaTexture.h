@@ -175,9 +175,9 @@ public:
 	 */
 	bool SetData(AUchar* data, AUint dataSize, AnimaTextureCubeIndex index, AUint mipMapIndex);
 	const AUchar* GetData(AUint surfaceIndex) const;
-	AnimaArray<AUchar>* GetDataAsArray(AUint surfaceIndex) const;
+	const AnimaArray<AUchar>* GetDataAsArray(AUint surfaceIndex) const;
 	const AUchar* GetData(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
-	AnimaArray<AUchar>* GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
+	const AnimaArray<AUchar>* GetDataAsArray(AnimaTextureCubeIndex index, AUint surfaceIndex) const;
 
 	void SetTextureTarget(AnimaTextureTarget target);
 	AnimaTextureTarget GetTextureTarget() const;
@@ -272,7 +272,7 @@ public:
 	void SetData(AUchar* data, AUint dataSize);
 	void CopyData(const AnimaTextureSurface& src);
 	const AUchar* GetData() const;
-	AnimaArray<AUchar>* GetDataAsArray() const;
+	const AnimaArray<AUchar>* GetDataAsArray() const;
 
 	void SetWidth(AUint width);
 	AUint GetWidth() const;

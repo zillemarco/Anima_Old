@@ -8,21 +8,6 @@
 		<AnimaMappedValues>
 			<Properties>
 				<Property>
-					<Name>AlbedoMap</Name>
-					<Type>texture</Type>
-					<Value>
-						<AnimaTextureGenerator>
-							<Name>AlbedoMap.valueGenerator</Name>
-							<TextureName>txt-legno</TextureName>
-							<DataGenerator>
-								<AnimaDataGenerator>
-									<CanUpdateValue>true</CanUpdateValue>
-								</AnimaDataGenerator>
-							</DataGenerator>
-						</AnimaTextureGenerator>
-					</Value>
-				</Property>
-				<Property>
 					<Name>NormalMap</Name>
 					<Type>texture</Type>
 					<Value>
@@ -38,14 +23,24 @@
 					</Value>
 				</Property>
 				<Property>
-					<Name>Specular</Name>
-					<Type>float</Type>
-					<Value>0.5</Value>
+					<Name>AlbedoMap</Name>
+					<Type>texture</Type>
+					<Value>
+						<AnimaTextureGenerator>
+							<Name>AlbedoMap.valueGenerator</Name>
+							<TextureName>txt-legno</TextureName>
+							<DataGenerator>
+								<AnimaDataGenerator>
+									<CanUpdateValue>true</CanUpdateValue>
+								</AnimaDataGenerator>
+							</DataGenerator>
+						</AnimaTextureGenerator>
+					</Value>
 				</Property>
 				<Property>
-					<Name>Roughness</Name>
+					<Name>ReflectionIntensity</Name>
 					<Type>float</Type>
-					<Value>0.5</Value>
+					<Value>0.200000003</Value>
 				</Property>
 				<Property>
 					<Name>Metallic</Name>
@@ -53,9 +48,14 @@
 					<Value>0.100000001</Value>
 				</Property>
 				<Property>
-					<Name>ReflectionIntensity</Name>
+					<Name>Roughness</Name>
 					<Type>float</Type>
-					<Value>0.200000003</Value>
+					<Value>0.5</Value>
+				</Property>
+				<Property>
+					<Name>Specular</Name>
+					<Type>float</Type>
+					<Value>0.5</Value>
 				</Property>
 				<Property>
 					<Name>TwoSided</Name>

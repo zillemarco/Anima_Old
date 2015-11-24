@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -42,23 +42,14 @@ AnimaRenderer::AnimaRenderer(AnimaEngine* engine, AnimaAllocator* allocator)
 	_lastUpdatedNodeInstance = nullptr;
 
 	InitTextureSlots();
-
+	
 	AddRenderPassFunction(PreparePass);
 	AddRenderPassFunction(LightPass);
 	AddRenderPassFunction(CombinePass);
 	AddRenderPassFunction(BloomCreationPass);
 	AddRenderPassFunction(FinalPass);
 //	AddRenderPassFunction(DirectionalLightShadowMap);
-
-	AnimaTexture* environmentTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
-	AnimaTexture* irradianceTexture = AnimaAllocatorNamespace::AllocateNew<AnimaTexture>(*_allocator, _allocator);
-
-	environmentTexture->SetName("EnvironmentMap");
-	irradianceTexture->SetName("IrradianceMap");
-
-	SetTexture("EnvironmentMap", environmentTexture);
-	SetTexture("IrradianceMap", irradianceTexture);
-
+	
 	_programsBufferIndex = 0;
 	
 	DisablePhysicsDebugDrawing();
@@ -1344,6 +1335,7 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 		{
 			program->Use();
 			program->UpdateSceneObjectProperties(activeCamera, this);
+			program->UpdateMappedValuesObjectProperties(_scene, this);
 			program->UpdateRenderingManagerProperies(this);
 		}
 		
@@ -1400,6 +1392,7 @@ void AnimaRenderer::PointLightsPass(AnimaArray<AnimaLight*>* pointLights)
 		{
 			program->Use();
 			program->UpdateSceneObjectProperties(activeCamera, this);
+			program->UpdateMappedValuesObjectProperties(_scene, this);
 			program->UpdateRenderingManagerProperies(this);
 		}
 
@@ -2352,31 +2345,31 @@ bool AnimaRenderer::InitializeShaders()
 	AnimaShadersManager* shadersManager = _engine->GetShadersManager();
 	shadersManager->LoadShadersIncludes(shadersIncludesPath);
 	shadersManager->LoadShadersParts(shadersPartsPath);
-
+	
 	AnimaShaderProgram* prepareProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/static-geometry-base-material-pbr-inst.asp");
 	if (!prepareProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* directionalLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/directional-light-pbr.asp");
 	if (!directionalLightProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* skyboxProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/skybox.asp");
 	if (!skyboxProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* hemisphereLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/hemisphere-light.asp");
 	if (!hemisphereLightProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* pointLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/point-light-pbr.asp");
 	if (!pointLightProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* spotLightProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/spot-light.asp");
 	if (!spotLightProgram->Link())
 		return false;
-
+	
 	AnimaShaderProgram* nullFilterProgram = shadersManager->LoadShaderProgramFromFile(shadersPath + "Shaders/nullFilter.asp");
 	if (!nullFilterProgram->Link())
 		return false;
