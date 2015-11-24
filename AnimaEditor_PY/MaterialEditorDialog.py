@@ -1,6 +1,7 @@
 __author__ = 'marco'
 
 import wx
+import AnimaEngine
 
 class MaterialEditorDialog(wx.Dialog):
     def __init__(self, *args, **kwargs):
@@ -31,13 +32,18 @@ class MaterialEditorDialog(wx.Dialog):
             floats = self.material.GetFloats()
             colors = self.material.GetColors()
 
-            floatsCount = len(floats)
-            colorsCount = len(colors)
+            pos = 0
+            for f in floats:
+                self.listaMateriali.InsertStringItem(pos, AnimaEngine.AnimaMappedValues.ExtractName(f.key()))
+                self.listaMateriali.SetStringItem(pos, 1, str(f.data()))
+                pos += 1
 
-            for k in floats:
-                print k
+            for c in colors:
+                col = c.data().GetColor4f()
 
-            pass
+                self.listaMateriali.InsertStringItem(pos, AnimaEngine.AnimaMappedValues.ExtractName(c.key()))
+                self.listaMateriali.SetStringItem(pos, 1, str(col.r) + ":" + str(col.g) + ":" + str(col.b) + ":" + str(col.a))
+                pos += 1
 
     def OnCancel(self, e):
         self.Destroy()

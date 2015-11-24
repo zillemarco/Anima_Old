@@ -45,6 +45,10 @@
 #include "AnimaThirdPersonCamera.h"
 #include "AnimaCamera.h"
 #include "AnimaAnimation.h"
+#include "AnimaDataGenerator.h"
+#include "AnimaColorGenerator.h"
+#include "AnimaTextureGenerator.h"
+#include "AnimaVectorGenerator.h"
 
 #include <boost/unordered_map.hpp>
 #include <boost/python.hpp>
@@ -320,6 +324,18 @@ void (Anima::AnimaMappedValues::*AMV_AddMatrix1)(const Anima::AnimaString&, cons
 void (Anima::AnimaMappedValues::*AMV_AddMatrix2)(const Anima::AnimaString&, Anima::AFloat[16]) = &Anima::AnimaMappedValues::AddMatrix;
 void (Anima::AnimaMappedValues::*AMV_SetMatrix1)(const Anima::AnimaString&, const Anima::AnimaMatrix&) = &Anima::AnimaMappedValues::SetMatrix;
 void (Anima::AnimaMappedValues::*AMV_SetMatrix2)(const Anima::AnimaString&, Anima::AFloat[16]) = &Anima::AnimaMappedValues::SetMatrix;
+
+
+void (Anima::AnimaDataGenerator::*ADG_SetColor1)(const Anima::AnimaColor3f& color) = &Anima::AnimaDataGenerator::SetColor;
+void (Anima::AnimaDataGenerator::*ADG_SetColor2)(Anima::AFloat r, Anima::AFloat g, Anima::AFloat b) = &Anima::AnimaDataGenerator::SetColor;
+void (Anima::AnimaDataGenerator::*ADG_SetColor3)(const Anima::AnimaColor4f& color) = &Anima::AnimaDataGenerator::SetColor;
+void (Anima::AnimaDataGenerator::*ADG_SetColor4)(Anima::AFloat r, Anima::AFloat g, Anima::AFloat b, Anima::AFloat a) = &Anima::AnimaDataGenerator::SetColor;
+void (Anima::AnimaDataGenerator::*ADG_SetVector1)(const Anima::AnimaVertex2f& color) = &Anima::AnimaDataGenerator::SetVector;
+void (Anima::AnimaDataGenerator::*ADG_SetVector2)(Anima::AFloat x, Anima::AFloat y) = &Anima::AnimaDataGenerator::SetVector;
+void (Anima::AnimaDataGenerator::*ADG_SetVector3)(const Anima::AnimaVertex3f& color) = &Anima::AnimaDataGenerator::SetVector;
+void (Anima::AnimaDataGenerator::*ADG_SetVector4)(Anima::AFloat x, Anima::AFloat y, Anima::AFloat z) = &Anima::AnimaDataGenerator::SetVector;
+void (Anima::AnimaDataGenerator::*ADG_SetVector5)(const Anima::AnimaVertex4f& color) = &Anima::AnimaDataGenerator::SetVector;
+void (Anima::AnimaDataGenerator::*ADG_SetVector6)(Anima::AFloat x, Anima::AFloat y, Anima::AFloat z, Anima::AFloat w) = &Anima::AnimaDataGenerator::SetVector;
 
 bool (Anima::AnimaTexture::*AT_SetData1)(Anima::AUchar*, Anima::AUint, Anima::AUint) = &Anima::AnimaTexture::SetData;
 bool (Anima::AnimaTexture::*AT_SetData2)(Anima::AUchar*, Anima::AUint, Anima::AnimaTextureCubeIndex, Anima::AUint) = &Anima::AnimaTexture::SetData;
@@ -631,6 +647,8 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	.def("GetMatrixArray", &Anima::AnimaMappedValues::GetMatrixArray, return_value_policy<reference_existing_object>())
 	.def("HasMatrixArray", &Anima::AnimaMappedValues::HasMatrixArray)
 	.def("GetMatrixArrays", &Anima::AnimaMappedValues::GetMatrixArrays, return_value_policy<reference_existing_object>())
+	.def("ExtractName", &Anima::AnimaMappedValues::ExtractName)
+	.staticmethod("ExtractName")
 	;
 	
 	class_<Anima::AnimaArray<Anima::AnimaVectorGenerator*> >("AnimaVectorGeneratorArray")
@@ -671,6 +689,47 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	
 	class_<boost::unordered_map<Anima::AnimaString, Anima::AnimaArray<Anima::AnimaMatrix>*, Anima::AnimaStringHasher> >("AnimaMatrixArrayMap")
 	.def(pointer_map_indexing_suite<boost::unordered_map<Anima::AnimaString, Anima::AnimaArray<Anima::AnimaMatrix>*, Anima::AnimaStringHasher>, false>())
+	;
+	
+	// AnimaDataGenerator
+	class_<Anima::AnimaDataGenerator, boost::noncopyable>("AnimaDataGenerator", no_init)
+//	.def("UpdateValue", pure_virtual(&Anima::AnimaDataGenerator::UpdateValue))
+	.def("SetColor", ADG_SetColor1)
+	.def("SetColor", ADG_SetColor2)
+	.def("SetColor", ADG_SetColor3)
+	.def("SetColor", ADG_SetColor4)
+	.def("GetColor3f", &Anima::AnimaDataGenerator::GetColor3f)
+	.def("GetColor4f", &Anima::AnimaDataGenerator::GetColor4f)
+	.def("SetVector", ADG_SetVector1)
+	.def("SetVector", ADG_SetVector2)
+	.def("SetVector", ADG_SetVector3)
+	.def("SetVector", ADG_SetVector4)
+	.def("SetVector", ADG_SetVector5)
+	.def("SetVector", ADG_SetVector6)
+	.def("GetVector2f", &Anima::AnimaDataGenerator::GetVector2f)
+	.def("GetVector3f", &Anima::AnimaDataGenerator::GetVector3f)
+	.def("GetVector4f", &Anima::AnimaDataGenerator::GetVector4f)
+	.def("SetTexture", &Anima::AnimaDataGenerator::SetTexture)
+	.def("GetTexture", &Anima::AnimaDataGenerator::GetTexture, return_value_policy<reference_existing_object>())
+	.def("StopValueUpdate", &Anima::AnimaDataGenerator::StopValueUpdate)
+	.def("StartValueUpdate", &Anima::AnimaDataGenerator::StartValueUpdate)
+	.def("SetCanUpdateValue", &Anima::AnimaDataGenerator::SetCanUpdateValue)
+	.def("CanUpdateValue", &Anima::AnimaDataGenerator::CanUpdateValue)
+	;
+	
+	// AnimaColorGenerator
+	class_<Anima::AnimaColorGenerator, bases<Anima::AnimaDataGenerator> >("AnimaColorGenerator", no_init)
+	.def("UpdateValue", &Anima::AnimaColorGenerator::UpdateValue)
+	;
+	
+	// AnimaTextureGenerator
+	class_<Anima::AnimaTextureGenerator, bases<Anima::AnimaDataGenerator> >("AnimaTextureGenerator", no_init)
+	.def("UpdateValue", &Anima::AnimaTextureGenerator::UpdateValue)
+	;
+	
+	// AnimaVectorGenerator
+	class_<Anima::AnimaVectorGenerator, bases<Anima::AnimaDataGenerator> >("AnimaVectorGenerator", no_init)
+	.def("UpdateValue", &Anima::AnimaVectorGenerator::UpdateValue)
 	;
 	
 	// AnimaTexture

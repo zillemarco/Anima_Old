@@ -55,7 +55,7 @@ class MainFrame(wx.Frame):
         self.listaMateriali = wx.ListCtrl(leftPanel, size=(-1, 100), style=wx.LC_REPORT)
 
         self.listaScene.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnScenaSelezionata)
-        self.listaMateriali.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnMaterialeSelezionato)
+        self.listaMateriali.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnMaterialeSelezionato)
 
         leftSizer = wx.BoxSizer(wx.VERTICAL)
         leftSizer.Add(self.listaScene, 1, wx.EXPAND | wx.ALL)
