@@ -52,16 +52,11 @@ AnimaNode* AnimaNodesManager::LoadAssetFromExternalFile(const AnimaString& nodeP
 		return nullptr;
 	
 	AnimaNode* newAsset = nullptr;
-	
-	AnimaLogger::LogMessageFormat("Loading %s", name.c_str());
-
-	//_materialsManager->LoadMaterialsFromNode(scene, name);
-	//AnimaArray<AnimaString>* materialNames = _materialsManager->GetLastMaterialsIndexMap();
 
 	_animationsManager->LoadAnimations(scene);
 	AnimaMappedArray<AnimaAnimation*>* loadedAnimations = _animationsManager->GetLastLoadedAnimations();
 
-	if (_geometriesManager->LoadGeometriesFromNode(scene, name/*, materialNames*/))
+	if (_geometriesManager->LoadGeometriesFromNode(scene, name))
 	{
 		AnimaMappedArray<AnimaGeometryBoneInfo*>* geometriesBonesInfo = _geometriesManager->GetLastGeometriesBonesInfo();
 
@@ -72,7 +67,8 @@ AnimaNode* AnimaNodesManager::LoadAssetFromExternalFile(const AnimaString& nodeP
 		newAsset->SetGeometriesBonesInfo(geometriesBonesInfo);
 		newAsset->SetAnimations(loadedAnimations->GetArray());
 		newAsset->GetTransformation()->SetAnimationGlobalInverseMatrix(AnimaMatrix());
-
+		newAsset->SetIsAsset(true);
+		
 		_assets.Add(name, newAsset);
 	}
 

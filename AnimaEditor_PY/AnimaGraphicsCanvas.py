@@ -11,6 +11,7 @@ class AnimaGraphicsCanvas(wx.Window):
 
         assert isinstance(engine, AnimaEngine.AnimaEngine)
 
+        self.updateSceneAutomatically = False
         self.openGLInitialized = False
         self.rendererInitialized = False
         self.context = None
@@ -82,6 +83,10 @@ class AnimaGraphicsCanvas(wx.Window):
 
             self.rendererInitialized = True
 
+    def CheckPrograms(self):
+        if self.renderer is not None and self.scene is not None:
+            self.renderer.CheckPrograms(self.scene)
+
     def Redraw(self):
         self.Refresh()
 
@@ -89,11 +94,15 @@ class AnimaGraphicsCanvas(wx.Window):
         self.scene = scene
 
         if scene is not None:
+            self.updateSceneAutomatically = True
             self.scene.SetKeyboardInteractor(self.keyboardInteractor)
             self.scene.SetMouseInteractor(self.mouseInteractor)
 
             if self.renderer is not None:
                 self.renderer.CheckPrograms(self.scene)
+            threading.Timer(0.0001, self.Redraw).start()
+        else:
+            self.updateSceneAutomatically = False
 
     def OnDraw(self):
         if self.openGLInitialized == True and self.rendererInitialized == True and self.scene is not None:
@@ -105,4 +114,5 @@ class AnimaGraphicsCanvas(wx.Window):
 
             self.scene.StepScene()
 
-        threading.Timer(0.0001, self.Redraw).start()
+        if self.updateSceneAutomatically:
+            threading.Timer(0.0001, self.Redraw).start()

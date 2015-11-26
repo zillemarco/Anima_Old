@@ -325,7 +325,6 @@ void (Anima::AnimaMappedValues::*AMV_AddMatrix2)(const Anima::AnimaString&, Anim
 void (Anima::AnimaMappedValues::*AMV_SetMatrix1)(const Anima::AnimaString&, const Anima::AnimaMatrix&) = &Anima::AnimaMappedValues::SetMatrix;
 void (Anima::AnimaMappedValues::*AMV_SetMatrix2)(const Anima::AnimaString&, Anima::AFloat[16]) = &Anima::AnimaMappedValues::SetMatrix;
 
-
 void (Anima::AnimaDataGenerator::*ADG_SetColor1)(const Anima::AnimaColor3f& color) = &Anima::AnimaDataGenerator::SetColor;
 void (Anima::AnimaDataGenerator::*ADG_SetColor2)(Anima::AFloat r, Anima::AFloat g, Anima::AFloat b) = &Anima::AnimaDataGenerator::SetColor;
 void (Anima::AnimaDataGenerator::*ADG_SetColor3)(const Anima::AnimaColor4f& color) = &Anima::AnimaDataGenerator::SetColor;
@@ -371,6 +370,23 @@ void (Anima::AnimaLight::*AL_SetDirection1)(const Anima::AnimaVertex3f&) = &Anim
 void (Anima::AnimaLight::*AL_SetDirection2)(Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaLight::SetDirection;
 void (Anima::AnimaLight::*AL_SetColor1)(const Anima::AnimaColor3f&) = &Anima::AnimaLight::SetColor;
 void (Anima::AnimaLight::*AL_SetColor2)(Anima::AFloat, Anima::AFloat, Anima::AFloat) = &Anima::AnimaLight::SetColor;
+
+void (Anima::AnimaTransformation::*AT_Translate1)(const Anima::AnimaVertex3f& t) = &Anima::AnimaTransformation::Translate;
+void (Anima::AnimaTransformation::*AT_Translate2)(Anima::AFloat tx, Anima::AFloat ty, Anima::AFloat tz) = &Anima::AnimaTransformation::Translate;
+void (Anima::AnimaTransformation::*AT_SetTranslation1)(const Anima::AnimaVertex3f& t) = &Anima::AnimaTransformation::SetTranslation;
+void (Anima::AnimaTransformation::*AT_SetTranslation2)(Anima::AFloat tx, Anima::AFloat ty, Anima::AFloat tz) = &Anima::AnimaTransformation::SetTranslation;
+void (Anima::AnimaTransformation::*AT_Rotate1)(const Anima::AnimaVertex3f& r) = &Anima::AnimaTransformation::Rotate;
+void (Anima::AnimaTransformation::*AT_Rotate2)(Anima::AFloat rx, Anima::AFloat ry, Anima::AFloat rz) = &Anima::AnimaTransformation::Rotate;
+void (Anima::AnimaTransformation::*AT_SetRotation1)(const Anima::AnimaVertex3f& r) = &Anima::AnimaTransformation::SetRotation;
+void (Anima::AnimaTransformation::*AT_SetRotation2)(Anima::AFloat rx, Anima::AFloat ry, Anima::AFloat rz) = &Anima::AnimaTransformation::SetRotation;
+void (Anima::AnimaTransformation::*AT_RotateDeg1)(const Anima::AnimaVertex3f& r) = &Anima::AnimaTransformation::RotateDeg;
+void (Anima::AnimaTransformation::*AT_RotateDeg2)(Anima::AFloat rx, Anima::AFloat ry, Anima::AFloat rz) = &Anima::AnimaTransformation::RotateDeg;
+void (Anima::AnimaTransformation::*AT_SetRotationDeg1)(const Anima::AnimaVertex3f& r) = &Anima::AnimaTransformation::SetRotationDeg;
+void (Anima::AnimaTransformation::*AT_SetRotationDeg2)(Anima::AFloat rx, Anima::AFloat ry, Anima::AFloat rz) = &Anima::AnimaTransformation::SetRotationDeg;
+void (Anima::AnimaTransformation::*AT_Scale1)(const Anima::AnimaVertex3f& s) = &Anima::AnimaTransformation::Scale;
+void (Anima::AnimaTransformation::*AT_Scale2)(Anima::AFloat sx, Anima::AFloat sy, Anima::AFloat sz) = &Anima::AnimaTransformation::Scale;
+void (Anima::AnimaTransformation::*AT_SetScale1)(const Anima::AnimaVertex3f& s) = &Anima::AnimaTransformation::SetScale;
+void (Anima::AnimaTransformation::*AT_SetScale2)(Anima::AFloat sx, Anima::AFloat sy, Anima::AFloat sz) = &Anima::AnimaTransformation::SetScale;
 
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
@@ -565,6 +581,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	class_<Anima::AnimaNamedObject>("AnimaNamedObject", init<const Anima::AnimaString&, Anima::AnimaAllocator*>())
 	.def("GetName", &Anima::AnimaNamedObject::GetName)
 	.def("SetName", &Anima::AnimaNamedObject::SetName)
+	.def("SaveObject", &Anima::AnimaNamedObject::SaveObject)
 	;
 
 	// AnimaMappedValues
@@ -897,6 +914,8 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	.def("GetZAxis", &Anima::AnimaCamera::GetZAxis, return_value_policy<reference_existing_object>())
 	.def("SetPreferTargetYAxisOrbiting", &Anima::AnimaCamera::SetPreferTargetYAxisOrbiting)
 	.def("PreferTargetYAxisOrbiting", &Anima::AnimaCamera::PreferTargetYAxisOrbiting)
+	.def("Activate", &Anima::AnimaCamera::Activate)
+	.def("Deactivate", &Anima::AnimaCamera::Deactivate)
 	.def("IsActive", &Anima::AnimaCamera::IsActive)
 	;
 	
@@ -1213,6 +1232,65 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	.def_readwrite("g", &Anima::AnimaVertex4f::g)
 	.def_readwrite("b", &Anima::AnimaVertex4f::b)
 	.def_readwrite("a", &Anima::AnimaVertex4f::a)
+	;
+	
+	// AnimaTransformation
+	class_<Anima::AnimaTransformation>("AnimaTransformation", init<>())
+	.def("Translate", AT_Translate1)
+	.def("Translate", AT_Translate2)
+	.def("TranslateX", &Anima::AnimaTransformation::TranslateX)
+	.def("TranslateY", &Anima::AnimaTransformation::TranslateY)
+	.def("TranslateZ", &Anima::AnimaTransformation::TranslateZ)
+	.def("SetTranslation", AT_SetTranslation1)
+	.def("SetTranslation", AT_SetTranslation2)
+	.def("SetTranslationX", &Anima::AnimaTransformation::SetTranslationX)
+	.def("SetTranslationY", &Anima::AnimaTransformation::SetTranslationY)
+	.def("SetTranslationZ", &Anima::AnimaTransformation::SetTranslationZ)
+	.def("GetTranslation", &Anima::AnimaTransformation::GetTranslation)
+	.def("GetTranslationX", &Anima::AnimaTransformation::GetTranslationX)
+	.def("GetTranslationY", &Anima::AnimaTransformation::GetTranslationY)
+	.def("GetTranslationZ", &Anima::AnimaTransformation::GetTranslationZ)
+	.def("GetCompleteTranslation", &Anima::AnimaTransformation::GetCompleteTranslation)
+	.def("Rotate", AT_Rotate1)
+	.def("Rotate", AT_Rotate2)
+	.def("RotateX", &Anima::AnimaTransformation::RotateX)
+	.def("RotateY", &Anima::AnimaTransformation::RotateY)
+	.def("RotateZ", &Anima::AnimaTransformation::RotateZ)
+	.def("SetRotation", AT_SetRotation1)
+	.def("SetRotation", AT_SetRotation2)
+	.def("SetRotationX", &Anima::AnimaTransformation::SetRotationX)
+	.def("SetRotationY", &Anima::AnimaTransformation::SetRotationY)
+	.def("SetRotationZ", &Anima::AnimaTransformation::SetRotationZ)
+	.def("RotateDeg", AT_RotateDeg1)
+	.def("RotateDeg", AT_RotateDeg2)
+	.def("RotateXDeg", &Anima::AnimaTransformation::RotateXDeg)
+	.def("RotateYDeg", &Anima::AnimaTransformation::RotateYDeg)
+	.def("RotateZDeg", &Anima::AnimaTransformation::RotateZDeg)
+	.def("SetRotationDeg", AT_SetRotationDeg1)
+	.def("SetRotationDeg", AT_SetRotationDeg2)
+	.def("SetRotationXDeg", &Anima::AnimaTransformation::SetRotationXDeg)
+	.def("SetRotationYDeg", &Anima::AnimaTransformation::SetRotationYDeg)
+	.def("SetRotationZDeg", &Anima::AnimaTransformation::SetRotationZDeg)
+	.def("GetRotation", &Anima::AnimaTransformation::GetRotation)
+	.def("GetRotationX", &Anima::AnimaTransformation::GetRotationX)
+	.def("GetRotationY", &Anima::AnimaTransformation::GetRotationY)
+	.def("GetRotationZ", &Anima::AnimaTransformation::GetRotationZ)
+	.def("GetCompleteRotation", &Anima::AnimaTransformation::GetCompleteRotation)
+	.def("Scale", AT_Scale1)
+	.def("Scale", AT_Scale2)
+	.def("ScaleX", &Anima::AnimaTransformation::ScaleX)
+	.def("ScaleY", &Anima::AnimaTransformation::ScaleY)
+	.def("ScaleZ", &Anima::AnimaTransformation::ScaleZ)
+	.def("SetScale", AT_SetScale1)
+	.def("SetScale", AT_SetScale2)
+	.def("SetScaleX", &Anima::AnimaTransformation::SetScaleX)
+	.def("SetScaleY", &Anima::AnimaTransformation::SetScaleY)
+	.def("SetScaleZ", &Anima::AnimaTransformation::SetScaleZ)
+	.def("GetScale", &Anima::AnimaTransformation::GetScale)
+	.def("GetScaleX", &Anima::AnimaTransformation::GetScaleX)
+	.def("GetScaleY", &Anima::AnimaTransformation::GetScaleY)
+	.def("GetScaleZ", &Anima::AnimaTransformation::GetScaleZ)
+	.def("GetCompleteScale", &Anima::AnimaTransformation::GetCompleteScale)
 	;
 }
 

@@ -127,7 +127,7 @@ AnimaArray<AnimaGeometryInstance*>* AnimaGeometryInstancesManager::CreateInstanc
 			newInstance->AddShader(geometry->GetShaderName(ns));
 
 		geometry->AddInstance(newInstance);
-
+		
 		_lastInstancesFromNode.push_back(newInstance);
 	}
 

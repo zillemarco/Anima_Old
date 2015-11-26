@@ -28,7 +28,15 @@ AnimaMaterialsManager::AnimaMaterialsManager(AnimaScene* scene, AnimaTexturesMan
 	_texturesManager = texturesManager;
 
 	if (_defaultMaterial == nullptr)
+	{
 		_defaultMaterial = AnimaAllocatorNamespace::AllocateNew<AnimaMaterial>(*(_scene->GetMaterialsAllocator()), _scene->GetMaterialsAllocator(), _scene->GetDataGeneratorsManager(), "defaultMaterial");
+		
+		_defaultMaterial->SetColor("Albedo", 1.0, 1.0, 1.0, 1.0);
+		_defaultMaterial->SetFloat("ReflectionIntensity", 0.1);
+		_defaultMaterial->SetFloat("Metallic", 0.0);
+		_defaultMaterial->SetFloat("Roughness", 0.8);
+		_defaultMaterial->SetFloat("Specular", 0.5);
+	}
 
 	_instancesCount++;
 }

@@ -10,7 +10,7 @@
 	<FovY>90</FovY>
 	<AspectRatio>1.33333337</AspectRatio>
 	<ZNear>0.100000001</ZNear>
-	<ZFar>100</ZFar>
+	<ZFar>10000</ZFar>
 	<Top>1</Top>
 	<Left>1</Left>
 	<Bottom>1</Bottom>

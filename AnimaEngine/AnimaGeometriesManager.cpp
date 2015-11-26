@@ -78,9 +78,8 @@ bool AnimaGeometriesManager::LoadGeometriesFromNode(const aiScene* scene, const 
 			int numeroIndiciFaccia = face->mNumIndices;
 			if (numeroIndiciFaccia == 3)
 				facce.push_back(AnimaFace(face->mIndices[0], face->mIndices[1], face->mIndices[2]));
-			else
-				AnimaLogger::LogMessageFormat("\tFace with %d vertices", numeroIndiciFaccia);
 		}
+		
 		newGeometry->SetFaces(facce);
 
 		if (geometry->HasNormals())

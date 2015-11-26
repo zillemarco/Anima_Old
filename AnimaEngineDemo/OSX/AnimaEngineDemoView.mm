@@ -53,8 +53,8 @@ std::mutex mutex;
 
 Anima::AnimaGC* _gc = nullptr;
 Anima::AnimaScene* _scene = nullptr;
-Anima::AnimaCamerasManager* _camerasManager = nullptr;
-Anima::AnimaCamera* _camera = nullptr;
+//Anima::AnimaCamerasManager* _camerasManager = nullptr;
+//Anima::AnimaCamera* _camera = nullptr;
 Anima::AnimaNode* _model = nullptr;
 Anima::AnimaNode* _floorModel = nullptr;
 Anima::AnimaAnimationsManager* _animationsManager = nullptr;
@@ -181,101 +181,12 @@ bool moveDownPressed = false;
 				CVDisplayLinkStart(displayLink);
 			}
 			
-			if(joystickInteractor->Install(0, &_engine))
-			{
-//				joystickInteractor->SetEventHandler("onButtonPressed", [](Anima::AnimaEventArgs* args) {
-//					Anima::AnimaEngine* engine = ((Anima::AnimaJoystickInteractor*)args->GetSourceEvent())->GetEngine();
-//					Anima::AnimaJoystickButtonEventArgs* buttonArgs = (Anima::AnimaJoystickButtonEventArgs*)args;
-//					
-//					if (buttonArgs->GetButtonId() == 7)
-//					{
-//						if (engine)
-//						{
-//							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
-//							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
-//					
-//							if (scene)
-//							{
-//								Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-//								Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-//					
-//								if (camera)
-//								{
-//									Anima::AnimaCameraType type = camera->GetCameraType();
-//									if (type == Anima::ACT_FIRST_PERSON || type == Anima::ACT_SPECTATOR)
-//										camera->SetCameraType(Anima::ACT_FLIGHT);
-//									else if (type == Anima::ACT_FLIGHT)
-//										camera->SetCameraType(Anima::ACT_ORBIT);
-//									else if (type == Anima::ACT_ORBIT)
-//										camera->SetCameraType(Anima::ACT_FIRST_PERSON);
-//								}
-//							}
-//						}
-//					}
-//				});
-//				joystickInteractor->SetEventHandler("onAxisMoved", [](Anima::AnimaEventArgs* args) {
-//					Anima::AnimaJoystickAxisEventArgs* axisArgs = (Anima::AnimaJoystickAxisEventArgs*)args;
-//					
-//					printf("Moved axis %d: %f\n", axisArgs->GetAxisId(), axisArgs->GetAxisValue());
-//				});
-//				
-//				joystickInteractor->SetEventHandler("onUpdateScene", [](Anima::AnimaEventArgs* args){
-//					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
-//					Anima::AnimaJoystickDevice* joystick = ((Anima::AnimaJoystickInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetJoystick(0);
-//					
-//					if(scene && joystick->IsPresent())
-//					{
-//						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-//						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-//						
-//						if(camera)
-//						{
-//							Anima::AnimaArray<Anima::AFloat> axis = joystick->GetAxis();
-//							
-//							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
-//							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
-//							
-//							Anima::AnimaVertex3f maxVel = camera->GetDefaultMaximumVelocity();
-//							
-//							float rotationMultiplier = 15.0f;
-//							float velocityMultiplier = 30.0f;
-//							
-//							if (axis[0] != 0.0f)
-//							{
-//								direction.x = axis[0] > 0.0f ? 1.0f : -1.0f;
-//								maxVel.x = fabs(axis[0]) * velocityMultiplier;
-//							}
-//							
-//							if (axis[1] != 0.0f)
-//							{
-//								direction.z = axis[1] > 0.0f ? -1.0f : 1.0f;
-//								maxVel.z = fabs(axis[1]) * velocityMultiplier;
-//							}
-//							
-//							camera->SetMaximumVelocity(maxVel);
-//							
-//							switch (camera->GetCameraType())
-//							{
-//								case Anima::ACT_FIRST_PERSON:
-//								case Anima::ACT_SPECTATOR:
-//									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, -axis[3] * rotationMultiplier, 0.0f);
-//									break;
-//								case Anima::ACT_FLIGHT:
-//									camera->SmoothRotateDeg(0.0f, axis[3] * rotationMultiplier, -axis[2] * rotationMultiplier);
-//									break;									
-//								case Anima::ACT_ORBIT:
-//									camera->SmoothRotateDeg(-axis[2] * rotationMultiplier, axis[3] * rotationMultiplier, 0.0f);
-//									break;
-//							}
-//							camera->SetUpdateData(direction);
-//						}
-//					}
-//				});
-			}
+			joystickInteractor->Install(0, &_engine);
+			keyboardInteractor.Install((long)self, &_engine);
 			
 			if(mouseInteractor.Install((long)self, &_engine))
 			{
-				mouseInteractor.SetEventHandler("onLeftMouseClick", [&] (Anima::AnimaEventArgs* args) {
+				mouseInteractor.SetEventHandler("onLeftMouseClick", [] (Anima::AnimaEventArgs* args) {
 					
 					Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
 					Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
@@ -327,118 +238,6 @@ bool moveDownPressed = false;
 						}
 					}
 				});
-			}
-			
-			if(keyboardInteractor.Install((long)self, &_engine))
-			{
-//				keyboardInteractor.SetEventHandler("onUpdateScene", [&] (Anima::AnimaEventArgs* args) {
-//					Anima::AnimaScene* scene = ((Anima::AnimaUpdateSceneEventArgs*)args)->GetScene();
-//					Anima::AnimaKeyboardStatusMap keyboardStatus = ((Anima::AnimaKeyboardInteractor*)((Anima::AnimaUpdateSceneEventArgs*)args)->GetSourceEvent())->GetKeyboardStatus();
-//					
-//					if(scene)
-//					{
-//						Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
-//						Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
-//						
-//						if(camera)
-//						{
-//							Anima::AnimaVertex3f velocity = camera->GetCurrentVelocity();
-//							Anima::AnimaVertex3f direction(0.0f, 0.0f, 0.0f);
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_W])
-//							{
-//								if (!moveForwardsPressed)
-//								{
-//									moveForwardsPressed = true;
-//									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
-//								}
-//									
-//								direction.z += 1.0f;
-//							}
-//							else
-//							{
-//								moveForwardsPressed = false;
-//							}
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_S])
-//							{
-//								if (!moveBackwardsPressed)
-//								{
-//									moveBackwardsPressed = true;
-//									camera->SetCurrentVelocity(velocity.x, velocity.y, 0.0f);
-//								}
-//							
-//								direction.z -= 1.0f;
-//							}
-//							else
-//							{
-//								moveBackwardsPressed = false;
-//							}
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_D])
-//							{
-//								if (!moveRightPressed)
-//								{
-//									moveRightPressed = true;
-//									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
-//								}
-//								
-//								direction.x += 1.0f;
-//							}
-//							else
-//							{
-//								moveRightPressed = false;
-//							}
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_A])
-//							{
-//								if (!moveLeftPressed)
-//								{
-//									moveLeftPressed = true;
-//									camera->SetCurrentVelocity(0.0f, velocity.y, velocity.z);
-//								}
-//									
-//								direction.x -= 1.0f;
-//							}
-//							else
-//							{
-//								moveLeftPressed = false;
-//							}
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_E])
-//							{
-//								if (!moveUpPressed)
-//								{
-//									moveUpPressed = true;
-//									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
-//								}
-//								
-//								direction.y += 1.0f;
-//							}
-//							else
-//							{
-//								moveUpPressed = false;
-//							}
-//								
-//							if (keyboardStatus[Anima::AnimaKeyboardKey::AKK_Q])
-//							{
-//								if (!moveDownPressed)
-//								{
-//									moveDownPressed = true;
-//									camera->SetCurrentVelocity(velocity.x, 0.0f, velocity.z);
-//								}
-//								
-//								direction.y -= 1.0f;
-//							}
-//							else
-//							{
-//								moveDownPressed = false;
-//							}
-//								
-//							camera->SetUpdateData(direction);
-//						}
-//					}
-//				});
 			}
 		}
 	}
@@ -536,234 +335,288 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	if (!_engine.Initialize())
 		return false;
 	
-	printf("\nOpenCL available platforms:\n\n");
-	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
-	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
-	for (auto& plat : platforms)
-	{
-		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
-		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
-		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
-		
-		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
-		for (auto& dev : devices)
-		{
-			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
-			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
-			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
-		}
-	}
+//	printf("\nOpenCL available platforms:\n\n");
+//	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
+//	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
+//	for (auto& plat : platforms)
+//	{
+//		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
+//		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
+//		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
+//		
+//		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
+//		for (auto& dev : devices)
+//		{
+//			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
+//			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
+//			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
+//		}
+//	}
+
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 	
-	Anima::AnimaString dataPath = DATA_PATH;
-	Anima::AnimaString materialsPath = dataPath + "/materials";
-	Anima::AnimaString modelPath = dataPath + "/models/";
-	Anima::AnimaString modelName = "";
-	Anima::AnimaString materialName = "oro";
-	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
-	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
+	Anima::AnimaScenesManager* scenesManager = _engine.GetScenesManager();
+	Anima::AnimaScene* newScene = scenesManager->CreateScene("scena");
 	
-	// Creazione della scena
-#if defined SAVE_SCENE
-	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
-#else
-	_engine.GetScenesManager()->LoadScenes(dataPath);
-#endif
+	if(newScene)
+	{
+		Anima::AnimaCamerasManager* camerasManager = newScene->GetCamerasManager();
+		Anima::AnimaLightsManager* lightsManager = newScene->GetLightsManager();
+		Anima::AnimaTexturesManager* texturesManager = newScene->GetTexturesManager();
+		
+		Anima::AnimaCamera* newCamera = camerasManager->CreateCamera("default-camera");
+		Anima::AnimaDirectionalLight* newLight = lightsManager->CreateDirectionalLight("default-light");
+		
+		Anima::AnimaString texturesPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures";
+		
+		Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/cubemap.dds", "dds-skybox-texture");
+		newScene->SetTexture("SkyBox", textureCube);
+		newScene->SetTexture("EnvironmentMap", textureCube);
+		
+		Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+		newScene->SetTexture("IrradianceMap", textureIrr);
+		
+		if(newLight)
+		{
+			newLight->SetDirection(1, -1, -1);
+			newLight->SetColor(1, 1, 1);
+			newLight->SetIntensity(1);
+		}
+		
+		if(newCamera)
+		{
+			Anima::AnimaVertex3f position(-35, 10, 15);
+			Anima::AnimaVertex3f target(-36, 10.2, 15);
+			Anima::AnimaVertex3f up(0, 1, 0);
+			newCamera->LookAt(position, target, up);
+		}
+		
+		_scene = newScene;
+		
+		_renderer->CheckPrograms(_scene);
+	}
 	
-	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
-
-	if (!_scene)
-		return false;
-	
-	_scene->InitializePhysics();
-	_scene->InitializePhysicObjects();
-	
-	_scene->SetKeyboardInteractor(&keyboardInteractor);
-	_scene->SetJoystickInteractor(joystickInteractor);
-	
-	// Caricamento dei materiali
-	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	Anima::AnimaNodeInstancesManager* modelInstancesManager = _scene->GetNodeInstancesManager();
-#if defined SAVE_SCENE
-	if (!materialsManager->LoadMaterials(materialsPath))
-		return false;
-#endif
-	
-	// Creazione di una telecamera
-	_camerasManager = _scene->GetCamerasManager();
-#if defined SAVE_SCENE
-	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
-	if (!_camera)
-		return false;
-#else
-	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
-	if (!_camera)
-		return false;
-#endif
-	
-	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
-	
-#if defined SAVE_SCENE
-	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
-	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
-#endif
-	
-#if defined SAVE_SCENE
-	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
-	if (!_model)
-		return false;
-	
-	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
-	if (!_floorModel)
-		return false;
-	
-	// Creo le istanze del pavimento e imposto i loro materiali
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
-	
-	Anima::AnimaModelInstance* floorModelInstance1 = modelInstancesManager->CreateInstance("floorModelInstance1", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance2 = modelInstancesManager->CreateInstance("floorModelInstance2", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
-	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
-	
-	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
-	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
-	
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	floorModelInstanceMeshes.clear();
-	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance2->GetTransformation()->TranslateX(3);
-	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
-	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
-	
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-	
-	floorModelInstanceMeshes.clear();
-	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance3->GetTransformation()->TranslateZ(3);
-	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
-	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
-	
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	floorModelInstanceMeshes.clear();
-	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorModelInstance4->GetTransformation()->TranslateX(3);
-	floorModelInstance4->GetTransformation()->TranslateZ(3);
-	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
-	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
-	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
-	
-	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
-		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-	
-	// Creo le istanze degli oggetti applicando i materiali
-	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
-	
-	Anima::AnimaModelInstance* modelInstanceOro = modelInstancesManager->CreateInstance("modelInstanceOro", _model);
-	Anima::AnimaModelInstance* modelInstanceRame = modelInstancesManager->CreateInstance("modelInstanceRame", _model);
-	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
-	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
-	
-	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
-	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
-	
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
-	
-	modelInstanceMeshes.clear();
-	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceRame->GetTransformation()->TranslateX(3);
-	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
-	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
-	
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
-	
-	modelInstanceMeshes.clear();
-	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceGomma->GetTransformation()->TranslateZ(3);
-	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
-	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
-	
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
-
-	modelInstanceMeshes.clear();
-	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	modelInstanceLegno->GetTransformation()->TranslateX(3);
-	modelInstanceLegno->GetTransformation()->TranslateZ(3);
-	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
-	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
-	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
-	
-	for (int j = 0; j < modelInstanceMeshes.size(); j++)
-		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
-	
-	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
-#endif
-	
-	_camera->Activate();
-	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	
-#if defined SAVE_SCENE
-	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
-	directionalLight->SetDirection(1.0, -1.0, -1.0);
-	directionalLight->SetColor(1.0, 1.0, 1.0);
-	directionalLight->SetIntensity(1.0);
-	
-	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
-	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
-	//pointLight1->SetColor(1.0, 0.0, 0.0);
-	//pointLight1->SetIntensity(1.0);
-	//pointLight1->SetConstantAttenuation(1.0);
-	//pointLight1->SetLinearAttenuation(0.0);
-	//pointLight1->SetExponentAttenuation(0.0);
-	//pointLight1->SetRange(200);
-#endif
-	
-	_animationsManager = _scene->GetAnimationsManager();
-	
-	_timer.Reset();
-	
-#if defined SAVE_SCENE
-	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
-	
-	Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
-	_scene->SetTexture("SkyBox", textureCube);
-	_scene->SetTexture("EnvironmentMap", textureCube);
-	
-	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", "dds-skybox-texture-irr");
-	_scene->SetTexture("IrradianceMap", textureIrr);
-#endif
-	
-	_renderer->CheckPrograms(_scene);
+//	Anima::AnimaString dataPath = DATA_PATH;
+//	Anima::AnimaString materialsPath = dataPath + "/materials";
+//	Anima::AnimaString modelPath = dataPath + "/models/";
+//	Anima::AnimaString modelName = "";
+//	Anima::AnimaString materialName = "oro";
+//	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
+//	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
+//	
+//	// Creazione della scena
+//#if defined SAVE_SCENE
+//	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
+//#else
+//	_engine.GetScenesManager()->LoadScenes(dataPath);
+//#endif
+//	
+//	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
+//
+//	if (!_scene)
+//		return false;
+//	
+//	_scene->InitializePhysics();
+//	_scene->InitializePhysicObjects();
+//	
+//	_scene->SetKeyboardInteractor(&keyboardInteractor);
+//	_scene->SetJoystickInteractor(joystickInteractor);
+//	
+//	// Caricamento dei materiali
+//	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+//	Anima::AnimaNodeInstancesManager* modelInstancesManager = _scene->GetNodeInstancesManager();
+//#if defined SAVE_SCENE
+//	if (!materialsManager->LoadMaterials(materialsPath))
+//		return false;
+//#endif
+//	
+//	// Creazione di una telecamera
+//	_camerasManager = _scene->GetCamerasManager();
+//#if defined SAVE_SCENE
+//	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+//	if (!_camera)
+//		return false;
+//#else
+//	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+//	if (!_camera)
+//		return false;
+//#endif
+//	
+//	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
+//	
+//#if defined SAVE_SCENE
+//	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
+//	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+//#endif
+//	
+//#if defined SAVE_SCENE
+//	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
+//	if (!_model)
+//		return false;
+//	
+//	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
+//	if (!_floorModel)
+//		return false;
+//	
+//	// Creo le istanze del pavimento e imposto i loro materiali
+//	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
+//	
+//	Anima::AnimaModelInstance* floorModelInstance1 = modelInstancesManager->CreateInstance("floorModelInstance1", _floorModel);
+//	Anima::AnimaModelInstance* floorModelInstance2 = modelInstancesManager->CreateInstance("floorModelInstance2", _floorModel);
+//	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
+//	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
+//	
+//	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+//	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
+//	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
+//	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
+//	
+//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+//
+//	floorModelInstanceMeshes.clear();
+//	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+//	floorModelInstance2->GetTransformation()->TranslateX(3);
+//	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
+//	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
+//	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
+//	
+//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+//	
+//	floorModelInstanceMeshes.clear();
+//	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+//	floorModelInstance3->GetTransformation()->TranslateZ(3);
+//	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
+//	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
+//	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
+//	
+//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+//
+//	floorModelInstanceMeshes.clear();
+//	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+//	floorModelInstance4->GetTransformation()->TranslateX(3);
+//	floorModelInstance4->GetTransformation()->TranslateZ(3);
+//	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
+//	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
+//	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
+//	
+//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+//	
+//	// Creo le istanze degli oggetti applicando i materiali
+//	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+//	
+//	Anima::AnimaModelInstance* modelInstanceOro = modelInstancesManager->CreateInstance("modelInstanceOro", _model);
+//	Anima::AnimaModelInstance* modelInstanceRame = modelInstancesManager->CreateInstance("modelInstanceRame", _model);
+//	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
+//	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
+//	
+//	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+//	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
+//	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
+//	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
+//	
+//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
+//	
+//	modelInstanceMeshes.clear();
+//	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+//	modelInstanceRame->GetTransformation()->TranslateX(3);
+//	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
+//	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
+//	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
+//	
+//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
+//	
+//	modelInstanceMeshes.clear();
+//	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+//	modelInstanceGomma->GetTransformation()->TranslateZ(3);
+//	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
+//	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
+//	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
+//	
+//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
+//
+//	modelInstanceMeshes.clear();
+//	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+//	modelInstanceLegno->GetTransformation()->TranslateX(3);
+//	modelInstanceLegno->GetTransformation()->TranslateZ(3);
+//	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
+//	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
+//	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
+//	
+//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
+//	
+//	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
+//#endif
+//	
+//	_camera->Activate();
+//	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+//	
+//#if defined SAVE_SCENE
+//	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
+//	directionalLight->SetDirection(1.0, -1.0, -1.0);
+//	directionalLight->SetColor(1.0, 1.0, 1.0);
+//	directionalLight->SetIntensity(1.0);
+//	
+//	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
+//	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
+//	//pointLight1->SetColor(1.0, 0.0, 0.0);
+//	//pointLight1->SetIntensity(1.0);
+//	//pointLight1->SetConstantAttenuation(1.0);
+//	//pointLight1->SetLinearAttenuation(0.0);
+//	//pointLight1->SetExponentAttenuation(0.0);
+//	//pointLight1->SetRange(200);
+//#endif
+//	
+//	_animationsManager = _scene->GetAnimationsManager();
+//	
+//	_timer.Reset();
+//	
+//#if defined SAVE_SCENE
+//	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+//	
+//	Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
+//	_scene->SetTexture("SkyBox", textureCube);
+//	_scene->SetTexture("EnvironmentMap", textureCube);
+//	
+//	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+//	_scene->SetTexture("IrradianceMap", textureIrr);
+//#endif
+//	
+//	Anima::AnimaNode* newAsset = _scene->GetNodesManager()->LoadAssetFromExternalFile("/Users/marco/Desktop/base_cassettiera/143853.3ds", "base");
+//	Anima::AnimaNodeInstance* newInstace = _scene->GetNodeInstancesManager()->CreateAssetInstance("base-instance", newAsset);
+//	newInstace->GetTransformation()->SetScale(0.01, 0.01, 0.01);
+//	newInstace->GetTransformation()->TranslateY(20);
+//	newInstace->GetTransformation()->RotateXDeg(-90);
+//	
+//	_renderer->CheckPrograms(_scene);
 	
 	return true;
 }
 
 - (void) setViewportWidth: (float)w Height: (float)h
 {
-	if (_camerasManager)
+	if (_scene)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 100.0f);
+		_scene->GetCamerasManager()->UpdatePerspectiveCameras(90.0f, size, 0.1f, 10000.0f);
 	}
 	
-	if(_scene)
-		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+//	if (_camerasManager)
+//	{
+//		Anima::AnimaVertex2f size((float)w, (float)h);
+//		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 10000.0f);
+//	}
+	
+//	if(_scene)
+//		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 	
 	if (_renderer)
 	{
@@ -773,9 +626,9 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	
 	if(!sceneSaved)
 	{
-#if defined SAVE_SCENE
-//		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene", true);
-#endif
+//#if defined SAVE_SCENE
+		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene2", true);
+//#endif
 		sceneSaved = true;
 	}
 }

@@ -81,7 +81,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::CreateAssetInstance(const AnimaStr
 
 AnimaNodeInstance* AnimaNodeInstancesManager::CreateAssetInstance(const AnimaString& instanceName, const AnimaString& srcAssetName)
 {
-	AnimaNode* srcAsset = _nodesManager->GetNodeFromName(srcAssetName);
+	AnimaNode* srcAsset = _nodesManager->GetAssetFromName(srcAssetName);
 	
 	if (srcAsset == nullptr)
 		return nullptr;
@@ -99,6 +99,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstanceFromNode(const Anima
 		completeInstanceName = srcNode->GetName() + "." + instanceName;
 	else
 		completeInstanceName = instanceName;
+	
 	AnimaString nodeName = srcNode->GetName();
 	AnimaString nodeInstanceName;
 	AnimaNodeInstance* newInstance = nullptr;
@@ -136,7 +137,7 @@ AnimaNodeInstance* AnimaNodeInstancesManager::CreateInstanceFromNode(const Anima
 	}
 
 	newInstance->UpdateChildrenTransformation();
-
+	
 	return newInstance;
 }
 

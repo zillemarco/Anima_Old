@@ -860,7 +860,10 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
 			if (program == nullptr)
+			{
+				printf("Program not found %s\n", instance->GetName().c_str());
 				continue;
+			}
 
 			AnimaMaterial* material = instance->GetMaterial();
 			if (material == nullptr)
