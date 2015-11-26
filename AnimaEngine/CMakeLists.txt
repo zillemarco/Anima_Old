@@ -252,6 +252,11 @@ if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	include_directories(${PYTHON_INCLUDE_DIRS})
 endif()
 
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
+
+
 if(BUILD_SHARED_LIBS)
 	add_library(${PROJECT_NAME} SHARED ${AnimaEngineCore_SOURCES} ${AnimaEngineCore_HEADERS})
 else()
