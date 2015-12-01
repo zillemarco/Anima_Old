@@ -85,11 +85,9 @@ bool moveRightPressed = false;
 bool moveLeftPressed = false;
 bool moveUpPressed = false;
 bool moveDownPressed = false;
+bool rendererInitialized = false;
 
 @implementation AnimaEngineDemoView
-{
-	CVDisplayLinkRef displayLink;
-}
 
 - (id) initWithFrame: (NSRect)frameRect
 {
@@ -110,7 +108,6 @@ bool moveDownPressed = false;
 
 - (void) dealloc
 {
-	CVDisplayLinkRelease(displayLink);
 	[[NSNotificationCenter defaultCenter] removeObserver: self];
 	[super dealloc];
 }
@@ -155,34 +152,41 @@ bool moveDownPressed = false;
 			
 			NSRect rc = [self bounds];
 			
+			gc->SetUpdateFrameCallback((long)self, [](Anima::AnimaGC* context, long userData) {
+				AnimaEngineDemoView* view = (AnimaEngineDemoView*)userData;
+				[view update];
+			});
+			
 			[self initEngine];
 			[self setViewportWidth:rc.size.width Height:rc.size.height];
 			
-			if(gc->GetContext() != nil && gc->GetPixelFormat() != nil)
-			{
-				NSOpenGLContext* context = gc->GetContext();
-				NSOpenGLPixelFormat* pixelFormat = gc->GetPixelFormat();
-				
-				GLint swapInt = 1;
-				[context setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-				
-				// Create a display link capable of being used with all active displays
-				CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
-				
-				// Set the renderer output callback function
-				CVDisplayLinkSetOutputCallback(displayLink, &DisplayLinkCallback, (__bridge void*)self);
-				
-				// Set the display link for the current renderer
-				CGLContextObj cglContext = [context CGLContextObj];
-				CGLPixelFormatObj cglPixelFormat = [pixelFormat CGLPixelFormatObj];
-				CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
-				
-				// Activate the display link
-				CVDisplayLinkStart(displayLink);
-			}
-			
 			joystickInteractor->Install(0, &_engine);
-			keyboardInteractor.Install((long)self, &_engine);
+			if(keyboardInteractor.Install((long)self, &_engine))
+			{
+				keyboardInteractor.SetEventHandler("onKeyDown", [&](Anima::AnimaEventArgs* args) {
+					Anima::AnimaKeyboardEventArgs* kArgs = (Anima::AnimaKeyboardEventArgs*)args;
+					
+					if(kArgs->GetKey() == Anima::AnimaKeyboardKey::AKK_L)
+					{
+						Anima::AnimaNodesManager* nodesManager = _scene->GetNodesManager();
+						Anima::AnimaNodeInstancesManager* nodeInstancesManager = _scene->GetNodeInstancesManager();
+						
+						Anima::AnimaNode* asset = nodesManager->LoadAssetFromExternalFile("/Users/marco/Desktop/base_cassettiera/143853.3ds", "asset");
+						if(asset)
+						{
+							Anima::AnimaNodeInstance* assetInstance = nodeInstancesManager->CreateAssetInstance("asset-inst", asset);
+							if(assetInstance)
+							{
+								assetInstance->GetTransformation()->SetScale(0.01, 0.01, 0.01);
+								assetInstance->GetTransformation()->TranslateX(-20);
+								assetInstance->GetTransformation()->RotateXDeg(-90);
+								
+								_renderer->CheckPrograms(_scene);
+							}
+						}
+					}
+				});
+			}
 			
 			if(mouseInteractor.Install((long)self, &_engine))
 			{
@@ -213,26 +217,29 @@ bool moveDownPressed = false;
 								
 								btDynamicsWorld* world = scene->GetPhysWorld();
 								
-								world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z), RayCallback);
+								if(world)
+								{
+									world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z), RayCallback);
 								
-								if(RayCallback.hasHit())
-								{
-									Anima::AnimaGeometryInstance* instance = (Anima::AnimaGeometryInstance*)RayCallback.m_collisionObject->getUserPointer();
-									Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
+									if(RayCallback.hasHit())
+									{
+										Anima::AnimaGeometryInstance* instance = (Anima::AnimaGeometryInstance*)RayCallback.m_collisionObject->getUserPointer();
+										Anima::AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
 									
-									Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
+										Anima::AnimaString str = Anima::FormatString("Picked material named '%s'", instance->GetMaterial()->GetName().c_str());
 									
-									NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+										NSString *message = [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
 									
-									NSAlert* alert = [[NSAlert alloc] init];
-									[alert addButtonWithTitle:@"OK"];
-									[alert setMessageText:message];
-									[alert setAlertStyle:NSCriticalAlertStyle];
-									[alert beginSheetModalForWindow:[view window] completionHandler:nil];
-								}
-								else
-								{
-									printf("Picked nothing\n");
+										NSAlert* alert = [[NSAlert alloc] init];
+										[alert addButtonWithTitle:@"OK"];
+										[alert setMessageText:message];
+										[alert setAlertStyle:NSCriticalAlertStyle];
+										[alert beginSheetModalForWindow:[view window] completionHandler:nil];
+									}
+									else
+									{
+										printf("Picked nothing\n");
+									}
 								}
 							}
 						}
@@ -243,13 +250,6 @@ bool moveDownPressed = false;
 	}
 	
 	return true;
-}
-
-// This is the renderer output callback function
-static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
-{
-	CVReturn result = [(__bridge AnimaEngineDemoView*)displayLinkContext getFrameForTime:outputTime];
-	return result;
 }
 
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
@@ -270,6 +270,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 
 - (void) _frameChanged: (NSNotification *) aNot
 {
+	printf("Update frame da frame changed\n");
 	[self update];
 }
 
@@ -334,24 +335,6 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 	// Inizializzazione del motore
 	if (!_engine.Initialize())
 		return false;
-	
-//	printf("\nOpenCL available platforms:\n\n");
-//	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
-//	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
-//	for (auto& plat : platforms)
-//	{
-//		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
-//		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
-//		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
-//		
-//		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
-//		for (auto& dev : devices)
-//		{
-//			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
-//			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
-//			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
-//		}
-//	}
 
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
@@ -387,12 +370,30 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		if(newCamera)
 		{
 			Anima::AnimaVertex3f position(-35, 10, 15);
-			Anima::AnimaVertex3f target(-36, 10.2, 15);
+			Anima::AnimaVertex3f target(-34, 9.8, 15);
 			Anima::AnimaVertex3f up(0, 1, 0);
 			newCamera->LookAt(position, target, up);
 		}
 		
 		_scene = newScene;
+		_scene->SetKeyboardInteractor(&keyboardInteractor);
+		
+		Anima::AnimaNodesManager* nodesManager = _scene->GetNodesManager();
+		Anima::AnimaNodeInstancesManager* nodeInstancesManager = _scene->GetNodeInstancesManager();
+		
+		Anima::AnimaNode* asset = nodesManager->LoadAssetFromExternalFile("/Users/marco/Desktop/base_cassettiera/143853.3ds", "asset");
+		if(asset)
+		{
+			Anima::AnimaNodeInstance* assetInstance = nodeInstancesManager->CreateAssetInstance("asset-inst", asset);
+			if(assetInstance)
+			{
+				assetInstance->GetTransformation()->SetScale(0.01, 0.01, 0.01);
+				assetInstance->GetTransformation()->TranslateX(-20);
+				assetInstance->GetTransformation()->RotateXDeg(-90);
+				
+//				_renderer->CheckPrograms(_scene);
+			}
+		}
 		
 		_renderer->CheckPrograms(_scene);
 	}
@@ -416,7 +417,7 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 //
 //	if (!_scene)
 //		return false;
-//	
+//
 //	_scene->InitializePhysics();
 //	_scene->InitializePhysicObjects();
 //	
@@ -609,41 +610,34 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
 		_scene->GetCamerasManager()->UpdatePerspectiveCameras(90.0f, size, 0.1f, 10000.0f);
 	}
 	
-//	if (_camerasManager)
-//	{
-//		Anima::AnimaVertex2f size((float)w, (float)h);
-//		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 10000.0f);
-//	}
-	
-//	if(_scene)
-//		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
-	
 	if (_renderer)
 	{
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
+		
+		rendererInitialized = true;
 	}
 	
 	if(!sceneSaved)
 	{
-//#if defined SAVE_SCENE
-		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/Scene2", true);
-//#endif
+#if defined SAVE_SCENE
+		_engine.GetScenesManager()->SaveSceneToFile(_scene, "/Users/marco/Desktop/scene4", true);
+#endif
 		sceneSaved = true;
 	}
 }
 
 - (void) drawScene
 {
-	if(_renderer && _scene)
+	if(_renderer && rendererInitialized && _scene)
 	{
 		if(!_scene->IsRunning())
 			_scene->StartScene();
 		
+		_scene->StepScene();
+		
 		_renderer->Start(_scene);
 		_renderer->Render();
-		
-		_scene->StepScene();
 	}
 }
 

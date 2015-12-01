@@ -10,12 +10,15 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 void* AnimaGC::_framework = NULL;
 bool AnimaGC::_contextAPIsInitialized = false;
 bool AnimaGC::_GLEWExtensionsLoaded = false;
+std::mutex AnimaGC::_updateFrameCallbackMutex;
 
 AnimaGC::AnimaGC()
 {
 	_view = nil;
 	_context = nil;
 	_pixelFormat = nil;
+	_updateFrameUserData = 0;
+	_vSyncEnabled = false;
 }
 
 AnimaGC::~AnimaGC()
@@ -46,13 +49,42 @@ void AnimaGC::ClearColor(AFloat r, AFloat g, AFloat b, AFloat a)
 	glClearColor(r, g, b, a);
 }
 
-void AnimaGC::SetSwapInterval(AInt interval)
+void AnimaGC::EnableVSync(bool enable)
 {
-	//if(_context)
-	//{
-	//	GLint sync = interval;
-	//	[_context setValues:&sync forParameter:NSOpenGLCPSwapInterval];
-	//}
+	if(enable)
+	{
+		if (_vSyncEnabled == false)
+		{
+			if(_context == nil || _pixelFormat == nil)
+				return;
+		
+			GLint swapInt = 1;
+			[_context setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+		
+			// Create a display link capable of being used with all active displays
+			CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
+		
+			// Set the renderer output callback function
+			CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, (__bridge void*)this);
+		
+			// Set the display link for the current renderer
+			CGLContextObj cglContext = [_context CGLContextObj];
+			CGLPixelFormatObj cglPixelFormat = [_pixelFormat CGLPixelFormatObj];
+			CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(_displayLink, cglContext, cglPixelFormat);
+		
+			// Activate the display link
+			CVDisplayLinkStart(_displayLink);
+		
+			_vSyncEnabled = true;
+		}
+	}
+	else
+	{
+		if (_vSyncEnabled == true)
+		{
+			CVDisplayLinkRelease(_displayLink);
+		}
+	}
 }
 
 bool AnimaGC::InitializeGLEWExtensions()
@@ -484,6 +516,9 @@ AnimaGC* AnimaGC::CreateContext(long windowId, AnimaGCContextConfig ctxconfig, A
 	
 	newGC->MakeCurrent();
 	InitializeGLEWExtensions();
+	
+	if(vSyncEnabled)
+		newGC->EnableVSync(true);
 		
 	return newGC;
 }
@@ -512,6 +547,39 @@ NSOpenGLPixelFormat* AnimaGC::GetPixelFormat()
 bool AnimaGC::CheckIntegrity(NSView* view)
 {
 	return true;
+}
+
+void AnimaGC::SetUpdateFrameCallback(long userData, std::function<void (AnimaGC* context, long userData)> callback)
+{
+	_updateFrameCallback = callback;
+	_updateFrameUserData = userData;
+}
+
+#if defined ANIMA_ENGINE_EXPORT_TO_PYTHON
+void AnimaGC::SetUpdateFrameCallback(boost::python::object userData, std::function<void (AnimaGC* context, boost::python::object userData)> callback)
+{
+	_pythonUpdateFrameUserData = userData;
+	_pythonUpdateFrameCallback = callback;
+}
+#endif
+
+CVReturn AnimaGC::DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
+{
+	_updateFrameCallbackMutex.lock();
+	
+	AnimaGC* gc = (AnimaGC*)displayLinkContext;
+	
+	if(gc->_updateFrameCallback != nullptr)
+		gc->_updateFrameCallback(gc, gc->_updateFrameUserData);
+	
+	#if defined ANIMA_ENGINE_EXPORT_TO_PYTHON
+	if(gc->_pythonUpdateFrameCallback != nullptr)
+		gc->_pythonUpdateFrameCallback(gc, gc->_pythonUpdateFrameUserData);
+	#endif
+	
+	_updateFrameCallbackMutex.unlock();
+	
+	return kCVReturnSuccess;
 }
 
 END_ANIMA_ENGINE_NAMESPACE

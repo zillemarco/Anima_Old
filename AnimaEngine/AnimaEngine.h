@@ -10,7 +10,8 @@
 #define __Anima__AnimaEngine__
 
 #include "AnimaEngineCore.h"
-#include "AnimaGC.h"
+#include "AnimaGraphicsIncludes.h"
+#include "AnimaPlatformIncludes.h"
 #include "AnimaAllocators.h"
 #include "AnimaAssert.h"
 #include "AnimaEngineConfig.h"

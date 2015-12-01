@@ -93,7 +93,9 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaMouseInteractor.h
 					AnimaKeyboardInteractor.h
 					AnimaJoystickInteractor.h
-					AnimaDefaultInteractors.h)
+					AnimaDefaultInteractors.h
+					AnimaGraphicsIncludes.h
+					AnimaPlatformIncludes.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -165,7 +167,9 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaPhysicsDebugDrawer.cpp
 					IAnimaInteractor.cpp
 					IAnimaEvents.cpp
-					AnimaDefaultInteractors.cpp)
+					AnimaDefaultInteractors.cpp
+					AnimaGraphicsIncludes.cpp
+					AnimaPlatformIncludes.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -196,6 +200,8 @@ else()
 	source_group("Engine\\Graphic Context" FILES AnimaGC.h AnimaGC.cpp)
 	source_group(Engine\\Interactors FILES AnimaMouseInteractor.cpp AnimaKeyboardInteractor.cpp AnimaJoystickInteractor.cpp)
 endif()
+
+source_group(Engine\\Platform FILES AnimaPlatformIncludes.h AnimaPlatformIncludes.cpp AnimaGraphicsIncludes.h AnimaGraphicsIncludes.cpp)
 
 source_group(Engine\\Tools FILES AnimaAssert.h AnimaAssert.cpp AnimaTimer.h AnimaTimer.cpp AnimaFPSTimer.h AnimaFPSTimer.cpp AnimaXmlTranslators.h AnimaXmlTranslators.cpp AnimaMD5.h AnimaMD5.cpp AnimaLogger.cpp AnimaLogger.h AnimaRandom.cpp AnimaRandom.h AnimaTools.h AnimaTools.cpp)
 source_group(Engine\\Types FILES AnimaTypes.h)

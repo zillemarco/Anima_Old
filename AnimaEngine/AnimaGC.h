@@ -1,25 +1,17 @@
 #if !defined __Anima__AnimaGC__
 #define __Anima__AnimaGC__
 
-#if !defined ANIMA_ENGINE_INCLUDED_GLEW
-#	include <GL/glew.h>
-#	define ANIMA_ENGINE_INCLUDED_GLEW
-#endif
-
-#if defined _WIN32
-#	include <GL/wglew.h>
-#	include <windows.h>
-#else
-#	if defined __OBJC__
-#		import <Cocoa/Cocoa.h>
-#	else
-#		include <ApplicationServices/ApplicationServices.h>
-		typedef void* id;
-#	endif
-#endif
+#include "AnimaGraphicsIncludes.h"
+#include "AnimaPlatformIncludes.h"
 
 #include "AnimaEngineCore.h"
 #include "AnimaTypes.h"
+#include <functional>
+#include <mutex>
+
+#if defined ANIMA_ENGINE_EXPORT_TO_PYTHON
+#	include <boost/python/object_core.hpp>
+#endif
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -138,6 +130,14 @@ public:
 	 *	\author		Zille Marco
 	 */
 	void ClearColor(AFloat r, AFloat g, AFloat b, AFloat a);
+	
+	void EnableVSync(bool enable);
+	
+	void SetUpdateFrameCallback(long userData, std::function<void (AnimaGC* context, long userData)> callback);
+	
+	#if defined ANIMA_ENGINE_EXPORT_TO_PYTHON
+	void SetUpdateFrameCallback(boost::python::object userData, std::function<void (AnimaGC* context, boost::python::object userData)> callback);
+	#endif
 
 public:
 	/*!
@@ -162,7 +162,6 @@ public:
 	 *	\author		Zille Marco
 	 */
 	static void DestroyContext(AnimaGC* context);
-	static void SetSwapInterval(AInt interval);
 	
 	/*!
 	 *	\brief		Torna un'istanza di AnimaGCContextConfig inizializzata con i valori di default del contesto per creare un contesto grafico
@@ -213,7 +212,15 @@ protected:
 protected:
 	static bool _GLEWExtensionsLoaded;		/*!< Indica se la libreria GLEW e' stata caricata correttamente */
 	static bool _contextAPIsInitialized;	/*!< Indica se le API del contesto sono state inizializzate correttamente */
-
+	long _updateFrameUserData;
+	bool _vSyncEnabled;
+	std::function<void (AnimaGC* context, long userData)> _updateFrameCallback;
+	
+	#if defined ANIMA_ENGINE_EXPORT_TO_PYTHON
+	boost::python::object _pythonUpdateFrameUserData;
+	std::function<void (AnimaGC* context, boost::python::object userData)> _pythonUpdateFrameCallback;
+	#endif
+	
 #ifdef _WIN32
 	public:
 		bool CheckIntegrity(HWND hWnd);
@@ -265,11 +272,15 @@ protected:
 		static void TerminateContextAPIs();
 	
 		static void SurfaceNeedsUpdateHandler(CFNotificationCenterRef center, void* observer, CFStringRef name, const void* object, CFDictionaryRef userInfo);
+		static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext);
 	
 	protected:
 		NSView* _view;
 		NSOpenGLContext* _context;
 		NSOpenGLPixelFormat* _pixelFormat;
+		CVDisplayLinkRef _displayLink;
+	
+		static std::mutex _updateFrameCallbackMutex;
 	
 	protected:
 		static void* _framework;

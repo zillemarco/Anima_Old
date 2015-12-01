@@ -27,7 +27,6 @@ class AnimaGraphicsCanvas(wx.Window):
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouseEvent)
 
     def __del__(self):
         del self.renderer
@@ -44,16 +43,18 @@ class AnimaGraphicsCanvas(wx.Window):
             self.Refresh()
 
     def OnPaint(self, event):
-
         if not self.openGLInitialized:
             self.InitializeOpenGL()
 
-        self.context.MakeCurrent()
-        self.OnDraw()
-        self.context.SwapBuffers()
+    def Draw(self):
+        if self.openGLInitialized and self.context is not None:
+            self.context.MakeCurrent()
+            self.OnDraw()
+            self.context.SwapBuffers()
 
     def InitializeOpenGL(self):
         if self.context is None:
+            self.openGLInitialized = True
             fbConfig = AnimaEngine.AnimaGC.GetDefaultFrameBufferConfig()
             ctConfig = AnimaEngine.AnimaGC.GetDefaultContextConfig()
 
@@ -65,7 +66,6 @@ class AnimaGraphicsCanvas(wx.Window):
 
             # solo dopo aver creato il contesto e reso attivo posso creare il renderer
             self.renderer = AnimaEngine.AnimaRenderer(self.engine, self.engine.GetGenericAllocator())
-            self.openGLInitialized = True
 
         self.SetViewport()
 
@@ -87,9 +87,6 @@ class AnimaGraphicsCanvas(wx.Window):
         if self.renderer is not None and self.scene is not None:
             self.renderer.CheckPrograms(self.scene)
 
-    def Redraw(self):
-        self.Refresh()
-
     def SetScene(self, scene):
         self.scene = scene
 
@@ -98,9 +95,13 @@ class AnimaGraphicsCanvas(wx.Window):
             self.scene.SetKeyboardInteractor(self.keyboardInteractor)
             self.scene.SetMouseInteractor(self.mouseInteractor)
 
+            size = self.GetClientSize()
+            vertex = AnimaEngine.AnimaVertex2f(size.width, size.height)
+            self.scene.GetCamerasManager().UpdatePerspectiveCameras(90.0, vertex, 0.1, 10000.0)
+
             if self.renderer is not None:
                 self.renderer.CheckPrograms(self.scene)
-            threading.Timer(0.0001, self.Redraw).start()
+            threading.Timer(0.001, self.Draw).start()
         else:
             self.updateSceneAutomatically = False
 
@@ -109,10 +110,10 @@ class AnimaGraphicsCanvas(wx.Window):
             if not self.scene.IsRunning():
                 self.scene.StartScene()
 
+            self.scene.StepScene()
+
             self.renderer.Start(self.scene)
             self.renderer.Render()
 
-            self.scene.StepScene()
-
         if self.updateSceneAutomatically:
-            threading.Timer(0.0001, self.Redraw).start()
+            threading.Timer(0.001, self.Draw).start()

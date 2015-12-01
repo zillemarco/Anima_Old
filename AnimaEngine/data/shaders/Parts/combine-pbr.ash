@@ -41,9 +41,9 @@
 					vec3 specular 	= texture(LightsBuffer_SpecularMap, textureCoord).xyz;
 					vec3 irradiance = texture(LightsBuffer_IrradianceMap, textureCoord).xyz;
 
-					FragColor.xyz = 	diffuse * AmbientLight * irradiance;
-					FragColor.xyz += 	light;
-					FragColor.xyz += 	specular;
+					//FragColor.xyz = 	diffuse * AmbientLight * irradiance;
+					//FragColor.xyz = 	light;
+					FragColor.xyz = 	specular;
 					FragColor.a =		1.0f;
 				}
 				]]>

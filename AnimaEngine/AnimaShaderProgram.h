@@ -61,6 +61,7 @@ public:
 
 public:
 	void AddShader(AnimaShader* shader);
+	void SetShaders(const AnimaArray<AnimaShader*>& shaders);
 	void SetShaders(AnimaShader** shaders, ASizeT count);
 
 	bool CompileShaders();
@@ -124,8 +125,7 @@ private:
 	void UpdateDataLookup();
 	
 private:
-	AnimaShader**	_shaders;
-	ASizeT			_shadersCount;
+	AnimaArray<AnimaShader*> _shaders;
 
 	AnimaShadersManager* _shadersManager;
 

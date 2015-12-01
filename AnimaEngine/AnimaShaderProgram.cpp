@@ -17,8 +17,6 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaString& name, AnimaAllocator* 
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaShaderProgram);
 
-	_shaders = nullptr;
-	_shadersCount = 0;
 	_id = 0;
 	_linked = false;
 
@@ -34,9 +32,6 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_id = src._id;
 	_linked = src._linked;
 
-	_shaders = nullptr;
-	_shadersCount = 0;
-
 	_shadersManager = src._shadersManager;
 	_data = src._data;
 	_staticGroupData = src._staticGroupData;
@@ -45,13 +40,12 @@ AnimaShaderProgram::AnimaShaderProgram(const AnimaShaderProgram& src)
 	_supportsInstance = src._supportsInstance;
 	_maxInstances = src._maxInstances;
 
-	SetShaders(src._shaders, src._shadersCount);
+	SetShaders(src._shaders);
 }
 
 AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 	: AnimaNamedObject(src)
 	, _shaders(src._shaders)
-	, _shadersCount(src._shadersCount)
 	, _id(src._id)
 	, _linked(src._linked)
 {	
@@ -62,9 +56,7 @@ AnimaShaderProgram::AnimaShaderProgram(AnimaShaderProgram&& src)
 
 	_supportsInstance = src._supportsInstance;
 	_maxInstances = src._maxInstances;
-
-	src._shaders = nullptr;
-	src._shadersCount = 0;
+	
 	src._id = 0;
 }
 
@@ -72,12 +64,7 @@ AnimaShaderProgram::~AnimaShaderProgram()
 {
 	ANIMA_ASSERT(_allocator != nullptr);
 
-	if (_shadersCount > 0 && _shaders != nullptr)
-	{
-		AnimaAllocatorNamespace::DeallocateArray<AnimaShader*>(*_allocator, _shaders);
-		_shaders = nullptr;
-		_shadersCount = 0;
-	}
+	_shaders.clear();
 
 	Delete();
 }
@@ -88,7 +75,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(const AnimaShaderProgram& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		SetShaders(src._shaders, src._shadersCount);
+		SetShaders(src._shaders);
 
 		_shadersManager = src._shadersManager;
 		_data = src._data;
@@ -111,7 +98,7 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 	{
 		AnimaNamedObject::operator=(src);
 
-		SetShaders(src._shaders, src._shadersCount);
+		SetShaders(src._shaders);
 
 		_shadersManager = src._shadersManager;
 		_data = src._data;
@@ -125,8 +112,6 @@ AnimaShaderProgram& AnimaShaderProgram::operator=(AnimaShaderProgram&& src)
 		_linked = src._linked;
 
 		src._id = 0;
-		src._shaders = nullptr;
-		src._shadersCount = 0;
 		src._linked = false;
 	}
 
@@ -138,10 +123,10 @@ bool AnimaShaderProgram::operator==(const AnimaShaderProgram& left)
 	if (_id != left._id) return false;
 	if (_shadersManager != left._shadersManager) return false;
 	if (_allocator != left._allocator) return false;
-	if (_shadersCount != left._shadersCount) return false; 
+	if (_shaders.size() != left._shaders.size()) return false;
 	if (_linked != left._linked) return false;
 
-	for (int i = 0; i < _shadersCount; i++)
+	for (int i = 0; i < _shaders.size(); i++)
 	{
 		if (_shaders[i] != left._shaders[i])
 			return false;
@@ -155,10 +140,10 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 	if (_id != left._id) return true;
 	if (_shadersManager != left._shadersManager) return true;
 	if (_allocator != left._allocator) return true;
-	if (_shadersCount != left._shadersCount) return true;
+	if (_shaders.size() != left._shaders.size()) return false;
 	if (_linked != left._linked) return true;
 
-	for (int i = 0; i < _shadersCount; i++)
+	for (int i = 0; i < _shaders.size(); i++)
 	{
 		if (_shaders[i] != left._shaders[i])
 			return true;
@@ -169,63 +154,32 @@ bool AnimaShaderProgram::operator!=(const AnimaShaderProgram& left)
 
 void AnimaShaderProgram::AddShader(AnimaShader* shader)
 {
-	ANIMA_ASSERT(_allocator != nullptr);
-	if (_shadersCount > 0)
-	{
-		AnimaShader** tmpOldShaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
-
-		for (int i = 0; i < _shadersCount; i++)
-			tmpOldShaders[i] = _shaders[i];
-
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
-
-		_shadersCount++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
-
-		for (int i = 0; i < _shadersCount - 1; i++)
-			_shaders[i] = tmpOldShaders[i];
-
-		_shaders[_shadersCount - 1] = shader;
-
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, tmpOldShaders);
-	}
-	else
-	{
-		_shadersCount++;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, _shadersCount);
-
-		_shaders[_shadersCount - 1] = shader;
-	}
+	_shaders.push_back(shader);
 }
 
 void AnimaShaderProgram::SetShaders(AnimaShader** shaders, ASizeT count)
 {
-	ANIMA_ASSERT(_allocator != nullptr)
 	ClearShaders();
+	
+	for(ASizeT i = 0; i < count; i++)
+		_shaders.push_back(shaders[i]);
+}
 
-	if (shaders != nullptr && count > 0)
-	{
-		_shadersCount = count;
-		_shaders = AnimaAllocatorNamespace::AllocateArray<AnimaShader*>(*_allocator, count);
-
-		for (int i = 0; i < _shadersCount; i++)
-			_shaders[i] = shaders[i];
-	}
+void AnimaShaderProgram::SetShaders(const AnimaArray<AnimaShader*>& shaders)
+{
+	ClearShaders();
+	_shaders = shaders;
 }
 
 void AnimaShaderProgram::ClearShaders()
 {
-	if (_shaders != nullptr && _shadersCount > 0)
-	{
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, _shaders);
-		_shaders = nullptr;
-		_shadersCount = 0;
-	}
+	_shaders.clear();
 }
 
 bool AnimaShaderProgram::CompileShaders()
 {
-	for (int i = 0; i < _shadersCount; i++)
+	AInt count = _shaders.size();
+	for (int i = 0; i < count; i++)
 	{
 		_shadersManager->AttachIncludes(_shaders[i]);
 		if (!_shaders[i]->Compile())
@@ -264,7 +218,8 @@ bool AnimaShaderProgram::Link()
 	if (glGetError() != GL_NO_ERROR)
 		return false;
 
-	for (int i = 0; i < _shadersCount; i++)
+	AInt count = _shaders.size();
+	for (int i = 0; i < count; i++)
 		glAttachShader(_id, _shaders[i]->GetID());
 	
 	glLinkProgram(_id);
@@ -599,7 +554,9 @@ void AnimaShaderProgram::UpdateDataLookup()
 	_data.RemoveAll();
 	_dynamicGroupData.RemoveAll();
 	_staticGroupData.RemoveAll();
-	for (AInt i = 0; i < _shadersCount; i++)
+	
+	AInt count = _shaders.size();
+	for (AInt i = 0; i < count; i++)
 	{
 		AnimaShader* shader = _shaders[i];
 
@@ -635,7 +592,7 @@ void AnimaShaderProgram::UpdateDataLookup()
 	}
 
 	// Una volta costruiti i dati li vado ad aggiornare
-	AInt count = _data.GetSize();
+	count = _data.GetSize();
 	for (AInt i = 0; i < count; i++)
 	{
 		_data[i].Analize(this);

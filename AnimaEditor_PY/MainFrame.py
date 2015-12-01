@@ -79,7 +79,7 @@ class MainFrame(wx.Frame):
         self.Destroy()
 
     def OnNewScene(self, event):
-        dlg = wx.TextEntryDialog(self, 'Insert the new scene name', 'New scene', 'New scene')
+        dlg = wx.TextEntryDialog(self, 'Insert the new scene name', 'New scene', '<new_scene>')
         if dlg.ShowModal() == wx.ID_OK:
 
             sceneName = dlg.GetValue().encode('utf-8')
@@ -117,7 +117,7 @@ class MainFrame(wx.Frame):
                 else:
                     #newCamera.SetPosition(0, 20, 30)
                     position = AnimaEngine.AnimaVertex3f(-35, 10, 15)
-                    target = AnimaEngine.AnimaVertex3f(-36, 10.2, 15)
+                    target = AnimaEngine.AnimaVertex3f(-34, 10.2, 15)
                     up = AnimaEngine.AnimaVertex3f(0, 1, 0)
                     newCamera.LookAt(position, target, up)
                     newCamera.Activate()
@@ -154,7 +154,7 @@ class MainFrame(wx.Frame):
             print "You need to have an active scene to load an asset"
             return
 
-        dlgAssetName = wx.TextEntryDialog(self, 'Insert the new scene name', 'New scene', 'New scene')
+        dlgAssetName = wx.TextEntryDialog(self, 'Insert the new asset name', 'Load asset', '<new_asset>')
         if dlgAssetName.ShowModal() == wx.ID_OK:
 
             assetName = dlgAssetName.GetValue().encode('utf-8')
