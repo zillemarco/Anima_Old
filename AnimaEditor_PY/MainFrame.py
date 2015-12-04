@@ -35,7 +35,8 @@ class MainFrame(wx.Frame):
 
         # Creazione menu Scene
         sceneMenu = wx.Menu()
-        menuLoadAsset = sceneMenu.Append(wx.ID_ADD, "Load asset", "Loads an asset")
+        menuLoadAsset = sceneMenu.Append(wx.ID_ANY, "Load asset", "Loads an asset")
+        menuCreateMaterial = sceneMenu.Append(wx.ID_ANY, "New material", "Creates a new material")
 
         # Creazione barra del menu
         menuBar = wx.MenuBar()
@@ -51,6 +52,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnSaveScene, menuSaveScene)
         self.Bind(wx.EVT_MENU, self.OnSaveAllScenes, menuSaveAllScenes)
         self.Bind(wx.EVT_MENU, self.OnLoadAsset, menuLoadAsset)
+        self.Bind(wx.EVT_MENU, self.OnCreateMaterial, menuCreateMaterial)
 
         mainPanel = wx.Panel(self, wx.ID_ANY)
         leftPanel = wx.Panel(mainPanel, wx.ID_ANY)
@@ -79,12 +81,13 @@ class MainFrame(wx.Frame):
         self.Destroy()
 
     def OnNewScene(self, event):
-        dlg = wx.TextEntryDialog(self, 'Insert the new scene name', 'New scene', '<new_scene>')
+        scenesManager = AnimaEditor.AnimaEditorApp.engine.GetScenesManager()
+
+        dlg = wx.TextEntryDialog(self, 'Insert the new scene name', 'New scene', 'scene{:d}'.format(scenesManager.GetScenesCount()))
         if dlg.ShowModal() == wx.ID_OK:
 
             sceneName = dlg.GetValue().encode('utf-8')
 
-            scenesManager = AnimaEditor.AnimaEditorApp.engine.GetScenesManager()
             newScene = scenesManager.CreateScene(sceneName)
             if newScene is not None:
 
@@ -122,6 +125,8 @@ class MainFrame(wx.Frame):
                     newCamera.LookAt(position, target, up)
                     newCamera.Activate()
 
+                newScene.InitializePhysics()
+
                 self.LoadScenesList()
             else:
                 print "Unable to create the new scene.\nA scene named \'" + sceneName + "\' already exists"
@@ -154,26 +159,24 @@ class MainFrame(wx.Frame):
             print "You need to have an active scene to load an asset"
             return
 
-        dlgAssetName = wx.TextEntryDialog(self, 'Insert the new asset name', 'Load asset', '<new_asset>')
+        nodesManager = self.currentScene.GetNodesManager()
+
+        dlgAssetName = wx.TextEntryDialog(self, 'Insert the new asset name', 'Load asset', 'asset{:d}'.format(nodesManager.GetAssetsCount()))
         if dlgAssetName.ShowModal() == wx.ID_OK:
 
             assetName = dlgAssetName.GetValue().encode('utf-8')
 
             openFileDialog = wx.FileDialog(None, "", os.getcwd(), "", "", wx.OPEN)
             if openFileDialog.ShowModal() == wx.ID_OK:
-                nodesManager = self.currentScene.GetNodesManager()
-
                 newAsset = nodesManager.LoadAssetFromExternalFile(openFileDialog.GetPath().encode('utf-8'), assetName)
 
                 if newAsset is None:
                     print "Error reading asset"
                 else:
                     nodeInstancesManager = self.currentScene.GetNodeInstancesManager()
-                    assetInstance = nodeInstancesManager.CreateAssetInstance((assetName + "-instance").encode('utf-8'), newAsset)
+                    nodeInstancesManager.CreateAssetInstance((assetName + "-instance").encode('utf-8'), newAsset)
 
-                    assetInstance.GetTransformation().SetScale(0.01, 0.01, 0.01)
-                    assetInstance.GetTransformation().TranslateY(20)
-                    assetInstance.GetTransformation().RotateXDeg(-90)
+                    self.currentScene.IntializePhysicsObjects()
 
                 self.sceneDataCtrl.UpdateLists()
                 self.graphicsCtrl.CheckPrograms()
@@ -198,3 +201,23 @@ class MainFrame(wx.Frame):
         self.currentScene = scena
         self.graphicsCtrl.SetScene(self.currentScene)
         self.sceneDataCtrl.SetScene(self.currentScene)
+
+    def OnCreateMaterial(self, event):
+        if self.currentScene is None:
+            print "You need to have an active scene to load an asset"
+            return
+
+        materialsManager = self.currentScene.GetMaterialsManager()
+
+        dlgMaterialName = wx.TextEntryDialog(self, 'Insert the new material name', 'Create material', 'material{:d}'.format(materialsManager.GetMaterialsCount()))
+        if dlgMaterialName.ShowModal() == wx.ID_OK:
+
+            materialName = dlgMaterialName.GetValue().encode('utf-8')
+
+            newMaterial = materialsManager.CreateMaterial(materialName)
+
+            if newMaterial is None:
+                print "Unable to create the new material"
+            else:
+                self.sceneDataCtrl.UpdateLists()
+        dlgMaterialName.Destroy()

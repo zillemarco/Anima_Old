@@ -88,13 +88,13 @@
 					vec3 fresnel = Specular_F_Roughness(specularColor, roughness * roughness, normal, viewDir) * envColor * reflectionIntensity;
 					
 					// luce
-					FragColor[0] = vec4(1.0, 0.0, 0.0, 1.0);//vec4(luce, 1.0f) * shadowAmount;
+					FragColor[0] = vec4(luce, 1.0f) * shadowAmount;
 					
 					// fresnel
-					FragColor[1] = vec4(0.0, 0.0, 1.0, 1.0);//vec4(fresnel, 1.0f) * shadowAmount;
+					FragColor[1] = vec4(fresnel, 1.0f) * shadowAmount;
 
 					// irradiance
-					FragColor[2] = vec4(0.0, 1.0, 0.0, 1.0);//vec4(irradiance, 1.0f) * shadowAmount;
+					FragColor[2] = vec4(irradiance, 1.0f);
 				}
 
 				]]>

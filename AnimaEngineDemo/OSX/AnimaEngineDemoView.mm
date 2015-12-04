@@ -340,13 +340,17 @@ bool rendererInitialized = false;
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 	
 	Anima::AnimaScenesManager* scenesManager = _engine.GetScenesManager();
-	Anima::AnimaScene* newScene = scenesManager->CreateScene("scena");
 	
-	if(newScene)
+//	_scene = scenesManager->LoadSceneFromFile("/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff/AnimaEngineDemoScene.ascene");
+//	_renderer->CheckPrograms(_scene);
+	
+	_scene = scenesManager->CreateScene("scena");
+	
+	if(_scene)
 	{
-		Anima::AnimaCamerasManager* camerasManager = newScene->GetCamerasManager();
-		Anima::AnimaLightsManager* lightsManager = newScene->GetLightsManager();
-		Anima::AnimaTexturesManager* texturesManager = newScene->GetTexturesManager();
+		Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+		Anima::AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+		Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
 		
 		Anima::AnimaCamera* newCamera = camerasManager->CreateCamera("default-camera");
 		Anima::AnimaDirectionalLight* newLight = lightsManager->CreateDirectionalLight("default-light");
@@ -354,11 +358,11 @@ bool rendererInitialized = false;
 		Anima::AnimaString texturesPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures";
 		
 		Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/cubemap.dds", "dds-skybox-texture");
-		newScene->SetTexture("SkyBox", textureCube);
-		newScene->SetTexture("EnvironmentMap", textureCube);
+		_scene->SetTexture("SkyBox", textureCube);
+		_scene->SetTexture("EnvironmentMap", textureCube);
 		
 		Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/Irradiance.dds", "dds-skybox-texture-irr");
-		newScene->SetTexture("IrradianceMap", textureIrr);
+		_scene->SetTexture("IrradianceMap", textureIrr);
 		
 		if(newLight)
 		{
@@ -373,29 +377,10 @@ bool rendererInitialized = false;
 			Anima::AnimaVertex3f target(-34, 9.8, 15);
 			Anima::AnimaVertex3f up(0, 1, 0);
 			newCamera->LookAt(position, target, up);
+			newCamera->Activate();
 		}
 		
-		_scene = newScene;
 		_scene->SetKeyboardInteractor(&keyboardInteractor);
-		
-		Anima::AnimaNodesManager* nodesManager = _scene->GetNodesManager();
-		Anima::AnimaNodeInstancesManager* nodeInstancesManager = _scene->GetNodeInstancesManager();
-		
-		Anima::AnimaNode* asset = nodesManager->LoadAssetFromExternalFile("/Users/marco/Desktop/base_cassettiera/143853.3ds", "asset");
-		if(asset)
-		{
-			Anima::AnimaNodeInstance* assetInstance = nodeInstancesManager->CreateAssetInstance("asset-inst", asset);
-			if(assetInstance)
-			{
-				assetInstance->GetTransformation()->SetScale(0.01, 0.01, 0.01);
-				assetInstance->GetTransformation()->TranslateX(-20);
-				assetInstance->GetTransformation()->RotateXDeg(-90);
-				
-//				_renderer->CheckPrograms(_scene);
-			}
-		}
-		
-		_renderer->CheckPrograms(_scene);
 	}
 	
 //	Anima::AnimaString dataPath = DATA_PATH;

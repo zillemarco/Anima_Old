@@ -39,10 +39,10 @@ class MaterialEditorDialog(wx.Dialog):
                 pos += 1
 
             for c in colors:
-                col = c.data().GetColor4f()
+                col = c.data().GetColor3f()
 
                 self.listaMateriali.InsertStringItem(pos, AnimaEngine.AnimaMappedValues.ExtractName(c.key()))
-                self.listaMateriali.SetStringItem(pos, 1, str(col.r) + ":" + str(col.g) + ":" + str(col.b) + ":" + str(col.a))
+                self.listaMateriali.SetStringItem(pos, 1, "{:.2f}:{.2f}:{.2f}".format(col.r, col.g, col.b))
                 pos += 1
 
     def OnCancel(self, e):

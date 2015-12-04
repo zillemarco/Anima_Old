@@ -12,6 +12,7 @@
 #include "AnimaLightsManager.h"
 #include "AnimaScene.h"
 #include "AnimaCamera.h"
+#include "AnimaGeometryInstance.h"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
@@ -91,6 +92,55 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 								
 								camera->SmoothRotateDeg(dx, dy, 0.0f);
 								break;
+						}
+					}
+				}
+			}
+		});
+		
+		SetEventHandler("onLeftMouseClick", [] (Anima::AnimaEventArgs* args) {
+			
+			Anima::AnimaVertex2f point = ((Anima::AnimaMouseEventArgs*)args)->GetPoint();
+			Anima::AnimaVertex2f size = ((Anima::AnimaMouseEventArgs*)args)->GetWindowSize();
+			
+			AnimaLogger::LogMessageFormat("click at %f:%f", point.x, point.y);
+			
+			Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+			
+			if(engine)
+			{
+				Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+				Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+				
+				if(scene)
+				{
+					Anima::AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
+					Anima::AnimaCamera* camera = camerasManager->GetActiveCamera();
+					
+					if(camera)
+					{
+						Anima::AnimaVertex3f origin = camera->GetPosition();
+						Anima::AnimaVertex3f end = camera->ScreenPointToWorldPoint(point);
+						
+						btCollisionWorld::ClosestRayResultCallback RayCallback(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z));
+						
+						btDynamicsWorld* world = scene->GetPhysWorld();
+						
+						if(world)
+						{
+							world->rayTest(btVector3(origin.x, origin.y, origin.z), btVector3(end.x, end.y, end.z), RayCallback);
+							
+							if(RayCallback.hasHit())
+							{
+								AnimaGeometryInstance* instance = (AnimaGeometryInstance*)RayCallback.m_collisionObject->getUserPointer();
+								AnimaVertex3f contactPoint(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z());
+								
+								AnimaLogger::LogMessageFormat("Picked geometry named '%s'", instance->GetName().c_str());
+							}
+							else
+							{
+								printf("Picked nothing\n");
+							}
 						}
 					}
 				}

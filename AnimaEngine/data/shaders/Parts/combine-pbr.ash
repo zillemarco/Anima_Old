@@ -11,7 +11,6 @@
 				<Data propertyName="LightsBuffer.EmissiveMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="LightsBuffer_EmissiveMap"/>
 				<Data propertyName="LightsBuffer.SpecularMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="LightsBuffer_SpecularMap"/>
 				<Data propertyName="LightsBuffer.IrradianceMap" type="TEXTURE2D" sourceObject="GBUFFER" associatedWith="LightsBuffer_IrradianceMap"/>
-				<Data propertyName="AmbientLight" type="FLOAT3" sourceObject="RENDERER"/>
 				<Data propertyName="ScreenSize" type="FLOAT2" sourceObject="RENDERER"/>
 			</Datas>
 			<Code>
@@ -22,7 +21,6 @@
 				uniform sampler2D LightsBuffer_EmissiveMap;
 				uniform sampler2D LightsBuffer_SpecularMap;
 				uniform sampler2D LightsBuffer_IrradianceMap;
-				uniform vec3 AmbientLight;
 				uniform vec2 ScreenSize;
 
 				vec2 CalcTexCoord()
@@ -41,9 +39,9 @@
 					vec3 specular 	= texture(LightsBuffer_SpecularMap, textureCoord).xyz;
 					vec3 irradiance = texture(LightsBuffer_IrradianceMap, textureCoord).xyz;
 
-					//FragColor.xyz = 	diffuse * AmbientLight * irradiance;
-					//FragColor.xyz = 	light;
-					FragColor.xyz = 	specular;
+					FragColor.xyz = 	diffuse * irradiance;
+					FragColor.xyz += 	light;
+					FragColor.xyz += 	specular;
 					FragColor.a =		1.0f;
 				}
 				]]>

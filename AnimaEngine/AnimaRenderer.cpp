@@ -860,10 +860,7 @@ void AnimaRenderer::BuildProgramsData(AnimaArray<AnimaRendererProgramData>* prog
 
 			AnimaShaderProgram* program = instance->GetShaderProgram();
 			if (program == nullptr)
-			{
-				printf("Program not found %s\n", instance->GetName().c_str());
 				continue;
-			}
 
 			AnimaMaterial* material = instance->GetMaterial();
 			if (material == nullptr)
@@ -1184,9 +1181,10 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 				glBindVertexArray(geometry->GetVertexArrayObject());
 #else
 				program->EnableInputs(geometry);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
+//				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-				glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
+//				glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
+				glDrawArraysInstanced(GL_TRIANGLES, 0, geometry->GetFloatVerticesCount(), programGeometry._instances.size());
 #if !defined USE_VAOS
 				program->DisableInputs();
 #endif
@@ -1227,9 +1225,10 @@ void AnimaRenderer::PreparePass(AnimaRenderer* renderer)
 					glBindVertexArray(geometry->GetVertexArrayObject());
 #else
 					program->EnableInputs(geometry);
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
+//					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-					glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+//					glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+					glDrawArrays(GL_TRIANGLES, 0, geometry->GetFloatVerticesCount());
 #if !defined USE_VAOS
 					program->DisableInputs();
 #endif
@@ -1633,9 +1632,10 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 			glBindVertexArray(geometry->GetVertexArrayObject());
 #else
 			program->EnableInputs(geometry);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
+//			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-			glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
+//			glDrawElementsInstanced(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0, programGeometry._instances.size());
+			glDrawArraysInstanced(GL_TRIANGLES, 0, geometry->GetFloatVerticesCount(), programGeometry._instances.size());
 #if !defined USE_VAOS
 			program->DisableInputs();
 #endif
@@ -1670,9 +1670,10 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 				glBindVertexArray(geometry->GetVertexArrayObject());
 #else
 				program->EnableInputs(geometry);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
+//				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->GetIndexesBufferObject());
 #endif
-				glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+//				glDrawElements(GL_TRIANGLES, geometry->GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+				glDrawArrays(GL_TRIANGLES, 0, geometry->GetFloatVerticesCount());
 #if !defined USE_VAOS
 				program->DisableInputs();
 #endif

@@ -497,7 +497,12 @@ void AnimaTransformation::UpdateMatrix()
 //	}
 //	else
 //	{
-		translationMatrix = AnimaMatrix::MakeTranslation(_translation.x, _translation.y, _translation.z);
+	AnimaVertex3f translation = _translation;
+	
+	if (_parentObject != nullptr)
+		translation += _parentObject->GetPosition();
+	
+		translationMatrix = AnimaMatrix::MakeTranslation(translation.x, translation.y, translation.z);
 		rotationMatrix = AnimaMatrix::MakeRotationZRad(_rotation.z) * (AnimaMatrix::MakeRotationYRad(_rotation.y) * AnimaMatrix::MakeRotationXRad(_rotation.x));
 //	}
 			

@@ -226,7 +226,7 @@ bool AnimaSceneObject::FinalizeAfterRead(AnimaScene* scene)
 void AnimaSceneObject::SetPosition(const AnimaVertex3f& position)
 {
 	AnimaMappedValues::SetVector("Position", position);
-	_transformation.Translate(position);
+	_transformation.UpdateMatrix();
 }
 
 void AnimaSceneObject::SetPosition(AFloat x, AFloat y, AFloat z)

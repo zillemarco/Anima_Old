@@ -824,16 +824,18 @@ void AnimaGeometry::UpdateBuffers()
 			glInvalidateBufferData(_boneIDsBufferObject);
 	}
 	
+	ComputeFlatNormals();
+	
 	glBindVertexArray(_vertexArrayObject);
 	
-	if (GetFacesIndicesCount() > 0)
-	{
-		AUint* indexes = GetFacesIndices();
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
-		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
-		indexes = nullptr;
-	}
+//	if (GetFacesIndicesCount() > 0)
+//	{
+//		AUint* indexes = GetFacesIndices();
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
+//		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
+//		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
+//		indexes = nullptr;
+//	}
 
 	if (GetFloatVerticesCount() > 0)
 	{
@@ -1144,7 +1146,8 @@ AUint* AnimaGeometry::GetFacesIndices()
 
 AUint AnimaGeometry::GetFloatVerticesCount()
 {
-	return (AUint)_vertices.size() * 3;
+//	return (AUint)_vertices.size() * 3;
+	return _faces.size() * 9;
 }
 
 AFloat* AnimaGeometry::GetFloatVertices()
@@ -1157,10 +1160,25 @@ AFloat* AnimaGeometry::GetFloatVertices()
 	{
 		vertices = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
 
-		AInt verticesCount = _vertices.size();
-		for (int i = 0; i < verticesCount; i++)
+//		AInt verticesCount = _vertices.size();
+//		for (int i = 0; i < verticesCount; i++)
+//		{
+//			memcpy(vertices + offset, _vertices[i].vec, sizeof(AFloat) * 3);
+//			offset += 3;
+//		}
+		
+		int facesCount = _faces.size();
+		for(int i = 0; i < facesCount; i++)
 		{
-			memcpy(vertices + offset, _vertices[i].vec, sizeof(AFloat) * 3);
+			AnimaFace face = _faces[i];
+			
+			memcpy(vertices + offset, _vertices[face.GetIndex(0)].vec, sizeof(AFloat) * 3);
+			offset += 3;
+			
+			memcpy(vertices + offset, _vertices[face.GetIndex(1)].vec, sizeof(AFloat) * 3);
+			offset += 3;
+			
+			memcpy(vertices + offset, _vertices[face.GetIndex(2)].vec, sizeof(AFloat) * 3);
 			offset += 3;
 		}
 	}
@@ -1170,7 +1188,8 @@ AFloat* AnimaGeometry::GetFloatVertices()
 
 AUint AnimaGeometry::GetFloatVerticesNormalCount()
 {
-	return (AUint)_normals.size() * 3;
+//	return (AUint)_normals.size() * 3;
+	return _faces.size() * 9;
 }
 
 AFloat* AnimaGeometry::GetFloatVerticesNormal()
@@ -1184,10 +1203,26 @@ AFloat* AnimaGeometry::GetFloatVerticesNormal()
 	{
 		normals = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
 
-		AInt normalsCount = _normals.size();
-		for (int i = 0; i < normalsCount; i++)
+//		AInt normalsCount = _normals.size();
+//		for (int i = 0; i < normalsCount; i++)
+//		{
+//			memcpy(normals + offset, _normals[i].vec, sizeof(AFloat) * 3);
+//			offset += 3;
+//		}
+		
+		int facesCount = _faces.size();
+		for(int i = 0; i < facesCount; i++)
 		{
-			memcpy(normals + offset, _normals[i].vec, sizeof(AFloat) * 3);
+			AnimaFace face = _faces[i];
+			AnimaVertex3f faceNormal = face.GetNormal();
+			
+			memcpy(normals + offset, faceNormal.vec, sizeof(AFloat) * 3);
+			offset += 3;
+			
+			memcpy(normals + offset, faceNormal.vec, sizeof(AFloat) * 3);
+			offset += 3;
+			
+			memcpy(normals + offset, faceNormal.vec, sizeof(AFloat) * 3);
 			offset += 3;
 		}
 	}
@@ -1622,8 +1657,12 @@ void AnimaGeometry::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, b
 	}
 #else
 	program->EnableInputs(this);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
-	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
+//	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	
+	glDrawArrays(GL_TRIANGLES, 0, GetFloatVerticesCount());
+	
 	program->DisableInputs();
 #endif
 }
