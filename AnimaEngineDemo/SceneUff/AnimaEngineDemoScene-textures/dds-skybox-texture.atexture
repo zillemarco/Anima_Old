@@ -7,7 +7,7 @@
 	<Target>CUBE</Target>
 	<Format>BGRA</Format>
 	<InternalFormat>RGBA8</InternalFormat>
-	<MinFilter>LINEAR</MinFilter>
+	<MinFilter>LINEAR_MIPMAP_LINEAR</MinFilter>
 	<MagFilter>LINEAR</MagFilter>
 	<Attachment>NONE</Attachment>
 	<DataType>UBYTE</DataType>

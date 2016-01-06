@@ -22,6 +22,12 @@ AnimaMouseInteractor::AnimaMouseInteractor()
 	_mouseMoved = false;
 	_windowsProcHook = NULL;
 	_messageProcHook = NULL;
+
+	_modifiers = 0;
+	_mousePosition = AnimaVertex2f(0, 0);
+	_delta = AnimaVertex2f(0, 0);
+	_leftButtonDown = false;
+	_rightButtonDown = false;
 	
 	_supportedEvents = {
 		//		{"onMouseMoved",		""},
@@ -43,9 +49,15 @@ AnimaMouseInteractor::AnimaMouseInteractor(const AnimaMouseInteractor& src)
 	_engine = src._engine;
 	_installed = src._installed;
 	_mouseMoved = src._mouseMoved;
-	_lastMousePosition = src._lastMousePosition;
+	_mousePosition = src._mousePosition;
 	_windowsProcHook = src._windowsProcHook;
 	_messageProcHook = src._messageProcHook;
+
+	_modifiers = src._modifiers;
+	_mousePosition = src._mousePosition;
+	_delta = src._delta;
+	_leftButtonDown = src._leftButtonDown;
+	_rightButtonDown = src._rightButtonDown;
 }
 
 AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
@@ -54,9 +66,15 @@ AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
 	_engine = src._engine;
 	_installed = src._installed;
 	_mouseMoved = src._mouseMoved;
-	_lastMousePosition = src._lastMousePosition;
+	_mousePosition = src._mousePosition;
 	_windowsProcHook = src._windowsProcHook;
 	_messageProcHook = src._messageProcHook;
+
+	_modifiers = src._modifiers;
+	_mousePosition = src._mousePosition;
+	_delta = src._delta;
+	_leftButtonDown = src._leftButtonDown;
+	_rightButtonDown = src._rightButtonDown;
 }
 
 AnimaMouseInteractor::~AnimaMouseInteractor()
@@ -72,9 +90,15 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(const AnimaMouseInteractor
 		_engine = src._engine;
 		_installed = src._installed;
 		_mouseMoved = src._mouseMoved;
-		_lastMousePosition = src._lastMousePosition;
+		_mousePosition = src._mousePosition;
 		_windowsProcHook = src._windowsProcHook;
 		_messageProcHook = src._messageProcHook;
+
+		_modifiers = src._modifiers;
+		_mousePosition = src._mousePosition;
+		_delta = src._delta;
+		_leftButtonDown = src._leftButtonDown;
+		_rightButtonDown = src._rightButtonDown;
 	}
 
 	return *this;
@@ -88,9 +112,15 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(AnimaMouseInteractor&& src
 		_engine = src._engine;
 		_installed = src._installed;
 		_mouseMoved = src._mouseMoved;
-		_lastMousePosition = src._lastMousePosition;
+		_mousePosition = src._mousePosition;
 		_windowsProcHook = src._windowsProcHook;
 		_messageProcHook = src._messageProcHook;
+
+		_modifiers = src._modifiers;
+		_mousePosition = src._mousePosition;
+		_delta = src._delta;
+		_leftButtonDown = src._leftButtonDown;
+		_rightButtonDown = src._rightButtonDown;
 	}
 
 	return *this;
@@ -262,21 +292,27 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 		if (PtInRect(&rc, point))
 		{
 			AnimaVertex2f pt(xPos, yPos);
-			AnimaVertex2f delta = interactor->_lastMousePosition - pt;
+			AnimaVertex2f delta = interactor->_mousePosition - pt;
 			AnimaVertex2f size((AFloat)rc.right - (AFloat)rc.left, (AFloat)rc.bottom - (AFloat)rc.top);
 
 			// Siccome il messaggio di mouse move viene lanciato anche al primo click con i tasti del mouse,
 			// controllo se la posizione non è diversa da quella dell'ultima posizione nota e il flag _mouseMoved è falso
 			// che in questo caso significa che ho appena fatto click con un pulsante e non devo mandare il messaggio di mouse move
 			// o dragged e soprattuo non impostare il flag _mouseMoved a true, altrimenti non verranno mai inviati dei messaggi di click
-			if (pt.x == interactor->_lastMousePosition.x && pt.y == interactor->_lastMousePosition.y && interactor->_mouseMoved == false)
+			if (pt.x == interactor->_mousePosition.x && pt.y == interactor->_mousePosition.y && interactor->_mouseMoved == false)
 				return;
 
-			interactor->_lastMousePosition = pt;
+			interactor->_mousePosition = pt;
 			interactor->_mouseMoved = true;
+			interactor->_delta += delta;
+			interactor->_modifiers = TranslateFlags();
+			interactor->_leftButtonDown = false;
+			interactor->_rightButtonDown = false;
 
 			if ((wParam & MK_LBUTTON) == MK_LBUTTON)
 			{
+				interactor->_leftButtonDown = true;
+
 				AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, TranslateFlags(), delta);
 				interactor->LaunchEvent("onLeftMouseDragged", args);
 
@@ -285,6 +321,8 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 			}
 			else if ((wParam & MK_RBUTTON) == MK_RBUTTON)
 			{
+				interactor->_rightButtonDown = true;
+
 				AnimaEventArgs* args = new AnimaMouseDraggedEventArgs(interactor, pt, size, TranslateFlags(), delta);
 				interactor->LaunchEvent("onRightMouseDragged", args);
 
@@ -310,8 +348,12 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 			AnimaVertex2f pt(xPos, yPos);
 			AnimaVertex2f size((AFloat)rc.right - (AFloat)rc.left, (AFloat)rc.bottom - (AFloat)rc.top);
 
-			interactor->_lastMousePosition = pt;
+			interactor->_mousePosition = pt;
 			interactor->_mouseMoved = false;
+			interactor->_delta = AnimaVertex2f(0, 0);
+			interactor->_modifiers = TranslateFlags();
+			interactor->_leftButtonDown = true;
+			interactor->_rightButtonDown = false;
 
 			AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onLeftMouseDown", args);
@@ -337,8 +379,12 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 			AnimaVertex2f pt(xPos, yPos);
 			AnimaVertex2f size((AFloat)rc.right - (AFloat)rc.left, (AFloat)rc.bottom - (AFloat)rc.top);
 
-			interactor->_lastMousePosition = pt;
+			interactor->_mousePosition = pt;
 			interactor->_mouseMoved = false;
+			interactor->_delta = AnimaVertex2f(0, 0);
+			interactor->_modifiers = TranslateFlags();
+			interactor->_leftButtonDown = false;
+			interactor->_rightButtonDown = true;
 
 			AnimaEventArgs* args = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onRightMouseDown", args);
@@ -364,7 +410,11 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 			AnimaVertex2f pt(xPos, yPos);
 			AnimaVertex2f size((AFloat)rc.right - (AFloat)rc.left, (AFloat)rc.bottom - (AFloat)rc.top);
 
-			interactor->_lastMousePosition = pt;
+			interactor->_mousePosition = pt;
+			interactor->_delta = AnimaVertex2f(0, 0);
+			interactor->_modifiers = TranslateFlags();
+			interactor->_leftButtonDown = false;
+			interactor->_rightButtonDown = false;
 
 			AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onLeftMouseUp", argsUp);
@@ -399,7 +449,11 @@ void AnimaMouseInteractor::HandleMessage(HWND hWnd, AUint message, WPARAM wParam
 			AnimaVertex2f pt(xPos, yPos);
 			AnimaVertex2f size((AFloat)rc.right - (AFloat)rc.left, (AFloat)rc.bottom - (AFloat)rc.top);
 
-			interactor->_lastMousePosition = pt;
+			interactor->_mousePosition = pt;
+			interactor->_delta = AnimaVertex2f(0, 0);
+			interactor->_modifiers = TranslateFlags();
+			interactor->_leftButtonDown = false;
+			interactor->_rightButtonDown = false;
 
 			AnimaEventArgs* argsUp = new AnimaMouseEventArgs(interactor, pt, size, TranslateFlags());
 			interactor->LaunchEvent("onRightMouseUp", argsUp);

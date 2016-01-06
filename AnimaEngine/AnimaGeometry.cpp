@@ -1629,7 +1629,9 @@ void AnimaGeometry::MakeCylinder(AFloat topRadius, AFloat bottomRadius, AFloat h
 
 void AnimaGeometry::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, bool start, bool end, bool updateMaterial)
 {
+	AUint error = glGetError();
 	program->UpdateSceneObjectProperties(this, renderer);
+	error = glGetError();
 
 	if (updateMaterial)
 	{
@@ -1637,24 +1639,23 @@ void AnimaGeometry::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, b
 		if (material == nullptr)
 			material = AnimaMaterialsManager::GetDefaultMaterial();
 
+		error = glGetError();
 		program->UpdateMappedValuesObjectProperties(material, renderer);
+		error = glGetError();
 	}
 
 #ifdef _WIN32
-	if (start)
-	{
-		//glBindVertexArray(GetVertexArrayObject());
-		program->EnableInputs(this);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
-	}
+	program->EnableInputs(this);
+	error = glGetError();
 
-	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
+	//	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
 
-	if (end)
-	{
-		//glBindVertexArray(0);
-		program->DisableInputs();
-	}
+	glDrawArrays(GL_TRIANGLES, 0, GetFloatVerticesCount());
+	error = glGetError();
+
+	program->DisableInputs();
+	error = glGetError();
 #else
 	program->EnableInputs(this);
 	

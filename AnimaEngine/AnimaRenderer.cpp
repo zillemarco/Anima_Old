@@ -19,8 +19,8 @@
 #include "AnimaLogger.h"
 
 //#define ENGINE_DATA_PATH				"data"
-#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
-//#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
+//#define ENGINE_DATA_PATH				"/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngine/data"
+#define ENGINE_DATA_PATH				"D:/Git/Anima/AnimaEngine/data"
 #define SHADERS_PATH					ENGINE_DATA_PATH "/shaders/"
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
@@ -551,18 +551,18 @@ void AnimaRenderer::ApplyEffectFromTextureToTexture(AnimaShaderProgram* filterPr
 
 	if (_filterGeometry->NeedsBuffersUpdate())
 		_filterGeometry->UpdateBuffers();
-
+	
 	SetTexture("FilterMap", src, false);
 	SetVector("TextureSize", AnimaVertex2f((AFloat)src->GetWidth(), (AFloat)src->GetHeight()));
-
+	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	filterProgram->Use();
 	filterProgram->UpdateSceneObjectProperties(_filterCamera, this);
 	filterProgram->UpdateRenderingManagerProperies(this);
-
+	
 	_filterGeometry->Draw(this, filterProgram, true, true, false);
-
+	
 	SetTexture("FilterMap", nullptr, false);
 }
 
@@ -1318,12 +1318,13 @@ void AnimaRenderer::DirectionalLightsPass(AnimaArray<AnimaLight*>* directionalLi
 	for (AInt i = 0; i < count; i++)
 	{
 		AnimaDirectionalLight* light = (AnimaDirectionalLight*)directionalLights->at(i);
-		
+
 		if(light->GetBoolean("CastShadows"))
 			UpdateDirectionalLightShadowMap(light);
 				
 		// Attivo il buffer delle luci e lo imposto che potrebbe essere stato cambiato da UpdateDirectionalLights
 		GetGBuffer("LightsBuffer")->BindAsRenderTarget();
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);
 		glDepthMask(GL_FALSE);
@@ -1572,15 +1573,18 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	AnimaShaderProgram* program = shadersManager->GetProgramFromName("dil-shadow-map");
 	
 	shadowMap->BindAsRenderTarget();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-
+	
 	ANIMA_FRAME_PUSH("Build data");
 	AnimaArray<AnimaRendererGeometryInstances> geometryInstances;
 	BuildShadowMapGeometries(&geometryInstances);
+
 	SetupShadowMapStaticBuffers(program, &geometryInstances, light);
+
 	ANIMA_FRAME_POP();
 	
 	bool supportsInstance = program->CanSupportInstance();
@@ -1601,7 +1605,7 @@ void AnimaRenderer::UpdateDirectionalLightShadowMap(AnimaDirectionalLight* light
 	}
 
 	program->Use();
-
+	
 	ANIMA_FRAME_PUSH("Update normal uniforms");
 	program->UpdateRenderingManagerProperies(this);
 	program->UpdateSceneObjectProperties(light, this);

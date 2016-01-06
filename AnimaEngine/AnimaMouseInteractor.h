@@ -71,22 +71,28 @@ public:
 	AnimaMouseInteractor(const AnimaMouseInteractor& src);
 	AnimaMouseInteractor(AnimaMouseInteractor&& src);
 	virtual ~AnimaMouseInteractor();
-	
+
 	AnimaMouseInteractor& operator=(const AnimaMouseInteractor& src);
 	AnimaMouseInteractor& operator=(AnimaMouseInteractor&& src);
-	
+
 public:
 	bool Install(long windowId, AnimaEngine* engine) override;
 	bool Remove() override;
 	void UpdateScene(AnimaScene* scene, AFloat elapsedTime) override;
-	
-	bool SetEventHandler(const AnimaString& eventName, std::function<void (AnimaEventArgs* eventArgs)> handler) override;
+
+	bool SetEventHandler(const AnimaString& eventName, std::function<void(AnimaEventArgs* eventArgs)> handler) override;
 	bool LaunchEvent(const AnimaString& eventName, AnimaEventArgs* eventArgs) const override;
 	AnimaArray<AnimaEventInfo> GetSupportedEvents() const override;
 	bool EventIsSupported(const AnimaString& eventName) const override;
-	
+
 	long GetWindowId() const { return _windowId; }
 	AnimaEngine* GetEngine() { return _engine; }
+
+	AInt GetModifiers() const { return _modifiers; }
+	bool LeftButtonDown() const { return _leftButtonDown; }
+	bool RightButtonDown() const { return _rightButtonDown; }
+	const AnimaVertex2f& GetDelta() const { return _delta; }
+	const AnimaVertex2f& GetMousePosition() const { return _mousePosition; }
 	
 private:
 #if defined WIN32
@@ -109,8 +115,13 @@ protected:
 	AnimaEngine* _engine;
 	
 	bool _mouseMoved;
-	AnimaVertex2f _lastMousePosition;
-	
+
+	AInt _modifiers;
+	AnimaVertex2f _mousePosition;
+	AnimaVertex2f _delta;
+	bool _leftButtonDown;
+	bool _rightButtonDown;
+		
 	AnimaArray<AnimaEventInfo> _supportedEvents;
 	
 #if defined WIN32

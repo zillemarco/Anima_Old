@@ -389,7 +389,7 @@ void (Anima::AnimaTransformation::*AT_Scale2)(Anima::AFloat sx, Anima::AFloat sy
 void (Anima::AnimaTransformation::*AT_SetScale1)(const Anima::AnimaVertex3f& s) = &Anima::AnimaTransformation::SetScale;
 void (Anima::AnimaTransformation::*AT_SetScale2)(Anima::AFloat sx, Anima::AFloat sy, Anima::AFloat sz) = &Anima::AnimaTransformation::SetScale;
 
-void AnimaGC_SetUpdateFrameCallback_aux(Anima::AnimaGC& self, object userData, object callback) { self.SetUpdateFrameCallback(userData, callback); }
+//void AnimaGC_SetUpdateFrameCallback_aux(Anima::AnimaGC& self, object userData, object callback) { self.SetUpdateFrameCallback(userData, callback); }
 
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShader;
 Anima::AnimaShader* (Anima::AnimaShadersManager::*LoadShaderFromFileStringString)(const Anima::AnimaString&, const Anima::AnimaString&, Anima::AnimaShaderType) = &Anima::AnimaShadersManager::LoadShaderFromFile;
@@ -1146,7 +1146,7 @@ BOOST_PYTHON_MODULE(AnimaEngine)
 	.def("GetDefaultContextConfig", &Anima::AnimaGC::GetDefaultContextConfig)
 	.def("GetDefaultFrameBufferConfig", &Anima::AnimaGC::GetDefaultFrameBufferConfig)
 	.def("InitializeGLEWExtensions", &Anima::AnimaGC::InitializeGLEWExtensions)
-	.def("SetUpdateFrameCallback", &AnimaGC_SetUpdateFrameCallback_aux)
+	//.def("SetUpdateFrameCallback", &AnimaGC_SetUpdateFrameCallback_aux)
 	.def("MakeCurrent", &Anima::AnimaGC::MakeCurrent)
 	.def("SwapBuffers", &Anima::AnimaGC::SwapBuffers)
 	.def("ClearColor", &Anima::AnimaGC::ClearColor)

@@ -49,7 +49,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
 	
 	_textureTarget	= TEXTURE_TARGET_NONE;
-	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR;
+	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
 	_magFilter		= TEXTURE_MAG_FILTER_MODE_LINEAR;
 	_internalFormat = TEXTURE_INTERNAL_FORMAT_RGB;
 	_format			= TEXTURE_FORMAT_RGB;
@@ -86,7 +86,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	IMPLEMENT_ANIMA_CLASS(AnimaTexture);
 	
 	_textureTarget	= TEXTURE_TARGET_NONE;
-	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR;
+	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
 	_magFilter		= TEXTURE_MAG_FILTER_MODE_LINEAR;
 	_internalFormat = TEXTURE_INTERNAL_FORMAT_RGB;
 	_format			= TEXTURE_FORMAT_RGB;
@@ -124,7 +124,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	SetData(data, dataSize, 0);
 	
 	_textureTarget	= TEXTURE_TARGET_NONE;
-	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR;
+	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
 	_magFilter		= TEXTURE_MAG_FILTER_MODE_LINEAR;
 	_internalFormat = TEXTURE_INTERNAL_FORMAT_RGB;
 	_format			= TEXTURE_FORMAT_RGB;
@@ -162,7 +162,7 @@ AnimaTexture::AnimaTexture(AnimaAllocator* allocator, const AnimaString& name, A
 	SetData(data, dataSize, 0);
 	
 	_textureTarget	= TEXTURE_TARGET_NONE;
-	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR;
+	_minFilter		= TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR;
 	_magFilter		= TEXTURE_MAG_FILTER_MODE_LINEAR;
 	_internalFormat = TEXTURE_INTERNAL_FORMAT_RGB;
 	_format			= TEXTURE_FORMAT_RGB;

@@ -86,6 +86,7 @@ bool moveRightPressed = false;
 bool moveLeftPressed = false;
 bool moveUpPressed = false;
 bool moveDownPressed = false;
+bool rendererInitialized = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -114,7 +115,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		Anima::AnimaGCContextConfig context = Anima::AnimaGC::GetDefaultContextConfig();
 		context._major = 3;
 		context._minor = 3;
-		context._debug = false;
+		context._debug = true;
 		Anima::AnimaGCFrameBufferConfig frameBuffer = Anima::AnimaGC::GetDefaultFrameBufferConfig();
 		frameBuffer._depthBits = 32;
 
@@ -314,304 +315,269 @@ bool InitEngine()
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 
-	Anima::AnimaString dataPath = DATA_PATH;
-	Anima::AnimaString materialsPath = dataPath + "/materials";
-	Anima::AnimaString nodePath = dataPath + "/nodes/";
-	Anima::AnimaString nodeName = "material2.3ds";
-	Anima::AnimaString materialName = "legno";
-	Anima::AnimaString sceneNodesPath = nodePath + "scene_nodes/";
-	Anima::AnimaString sceneGeometriesPath = nodePath + "scene_nodes/";
+	Anima::AnimaScenesManager* scenesManager = _engine.GetScenesManager();
 
-	// Creazione della scena
-#if defined SAVE_SCENE
-	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);	
-#else
-	_engine.GetScenesManager()->LoadScenes(dataPath);
-
-	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
-#endif
-
-	if (!_scene)
-		return false;
-
-	_scene->InitializePhysics();
-	_scene->InitializePhysicObjects();
-
-	_scene->SetKeyboardInteractor(&keyboardInteractor);
-	_scene->SetJoystickInteractor(joystickInteractor);
-	
-	// Caricamento dei materiali
-	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
-	Anima::AnimaNodeInstancesManager* nodeInstancesManager = _scene->GetNodeInstancesManager();
-#if defined SAVE_SCENE
-	if (!materialsManager->LoadMaterials(materialsPath))
-		return false;
-#endif
-
-	// Creazione di una telecamera
-	_camerasManager = _scene->GetCamerasManager();
-#if defined SAVE_SCENE
-	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
-	if (!_camera)
-		return false;
-#else
-	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
-#endif
-	
-#if defined SAVE_SCENE
-	_scene->GetGeometriesManager()->LoadGeometries(sceneGeometriesPath);
-	_scene->GetNodesManager()->LoadNodes(sceneNodesPath);
-#endif
-
-#if defined SAVE_SCENE
-	_node = _scene->GetNodesManager()->GetNodeFromName("AnimaEngineDemoNode");
-	if (!_node)
-		return false;
-
-	_floorNode = _scene->GetNodesManager()->GetNodeFromName("floorNode");
-	if (!_floorNode)
-		return false;
-	
-	// Creo le istanze del pavimento e imposto i loro materiali
-	Anima::AnimaArray<Anima::AnimaGeometryInstance*> floorNodeInstanceGeometries;
-
-	Anima::AnimaNodeInstance* floorNodeInstance1 = nodeInstancesManager->CreateInstance("floorNodeInstance1", _floorNode);
-	Anima::AnimaNodeInstance* floorNodeInstance2 = nodeInstancesManager->CreateInstance("floorNodeInstance2", _floorNode);
-	Anima::AnimaNodeInstance* floorNodeInstance3 = nodeInstancesManager->CreateInstance("floorNodeInstance3", _floorNode);
-	Anima::AnimaNodeInstance* floorNodeInstance4 = nodeInstancesManager->CreateInstance("floorNodeInstance4", _floorNode);
-
-	floorNodeInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorNodeInstance1->GetTransformation()->SetRotationXDeg(-90);
-	floorNodeInstance1->GetTransformation()->SetRotationYDeg(-90);
-	floorNodeInstance1->GetAllGeometries(&floorNodeInstanceGeometries);
-
-	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
-		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	floorNodeInstanceGeometries.clear();
-	floorNodeInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorNodeInstance2->GetTransformation()->TranslateX(3);
-	floorNodeInstance2->GetTransformation()->SetRotationXDeg(-90);
-	floorNodeInstance2->GetTransformation()->SetRotationYDeg(-90);
-	floorNodeInstance2->GetAllGeometries(&floorNodeInstanceGeometries);
-
-	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
-		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	floorNodeInstanceGeometries.clear();
-	floorNodeInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorNodeInstance3->GetTransformation()->TranslateZ(3);
-	floorNodeInstance3->GetTransformation()->SetRotationXDeg(-90);
-	floorNodeInstance3->GetTransformation()->SetRotationYDeg(-270);
-	floorNodeInstance3->GetAllGeometries(&floorNodeInstanceGeometries);
-
-	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
-		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	floorNodeInstanceGeometries.clear();
-	floorNodeInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
-	floorNodeInstance4->GetTransformation()->TranslateX(3);
-	floorNodeInstance4->GetTransformation()->TranslateZ(3);
-	floorNodeInstance4->GetTransformation()->SetRotationXDeg(-90);
-	floorNodeInstance4->GetTransformation()->SetRotationYDeg(-270);
-	floorNodeInstance4->GetAllGeometries(&floorNodeInstanceGeometries);
-
-	for (int j = 0; j < floorNodeInstanceGeometries.size(); j++)
-		floorNodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
-
-	// Creo le istanze degli oggetti applicando i materiali
-	Anima::AnimaArray<Anima::AnimaGeometryInstance*> nodeInstanceGeometries;
-
-	Anima::AnimaNodeInstance* nodeInstanceOro = nodeInstancesManager->CreateInstance("nodeInstanceOro", _node);
-	Anima::AnimaNodeInstance* nodeInstanceRame = nodeInstancesManager->CreateInstance("nodeInstanceRame", _node);
-	Anima::AnimaNodeInstance* nodeInstanceGomma = nodeInstancesManager->CreateInstance("nodeInstanceGomma", _node);
-	Anima::AnimaNodeInstance* nodeInstanceLegno = nodeInstancesManager->CreateInstance("nodeInstanceLegno", _node);
-
-	nodeInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	nodeInstanceOro->GetTransformation()->SetRotationXDeg(-90);
-	nodeInstanceOro->GetTransformation()->SetRotationYDeg(0);
-	nodeInstanceOro->GetAllGeometries(&nodeInstanceGeometries);
-
-	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
-		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
-
-	nodeInstanceGeometries.clear();
-	nodeInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	nodeInstanceRame->GetTransformation()->TranslateX(3);
-	nodeInstanceRame->GetTransformation()->SetRotationXDeg(-90);
-	nodeInstanceRame->GetTransformation()->SetRotationYDeg(0);
-	nodeInstanceRame->GetAllGeometries(&nodeInstanceGeometries);
-
-	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
-		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
-
-	nodeInstanceGeometries.clear();
-	nodeInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	nodeInstanceGomma->GetTransformation()->TranslateZ(3);
-	nodeInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
-	nodeInstanceGomma->GetTransformation()->SetRotationYDeg(180);
-	nodeInstanceGomma->GetAllGeometries(&nodeInstanceGeometries);
-
-	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
-		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
-
-	nodeInstanceGeometries.clear();
-	nodeInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
-	nodeInstanceLegno->GetTransformation()->TranslateX(3);
-	nodeInstanceLegno->GetTransformation()->TranslateZ(3);
-	nodeInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
-	nodeInstanceLegno->GetTransformation()->SetRotationYDeg(180);
-	nodeInstanceLegno->GetAllGeometries(&nodeInstanceGeometries);
-
-	for (int j = 0; j < nodeInstanceGeometries.size(); j++)
-		nodeInstanceGeometries[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
-
-	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
-#endif
-
-	_camera->Activate();
-
-#if defined SAVE_SCENE
-	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
-	directionalLight->SetDirection(-1.0, -1.0, -1.0);
-	directionalLight->SetColor(1.0, 1.0, 1.0);
-	directionalLight->SetIntensity(1.0);
-	
-	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
-	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
-	//pointLight1->SetColor(1.0, 0.0, 0.0);
-	//pointLight1->SetIntensity(1.0);
-	//pointLight1->SetConstantAttenuation(1.0);
-	//pointLight1->SetLinearAttenuation(0.0);
-	//pointLight1->SetExponentAttenuation(0.0);
-	//pointLight1->SetRange(200);
-#endif
-
-	_animationsManager = _scene->GetAnimationsManager();
-
-	_timer.Reset();
-
-	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
-
-	Anima::AnimaArray<Anima::AnimaArray<Anima::AUchar> > data;
-	Anima::AUint width;
-	Anima::AUint height;
-	Anima::AUint depth;
-	Anima::AUint mipMapsCount;
-	Anima::AUint imagesCount;
-	Anima::AnimaTextureFormat format;
-	Anima::AnimaTextureInternalFormat internalFormat;
-	Anima::AnimaTextureTarget target;
-
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
-	{
-		Anima::AnimaTexture* texture = _renderer->GetTexture("EnvironmentMap");
-		if (texture != nullptr)
-		{
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetDepth(depth);
-
-			if (format != 0 && internalFormat != 0)
-			{
-				texture->SetFormat(format);
-				texture->SetInternalFormat(internalFormat);
-			}
-
-			texture->SetTextureTarget(target);
-			texture->SetMipMapLevels(mipMapsCount);
-
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = max(mipMapsCount, 1);
-			
-			Anima::AInt offset = 0;
-			for (Anima::AUint i = 0; i < imagesCount; i++)
-			{
-				for (Anima::AUint j = 0; j < mipMapsCount; j++)
-				{
-					Anima::AUchar* buffer = &data[offset][0];
-					Anima::AUint bufferSize = data[offset].size();
-
-					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
-
-					offset++;
-				}
-			}
-
-			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
-			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
-		}
-	}
-
-	if (texturesManager->GetTextureDataFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", &data, imagesCount, width, height, depth, mipMapsCount, format, internalFormat, target))
-	{
-		Anima::AnimaTexture* texture = _renderer->GetTexture("IrradianceMap");
-		if (texture != nullptr)
-		{
-			texture->SetWidth(width);
-			texture->SetHeight(height);
-			texture->SetDepth(depth);
-
-			if (format != 0 && internalFormat != 0)
-			{
-				texture->SetFormat(format);
-				texture->SetInternalFormat(internalFormat);
-			}
-
-			texture->SetTextureTarget(target);
-			texture->SetMipMapLevels(mipMapsCount);
-
-			// Forzo ad avere come minimo un livello di mip-map per evitare condizioni dopo sui cicli
-			mipMapsCount = max(mipMapsCount, 1);
-
-			texture->SetTextureTarget(target);
-
-			Anima::AInt offset = 0;
-			for (Anima::AUint i = 0; i < imagesCount; i++)
-			{
-				for (Anima::AUint j = 0; j < mipMapsCount; j++)
-				{
-					Anima::AUchar* buffer = &data[offset][0];
-					Anima::AUint bufferSize = data[offset].size();
-
-					texture->SetData(buffer, bufferSize, (Anima::AnimaTextureCubeIndex)i, j);
-
-					offset++;
-				}
-			}
-
-			texture->SetMinFilter(Anima::TEXTURE_MIN_FILTER_MODE_LINEAR_MIPMAP_LINEAR);
-			texture->SetMagFilter(Anima::TEXTURE_MAG_FILTER_MODE_LINEAR);
-		}
-	}
-
-#if defined SAVE_SCENE
-	Anima::AnimaTexture* textureSkyBox = texturesManager->LoadTextureFromDDSFile(dataPath + "/textures/Roma/cubemap.dds", "dds-skybox-texture");
-#else
-	Anima::AnimaTexture* textureSkyBox = texturesManager->GetTextureFromName("dds-skybox-texture");
-#endif
-	textureSkyBox->Load();
-
+	_scene = scenesManager->LoadSceneFromFile("D:/Git/Anima/AnimaEngineDemo/SceneUff/AnimaEngineDemoScene.ascene");
 	_renderer->CheckPrograms(_scene);
+	_scene->SetKeyboardInteractor(&keyboardInteractor);
+
+	//_scene = scenesManager->CreateScene("scena");
+
+	//if (_scene)
+	//{
+	//	Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+	//	Anima::AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+	//	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+
+	//	Anima::AnimaCamera* newCamera = camerasManager->CreateCamera("default-camera");
+	//	Anima::AnimaDirectionalLight* newLight = lightsManager->CreateDirectionalLight("default-light");
+
+	//	Anima::AnimaString texturesPath = "D:/Git/Anima/AnimaEngineDemo/Scene/textures";
+
+	//	Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/cubemap.dds", "dds-skybox-texture");
+	//	_scene->SetTexture("SkyBox", textureCube);
+	//	_scene->SetTexture("EnvironmentMap", textureCube);
+
+	//	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+	//	_scene->SetTexture("IrradianceMap", textureIrr);
+
+	//	if (newLight)
+	//	{
+	//		newLight->SetDirection(1, -1, -1);
+	//		newLight->SetColor(1, 1, 1);
+	//		newLight->SetIntensity(1);
+	//	}
+
+	//	if (newCamera)
+	//	{
+	//		Anima::AnimaVertex3f position(-35, 10, 15);
+	//		Anima::AnimaVertex3f target(-34, 9.8, 15);
+	//		Anima::AnimaVertex3f up(0, 1, 0);
+	//		newCamera->LookAt(position, target, up);
+	//		newCamera->Activate();
+	//	}
+
+	//	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	//}
+
+	//	Anima::AnimaString dataPath = DATA_PATH;
+	//	Anima::AnimaString materialsPath = dataPath + "/materials";
+	//	Anima::AnimaString modelPath = dataPath + "/models/";
+	//	Anima::AnimaString modelName = "";
+	//	Anima::AnimaString materialName = "oro";
+	//	Anima::AnimaString sceneModelsPath = modelPath + "scene_models/";
+	//	Anima::AnimaString sceneMeshesPath = modelPath + "scene_models/";
+	//	
+	//	// Creazione della scena
+	//#if defined SAVE_SCENE
+	//	_scene = _engine.GetScenesManager()->CreateScene(ANIMA_ENGINE_DEMO_SCENE_NAME);
+	//#else
+	//	_engine.GetScenesManager()->LoadScenes(dataPath);
+	//#endif
+	//	
+	//	_scene = _engine.GetScenesManager()->GetSceneFromName(ANIMA_ENGINE_DEMO_SCENE_NAME);
+	//
+	//	if (!_scene)
+	//		return false;
+	//
+	//	_scene->InitializePhysics();
+	//	_scene->InitializePhysicObjects();
+	//	
+	//	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	//	_scene->SetJoystickInteractor(joystickInteractor);
+	//	
+	//	// Caricamento dei materiali
+	//	Anima::AnimaMaterialsManager* materialsManager = _scene->GetMaterialsManager();
+	//	Anima::AnimaNodeInstancesManager* modelInstancesManager = _scene->GetNodeInstancesManager();
+	//#if defined SAVE_SCENE
+	//	if (!materialsManager->LoadMaterials(materialsPath))
+	//		return false;
+	//#endif
+	//	
+	//	// Creazione di una telecamera
+	//	_camerasManager = _scene->GetCamerasManager();
+	//#if defined SAVE_SCENE
+	//	_camera = _camerasManager->CreateFirstPersonCamera(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	//	if (!_camera)
+	//		return false;
+	//#else
+	//	_camera = _camerasManager->GetCameraFromName(ANIMA_ENGINE_DEMO_CAMERA_NAME);
+	//	if (!_camera)
+	//		return false;
+	//#endif
+	//	
+	//	_pbrMaterial = materialsManager->GetMaterialFromName(materialName);
+	//	
+	//#if defined SAVE_SCENE
+	//	_scene->GetMeshesManager()->LoadMeshes(sceneMeshesPath);
+	//	_scene->GetModelsManager()->LoadModels(sceneModelsPath);
+	//#endif
+	//	
+	//#if defined SAVE_SCENE
+	//	_model = _scene->GetModelsManager()->GetModelFromName("AnimaEngineDemoModel");
+	//	if (!_model)
+	//		return false;
+	//	
+	//	_floorModel = _scene->GetModelsManager()->GetModelFromName("floorModel");
+	//	if (!_floorModel)
+	//		return false;
+	//	
+	//	// Creo le istanze del pavimento e imposto i loro materiali
+	//	Anima::AnimaArray<Anima::AnimaMeshInstance*> floorModelInstanceMeshes;
+	//	
+	//	Anima::AnimaModelInstance* floorModelInstance1 = modelInstancesManager->CreateInstance("floorModelInstance1", _floorModel);
+	//	Anima::AnimaModelInstance* floorModelInstance2 = modelInstancesManager->CreateInstance("floorModelInstance2", _floorModel);
+	//	Anima::AnimaModelInstance* floorModelInstance3 = modelInstancesManager->CreateInstance("floorModelInstance3", _floorModel);
+	//	Anima::AnimaModelInstance* floorModelInstance4 = modelInstancesManager->CreateInstance("floorModelInstance4", _floorModel);
+	//	
+	//	floorModelInstance1->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	//	floorModelInstance1->GetTransformation()->SetRotationXDeg(-90);
+	//	floorModelInstance1->GetTransformation()->SetRotationYDeg(-90);
+	//	floorModelInstance1->GetAllMeshes(&floorModelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+	//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	//
+	//	floorModelInstanceMeshes.clear();
+	//	floorModelInstance2->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	//	floorModelInstance2->GetTransformation()->TranslateX(3);
+	//	floorModelInstance2->GetTransformation()->SetRotationXDeg(-90);
+	//	floorModelInstance2->GetTransformation()->SetRotationYDeg(-90);
+	//	floorModelInstance2->GetAllMeshes(&floorModelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+	//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	//	
+	//	floorModelInstanceMeshes.clear();
+	//	floorModelInstance3->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	//	floorModelInstance3->GetTransformation()->TranslateZ(3);
+	//	floorModelInstance3->GetTransformation()->SetRotationXDeg(-90);
+	//	floorModelInstance3->GetTransformation()->SetRotationYDeg(-270);
+	//	floorModelInstance3->GetAllMeshes(&floorModelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+	//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	//
+	//	floorModelInstanceMeshes.clear();
+	//	floorModelInstance4->GetTransformation()->SetScale(0.6, 0.6, 0.6);
+	//	floorModelInstance4->GetTransformation()->TranslateX(3);
+	//	floorModelInstance4->GetTransformation()->TranslateZ(3);
+	//	floorModelInstance4->GetTransformation()->SetRotationXDeg(-90);
+	//	floorModelInstance4->GetTransformation()->SetRotationYDeg(-270);
+	//	floorModelInstance4->GetAllMeshes(&floorModelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < floorModelInstanceMeshes.size(); j++)
+	//		floorModelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("floor-material"));
+	//	
+	//	// Creo le istanze degli oggetti applicando i materiali
+	//	Anima::AnimaArray<Anima::AnimaMeshInstance*> modelInstanceMeshes;
+	//	
+	//	Anima::AnimaModelInstance* modelInstanceOro = modelInstancesManager->CreateInstance("modelInstanceOro", _model);
+	//	Anima::AnimaModelInstance* modelInstanceRame = modelInstancesManager->CreateInstance("modelInstanceRame", _model);
+	//	Anima::AnimaModelInstance* modelInstanceGomma = modelInstancesManager->CreateInstance("modelInstanceGomma", _model);
+	//	Anima::AnimaModelInstance* modelInstanceLegno = modelInstancesManager->CreateInstance("modelInstanceLegno", _model);
+	//	
+	//	modelInstanceOro->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	//	modelInstanceOro->GetTransformation()->SetRotationXDeg(-90);
+	//	modelInstanceOro->GetTransformation()->SetRotationYDeg(0);
+	//	modelInstanceOro->GetAllMeshes(&modelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+	//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("oro"));
+	//	
+	//	modelInstanceMeshes.clear();
+	//	modelInstanceRame->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	//	modelInstanceRame->GetTransformation()->TranslateX(3);
+	//	modelInstanceRame->GetTransformation()->SetRotationXDeg(-90);
+	//	modelInstanceRame->GetTransformation()->SetRotationYDeg(0);
+	//	modelInstanceRame->GetAllMeshes(&modelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+	//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("rame"));
+	//	
+	//	modelInstanceMeshes.clear();
+	//	modelInstanceGomma->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	//	modelInstanceGomma->GetTransformation()->TranslateZ(3);
+	//	modelInstanceGomma->GetTransformation()->SetRotationXDeg(-90);
+	//	modelInstanceGomma->GetTransformation()->SetRotationYDeg(180);
+	//	modelInstanceGomma->GetAllMeshes(&modelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+	//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("gomma"));
+	//
+	//	modelInstanceMeshes.clear();
+	//	modelInstanceLegno->GetTransformation()->SetScale(0.2, 0.2, 0.2);
+	//	modelInstanceLegno->GetTransformation()->TranslateX(3);
+	//	modelInstanceLegno->GetTransformation()->TranslateZ(3);
+	//	modelInstanceLegno->GetTransformation()->SetRotationXDeg(-90);
+	//	modelInstanceLegno->GetTransformation()->SetRotationYDeg(180);
+	//	modelInstanceLegno->GetAllMeshes(&modelInstanceMeshes);
+	//	
+	//	for (int j = 0; j < modelInstanceMeshes.size(); j++)
+	//		modelInstanceMeshes[j]->SetMaterial(materialsManager->GetMaterialFromName("legno"));
+	//	
+	//	_camera->LookAt(-3.5, 1.0, 1.5, 1.0, -0.2, 0.0);
+	//#endif
+	//	
+	//	_camera->Activate();
+	//	_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
+	//	
+	//#if defined SAVE_SCENE
+	//	Anima::AnimaDirectionalLight* directionalLight = _scene->GetLightsManager()->CreateDirectionalLight("light-0");
+	//	directionalLight->SetDirection(1.0, -1.0, -1.0);
+	//	directionalLight->SetColor(1.0, 1.0, 1.0);
+	//	directionalLight->SetIntensity(1.0);
+	//	
+	//	//Anima::AnimaPointLight* pointLight1 = _scene->GetLightsManager()->CreatePointLight("light-1");
+	//	//pointLight1->SetPosition(-40.0, 20.0, 0.0);
+	//	//pointLight1->SetColor(1.0, 0.0, 0.0);
+	//	//pointLight1->SetIntensity(1.0);
+	//	//pointLight1->SetConstantAttenuation(1.0);
+	//	//pointLight1->SetLinearAttenuation(0.0);
+	//	//pointLight1->SetExponentAttenuation(0.0);
+	//	//pointLight1->SetRange(200);
+	//#endif
+	//	
+	//	_animationsManager = _scene->GetAnimationsManager();
+	//	
+	//	_timer.Reset();
+	//	
+	//#if defined SAVE_SCENE
+	//	Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+	//	
+	//	Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/cubemap.dds", "dds-skybox-texture");
+	//	_scene->SetTexture("SkyBox", textureCube);
+	//	_scene->SetTexture("EnvironmentMap", textureCube);
+	//	
+	//	Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(dataPath + "/../Scene/textures/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+	//	_scene->SetTexture("IrradianceMap", textureIrr);
+	//#endif
+	//	
+	//	Anima::AnimaNode* newAsset = _scene->GetNodesManager()->LoadAssetFromExternalFile("/Users/marco/Desktop/base_cassettiera/143853.3ds", "base");
+	//	Anima::AnimaNodeInstance* newInstace = _scene->GetNodeInstancesManager()->CreateAssetInstance("base-instance", newAsset);
+	//	newInstace->GetTransformation()->SetScale(0.01, 0.01, 0.01);
+	//	newInstace->GetTransformation()->TranslateY(20);
+	//	newInstace->GetTransformation()->RotateXDeg(-90);
+	//	
+	//	_renderer->CheckPrograms(_scene);
 		
 	return true;
 }
 
 void SetViewport(int w, int h)
 {
-	if (_camerasManager)
+	if (_scene)
 	{
 		Anima::AnimaVertex2f size((float)w, (float)h);
-		_camerasManager->UpdatePerspectiveCameras(90.0f, size, 0.1f, 100.0f);
+		_scene->GetCamerasManager()->UpdatePerspectiveCameras(90.0f, size, 0.1f, 10000.0f);
 	}
-
-	if (_scene)
-		_scene->GetLightsManager()->UpdateLightsMatrix(_camera);
 
 	if (_renderer)
 	{
 		_renderer->InitRenderingTargets(w, h);
 		_renderer->InitRenderingUtilities(w, h);
+
+		rendererInitialized = true;
 	}
 	
 	if (!sceneSaved)
@@ -629,15 +595,15 @@ void UpdateFrame()
 	{
 		_gc->MakeCurrent();
 
-		if (_renderer && _scene)
+		if (_renderer && rendererInitialized && _scene)
 		{
-			if(!_scene->IsRunning())
+			if (!_scene->IsRunning())
 				_scene->StartScene();
+
+			_scene->StepScene();
 
 			_renderer->Start(_scene);
 			_renderer->Render();
-
-			_scene->StepScene();
 		}
 
 		_gc->SwapBuffers();

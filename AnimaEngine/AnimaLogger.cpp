@@ -101,25 +101,25 @@ void AnimaLogger::InitGraphicsLogger()
 
 void AnimaLogger::OpenGLErrorCallback(AUint source, AUint type, AUint id, AUint severity, AInt length, const AChar* message, const void* userParam)
 {
-#if defined _DEBUG
-	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-	{
-		const AnimaLoggerTextColor textColor = OpenGLDebugSeverityColor(severity);
-		LogMessage("OpenGL Error:", textColor);
-		LogMessage("=============", textColor);
-		LogMessageFormatColor(textColor, " Object ID: %d", id);
-		LogMessageFormatColor(textColor, " Severity:  %s", OpenGLDebugSeverityString(severity));
-		LogMessageFormatColor(textColor, " Type:      %s", OpenGLDebugTypeString(type));
-		LogMessageFormatColor(textColor, " Source:    %s", OpenGLDebugSourceString(source));
-		LogMessageFormatColor(textColor, " Message:   %s", message);
-
-//#ifdef _MSC_VER
-//		if(IsDebuggerPresent()) __debugbreak();
-//#else
-//		asm("int $3");
+//#if defined _DEBUG
+//	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+//	{
+//		const AnimaLoggerTextColor textColor = OpenGLDebugSeverityColor(severity);
+//		LogMessage("OpenGL Error:", textColor);
+//		LogMessage("=============", textColor);
+//		LogMessageFormatColor(textColor, " Object ID: %d", id);
+//		LogMessageFormatColor(textColor, " Severity:  %s", OpenGLDebugSeverityString(severity));
+//		LogMessageFormatColor(textColor, " Type:      %s", OpenGLDebugTypeString(type));
+//		LogMessageFormatColor(textColor, " Source:    %s", OpenGLDebugSourceString(source));
+//		LogMessageFormatColor(textColor, " Message:   %s", message);
+//
+////#ifdef _MSC_VER
+////		if(IsDebuggerPresent()) __debugbreak();
+////#else
+////		asm("int $3");
+////#endif
+//	}
 //#endif
-	}
-#endif
 }
 
 const char* AnimaLogger::OpenGLDebugSourceString(AUint source)

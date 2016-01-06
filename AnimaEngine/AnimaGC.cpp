@@ -67,10 +67,10 @@ void AnimaGC::ClearColor(AFloat r, AFloat g, AFloat b, AFloat a)
 	glClearColor(r, g, b, a);
 }
 
-void AnimaGC::SetSwapInterval(AInt interval)
+void AnimaGC::EnableVSync(bool enable)
 {
 	if (_EXT_swap_control)
-		_SwapIntervalEXT(interval);
+		_SwapIntervalEXT(enable ? 1 : 0);
 }
 
 bool AnimaGC::InitializeGLEWExtensions()
