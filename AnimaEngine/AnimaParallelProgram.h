@@ -8,6 +8,7 @@
 #include "AnimaNamedObject.h"
 
 #include <CL/cl.h>
+#include <CL/cl_gl.h>
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 

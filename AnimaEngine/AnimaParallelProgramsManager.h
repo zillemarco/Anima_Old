@@ -20,6 +20,13 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaEngine;
 
+typedef struct _AnimaParallelProgramContextInfo {
+	AnimaParallelelProgramType _type;
+	bool _graphicsInterop;
+	cl_platform_id _platformId;
+	cl_context _context;
+} AnimaParallelProgramContextInfo;
+
 class ANIMA_ENGINE_EXPORT AnimaParallelProgramsManager
 {
 public:
@@ -42,9 +49,13 @@ public:
 	AnimaArray<cl_device_id> GetDeviceIDs(const cl_platform_id& platform, const AUint& count, const AnimaParallelelProgramType& type) const;
 	AnimaString GetDeviceName(const cl_device_id& device) const;
 	AnimaString GetDeviceVersion(const cl_device_id& device) const;
+	AnimaString GetDeviceExtensions(const cl_device_id& device) const;
+	bool DeviceHasExtension(const cl_device_id& device, const AnimaString& extension);
 
-	bool GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool tryCreateIfInvalid = true);
-	bool CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr);
+	bool FindContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
+
+	bool GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false, bool tryCreateToIfNotFound = true);
+	bool CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
 
 private:
 	void ClearPrograms();
@@ -55,11 +66,7 @@ private:
 	AnimaEngine* _engine;
 	AnimaMappedArray<AnimaParallelProgram*> _programs;
 
-	cl_context _cpuContext;
-	cl_context _gpuContext;
-	cl_context _defaultContext;
-	cl_context _acceleratorContext;
-	cl_context _allContext;
+	AnimaArray<AnimaParallelProgramContextInfo> _contexts;
 };
 
 END_ANIMA_ENGINE_NAMESPACE

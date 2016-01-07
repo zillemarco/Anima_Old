@@ -312,6 +312,10 @@ bool InitEngine()
 		}
 	}
 
+	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU);
+	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_CPU);
+	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_CPU, ppManager->GetPlatformIDs()[0]);
+
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
 

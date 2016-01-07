@@ -15,12 +15,6 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 AnimaParallelProgramsManager::AnimaParallelProgramsManager(AnimaEngine* engine)
 {
 	_engine = engine;
-
-	_cpuContext = 0;
-	_gpuContext = 0;
-	_defaultContext = 0;
-	_acceleratorContext = 0;
-	_allContext = 0;
 }
 
 AnimaParallelProgramsManager::~AnimaParallelProgramsManager()
@@ -204,215 +198,177 @@ AnimaString AnimaParallelProgramsManager::GetDeviceVersion(const cl_device_id& d
 	return name;
 }
 
-bool AnimaParallelProgramsManager::GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool tryCreateIfInvalid)
+AnimaString AnimaParallelProgramsManager::GetDeviceExtensions(const cl_device_id& device) const
+{
+	ASizeT size = 0;
+	if (clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, 0, nullptr, &size) != CL_SUCCESS)
+	{
+		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to get device extensions size", ANIMA_LOGGER_TEXT_COLOR_RED);
+		return "";
+	}
+
+	AnimaString extensions;
+	extensions.resize(size);
+	if (clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, size, const_cast<char*>(extensions.data()), nullptr) != CL_SUCCESS)
+	{
+		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to get device extensions", ANIMA_LOGGER_TEXT_COLOR_RED);
+		return "";
+	}
+
+	return extensions;
+}
+
+bool AnimaParallelProgramsManager::DeviceHasExtension(const cl_device_id& device, const AnimaString& extension)
+{
+	AnimaString extensions = GetDeviceExtensions(device);
+	if (extension.find(extension) != AnimaString::npos)
+		return true;
+	return false;
+}
+
+bool AnimaParallelProgramsManager::FindContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
 {
 	context = nullptr;
 
-	switch (type)
+	AInt count = _contexts.size();
+	for (AInt i = 0; i < count; i++)
 	{
-	case APP_TYPE_CPU:
-		if (_cpuContext == 0 && tryCreateIfInvalid)
+		AnimaParallelProgramContextInfo* info = &_contexts[i];
+		// Controllo che le specifiche del contesto siano uguali
+		// Nel caso l'ID della piattaforma passata sia nullptr allora prendo in considerazioe i contesti di tutte le piattaforme installate
+		if (info->_graphicsInterop == graphicsInterop && info->_type == type && (info->_platformId == platformId || platformId == nullptr))
 		{
-			if (!CreateContext(APP_TYPE_CPU, platformId))
-				return false;
+			context = info->_context;
+			return true;
 		}
-
-		context = _cpuContext;
-		break;
-	case APP_TYPE_GPU:
-		if (_gpuContext == 0 && tryCreateIfInvalid)
-		{
-			if (!CreateContext(APP_TYPE_GPU, platformId))
-				return false;
-		}
-
-		context = _gpuContext;
-		break;
-	case APP_TYPE_DEFAULT:
-		if (_defaultContext == 0 && tryCreateIfInvalid)
-		{
-			if (!CreateContext(APP_TYPE_DEFAULT, platformId))
-				return false;
-		}
-
-		context = _defaultContext;
-		break;
-	case APP_TYPE_ACCELLERATOR:
-		if (_acceleratorContext == 0 && tryCreateIfInvalid)
-		{
-			if (!CreateContext(APP_TYPE_ACCELLERATOR, platformId))
-				return false;
-		}
-
-		context = _acceleratorContext;
-		break;
-	case APP_TYPE_ALL:
-		if (_allContext == 0 && tryCreateIfInvalid)
-		{
-			if (!CreateContext(APP_TYPE_ALL, platformId))
-				return false;
-		}
-
-		context = _allContext;
-		break;
 	}
 
-	return true;
+	return false;
 }
 
-bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId)
+bool AnimaParallelProgramsManager::GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool tryCreateToIfNotFound, bool graphicsInterop)
 {
+	// Se il contesto è già presente con le informazioni necessarie lo torno subito
+	if (FindContext(context, type, platformId, graphicsInterop))
+		return context;
+
+	// Se non ho trovato il contesto lo vado a tentare di creare
+	if (CreateContext(type, platformId, graphicsInterop))
+		return true;
+
+	return false;
+}
+
+bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
+{
+	// Prima di tutto controllo che il contesto non sia già stato creato, nel qual caso termino immediatamente la funzione
+	cl_context context = nullptr;
+	if (FindContext(context, type, platformId, graphicsInterop))
+		return true;
+
+	// Se non mi viene passata l'ID di una piattaforma specifica vado a cercare la piattaforme installate
 	cl_platform_id platform = platformId;
 	if (platform == nullptr)
 	{
 		AnimaArray<cl_platform_id> platforms = GetPlatformIDs();
+
+		// Se non trovo nessuna piattaforma allora non posso utilizzare OpenCL
 		if (platforms.size() == 0)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find valid platforms", ANIMA_LOGGER_TEXT_COLOR_RED);
 			return false;
 		}
 
-		platform = platforms[0];
+		// Trovo la prima piattaforma che ha almeno un device del tipo richiesto
+		AInt count = platforms.size();
+		for (AInt i = 0; i < count && platform == nullptr; i++)
+		{
+			if (GetDeviceIDs(platforms[i], type).size() > 0)
+				platform = platforms[i];
+		}
 	}
 
-	switch (type)
+	// Se la piattaforma è ancora nullptr allora non ho trovato nessuna piattaforma che abbia almeno un device del tipo cercato
+	// quindi termino la funzione segnalando un errore
+	if (platform == nullptr)
 	{
-	case APP_TYPE_CPU:
-	{
-		if (_cpuContext != 0)
-			return true;
+		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find a platform with the requested device type", ANIMA_LOGGER_TEXT_COLOR_RED);
+		return false;
+	}
+	
+	// Cerco di device della piattaforma
+	AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, type);
 
+	// Se la piattaforma non ha nessun device del tipo cercato allora non termino la funzione segnalando un errore
+	if (deviceIds.size() == 0)
+	{
+		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for the selected platform", ANIMA_LOGGER_TEXT_COLOR_RED);
+		return false;
+	}
+
+	// Nel caso sia stato trovato almeno un device vado a tentare di creare il contesto
+	AInt error = CL_SUCCESS;
+
+	if (graphicsInterop)
+	{
+		#if defined APPLE
+			AnimaString extensionString = "cl_apple_gl_sharing";
+		#else
+			AnimaString extensionString = "cl_khr_gl_sharing";
+		#endif
+
+		// Controllo tra i device se ne trovo uno che supporti interoperabilità con la grafica
+		cl_device_id device = nullptr;
+		AInt count = deviceIds.size();
+		for (AInt i = 0; i < count && device == nullptr; i++)
+		{
+			if (DeviceHasExtension(deviceIds[i], extensionString))
+				device = deviceIds[i];
+		}
+
+		// Se non è stato trovato un device che supporti interoperabilità con la grafica allora termino la funzione segnalando un errore
+		if (device == nullptr)
+		{
+			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find a device capable of graphics interoperability for the selected platform", ANIMA_LOGGER_TEXT_COLOR_RED);
+			return false;
+		}
+
+		#if defined APPLE
+		#else
+			const cl_context_properties contextProperties[] = {
+				CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
+				CL_WGL_HDC_KHR, reinterpret_cast<cl_context_properties>(wglGetCurrentDC()),
+				CL_GL_CONTEXT_KHR, reinterpret_cast<cl_context_properties>(wglGetCurrentContext()),
+				0, 0
+			};
+		#endif
+
+		context = clCreateContext(contextProperties, 1, &deviceIds[0], nullptr, nullptr, &error);
+	}
+	else
+	{
 		const cl_context_properties contextProperties[] = {
 			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
 			0, 0
 		};
 
-		AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, APP_TYPE_CPU);
-		if (deviceIds.size() == 0)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for CPU platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		AInt error = CL_SUCCESS;
-		_cpuContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error == CL_SUCCESS)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create CPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		break;
+		context = clCreateContext(contextProperties, 1, &deviceIds[0], nullptr, nullptr, &error);
 	}
-	case APP_TYPE_GPU:
+
+	if (error != CL_SUCCESS)
 	{
-		if (_gpuContext != 0)
-			return true;
-
-		const cl_context_properties contextProperties[] = {
-			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
-			0, 0
-		};
-
-		AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, APP_TYPE_GPU);
-		if (deviceIds.size() == 0)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for GPU platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		AInt error = CL_SUCCESS;
-		_gpuContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error == CL_SUCCESS)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create GPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		break;
+		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create CPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
+		return false;
 	}
-	case APP_TYPE_DEFAULT:
-	{
-		if (_defaultContext != 0)
-			return true;
 
-		const cl_context_properties contextProperties[] = {
-			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
-			0, 0
-		};
+	// Aggiungo alla lista di contesti creati quello nuovo appena creato
+	AnimaParallelProgramContextInfo info;
+	info._type = type;
+	info._platformId = platform;
+	info._graphicsInterop = graphicsInterop;
+	info._context = context;
 
-		AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, APP_TYPE_DEFAULT);
-		if (deviceIds.size() == 0)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for DEFAULT platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		AInt error = CL_SUCCESS;
-		_defaultContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error == CL_SUCCESS)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create DEFAULT context", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		break;
-	}
-	case APP_TYPE_ACCELLERATOR:
-	{
-		if (_acceleratorContext != 0)
-			return true;
-
-		const cl_context_properties contextProperties[] = {
-			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
-			0, 0
-		};
-
-		AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, APP_TYPE_ACCELLERATOR);
-		if (deviceIds.size() == 0)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for ACCELERATOR platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		AInt error = CL_SUCCESS;
-		_acceleratorContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error == CL_SUCCESS)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create ACCELERATOR context", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		break;
-	}
-	case APP_TYPE_ALL:
-	{
-		if (_allContext != 0)
-			return true;
-
-		const cl_context_properties contextProperties[] = {
-			CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
-			0, 0
-		};
-
-		AnimaArray<cl_device_id> deviceIds = GetDeviceIDs(platform, APP_TYPE_ALL);
-		if (deviceIds.size() == 0)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for ALL platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		AInt error = CL_SUCCESS;
-		_allContext = clCreateContext(contextProperties, deviceIds.size(), &deviceIds[0], nullptr, nullptr, &error);
-		if (error == CL_SUCCESS)
-		{
-			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create ALL context", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
-		}
-
-		break;
-	}
-	}
+	_contexts.push_back(info);
 
 	return true;
 }
