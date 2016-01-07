@@ -48,7 +48,7 @@ AnimaMouseInteractor::AnimaMouseInteractor(const AnimaMouseInteractor& src)
 	_engine = src._engine;
 	_installed = src._installed;
 	_mouseMoved = src._mouseMoved;
-	_lastMousePosition = src._lastMousePosition;
+	_mousePosition = src._mousePosition;
 	
 	_mouseMovedMonitor = src._mouseMovedMonitor;
 	_leftMouseDraggedMonitor = src._leftMouseDraggedMonitor;
@@ -65,7 +65,7 @@ AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
 	_engine = src._engine;
 	_installed = src._installed;
 	_mouseMoved = src._mouseMoved;
-	_lastMousePosition = src._lastMousePosition;
+	_mousePosition = src._mousePosition;
 	
 	_mouseMovedMonitor = src._mouseMovedMonitor;
 	_leftMouseDraggedMonitor = src._leftMouseDraggedMonitor;
@@ -89,7 +89,7 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(const AnimaMouseInteractor
 		_engine = src._engine;
 		_installed = src._installed;
 		_mouseMoved = src._mouseMoved;
-		_lastMousePosition = src._lastMousePosition;
+		_mousePosition = src._mousePosition;
 		
 		_mouseMovedMonitor = src._mouseMovedMonitor;
 		_leftMouseDraggedMonitor = src._leftMouseDraggedMonitor;
@@ -111,7 +111,7 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(AnimaMouseInteractor&& src
 		_engine = src._engine;
 		_installed = src._installed;
 		_mouseMoved = src._mouseMoved;
-		_lastMousePosition = src._lastMousePosition;
+		_mousePosition = src._mousePosition;
 		
 		_mouseMovedMonitor = src._mouseMovedMonitor;
 		_leftMouseDraggedMonitor = src._leftMouseDraggedMonitor;
@@ -284,10 +284,10 @@ void AnimaMouseInteractor::LeftMouseDraggedCallback(AnimaMouseInteractor* intera
 	point = [view convertPoint:point fromView:nil];
 	
 	AnimaVertex2f pt(point.x, point.y);
-	AnimaVertex2f delta = interactor->_lastMousePosition - pt;
+	AnimaVertex2f delta = interactor->_mousePosition - pt;
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = true;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
@@ -317,10 +317,10 @@ void AnimaMouseInteractor::RightMouseDraggedCallback(AnimaMouseInteractor* inter
 	point = [view convertPoint:point fromView:nil];
 	
 	AnimaVertex2f pt(point.x, point.y);
-	AnimaVertex2f delta = interactor->_lastMousePosition - pt;
+	AnimaVertex2f delta = interactor->_mousePosition - pt;
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = true;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
@@ -352,7 +352,7 @@ void AnimaMouseInteractor::LeftMouseDownCallback(AnimaMouseInteractor* interacto
 	AnimaVertex2f pt(point.x, point.y);
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = false;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
@@ -384,7 +384,7 @@ void AnimaMouseInteractor::RightMouseDownCallback(AnimaMouseInteractor* interact
 	AnimaVertex2f pt(point.x, point.y);
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = false;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
@@ -416,7 +416,7 @@ void AnimaMouseInteractor::LeftMouseUpCallback(AnimaMouseInteractor* interactor,
 	AnimaVertex2f pt(point.x, point.y);
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
@@ -456,7 +456,7 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 	AnimaVertex2f pt(point.x, point.y);
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
-	interactor->_lastMousePosition = pt;
+	interactor->_mousePosition = pt;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0

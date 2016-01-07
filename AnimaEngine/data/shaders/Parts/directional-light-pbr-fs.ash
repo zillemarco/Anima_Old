@@ -94,7 +94,7 @@
 					FragColor[1] = vec4(fresnel, 1.0f) * shadowAmount;
 
 					// irradiance
-					FragColor[2] = vec4(irradiance, 1.0f);
+					FragColor[2] = vec4(irradiance, 1.0f) * shadowAmount;
 				}
 
 				]]>

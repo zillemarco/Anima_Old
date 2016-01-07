@@ -2,7 +2,6 @@ __author__ = 'marco'
 
 import wx
 import wx.lib.mixins.listctrl as listmix
-import MaterialEditorDialog
 import AnimaEngine
 
 class EditableListCtrl(wx.ListCtrl, listmix.TextEditMixin):
@@ -189,7 +188,9 @@ class GeometriesTab(wx.Panel):
 
     def OnGeometryRClick(self, event):
         geometryInstancesManager = self.currentScene.GetGeometryInstancesManager()
-        self.currentSelectedGeometry = geometryInstancesManager.GetGeometryInstance(event.m_itemIndex)
+        itemText = event.Label.encode('utf-8')
+
+        self.currentSelectedGeometry = geometryInstancesManager.GetGeometryInstanceFromName(itemText)
 
         menu = wx.Menu()
         menuSetMaterial = menu.Append(wx.ID_ANY, "Set material", "Choose a material and set it to the selected geometry")

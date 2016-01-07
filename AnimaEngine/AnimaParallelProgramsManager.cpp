@@ -20,6 +20,7 @@ AnimaParallelProgramsManager::AnimaParallelProgramsManager(AnimaEngine* engine)
 AnimaParallelProgramsManager::~AnimaParallelProgramsManager()
 {
 	ClearPrograms();
+	ClearContexts();
 }
 
 AnimaParallelProgram* AnimaParallelProgramsManager::CreateProgram(const AnimaString& name)
@@ -47,6 +48,15 @@ void AnimaParallelProgramsManager::ClearPrograms()
 	}
 
 	_programs.RemoveAll();
+}
+
+void AnimaParallelProgramsManager::ClearContexts()
+{
+	AInt count = _contexts.size();
+	for (AInt i = 0; i < count; i++)
+		clReleaseContext(_contexts[i]._context);
+	
+	_contexts.clear();
 }
 
 AnimaParallelProgram* AnimaParallelProgramsManager::GetProgram(AUint index)
@@ -333,7 +343,16 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 			return false;
 		}
 
-		#if defined APPLE
+		#if !defined WIN32
+			CGLContextObj cglContext = CGLGetCurrentContext();
+			CGLShareGroupObj cglShareGroup = CGLGetShareGroup(cglContext);
+		
+			const cl_context_properties contextProperties[] = {
+				CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, reinterpret_cast<cl_context_properties>(cglShareGroup),
+				0, 0
+			};
+		
+			context = clCreateContext(contextProperties, 0, nullptr, nullptr, nullptr, &error);
 		#else
 			const cl_context_properties contextProperties[] = {
 				CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform),
@@ -341,9 +360,9 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 				CL_GL_CONTEXT_KHR, reinterpret_cast<cl_context_properties>(wglGetCurrentContext()),
 				0, 0
 			};
-		#endif
 
-		context = clCreateContext(contextProperties, 1, &deviceIds[0], nullptr, nullptr, &error);
+			context = clCreateContext(contextProperties, 1, &deviceIds[0], nullptr, nullptr, &error);
+		#endif
 	}
 	else
 	{

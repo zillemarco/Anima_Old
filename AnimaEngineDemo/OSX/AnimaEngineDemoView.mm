@@ -185,6 +185,42 @@ bool rendererInitialized = false;
 							}
 						}
 					}
+					else if(kArgs->GetKey() == Anima::AnimaKeyboardKey::AKK_RIGHT_BRACKET) // +
+					{
+						Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+						
+						if(engine)
+						{
+							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+							
+							if(scene)
+							{
+								Anima::AnimaMaterialsManager* materialsManager = scene->GetMaterialsManager();
+								
+								Anima::AnimaMaterial* material = materialsManager->GetMaterialFromName("oro");
+								material->SetFloat("Roughness", fminf(1.0, material->GetFloat("Roughness") + 0.01));
+							}
+						}
+					}
+					else if(kArgs->GetKey() == Anima::AnimaKeyboardKey::AKK_SLASH) // -
+					{
+						Anima::AnimaEngine* engine = ((Anima::AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+						
+						if(engine)
+						{
+							Anima::AnimaScenesManager* scenesManager = engine->GetScenesManager();
+							Anima::AnimaScene* scene = scenesManager->GetActiveScene();
+							
+							if(scene)
+							{
+								Anima::AnimaMaterialsManager* materialsManager = scene->GetMaterialsManager();
+								
+								Anima::AnimaMaterial* material = materialsManager->GetMaterialFromName("oro");
+								material->SetFloat("Roughness", fmaxf(0.0, material->GetFloat("Roughness") - 0.01));
+							}
+						}
+					}
 				});
 			}
 			
@@ -335,6 +371,27 @@ bool rendererInitialized = false;
 	// Inizializzazione del motore
 	if (!_engine.Initialize())
 		return false;
+	
+	printf("\nOpenCL available platforms:\n\n");
+	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
+	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
+	for (auto& plat : platforms)
+	{
+		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
+		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
+		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
+		
+		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
+		for (auto& dev : devices)
+		{
+			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
+			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
+			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
+		}
+	}
+	
+	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU);
+	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU, nullptr, true);
 
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());
@@ -343,6 +400,7 @@ bool rendererInitialized = false;
 	
 //	_scene = scenesManager->LoadSceneFromFile("/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff/AnimaEngineDemoScene.ascene");
 //	_renderer->CheckPrograms(_scene);
+//	_scene->SetKeyboardInteractor(&keyboardInteractor);
 	
 	_scene = scenesManager->CreateScene("scena");
 	

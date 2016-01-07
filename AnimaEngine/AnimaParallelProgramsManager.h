@@ -59,6 +59,7 @@ public:
 
 private:
 	void ClearPrograms();
+	void ClearContexts();
 
 protected:
 	

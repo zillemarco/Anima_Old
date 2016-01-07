@@ -7,8 +7,11 @@
 #include "AnimaString.h"
 #include "AnimaNamedObject.h"
 
-#include <CL/cl.h>
-#include <CL/cl_gl.h>
+#ifdef __APPLE__
+#include <OpenCL/OpenCL.h>
+#else
+#include <CL/opencl.h>
+#endif
 
 BEGIN_ANIMA_ENGINE_NAMESPACE
 
