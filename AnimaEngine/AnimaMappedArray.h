@@ -381,7 +381,14 @@ public:
 
 	AInt Contains(TYPE element)
 	{
-		return _array.Contains(element);
+		AInt count = _array.size();
+		for (AInt i = 0; i < count; i++)
+		{
+			if (_array[i] == element)
+				return i;
+		}
+
+		return -1;
 	}
 
 	AInt Contains(const AnimaString& name) const

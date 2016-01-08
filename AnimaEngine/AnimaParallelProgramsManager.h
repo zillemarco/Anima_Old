@@ -20,20 +20,14 @@ BEGIN_ANIMA_ENGINE_NAMESPACE
 
 class AnimaEngine;
 
-typedef struct _AnimaParallelProgramContextInfo {
-	AnimaParallelelProgramType _type;
-	bool _graphicsInterop;
-	cl_platform_id _platformId;
-	cl_context _context;
-} AnimaParallelProgramContextInfo;
-
 class ANIMA_ENGINE_EXPORT AnimaParallelProgramsManager
 {
 public:
 	AnimaParallelProgramsManager(AnimaEngine* engine);
 	~AnimaParallelProgramsManager();
 	
-	AnimaParallelProgram* CreateProgram(const AnimaString& name);
+	AnimaParallelProgram* CreateProgram(const AnimaString& name, const AnimaParallelProgramContextInfo* contextInfo);
+	AnimaParallelProgram* CreateProgram(const AnimaString& name, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
 
 	AnimaParallelProgram* GetProgram(AUint index);
 	AnimaParallelProgram* GetProgramFromName(const AnimaString& name);
@@ -52,10 +46,10 @@ public:
 	AnimaString GetDeviceExtensions(const cl_device_id& device) const;
 	bool DeviceHasExtension(const cl_device_id& device, const AnimaString& extension);
 
-	bool FindContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
+	AnimaParallelProgramContextInfo* FindContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
 
-	bool GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false, bool tryCreateToIfNotFound = true);
-	bool CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
+	AnimaParallelProgramContextInfo* GetContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false, bool tryCreateToIfNotFound = true);
+	AnimaParallelProgramContextInfo* CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId = nullptr, bool graphicsInterop = false);
 
 private:
 	void ClearPrograms();

@@ -95,7 +95,8 @@ set(common_HEADERS	AnimaEngineCore.h
 					AnimaJoystickInteractor.h
 					AnimaDefaultInteractors.h
 					AnimaGraphicsIncludes.h
-					AnimaPlatformIncludes.h)
+					AnimaPlatformIncludes.h
+					AnimaParallelProgramBuffers.h)
 
 set(common_SOURCES	AnimaEngineCore.cpp
 					AnimaEngine.cpp
@@ -169,7 +170,8 @@ set(common_SOURCES	AnimaEngineCore.cpp
 					IAnimaEvents.cpp
 					AnimaDefaultInteractors.cpp
 					AnimaGraphicsIncludes.cpp
-					AnimaPlatformIncludes.cpp)
+					AnimaPlatformIncludes.cpp
+					AnimaParallelProgramBuffers.cpp)
 
 if(ANIMA_ENGINE_EXPORT_TO_PYTHON)
 	set(AnimaEngineCore_HEADERS	${common_HEADERS} AnimaEnginePY.h)
@@ -230,7 +232,7 @@ source_group(Engine\\Scene\\Data\\Textures FILES AnimaTexture.h AnimaTexture.cpp
 source_group(Engine\\Scene\\Data\\Materials FILES AnimaMaterial.h AnimaMaterial.cpp)
 source_group(Engine\\Scene\\Physics\\Debug FILES AnimaPhysicsDebugDrawer.h AnimaPhysicsDebugDrawer.cpp)
 source_group(Engine\\Scene\\Data\\DataGenerators FILES AnimaColorGenerator.h AnimaColorGenerator.cpp AnimaDataGenerator.h AnimaDataGenerator.cpp AnimaVectorGenerator.h AnimaVectorGenerator.cpp AnimaTextureGenerator.h AnimaTextureGenerator.cpp)
-source_group("Engine\\Parallel Programming" FILES AnimaParallelProgram.cpp AnimaParallelProgram.h)
+source_group("Engine\\Parallel Programming" FILES AnimaParallelProgram.cpp AnimaParallelProgram.h AnimaParallelProgramBuffers.h AnimaParallelProgramBuffers.cpp)
 
 source_group(Engine\\Allocators FILES AnimaAllocator.h AnimaStackAllocator.h AnimaLinearAllocator.h AnimaFreeListAllocator.h AnimaPoolAllocator.h AnimaProxyAllocator.h AnimaAllocator.cpp AnimaStackAllocator.cpp AnimaLinearAllocator.cpp AnimaFreeListAllocator.cpp AnimaPoolAllocator.cpp AnimaProxyAllocator.cpp)
 

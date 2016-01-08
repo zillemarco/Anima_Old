@@ -34,6 +34,7 @@
 #include <AnimaTexture.h>
 #include <AnimaRandom.h>
 #include <AnimaDefaultInteractors.h>
+#include "AnimaParallelProgramBuffers.h"
 
 #include "main.h"
 
@@ -312,9 +313,47 @@ bool InitEngine()
 		}
 	}
 
-	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU);
-	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_CPU);
-	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_CPU, ppManager->GetPlatformIDs()[0]);
+	std::string saxpy_kernel =
+		"__kernel                                   \n"
+		"void saxpy_kernel(float alpha,				\n"
+		"                  __global float *A,       \n"
+		"                  __global float *B,       \n"
+		"                  __global float *C)       \n"
+		"{                                          \n"
+		"    //Get the index of the work-item       \n"
+		"    int index = get_global_id(0);          \n"
+		"    C[index] = alpha* A[index] + B[index]; \n"
+		"}											\n";
+
+	int dataSize = 100000000;
+
+	float alpha = 2.0f;
+	std::vector<float> A, B, C, D;
+	A.resize(dataSize);
+	B.resize(dataSize);
+	C.resize(dataSize);
+	D.resize(dataSize);
+
+	for (int i = 0; i < dataSize; i++)
+	{
+		A[i] = i;
+		B[i] = dataSize - i;
+		C[i] = 0.0f;
+		D[i] = alpha * A[i] + B[i];
+	}
+	
+	Anima::AnimaParallelProgram* program = ppManager->CreateProgram("prova", Anima::APP_TYPE_CPU);
+	program->SetCode(saxpy_kernel);
+	program->SetKernelName("saxpy_kernel");
+
+	program->Create();
+
+	program->AddSingleValueKernelArgument<float>("alpha", 0, &alpha, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<std::vector<float>, float>("A", 1, &A, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<std::vector<float>, float>("B", 2, &B, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<std::vector<float>, float>("C", 3, &C, Anima::APPBDRWP_WRITE_ONLY, Anima::APPBDCP_READ_ONLY);
+
+	program->Execute(dataSize, 128);
 
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());

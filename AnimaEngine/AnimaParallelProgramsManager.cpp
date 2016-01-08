@@ -23,18 +23,30 @@ AnimaParallelProgramsManager::~AnimaParallelProgramsManager()
 	ClearContexts();
 }
 
-AnimaParallelProgram* AnimaParallelProgramsManager::CreateProgram(const AnimaString& name)
+AnimaParallelProgram* AnimaParallelProgramsManager::CreateProgram(const AnimaString& name, const AnimaParallelProgramContextInfo* contextInfo)
 {
+	if (contextInfo == nullptr)
+		return nullptr;
+
 	AInt index = _programs.Contains(name);
 	if (index >= 0)
 	{
 		AnimaLogger::LogMessageFormatColor(ANIMA_LOGGER_TEXT_COLOR_RED, "[WARNING] Parallel programs manager: program named %s already exists", name.c_str());
 		return nullptr;
 	}
-	
-	AnimaParallelProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgram>(*(_engine->GetParallelProgramsAllocator()), name, _engine->GetParallelProgramsAllocator(), this);
+
+	AnimaParallelProgram* program = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgram>(*(_engine->GetParallelProgramsAllocator()), name, _engine->GetParallelProgramsAllocator(), this, contextInfo);
 	_programs.Add(name, program);
 	return program;
+}
+
+AnimaParallelProgram* AnimaParallelProgramsManager::CreateProgram(const AnimaString& name, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
+{
+	AnimaParallelProgramContextInfo* contextInfo = GetContext(type, platformId, graphicsInterop);
+	if (contextInfo == nullptr)
+		return nullptr;
+
+	return CreateProgram(name, contextInfo);
 }
 
 void AnimaParallelProgramsManager::ClearPrograms()
@@ -236,10 +248,8 @@ bool AnimaParallelProgramsManager::DeviceHasExtension(const cl_device_id& device
 	return false;
 }
 
-bool AnimaParallelProgramsManager::FindContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
+AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::FindContext(const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
 {
-	context = nullptr;
-
 	AInt count = _contexts.size();
 	for (AInt i = 0; i < count; i++)
 	{
@@ -247,34 +257,29 @@ bool AnimaParallelProgramsManager::FindContext(cl_context& context, const AnimaP
 		// Controllo che le specifiche del contesto siano uguali
 		// Nel caso l'ID della piattaforma passata sia nullptr allora prendo in considerazioe i contesti di tutte le piattaforme installate
 		if (info->_graphicsInterop == graphicsInterop && info->_type == type && (info->_platformId == platformId || platformId == nullptr))
-		{
-			context = info->_context;
-			return true;
-		}
+			return info;
 	}
 
-	return false;
+	return nullptr;
 }
 
-bool AnimaParallelProgramsManager::GetContext(cl_context& context, const AnimaParallelelProgramType& type, cl_platform_id platformId, bool tryCreateToIfNotFound, bool graphicsInterop)
+AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::GetContext(const AnimaParallelelProgramType& type, cl_platform_id platformId, bool tryCreateToIfNotFound, bool graphicsInterop)
 {
 	// Se il contesto è già presente con le informazioni necessarie lo torno subito
-	if (FindContext(context, type, platformId, graphicsInterop))
-		return context;
+	AnimaParallelProgramContextInfo* contextInfo = FindContext(type, platformId, graphicsInterop);
+	if (contextInfo != nullptr)
+		return contextInfo;
 
 	// Se non ho trovato il contesto lo vado a tentare di creare
-	if (CreateContext(type, platformId, graphicsInterop))
-		return true;
-
-	return false;
+	return CreateContext(type, platformId, graphicsInterop);
 }
 
-bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
+AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramType& type, cl_platform_id platformId, bool graphicsInterop)
 {
 	// Prima di tutto controllo che il contesto non sia già stato creato, nel qual caso termino immediatamente la funzione
-	cl_context context = nullptr;
-	if (FindContext(context, type, platformId, graphicsInterop))
-		return true;
+	AnimaParallelProgramContextInfo* contextInfo = FindContext(type, platformId, graphicsInterop);
+	if (contextInfo != nullptr)
+		return contextInfo;
 
 	// Se non mi viene passata l'ID di una piattaforma specifica vado a cercare la piattaforme installate
 	cl_platform_id platform = platformId;
@@ -318,6 +323,7 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 
 	// Nel caso sia stato trovato almeno un device vado a tentare di creare il contesto
 	AInt error = CL_SUCCESS;
+	cl_context context;
 
 	if (graphicsInterop)
 	{
@@ -386,10 +392,11 @@ bool AnimaParallelProgramsManager::CreateContext(const AnimaParallelelProgramTyp
 	info._platformId = platform;
 	info._graphicsInterop = graphicsInterop;
 	info._context = context;
+	info._devices = deviceIds;
 
 	_contexts.push_back(info);
 
-	return true;
+	return &(_contexts[_contexts.size() - 1]);
 }
 
 END_ANIMA_ENGINE_NAMESPACE
