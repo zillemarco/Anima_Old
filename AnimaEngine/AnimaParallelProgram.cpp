@@ -9,8 +9,12 @@ AnimaParallelProgram::AnimaParallelProgram(const AnimaString& name, AnimaAllocat
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaParallelProgram);
 
-	ANIMA_ASSERT(_parallelProgramsManager != nullptr);
-	ANIMA_ASSERT(_contextInfo != nullptr);
+	if (parallelProgramsManager == nullptr)
+		throw "Invalid value for parallel programs manager";
+
+	if (contextInfo == nullptr)
+		throw "Invalid value for the context";
+
 	_parallelProgramsManager = parallelProgramsManager;
 	_contextInfo = contextInfo;
 
@@ -110,7 +114,7 @@ AUint AnimaParallelProgram::TranslateParallelProgramDeviceType(const AnimaParall
 	return CL_DEVICE_TYPE_ALL;
 }
 
-bool AnimaParallelProgram::Create()
+bool AnimaParallelProgram::Compile()
 {
 	if (_queue != nullptr && _program != nullptr && _kernel != nullptr)
 		return true;
@@ -229,7 +233,7 @@ bool AnimaParallelProgram::CreateKernel()
 	return true;
 }
 
-bool AnimaParallelProgram::Execute(AUint globalSize, AUint localSize)
+bool AnimaParallelProgram::Execute(AUint globalSize, AUint localSize, bool readBuffers)
 {
 	if (_queue == nullptr || _program == nullptr || _kernel == nullptr)
 		return false;
@@ -242,8 +246,10 @@ bool AnimaParallelProgram::Execute(AUint globalSize, AUint localSize)
 	// Copio i valori degli argomenti che devo passare al kernel nella memoria del dispositivo
 	for (AInt i = 0; i < kernelArgumentsCount; i++)
 	{
-		// Se non riesco a copiare il valore in un argomento non posso eseguire il programma quindi termino segnalando un errore
-		if (_kernelArguments[i]->Write() == false)
+		AnimaParallelProgramBufferBase* buffer = _kernelArguments[i];
+
+		// Se non riesco a creare il buffer o a copiare il valore in un argomento non posso eseguire il programma quindi termino segnalando un errore
+		if (buffer->Create() == false || buffer->Write() == false)
 			return false;
 	}
 	
@@ -263,13 +269,16 @@ bool AnimaParallelProgram::Execute(AUint globalSize, AUint localSize)
 	if (status != CL_SUCCESS)
 		return false;
 
-	// Una volta lanciata l'esecuzione del programma leggo i valori di ritorno
-	for (AInt i = 0; i < kernelArgumentsCount; i++)
+	// Se richiesto, alla fine dell'esecuzione del programma leggo i valori di ritorno
+	if (readBuffers)
 	{
-		AnimaParallelProgramBufferBase* kernelArgument = _kernelArguments[i];
-		AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = kernelArgument->GetDeviceComunicationPolicy();
-		if (deviceComunicationPolicy == APPBDCP_READ_WRITE || deviceComunicationPolicy == APPBDCP_READ_ONLY)
-			kernelArgument->Read();
+		for (AInt i = 0; i < kernelArgumentsCount; i++)
+		{
+			AnimaParallelProgramBufferBase* kernelArgument = _kernelArguments[i];
+			AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = kernelArgument->GetDeviceComunicationPolicy();
+			if (deviceComunicationPolicy == APPBDCP_READ_WRITE || deviceComunicationPolicy == APPBDCP_READ_ONLY)
+				kernelArgument->Read();
+		}
 	}
 
 	// Forzo la terminazione della queue

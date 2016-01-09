@@ -44,7 +44,10 @@ AnimaParallelProgram* AnimaParallelProgramsManager::CreateProgram(const AnimaStr
 {
 	AnimaParallelProgramContextInfo* contextInfo = GetContext(type, platformId, graphicsInterop);
 	if (contextInfo == nullptr)
+	{
+		AnimaLogger::LogMessageFormat("[WARNING] Parallel programs manager: unable to create program named %s because the is no context", name.c_str());
 		return nullptr;
+	}
 
 	return CreateProgram(name, contextInfo);
 }

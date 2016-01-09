@@ -8,7 +8,7 @@ AnimaParallelProgramBufferBase::AnimaParallelProgramBufferBase(const AnimaString
 {
 	IMPLEMENT_ANIMA_CLASS(AnimaParallelProgramBufferBase);
 
-	ANIMA_ASSERT(_program != nullptr)
+	ANIMA_ASSERT(program != nullptr)
 
 	_deviceReadWritePolicy = deviceReadWritePolicy;
 	_deviceComunicationPolicy = deviceComunicationPolicy;

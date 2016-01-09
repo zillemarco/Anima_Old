@@ -343,17 +343,27 @@ bool InitEngine()
 	}
 	
 	Anima::AnimaParallelProgram* program = ppManager->CreateProgram("prova", Anima::APP_TYPE_CPU);
+
 	program->SetCode(saxpy_kernel);
 	program->SetKernelName("saxpy_kernel");
 
-	program->Create();
+	program->Compile();
 
 	program->AddSingleValueKernelArgument<float>("alpha", 0, &alpha, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
-	program->AddMultipleValueKernelArgument<std::vector<float>, float>("A", 1, &A, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
-	program->AddMultipleValueKernelArgument<std::vector<float>, float>("B", 2, &B, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
-	program->AddMultipleValueKernelArgument<std::vector<float>, float>("C", 3, &C, Anima::APPBDRWP_WRITE_ONLY, Anima::APPBDCP_READ_ONLY);
+	program->AddMultipleValueKernelArgument<float>("A", 1, &A, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<float>("B", 2, &B, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<float>("C", 3, &C, Anima::APPBDRWP_WRITE_ONLY, Anima::APPBDCP_READ_ONLY);
 
-	program->Execute(dataSize, 128);
+	Anima::AnimaTimer timer;
+
+	for (int i = 0; i < 100; i++)
+	{
+		timer.Reset();
+		program->Execute(dataSize, 128);
+		printf("GPGPU execution time: %f\n", timer.Elapsed());
+	}
+
+	program->GetKernelArgumentFromName("C")->Read();
 
 	// Creazione del renderer
 	_renderer = new Anima::AnimaRenderer(&_engine, _engine.GetGenericAllocator());

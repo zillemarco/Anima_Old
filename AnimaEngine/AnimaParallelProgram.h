@@ -52,10 +52,10 @@ public:
 	bool operator!=(const AnimaParallelProgram& left);
 
 public:	
-	bool Create();
+	bool Compile();
 	bool Destroy();
 
-	bool Execute(AUint globalSize, AUint localSize);
+	bool Execute(AUint globalSize, AUint localSize, bool readBuffers = false);
 
 	void SetCode(const AnimaString& code) { _code = code; }
 	AnimaString GetCode() const { return _code; }
@@ -77,14 +77,26 @@ public:
 		return true;
 	}
 
-	template<typename vector_type, typename vector_data_type>
-	bool AddMultipleValueKernelArgument(const AnimaString& argumentName, AInt argumentIndex, vector_type* data, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
+	template<typename data_type>
+	bool AddMultipleValueKernelArgument(const AnimaString& argumentName, AInt argumentIndex, AnimaArray<data_type>* data, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
 	{
 		// Controllo che non esista già un argomento con quel nome o a quel indice
 		if (KernelHasArgument(argumentName) || KernelHasArgument(argumentIndex))
 			return false;
 
-		AnimaParallelProgramMultipleValueBuffer<vector_type, vector_data_type>* newBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgramMultipleValueBuffer<vector_type, vector_data_type> >(*_allocator, argumentName, _allocator, data, this, argumentIndex, deviceReadWritePolicy, deviceComunicationPolicy);
+		AnimaParallelProgramMultipleValueBuffer<data_type>* newBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgramMultipleValueBuffer<data_type> >(*_allocator, argumentName, _allocator, data, this, argumentIndex, deviceReadWritePolicy, deviceComunicationPolicy);
+		_kernelArguments.Add(argumentName, newBuffer);
+		return true;
+	}
+
+	template<typename data_type>
+	bool AddMultipleValueKernelArgument(const AnimaString& argumentName, AInt argumentIndex, data_type* data, AUint dataLength, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
+	{
+		// Controllo che non esista già un argomento con quel nome o a quel indice
+		if (KernelHasArgument(argumentName) || KernelHasArgument(argumentIndex))
+			return false;
+
+		AnimaParallelProgramMultipleValueBuffer<data_type>* newBuffer = AnimaAllocatorNamespace::AllocateNew<AnimaParallelProgramMultipleValueBuffer<data_type> >(*_allocator, argumentName, _allocator, data, dataLength, this, argumentIndex, deviceReadWritePolicy, deviceComunicationPolicy);
 		_kernelArguments.Add(argumentName, newBuffer);
 		return true;
 	}

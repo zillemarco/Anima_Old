@@ -156,19 +156,34 @@ protected:
 	data_type* _data;
 };
 
-template<typename vector_type, typename vector_data_type>
+template<typename data_type>
 class ANIMA_ENGINE_EXPORT AnimaParallelProgramMultipleValueBuffer : public AnimaParallelProgramBufferBase
 {
 	DECLARE_ANIMA_CLASS(AnimaParallelProgramMultipleValueBuffer);
 
-	static_assert(std::is_same<vector_type, AnimaArray<AFloat> >::value,
+	static_assert(std::is_same<data_type, AFloat>::value,
 		"AnimaParallelProgramSingleValueBuffer can be used only with float values");
 
 public:
-	AnimaParallelProgramMultipleValueBuffer(const AnimaString& name, AnimaAllocator* allocator, vector_type* data, AnimaParallelProgram* program, AInt programKernelArgumentIndex, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
+	AnimaParallelProgramMultipleValueBuffer(const AnimaString& name, AnimaAllocator* allocator, AnimaArray<data_type>* data, AnimaParallelProgram* program, AInt programKernelArgumentIndex, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
 		: AnimaParallelProgramBufferBase(name, allocator, program, programKernelArgumentIndex, deviceReadWritePolicy, deviceComunicationPolicy)
 	{
+		ANIMA_ASSERT(data != nullptr);
+
+		_data = &(*data)[0];
+		_dataLength = data->size();
+		_needsUpdate = true;
+		_bufferMemory = nullptr;
+	}
+
+	AnimaParallelProgramMultipleValueBuffer(const AnimaString& name, AnimaAllocator* allocator, data_type* data, AUint dataLength, AnimaParallelProgram* program, AInt programKernelArgumentIndex, AnimaParallelProgramBufferDeviceReadWritePolicy deviceReadWritePolicy = APPBDRWP_READ_WRITE, AnimaParallelProgramBufferDeviceComunicationPolicy deviceComunicationPolicy = APPBDCP_READ_WRITE)
+		: AnimaParallelProgramBufferBase(name, allocator, program, programKernelArgumentIndex, deviceReadWritePolicy, deviceComunicationPolicy)
+	{
+		ANIMA_ASSERT(data != nullptr);
+
 		_data = data;
+		_dataLength = dataLength;
+		_needsUpdate = true;
 		_bufferMemory = nullptr;
 	}
 
@@ -224,8 +239,15 @@ public:
 			return true;
 
 		AInt status = CL_SUCCESS;
-		_bufferMemory = clCreateBuffer(_program->GetContextInfo()->_context, TranslateParallelProgramBufferDeviceReadWritePolicy(_deviceReadWritePolicy), _data->size() * sizeof(vector_data_type), nullptr, &status);
 
+		if (_data != nullptr && _needsUpdate == true)
+		{
+			_bufferMemory = clCreateBuffer(_program->GetContextInfo()->_context, TranslateParallelProgramBufferDeviceReadWritePolicy(_deviceReadWritePolicy) | CL_MEM_USE_HOST_PTR, _dataLength * sizeof(data_type), _data, &status);
+			_needsUpdate = false;
+		}
+		else
+			_bufferMemory = clCreateBuffer(_program->GetContextInfo()->_context, TranslateParallelProgramBufferDeviceReadWritePolicy(_deviceReadWritePolicy), _dataLength * sizeof(data_type), nullptr, &status);
+		
 		// Se la creazione non è andata a buon fine reimposto l'attributo _bufferMemory a nullptr e termino tornando false
 		if (status != CL_SUCCESS)
 		{
@@ -241,7 +263,7 @@ public:
 		// Posso leggere il valore dalla memoria solamente se la policy me lo consente e il buffer è stato creato
 		if (_bufferMemory != nullptr && (_deviceComunicationPolicy == APPBDCP_READ_ONLY || _deviceComunicationPolicy == APPBDCP_READ_WRITE))
 		{
-			AInt status = clEnqueueReadBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _data->size() * sizeof(vector_data_type), &((*_data)[0]), 0, nullptr, nullptr);
+			AInt status = clEnqueueReadBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _dataLength * sizeof(data_type), _data, 0, nullptr, nullptr);
 			// Se la lettura non è andata a buon fine termino tornando false
 			if (status != CL_SUCCESS)
 				return false;
@@ -252,32 +274,60 @@ public:
 
 	bool Write() override
 	{
-		if (Create() == false)
+		// Deve per forza essere prima creato e poi scritto
+		if (_bufferMemory == nullptr)
 			return false;
 
-		AInt status = clEnqueueWriteBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _data->size() * sizeof(vector_data_type), &((*_data)[0]), 0, nullptr, nullptr);
+		// Se non ho bisogno di aggiornare il buffer allora termino immediatamente
+		if (_needsUpdate == false)
+			return true;
+
+		AInt status = clEnqueueWriteBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _dataLength * sizeof(data_type), _data, 0, nullptr, nullptr);
 		
 		// Se la scrittura non è andata a buon fine termino tornando false
 		if (status != CL_SUCCESS)
 			return false;
+		
+		_needsUpdate = false;
 		return true;
 	}
 
 	void* GetDataForProgram() override { return (void*)&_bufferMemory; }
 	AUint GetDataSizeForProgram() override { return sizeof(cl_mem); }
 
-	vector_type* GetData() { return _data; }
+	void SetData(AnimaArray<data_type>* data)
+	{
+		ANIMA_ASSERT(data != nullptr);
+		_data = &(*data)[0];
+		_dataLength = data->size();
+		_needsUpdate = true;
+	}
+
+	void SetData(data_type* data, AUint dataLength)
+	{
+		ANIMA_ASSERT(data != nullptr);
+		_data = data;
+		_dataLength = dataLength;
+		_needsUpdate = true;
+	}
+
+	data_type* GetData() { return _data; }
+
+	void SetNeedsUpdate() { _needsUpdate = true; }
 	
 protected:
-	vector_type* _data;
+	data_type* _data;
+	AUint _dataLength;
 	cl_mem _bufferMemory;
+
+	bool _needsUpdate;
 };
 
 // Definizione dei tipi supportati dal buffer a valore singolo per l'esportazione al di fuori della libreria
 template AnimaParallelProgramSingleValueBuffer < AFloat > ;
 
 // Definizione dei tipi supportati dal buffer a valore multiplo per l'esportazione al di fuori della libreria
-template AnimaParallelProgramMultipleValueBuffer < AnimaArray<AFloat>, AFloat >;
+template AnimaParallelProgramMultipleValueBuffer < AFloat >;
 
 template AnimaMappedArray < AnimaParallelProgramBufferBase* > ;
 
