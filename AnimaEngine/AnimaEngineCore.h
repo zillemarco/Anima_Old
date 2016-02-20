@@ -43,6 +43,8 @@
 
 #define _ANIMA_ENGINE_USE_OPENGL
 
+#define INDEXED_DRAWING
+
 #define M_2PI	2.0f * (AFloat)M_PI
 
 #if (ANIMA_ENGINE_USE_NVTOOLS) && (!defined ANIMA_FRAME_DEBUG)

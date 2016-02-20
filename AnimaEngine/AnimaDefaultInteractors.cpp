@@ -51,17 +51,25 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 {
 	if(AnimaMouseInteractor::Install(windowId, engine))
 	{
-		SetEventHandler("onLeftMouseDragged", [] (AnimaEventArgs* args) {			
-			AnimaVertex2f delta = ((AnimaMouseDraggedEventArgs*)args)->GetDelta();
-			AnimaEngine* engine = ((AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+		SetEventHandler("onUpdateScene", [] (AnimaEventArgs* args) {
 			
-			if(engine)
+			AnimaMouseInteractor* interactor = ((AnimaMouseInteractor*)args->GetSourceEvent());
+			AnimaScene* scene = ((AnimaUpdateSceneEventArgs*)args)->GetScene();
+			AnimaVertex2f delta = interactor->GetDelta();
+			
+			if(scene && interactor->LeftButtonDown() && delta != AnimaVertex2f(0.0, 0.0))
 			{
-				AnimaScenesManager* scenesManager = engine->GetScenesManager();
-				AnimaScene* scene = scenesManager->GetActiveScene();
-				
-				if(scene)
-				{
+			
+//			AnimaVertex2f delta = ((AnimaMouseDraggedEventArgs*)args)->GetDelta();
+//			AnimaEngine* engine = ((AnimaMouseInteractor*)args->GetSourceEvent())->GetEngine();
+//			
+//			if(engine)
+//			{
+//				AnimaScenesManager* scenesManager = engine->GetScenesManager();
+//				AnimaScene* scene = scenesManager->GetActiveScene();
+//				
+//				if(scene)
+//				{
 					AnimaCamerasManager* camerasManager = scene->GetCamerasManager();
 					AnimaCamera* camera = camerasManager->GetActiveCamera();
 					
@@ -94,7 +102,7 @@ bool AnimaDefaultMouseInteractor::Install(long windowId, AnimaEngine* engine)
 								break;
 						}
 					}
-				}
+//				}
 			}
 		});
 		

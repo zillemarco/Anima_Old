@@ -294,7 +294,7 @@ AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(con
 		if (platforms.size() == 0)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find valid platforms", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
+			return nullptr;
 		}
 
 		// Trovo la prima piattaforma che ha almeno un device del tipo richiesto
@@ -311,7 +311,7 @@ AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(con
 	if (platform == nullptr)
 	{
 		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find a platform with the requested device type", ANIMA_LOGGER_TEXT_COLOR_RED);
-		return false;
+		return nullptr;
 	}
 	
 	// Cerco di device della piattaforma
@@ -321,7 +321,7 @@ AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(con
 	if (deviceIds.size() == 0)
 	{
 		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find devices for the selected platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-		return false;
+		return nullptr;
 	}
 
 	// Nel caso sia stato trovato almeno un device vado a tentare di creare il contesto
@@ -349,7 +349,7 @@ AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(con
 		if (device == nullptr)
 		{
 			AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to find a device capable of graphics interoperability for the selected platform", ANIMA_LOGGER_TEXT_COLOR_RED);
-			return false;
+			return nullptr;
 		}
 
 		#if !defined WIN32
@@ -386,7 +386,7 @@ AnimaParallelProgramContextInfo* AnimaParallelProgramsManager::CreateContext(con
 	if (error != CL_SUCCESS)
 	{
 		AnimaLogger::LogMessage("[ERROR] Parallel programs manager: unable to create CPU context", ANIMA_LOGGER_TEXT_COLOR_RED);
-		return false;
+		return nullptr;
 	}
 
 	// Aggiungo alla lista di contesti creati quello nuovo appena creato

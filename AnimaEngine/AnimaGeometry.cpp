@@ -823,19 +823,23 @@ void AnimaGeometry::UpdateBuffers()
 		if (_boneIDsBufferObject > 0)
 			glInvalidateBufferData(_boneIDsBufferObject);
 	}
-	
+
+#if !defined INDEXED_DRAWING
 	ComputeFlatNormals();
+#endif
 	
 	glBindVertexArray(_vertexArrayObject);
 	
-//	if (GetFacesIndicesCount() > 0)
-//	{
-//		AUint* indexes = GetFacesIndices();
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
-//		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
-//		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
-//		indexes = nullptr;
-//	}
+#if defined INDEXED_DRAWING
+	if (GetFacesIndicesCount() > 0)
+	{
+		AUint* indexes = GetFacesIndices();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexesBufferObject);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(AUint) * GetFacesIndicesCount(), indexes, GL_STATIC_DRAW);
+		AnimaAllocatorNamespace::DeallocateArray(*_allocator, indexes);
+		indexes = nullptr;
+	}
+#endif
 
 	if (GetFloatVerticesCount() > 0)
 	{
@@ -1146,8 +1150,11 @@ AUint* AnimaGeometry::GetFacesIndices()
 
 AUint AnimaGeometry::GetFloatVerticesCount()
 {
-//	return (AUint)_vertices.size() * 3;
+#if defined INDEXED_DRAWING
+	return (AUint)_vertices.size() * 3;
+#else
 	return _faces.size() * 9;
+#endif
 }
 
 AFloat* AnimaGeometry::GetFloatVertices()
@@ -1159,14 +1166,14 @@ AFloat* AnimaGeometry::GetFloatVertices()
 	if (count > 0)
 	{
 		vertices = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
-
-//		AInt verticesCount = _vertices.size();
-//		for (int i = 0; i < verticesCount; i++)
-//		{
-//			memcpy(vertices + offset, _vertices[i].vec, sizeof(AFloat) * 3);
-//			offset += 3;
-//		}
-		
+#if defined INDEXED_DRAWING
+		AInt verticesCount = _vertices.size();
+		for (int i = 0; i < verticesCount; i++)
+		{
+			memcpy(vertices + offset, _vertices[i].vec, sizeof(AFloat) * 3);
+			offset += 3;
+		}
+#else
 		int facesCount = _faces.size();
 		for(int i = 0; i < facesCount; i++)
 		{
@@ -1181,6 +1188,7 @@ AFloat* AnimaGeometry::GetFloatVertices()
 			memcpy(vertices + offset, _vertices[face.GetIndex(2)].vec, sizeof(AFloat) * 3);
 			offset += 3;
 		}
+#endif
 	}
 
 	return vertices;
@@ -1188,8 +1196,11 @@ AFloat* AnimaGeometry::GetFloatVertices()
 
 AUint AnimaGeometry::GetFloatVerticesNormalCount()
 {
-//	return (AUint)_normals.size() * 3;
+#if defined INDEXED_DRAWING
+	return (AUint)_normals.size() * 3;
+#else
 	return _faces.size() * 9;
+#endif
 }
 
 AFloat* AnimaGeometry::GetFloatVerticesNormal()
@@ -1203,13 +1214,14 @@ AFloat* AnimaGeometry::GetFloatVerticesNormal()
 	{
 		normals = AnimaAllocatorNamespace::AllocateArray<AFloat>(*_allocator, count);
 
-//		AInt normalsCount = _normals.size();
-//		for (int i = 0; i < normalsCount; i++)
-//		{
-//			memcpy(normals + offset, _normals[i].vec, sizeof(AFloat) * 3);
-//			offset += 3;
-//		}
-		
+#if defined INDEXED_DRAWING
+		AInt normalsCount = _normals.size();
+		for (int i = 0; i < normalsCount; i++)
+		{
+			memcpy(normals + offset, _normals[i].vec, sizeof(AFloat) * 3);
+			offset += 3;
+		}
+#else
 		int facesCount = _faces.size();
 		for(int i = 0; i < facesCount; i++)
 		{
@@ -1225,6 +1237,7 @@ AFloat* AnimaGeometry::GetFloatVerticesNormal()
 			memcpy(normals + offset, faceNormal.vec, sizeof(AFloat) * 3);
 			offset += 3;
 		}
+#endif
 	}
 
 	return normals;
@@ -1648,21 +1661,25 @@ void AnimaGeometry::Draw(AnimaRenderer* renderer, AnimaShaderProgram* program, b
 	program->EnableInputs(this);
 	error = glGetError();
 
-	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
-	//	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-
+#if defined INDEXED_DRAWING
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+#else
 	glDrawArrays(GL_TRIANGLES, 0, GetFloatVerticesCount());
 	error = glGetError();
-
+#endif
+	
 	program->DisableInputs();
 	error = glGetError();
 #else
 	program->EnableInputs(this);
-	
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
-//	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
-	
+
+#if defined INDEXED_DRAWING
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GetIndexesBufferObject());
+	glDrawElements(GL_TRIANGLES, GetFacesIndicesCount(), GL_UNSIGNED_INT, 0);
+#else
 	glDrawArrays(GL_TRIANGLES, 0, GetFloatVerticesCount());
+#endif
 	
 	program->DisableInputs();
 #endif

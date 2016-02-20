@@ -28,6 +28,12 @@ AnimaMouseInteractor::AnimaMouseInteractor()
 	_leftMouseUpMonitor = nullptr;
 	_rightMouseUpMonitor = nullptr;
 	
+	_modifiers = 0;
+	_mousePosition = AnimaVertex2f(0, 0);
+	_delta = AnimaVertex2f(0, 0);
+	_leftButtonDown = false;
+	_rightButtonDown = false;
+	
 	_supportedEvents = {
 //		{"onMouseMoved",		""},
 		{"onLeftMouseDragged",	""},
@@ -57,6 +63,12 @@ AnimaMouseInteractor::AnimaMouseInteractor(const AnimaMouseInteractor& src)
 	_rightMouseDownMonitor = src._rightMouseDownMonitor;
 	_leftMouseUpMonitor = src._leftMouseUpMonitor;
 	_rightMouseUpMonitor = src._rightMouseUpMonitor;
+	
+	_modifiers = src._modifiers;
+	_mousePosition = src._mousePosition;
+	_delta = src._delta;
+	_leftButtonDown = src._leftButtonDown;
+	_rightButtonDown = src._rightButtonDown;
 }
 
 AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
@@ -74,6 +86,12 @@ AnimaMouseInteractor::AnimaMouseInteractor(AnimaMouseInteractor&& src)
 	_rightMouseDownMonitor = src._rightMouseDownMonitor;
 	_leftMouseUpMonitor = src._leftMouseUpMonitor;
 	_rightMouseUpMonitor = src._rightMouseUpMonitor;
+	
+	_modifiers = src._modifiers;
+	_mousePosition = src._mousePosition;
+	_delta = src._delta;
+	_leftButtonDown = src._leftButtonDown;
+	_rightButtonDown = src._rightButtonDown;
 }
 
 AnimaMouseInteractor::~AnimaMouseInteractor()
@@ -98,6 +116,12 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(const AnimaMouseInteractor
 		_rightMouseDownMonitor = src._rightMouseDownMonitor;
 		_leftMouseUpMonitor = src._leftMouseUpMonitor;
 		_rightMouseUpMonitor = src._rightMouseUpMonitor;
+		
+		_modifiers = src._modifiers;
+		_mousePosition = src._mousePosition;
+		_delta = src._delta;
+		_leftButtonDown = src._leftButtonDown;
+		_rightButtonDown = src._rightButtonDown;
 	}
 	
 	return *this;
@@ -120,6 +144,12 @@ AnimaMouseInteractor& AnimaMouseInteractor::operator=(AnimaMouseInteractor&& src
 		_rightMouseDownMonitor = src._rightMouseDownMonitor;
 		_leftMouseUpMonitor = src._leftMouseUpMonitor;
 		_rightMouseUpMonitor = src._rightMouseUpMonitor;
+		
+		_modifiers = src._modifiers;
+		_mousePosition = src._mousePosition;
+		_delta = src._delta;
+		_leftButtonDown = src._leftButtonDown;
+		_rightButtonDown = src._rightButtonDown;
 	}
 	
 	return *this;
@@ -290,6 +320,11 @@ void AnimaMouseInteractor::LeftMouseDraggedCallback(AnimaMouseInteractor* intera
 	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = true;
 	
+	interactor->_delta = delta;
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = true;
+	interactor->_rightButtonDown = false;
+	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
 	//	point.y -= 1.0f;
@@ -323,6 +358,11 @@ void AnimaMouseInteractor::RightMouseDraggedCallback(AnimaMouseInteractor* inter
 	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = true;
 	
+	interactor->_delta = delta;
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = false;
+	interactor->_rightButtonDown = true;
+	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
 	//	point.y -= 1.0f;
@@ -354,6 +394,11 @@ void AnimaMouseInteractor::LeftMouseDownCallback(AnimaMouseInteractor* interacto
 	
 	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = false;
+	
+	interactor->_delta = AnimaVertex2f(0.0, 0.0);
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = true;
+	interactor->_rightButtonDown = false;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
@@ -387,6 +432,11 @@ void AnimaMouseInteractor::RightMouseDownCallback(AnimaMouseInteractor* interact
 	interactor->_mousePosition = pt;
 	interactor->_mouseMoved = false;
 	
+	interactor->_delta = AnimaVertex2f(0.0, 0.0);
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = false;
+	interactor->_rightButtonDown = true;
+	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
 	//	point.y -= 1.0f;
@@ -417,6 +467,11 @@ void AnimaMouseInteractor::LeftMouseUpCallback(AnimaMouseInteractor* interactor,
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
 	interactor->_mousePosition = pt;
+	
+	interactor->_delta = AnimaVertex2f(0.0, 0.0);
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = false;
+	interactor->_rightButtonDown = false;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0
@@ -457,6 +512,11 @@ void AnimaMouseInteractor::RightMouseUpCallback(AnimaMouseInteractor* interactor
 	AnimaVertex2f size(rect.size.width, rect.size.height);
 	
 	interactor->_mousePosition = pt;
+	
+	interactor->_delta = AnimaVertex2f(0.0, 0.0);
+	interactor->_modifiers = modifiers;
+	interactor->_leftButtonDown = false;
+	interactor->_rightButtonDown = false;
 	
 	//	// Siccome dalla documentazione di NSEvent il punto ha la coordinata Y che parte da 1.0 invece che da 0.0
 	//	// sottraggo 1.0

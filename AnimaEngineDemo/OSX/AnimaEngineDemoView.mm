@@ -372,24 +372,59 @@ bool rendererInitialized = false;
 	if (!_engine.Initialize())
 		return false;
 	
-	printf("\nOpenCL available platforms:\n\n");
 	Anima::AnimaParallelProgramsManager* ppManager = _engine.GetParallelProgramsManager();
-	Anima::AnimaArray<cl_platform_id> platforms = ppManager->GetPlatformIDs();
-	for (auto& plat : platforms)
+	
+	std::string saxpy_kernel =
+	"__kernel                                   \n"
+	"void saxpy_kernel(float alpha,				\n"
+	"                  __global float *A,       \n"
+	"                  __global float *B,       \n"
+	"                  __global float *C)       \n"
+	"{                                          \n"
+	"    //Get the index of the work-item       \n"
+	"    int index = get_global_id(0);          \n"
+	"    C[index] = alpha* A[index] + B[index]; \n"
+	"}											\n";
+	
+	int dataSize = 100000000;
+	
+	float alpha = 2.0f;
+	std::vector<float> A, B, C, D;
+	A.resize(dataSize);
+	B.resize(dataSize);
+	C.resize(dataSize);
+	D.resize(dataSize);
+	
+	for (int i = 0; i < dataSize; i++)
 	{
-		Anima::AnimaString platName = ppManager->GetPlatformName(plat);
-		Anima::AnimaString platVer = ppManager->GetPlatformVersion(plat);
-		printf("- Platform name: %s [version %s]\n", platName.c_str(), platVer.c_str());
-		
-		Anima::AnimaArray<cl_device_id> devices = ppManager->GetDeviceIDs(plat, Anima::AnimaParallelelProgramType::APP_TYPE_ALL);
-		for (auto& dev : devices)
-		{
-			Anima::AnimaString devName = ppManager->GetDeviceName(dev);
-			Anima::AnimaString devVer = ppManager->GetDeviceVersion(dev);
-			printf("\t- Device name: %s [version %s]\n", devName.c_str(), devVer.c_str());
-		}
+		A[i] = i;
+		B[i] = dataSize - i;
+		C[i] = 0.0f;
+		D[i] = alpha * A[i] + B[i];
 	}
 	
+	Anima::AnimaParallelProgram* program = ppManager->CreateProgram("prova", Anima::APP_TYPE_CPU);
+	
+	program->SetCode(saxpy_kernel);
+	program->SetKernelName("saxpy_kernel");
+	
+	program->Compile();
+	
+	program->AddSingleValueKernelArgument<float>("alpha", 0, &alpha, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<float>("A", 1, &A, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<float>("B", 2, &B, Anima::APPBDRWP_READ_ONLY, Anima::APPBDCP_WRITE_ONLY);
+	program->AddMultipleValueKernelArgument<float>("C", 3, &C, Anima::APPBDRWP_WRITE_ONLY, Anima::APPBDCP_READ_ONLY);
+	
+	Anima::AnimaTimer timer;
+	
+	for (int i = 0; i < 100; i++)
+	{
+		timer.Reset();
+		program->Execute(dataSize, 128);
+		printf("GPGPU execution time: %f\n", timer.Elapsed());
+	}
+	
+	program->GetKernelArgumentFromName("C")->Read();
 	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU);
 	ppManager->CreateContext(Anima::AnimaParallelelProgramType::APP_TYPE_GPU, nullptr, true);
 
@@ -398,48 +433,49 @@ bool rendererInitialized = false;
 	
 	Anima::AnimaScenesManager* scenesManager = _engine.GetScenesManager();
 	
-//	_scene = scenesManager->LoadSceneFromFile("/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff/AnimaEngineDemoScene.ascene");
-//	_renderer->CheckPrograms(_scene);
-//	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	_scene = scenesManager->LoadSceneFromFile("/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/SceneUff/AnimaEngineDemoScene.ascene");
+	_renderer->CheckPrograms(_scene);
+	_scene->SetKeyboardInteractor(&keyboardInteractor);
+	_scene->SetMouseInteractor(&mouseInteractor);
 	
-	_scene = scenesManager->CreateScene("scena");
+//	_scene = scenesManager->CreateScene("scena");
 	
-	if(_scene)
-	{
-		Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
-		Anima::AnimaLightsManager* lightsManager = _scene->GetLightsManager();
-		Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
-		
-		Anima::AnimaCamera* newCamera = camerasManager->CreateCamera("default-camera");
-		Anima::AnimaDirectionalLight* newLight = lightsManager->CreateDirectionalLight("default-light");
-		
-		Anima::AnimaString texturesPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures";
-		
-		Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/cubemap.dds", "dds-skybox-texture");
-		_scene->SetTexture("SkyBox", textureCube);
-		_scene->SetTexture("EnvironmentMap", textureCube);
-		
-		Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/Irradiance.dds", "dds-skybox-texture-irr");
-		_scene->SetTexture("IrradianceMap", textureIrr);
-		
-		if(newLight)
-		{
-			newLight->SetDirection(1, -1, -1);
-			newLight->SetColor(1, 1, 1);
-			newLight->SetIntensity(1);
-		}
-		
-		if(newCamera)
-		{
-			Anima::AnimaVertex3f position(-35, 10, 15);
-			Anima::AnimaVertex3f target(-34, 9.8, 15);
-			Anima::AnimaVertex3f up(0, 1, 0);
-			newCamera->LookAt(position, target, up);
-			newCamera->Activate();
-		}
-		
-		_scene->SetKeyboardInteractor(&keyboardInteractor);
-	}
+//	if(_scene)
+//	{
+//		Anima::AnimaCamerasManager* camerasManager = _scene->GetCamerasManager();
+//		Anima::AnimaLightsManager* lightsManager = _scene->GetLightsManager();
+//		Anima::AnimaTexturesManager* texturesManager = _scene->GetTexturesManager();
+//		
+//		Anima::AnimaCamera* newCamera = camerasManager->CreateCamera("default-camera");
+//		Anima::AnimaDirectionalLight* newLight = lightsManager->CreateDirectionalLight("default-light");
+//		
+//		Anima::AnimaString texturesPath = "/Users/marco/Documents/Progetti/Repository/Anima/AnimaEngineDemo/Scene/textures";
+//		
+//		Anima::AnimaTexture* textureCube = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/cubemap.dds", "dds-skybox-texture");
+//		_scene->SetTexture("SkyBox", textureCube);
+//		_scene->SetTexture("EnvironmentMap", textureCube);
+//		
+//		Anima::AnimaTexture* textureIrr = texturesManager->LoadTextureFromDDSFile(texturesPath + "/Roma/Irradiance.dds", "dds-skybox-texture-irr");
+//		_scene->SetTexture("IrradianceMap", textureIrr);
+//		
+//		if(newLight)
+//		{
+//			newLight->SetDirection(1, -1, -1);
+//			newLight->SetColor(1, 1, 1);
+//			newLight->SetIntensity(1);
+//		}
+//		
+//		if(newCamera)
+//		{
+//			Anima::AnimaVertex3f position(-35, 10, 15);
+//			Anima::AnimaVertex3f target(-34, 9.8, 15);
+//			Anima::AnimaVertex3f up(0, 1, 0);
+//			newCamera->LookAt(position, target, up);
+//			newCamera->Activate();
+//		}
+//		
+//		_scene->SetKeyboardInteractor(&keyboardInteractor);
+//	}
 	
 //	Anima::AnimaString dataPath = DATA_PATH;
 //	Anima::AnimaString materialsPath = dataPath + "/materials";

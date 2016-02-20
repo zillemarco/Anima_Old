@@ -230,67 +230,9 @@ public:
 	}
 	
 public:
-	bool Create() override
-	{
-		if (_program == nullptr)
-			return false;
-
-		if (_bufferMemory != nullptr)
-			return true;
-
-		AInt status = CL_SUCCESS;
-
-		if (_data != nullptr && _needsUpdate == true)
-		{
-			_bufferMemory = clCreateBuffer(_program->GetContextInfo()->_context, TranslateParallelProgramBufferDeviceReadWritePolicy(_deviceReadWritePolicy) | CL_MEM_USE_HOST_PTR, _dataLength * sizeof(data_type), _data, &status);
-			_needsUpdate = false;
-		}
-		else
-			_bufferMemory = clCreateBuffer(_program->GetContextInfo()->_context, TranslateParallelProgramBufferDeviceReadWritePolicy(_deviceReadWritePolicy), _dataLength * sizeof(data_type), nullptr, &status);
-		
-		// Se la creazione non è andata a buon fine reimposto l'attributo _bufferMemory a nullptr e termino tornando false
-		if (status != CL_SUCCESS)
-		{
-			_bufferMemory = nullptr;
-			return false;
-		}
-
-		return true;
-	}
-
-	bool Read() override
-	{
-		// Posso leggere il valore dalla memoria solamente se la policy me lo consente e il buffer è stato creato
-		if (_bufferMemory != nullptr && (_deviceComunicationPolicy == APPBDCP_READ_ONLY || _deviceComunicationPolicy == APPBDCP_READ_WRITE))
-		{
-			AInt status = clEnqueueReadBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _dataLength * sizeof(data_type), _data, 0, nullptr, nullptr);
-			// Se la lettura non è andata a buon fine termino tornando false
-			if (status != CL_SUCCESS)
-				return false;
-			return true;
-		}
-		return false;
-	}
-
-	bool Write() override
-	{
-		// Deve per forza essere prima creato e poi scritto
-		if (_bufferMemory == nullptr)
-			return false;
-
-		// Se non ho bisogno di aggiornare il buffer allora termino immediatamente
-		if (_needsUpdate == false)
-			return true;
-
-		AInt status = clEnqueueWriteBuffer(_program->GetQueue(), _bufferMemory, CL_TRUE, 0, _dataLength * sizeof(data_type), _data, 0, nullptr, nullptr);
-		
-		// Se la scrittura non è andata a buon fine termino tornando false
-		if (status != CL_SUCCESS)
-			return false;
-		
-		_needsUpdate = false;
-		return true;
-	}
+	bool Create() override;
+	bool Read() override;
+	bool Write() override;
 
 	void* GetDataForProgram() override { return (void*)&_bufferMemory; }
 	AUint GetDataSizeForProgram() override { return sizeof(cl_mem); }
@@ -323,12 +265,12 @@ protected:
 	bool _needsUpdate;
 };
 
-// Definizione dei tipi supportati dal buffer a valore singolo per l'esportazione al di fuori della libreria
-template AnimaParallelProgramSingleValueBuffer < AFloat > ;
-
-// Definizione dei tipi supportati dal buffer a valore multiplo per l'esportazione al di fuori della libreria
-template AnimaParallelProgramMultipleValueBuffer < AFloat >;
-
-template AnimaMappedArray < AnimaParallelProgramBufferBase* > ;
+//// Definizione dei tipi supportati dal buffer a valore singolo per l'esportazione al di fuori della libreria
+//template AnimaParallelProgramSingleValueBuffer < AFloat > ;
+//
+//// Definizione dei tipi supportati dal buffer a valore multiplo per l'esportazione al di fuori della libreria
+//template AnimaParallelProgramMultipleValueBuffer < AFloat >;
+//
+//template AnimaMappedArray < AnimaParallelProgramBufferBase* > ;
 
 END_ANIMA_ENGINE_NAMESPACE
